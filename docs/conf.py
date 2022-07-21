@@ -62,6 +62,9 @@ html_theme_options = {
     'logo': 'ocean_tracker.png',
     'logo_name': release,
     'fixed_sidebar': True,
-    'show_relbar_bottom': True
+    'show_relbar_bottom': True,
+    'github_user': 'oceantracker',
+    'github_repo': 'oceantracker',
+    'github_button': True
 }
 
