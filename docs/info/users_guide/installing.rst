@@ -16,7 +16,7 @@ Linux
 
 #.  Clone repository
 
-    ``git clone https://github.com/oceantracker/oceantracker.git`
+    ``git clone https://github.com/oceantracker/oceantracker.git``
 
 #. Working in a Virtual environment
     Change dir to repository dir eg. oceantracker
