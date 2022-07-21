@@ -1,5 +1,11 @@
 # OceanTracker
 
+# About/Install/User guide/Documentation 
+
+see [Github pages](https://oceantracker.github.io/oceantracker/)
+
+
+# Basic install
 ## Clone repository
 ```
 git clone https://gitlab.com/cinst/oceantracker02.git
