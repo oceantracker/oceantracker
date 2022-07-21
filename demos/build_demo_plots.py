@@ -1,0 +1,275 @@
+
+
+def demo01_plot_tracks(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import plot_tracks
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name)
+    plot_tracks(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
+                 heading='Tracks, point release',
+                 plot_file_name=output_file + '.jpeg' if output_file is not None else None)
+    return None
+
+def demo02_animation(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name, fraction_to_read=0.9)
+
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],show_grid=True,
+                                heading='3 hourly point and polygon releases with tidal stranding',
+                                release_group=None,
+                                movie_file=output_file + '.mp4' if output_file is not None else None,
+                                fps=15, back_ground_depth=True)
+    return None
+
+def demo03_heatmaps(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_heat_maps import plot_heat_map, animate_heat_map
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], nsequence=1)
+    axis_lims = [1591000, 1601500, 5478500, 5491000]
+    animate_heat_map(stats_data, axis_lims=axis_lims,
+                                    heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
+                                    movie_file=output_file + '.mp4' if output_file is not None else None,
+                                    fps=7)
+    plot_heat_map(stats_data, axis_lims=axis_lims, var='water_depth', heading='Water depth built on the fly, no tracks recorded',
+                                 plot_file_name=output_file + '_water_depth.jpeg' if output_file is not None else None)
+    s = load_stats_file(case_info_file_name, nsequence=2, var_list=['water_depth'])  # test polygon stats loading, in second stats file
+    return None
+
+def demo04_ageBasedHeatmaps(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_heat_maps import plot_heat_map, animate_heat_map
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], nsequence=1)
+    axis_lims = [1591000, 1601500, 5478500, 5491000]
+    animate_heat_map(stats_data, axis_lims=axis_lims,
+                                    heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
+                                    movie_file=output_file + '.mp4' if output_file is not None else None,
+                                    fps=7)
+    return None
+
+def demo05_parallel(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_heat_maps import plot_heat_map, animate_heat_map
+    # parallel run no plot
+    return None
+
+
+def demo06_reefstranding(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name)
+
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
+                                heading='Trajectory Modifer example, particles liking a reef',
+                                release_group=None,
+                                movie_file=output_file + '.mp4' if output_file is not None else None,
+                                fps=15, back_ground_depth=True)
+    return None
+
+
+def demo07_inside_polygon_events(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file, read_case_info_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+    from matplotlib import colors
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+    caseInfo = read_case_info_file(case_info_file_name)
+    track_data = load_particle_track_vars(case_info_file_name, var_list=['event_polygon'])
+
+    cmap = colors.ListedColormap(['b', 'm', 'y'])
+    animate_particles(track_data, colour_using_data=track_data['event_polygon'],
+                                    part_color_map=cmap,
+                                    axis_lims=[1591000, 1601500, 5478500, 5491000],
+                                    heading='Event logger, polygon aware particles',
+                                    vmin=-1,
+                                    vmax=1,
+                                    interval=70,
+                                    movie_file=output_file + '.mp4' if output_file is not None else None,
+                                    fps=15,
+                                    polygon_list_to_plot=caseInfo['full_params']['event_loggers'][0]['polygon_list'])
+    return None
+
+
+def demo08_particle_splitting(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name)
+
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
+                                heading='Split moving particles in two and culling 5%  every 6 hours',
+                                release_group=0,
+                                min_status=-2,
+                                movie_file=output_file + '.mp4' if output_file is not None else None,
+                                fps=15, back_ground_depth=True)
+    return None
+
+def demo09_polygon_release_overlapping_land(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name)
+
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
+                                heading='Polygon release 1) overlaping land, and 2) min 30m,  water depth',
+                                movie_file=output_file + '.mp4' if output_file is not None else None,
+                                fps=15, back_ground_depth=True)
+    return None
+
+def demo50_SCHISM_depthAver(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name)
+
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
+                                heading='Schsim',
+                                movie_file=output_file + '.mp4' if output_file is not None else None,
+                                fps=15, back_ground_depth=True)
+    return None
+
+def demo55_SCHISM_3D_fall_velocity(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name)
+
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000], show_grid=True,
+                                heading='SCHISIM reader, 3D, fall velocity and bottom stranding',
+                                movie_file=output_file + '.mp4' if output_file is not None else None,
+                                fps=15, back_ground_depth=True)
+    return None
+
+def demo56_SCHISM_3D_always_resupend(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name, fraction_to_read=.9)
+    ax_lims= [1591000, 1601500, 5478500, 5491000]
+    animate_particles(track_data, axis_lims=ax_lims,
+                      heading='SCHISIM 3D, fall velocity and always resuspend',
+                      movie_file=output_file + '_status.mp4' if output_file is not None else None,
+                      fps=15)
+
+    animate_particles(track_data, axis_lims=ax_lims,
+                                colour_using_data=track_data['z'],
+                                part_color_map='winter_r',
+                                interval=200,
+                                vmin=-20,
+                                vmax=0,
+                                heading='SCHISIM 3D, fall velocity and always resuspend, particles coloured by depth',
+                                movie_file=output_file + '_depth.mp4' if output_file is not None else None,
+                                fps=15, back_ground_depth=True)
+    return None
+
+def demo57_SCHISM_3D_lateralBoundaryTest(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name)
+
+    animate_particles(track_data, axis_lims=[1598000, 1601500, 5482000, 5488000],
+                                heading='SCHISIM reader, lateral boundary test',
+                                movie_file=output_file + '.mp4' if output_file is not None else None,
+                                fps=15, back_ground_depth=True)
+    return None
+
+def demo58_bottomBounce(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+    from oceantracker.post_processing.plotting.plot_vertical_tracks import plot_path_in_vertical_section, plot_relative_height
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth'])
+
+    plot_path_in_vertical_section(track_data,  title= 'fall velocity, always resuspend ',
+                                          plot_file_name=output_file +  '_section.jpeg' if output_file is not None else None)
+
+    plot_relative_height(track_data, title='fall velocity, always resuspend ')
+    plot_relative_height(track_data, title='fall velocity, always resuspend ', bottom=False)
+
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000], heading='vertical section tracks')
+    return None
+
+def demo59_crit_shear_resupension(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_vertical_tracks import plot_path_in_vertical_section
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth'])
+
+    plot_path_in_vertical_section(track_data, title='Fall velocity, critical friction velocity  resuspension ',
+                                                       plot_file_name=output_file +  '_section.jpeg' if output_file is not None else None)
+    return None
+
+
+def demo60_SCHISM_3D_decaying_particle(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth', 'C'])
+
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
+                                heading='SCHISIM reader, 3D, decaying particles, decay time 3.5 hrs',
+                                colour_using_data=track_data['C'], part_color_map='hot_r',
+                                size_using_data=track_data['C'],
+                                vmax=1.0,
+                                movie_file=output_file + '.mp4' if output_file is not None else None,
+                                fps=24,
+                                interval=20)
+    return None
+
+def demo61_concentration_test(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_concentration_vars, get_case_info_file_from_run_file
+    from oceantracker.post_processing.plotting.plot_heat_maps import animate_concentrations
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    c = load_concentration_vars(case_info_file_name, var_list=['particle_concentration', 'C'])
+
+    axis_lims = [1591000, 1601500, 5478500, 5491000]
+
+    animate_concentrations(c, data_to_plot=c['particle_concentration'], logscale=True,
+                                        axis_lims=axis_lims, cmap='hot_r',
+                                        heading='SCHISIM-3D, 2D concentrations in triangles, shading',
+                                        movie_file=output_file + '_shading.mp4' if output_file is not None else None,
+                                        fps=7, interval=20,
+                                        vmin =0., vmax=1.0)
+    animate_concentrations(c, data_to_plot=c['particle_count'],logscale=True,
+                                        axis_lims=axis_lims, cmap='hot_r', shading=False, interval=200,
+                                        heading='SCHISIM-3D, 2D particle counts in triangles, noshading',
+                                        fps=7,
+                                        movie_file=output_file + '_noshading.mp4' if output_file is not None else None,
+                                        )
+    return None
+
