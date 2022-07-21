@@ -1,0 +1,38 @@
+###########
+BaseInterp
+###########
+
+**Class:** oceantracker.interpolator._base_interp.BaseInterp
+
+**File:** oceantracker/interpolator/_base_interp.py
+
+**Inheritance:** BaseInterp
+
+**Default internal name:** ``"not given in defaults"``
+
+**Description:** 
+
+
+Parameters:
+************
+
+	* ``class_name``:  *<optional>*
+		**Description:** - Class name as string A.B.C, used to import this class from python path
+
+		- type: ``<class 'str'>``
+		- default: ``None``
+
+	* ``doc_str``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+
+	* ``name``:  *<optional>*
+		**Description:** - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field
+
+		- type: ``<class 'str'>``
+		- default: ``None``
+
+	* ``user_note``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+

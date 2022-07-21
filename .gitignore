@@ -1,0 +1,6 @@
+.idea
+venv
+/tests/output/
+/demos/output/
+/tests/nextVer/output/
+/docs/_build/doctrees/

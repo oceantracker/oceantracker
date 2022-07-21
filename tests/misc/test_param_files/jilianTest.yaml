@@ -1,0 +1,51 @@
+case_list:
+- dispersion:
+    A_H: 1.0
+    A_V: 0.001
+  particle_properties:
+  - class_name: oceantracker.particle_properties.friction_velocity.FrictionVelocity
+  particle_release_groups:
+  - points:
+    - &id001
+      - 380638.11568
+      - 4093116.7806
+      - 0
+    pulse_size: 10
+    release_interval: 600
+  particle_statistics:
+  - calculation_interval: 3600
+    class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
+    grid_center: *id001
+    grid_size:
+    - 120
+    - 121
+    grid_span:
+    - 25000.0
+    - 25000.0
+    particle_property_list:
+    - water_depth
+  run_params:
+    duration: 691200.0
+    write_tracks: true
+  solver:
+    n_sub_steps: 2
+    screen_output_step_count: 1
+  tracks_writer:
+    output_step_count: 3
+  trajectory_modifiers:
+  - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
+    critical_friction_velocity: 0.01
+  velocity_modifiers:
+  - class_name: oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity
+    mean: -0.001
+reader:
+  class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
+  depth_average: false
+  field_variables: {}
+  field_variables_to_depth_average:
+  - water_velocity
+  file_mask: schout_*.nc
+  input_dir: F:\Hindcasts\Hindcast_samples_tests\VIMS\Particle_ChesBay_Jilian_small
+shared_params:
+  output_file_base: jiliantest
+  root_output_dir: F:\OceanTrackerOuput\Vims\Jilian

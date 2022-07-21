@@ -1,0 +1,28 @@
+##################
+Parameter details
+##################
+
+Links to details of parameter default values, acceptable values etc.
+
+
+.. note::
+
+	Lots more to add here!!
+
+Top level parameters
+=====================
+
+.. toctree::
+	:maxdepth: 2
+
+	shared_params.rst
+
+
+Case parameters
+================
+
+.. toctree::
+	:maxdepth: 2
+
+	run_params.rst
+

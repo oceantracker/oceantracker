@@ -1,0 +1,6 @@
+#########################
+Minimal example
+#########################
+
+.. image::  ../../_static/demos/minimal_example.jpeg
+   :width: 95%

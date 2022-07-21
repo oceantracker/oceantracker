@@ -1,0 +1,11 @@
+########
+readers
+########
+
+.. toctree::
+	:maxdepth: 2
+
+	readers/GenericUnstructuredReader.rst
+	readers/SCHSIMreaderNCDF.rst
+	readers/BaseReader.rst
+

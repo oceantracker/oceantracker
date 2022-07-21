@@ -1,0 +1,138 @@
+base_case_params:
+  dispersion:
+    A_H: 0.1
+  event_loggers:
+  - class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
+    particle_prop_to_write_list:
+    - ID
+    - x
+    - IDrelease_group
+    - status
+    - age
+    polygon_list:
+    - points:
+      - - 1592682.1237
+        - 5489972.7479
+      - - 1593604.1667
+        - 5490275.5488
+      - - 1593886.4247
+        - 5489464.0424
+      - - 1592917.3387
+        - 5489000.0
+      - - 1592300.0
+        - 5489000.0
+      - - 1592682.1237
+        - 5489972.7479
+      user_polygon_name: A
+    - points:
+      - - 1597682.1237
+        - 5489972.7479
+      - - 1598604.1667
+        - 5490275.5488
+      - - 1598886.4247
+        - 5489464.0424
+      - - 1597917.3387
+        - 5487000
+      - - 1597300
+        - 5487000
+      - - 1597682.1237
+        - 5489972.7479
+      test spurious param: 1
+      user_polygon_name: B
+  particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+    initial_value: 20.0
+    name: Oxygen
+  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+  particle_release_groups: []
+  run_params:
+    description: test of notes
+  solver:
+    n_sub_steps: 6
+  tracks_writer:
+    turn_on_write_particle_properties_list:
+    - n_cell
+case_list:
+- particle_release_groups:
+  - points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+    pulse_size: 2
+    release_interval: 10800
+  run_params:
+    case_output_file_tag: test_case_tag_0
+- particle_release_groups:
+  - points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+    pulse_size: 2
+    release_interval: 10800
+  run_params:
+    case_output_file_tag: test_case_tag_1
+- particle_release_groups:
+  - points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+    pulse_size: 2
+    release_interval: 10800
+  run_params:
+    case_output_file_tag: test_case_tag_2
+- particle_release_groups:
+  - points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+    pulse_size: 2
+    release_interval: 10800
+  run_params:
+    case_output_file_tag: test_case_tag_3
+- particle_release_groups:
+  - points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+    pulse_size: 2
+    release_interval: 10800
+  run_params:
+    case_output_file_tag: test_case_tag_4
+reader:
+  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+  dimension_map:
+    node: nodes
+    time: time
+  field_variables:
+    tide: tide
+    water_depth: depth
+    water_velocity:
+    - east_vel
+    - north_vel
+  file_mask: demoHindcast2D*.nc
+  grid_variables:
+    time: time_sec
+    triangles: tri
+    x:
+    - east
+    - north
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker02\demos\demohindcast
+  isodate_of_hindcast_time_zero: '2020-06-01'
+  search_sub_dirs: true
+  time_buffer_size: 24
+shared_params:
+  add_date_to_run_output_dir: false
+  backtracking: false
+  compact_mode: true
+  debug: true
+  multiprocessing_case_start_delay: 1.0
+  output_file_base: demo05_parallel
+  processors: 2
+  replicates: 1
+  root_output_dir: E:\H_Local_drive\ParticleTracking\oceantracker02\demos\output

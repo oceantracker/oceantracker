@@ -1,0 +1,336 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>PolygonStats2D_ageBasedDepthRange &#8212; OceanTracker Beta 0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="PolygonStats2D_ageBasedTopBottom" href="PolygonStats2D_ageBasedTopBottom.html" />
+    <link rel="prev" title="PolygonStats2D_ageBased" href="PolygonStats2D_ageBased.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/demos.html">Demos</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/installing.html">Installing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/parameters_overview.html">Parameters overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="parameter_ref_toc.html#top-level-parameters">Top level parameters</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="parameter_ref_toc.html#case-parameters">Case parameters</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="run_params.html">run_params</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parameter_ref_toc.html#core-classes">Core classes</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="parameter_ref_toc.html#user-added-classes">User added classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/output_files.html">Output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/post_processing.html">Post processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/documentation.html">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../users_guide.html">Users guide</a><ul>
+  <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
+  <li><a href="particle_statistics_toc.html">particle_statistics</a><ul>
+      <li>Previous: <a href="PolygonStats2D_ageBased.html" title="previous chapter">PolygonStats2D_ageBased</a></li>
+      <li>Next: <a href="PolygonStats2D_ageBasedTopBottom.html" title="next chapter">PolygonStats2D_ageBasedTopBottom</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="polygonstats2d-agebaseddepthrange">
+<h1>PolygonStats2D_ageBasedDepthRange<a class="headerlink" href="#polygonstats2d-agebaseddepthrange" title="Permalink to this headline">¶</a></h1>
+<p><strong>Class:</strong> oceantracker.particle_statistics.statisics_in_water_depth_range.PolygonStats2D_ageBasedDepthRange</p>
+<p><strong>File:</strong> oceantracker/particle_statistics/statisics_in_water_depth_range.py</p>
+<p><strong>Inheritance:</strong> BaseParticleLocationStats&gt; GriddedStats2D_timeBased&gt; GriddedStats2D_agedBased&gt; CorePolygonMethods&gt; PolygonStats2D_ageBased&gt; WaterDepthRangeStats&gt; PolygonStats2D_ageBasedDepthRange</p>
+<p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;not</span> <span class="pre">given</span> <span class="pre">in</span> <span class="pre">defaults&quot;</span></code></p>
+<p><strong>Description:</strong></p>
+<section id="parameters">
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">age_bin_size</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">86400.0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">calculation_interval</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p><strong>Description:</strong> - time in sec, between calculating statistics</p>
+<ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">3600.0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">case_output_file_tag</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">stats_polygon_age_depth_range</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p><strong>Description:</strong> - Class name as string A.B.C, used to import this class from python path</p>
+<ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">count_status_equal_to</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">dict_keys(['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'frozen',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving'])</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">count_status_greater_than</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">dead</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">dict_keys(['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'frozen',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving'])</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">doc_str</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">grid_center</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>default list item: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>self: <code class="docutils literal notranslate"><span class="pre">&lt;oceantracker.util.parameter_checking.ParameterListChecker</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x000002B6DADF67F0&gt;</span></code></p></li>
+<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">grid_size</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
+<li><p>default list item: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>self: <code class="docutils literal notranslate"><span class="pre">&lt;oceantracker.util.parameter_checking.ParameterListChecker</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x000002B6DADF6910&gt;</span></code></p></li>
+<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">grid_span</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>default list item: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>self: <code class="docutils literal notranslate"><span class="pre">&lt;oceantracker.util.parameter_checking.ParameterListChecker</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x000002B6DADF6CD0&gt;</span></code></p></li>
+<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">max_age_to_bin</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">2592000.0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">max_water_depth</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1000000000.0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">min_age_to_bin</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">min_depth</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">-1000000000.0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">name</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">particle_property_list</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>default list item: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>self: <code class="docutils literal notranslate"><span class="pre">&lt;oceantracker.util.parameter_checking.ParameterListChecker</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x000002B6DADF6F40&gt;</span></code></p></li>
+<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">polygon_list</span></code>:  <em>&lt;optional&gt;</em></p></li>
+</ul>
+</div></blockquote>
+<p>polygon_list: still working on display  of lists of dict, eg nested polygon list</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">release_group_centered_grids</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">write</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="PolygonStats2D_ageBased.html" title="Previous document">PolygonStats2D_ageBased</a>
+        </li>
+        <li>
+          <a href="PolygonStats2D_ageBasedTopBottom.html" title="Next document">PolygonStats2D_ageBasedTopBottom</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2022, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/info/parameter_ref/PolygonStats2D_ageBasedDepthRange.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

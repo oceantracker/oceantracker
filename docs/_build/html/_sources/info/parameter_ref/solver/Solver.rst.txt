@@ -1,0 +1,40 @@
+#######
+Solver
+#######
+
+**Class:** oceantracker.solver.solver.Solver
+
+**File:** oceantracker/solver/solver.py
+
+**Default internal name:** "solver"
+
+
+Parameters:
+============
+
+	* ``RK_order``:  *<optional>*
+		- type: ``<class 'int'>``
+		- default: ``4``
+		- possible_values: ``[1, 2, 4]``
+
+	* ``class_name``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+		- possible_values: ``[]``
+
+	* ``n_sub_steps``:  *<optional>*
+		- type: ``<class 'int'>``
+		- default: ``1``
+		- min: ``1``
+		- possible_values: ``[]``
+
+	* ``name``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``solver``
+		- possible_values: ``[]``
+
+	* ``screen_output_step_count``:  *<optional>*
+		- type: ``<class 'int'>``
+		- default: ``1``
+		- possible_values: ``[]``
+

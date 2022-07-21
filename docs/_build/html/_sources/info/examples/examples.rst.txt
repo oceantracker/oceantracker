@@ -1,0 +1,30 @@
+
+#########################
+Examples
+#########################
+
+.. raw:: html
+
+  <center>
+    <video width="80%" controls autoplay loop src="../../_static/examples/demo60_SCHISM_3D_decaying_particle.mp4">
+   </video>
+  </center>
+
+.. toctree::
+    :maxdepth: 2
+
+    particle_properties.rst
+    trajectory_modifiers.rst
+    particle_statistics.rst
+
+
+All plots and animations created with standard postprocessing.plot methods (see demos/run_demos.py)
+
+
+
+
+
+
+
+
+

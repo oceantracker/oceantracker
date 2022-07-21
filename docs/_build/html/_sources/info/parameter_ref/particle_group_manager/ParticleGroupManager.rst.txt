@@ -1,0 +1,30 @@
+#####################
+ParticleGroupManager
+#####################
+
+**Class:** oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager
+
+**File:** oceantracker/particle_group_manager/particle_group_manager.py
+
+**Default internal name:** "not given in defaults"
+
+
+Parameters:
+============
+
+	* ``class_name``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+		- possible_values: ``[]``
+
+	* ``max_age``:  *<optional>*
+		- type: ``<class 'float'>``
+		- default: ``100000000000.0``
+		- min: ``0.0``
+		- possible_values: ``[]``
+
+	* ``name``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+		- possible_values: ``[]``
+

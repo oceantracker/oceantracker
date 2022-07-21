@@ -1,0 +1,82 @@
+##########################
+GenericUnstructuredReader
+##########################
+**Class:** oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+
+**File:** oceantracker/readers/generic_unstructured_reader.py
+
+
+Parameters:
+============
+
+	* ``class_name``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+		- possible_values: ``[]``
+
+	* ``cords_in_lat_long``:  *<optional>*
+		- type: ``<class 'bool'>``
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``depth_average``:  *<optional>*
+		- type: ``<class 'bool'>``
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+
+dimension_map: still working on display  of default params of  type <class 'dict'>
+
+
+field_variables: still working on display  of default params of  type <class 'dict'>
+
+
+field_variables_to_depth_average: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterListChecker'>
+
+	**<isrequired>**
+		- type: ``<class 'str'>``
+		- default: ``None``
+		- possible_values: ``[]``
+
+
+grid_variables: still working on display  of default params of  type <class 'dict'>
+
+	* ``input_dir``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+		- possible_values: ``[]``
+
+	* ``isodate_of_hindcast_time_zero``:  *<optional>*
+		- type: ``iso8601date``
+		- default: ``1970-01-01``
+		- possible_values: ``[]``
+
+	* ``max_numb_files_to_load``:  *<optional>*
+		- type: ``<class 'int'>``
+		- default: ``10000000``
+		- min: ``1``
+		- possible_values: ``[]``
+
+	* ``name``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+		- possible_values: ``[]``
+
+	* ``search_sub_dirs``:  *<optional>*
+		- type: ``<class 'bool'>``
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``time_buffer_size``:  *<optional>*
+		- type: ``<class 'int'>``
+		- default: ``48``
+		- min: ``2``
+		- possible_values: ``[]``
+
+	* ``time_zone``:  *<optional>*
+		- type: ``<class 'int'>``
+		- default: ``None``
+		- min: ``-12``
+		- max: ``23``
+		- possible_values: ``[]``
+

@@ -1,0 +1,13 @@
+########
+readers
+########
+**Module:** oceantracker.readers
+
+
+.. toctree::
+	:maxdepth: 1
+
+	readers/GenericUnstructuredReader.rst
+	readers/SCHSIMreaderNCDF.rst
+	readers/BaseReader.rst
+

@@ -1,0 +1,37 @@
+base_case_params:
+  dispersion:
+    A_H: 0.2
+    A_V: 0.001
+  particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 25714.28571428571
+    name: C
+  particle_release_groups:
+  - maximum_age: 17280.000000000004
+    points:
+    - - 1594500
+      - 5487000
+      - -1
+    - - 1594500
+      - 5483000
+      - -1
+    - - 1598000
+      - 5486100
+      - -1
+    pulse_size: 1
+    release_interval: 150.0
+  run_params: {}
+  solver:
+    n_sub_steps: 24
+reader:
+  class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
+  depth_average: true
+  field_variables:
+    water_temperature: temp
+  file_mask: demoHindcastSchism3D.nc
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker02\demos\demo_hindcast
+shared_params:
+  compact_mode: true
+  debug: true
+  output_file_base: demo60_SCHISM_3D_decaying_particle
+  root_output_dir: output

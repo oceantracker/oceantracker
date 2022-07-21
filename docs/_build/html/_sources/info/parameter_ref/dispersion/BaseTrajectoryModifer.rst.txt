@@ -1,0 +1,29 @@
+######################
+BaseTrajectoryModifer
+######################
+
+**Class:** oceantracker.dispersion._base_dispersion.BaseTrajectoryModifer
+
+**File:** oceantracker/dispersion/_base_dispersion.py
+
+**Default internal name:** "not given in defaults"
+
+
+Parameters:
+============
+
+	* ``class_name``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+		- possible_values: ``[]``
+
+	* ``is3D``:  *<optional>*
+		- type: ``<class 'bool'>``
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``name``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+		- possible_values: ``[]``
+

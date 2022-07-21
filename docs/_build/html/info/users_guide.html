@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Users guide &#8212; OceanTracker Beta 0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installing" href="users_guide/installing.html" />
+    <link rel="prev" title="Particle Statistics" href="demos/particle_statistics.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/demos.html">Demos</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Users guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/installing.html">Installing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html">Parameters overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html">Output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html">Post processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/documentation.html">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html">Change log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="future_dev.html">Future development</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="demos/particle_statistics.html" title="previous chapter">Particle Statistics</a></li>
+      <li>Next: <a href="users_guide/installing.html" title="next chapter">Installing</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="users-guide">
+<h1>Users guide<a class="headerlink" href="#users-guide" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="users_guide/installing.html">Installing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/installing.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/installing.html#linux">Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/installing.html#windows">Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="users_guide/running_ocean_tracker.html">Running OceanTracker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html#ways-to-run">Ways to run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html#minimal-example">Minimal example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html#run-from-parameter-file">Run from parameter file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html#run-from-code">Run from code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="users_guide/parameters_overview.html">Parameters overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#top-level-params">Top level params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#case-level-params">Case level params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#defaults">Defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#checking">Checking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#class-name-parameter">class_name parameter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html#top-level-parameters">Top level parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html#case-parameters">Case parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="users_guide/output_files.html">Output files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html#output-location">Output location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html#file-names">File names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html#file-types-and-roles">File types and roles</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="users_guide/post_processing.html">Post processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html#reading-output-files">Reading output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html#read-case-info-netcdf-and-grid-methods">Read case_info,  NetCDF and grid methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html#plotting">Plotting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="users_guide/documentation.html">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/internal_structure.html">Internal code structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="change_log.html">Change log</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-2-774-20-7-22">Version 0.2.774 20/7/22</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-2-772-11-7-22">Version 0.2.772 11/7/22</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-2-768-01-7-2022">Version 0.2.768 01/7/2022</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-2-760-28-6-2022">Version 0.2.760, 28/6/2022</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-2-751-22-6-2022">Version 0.2.751, 22/6/2022</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="future_dev.html">Future development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="future_dev.html#future-additions">Future additions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="future_dev.html#possible-additions">Possible additions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="future_dev.html#minor-additions">Minor additions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="demos/particle_statistics.html" title="Previous document">Particle Statistics</a>
+        </li>
+        <li>
+          <a href="users_guide/installing.html" title="Next document">Installing</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2022, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/info/users_guide.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

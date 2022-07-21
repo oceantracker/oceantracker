@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Minimal example &#8212; OceanTracker Beta 0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Particle properties" href="particle_properties.html" />
+    <link rel="prev" title="Demos" href="demos.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="demos.html">Demos</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Minimal example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="particle_properties.html">Particle properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trajectory_modifiers.html">Trajectory modifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="particle_statistics.html">Particle Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide.html">Users guide</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="demos.html">Demos</a><ul>
+      <li>Previous: <a href="demos.html" title="previous chapter">Demos</a></li>
+      <li>Next: <a href="particle_properties.html" title="next chapter">Particle properties</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="minimal-example">
+<h1>Minimal example<a class="headerlink" href="#minimal-example" title="Permalink to this headline">¶</a></h1>
+<center>
+  <video width="95%" controls muted autoplay loop src="../../_static/demos/minimal_example.mp4">
+ </video>
+</center><p>Example to show the minmum required to run oceanTracker, using code to both run and plot, or from parameter file.
+For this 3D hindcast, grey particles are stranded on the bottom, green ones are stranded on the shore by the tide.</p>
+<p><strong>Run and plot using code:</strong></p>
+<details>
+<summary> code </summary><div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">../../../demos/minimal_example.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># minimal_example.py</span>
+<span class="c1">#-------------------</span>
+<span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
+
+<span class="c1"># create parameters as a dictionary</span>
+<span class="n">params</span><span class="o">=</span> <span class="p">{</span><span class="s1">&#39;shared_params&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;output_file_base&#39;</span> <span class="p">:</span><span class="s1">&#39;minimal_example&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;root_output_dir&#39;</span><span class="p">:</span><span class="s1">&#39;output&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;reader&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="s1">&#39;class_name&#39;</span><span class="p">:</span> <span class="s1">&#39;oceantracker.reader.schism_reader.SCHSIMreaderNCDF&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;input_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;demo_hindcast&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;file_mask&#39;</span><span class="p">:</span> <span class="s1">&#39;demoHindcastSchism3D.nc&#39;</span><span class="p">,</span>
+                <span class="p">},</span>
+    <span class="s1">&#39;base_case_params&#39;</span> <span class="p">:</span> <span class="p">{</span> <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;n_sub_steps&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">},</span> <span class="c1">#not required but runs 5min steps in 1hr time step hindcast</span>
+                <span class="s1">&#39;particle_release_groups&#39;</span><span class="p">:</span>
+                      <span class="p">[{</span><span class="s1">&#39;points&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">1595000</span><span class="p">,</span> <span class="mi">5483300</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">],[</span><span class="mi">1596000</span><span class="p">,</span> <span class="mi">5487200</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="p">],</span> <span class="c1"># two 3D release locations</span>
+                        <span class="s1">&#39;pulse_size&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;release_interval&#39;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">}</span>
+                       <span class="p">]</span>
+                           <span class="p">}</span>
+        <span class="p">}</span>
+
+<span class="c1"># run OceanTracker to give track output files</span>
+<span class="n">runInfo_file_name</span><span class="p">,</span> <span class="n">has_errors</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+<span class="c1"># output now in folder output/minimal_example</span>
+
+<span class="c1"># below is optional code for plotting</span>
+<span class="c1">#-------------------------------------</span>
+<span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span><span class="p">,</span> <span class="n">plot_tracks</span>
+<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files.load_output_files</span> <span class="kn">import</span> <span class="n">get_case_info_file_from_run_file</span><span class="p">,</span> <span class="n">load_particle_track_vars</span>
+
+<span class="c1"># find case_info_file name, to used to locate output for the caseInfo file</span>
+<span class="n">case_info_file_name</span> <span class="o">=</span> <span class="n">get_case_info_file_from_run_file</span><span class="p">(</span><span class="n">runInfo_file_name</span><span class="p">)</span>
+
+<span class="c1"># read particle tracks for plotting</span>
+<span class="n">track_data</span> <span class="o">=</span> <span class="n">load_particle_track_vars</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">)</span>
+
+<span class="c1"># plot tracks</span>
+<span class="n">anim</span> <span class="o">=</span> <span class="n">plot_tracks</span><span class="p">(</span><span class="n">track_data</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5478500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">],</span>
+                            <span class="n">plot_file_name</span><span class="o">=</span><span class="s1">&#39;output</span><span class="se">\\</span><span class="s1">minimal_example.jpeg&#39;</span><span class="p">)</span>
+
+<span class="c1"># animate particles</span>
+<span class="n">anim</span> <span class="o">=</span> <span class="n">animate_particles</span><span class="p">(</span><span class="n">track_data</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5478500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">],</span>
+                         <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Minimal example of OceanTracker with 3D point release&#39;</span><span class="p">,</span>
+                         <span class="n">movie_file</span><span class="o">=</span><span class="s1">&#39;output</span><span class="se">\\</span><span class="s1">minimal_example.mp4&#39;</span><span class="p">)</span>
+
+</pre></div>
+</div>
+</div>
+</details><p><strong>Run using parameter file:</strong></p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run_oceantracker.py</span> <span class="pre">--param_file</span> <span class="pre">minimal_example.yaml</span></code></p>
+</div></blockquote>
+<details>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/minimal_example.yaml</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base_case_params</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">particle_release_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1595000</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5483300</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-2</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1596000</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487200</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span><span class="w"></span>
+<span class="w">  </span><span class="nt">solver</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">n_sub_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12</span><span class="w"></span>
+<span class="nt">reader</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.reader.schism_reader.SCHSIMreaderNCDF</span><span class="w"></span>
+<span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoHindcastSchism3D.nc</span><span class="w"></span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo_hindcast</span><span class="w"></span>
+<span class="nt">shared_params</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">minimal_example</span><span class="w"></span>
+<span class="w">  </span><span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</details><p>Output is written to directory given set by shared_parameters, ie. a dir named</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">['root_output_dir']/['output_file_base']</span></code></p>
+</div></blockquote>
+<p>in this example output is in</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">output/minimal_example</span></code></p>
+</div></blockquote>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="demos.html" title="Previous document">Demos</a>
+        </li>
+        <li>
+          <a href="particle_properties.html" title="Next document">Particle properties</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2022, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/info/demos/minimal_example.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,42 @@
+###################
+CorePolygonMethods
+###################
+
+**Class:** oceantracker.particle_statistics.polygon_statistics.CorePolygonMethods
+
+**File:** oceantracker/particle_statistics/polygon_statistics.py
+
+**Inheritance:** CorePolygonMethods
+
+**Default internal name:** ``"not given in defaults"``
+
+**Description:** 
+
+
+Parameters:
+************
+
+	* ``class_name``:  *<optional>*
+		**Description:** - Class name as string A.B.C, used to import this class from python path
+
+		- type: ``<class 'str'>``
+		- default: ``None``
+
+	* ``doc_str``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+
+	* ``name``:  *<optional>*
+		**Description:** - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field
+
+		- type: ``<class 'str'>``
+		- default: ``None``
+
+	* ``polygon_list``:  *<optional>*
+
+polygon_list: still working on display  of lists of dict, eg nested polygon list 
+
+	* ``user_note``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+

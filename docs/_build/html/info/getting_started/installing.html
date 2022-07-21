@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Installing &#8212; OceanTracker 0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Running OceanTracker" href="running_ocean_tracker.html" />
+    <link rel="prev" title="Users guide" href="../users_guide.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/demos.html">Demos</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Installing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#linux">Linux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameters_overview.html">Parameters overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../post_processing/post_processing.html">Post processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../documentation/documentation.html">Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../users_guide.html">Users guide</a><ul>
+      <li>Previous: <a href="../users_guide.html" title="previous chapter">Users guide</a></li>
+      <li>Next: <a href="running_ocean_tracker.html" title="next chapter">Running OceanTracker</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="installing">
+<h1>Installing<a class="headerlink" href="#installing" title="Permalink to this heading">¶</a></h1>
+<div class="section" id="linux">
+<h2>Linux<a class="headerlink" href="#linux" title="Permalink to this heading">¶</a></h2>
+<ol class="arabic">
+<li><p>Clone repository</p>
+<p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://gitlab.com/cinst/oceantracker02.git</span></code></p>
+</li>
+<li><p>Working in a Virtual environment</p></li>
+<li><p>Create virtual environment</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">venv</span></code></p>
+</div></blockquote>
+</li>
+<li><p>Activate venv</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">./venv/bin/activate</span></code></p>
+</div></blockquote>
+</li>
+<li><p>Install packages in venv</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">develop</span></code>
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">./requirements.txt</span></code></p>
+</div></blockquote>
+</li>
+<li><p>Deactivate environment</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">deactivate</span></code></p>
+</div></blockquote>
+</li>
+</ol>
+</div>
+<div class="section" id="windows">
+<h2>Windows<a class="headerlink" href="#windows" title="Permalink to this heading">¶</a></h2>
+<p>Install Anaconda and create a conda virtual envioment with this, TDDO more details coming.</p>
+</div>
+</div>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="../users_guide.html" title="Previous document">Users guide</a>
+        </li>
+        <li>
+          <a href="running_ocean_tracker.html" title="Next document">Running OceanTracker</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2022, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/info/getting_started/installing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

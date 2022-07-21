@@ -1,0 +1,34 @@
+base_case_params:
+  dispersion:
+    A_H: 0.5
+    A_V: 0.001
+  particle_release_groups:
+  - points:
+    - - 1594500
+      - 5482700
+    - - 1598000
+      - 5486100
+    pulse_size: 20
+    release_interval: 3600
+  run_params: {}
+  solver:
+    n_sub_steps: 6
+  user_fields:
+  - class_name: oceantracker.fields.total_water_depth.TotalWaterDepth
+  user_particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+  user_triangle_properties:
+  - class_name: oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations
+reader:
+  class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
+  depth_average: true
+  field_variables:
+    water_temperature: temp
+  file_mask: demoHindcastSchism3D.nc
+shared_params:
+  debug: true
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker02\demos\demohindcast
+  max_duration: 86400.0
+  output_file_base: demo61_concentrations
+  root_output_dir: E:\H_Local_drive\ParticleTracking\oceantracker02\demos\output
