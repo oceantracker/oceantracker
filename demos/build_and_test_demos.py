@@ -34,7 +34,7 @@ demo_base_params=\
                 'time_buffer_size': 24,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
  'base_case_params' : {
-    'run_params' : {'doc_str':'test of notes'},
+    'run_params' : {'user_note':'test of notes'},
     'dispersion': {'A_H': .1},
     'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell']},
     'solver': {'n_sub_steps': 2},
