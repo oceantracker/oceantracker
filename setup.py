@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from setuptools import setuptools, find_packages
+from setuptools import setup, find_packages
 
-setuptools.setup(name='oceantracker',
+setup(name='oceantracker',
       python_requires='>=3.8',
       version='0.3',
       description='Off line Lagrangian particle tracking in the Ocean',
