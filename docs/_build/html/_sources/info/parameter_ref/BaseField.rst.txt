@@ -35,12 +35,12 @@ Parameters:
 		- type: ``<class 'numpy.dtype'>``
 		- default: ``<class 'numpy.float64'>``
 
-	* ``is3D_in_file``:  *<optional>*
+	**<isrequired>**
 		- type: ``<class 'bool'>``
-		- default: ``False``
+		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``is_time_varying``:  *<optional>*
+	**<isrequired>**
 		- type: ``<class 'bool'>``
 		- default: ``True``
 		- possible_values: ``[True, False]``
@@ -49,18 +49,9 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``num_components``:  *<optional>*
+	**<isrequired>**
 		- type: ``<class 'int'>``
 		- default: ``None``
-
-	* ``reader_variable_list``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
-	* ``requires_depth_averaging``:  *<optional>*
-		- type: ``<class 'bool'>``
-		- default: ``False``
-		- possible_values: ``[True, False]``
 
 	* ``user_note``:  *<optional>*
 		- type: ``<class 'str'>``

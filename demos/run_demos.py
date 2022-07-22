@@ -61,6 +61,7 @@ if __name__ == "__main__":
 
         params = json_util.read_JSON(f[0])
         demo_name= params['shared_params']['output_file_base']
+        params['reader']['input_dir'] = path.join(path.dirname(__file__),'demo_hindcast')
 
         # clean output folder
         params['shared_params']['root_output_dir'] = 'output'

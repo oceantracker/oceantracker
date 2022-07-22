@@ -6,7 +6,7 @@ PolygonStats2D_ageBased
 
 **File:** oceantracker/particle_statistics/polygon_statistics.py
 
-**Inheritance:** BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased> CorePolygonMethods> PolygonStats2D_ageBased
+**Inheritance:** BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased> _CorePolygonMethods> PolygonStats2D_ageBased
 
 **Default internal name:** ``"not given in defaults"``
 
@@ -53,21 +53,21 @@ Parameters:
 	* ``grid_center``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADE5C70>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB02E0>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_size``:  *<optional>*
 		- a list containing type:  ``<class 'int'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADE5640>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB0220>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_span``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADE5CA0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB0310>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
@@ -86,7 +86,7 @@ Parameters:
 	* ``particle_property_list``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADE5DC0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB0430>``
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 

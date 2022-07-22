@@ -6,7 +6,7 @@ PolygonStats2D_timeBasedDepthRange
 
 **File:** oceantracker/particle_statistics/statisics_in_water_depth_range.py
 
-**Inheritance:** BaseParticleLocationStats> GriddedStats2D_timeBased> CorePolygonMethods> PolygonStats2D_timeBased> WaterDepthRangeStats> PolygonStats2D_timeBasedDepthRange
+**Inheritance:** BaseParticleLocationStats> GriddedStats2D_timeBased> _CorePolygonMethods> PolygonStats2D_timeBased> WaterDepthRangeStats> PolygonStats2D_timeBasedDepthRange
 
 **Default internal name:** ``"not given in defaults"``
 
@@ -49,21 +49,21 @@ Parameters:
 	* ``grid_center``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADEE9A0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBABF3A0>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_size``:  *<optional>*
 		- a list containing type:  ``<class 'int'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADEE7F0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBABF1F0>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_span``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADEEB80>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBABF0D0>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
@@ -82,7 +82,7 @@ Parameters:
 	* ``particle_property_list``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADFD310>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBABF6A0>``
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 

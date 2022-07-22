@@ -1,14 +1,9 @@
-.. _parameter-details:
-
 ##################
 Parameter details
 ##################
 
 
 Links to details of parameter default values, acceptable values etc.
-
-An overview  is at :ref:`parameter-overview`
-
 
 
 .. note::

@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="UserFieldBase" href="UserFieldBase.html" />
-    <link rel="prev" title="BaseField" href="BaseField.html" />
+    <link rel="prev" title="ReaderField" href="ReaderField.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -84,7 +84,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="fields_toc.html">fields</a><ul>
-      <li>Previous: <a href="BaseField.html" title="previous chapter">BaseField</a></li>
+      <li>Previous: <a href="ReaderField.html" title="previous chapter">ReaderField</a></li>
       <li>Next: <a href="UserFieldBase.html" title="next chapter">UserFieldBase</a></li>
   </ul></li>
   </ul></li>
@@ -115,7 +115,7 @@
 <p><strong>Class:</strong> oceantracker.fields.total_water_depth.TotalWaterDepth</p>
 <p><strong>File:</strong> oceantracker/fields/total_water_depth.py</p>
 <p><strong>Inheritance:</strong> BaseField&gt; UserFieldBase&gt; TotalWaterDepth</p>
-<p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;not</span> <span class="pre">given</span> <span class="pre">in</span> <span class="pre">defaults&quot;</span></code></p>
+<p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;total_water_depth&quot;</span></code></p>
 <p><strong>Description:</strong></p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
@@ -156,7 +156,7 @@
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">is3D_in_file</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<dt><code class="docutils literal notranslate"><span class="pre">is3D</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
 <li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
@@ -173,35 +173,18 @@
 </dd>
 </dl>
 </li>
-</ul>
-<dl class="simple">
-<dt><strong>&lt;isrequired&gt;</strong></dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">name</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
 <li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">total_water_depth</span></code></p></li>
 </ul>
 </dd>
 </dl>
-<ul class="simple">
+</li>
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">num_components</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
-<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">reader_variable_list</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
-<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">requires_depth_averaging</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
 <li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
@@ -228,7 +211,7 @@
     <ul>
         <li>
           &larr;
-          <a href="BaseField.html" title="Previous document">BaseField</a>
+          <a href="ReaderField.html" title="Previous document">ReaderField</a>
         </li>
         <li>
           <a href="UserFieldBase.html" title="Next document">UserFieldBase</a>

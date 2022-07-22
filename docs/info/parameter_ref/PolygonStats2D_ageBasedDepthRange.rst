@@ -6,7 +6,7 @@ PolygonStats2D_ageBasedDepthRange
 
 **File:** oceantracker/particle_statistics/statisics_in_water_depth_range.py
 
-**Inheritance:** BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased> CorePolygonMethods> PolygonStats2D_ageBased> WaterDepthRangeStats> PolygonStats2D_ageBasedDepthRange
+**Inheritance:** BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased> _CorePolygonMethods> PolygonStats2D_ageBased> WaterDepthRangeStats> PolygonStats2D_ageBasedDepthRange
 
 **Default internal name:** ``"not given in defaults"``
 
@@ -53,21 +53,21 @@ Parameters:
 	* ``grid_center``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADF67F0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB5490>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_size``:  *<optional>*
 		- a list containing type:  ``<class 'int'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADF6910>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB5B80>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_span``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADF6CD0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB5F70>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
@@ -94,7 +94,7 @@ Parameters:
 	* ``particle_property_list``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADF6F40>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBABF310>``
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 

@@ -26,6 +26,10 @@ Parameters:
 		- type: ``<class 'float'>``
 		- default: ``86400.0``
 
+	* ``description``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+
 	* ``doc_str``:  *<optional>*
 		- type: ``<class 'str'>``
 		- default: ``decaying particle based on age``

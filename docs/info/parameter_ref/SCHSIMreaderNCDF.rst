@@ -45,7 +45,7 @@ field_variables: still working on display  of nested  params dict <class 'dict'>
 	* ``field_variables_to_depth_average``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DA65B1F0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDB4664F0>``
 		- can_be_empty_list: ``True``
 
 	**<isrequired>**
@@ -80,7 +80,7 @@ grid_variables: still working on display  of nested  params dict <class 'dict'>
 		- min: ``0.0``
 
 	* ``name``:  *<optional>*
-		**Description:** - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field
+		**Description:** - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
 		- type: ``<class 'str'>``
 		- default: ``None``

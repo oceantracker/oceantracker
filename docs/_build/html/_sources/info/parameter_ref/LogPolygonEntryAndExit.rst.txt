@@ -36,7 +36,7 @@ Parameters:
 		- default: ``None``
 
 	* ``name``:  *<optional>*
-		**Description:** - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field
+		**Description:** - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
 		- type: ``<class 'str'>``
 		- default: ``None``
@@ -44,7 +44,7 @@ Parameters:
 	* ``particle_prop_to_write_list``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DAD98640>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBA59850>``
 		- can_be_empty_list: ``True``
 
 	* ``polygon_list``:  *<optional>*

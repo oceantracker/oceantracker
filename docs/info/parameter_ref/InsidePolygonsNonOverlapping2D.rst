@@ -22,6 +22,10 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
+	* ``description``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+
 	* ``doc_str``:  *<optional>*
 		- type: ``<class 'str'>``
 		- default: ``index of polygon particle is in side``

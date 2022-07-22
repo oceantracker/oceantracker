@@ -35,7 +35,7 @@ Parameters:
 		- default: ``-1000000000.0``
 
 	* ``name``:  *<optional>*
-		**Description:** - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field
+		**Description:** - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
 		- type: ``<class 'str'>``
 		- default: ``None``

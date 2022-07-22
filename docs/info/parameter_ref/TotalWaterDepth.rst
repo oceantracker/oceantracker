@@ -8,7 +8,7 @@ TotalWaterDepth
 
 **Inheritance:** BaseField> UserFieldBase> TotalWaterDepth
 
-**Default internal name:** ``"not given in defaults"``
+**Default internal name:** ``"total_water_depth"``
 
 **Description:** 
 
@@ -35,7 +35,7 @@ Parameters:
 		- type: ``<class 'numpy.dtype'>``
 		- default: ``<class 'numpy.float64'>``
 
-	* ``is3D_in_file``:  *<optional>*
+	* ``is3D``:  *<optional>*
 		- type: ``<class 'bool'>``
 		- default: ``False``
 		- possible_values: ``[True, False]``
@@ -45,21 +45,13 @@ Parameters:
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	**<isrequired>**
+	* ``name``:  *<optional>*
 		- type: ``<class 'str'>``
-		- default: ``None``
+		- default: ``total_water_depth``
 
 	* ``num_components``:  *<optional>*
-		- type: ``<class 'int'>``
-		- default: ``None``
-
-	* ``reader_variable_list``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
-	* ``requires_depth_averaging``:  *<optional>*
 		- type: ``<class 'bool'>``
-		- default: ``False``
+		- default: ``1``
 		- possible_values: ``[True, False]``
 
 	* ``user_note``:  *<optional>*

@@ -6,7 +6,7 @@ PolygonStats2D_ageBasedTopBottom
 
 **File:** oceantracker/particle_statistics/statisics_in_top_or_bottom_layer.py
 
-**Inheritance:** BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased> CorePolygonMethods> PolygonStats2D_ageBased> TopBottomLayerStats> PolygonStats2D_ageBasedTopBottom
+**Inheritance:** BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased> _CorePolygonMethods> PolygonStats2D_ageBased> TopBottomLayerStats> PolygonStats2D_ageBasedTopBottom
 
 **Default internal name:** ``"not given in defaults"``
 
@@ -53,21 +53,21 @@ Parameters:
 	* ``grid_center``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADEEDC0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB0760>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_size``:  *<optional>*
 		- a list containing type:  ``<class 'int'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADEE7C0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB0250>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_span``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADEEAF0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAA2A30>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
@@ -101,7 +101,7 @@ Parameters:
 	* ``particle_property_list``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002B6DADE50D0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBAB5100>``
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 

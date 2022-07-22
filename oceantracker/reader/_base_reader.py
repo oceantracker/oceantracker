@@ -113,16 +113,18 @@ class BaseReader(ParameterBaseClass):
         var_list = [v for v in var_list if v != None]
         var_file_name0=var_list[0]
 
+
+
+
+
         if self.params['dimension_map']['z'] is not None and nc.is_var_dim(var_file_name0, self.params['dimension_map']['z']):
             is3D_in_file = True
         else:
             is3D_in_file = False
 
-        d = {'name': name, 'variable_list':[],
-             'requires_depth_averaging': self.params['depth_average'] and is3D_in_file,
-             'dtype': nc.get_var_dtype(var_file_name0),
-             'is3D_in_file': is3D_in_file,
-             'is_time_varying': nc.is_var_dim(var_file_name0, self.params['dimension_map']['time'])}
+        unpacking_info={'variable_list':[],
+                        'is3D_in_file': is3D_in_file,
+                        'requires_depth_averaging': self.params['depth_average'] and is3D_in_file}
 
         # work out number of components in list of variables
         dm= self.params['dimension_map']
@@ -137,14 +139,20 @@ class BaseReader(ParameterBaseClass):
                 n_comp = 1
 
             n_total_comp += n_comp
-            d['variable_list'].append({'name_in_file':file_var_name, 'num_components': n_comp })
+            unpacking_info['variable_list'].append({'name_in_file':file_var_name, 'num_components': n_comp })
 
         # if a 3D var and vector then it must have  3D components
         # eg this allows for missing vertical velocity, to have zeros in water_velocity
         if is3D_in_file and n_total_comp> 1: n_total_comp =3
 
-        d['num_components'] = n_total_comp
-        return d
+        params = {'name': name,
+             'dtype': nc.get_var_dtype(var_file_name0),
+             'is_time_varying': nc.is_var_dim(var_file_name0, self.params['dimension_map']['time']),
+             'num_components' : n_total_comp,
+             'is3D' :  False if unpacking_info['requires_depth_averaging'] else is3D_in_file
+            }
+
+        return params, unpacking_info
 
     def fill_time_buffer(self, nt):
         # fil buffer frpom global time step ntb0
@@ -230,16 +238,16 @@ class BaseReader(ParameterBaseClass):
         si= self.shared_info
         # set up space to read data into
         sd=[1,] + list(field.data.shape[1:])
-        if field.params['requires_depth_averaging'] and field.params['is3D_in_file']:
+        if field.info['requires_depth_averaging'] and field.info['is3D_in_file']:
             sd[2] = nc.get_dim_size(self.params['dimension_map']['z'])
         if file_index is not None: sd[0] = file_index.shape[0]
 
         data = np.full(sd,0, dtype=field.data.dtype)
         m = 0
-        for var in field.params['variable_list']:
+        for var in field.info['variable_list']:
             s= [file_index.shape[0] if field.params['is_time_varying'] else 1,
                    si.grid['x'].shape[0],
-                   si.grid['nz'] if field.params['is3D_in_file'] else 1,
+                   si.grid['nz'] if field.info['is3D_in_file'] else 1,
                    var['num_components']]
             if  var['num_components'] == 1:
                 data[:, :,:, m] = nc.read_a_variable(var['name_in_file'], file_index).reshape(s[:-1])
@@ -247,7 +255,7 @@ class BaseReader(ParameterBaseClass):
                 data[:, :, :, range(m, m + var['num_components'])] = nc.read_a_variable(var['name_in_file'], file_index).reshape(s)
             m += var['num_components']
 
-        if field.params['requires_depth_averaging']:
+        if field.info['requires_depth_averaging']:
             data = depth_aver_SlayerLSC_in4D(data, si.grid['zlevel'], si.grid['bottom_cell_index'])
         return data
 

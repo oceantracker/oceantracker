@@ -1,12 +1,12 @@
 ###################
-CorePolygonMethods
+_CorePolygonMethods
 ###################
 
-**Class:** oceantracker.particle_statistics.polygon_statistics.CorePolygonMethods
+**Class:** oceantracker.particle_statistics.polygon_statistics._CorePolygonMethods
 
 **File:** oceantracker/particle_statistics/polygon_statistics.py
 
-**Inheritance:** CorePolygonMethods
+**Inheritance:** _CorePolygonMethods
 
 **Default internal name:** ``"not given in defaults"``
 
