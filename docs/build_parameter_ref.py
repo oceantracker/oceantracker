@@ -171,10 +171,11 @@ def make_sub_pages(class_type):
 
     for f in glob(path.join( package_dir,class_type,'*.py')):
 
-        mod_str= path.splitext(f)[0].split('oceantracker02\\')[-1].replace('\\','.')
+        mod_str= path.splitext(f)[0].split(package_util.get_root_package_dir() +'\\')[-1].replace('\\','.')
         mod = importlib.import_module(mod_str)
-
+        package_util.get_package_name()
         for name, c in  inspect.getmembers(mod):
+            if name[0] =='_' : continue  # ingore internal claases flagged with underscore
             if not inspect.isclass(c) : continue
             if not issubclass(c, ParameterBaseClass): continue
             if c.__module__ !=  mod.__name__ : continue  # only work on locally declared claseses

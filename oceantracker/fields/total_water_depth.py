@@ -5,10 +5,12 @@ from numba import njit
 import numpy as np
 
 class TotalWaterDepth(UserFieldBase):
-    def __int__(self):
+    def __init__(self):
         super().__init__()
         self.add_default_params({'name': PVC('total_water_depth', str),
-                                 'is_time_varying': PVC(True,bool)})
+                                 'is_time_varying': PVC(True,bool),
+                                 'num_components': PVC(1, bool),
+                                 'is3D': PVC(False,bool)})
         a=1
 
     def check_requirements(self):

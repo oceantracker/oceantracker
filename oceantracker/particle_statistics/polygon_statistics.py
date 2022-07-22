@@ -5,7 +5,7 @@ from numba import njit
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
-class CorePolygonMethods(ParameterBaseClass):
+class _CorePolygonMethods(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()
@@ -33,7 +33,7 @@ class CorePolygonMethods(ParameterBaseClass):
                                                 write=False))
         nc.add_a_Dimension('polygon', len(self.params['polygon_list']))
 
-class PolygonStats2D_timeBased(CorePolygonMethods,gridded_statistics.GriddedStats2D_timeBased):
+class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_timeBased):
     # class to hold counts of particles inside 2D polygons squares
 
     def __init__(self):
@@ -117,7 +117,7 @@ class PolygonStats2D_timeBased(CorePolygonMethods,gridded_statistics.GriddedStat
             for m in range(len(prop_list)):
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
 
-class PolygonStats2D_ageBased(CorePolygonMethods,gridded_statistics.GriddedStats2D_agedBased):
+class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_agedBased):
 
     def __init__(self):
         super().__init__()

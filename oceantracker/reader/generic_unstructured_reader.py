@@ -44,10 +44,11 @@ class GenericUnstructuredReader(BaseReader):
             #    class_params = getattr(self,'read_' + name)(nc, name, setup=True)
             #else:
                 # add scalar fields by read_scalar_field
-            class_params= self.get_field_variable_info(nc,name)
+            class_params, unpacking_info = self.get_field_variable_info(nc,name)
                 #class_params = self.read_scalar_field(nc, name, setup=True)
-
+            class_params['class_name']='oceantracker.fields.reader_field.ReaderField'
             i = fm.add_field('from_reader_field', class_params, crumbs = 'Adding field derived from reader field >>> ' + name)
+            i.info.update(unpacking_info) # info to unpack vaiabes in file
             i.initialize()
 
             if not i.params['is_time_varying']:
