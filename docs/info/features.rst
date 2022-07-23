@@ -42,7 +42,9 @@ Useful Features
 * Flexible reader with user configurable mapping  file variable names to consistent internal variable names.
 * Sorts all hindcast files match mask found in a dir, and optionally sun dirs, in to time order based on time with the file. Avoiding need to use file name structure to load files in date order.
 * For speed can optionally use a 3D hindcast as a 2D hindcast, with hindcast being depth averaged as it is read in.
-* Pyhthon core provided to read output variables into python dictionaries of variables.
+* Python core provided to read output variables into python dictionaries of variables.
+* Shoreline stranding of particles by the tide.
+* Resuspension from the bottom based on crtical friction velocity.
 
 
 SCHSIM specific
