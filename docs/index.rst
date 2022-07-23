@@ -33,7 +33,7 @@ or by an expert adding their specialised code for novel particle behaviours or s
 
 
 ====================
-Main Features
+Features
 ====================
 
 * Fast and extendable offline native grid particle tracking for unstructured grids [1]_
