@@ -44,7 +44,7 @@ Parameters:
 	* ``particle_prop_to_write_list``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDBA59F40>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000029B1CFB9F40>``
 		- can_be_empty_list: ``True``
 
 	* ``user_note``:  *<optional>*

@@ -45,7 +45,7 @@ field_variables: still working on display  of nested  params dict <class 'dict'>
 	* ``field_variables_to_depth_average``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000023DDB46BF40>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000029B1C87BF40>``
 		- can_be_empty_list: ``True``
 
 	**<isrequired>**
