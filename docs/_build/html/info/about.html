@@ -15,7 +15,7 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Demos" href="demos/demos.html" />
+    <link rel="next" title="Features" href="features.html" />
     <link rel="prev" title="OceanTracker" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -52,11 +52,8 @@
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">About</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#background">Background</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="demos/demos.html">Demos</a></li>
 <li class="toctree-l1"><a class="reference internal" href="users_guide.html">Users guide</a></li>
 </ul>
@@ -66,7 +63,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="../index.html" title="previous chapter"><em>OceanTracker</em></a></li>
-      <li>Next: <a href="demos/demos.html" title="next chapter">Demos</a></li>
+      <li>Next: <a href="features.html" title="next chapter">Features</a></li>
   </ul></li>
 </ul>
 </div>
@@ -90,8 +87,6 @@
             
   <section id="about">
 <h1>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h1>
-<section id="background">
-<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
 <p>Lagrangian particle tracking, is an important tool in quantifying bio-physical transports in the ocean.
 Particle tracking in the unstructured grids typically used in coastal regions is computationally slow,
 limiting the number of particles and ranges of behaviours that can be modeled.</p>
@@ -105,41 +100,6 @@ It also enables wider exploration of parameter sensitivity and particles’ bio-
 Using multiple computer cores further increased the speed to track a given number of particles.</p>
 <p>The code can build heat maps on the fly and within polygon counts. This eliminates the need to record large data sets of particle tracks for post processing into heat maps. In addition to speed the internal architecture of OceanTracker makes it easy for the user to customise and extend.</p>
 </section>
-<section id="architecture">
-<h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Fully driven by parameters in JSON/YAML file or in code from dictionary</p></li>
-<li><dl class="simple">
-<dt>Highly flexible architecture enabling:</dt><dd><ul>
-<li><p>user implemented approaches to core classes, core classes can be replaced via string name in parameter dictionary, eg. user spatial interpolator</p></li>
-<li><dl class="simple">
-<dt>user developed:</dt><dd><ul>
-<li><p>custom particle properties derived from other properties though inheritance</p></li>
-<li><p>augment particle velocity given by water_velocity read from hindcast, eg. particle fall velocity</p></li>
-<li><p>modify particle trajectories, eg. resuspension.</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Automated processes to add user developed particle proprieties, velocity, trajectory modifiers, etc , to calculation and output chain. Eg  Requesting a file variable “temperature” from hindcast file by adding to the readers “field_variables” list, will automatically:</dt><dd><ul>
-<li><p>create a feild of this name</p></li>
-<li><p>interpolate this field to the particle locations at each time step</p></li>
-<li><p>write this particle porpoerty to the output file along with the particle location etc.</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><p>All core and optional classes can be changed or added to list as parameter string using class_name as a string, eg optional particle distance travelled propoerty</p></li>
-<li><p>Reduce memory requirement in ‘compact_mode’,  which only retains active particles, eg. those young enough to be of interest.</p></li>
-<li><p>Written in python with numba package for fast in-place operations on particle properties and hindcast’s fields based on set of indices arrays.</p></li>
-</ul>
-</section>
-</section>
 
 
           </div>
@@ -152,7 +112,7 @@ Using multiple computer cores further increased the speed to track a given numbe
           <a href="../index.html" title="Previous document"><em>OceanTracker</em></a>
         </li>
         <li>
-          <a href="demos/demos.html" title="Next document">Demos</a>
+          <a href="features.html" title="Next document">Features</a>
           &rarr;
         </li>
     </ul>

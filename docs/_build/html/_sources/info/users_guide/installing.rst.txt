@@ -35,6 +35,12 @@ Linux
 
     ``pip install -r ./requirements.txt``
 
+#. Test by running a demo
+
+    ``cd ./demos``
+
+    ``python run_demos.py -n --d 2``
+
 #. Deactivate environment
 
     ``deactivate``

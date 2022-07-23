@@ -3,9 +3,6 @@
 About
 #############
 
-Background
-===============
-
 Lagrangian particle tracking, is an important tool in quantifying bio-physical transports in the ocean.
 Particle tracking in the unstructured grids typically used in coastal regions is computationally slow,
 limiting the number of particles and ranges of behaviours that can be modeled.
@@ -23,26 +20,5 @@ Using multiple computer cores further increased the speed to track a given numbe
 
 The code can build heat maps on the fly and within polygon counts. This eliminates the need to record large data sets of particle tracks for post processing into heat maps. In addition to speed the internal architecture of OceanTracker makes it easy for the user to customise and extend.
 
-
-Architecture
-===============
-
-* Fully driven by parameters in JSON/YAML file or in code from dictionary
-* Highly flexible architecture enabling:
-    * user implemented approaches to core classes, core classes can be replaced via string name in parameter dictionary, eg. user spatial interpolator
-
-    * user developed:
-        * custom particle properties derived from other properties though inheritance
-        * augment particle velocity given by water_velocity read from hindcast, eg. particle fall velocity
-        * modify particle trajectories, eg. resuspension.
-
-* Automated processes to add user developed particle proprieties, velocity, trajectory modifiers, etc , to calculation and output chain. Eg  Requesting a file variable "temperature" from hindcast file by adding to the readers "field_variables" list, will automatically:
-    * create a feild of this name
-    * interpolate this field to the particle locations at each time step
-    * write this particle porpoerty to the output file along with the particle location etc.
-
-* All core and optional classes can be changed or added to list as parameter string using class_name as a string, eg optional particle distance travelled propoerty
-* Reduce memory requirement in 'compact_mode',  which only retains active particles, eg. those young enough to be of interest.
-* Written in python with numba package for fast in-place operations on particle properties and hindcast's fields based on set of indices arrays.
 
 

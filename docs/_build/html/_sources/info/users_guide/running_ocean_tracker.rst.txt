@@ -24,6 +24,12 @@ OceanTracker can be run in two ways.
     * passing the parameter dictionary  to main.run() method
     * adding optional code for  post processing and/or plotting using oceantracker.post_processing.*
 
+.. note::
+
+    If OceanTracker was istalled with a virtual environment, activate it first. Eg. in linux, if in dir above OceanTracker package, then:
+
+    ``source ./oceantracker/venv/bin/activate``
+
 
 
 

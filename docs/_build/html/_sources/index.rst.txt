@@ -33,7 +33,7 @@ or by an expert adding their specialised code for novel particle behaviours or s
 
 
 ====================
-Features
+Main Features
 ====================
 
 * Fast and extendable offline native grid particle tracking for unstructured grids [1]_
@@ -70,6 +70,7 @@ Architecture
    :caption: Contents:
 
    info/about.rst
+   info/features.rst
    info/demos/demos.rst
    info/users_guide.rst
 
