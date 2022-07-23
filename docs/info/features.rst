@@ -32,7 +32,7 @@ Architecture
     * interpolate this field to the particle locations at each time step
     * write this particle property to the output file along with the particle location etc.
 
-* All core and optional classes can be changed or added to list as parameter string using class_name as a string, eg optional particle distance travelled propoerty
+* All core and optional classes can be changed or added to list as parameter string using class_name as a string, eg optional particle distance travelled property.
 * Reduce memory requirement in 'compact_mode',  which only retains active particles, eg. those young enough to be of interest.
 * Written in python with numba package for fast in-place operations on particle properties and hindcast's fields based on set of indices arrays.
 
