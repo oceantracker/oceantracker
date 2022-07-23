@@ -2,11 +2,14 @@
 # run from inside dir where install required
 
 rm oceantracker -rf # replacing any existing package
+
 git clone https://github.com/oceantracker/oceantracker.git
 cd ./oceantracker
 python3 -m venv venv
+
 source ./venv/bin/activate
-python setup.py develop
+
+python setup.py develop   # add package to path
 pip install -r ./requirements.txt
 
 # test by running one demo

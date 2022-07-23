@@ -113,13 +113,12 @@
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">numpy  &lt; 1.22</span>
 <span class="go">matplotlib&gt;=3.3.4</span>
 <span class="go">netcdf4&gt;=1.5.6</span>
-<span class="go">setuptools&gt;=52.0.0</span>
 <span class="go">psutil&gt;=5.8.0</span>
 <span class="go">numba &gt;= 0.5</span>
 <span class="go">pyproj&gt;=3.0</span>
 <span class="go">scipy&gt;=1.6.1</span>
 <span class="go">pyyaml &gt;= 5.3.1</span>
-<span class="go">python-dateutil &gt;= 2.8</span>
+<span class="go">setuptools&gt;=52.0.0</span>
 </pre></div>
 </div>
 </div>
@@ -148,8 +147,8 @@
 </li>
 <li><p>Install packages in venv</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">develop</span></code>
-<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">./requirements.txt</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">develop</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">./requirements.txt</span></code></p>
 </div></blockquote>
 </li>
 <li><p>Deactivate environment</p>
@@ -158,6 +157,31 @@
 </div></blockquote>
 </li>
 </ol>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">../../../tests/oceantracker_linux_install.sh</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"># </span>install ocean tracker
+<span class="gp"># </span>run from inside dir where install required
+
+<span class="go">rm oceantracker -rf # replacing any existing package</span>
+
+<span class="go">git clone https://github.com/oceantracker/oceantracker.git</span>
+<span class="go">cd ./oceantracker</span>
+<span class="go">python3 -m venv venv</span>
+
+<span class="go">source ./venv/bin/activate</span>
+
+<span class="go">python setup.py develop   # add package to path</span>
+<span class="go">pip install -r ./requirements.txt</span>
+
+<span class="gp"># </span><span class="nb">test</span> by running one demo
+<span class="go">echo &quot;Test run demo 60&quot;</span>
+<span class="go">cd ./demos</span>
+<span class="go">python run_demos.py -n --d 2</span>
+<span class="go">cd ..</span>
+<span class="go">cd ..</span>
+</pre></div>
+</div>
+</div>
 </section>
 <section id="windows">
 <h2>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h2>
