@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Features &#8212; OceanTracker Beta 0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Demos" href="demos/demos.html" />
+    <link rel="prev" title="About" href="about.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=oceantracker&repo=oceantracker&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main-features">Main Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#useful-features">Useful Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#schsim-specific">SCHSIM specific</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="demos/demos.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users_guide.html">Users guide</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="about.html" title="previous chapter">About</a></li>
+      <li>Next: <a href="demos/demos.html" title="next chapter">Demos</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="features">
+<h1>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h1>
+<section id="main-features">
+<h2>Main Features<a class="headerlink" href="#main-features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Ability to track millions of particles in hours in unstructured grids.</p></li>
+<li><p>Calculate particle statistics one the fly, eliminating need to store and wade though large volumes of particle track output.</p></li>
+<li><p>Flexible parameter file driven particle tracking.</p></li>
+<li><p>Adding user particle properties, changes to particle trajectories, statistics etc,  to the computational pipe line from parameter text file.</p></li>
+<li><p>Flexible particle releases, from points or polygons.</p></li>
+<li><p>Forwards and backwards in time particle tracking.</p></li>
+<li><p>Post run plotting and animation.</p></li>
+<li><p>Run multiple cases in parallel, to reduce run time.</p></li>
+</ul>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Fully driven by parameters in JSON/YAML file or in code from dictionary</p></li>
+<li><dl class="simple">
+<dt>Highly flexible architecture enabling:</dt><dd><ul>
+<li><p>user implemented approaches to core classes, core classes can be replaced via string name in parameter dictionary, eg. user spatial interpolator</p></li>
+<li><dl class="simple">
+<dt>user developed:</dt><dd><ul>
+<li><p>custom particle properties derived from other properties though inheritance</p></li>
+<li><p>augment particle velocity given by water_velocity read from hindcast, eg. particle fall velocity</p></li>
+<li><p>modify particle trajectories, eg. resuspension.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Automated processes to add user developed particle proprieties, velocity, trajectory modifiers, etc , to calculation and output chain. Eg  Requesting a file variable “temperature” from hindcast file by adding to the readers “field_variables” list, will automatically:</dt><dd><ul>
+<li><p>create a feild of this name</p></li>
+<li><p>interpolate this field to the particle locations at each time step</p></li>
+<li><p>write this particle property to the output file along with the particle location etc.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>All core and optional classes can be changed or added to list as parameter string using class_name as a string, eg optional particle distance travelled property.</p></li>
+<li><p>Reduce memory requirement in ‘compact_mode’,  which only retains active particles, eg. those young enough to be of interest.</p></li>
+<li><p>Written in python with numba package for fast in-place operations on particle properties and hindcast’s fields based on set of indices arrays.</p></li>
+</ul>
+</section>
+<section id="useful-features">
+<h2>Useful Features<a class="headerlink" href="#useful-features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Flexible reader with user configurable mapping  file variable names to consistent internal variable names.</p></li>
+<li><p>Sorts all hindcast files match mask found in a dir, and optionally sun dirs, in to time order based on time with the file. Avoiding need to use file name structure to load files in date order.</p></li>
+<li><p>For speed can optionally use a 3D hindcast as a 2D hindcast, with hindcast being depth averaged as it is read in.</p></li>
+<li><p>Python core provided to read output variables into python dictionaries of variables.</p></li>
+<li><p>Shoreline stranding of particles by the tide.</p></li>
+<li><p>Resuspension from the bottom based on crtical friction velocity.</p></li>
+</ul>
+</section>
+<section id="schsim-specific">
+<h2>SCHSIM specific<a class="headerlink" href="#schsim-specific" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Reads SCHSIM netcdf output, automatically determining whether 2D or 3D</p></li>
+<li><p>Native grid particle tracking for both S-layer and LSC vertical grids</p></li>
+<li><p>Break quad cells into triangles</p></li>
+<li><p>Can have open boundary if hgrid.gr3 file available</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="about.html" title="Previous document">About</a>
+        </li>
+        <li>
+          <a href="demos/demos.html" title="Next document">Demos</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2022, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/info/features.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
