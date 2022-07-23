@@ -32,11 +32,16 @@ Linux
 #. Install packages in venv
 
     ``python setup.py develop``
+
     ``pip install -r ./requirements.txt``
 
 #. Deactivate environment
 
     ``deactivate``
+
+.. literalinclude:: ../../../tests/oceantracker_linux_install.sh
+    :language: console
+    :caption:
 
 Windows
 =======================
