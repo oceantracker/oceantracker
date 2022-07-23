@@ -7,12 +7,13 @@ Main Features
 =================
 
 * Ability to track millions of particles in hours in unstructured grids.
-* Calculate particle statics one the fly, eliminating need to store and wade though large volumes of particle track output.
+* Calculate particle statistics one the fly, eliminating need to store and wade though large volumes of particle track output.
 * Flexible parameter file driven particle tracking.
 * Adding user particle properties, changes to particle trajectories, statistics etc,  to the computational pipe line from parameter text file.
 * Flexible particle releases, from points or polygons.
 * Forwards and backwards in time particle tracking.
 * Post run plotting and animation.
+* Run multiple cases in parallel, to reduce run time.
 
 
 Architecture
