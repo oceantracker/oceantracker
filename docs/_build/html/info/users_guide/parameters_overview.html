@@ -106,12 +106,11 @@
           <div class="body" role="main">
             
   <section id="parameters-overview">
-<span id="parameter-overview"></span><h1>Parameters overview<a class="headerlink" href="#parameters-overview" title="Permalink to this headline">¶</a></h1>
+<h1>Parameters overview<a class="headerlink" href="#parameters-overview" title="Permalink to this headline">¶</a></h1>
 <p>OceanTracker is structured to run one more “cases” of particle tracking, each with their own set of parameters.
 The parameters are a python dictionary of key-value pairs
 (parameters  in JSON or Yaml file  are converted to a python dictionary).
 Thus key-value pairs of parameters setup the computations. The top level parameter dictionary, may contain other nested parameter dictionaries, or lists of other parameter dictionaries.</p>
-<p>Full details are at  <span class="xref std std-ref">parameter-details</span></p>
 <section id="top-level-params">
 <h2>Top level params<a class="headerlink" href="#top-level-params" title="Permalink to this headline">¶</a></h2>
 <p>The top level parameter dictionary has the structure:</p>
@@ -175,7 +174,6 @@ have specified default values associated with their key, which are used if none 
 <p>Any user given values are checked to ensure they are the required data type,  are in the range of acceptable values, etc.
 For a few keys, a value must be supplied by the user (eg. input_dir of hindcast files). If these are not given an “is_required error” will be generated.</p>
 <p>The user is warned of any unexpected keys found within the parameters, ie those not in the default parameter dictionary.</p>
-<p>Full details of defaults are given in  <span class="xref std std-ref">parameter-details</span></p>
 </section>
 <section id="class-name-parameter">
 <h2>class_name parameter<a class="headerlink" href="#class-name-parameter" title="Permalink to this headline">¶</a></h2>
@@ -215,9 +213,9 @@ the computational pipeline by the ParticleGroupManager. Then it will automatical
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_default_params</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">PVC</span><span class="p">(</span><span class="s1">&#39;age_decay&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="p">,</span>
-                                 <span class="s1">&#39;doc_str&#39;</span><span class="p">:</span> <span class="n">PVC</span><span class="p">(</span> <span class="s1">&#39;decaying particle based on age&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
-                                 <span class="s1">&#39;initial_value&#39;</span><span class="p">:</span> <span class="n">PVC</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span>
+                                 <span class="s1">&#39;initial_value&#39;</span><span class="p">:</span> <span class="n">PVC</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span><span class="n">doc_str</span><span class="o">=</span><span class="s1">&#39;Particle property at the time of release&#39;</span><span class="p">),</span>
                                  <span class="s1">&#39;decay_time_scale&#39;</span><span class="p">:</span> <span class="n">PVC</span><span class="p">(</span> <span class="mf">1.</span><span class="o">*</span><span class="mi">3600</span><span class="o">*</span><span class="mi">24</span><span class="p">,</span> <span class="nb">float</span><span class="p">)})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_doc</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Exponentially decaying particle property based on age.&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">check_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">msg_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_class_required_fields_properties_grid_vars_and_3D</span><span class="p">(</span><span class="n">required_props</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">])</span>

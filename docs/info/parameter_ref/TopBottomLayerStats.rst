@@ -22,10 +22,6 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``layer_thick_ness``:  *<optional>*
 		- type: ``<class 'float'>``
 		- default: ``0.0``

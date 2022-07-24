@@ -27,10 +27,6 @@ Parameters:
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``dtype``:  *<optional>*
 		- type: ``<class 'numpy.dtype'>``
 		- default: ``<class 'numpy.float64'>``

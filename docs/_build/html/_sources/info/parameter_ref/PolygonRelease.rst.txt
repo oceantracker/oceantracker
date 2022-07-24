@@ -29,10 +29,6 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.``
-
 	* ``maximum_age``:  *<optional>*
 		**Description:** - Particles older than this are killed off and removed from computation.
 
@@ -76,10 +72,6 @@ Parameters:
 		- type: ``iso8601date``
 		- default: ``None``
 
-	* ``release_z``:  *<optional>*
-		- type: ``<class 'float'>``
-		- default: ``0.0``
-
 	* ``user_note``:  *<optional>*
 		- type: ``<class 'str'>``
 		- default: ``None``
@@ -109,10 +101,14 @@ user_particle_property_parameters: still working on display  of nested  params d
 		- default: ``None``
 
 	* ``z_max``:  *<optional>*
+		**Description:** - Max. z cord value to release with the polygon
+
 		- type: ``<class 'float'>``
 		- default: ``0.0``
 
 	* ``z_min``:  *<optional>*
+		**Description:** - Min. z cord value to release with the polygon
+
 		- type: ``<class 'float'>``
 		- default: ``0.0``
 

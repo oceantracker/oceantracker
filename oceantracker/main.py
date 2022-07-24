@@ -39,7 +39,7 @@ import subprocess
 
 code_version = '0.3.000'
 
-run_info = {'doc_str': {}, 'screen_log': [],
+run_info = {'user_note': {}, 'screen_log': [],
             'run_started': datetime.now(),
             'run_ended': None,
             'elasped_time': None,

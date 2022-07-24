@@ -10,7 +10,7 @@ GenericUnstructuredReader
 
 **Default internal name:** ``"not given in defaults"``
 
-**Description:** 
+**Description:** Generic reader, reading netcdf file variables using given name map mapped to internal variables 
 
 
 Parameters:
@@ -35,17 +35,13 @@ Parameters:
 
 dimension_map: still working on display  of nested  params dict <class 'dict'>
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 
 field_variables: still working on display  of nested  params dict <class 'dict'>
 
 	* ``field_variables_to_depth_average``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000029B1C87B670>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002798A590580>``
 		- can_be_empty_list: ``True``
 
 	**<isrequired>**

@@ -54,7 +54,7 @@ SCHSIM specific
 
 * Reads SCHSIM netcdf output, automatically determining whether 2D or 3D
 * Native grid particle tracking for both S-layer and LSC vertical grids
-* Break quad cells into triangles
+* Splits quad cells into triangles
 * Can have open boundary if hgrid.gr3 file available
 
 

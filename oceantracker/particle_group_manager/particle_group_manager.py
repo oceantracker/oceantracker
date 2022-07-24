@@ -189,7 +189,7 @@ class ParticleGroupManager(ParameterBaseClass):
                 w.create_variable_to_write(i.params['name'], is_time_varying=i.params['time_varying'],
                                            is_part_prop=True,
                                            vector_dim=i.params['vector_dim'],
-                                           attributes={'doc_str': i.params['doc_str']},
+                                           attributes={'description': i.params['doc_str']},
                                            dtype=i.params['dtype'])
 
     def get_particle_time(self): return self.time_varying_group_info['time'].get_values()

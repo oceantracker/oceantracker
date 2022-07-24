@@ -34,10 +34,6 @@ Parameters:
 		- default: ``None``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``name``:  *<optional>*
 		**Description:** - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
@@ -57,7 +53,7 @@ Parameters:
 	* ``particle_properties_to_track``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000029B1CFCD340>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002798ACCE1C0>``
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 

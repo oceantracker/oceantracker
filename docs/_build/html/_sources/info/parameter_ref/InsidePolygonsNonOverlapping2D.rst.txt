@@ -10,7 +10,7 @@ InsidePolygonsNonOverlapping2D
 
 **Default internal name:** ``"inside_polygons_non_overlapping"``
 
-**Description:** index of polygon particle is in side
+**Description:** Index of polygon a particle is inside
 
 
 Parameters:
@@ -25,10 +25,6 @@ Parameters:
 	* ``description``:  *<optional>*
 		- type: ``<class 'str'>``
 		- default: ``None``
-
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``index of polygon particle is in side``
 
 	* ``dtype``:  *<optional>*
 		- type: ``<class 'type'>``

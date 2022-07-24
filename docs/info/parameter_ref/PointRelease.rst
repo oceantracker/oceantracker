@@ -22,10 +22,6 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.``
-
 	* ``maximum_age``:  *<optional>*
 		**Description:** - Particles older than this are killed off and removed from computation.
 
@@ -76,10 +72,6 @@ Parameters:
 	* ``release_start_date``:  *<optional>*
 		- type: ``iso8601date``
 		- default: ``None``
-
-	* ``release_z``:  *<optional>*
-		- type: ``<class 'float'>``
-		- default: ``0.0``
 
 	* ``user_note``:  *<optional>*
 		- type: ``<class 'str'>``

@@ -117,7 +117,7 @@
 <p><strong>File:</strong> oceantracker/particle_properties/age_decay.py</p>
 <p><strong>Inheritance:</strong> BasePropertyInfo&gt; ParticleProperty&gt; AgeDecay</p>
 <p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;age_decay&quot;</span></code></p>
-<p><strong>Description:</strong> decaying particle based on age</p>
+<p><strong>Description:</strong> Exponentially decaying particle property based on age.</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
 <blockquote>
@@ -148,14 +148,6 @@
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">doc_str</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
-<li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">decaying</span> <span class="pre">particle</span> <span class="pre">based</span> <span class="pre">on</span> <span class="pre">age</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">dtype</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
 <li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'type'&gt;</span></code></p></li>
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></code></p></li>
@@ -165,7 +157,8 @@
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">initial_value</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul>
+<dt><code class="docutils literal notranslate"><span class="pre">initial_value</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p><strong>Description:</strong> - Particle property at the time of release</p>
+<ul>
 <li><p>type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></li>
 </ul>

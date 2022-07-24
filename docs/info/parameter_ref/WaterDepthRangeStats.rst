@@ -22,10 +22,6 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``max_water_depth``:  *<optional>*
 		- type: ``<class 'float'>``
 		- default: ``1000000000.0``

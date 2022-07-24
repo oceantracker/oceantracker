@@ -120,13 +120,15 @@ class ParamDictValueChecker(object):
     def __init__(self, value, dtype, is_required=False, list_contains_type=None,
                  min=None, max=None,
                  possible_values=None,
-                 doc_str=None):
+                 doc_str=None,
+                 class_doc_feature=None):
 
         if value is not None and type(value) == dict:
             raise ValueError('"value" of default set by ParamValueChecker (PVC) can not be a dictionary, as all dict in default_params are assumed to also be parameter dict in their own right')
 
         i = dict(default_value=value,
                  doc_str=doc_str,
+                 class_doc_feature=class_doc_feature,
                  type=dtype,
                  min=min,
                  max=max,

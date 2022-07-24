@@ -32,10 +32,6 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``is3D``:  *<optional>*
 		- type: ``<class 'bool'>``
 		- default: ``False``

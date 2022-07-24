@@ -22,10 +22,6 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``name``:  *<optional>*
 		- type: ``<class 'str'>``
 		- default: ``None``

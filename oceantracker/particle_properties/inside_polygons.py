@@ -11,9 +11,10 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
     def __init__(self):
         super().__init__()
         self.add_default_params({'name': PVC('inside_polygons_non_overlapping', str) ,
-                                 'doc_str': PVC( 'index of polygon particle is in side', str),
                                  'initial_value': PVC(-1, int),
                                  'dtype':PVC(np.int32,type)})
+
+        self.class_doc(description= 'Index of polygon a particle is inside',)
 
         self.add_default_params({'polygon_list':PLC(None, dict, default_value=default_polygon_dict_params,
                                                     can_be_empty_list=False)

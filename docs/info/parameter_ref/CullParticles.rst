@@ -37,10 +37,6 @@ Parameters:
 		- default: ``dead``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``name``:  *<optional>*
 		- type: ``<class 'str'>``
 		- default: ``ParticleKill``

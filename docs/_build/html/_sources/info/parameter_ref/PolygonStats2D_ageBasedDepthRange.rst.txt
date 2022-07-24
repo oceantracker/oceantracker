@@ -46,28 +46,24 @@ Parameters:
 		- default: ``dead``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``grid_center``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000029B1D014490>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002798AD17FD0>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_size``:  *<optional>*
 		- a list containing type:  ``<class 'int'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000029B1D014B80>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002798AD17B80>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_span``:  *<optional>*
 		- a list containing type:  ``<class 'float'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000029B1D014F70>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002798AD17E80>``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
@@ -94,7 +90,7 @@ Parameters:
 	* ``particle_property_list``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x0000029B1D01F310>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002798AD20280>``
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 

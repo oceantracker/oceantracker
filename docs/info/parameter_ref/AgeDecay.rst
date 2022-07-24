@@ -10,7 +10,7 @@ AgeDecay
 
 **Default internal name:** ``"age_decay"``
 
-**Description:** decaying particle based on age
+**Description:** Exponentially decaying particle property based on age.
 
 
 Parameters:
@@ -30,16 +30,14 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``decaying particle based on age``
-
 	* ``dtype``:  *<optional>*
 		- type: ``<class 'type'>``
 		- default: ``<class 'numpy.float64'>``
 		- possible_values: ``[<class 'numpy.float32'>, <class 'numpy.float64'>, <class 'numpy.int8'>, <class 'numpy.int16'>, <class 'numpy.int32'>, <class 'bool'>]``
 
 	* ``initial_value``:  *<optional>*
+		**Description:** - Particle property at the time of release
+
 		- type: ``<class 'float'>``
 		- default: ``1.0``
 

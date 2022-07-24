@@ -32,10 +32,10 @@ class ParameterBaseClass(object):
 
         self.params={}
         self.info={}  # stores info about object
+        self.docs={'description': ''}
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
                                  'name':  PVC(None, str, doc_str='The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code'),
-                                 'doc_str': PVC(None, str),
                                  'user_note': PVC(None, str),
                                  })
 
@@ -45,6 +45,10 @@ class ParameterBaseClass(object):
         if type(d) is not dict: raise ValueError('add_default_params : default param must be a dictionary')
         # deep update to defaults
         basic_util.deep_dict_update(self.default_params, d)
+
+    def class_doc(self,description=None):
+        self.docs['description']=description
+
 
     def check_requirements(self):
         msg_list = self.check_class_required_fields_properties_grid_vars_and_3D()

@@ -26,10 +26,6 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``dtype``:  *<optional>*
 		- type: ``<class 'type'>``
 		- default: ``<class 'numpy.float64'>``

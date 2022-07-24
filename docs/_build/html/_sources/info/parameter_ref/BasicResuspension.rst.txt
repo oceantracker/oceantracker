@@ -27,10 +27,6 @@ Parameters:
 		- default: ``0.0``
 		- min: ``0.0``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``name``:  *<optional>*
 		- type: ``<class 'str'>``
 		- default: ``BasicResuspension``

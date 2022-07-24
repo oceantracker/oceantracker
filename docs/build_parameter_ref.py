@@ -153,7 +153,6 @@ class RSTfileBuilder(object):
 def make_sub_pages(class_type):
     # make doc pages from defaults of all python in named dir
 
-
     if class_type in default_class_names:
         mod_name= default_class_names[class_type].rsplit('.', maxsplit=2)[0]
     else:
@@ -204,7 +203,7 @@ def make_sub_pages(class_type):
             p.add_lines('**Default internal name:** ``"' + internal_name.strip() + '"``' )
             p.add_lines()
 
-            p.add_lines('**Description:** ' + (instance.default_params['doc_str'].get_default()  if instance.default_params['doc_str'].get_default() is not None else '' ))
+            p.add_lines('**Description:** ' + instance.docs['description'])
             p.add_lines()
             default_params = instance.default_params
             p.add_params_from_dict(default_params)
@@ -220,7 +219,8 @@ def build_param_ref():
     # parameter ref  TOC
 
     page= RSTfileBuilder('parameter_ref_toc','Parameter details')
-    page.add_lines()
+
+
     page.add_lines('Links to details of parameter default values, acceptable values etc.')
     page.add_lines()
     page.add_directive('note',body= 'Lots more to add here!!')

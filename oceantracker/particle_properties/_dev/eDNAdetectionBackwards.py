@@ -5,12 +5,14 @@ class eDNAdetection(ParticleProperty):
 
     def __init__(self):
         super().__init__()
-        self.add_default_params({'name': 'eDNAdetection','doc_str': 'eDNAdetection', 'decay_time_scale': 1.*3600*24})
+        self.add_default_params({'name': 'eDNAdetection','decay_time_scale': 1.*3600*24})
 
         self.add_default_params({'decay_time_scale_hours': 3.,  # sablella
                                 'sample_collector_area': .05**2,  # number of animals shedding dna [1, 10, 100]
                                 'retained_sample_size_ml': 100.,  # sabella
                                 'detection_limit_copies_per_ml': 0.14})
+        self.class_doc(desciption= 'eDNAdetection')
+
 
     def initial_value_at_birth(self, new_part_IDs):
         part_prop= self.shared_info.classes['particle_properties']
