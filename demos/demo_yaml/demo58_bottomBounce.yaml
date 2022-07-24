@@ -77,7 +77,7 @@ reader:
   - salt
   - water_temperature
   file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker02\demos\demo_hindcast
+  input_dir: demo_hindcast
 shared_params:
   backtracking: false
   compact_mode: true

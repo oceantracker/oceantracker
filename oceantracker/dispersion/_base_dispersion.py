@@ -5,7 +5,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 
-class BaseTrajectoryModifer(ParameterBaseClass):
+class _BaseTrajectoryModifer(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes

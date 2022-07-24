@@ -13,7 +13,7 @@ from oceantracker.fields.util.fields_util import depth_aver_SlayerLSC_in4D
 from copy import copy
 from oceantracker.util.cord_transforms import WGS84_to_UTM
 
-class BaseReader(ParameterBaseClass):
+class _BaseReader(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
@@ -43,7 +43,7 @@ class BaseReader(ParameterBaseClass):
                                  'search_sub_dirs': PVC(False, bool),
                                  'max_numb_files_to_load': PVC(10 ** 7, int, min=1)
                                  })  # list of normal required dimensions
-        self.class_doc(description='Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names')
+
         self.buffer_info = {'n_filled': None}
 
     def _file_checks(self, file_name, msg_list): pass

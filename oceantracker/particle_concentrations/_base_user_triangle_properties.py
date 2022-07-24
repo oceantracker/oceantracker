@@ -7,7 +7,7 @@ from os import path
 from datetime import datetime
 
 
-class BaseTriangleProperties(ParameterBaseClass):
+class _BaseTriangleProperties(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()

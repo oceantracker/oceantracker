@@ -1,7 +1,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 import oceantracker.util.basic_util  as basic_util
 
-class BaseInterp(ParameterBaseClass):
+class _BaseInterp(ParameterBaseClass):
     # prototype for interplotor
 
     def __init__(self):

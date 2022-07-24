@@ -1,12 +1,12 @@
 # modfiy aspects pof all isActive particles, ie moving and stranded
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 import numpy as np
-from oceantracker.trajectory_modifiers._base_trajectory_modifers import TrajectoryModifiersBase
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 
 
 from numba import  njit
 
-class BasicResuspension(TrajectoryModifiersBase):
+class BasicResuspension(_BaseTrajectoryModifier):
 
     def __init__(self):
         # set up info/attributes

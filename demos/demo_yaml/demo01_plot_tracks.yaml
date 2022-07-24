@@ -14,7 +14,7 @@ base_case_params:
     pulse_size: 200
     release_interval: 0
   run_params:
-    doc_str: test of notes
+    user_note: test of notes
   solver:
     n_sub_steps: 2
   tracks_writer:
@@ -45,7 +45,7 @@ reader:
     x:
     - east
     - north
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker02\demos\demo_hindcast
+  input_dir: demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 24

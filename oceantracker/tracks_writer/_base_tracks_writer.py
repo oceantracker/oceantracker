@@ -5,7 +5,7 @@ from oceantracker.util.basic_util import nopass
 # class to write with, outline methods needed
 # a non-writer, as all methods are None
 
-class BaseWriter(ParameterBaseClass):
+class _BaseWriter(ParameterBaseClass):
     # particle property  write modes,   used to set when to write  properties to output, as well as if to calculate at all
 
 

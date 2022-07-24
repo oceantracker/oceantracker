@@ -1,8 +1,8 @@
 import  numpy as np
 
-from oceantracker.fields._base_field import BaseField
+from oceantracker.fields._base_field import _BaseField
 
-class ReaderField(BaseField):
+class ReaderField(_BaseField):
     # reader filds have extra info to unpack  variables in the file
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params

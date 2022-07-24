@@ -6,12 +6,12 @@ import numpy as np
 
 from scipy.spatial import cKDTree
 
-from oceantracker.interpolator._base_interp import BaseInterp
+from oceantracker.interpolator._base_interp import _BaseInterp
 from oceantracker.util import basic_util
 from oceantracker.interpolator.util import triangle_interpolator_util
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
 
-class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
+class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     # uses tweaked sci py which allows using start triangle location
 
