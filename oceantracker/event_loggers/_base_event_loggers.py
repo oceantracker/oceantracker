@@ -7,7 +7,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.ncdf_util import  NetCDFhandler
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 
-class BaseEventLogger(ParameterBaseClass):
+class _BaseEventLogger(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()

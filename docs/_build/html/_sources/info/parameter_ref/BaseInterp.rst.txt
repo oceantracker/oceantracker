@@ -2,11 +2,11 @@
 BaseInterp
 ###########
 
-**Class:** oceantracker.interpolator._base_interp.BaseInterp
+**Class:** oceantracker.interpolator._base_interp._BaseInterp
 
 **File:** oceantracker/interpolator/_base_interp.py
 
-**Inheritance:** BaseInterp
+**Inheritance:** _BaseInterp
 
 **Default internal name:** ``"not given in defaults"``
 
@@ -19,6 +19,10 @@ Parameters:
 	* ``class_name``:  *<optional>*
 		**Description:** - Class name as string A.B.C, used to import this class from python path
 
+		- type: ``<class 'str'>``
+		- default: ``None``
+
+	* ``description``:  *<optional>*
 		- type: ``<class 'str'>``
 		- default: ``None``
 

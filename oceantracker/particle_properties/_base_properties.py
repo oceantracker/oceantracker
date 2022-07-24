@@ -3,7 +3,8 @@ from oceantracker.particle_properties.util import particle_operations_util, part
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
-class BasePropertyInfo(ParameterBaseClass):
+
+class _BasePropertyInfo(ParameterBaseClass):
     # properties which are maintained in memory and may be written out, eg group and particle
 
     def __init__(self):
@@ -29,7 +30,7 @@ class BasePropertyInfo(ParameterBaseClass):
     def get_dtype(self): return self.data.dtype
 
 
-class TimeVaryingInfo(BasePropertyInfo):
+class TimeVaryingInfo(_BasePropertyInfo):
     # single valued time varying information, ie not a particle property
     # eg  "time" data, numer released so far
 
@@ -49,7 +50,7 @@ class TimeVaryingInfo(BasePropertyInfo):
     def set_values(self, value): self.data[0]=value
     def get_values(self): return self.data[0]
 
-class ParticleProperty(BasePropertyInfo):
+class ParticleProperty(_BasePropertyInfo):
     # property of each particle individually, eg x, time released etc , status
     # or non-time varying parameter eg ID,
 

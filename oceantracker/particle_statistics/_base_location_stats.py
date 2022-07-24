@@ -6,7 +6,7 @@ from os import  path
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 
-class BaseParticleLocationStats(ParameterBaseClass):
+class _BaseParticleLocationStats(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes

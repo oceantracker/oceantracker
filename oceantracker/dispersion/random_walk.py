@@ -1,9 +1,9 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
-from oceantracker.dispersion._base_dispersion import BaseTrajectoryModifer
+from oceantracker.dispersion._base_dispersion import _BaseTrajectoryModifer
 
 
-class RandomWalk(BaseTrajectoryModifer):
+class RandomWalk(_BaseTrajectoryModifer):
 
     def __init__(self):
         # set up default params

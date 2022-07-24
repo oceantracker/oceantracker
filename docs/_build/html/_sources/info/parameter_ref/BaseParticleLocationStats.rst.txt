@@ -2,11 +2,11 @@
 BaseParticleLocationStats
 ##########################
 
-**Class:** oceantracker.particle_statistics._base_location_stats.BaseParticleLocationStats
+**Class:** oceantracker.particle_statistics._base_location_stats._BaseParticleLocationStats
 
 **File:** oceantracker/particle_statistics/_base_location_stats.py
 
-**Inheritance:** BaseParticleLocationStats
+**Inheritance:** _BaseParticleLocationStats
 
 **Default internal name:** ``"not given in defaults"``
 
@@ -39,6 +39,10 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``dead``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
+
+	* ``description``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
 
 	* ``name``:  *<optional>*
 		- type: ``<class 'str'>``

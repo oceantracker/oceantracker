@@ -2,15 +2,15 @@
 BaseReader
 ###########
 
-**Class:** oceantracker.reader._base_reader.BaseReader
+**Class:** oceantracker.reader._base_reader._BaseReader
 
 **File:** oceantracker/reader/_base_reader.py
 
-**Inheritance:** BaseReader
+**Inheritance:** _BaseReader
 
 **Default internal name:** ``"not given in defaults"``
 
-**Description:** Generic reader, reading netcdf file variables using given name map mapped to internal variables 
+**Description:** Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names
 
 
 Parameters:
@@ -32,6 +32,10 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
+	* ``description``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
+
 
 dimension_map: still working on display  of nested  params dict <class 'dict'>
 
@@ -41,7 +45,7 @@ field_variables: still working on display  of nested  params dict <class 'dict'>
 	* ``field_variables_to_depth_average``:  *<optional>*
 		- a list containing type:  ``<class 'str'>``
 		- default list item: ``None``
-		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000002798A5901C0>``
+		- self: ``<oceantracker.util.parameter_checking.ParameterListChecker object at 0x000001D957A9B1F0>``
 		- can_be_empty_list: ``True``
 
 	**<isrequired>**

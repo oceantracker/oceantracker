@@ -12,16 +12,16 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from datetime import datetime
 
-from oceantracker.reader._base_reader import BaseReader
+from oceantracker.reader._base_reader import _BaseReader
 
-class GenericUnstructuredReader(BaseReader):
+class GenericUnstructuredReader(_BaseReader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({ 'dimension_map': {'node': PVC('node', str)}} )
 
         self.buffer_info ={'n_filled' : None}
-
+        self.class_doc(description='Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names')
 
     def build_reader(self, reader_build_info):
         si = self.shared_info

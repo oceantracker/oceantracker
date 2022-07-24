@@ -6,10 +6,10 @@ Features
 Main Features
 =================
 
-* Ability to track millions of particles in hours in unstructured grids.
+* Ability to calculate tracks of  millions of particles in hours in unstructured grids.
 * Calculate particle statistics one the fly, eliminating need to store and wade though large volumes of particle track output.
 * Flexible parameter file driven particle tracking.
-* Adding user particle properties, changes to particle trajectories, statistics etc,  to the computational pipe line from parameter text file.
+* Adding user particle properties, changes to particle trajectories, statistics etc,  to the computational pipe line from parameter  file.
 * Flexible particle releases, from points or polygons.
 * Forwards and backwards in time particle tracking.
 * Post run plotting and animation.
@@ -22,8 +22,7 @@ Architecture
 * Fully driven by parameters in JSON/YAML file or in code from dictionary
 * Highly flexible architecture enabling:
     * user implemented approaches to core classes, core classes can be replaced via string name in parameter dictionary, eg. user spatial interpolator
-
-    * user developed:
+    * adding user developed:
         * custom particle properties derived from other properties though inheritance
         * augment particle velocity given by water_velocity read from hindcast, eg. particle fall velocity
         * modify particle trajectories, eg. resuspension.
@@ -49,10 +48,10 @@ Useful Features
 * Resuspension from the bottom based on crtical friction velocity.
 
 
-SCHSIM specific
+SCHISM specific
 ===============
 
-* Reads SCHSIM netcdf output, automatically determining whether 2D or 3D
+* Reads SCHISM netcdf output, automatically determining whether 2D or 3D
 * Native grid particle tracking for both S-layer and LSC vertical grids
 * Splits quad cells into triangles
 * Can have open boundary if hgrid.gr3 file available

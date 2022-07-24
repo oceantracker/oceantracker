@@ -4,7 +4,7 @@ import numpy as np
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from copy import  copy
 
-class BaseField(ParameterBaseClass):
+class _BaseField(ParameterBaseClass):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params
         self.add_default_params({'name': PVC( None, str, is_required=True),
@@ -40,7 +40,7 @@ class BaseField(ParameterBaseClass):
             return self.data[:] # give whole
     def update(self): pass
 
-class UserFieldBase(BaseField):
+class UserFieldBase(_BaseField):
     # same as above but update method is required
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params

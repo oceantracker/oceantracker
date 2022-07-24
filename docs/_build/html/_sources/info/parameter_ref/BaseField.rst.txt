@@ -2,11 +2,11 @@
 BaseField
 ##########
 
-**Class:** oceantracker.fields._base_field.BaseField
+**Class:** oceantracker.fields._base_field._BaseField
 
 **File:** oceantracker/fields/_base_field.py
 
-**Inheritance:** BaseField
+**Inheritance:** _BaseField
 
 **Default internal name:** ``"not given in defaults"``
 
@@ -26,6 +26,10 @@ Parameters:
 		- type: ``<class 'bool'>``
 		- default: ``True``
 		- possible_values: ``[True, False]``
+
+	* ``description``:  *<optional>*
+		- type: ``<class 'str'>``
+		- default: ``None``
 
 	* ``dtype``:  *<optional>*
 		- type: ``<class 'numpy.dtype'>``

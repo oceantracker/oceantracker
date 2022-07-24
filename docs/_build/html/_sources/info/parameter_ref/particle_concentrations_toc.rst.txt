@@ -8,6 +8,5 @@ particle_concentrations
 .. toctree::
 	:maxdepth: 1
 
-	BaseTriangleProperties.rst
 	ParticleConcentrations2D.rst
 

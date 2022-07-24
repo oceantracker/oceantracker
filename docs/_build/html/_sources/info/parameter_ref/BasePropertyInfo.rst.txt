@@ -1,12 +1,12 @@
 #################
-BasePropertyInfo
+_BasePropertyInfo
 #################
 
-**Class:** oceantracker.particle_properties._base_properties.BasePropertyInfo
+**Class:** oceantracker.particle_properties._base_properties._BasePropertyInfo
 
 **File:** oceantracker/particle_properties/_base_properties.py
 
-**Inheritance:** BasePropertyInfo
+**Inheritance:** _BasePropertyInfo
 
 **Default internal name:** ``"not given in defaults"``
 

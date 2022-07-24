@@ -8,7 +8,6 @@ particle_statistics
 .. toctree::
 	:maxdepth: 1
 
-	BaseParticleLocationStats.rst
 	GriddedStats2D_ageBasedDepthRange.rst
 	GriddedStats2D_ageBasedTopBottom.rst
 	GriddedStats2D_agedBased.rst

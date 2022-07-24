@@ -1,10 +1,10 @@
-from oceantracker.event_loggers._base_event_loggers import BaseEventLogger
+from oceantracker.event_loggers._base_event_loggers import _BaseEventLogger
 import numpy as np
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from oceantracker.util.message_and_error_logging import FatalError
 
-class LogPolygonEntryAndExit(BaseEventLogger):
+class LogPolygonEntryAndExit(_BaseEventLogger):
     # assumes non over lapping polygons
 
     def __init__(self):

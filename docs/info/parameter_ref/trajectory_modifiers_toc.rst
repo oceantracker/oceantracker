@@ -12,5 +12,4 @@ trajectory_modifiers
 	CullParticles.rst
 	SettleInPolygon.rst
 	SplitParticles.rst
-	TrajectoryModifiersBase.rst
 

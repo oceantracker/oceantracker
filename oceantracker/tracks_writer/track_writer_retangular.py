@@ -1,5 +1,5 @@
 import  oceantracker.util.basic_util as basic_util
-from oceantracker.tracks_writer._base_tracks_writer import BaseWriter
+from oceantracker.tracks_writer._base_tracks_writer import _BaseWriter
 from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
 import numpy as np
@@ -9,7 +9,7 @@ from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from os import path
 
 
-class  RectangularTrackWriter(BaseWriter):
+class  RectangularTrackWriter(_BaseWriter):
     # write particle properties from a property dictionary into rectangular arrays, (time ,  nparticles,:,:)
     # time is unlimited dimension
     #todo set time chunk to fraction of total time steps with minimum?

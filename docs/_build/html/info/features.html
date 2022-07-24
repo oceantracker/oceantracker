@@ -57,7 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#main-features">Main Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#useful-features">Useful Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#schsim-specific">SCHSIM specific</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#schism-specific">SCHISM specific</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="demos/demos.html">Demos</a></li>
@@ -96,10 +96,10 @@
 <section id="main-features">
 <h2>Main Features<a class="headerlink" href="#main-features" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Ability to track millions of particles in hours in unstructured grids.</p></li>
+<li><p>Ability to calculate tracks of  millions of particles in hours in unstructured grids.</p></li>
 <li><p>Calculate particle statistics one the fly, eliminating need to store and wade though large volumes of particle track output.</p></li>
 <li><p>Flexible parameter file driven particle tracking.</p></li>
-<li><p>Adding user particle properties, changes to particle trajectories, statistics etc,  to the computational pipe line from parameter text file.</p></li>
+<li><p>Adding user particle properties, changes to particle trajectories, statistics etc,  to the computational pipe line from parameter  file.</p></li>
 <li><p>Flexible particle releases, from points or polygons.</p></li>
 <li><p>Forwards and backwards in time particle tracking.</p></li>
 <li><p>Post run plotting and animation.</p></li>
@@ -114,7 +114,7 @@
 <dt>Highly flexible architecture enabling:</dt><dd><ul>
 <li><p>user implemented approaches to core classes, core classes can be replaced via string name in parameter dictionary, eg. user spatial interpolator</p></li>
 <li><dl class="simple">
-<dt>user developed:</dt><dd><ul>
+<dt>adding user developed:</dt><dd><ul>
 <li><p>custom particle properties derived from other properties though inheritance</p></li>
 <li><p>augment particle velocity given by water_velocity read from hindcast, eg. particle fall velocity</p></li>
 <li><p>modify particle trajectories, eg. resuspension.</p></li>
@@ -151,10 +151,10 @@
 <li><p>Resuspension from the bottom based on crtical friction velocity.</p></li>
 </ul>
 </section>
-<section id="schsim-specific">
-<h2>SCHSIM specific<a class="headerlink" href="#schsim-specific" title="Permalink to this headline">¶</a></h2>
+<section id="schism-specific">
+<h2>SCHISM specific<a class="headerlink" href="#schism-specific" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Reads SCHSIM netcdf output, automatically determining whether 2D or 3D</p></li>
+<li><p>Reads SCHISM netcdf output, automatically determining whether 2D or 3D</p></li>
 <li><p>Native grid particle tracking for both S-layer and LSC vertical grids</p></li>
 <li><p>Splits quad cells into triangles</p></li>
 <li><p>Can have open boundary if hgrid.gr3 file available</p></li>

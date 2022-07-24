@@ -9,7 +9,6 @@ particle_properties
 	:maxdepth: 1
 
 	AgeDecay.rst
-	BasePropertyInfo.rst
 	DistanceTravelled.rst
 	FrictionVelocity.rst
 	InsidePolygonsNonOverlapping2D.rst

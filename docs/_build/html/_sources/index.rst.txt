@@ -31,6 +31,8 @@ the code has the ability to calculate statistics on the fly, such as heat maps a
 OceanTracker code is highly flexible and extendable by the user, whether run by a new user with a text file of parameters,
 or by an expert adding their specialised code for novel particle behaviours or statistics, to the computational pipe line.
 
+Code is on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
+
 
 ====================
 Features

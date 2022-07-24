@@ -8,7 +8,7 @@ from copy import  copy
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import time_util
-from oceantracker.fields._base_field import BaseField
+from oceantracker.fields._base_field import _BaseField
 
 
 class SCHSIMreaderNCDF(GenericUnstructuredReader):
@@ -39,6 +39,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
                                     'bottom_cell_index': PVC('node_bottom_index',str),
                                      'triangles': PVC('SCHISM_hgrid_face_nodes',str),                                                                      },
                                                })
+        self.class_doc(description='Reads SCHISM netCDF output files')
 
     def _file_checks(self, file_name, msg_list):
         # sort out which velocity etc are there and adjust field variables

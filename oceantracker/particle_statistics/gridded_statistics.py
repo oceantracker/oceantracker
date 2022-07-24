@@ -2,11 +2,11 @@ import numpy as np
 from numba import njit
 from numba.typed import List as NumbaList
 
-from oceantracker.particle_statistics._base_location_stats import BaseParticleLocationStats
+from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC, GracefulExitError
 
 
-class GriddedStats2D_timeBased(BaseParticleLocationStats):
+class GriddedStats2D_timeBased(_BaseParticleLocationStats):
     # class to hold counts of particles inside grid squares
 
     def __init__(self):
