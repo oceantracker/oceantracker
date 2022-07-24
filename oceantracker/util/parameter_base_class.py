@@ -36,6 +36,7 @@ class ParameterBaseClass(object):
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
                                  'name':  PVC(None, str, doc_str='The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code'),
+                                 'description': PVC(None, str),
                                  'user_note': PVC(None, str),
                                  })
 

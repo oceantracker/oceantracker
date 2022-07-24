@@ -40,7 +40,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # parameters are set once and then don't change with time
         self.create_particle_property('manual_update',dict(name='ID', dtype=np.int32, initial_value=-1, time_varying= False,
-                                      doc_str='unique particle ID number, zero based'))
+                                      description='unique particle ID number, zero based'))
         self.create_particle_property('manual_update',dict(name='IDrelease_group',  dtype=np.int32, initial_value=-1, time_varying=False,
                                            description='ID of group release location is in, zero based'))
         self.create_particle_property('manual_update',dict(name='user_release_group_ID',  dtype=np.int32, initial_value=-1, time_varying= False,
@@ -189,7 +189,7 @@ class ParticleGroupManager(ParameterBaseClass):
                 w.create_variable_to_write(i.params['name'], is_time_varying=i.params['time_varying'],
                                            is_part_prop=True,
                                            vector_dim=i.params['vector_dim'],
-                                           attributes={'description': i.params['doc_str']},
+                                           attributes={'description': i.params['description']},
                                            dtype=i.params['dtype'])
 
     def get_particle_time(self): return self.time_varying_group_info['time'].get_values()
