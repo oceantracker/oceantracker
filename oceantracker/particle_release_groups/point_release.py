@@ -13,10 +13,8 @@ class PointRelease(ParameterBaseClass):
         # set up info/attributes
         super().__init__()
         self.add_default_params({
-                                 'doc_str': PVC('Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.', str),
                                  'points':          PVC([],'vector', is_required=True, doc_str='List of points where particles are released'),
                                  'release_radius':  PVC(0., float, min= 0., doc_str= 'Particles are released from random locations in circle of given radius around each point.'),
-                                 'release_z':       PVC(0., float),
                                  'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles is a single pluse.'),
                                  'release_interval':PVC(0., float, min =0., doc_str= 'Time interval between released pulses.'),
                                  'release_start_date': PVC(None, 'iso8601date'),
@@ -31,6 +29,7 @@ class PointRelease(ParameterBaseClass):
                                                                             # each a dictionary of parameters for that property
                                                                             # eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}}
                                  })
+        self.class_doc(description= 'Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.')
 
 
     def initialize(self):
@@ -49,8 +48,8 @@ class PointRelease(ParameterBaseClass):
         x0 = np.array(self.params['points']).astype(np.float64)
 
         if si.hindcast_is3D and x0.shape[1] != 3 :
-            x0=np.hstack( (x0, self.params['release_z']*np.ones((x0.shape[0],1))))
-            si.case_log.write_warning('x0 is 2D for 3D hindcast, releasing at depth given by release_z param = ' + str(self.params['release_z']))
+            x0=np.hstack( (x0, np.zeros((x0.shape[0],1))))
+            si.case_log.write_warning('x0 is 2D for 3D hindcast, releasing at depth 0.0')
 
         return x0
 

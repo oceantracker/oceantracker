@@ -12,11 +12,12 @@ class PolygonRelease(PointRelease):
         # set up info/attributes
         super().__init__()
         self.add_default_params(default_polygon_dict_params)
-        self.add_default_params({'z_min': PVC(0.,float),
-                                 'z_max': PVC(0., float),
-                                 'allow_release_in_dry_cells' :  PVC(False, bool, doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide'),
-                                 'doc_str': PVC('Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.',str),
-                                 })
+        self.add_default_params({'z_min': PVC(0.,float, doc_str='Min. z cord value to release with the polygon'),
+                                 'z_max': PVC(0., float, doc_str='Max. z cord value to release with the polygon'),
+                                 'allow_release_in_dry_cells' :  PVC(False, bool,
+                                        doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide'),
+                                })
+        self.class_doc(description='Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.')
 
         # below are not needed for polygons
         self.remove_default_params(['release_radius'])

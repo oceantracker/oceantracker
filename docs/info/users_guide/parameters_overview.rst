@@ -1,5 +1,3 @@
-.. _parameter-overview:
-
 ##########################
 Parameters overview
 ##########################
@@ -10,7 +8,6 @@ The parameters are a python dictionary of key-value pairs
 (parameters  in JSON or Yaml file  are converted to a python dictionary).
 Thus key-value pairs of parameters setup the computations. The top level parameter dictionary, may contain other nested parameter dictionaries, or lists of other parameter dictionaries.
 
-Full details are at  :ref:`parameter-details`
 
 Top level params
 =================================
@@ -85,7 +82,6 @@ For a few keys, a value must be supplied by the user (eg. input_dir of hindcast 
 
 The user is warned of any unexpected keys found within the parameters, ie those not in the default parameter dictionary.
 
-Full details of defaults are given in  :ref:`parameter-details`
 
 class_name parameter
 =================================
