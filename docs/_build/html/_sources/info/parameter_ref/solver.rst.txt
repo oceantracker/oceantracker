@@ -27,10 +27,6 @@ Parameters:
 		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``doc_str``:  *<optional>*
-		- type: ``<class 'str'>``
-		- default: ``None``
-
 	* ``n_sub_steps``:  *<optional>*
 		- type: ``<class 'int'>``
 		- default: ``1``
