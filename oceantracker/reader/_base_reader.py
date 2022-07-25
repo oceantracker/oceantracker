@@ -22,7 +22,7 @@ class _BaseReader(ParameterBaseClass):
                                  'time_zone': PVC(None, int, min=-12, max=23),
                                  'cords_in_lat_long': PVC(False, bool),
                                  'time_buffer_size': PVC(48, int, min=2),
-                                 'file_mask': PVC(None, str, is_required=True),
+                                 'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
                                  'depth_average': PVC(False, bool),  # turns 3D hindcast into a 2D one
                                  'field_variables_to_depth_average': PLC(None, str),  # list of field_variables that are depth averaged on the fly
                                  'grid_variables': {'time': PVC('time', str, is_required=True),

@@ -12,8 +12,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # set up info/attributes
         super().__init__()
 
-        self.add_default_params({'name':       PVC(None,str),
-                                    'calculation_interval':       PVC(24*60*60.,float),
+        self.add_default_params({ 'calculation_interval':       PVC(24*60*60.,float),
                                   'case_output_file_tag' :           PVC('stats_base',str),
                                   'count_status_greater_than':   PVC('dead', str, possible_values=particle_info['status_flags'].keys()),
                                   'count_status_equal_to':       PVC(None, str, possible_values=particle_info['status_flags'].keys()),

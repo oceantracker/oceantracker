@@ -2,6 +2,8 @@
 Solver
 #######
 
+**Description:** 
+
 **Class:** oceantracker.solver.solver.Solver
 
 **File:** oceantracker/solver/solver.py
@@ -9,8 +11,6 @@ Solver
 **Inheritance:** Solver
 
 **Default internal name:** ``"solver"``
-
-**Description:** 
 
 
 Parameters:
@@ -22,8 +22,12 @@ Parameters:
 		- possible_values: ``[1, 2, 4]``
 
 	* ``class_name``:  *<optional>*
-		**Description:** - Class name as string A.B.C, used to import this class from python path
+		Description: - Class name as string A.B.C, used to import this class from python path
 
+		- type: ``<class 'str'>``
+		- default: ``None``
+
+	* ``description``:  *<optional>*
 		- type: ``<class 'str'>``
 		- default: ``None``
 

@@ -8,6 +8,7 @@ from oceantracker.common_info_default_param_dict_templates import run_params_def
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
+from oceantracker.util.yaml_util import write_YAML
 
 root_param_ref_dir = path.join(package_util.get_root_package_dir(),'docs', 'info', 'parameter_ref')
 
@@ -41,6 +42,7 @@ class RSTfileBuilder(object):
     def add_directive(self,direct_type, caption='', body=[], indent=0):
         if type(body) != list: body=[body]
         self.lines.append({'type': 'directive', 'direct_type': direct_type, 'body' : body, 'indent' :indent, 'params':{}})
+        self.add_lines()
 
     def collapsable_code(self,file_name):
         a=1
@@ -90,63 +92,65 @@ class RSTfileBuilder(object):
         self.add_lines()
         self.add_directive('warning', body='Lots more to add here and work on layout!!')
 
+        self.add_heading('Parameters:', level=0)
+
         self.add_params_from_dict(params)
 
         self.write()
 
-    def add_params_from_dict(self,params):
+    def add_params_from_dict(self,params, indent=0):
 
-        self.add_heading('Parameters:', level=0)
 
         for key in sorted(params.keys()):
             item= params[key]
 
             if type(item) == dict:
-                self.add_lines()
-                self.add_lines(key +': still working on display  of nested  params dict ' + str(type(item)),indent=0)
-                self.add_lines()
+                self.add_lines('* ``' + key + '``:' + ' nested parameter dictionary' , indent=indent+1)
+
+                self.add_params_from_dict( item, indent=1)
+
                 continue
 
-            if type(item) == list:
-                self.add_lines()
-                self.add_lines(key + ': still working on display  of list ' + str(type(item)), indent=0)
-                self.add_lines()
-                continue
-
-            self.add_lines('* ``' + key + '``:' + '  *<optional>*' if not item.info['is_required'] else '**<isrequired>**' , indent=1)
-            if item.info['doc_str'] is not None:
-                self.add_lines('**Description:** - ' + str(item.info['doc_str'].strip()), indent=2)
-                self.add_lines()
 
             if type(item) == PVC:
-                self.add_lines('- type: ``' + str(item.info['type']) + '``', indent=2)
-                self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=2)
+                self.add_lines('* ``' + key + '``:' + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
+                if item.info['doc_str'] is not None:
+                    self.add_lines('Description: - ' + str(item.info['doc_str'].strip()), indent=indent+2)
+                    self.add_lines()
+
+                self.add_lines('- type: ``' + str(item.info['type']) + '``', indent=indent+2)
+                self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
 
                 for k, v in item.info.items():
                     if k not in ['type', 'default_value', 'is_required', 'doc_str'] and v is not None:
-                        self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=2)
+                        self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 
                 self.add_lines()
             elif type(item) == PLC:
 
+                self.add_lines('* ``' + key + '``:' + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**'), indent=indent + 1)
+                if item.info['doc_str'] is not None:
+                    self.add_lines('Description: - ' + str(item.info['doc_str'].strip()), indent=indent + 2)
+                    self.add_lines()
+
                 if  type(item.info['list_type']) == dict or type(item.info['default_list']) == dict or type(item.info['default_value']) == dict:
                     self.add_lines()
-                    self.add_lines(key + ': still working on display  of lists of dict, eg nested polygon list ', indent=0)
+                    self.add_lines(key + ': still working on display  of lists of dict, eg nested polygon list ', indent=indent+0)
                     self.add_lines()
                     continue
 
-                self.add_lines('- a list containing type:  ``' + str(item.info['list_type']) + '``', indent=2)
+                self.add_lines('- a list containing type:  ``' + str(item.info['list_type']) + '``', indent=indent+2)
                 self.add_lines('- default list item: ``'
-                               + str(item.info['default_value'].get_defaults() if item.info['default_value'] is not None else None) + '``', indent=2)
+                               + str(item.info['default_value'].get_defaults() if item.info['default_value'] is not None else None) + '``', indent=indent+2)
 
                 for k, v in item.info.items():
                     if k not in ['default_list','list_type', 'default_value', 'is_required', 'doc_str'] and v is not None:
-                        self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=2)
+                        self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 
                 self.add_lines()
             else:
                 self.add_lines()
-                self.add_lines(key +': still working on display  of default params of  type ' + str(type(params[key])),indent=0)
+                self.add_lines(key +': still working on display  of default params of  type ' + str(type(params[key])),indent=indent+0)
                 self.add_lines()
 
 
@@ -206,10 +210,13 @@ def make_sub_pages(class_type):
             p.add_lines('**Default internal name:** ``"' + internal_name.strip() + '"``' )
             p.add_lines()
 
-            p.add_directive('note', body='These pages are generated by code from classes. Needs more work to fully display all params!!')
+            # get all defaults and wrte to yaml
+            #instance.merge_with_class_defaults({},{})
+            #write_YAML(name+'.yaml',instance.params)
 
-            default_params = instance.default_params
-            p.add_params_from_dict(default_params)
+            p.add_heading('Parameters:', level=0)
+
+            p.add_params_from_dict(instance.default_params)
 
             p.write()
             toc.add_toc_link(class_type,p)

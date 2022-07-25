@@ -9,6 +9,7 @@ shared_params
 	Lots more to add here and work on layout!!
 
 
+
 Parameters:
 ************
 
@@ -23,7 +24,7 @@ Parameters:
 		- possible_values: ``[True, False]``
 
 	* ``compact_mode``:  *<optional>*
-		**Description:** - Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format
+		Description: - Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format
 
 		- type: ``<class 'bool'>``
 		- default: ``False``
@@ -58,27 +59,27 @@ Parameters:
 		- default: ``default_output_file_base``
 
 	* ``processors``:  *<optional>*
-		**Description:** - number of processors used, if > 1 then cases in the case_list run in parallel
+		Description: - number of processors used, if > 1 then cases in the case_list run in parallel
 
 		- type: ``<class 'int'>``
 		- default: ``1``
 		- min: ``1``
 
 	* ``replicates``:  *<optional>*
-		**Description:** - number of replicates of each case to run, allows running larger particle numbers for each case in less time if running in parallel
+		Description: - number of replicates of each case to run, allows running larger particle numbers for each case in less time if running in parallel
 
 		- type: ``<class 'int'>``
 		- default: ``1``
 		- min: ``1``
 
 	* ``root_output_dir``:  *<optional>*
-		**Description:** - base dir for all ouput files
+		Description: - base dir for all ouput files
 
 		- type: ``<class 'str'>``
 		- default: ``default_root_output_dir``
 
 	* ``use_numpy_random_seed``:  *<optional>*
-		**Description:** - Makes results reproducible, only use for testing developments give the same results!
+		Description: - Makes results reproducible, only use for testing developments give the same results!
 
 		- type: ``<class 'bool'>``
 		- default: ``False``

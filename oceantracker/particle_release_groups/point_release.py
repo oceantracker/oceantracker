@@ -13,9 +13,9 @@ class PointRelease(ParameterBaseClass):
         # set up info/attributes
         super().__init__()
         self.add_default_params({
-                                 'points':          PVC([],'vector', is_required=True, doc_str='List of points where particles are released'),
+                                 'points':          PVC([],'vector', is_required=True, doc_str='A N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array'),
                                  'release_radius':  PVC(0., float, min= 0., doc_str= 'Particles are released from random locations in circle of given radius around each point.'),
-                                 'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles is a single pluse.'),
+                                 'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles is a single pulse.'),
                                  'release_interval':PVC(0., float, min =0., doc_str= 'Time interval between released pulses.'),
                                  'release_start_date': PVC(None, 'iso8601date'),
                                  'release_duration': PVC(1.0e32, float,min=0,
