@@ -16,65 +16,53 @@ InsidePolygonsNonOverlapping2D
 Parameters:
 ************
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``dtype``:  *<optional>*
-		- type: ``<class 'type'>``
+	* ``dtype`` :   ``<class 'type'>``   *<optional>*
 		- default: ``<class 'numpy.int32'>``
 
-	* ``initial_value``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``initial_value`` :   ``<class 'int'>``   *<optional>*
 		- default: ``-1``
 
-	* ``name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``inside_polygons_non_overlapping``
 
 	* ``polygon_list``:  *<optional>*
 
 polygon_list: still working on display  of lists of dict, eg nested polygon list 
 
-	* ``prop_dim3``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
 
-	* ``time_varying``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``type``:  *<optional>*
+	* ``type`` :   ``<class 'str'>``   *<optional>*
 		Description: - particle property
 
-		- type: ``<class 'str'>``
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
 
-	* ``update``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``vector_dim``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``vector_dim`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
 
-	* ``write``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 

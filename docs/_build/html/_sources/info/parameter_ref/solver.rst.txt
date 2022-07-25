@@ -16,35 +16,28 @@ Solver
 Parameters:
 ************
 
-	* ``RK_order``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``RK_order`` :   ``<class 'int'>``   *<optional>*
 		- default: ``4``
 		- possible_values: ``[1, 2, 4]``
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``n_sub_steps``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``n_sub_steps`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
 
-	* ``name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``solver``
 
-	* ``screen_output_step_count``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``screen_output_step_count`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

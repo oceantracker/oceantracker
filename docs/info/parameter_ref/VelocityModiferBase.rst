@@ -16,26 +16,21 @@ VelocityModiferBase
 Parameters:
 ************
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``is3D``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

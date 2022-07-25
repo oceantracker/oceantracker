@@ -50,9 +50,9 @@ base_case_params:
     pulse_size: 1
     release_interval: 0
   run_params:
+    block_dry_cells: false
     particle_buffer_size: 5000
     retain_culled_part_locations: true
-    user_note: test of notes
   solver:
     n_sub_steps: 6
   tracks_writer:

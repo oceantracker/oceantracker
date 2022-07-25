@@ -16,33 +16,27 @@ RectangularTrackWriter
 Parameters:
 ************
 
-	* ``NCDF_time_chunk``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``NCDF_time_chunk`` :   ``<class 'int'>``   *<optional>*
 		- default: ``24``
 		- min: ``1``
 
-	* ``case_output_file_tag``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``case_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``tracks``
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``name``:  *<optional>*
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``output_step_count``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``output_step_count`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
 
@@ -56,7 +50,6 @@ Parameters:
 		- default list item: ``None``
 		- can_be_empty_list: ``True``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

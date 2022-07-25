@@ -16,33 +16,27 @@ InterpTriangularNativeGrid_Slayer_and_LSCgrid
 Parameters:
 ************
 
-	* ``bc_walk_tol``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``bc_walk_tol`` :   ``<class 'float'>``   *<optional>*
 		- default: ``1e-06``
 		- min: ``0.0``
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``max_search_steps``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``max_search_steps`` :   ``<class 'int'>``   *<optional>*
 		- default: ``100``
 		- min: ``1``
 
-	* ``name``:  *<optional>*
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

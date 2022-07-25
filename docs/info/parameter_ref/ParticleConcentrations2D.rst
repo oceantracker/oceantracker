@@ -16,41 +16,33 @@ ParticleConcentrations2D
 Parameters:
 ************
 
-	* ``calculation_interval``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``calculation_interval`` :   ``<class 'float'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
 
-	* ``case_output_file_tag``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``case_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``class_name``:**<isrequired>**
-		- type: ``<class 'str'>``
+	* ``class_name`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
 
-	* ``count_status_equal_to``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``count_status_equal_to`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``name``:  *<optional>*
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``only_update_concentrations_on_write``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``only_update_concentrations_on_write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``output_step_count``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``output_step_count`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
 
@@ -60,17 +52,14 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 
-	* ``release_group_to_track``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``release_group_to_track`` :   ``<class 'int'>``   *<optional>*
 		- default: ``None``
 		- min: ``0``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``write``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 

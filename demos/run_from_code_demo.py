@@ -1,7 +1,7 @@
 # run oceantracker direct from code from dictionary built in code
 # make polygons staggered to south west, by appending polygon release groups
 import numpy as np
-from main import run
+from oceantracker.main import run
 from oceantracker.post_processing.read_output_files import load_output_files
 from oceantracker.post_processing.plotting.plot_tracks import plot_tracks
 

@@ -16,29 +16,24 @@ LogPolygonEntryAndExit
 Parameters:
 ************
 
-	* ``case_output_file_tag``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``case_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``inside_polygon_events``
 
-	* ``chunk_size``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``chunk_size`` :   ``<class 'int'>``   *<optional>*
 		- default: ``5000``
 		- min: ``1``
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``name``:  *<optional>*
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
 	* ``particle_prop_to_write_list``:  *<optional>*
@@ -50,12 +45,10 @@ Parameters:
 
 polygon_list: still working on display  of lists of dict, eg nested polygon list 
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``write``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 

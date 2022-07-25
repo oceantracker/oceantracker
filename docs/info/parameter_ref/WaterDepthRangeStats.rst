@@ -16,31 +16,25 @@ WaterDepthRangeStats
 Parameters:
 ************
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``max_water_depth``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``max_water_depth`` :   ``<class 'float'>``   *<optional>*
 		- default: ``1000000000.0``
 
-	* ``min_depth``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``min_depth`` :   ``<class 'float'>``   *<optional>*
 		- default: ``-1000000000.0``
 
-	* ``name``:  *<optional>*
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

@@ -16,26 +16,21 @@ ParticleGroupManager
 Parameters:
 ************
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``max_age``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``max_age`` :   ``<class 'float'>``   *<optional>*
 		- default: ``100000000000.0``
 		- min: ``0.0``
 
-	* ``name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``particle_group_manager``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

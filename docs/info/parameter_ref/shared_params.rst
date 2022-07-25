@@ -13,89 +13,73 @@ shared_params
 Parameters:
 ************
 
-	* ``add_date_to_run_output_dir``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``add_date_to_run_output_dir`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``backtracking``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``backtracking`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``compact_mode``:  *<optional>*
+	* ``compact_mode`` :   ``<class 'bool'>``   *<optional>*
 		Description: - Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format
 
-		- type: ``<class 'bool'>``
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``debug``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``debug`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``max_duration``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``max_duration`` :   ``<class 'float'>``   *<optional>*
 		- default: ``1e+20``
 
-	* ``max_warnings``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``max_warnings`` :   ``<class 'int'>``   *<optional>*
 		- default: ``50``
 		- min: ``0``
 
-	* ``multiprocessing_case_start_delay``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``multiprocessing_case_start_delay`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 		- min: ``0.0``
 
-	* ``numba_function_cache_size``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``numba_function_cache_size`` :   ``<class 'int'>``   *<optional>*
 		- default: ``512``
 		- min: ``128``
 
-	* ``output_file_base``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``output_file_base`` :   ``<class 'str'>``   *<optional>*
 		- default: ``default_output_file_base``
 
-	* ``processors``:  *<optional>*
+	* ``processors`` :   ``<class 'int'>``   *<optional>*
 		Description: - number of processors used, if > 1 then cases in the case_list run in parallel
 
-		- type: ``<class 'int'>``
 		- default: ``1``
 		- min: ``1``
 
-	* ``replicates``:  *<optional>*
+	* ``replicates`` :   ``<class 'int'>``   *<optional>*
 		Description: - number of replicates of each case to run, allows running larger particle numbers for each case in less time if running in parallel
 
-		- type: ``<class 'int'>``
 		- default: ``1``
 		- min: ``1``
 
-	* ``root_output_dir``:  *<optional>*
+	* ``root_output_dir`` :   ``<class 'str'>``   *<optional>*
 		Description: - base dir for all ouput files
 
-		- type: ``<class 'str'>``
 		- default: ``default_root_output_dir``
 
-	* ``use_numpy_random_seed``:  *<optional>*
+	* ``use_numpy_random_seed`` :   ``<class 'bool'>``   *<optional>*
 		Description: - Makes results reproducible, only use for testing developments give the same results!
 
-		- type: ``<class 'bool'>``
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``No user note``
 
-	* ``write_grid``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``write_grid`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``write_output_files``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``write_output_files`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 

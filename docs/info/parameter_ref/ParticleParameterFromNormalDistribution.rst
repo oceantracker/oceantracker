@@ -16,71 +16,57 @@ ParticleParameterFromNormalDistribution
 Parameters:
 ************
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``dtype``:  *<optional>*
-		- type: ``<class 'type'>``
+	* ``dtype`` :   ``<class 'type'>``   *<optional>*
 		- default: ``<class 'numpy.float64'>``
 		- possible_values: ``[<class 'numpy.float32'>, <class 'numpy.float64'>, <class 'numpy.int8'>, <class 'numpy.int16'>, <class 'numpy.int32'>, <class 'bool'>]``
 
-	* ``initial_value``:  *<optional>*
-		- type: ``(<class 'int'>, <class 'float'>, <class 'bool'>)``
+	* ``initial_value`` :   ``(<class 'int'>, <class 'float'>, <class 'bool'>)``   *<optional>*
 		- default: ``0.0``
 
-	* ``mean``:**<isrequired>**
-		- type: ``<class 'float'>``
+	* ``mean`` :   ``<class 'float'>`` **<isrequired>**
 		- default: ``0.0``
 
-	* ``name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``prop_dim3``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
 
-	* ``time_varying``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``type``:  *<optional>*
+	* ``type`` :   ``<class 'str'>``   *<optional>*
 		Description: - particle property
 
-		- type: ``<class 'str'>``
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
 
-	* ``update``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``variance``:**<isrequired>**
-		- type: ``<class 'float'>``
+	* ``variance`` :   ``<class 'float'>`` **<isrequired>**
 		- default: ``0.0``
 		- min: ``0.0``
 
-	* ``vector_dim``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``vector_dim`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
 
-	* ``write``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 

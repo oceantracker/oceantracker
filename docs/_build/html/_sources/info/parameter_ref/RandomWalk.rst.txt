@@ -16,36 +16,29 @@ RandomWalk
 Parameters:
 ************
 
-	* ``A_H``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``A_H`` :   ``<class 'float'>``   *<optional>*
 		- default: ``1.0``
 		- min: ``0.0``
 
-	* ``A_V``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``A_V`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.001``
 		- min: ``0.0``
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``is3D``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``random_walk``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

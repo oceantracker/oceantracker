@@ -16,38 +16,31 @@ PolygonStats2D_ageBased
 Parameters:
 ************
 
-	* ``age_bin_size``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``age_bin_size`` :   ``<class 'float'>``   *<optional>*
 		- default: ``86400.0``
 
-	* ``calculation_interval``:  *<optional>*
+	* ``calculation_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: - time in sec, between calculating statistics
 
-		- type: ``<class 'float'>``
 		- default: ``3600.0``
 
-	* ``case_output_file_tag``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``case_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_polygon_age``
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``count_status_equal_to``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``count_status_equal_to`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``count_status_greater_than``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``count_status_greater_than`` :   ``<class 'str'>``   *<optional>*
 		- default: ``dead``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
 	* ``grid_center``:  *<optional>*
@@ -68,18 +61,15 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
-	* ``max_age_to_bin``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``max_age_to_bin`` :   ``<class 'float'>``   *<optional>*
 		- default: ``2592000.0``
 
-	* ``min_age_to_bin``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``min_age_to_bin`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 
-	* ``name``:  *<optional>*
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
 	* ``particle_property_list``:  *<optional>*
@@ -92,17 +82,14 @@ Parameters:
 
 polygon_list: still working on display  of lists of dict, eg nested polygon list 
 
-	* ``release_group_centered_grids``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``release_group_centered_grids`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``write``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 

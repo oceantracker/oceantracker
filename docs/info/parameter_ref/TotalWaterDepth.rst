@@ -16,45 +16,36 @@ TotalWaterDepth
 Parameters:
 ************
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``create_particle_property_with_same_name``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``create_particle_property_with_same_name`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``dtype``:  *<optional>*
-		- type: ``<class 'numpy.dtype'>``
+	* ``dtype`` :   ``<class 'numpy.dtype'>``   *<optional>*
 		- default: ``<class 'numpy.float64'>``
 
-	* ``is3D``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``is_time_varying``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``is_time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``total_water_depth``
 
-	* ``num_components``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``num_components`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``1``
 		- possible_values: ``[True, False]``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

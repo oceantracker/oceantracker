@@ -16,39 +16,31 @@ SettleInPolygon
 Parameters:
 ************
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``settle_in_polygon``
 
 	* ``polygon``: nested parameter dictionary
-		* ``points``:**<isrequired>**
-			- type: ``vector``
+		* ``points`` :   ``vector`` **<isrequired>**
 			- default: ``None``
 
-	* ``probability_of_settlement``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``probability_of_settlement`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 
-	* ``requires_3D``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``settlement_duration``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``settlement_duration`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

@@ -16,101 +16,84 @@ PolygonRelease
 Parameters:
 ************
 
-	* ``allow_release_in_dry_cells``:  *<optional>*
+	* ``allow_release_in_dry_cells`` :   ``<class 'bool'>``   *<optional>*
 		Description: - Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide
 
-		- type: ``<class 'bool'>``
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``maximum_age``:  *<optional>*
+	* ``maximum_age`` :   ``<class 'float'>``   *<optional>*
 		Description: - Particles older than this are killed off and removed from computation.
 
-		- type: ``<class 'float'>``
 		- default: ``1e+32``
 		- min: ``1.0``
 
-	* ``name``:  *<optional>*
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``points``:**<isrequired>**
-		- type: ``vector``
+	* ``points`` :   ``vector`` **<isrequired>**
 		- default: ``[]``
 		- list_contains_type: ``<class 'float'>``
 
-	* ``pulse_size``:  *<optional>*
+	* ``pulse_size`` :   ``<class 'int'>``   *<optional>*
 		Description: - Number of particles is a single pulse.
 
-		- type: ``<class 'int'>``
 		- default: ``1``
 		- min: ``1``
 
-	* ``release_duration``:  *<optional>*
+	* ``release_duration`` :   ``<class 'float'>``   *<optional>*
 		Description: - Time particles are released for after they start being released, ie releases stop this time after first release.
 
-		- type: ``<class 'float'>``
 		- default: ``1e+32``
 		- min: ``0``
 
-	* ``release_interval``:  *<optional>*
+	* ``release_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: - Time interval between released pulses.
 
-		- type: ``<class 'float'>``
 		- default: ``0.0``
 		- min: ``0.0``
 
-	* ``release_start_date``:  *<optional>*
-		- type: ``iso8601date``
+	* ``release_start_date`` :   ``iso8601date``   *<optional>*
 		- default: ``None``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
 	* ``user_particle_property_parameters``: nested parameter dictionary
-	* ``user_polygonID``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``user_polygonID`` :   ``<class 'int'>``   *<optional>*
 		- default: ``0``
 		- min: ``0``
 
-	* ``user_polygon_name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_polygon_name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``user_release_group_ID``:  *<optional>*
+	* ``user_release_group_ID`` :   ``<class 'int'>``   *<optional>*
 		Description: - User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.
 
-		- type: ``<class 'int'>``
 		- default: ``0``
 
-	* ``user_release_group_name``:  *<optional>*
+	* ``user_release_group_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - User given name/label to attached to this release groups to make it easier to distinguish.
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``z_max``:  *<optional>*
+	* ``z_max`` :   ``<class 'float'>``   *<optional>*
 		Description: - Max. z cord value to release with the polygon
 
-		- type: ``<class 'float'>``
 		- default: ``0.0``
 
-	* ``z_min``:  *<optional>*
+	* ``z_min`` :   ``<class 'float'>``   *<optional>*
 		Description: - Min. z cord value to release with the polygon
 
-		- type: ``<class 'float'>``
 		- default: ``0.0``
 

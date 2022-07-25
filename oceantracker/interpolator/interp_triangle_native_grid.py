@@ -98,12 +98,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                     si.grid['bc_transform'],
                                                     si.grid['adjacency'],
                                                     si.grid['is_dry_cell'],
+                                                    si.run_params['block_dry_cells'],
                                                     self.params['bc_walk_tol'],
                                                     self.params['max_search_steps'],
                                                     si.case_params['run_params']['open_boundary_type'] == 1,
                                                     active)
         sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_particle_subset_buffer())
-        if sel.shape[0] > 0 :
+        if sel.shape[0] > 0:
             self.code_timer.start('kd-tree_retrys')
             new_cell = self.initial_cell_guess(xq[sel,:2])
             part_prop['n_cell'].set_values(new_cell, sel)
@@ -111,10 +112,14 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             nsteps, nmax = triangle_interpolator_util.BCwalk_with_move_backs_numba(
                                             xq,
                                             part_prop['x_last_good'].data,
+                                            nb, step_dt_fraction,
                                             part_prop['status'].data,
                                             part_prop['n_cell'].data,
                                             part_prop['bc_cords'].data,
-                                            si.grid['bc_transform'], si.grid['adjacency'],
+                                            si.grid['bc_transform'],
+                                            si.grid['adjacency'],
+                                            si.grid['is_dry_cell'],
+                                            si.run_params['block_dry_cells'],
                                             self.params['bc_walk_tol'],
                                             self.params['max_search_steps'],
                                             si.case_params['run_params']['open_boundary_type'] == 1,

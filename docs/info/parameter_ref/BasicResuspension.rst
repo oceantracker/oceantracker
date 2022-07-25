@@ -16,31 +16,25 @@ BasicResuspension
 Parameters:
 ************
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``critical_friction_velocity``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``critical_friction_velocity`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 		- min: ``0.0``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``BasicResuspension``
 
-	* ``requires_3D``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

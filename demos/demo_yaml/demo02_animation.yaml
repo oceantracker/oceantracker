@@ -32,7 +32,7 @@ base_case_params:
     pulse_size: 10
     release_interval: 10800
   run_params:
-    user_note: test of notes
+    block_dry_cells: false
   solver:
     n_sub_steps: 6
   tracks_writer:

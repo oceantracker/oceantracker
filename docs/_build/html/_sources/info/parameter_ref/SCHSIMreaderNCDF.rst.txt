@@ -16,62 +16,49 @@ SCHSIMreaderNCDF
 Parameters:
 ************
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``cords_in_lat_long``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``cords_in_lat_long`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``depth_average``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``depth_average`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
 	* ``dimension_map``: nested parameter dictionary
-		* ``node``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``node`` :   ``<class 'str'>``   *<optional>*
 			- default: ``nSCHISM_hgrid_node``
 
-		* ``time``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``time`` :   ``<class 'str'>``   *<optional>*
 			- default: ``time``
 
-		* ``vector2Ddim``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``vector2Ddim`` :   ``<class 'str'>``   *<optional>*
 			- default: ``two``
 
-		* ``vector3Ddim``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``vector3Ddim`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
 
-		* ``z``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``z`` :   ``<class 'str'>``   *<optional>*
 			- default: ``nSCHISM_vgrid_layers``
 
 	* ``field_variables``: nested parameter dictionary
-		* ``tide``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``tide`` :   ``<class 'str'>``   *<optional>*
 			- default: ``elev``
 
-		* ``water_depth``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``water_depth`` :   ``<class 'str'>``   *<optional>*
 			- default: ``depth``
 
-		* ``water_salinity``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``water_salinity`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
 
-		* ``water_temperature``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``water_temperature`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
 
 		* ``water_velocity``:  *<optional>*
@@ -85,23 +72,19 @@ Parameters:
 		- default list item: ``None``
 		- can_be_empty_list: ``True``
 
-	* ``file_mask``:**<isrequired>**
+	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
 		Description: - Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
 	* ``grid_variables``: nested parameter dictionary
-		* ``bottom_cell_index``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``bottom_cell_index`` :   ``<class 'str'>``   *<optional>*
 			- default: ``node_bottom_index``
 
-		* ``time``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``time`` :   ``<class 'str'>``   *<optional>*
 			- default: ``time``
 
-		* ``triangles``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``triangles`` :   ``<class 'str'>``   *<optional>*
 			- default: ``SCHISM_hgrid_face_nodes``
 
 		* ``x``:  *<optional>*
@@ -110,61 +93,49 @@ Parameters:
 			- can_be_empty_list: ``True``
 			- fixed_len: ``2``
 
-		* ``zlevel``:  *<optional>*
-			- type: ``<class 'str'>``
+		* ``zlevel`` :   ``<class 'str'>``   *<optional>*
 			- default: ``zcor``
 
-	* ``hgrid_file_name``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``hgrid_file_name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``input_dir``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``input_dir`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``isodate_of_hindcast_time_zero``:  *<optional>*
-		- type: ``iso8601date``
+	* ``isodate_of_hindcast_time_zero`` :   ``iso8601date``   *<optional>*
 		- default: ``1970-01-01``
 
-	* ``max_numb_files_to_load``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``max_numb_files_to_load`` :   ``<class 'int'>``   *<optional>*
 		- default: ``10000000``
 		- min: ``1``
 
-	* ``minimum_total_water_depth``:  *<optional>*
+	* ``minimum_total_water_depth`` :   ``<class 'float'>``   *<optional>*
 		Description: - Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering
 
-		- type: ``<class 'float'>``
 		- default: ``0.25``
 		- min: ``0.0``
 
-	* ``name``:  *<optional>*
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``search_sub_dirs``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``search_sub_dirs`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``time_buffer_size``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
 		- default: ``48``
 		- min: ``2``
 
-	* ``time_zone``:  *<optional>*
-		- type: ``<class 'int'>``
+	* ``time_zone`` :   ``<class 'int'>``   *<optional>*
 		- default: ``None``
 		- min: ``-12``
 		- max: ``23``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``water_velocity_depth_average``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``water_velocity_depth_average`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

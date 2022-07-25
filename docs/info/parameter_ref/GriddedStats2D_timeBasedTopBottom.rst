@@ -16,34 +16,28 @@ GriddedStats2D_timeBasedTopBottom
 Parameters:
 ************
 
-	* ``calculation_interval``:  *<optional>*
+	* ``calculation_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: - time in sec, between calculating statistics
 
-		- type: ``<class 'float'>``
 		- default: ``3600.0``
 
-	* ``case_output_file_tag``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``case_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_gridded_time_layer``
 
-	* ``class_name``:  *<optional>*
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
-	* ``count_status_equal_to``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``count_status_equal_to`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``count_status_greater_than``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``count_status_greater_than`` :   ``<class 'str'>``   *<optional>*
 		- default: ``dead``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``description``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
 	* ``grid_center``:  *<optional>*
@@ -64,25 +58,21 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
-	* ``layer_thick_ness``:  *<optional>*
-		- type: ``<class 'float'>``
+	* ``layer_thick_ness`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 		- min: ``0.0``
 
-	* ``max_status``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``max_status`` :   ``<class 'str'>``   *<optional>*
 		- default: ``moving``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``min_status``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``min_status`` :   ``<class 'str'>``   *<optional>*
 		- default: ``frozen``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``name``:  *<optional>*
+	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
-		- type: ``<class 'str'>``
 		- default: ``None``
 
 	* ``particle_property_list``:  *<optional>*
@@ -91,22 +81,18 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 
-	* ``release_group_centered_grids``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``release_group_centered_grids`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``top_layer``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``top_layer`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``user_note``:  *<optional>*
-		- type: ``<class 'str'>``
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``write``:  *<optional>*
-		- type: ``<class 'bool'>``
+	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
