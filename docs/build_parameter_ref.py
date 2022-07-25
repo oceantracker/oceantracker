@@ -100,7 +100,6 @@ class RSTfileBuilder(object):
 
     def add_params_from_dict(self,params, indent=0):
 
-
         for key in sorted(params.keys()):
             item= params[key]
 
@@ -113,12 +112,12 @@ class RSTfileBuilder(object):
 
 
             if type(item) == PVC:
-                self.add_lines('* ``' + key + '``:' + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
+                self.add_lines('* ``' + key + '`` :   ``' + str(item.info['type']) + '`` '
+                               + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
                 if item.info['doc_str'] is not None:
                     self.add_lines('Description: - ' + str(item.info['doc_str'].strip()), indent=indent+2)
                     self.add_lines()
 
-                self.add_lines('- type: ``' + str(item.info['type']) + '``', indent=indent+2)
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
 
                 for k, v in item.info.items():

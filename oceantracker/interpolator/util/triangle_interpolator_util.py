@@ -16,7 +16,7 @@ status_cell_search_failed = int(particle_info['status_flags']['cell_search_faile
 
 #________ Barycentric triangle walk________
 @njit
-def BCwalk_with_move_backs_numba(xq, x_old, nb, step_dt_fraction, status, n_cell, BC, BCtransform, triNeighbours,is_dry_cell, tol, max_BC_walk_steps, has_open_boundary, active):
+def BCwalk_with_move_backs_numba(xq, x_old, nb, step_dt_fraction, status, n_cell, BC, BCtransform, triNeighbours,is_dry_cell, block_dry_cells, tol, max_BC_walk_steps, has_open_boundary, active):
    # Barycentric walk across triangles to find cells
 
     n_total_walking_steps=0
@@ -58,17 +58,18 @@ def BCwalk_with_move_backs_numba(xq, x_old, nb, step_dt_fraction, status, n_cell
                     # leave bc, cell, location  unchanged as outside
                     status[n] = status_outside_open_boundary
                     break
-                else: # n_tri == -1 , and any future -ve face types, attempt to move back to last good position
+                else: # n_tri == -1 outside domain and any future -ve face types, attempt to move back to last good position
                     # solid boundary, so just move back
                     if np.all(np.isfinite(x_old[n, :])):
                         xq[n, :] = x_old[n, :]
                     else:
                         status[n] = status_bad_cord
                     break
+
             # check for dry cell
             is_dry = is_dry_cell[nb,n_tri]*(1.-step_dt_fraction) +  is_dry_cell[nb,n_tri]*step_dt_fraction
-            if is_dry > 0.5:
-                # treasts dry cel like a lateral boundary
+            if block_dry_cells and is_dry > 0.5:
+                # treats dry cell like a lateral boundary
                 # move back and keep triangle the same
                 if np.all(np.isfinite(x_old[n, :])):
                     xq[n, :] = x_old[n, :]
