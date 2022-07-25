@@ -1,12 +1,8 @@
 # method to run ocean tracker from parmeters
 # eg run(params)
 
-# todo open boundary condition??
-# todo get tide and depth part prop from zlevel interp
+
 # todo kernal/numba based RK4 step
-# todo add version to output files
-# todo  add git version to output eg
-#  import subprocess    subprocess.check_output(['git', 'rev-parse', 'HEAD']) , done but not working when not in package dir use cd?
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
 # Dev notes
 # line debug?? python3.6 -m pyinstrument --show-all plasticsTrackOnLine_Main.py

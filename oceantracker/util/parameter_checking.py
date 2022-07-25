@@ -215,6 +215,7 @@ class ParameterListChecker(object):
                   fixed_len =None, min_length=None, doc_str=None, make_list_unique=None) :
 
         self.info= locals() # get keyword args as dict
+        self.info.pop('self') # dont want self param
 
         requiredKW= ['default_list', 'list_type']
         for name in requiredKW:
