@@ -424,5 +424,6 @@ if __name__ == "__main__":
 
     if args.testrun:
         from minimal_example import params as min_params
+
         json_util.write_JSON(path.join(JSONdir, 'minimal_example.json'), min_params)
         yaml_util.write_YAML(path.join(YAMLdir, 'minimal_example.yaml'), min_params)

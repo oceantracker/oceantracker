@@ -38,6 +38,23 @@ along with counts of particles inside polygons
 
    </details>
 
+
+.. raw:: html
+
+   <details>
+   <summary> json parameters </summary>
+
+.. literalinclude:: ../../../demos/demo_json/demo03_heatmaps.json
+    :language: json
+    :caption:
+
+.. raw:: html
+
+   </details>
+
+
+
+
 .. raw:: html
 
    <details>
