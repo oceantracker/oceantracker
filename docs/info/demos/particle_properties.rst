@@ -36,6 +36,19 @@ Decaying particle property used to size and colour  particles. ``decay_time_scal
 .. raw:: html
 
    <details>
+   <summary> json parameters </summary>
+
+.. literalinclude:: ../../../demos/demo_json/demo60_SCHISM_3D_decaying_particle.json
+    :language: json
+    :caption:
+
+.. raw:: html
+
+   </details>
+
+.. raw:: html
+
+   <details>
    <summary> yaml parameters </summary>
 
 .. literalinclude:: ../../../demos/demo_yaml/demo60_SCHISM_3D_decaying_particle.yaml
@@ -77,6 +90,24 @@ Particles with additional inside polygon  property, with optional logging of pol
 .. raw:: html
 
    <details>
+   <summary> json parameters </summary>
+
+.. literalinclude:: ../../../demos/demo_json/demo07_inside_polygon_events.json
+    :language: json
+    :caption:
+
+.. raw:: html
+
+   </details>
+
+
+.. raw:: html
+
+   </details>
+
+.. raw:: html
+
+   <details>
    <summary> yaml parameters </summary>
 
 .. literalinclude:: ../../../demos/demo_yaml/demo07_inside_polygon_events.yaml
@@ -110,6 +141,19 @@ Particles coloured by their status property. Status can be one of following stri
     :language: python
     :caption:
 
+.. raw:: html
+
+   </details>
+
+
+.. raw:: html
+
+   <details>
+   <summary> json parameters </summary>
+
+.. literalinclude:: ../../../demos/demo_json/demo56_SCHISM_3D_always_resupend.json
+    :language: json
+    :caption:
 
 .. raw:: html
 

@@ -34,6 +34,19 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
 .. raw:: html
 
    <details>
+   <summary> json parameters </summary>
+
+.. literalinclude:: ../../../demos/demo_json/demo06_reefstranding.json
+    :language: json
+    :caption:
+
+.. raw:: html
+
+   </details>
+
+.. raw:: html
+
+   <details>
    <summary> yaml parameters </summary>
 
 .. literalinclude:: ../../../demos/demo_yaml/demo06_reefstranding.yaml
@@ -50,7 +63,7 @@ Resuspension
 .. raw:: html
 
   <center>
-    <video width="95%" controls autoplay loop src="../../_static/demos/demo56_SCHISM_3D_always_resupend_1.mp4">
+    <video width="95%" controls autoplay loop src="../../_static/demos/demo56_SCHISM_3D_always_resupend_status.mp4">
    </video>
   </center>
 
@@ -75,6 +88,20 @@ Vertical slice showing one example of a falling particle and resuspension, with 
 .. raw:: html
 
    </details>
+
+.. raw:: html
+
+   <details>
+   <summary> json parameters </summary>
+
+.. literalinclude:: ../../../demos/demo_json/demo58_bottomBounce.json
+    :language: json
+    :caption:
+
+.. raw:: html
+
+   </details>
+
 
 .. raw:: html
 
@@ -116,6 +143,21 @@ Particles with splitting in two every 6 hours and a 5% chance of dying every 6 h
 .. raw:: html
 
    </details>
+
+
+.. raw:: html
+
+   <details>
+   <summary> json parameters </summary>
+
+.. literalinclude:: ../../../demos/demo_json/demo08_particle_splitting.json
+    :language: json
+    :caption:
+
+.. raw:: html
+
+   </details>
+
 
 .. raw:: html
 

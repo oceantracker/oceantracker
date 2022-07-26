@@ -101,9 +101,18 @@ JSON files
 
 Example   demos\\JSONinputFiles\\demo01_plot_tracks.json
 
+.. raw:: html
+
+   <details>
+   <summary> json parameter file </summary>
+
 .. literalinclude:: ../../../demos/demo_json/demo01_plot_tracks.json
     :caption:
     :language: JSON
+
+.. raw:: html
+
+   </details>
 
 Run from code
 ==============

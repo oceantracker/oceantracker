@@ -5,7 +5,7 @@ from os import path
 from datetime import datetime,date
 
 
-def write_JSON(file_name,d):
+def write_JSON(file_name,d, indent=4):
     # aviod changing given file name
     if '.json' in file_name.lower():
         fn = file_name
@@ -13,7 +13,7 @@ def write_JSON(file_name,d):
         fn=file_name+'.json'
     try:
         with open(fn, 'w') as fp:
-            json.dump(d, fp, cls=MyEncoder)
+            json.dump(d, fp, cls=MyEncoder, indent=indent)
 
     except Exception as e:
         print('Error>>  Failed to write json file ="' + file_name +'"')

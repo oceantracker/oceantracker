@@ -35,6 +35,22 @@ For this 3D hindcast, grey particles are stranded on the bottom, green ones are 
 
     ``python run_oceantracker.py --param_file minimal_example.yaml``
 
+
+.. raw:: html
+
+   <details>
+   <summary> json parameters </summary>
+
+.. literalinclude:: ../../../demos/demo_json/minimal_example.json
+    :language: json
+    :caption:
+
+.. raw:: html
+
+   </details>
+
+
+
 .. raw:: html
 
    <details>
