@@ -77,16 +77,16 @@ def read_case_info_file(case_info_file_name):
     case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
     return case_info
 
-def load_particle_track_vars(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None):
-    # load tracks for data given by case_info_file_name
+def load_particle_track_vars(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1):
+    # load one track file from squeuence of what may be split files
 
     if var_list is None: var_list=[]
     var_list = list(set(var_list+['time', 'x','status'])) # default vars
 
     case_info = read_case_info_file(case_info_file_name)
-    tracks_file = path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['tracks_writer'])
-    tracks = read_ncdf_output_files.read_particle_tracks_file(tracks_file, var_list, release_group=release_group, fraction_to_read=fraction_to_read)
 
+    track_file = path.join( case_info['output_files']['run_output_dir'], case_info['output_files']['tracks_writer'][track_file_number-1])
+    tracks = read_ncdf_output_files.read_particle_tracks_file(track_file, var_list, release_group=release_group, fraction_to_read=fraction_to_read)
     tracks['grid'] = load_grid(case_info_file_name)
     tracks= _extract_useful_params(case_info, tracks)
     return tracks
@@ -101,8 +101,8 @@ def _get_user_class_filename(user_class_type, case_info,nsequence):
         print ('Warning load output files , nsequence is greater than numer of users classes (setting to last in sequence), for user class type = ' + user_class_type)
         nsequence = len(user_class_files)
 
-    file_name= path.join(case_info['output_files']['run_output_dir'], user_class_files[nsequence -1])
-    return  file_name
+    file_name = path.join(case_info['output_files']['run_output_dir'], user_class_files[nsequence -1])
+    return file_name
 
 def _extract_useful_params(case_info, d):
     d.update({'particle_status_flags': case_info['particles']['particle_status_flags'],

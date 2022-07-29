@@ -17,6 +17,10 @@ def seconds_to_pretty_str(s, seconds= True):
     if seconds: fmt +=":%S"
     s_str= seconds_to_date(s).strftime(fmt)
     return s_str
+def seconds_to_short_date(s):
+    fmt="%Y_%m_%d"
+    s_str= seconds_to_date(s).strftime(fmt)
+    return s_str
 def iso8601str_to_seconds(s):  return date_to_seconds(date_from_iso8601str(s))
 
 def date_to_seconds(date): return  (date-ot_time_zero()).total_seconds()

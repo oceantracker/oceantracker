@@ -47,8 +47,8 @@ Parameters:
 		- min: ``1``
 
 	* ``particle_properties_to_track``:  *<optional>*
-		- a list containing type:  ``<class 'str'>``
-		- default list item: ``None``
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 

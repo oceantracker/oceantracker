@@ -1,5 +1,6 @@
 from  oceantracker.util import basic_util
 import numpy as np
+from time import perf_counter
 from oceantracker.shared_info import SharedInfoClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, merge_params_with_defaults, append_message,GracefulExitError
 # parameter dictionaries are nested dictionaries or lists of dictionaries
@@ -31,7 +32,7 @@ class ParameterBaseClass(object):
         # 4) check requirements
 
         self.params={}
-        self.info={}  # stores info about object
+        self.info={'time_spent_updating': 0., 'calls': 0}  # stores info about object
         self.docs={'description': ''}
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
@@ -117,5 +118,8 @@ class ParameterBaseClass(object):
         return self.particle_subset_buffer_data[:]
 
 
+    def update_timer(self, t0):
+        self.info['time_spent_updating'] += perf_counter() - t0
+        self.info['calls'] += 1
 
 

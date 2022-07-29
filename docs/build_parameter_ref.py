@@ -139,8 +139,8 @@ class RSTfileBuilder(object):
                     continue
 
                 self.add_lines('- a list containing type:  ``' + str(item.info['list_type']) + '``', indent=indent+2)
-                self.add_lines('- default list item: ``'
-                               + str(item.info['default_value'].get_defaults() if item.info['default_value'] is not None else None) + '``', indent=indent+2)
+                self.add_lines('- default list : ``'
+                               + str(item.info['default_list']) + '``', indent=indent+2)
 
                 for k, v in item.info.items():
                     if k not in ['default_list','list_type', 'default_value', 'is_required', 'doc_str'] and v is not None:

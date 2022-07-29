@@ -460,17 +460,17 @@ if __name__ == '__main__':
 
     x0 =[[502096, 5968781, -2], [485000, 5982000, -2],[470376, 5980287, -2],[ 536935,5940317, -2] ,[560849,5932934, -2],[448288.024467616, 5983779.777737856, -2]]
     #x0 = [[502096, 5968781, -2]]
-    pulse_size = 50
+    pulse_size = 10
 
     case ={'run_params':{ 'particle_buffer_size': 300000, 'minimum_water_depth':.2,
                           'open_boundary_type':1,
-            'duration': 51. * 24 * 3600,
+            'duration': 2. * 24 * 3600,
                 'write_tracks': True},
         'tracks_writer' : {'output_step_count': 4},
         'solver': { 'screen_output_step_count': 1,  'n_sub_steps': 12},
-        'particle_release_groups': [{'points': x0,'pulse_size': pulse_size, 'release_interval': 600},
+        'particle_release_groups': [{'points': x0,'pulse_size': pulse_size, 'release_interval': 1200},
                                     {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
-                                     'points': statistical_polygon_list[1]['points'],'pulse_size': pulse_size, 'release_interval': 600}],
+                                     'points': statistical_polygon_list[1]['points'],'pulse_size': pulse_size, 'release_interval': 1200}],
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
         'trajectory_modifiers': [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
                                        'critical_friction_velocity': .01},

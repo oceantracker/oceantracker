@@ -158,7 +158,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.reader.schism_reader.SCHSIMreaderNCDF&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:/H_Local_drive/ParticleTracking/oceantracker03/demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoHindcastSchism3D.nc&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;depth_average&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;field_variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -244,7 +244,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">  </span><span class="nt">field_variables</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">water_temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">temp</span><span class="w"></span>
 <span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoHindcastSchism3D.nc</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:/H_Local_drive/ParticleTracking/oceantracker03/demos\demo_hindcast</span><span class="w"></span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo_hindcast</span><span class="w"></span>
 <span class="nt">shared_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">compact_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
@@ -314,7 +314,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:/H_Local_drive/ParticleTracking/oceantracker03/demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoHindcast2D*.nc&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;search_sub_dirs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;dimension_map&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -348,9 +348,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">            </span><span class="nt">&quot;A_H&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="w"></span>
 <span class="w">        </span><span class="p">},</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;tracks_writer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;turn_on_write_particle_properties_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;n_cell&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">]</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;time_steps_per_per_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">96</span><span class="w"></span>
 <span class="w">        </span><span class="p">},</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;solver&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;n_sub_steps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w"></span>
@@ -513,8 +512,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">  </span><span class="nt">solver</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">n_sub_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span><span class="w"></span>
 <span class="w">  </span><span class="nt">tracks_writer</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">turn_on_write_particle_properties_list</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">n_cell</span><span class="w"></span>
+<span class="w">    </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter</span><span class="w"></span>
+<span class="w">    </span><span class="nt">time_steps_per_per_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span><span class="w"></span>
 <span class="nt">reader</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dimension_map</span><span class="p">:</span><span class="w"></span>
@@ -533,7 +532,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="nt">x</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">east</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">north</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:/H_Local_drive/ParticleTracking/oceantracker03/demos\demo_hindcast</span><span class="w"></span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo_hindcast</span><span class="w"></span>
 <span class="w">  </span><span class="nt">isodate_of_hindcast_time_zero</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2020-06-01&#39;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">search_sub_dirs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">time_buffer_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">24</span><span class="w"></span>
@@ -605,7 +604,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.reader.schism_reader.SCHSIMreaderNCDF&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:/H_Local_drive/ParticleTracking/oceantracker03/demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoHindcastSchism3D.nc&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;depth_average&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;field_variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -901,7 +900,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">salt</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_temperature</span><span class="w"></span>
 <span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoHindcastSchism3D.nc</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:/H_Local_drive/ParticleTracking/oceantracker03/demos\demo_hindcast</span><span class="w"></span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo_hindcast</span><span class="w"></span>
 <span class="nt">shared_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">compact_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>

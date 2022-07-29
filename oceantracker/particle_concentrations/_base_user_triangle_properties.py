@@ -13,7 +13,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         super().__init__()
         # set up info/attributes
         self.add_default_params({'class_name' : PVC(None, str,is_required=True),
-                                 'particle_properties_to_track': PLC(None,str,  make_list_unique=True),
+                                 'particle_properties_to_track': PLC([],[str],  make_list_unique=True),
                                  'write': PVC(True, bool),
                                  'case_output_file_tag': PVC(None, str),
                                  'count_status_equal_to': PVC(None, str, possible_values=particle_info['status_flags'].keys()),

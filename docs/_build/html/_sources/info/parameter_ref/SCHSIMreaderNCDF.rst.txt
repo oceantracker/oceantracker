@@ -62,14 +62,14 @@ Parameters:
 			- default: ``None``
 
 		* ``water_velocity``:  *<optional>*
-			- a list containing type:  ``<class 'str'>``
-			- default list item: ``None``
+			- a list containing type:  ``[<class 'str'>]``
+			- default list : ``['hvel']``
 			- can_be_empty_list: ``True``
 			- fixed_len: ``2``
 
 	* ``field_variables_to_depth_average``:  *<optional>*
-		- a list containing type:  ``<class 'str'>``
-		- default list item: ``None``
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``[]``
 		- can_be_empty_list: ``True``
 
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
@@ -88,8 +88,8 @@ Parameters:
 			- default: ``SCHISM_hgrid_face_nodes``
 
 		* ``x``:  *<optional>*
-			- a list containing type:  ``<class 'str'>``
-			- default list item: ``None``
+			- a list containing type:  ``[<class 'str'>]``
+			- default list : ``['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y']``
 			- can_be_empty_list: ``True``
 			- fixed_len: ``2``
 

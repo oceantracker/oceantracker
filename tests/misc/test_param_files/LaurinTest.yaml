@@ -26,8 +26,8 @@ case_list:
     - - 448288.024467616
       - 5983779.777737856
       - -2
-    pulse_size: 50
-    release_interval: 600
+    pulse_size: 10
+    release_interval: 1200
   - class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
     points: &id001
     - - 577905.0
@@ -42,8 +42,8 @@ case_list:
       - 5921191.0
     - - 578488.0
       - 5917969.0
-    pulse_size: 50
-    release_interval: 600
+    pulse_size: 10
+    release_interval: 1200
   particle_statistics:
   - calculation_interval: 100
     class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
@@ -261,7 +261,7 @@ case_list:
     particle_property_list: []
     polygon_list: *id002
   run_params:
-    duration: 4406400.0
+    duration: 172800.0
     minimum_water_depth: 0.2
     open_boundary_type: 1
     particle_buffer_size: 300000

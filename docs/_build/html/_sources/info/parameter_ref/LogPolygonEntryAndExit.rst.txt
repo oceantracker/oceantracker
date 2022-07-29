@@ -37,8 +37,8 @@ Parameters:
 		- default: ``None``
 
 	* ``particle_prop_to_write_list``:  *<optional>*
-		- a list containing type:  ``<class 'str'>``
-		- default list item: ``None``
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``['ID', 'x', 'IDpulse', 'IDrelease_group', 'user_release_group_ID', 'status', 'age']``
 		- can_be_empty_list: ``True``
 
 	* ``polygon_list``:  *<optional>*

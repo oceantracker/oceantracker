@@ -64,7 +64,9 @@ p2['base_case_params']['particle_release_groups']=[
      'pulse_size': 10, 'release_interval': 3 * 3600}
 ]
 
-p2['base_case_params'].update({'solver': {'n_sub_steps': 6}, 'run_params': {'block_dry_cells': False}})
+p2['base_case_params'].update({'solver': {'n_sub_steps': 6}, 'run_params': {'block_dry_cells': False},
+                               'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
+                                                'time_steps_per_per_file':96}})
 p2['shared_params'].update({'output_file_base' :'demo02_animation' ,'compact_mode': True})
 params.append(p2)
 

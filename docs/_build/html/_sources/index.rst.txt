@@ -33,7 +33,6 @@ or by an expert adding their specialised code for novel particle behaviours or s
 
 Code is on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
 
-
 ====================
 Features
 ====================
@@ -41,8 +40,9 @@ Features
 * Fast and extendable offline native grid particle tracking for unstructured grids [1]_
 * Calculate the tracks of millions of particles
 * User configurable settings and computational pipeline driven entirely by json or yaml text files.
+* Add user defined particle properties and behaviours from parameter text files.
 * Native grid particle tracking for `SCHISM <http://ccrm.vims.edu/schismweb/>`_  like grids, which preserves the resolution of Slayer and LSC vertical grids
-* Builds heat maps on the fly, without recording particle tracks; plus inside polygon statistics computed on the fly
+* Builds heat maps on the fly, without recording particle tracks, also inside polygon counts computed on the fly
 * Backward and forward in time particle tracking
 * Shoreline stranding of particles by the tide and resuspension from the bottom
 * 2D and 3D particle tracking, with option to run 3D as 2D

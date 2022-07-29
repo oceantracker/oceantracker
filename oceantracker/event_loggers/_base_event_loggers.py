@@ -15,7 +15,7 @@ class _BaseEventLogger(ParameterBaseClass):
         self.add_default_params({'case_output_file_tag': PVC('event_logger',str),
                                  'write': PVC(True,bool),
                                  'chunk_size' : PVC(5000, int, min= 1),
-                                 'particle_prop_to_write_list': PLC([ 'ID','x','IDpulse', 'IDrelease_group', 'user_release_group_ID', 'status', 'age'], str)})
+                                 'particle_prop_to_write_list': PLC([ 'ID','x','IDpulse', 'IDrelease_group', 'user_release_group_ID', 'status', 'age'],[str])})
     def check_requirements(self):
 
         msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['event_has_started_boolean'])

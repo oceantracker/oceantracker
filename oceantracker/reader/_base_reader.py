@@ -24,14 +24,14 @@ class _BaseReader(ParameterBaseClass):
                                  'time_buffer_size': PVC(48, int, min=2),
                                  'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
                                  'depth_average': PVC(False, bool),  # turns 3D hindcast into a 2D one
-                                 'field_variables_to_depth_average': PLC(None, str),  # list of field_variables that are depth averaged on the fly
+                                 'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
                                  'grid_variables': {'time': PVC('time', str, is_required=True),
-                                                    'x': PLC(['x', 'y'], str, fixed_len=2),
+                                                    'x': PLC(['x', 'y'], [str], fixed_len=2),
                                                     'triangles': PVC(None, str, is_required=True),
                                                     'zlevel': PVC(None, str),
                                                     'bottom_cell_index': PVC(None, str),
                                                     },
-                                 'field_variables': {'water_velocity': PLC(['u', 'v', None], str, fixed_len=3),
+                                 'field_variables': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3),
                                                      'tide': PVC(None, str),
                                                      'water_depth': PVC(None, str),
                                                      'water_temperature': PVC(None, str),

@@ -41,20 +41,20 @@ Parameters:
 		- default: ``None``
 
 	* ``grid_center``:  *<optional>*
-		- a list containing type:  ``<class 'float'>``
-		- default list item: ``None``
+		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
+		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_size``:  *<optional>*
-		- a list containing type:  ``<class 'int'>``
-		- default list item: ``None``
+		- a list containing type:  ``[<class 'int'>]``
+		- default list : ``[100, 99]``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
 	* ``grid_span``:  *<optional>*
-		- a list containing type:  ``<class 'float'>``
-		- default list item: ``None``
+		- a list containing type:  ``[<class 'float'>]``
+		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
@@ -64,8 +64,8 @@ Parameters:
 		- default: ``None``
 
 	* ``particle_property_list``:  *<optional>*
-		- a list containing type:  ``<class 'str'>``
-		- default list item: ``None``
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 

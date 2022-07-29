@@ -62,14 +62,14 @@ Parameters:
 			- default: ``None``
 
 		* ``water_velocity``:  *<optional>*
-			- a list containing type:  ``<class 'str'>``
-			- default list item: ``None``
+			- a list containing type:  ``[<class 'str'>, None]``
+			- default list : ``['u', 'v', None]``
 			- can_be_empty_list: ``True``
 			- fixed_len: ``3``
 
 	* ``field_variables_to_depth_average``:  *<optional>*
-		- a list containing type:  ``<class 'str'>``
-		- default list item: ``None``
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``[]``
 		- can_be_empty_list: ``True``
 
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
@@ -88,8 +88,8 @@ Parameters:
 			- default: ``None``
 
 		* ``x``:  *<optional>*
-			- a list containing type:  ``<class 'str'>``
-			- default list item: ``None``
+			- a list containing type:  ``[<class 'str'>]``
+			- default list : ``['x', 'y']``
 			- can_be_empty_list: ``True``
 			- fixed_len: ``2``
 
