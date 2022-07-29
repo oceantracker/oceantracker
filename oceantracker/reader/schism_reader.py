@@ -20,7 +20,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({  # if be used along side 3D vel
                         'hgrid_file_name': PVC(None, str),
-                        'field_variables': {'water_velocity': PLC(['hvel'], str, fixed_len=2),
+                        'field_variables': {'water_velocity': PLC(['hvel'], [str], fixed_len=2),
                                               'water_depth': PVC('depth', str),
                                               'tide': PVC('elev', str),
                                               'water_temperature': PVC(None, str),
@@ -34,7 +34,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
                                                                       'vector2Ddim': PVC('two', str)
                                                                     },
                         'grid_variables': {'time':PVC('time',str),
-                                    'x':PLC(['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y'], str, fixed_len= 2),
+                                    'x':PLC(['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y'], [str], fixed_len= 2),
                                     'zlevel': PVC('zcor',str),
                                     'bottom_cell_index': PVC('node_bottom_index',str),
                                      'triangles': PVC('SCHISM_hgrid_face_nodes',str),                                                                      },

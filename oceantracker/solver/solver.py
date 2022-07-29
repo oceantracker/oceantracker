@@ -38,21 +38,38 @@ class Solver(ParameterBaseClass):
             required_props=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'],
             required_grid_vars=[])
 
-
         return msg_list
 
-    def initialize_run(self):
+    def initialize_run(self, nb0):
         si = self.shared_info
         info = self.info
+        pgm, fgm, tracks_writer = si.classes['particle_group_manager'], si.classes['field_group_manager'], si.classes['tracks_writer']
+        part_prop = si.classes['particle_properties']
+
         # set up particle velocity working space for solver
         info['n_time_steps_completed'] = 0
         info['total_num_particles_moving'] = 0
 
+        # initial release , writes and statistics etc
+        t0 = si.grid['time'][nb0]
+        new_particleIDs = pgm.release_particles(nb0, t0)
+        fgm.setup_interp_time_step(nb0, t0, part_prop['x'].data, new_particleIDs)  # set up interp for first time step
+        pgm.update_PartProp(t0, new_particleIDs)  # now update part prop with good cell and bc cords, eg  interp water_depth
+        if si.write_output_files and si.write_tracks:
+            tracks_writer.open_file_if_needed()
+            pgm.write_time_varying_prop_and_data()
+            pgm.write_non_time_varing_part_properties(new_particleIDs)
+
+        self._update_stats(t0)
+        self._update_concentrations(nb0, t0)
+        self._update_events(t0)
+
+
     def solve_for_data_in_buffer(self, nb0, num_in_buffer, nt0):
-        # solve fro dat in buffer
+        # solve for data in buffer
         si = self.shared_info
         info = self.info
-        p   = si.classes['particle_group_manager']
+        pgm, fgm, tracks_writer   = si.classes['particle_group_manager'], si.classes['field_group_manager'], si.classes['tracks_writer']
         computation_started = datetime.now()
 
 
@@ -66,36 +83,6 @@ class Solver(ParameterBaseClass):
                 t0_step = perf_counter()
                 t1 = t_hindcast + ns*si.model_substep_timestep*si.model_direction
 
-                p.release_particles(nb, t1)
-
-                # post release write time varying part properties and statistics
-                if si.write_output_files and si.write_tracks and info['n_time_steps_completed'] % si.classes['tracks_writer'].params['output_step_count'] == 0:
-                    p.write_time_varying_prop_and_data()
-
-                # update and write stats
-                self.code_timer.start('on_the_fly_statistics')
-                for s in si.class_list_interators['particle_statistics']['all'].values():
-                    if abs(t1 - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
-                        s.update(time=t1)
-                self.code_timer.stop('on_the_fly_statistics')
-
-                # update triangle concentrations
-                self.code_timer.start('particle_concentrations')
-                for s in si.class_list_interators['particle_concentrations']['all'].values():
-                    if abs(t1 - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
-                        s.update(nb,t1)
-                self.code_timer.stop('particle_concentrations')
-
-                # write events
-                self.code_timer.start('event_logging')
-                for e in  si.class_list_interators['event_loggers']['all'].values():
-                    e.update(time=t1)
-                self.code_timer.stop('event_logging')
-
-                # print screen data
-                if (info['n_time_steps_completed']  + ns) % self.params['screen_output_step_count'] == 0:
-                    self.screen_output(info['n_time_steps_completed'] , nt0, nb0, nb, ns, t1, t0_step,computation_started)
-
                 #  Main integration step
                 #  --------------------------------------
                 self.code_timer.start('integration_step')
@@ -106,15 +93,30 @@ class Solver(ParameterBaseClass):
                 self.code_timer.stop('integration_step')
                 info['total_num_particles_moving'] += moving.shape[0]
 
-                t2 = t1 + si.model_substep_timestep*si.model_direction
+                t2 = t1 + si.model_substep_timestep * si.model_direction
 
-                si.classes['dispersion'].update(nb, t2, moving)
+                self.post_step_bookeeping_and_dispersion(si.model_start_time, nb, info['n_time_steps_completed'], t2, moving)
 
-                self.post_step_bookeeping(si.model_start_time,nb,info['n_time_steps_completed'], t2, moving)
+                new_particleIDs = pgm.release_particles(nb, t2)
+                pgm.write_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
-                p.kill_old_particles(t2)
+                # write tracks file
+                if si.write_output_files and si.write_tracks and info['n_time_steps_completed'] % si.classes['tracks_writer'].params['output_step_count'] == 0:
+                    tracks_writer.open_file_if_needed()
+                    pgm.write_time_varying_prop_and_data()
 
-                if si.compact_mode: p.remove_dead_particles_from_memory()
+                # update outputs
+                self._update_stats(t2)
+                self._update_concentrations(nb, t2)
+                self._update_events(t2)
+
+                # print screen data
+                if (info['n_time_steps_completed']  + ns) % self.params['screen_output_step_count'] == 0:
+                    self.screen_output(info['n_time_steps_completed'] , nt0, nb0, nb, ns, t1, t0_step,computation_started)
+
+                pgm.kill_old_particles(t2)
+
+                if si.compact_mode: pgm.remove_dead_particles_from_memory()
 
                 info['n_time_steps_completed']  += 1
 
@@ -213,15 +215,17 @@ class Solver(ParameterBaseClass):
             for m in range(xold.shape[1]):
                 xnew[n, m] = xold[n, m] + velocity[n, m] * dt
                     
-    def post_step_bookeeping(self,t, nb, n_steps, t2, moving):
+    def post_step_bookeeping_and_dispersion(self, t, nb, n_steps, t2, moving):
         # do dispersion, modify trajectories,
         # do strandings etc to change particle status
         # update part prop, eg  interp mapped reader fields to particle locations
-        self.code_timer.start('post_step_bookeeping')
+        self.code_timer.start('post_step_bookeeping_and_dispersion')
         si = self.shared_info
         pm = si.classes['particle_group_manager'] # internal short cuts
         fgm = si.classes['field_group_manager']
         part_prop  =  si.classes['particle_properties']
+
+        si.classes['dispersion'].update(nb, t2, moving)
 
         # after dispersion some may be outside, update search cell status to see which are now outside domain etc
         fgm.setup_interp_time_step(nb, t2, part_prop['x'].data, moving)
@@ -250,7 +254,7 @@ class Solver(ParameterBaseClass):
                                                     si.minimum_total_water_depth,
                                                     sel,
                                                     part_prop['status'].data)
-        self.code_timer.stop('post_step_bookeeping')
+        self.code_timer.stop('post_step_bookeeping_and_dispersion')
 
     @staticmethod
     @njit
@@ -281,6 +285,42 @@ class Solver(ParameterBaseClass):
         s +=  ' Step-%4.0f ms' % (timePerStep * 1000.)
 
         si.case_log.write_msg(s)
+
+
+    def _update_stats(self,t):
+        # update and write stats
+        si= self.shared_info
+        self.code_timer.start('on_the_fly_statistics')
+        for s in si.class_list_interators['particle_statistics']['all'].values():
+
+            if abs(t - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
+                t0 = perf_counter()
+                s.update(time=t)
+                s.update_timer(t0)
+
+        self.code_timer.stop('on_the_fly_statistics')
+
+    def _update_concentrations(self, nb, t):
+        # update triangle concentrations
+        si = self.shared_info
+        self.code_timer.start('particle_concentrations')
+        for s in si.class_list_interators['particle_concentrations']['all'].values():
+            if abs(t - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
+                t0 = perf_counter()
+                s.update(nb, t)
+                s.update_timer(t0)
+        self.code_timer.stop('particle_concentrations')
+
+    def _update_events(self, t):
+        # write events
+        si = self.shared_info
+
+        self.code_timer.start('event_logging')
+        for e in si.class_list_interators['event_loggers']['all'].values():
+            t0 = perf_counter()
+            e.update(time=t)
+            e.update_timer(t0)
+        self.code_timer.stop('event_logging')
 
     def close(self):
         a=1

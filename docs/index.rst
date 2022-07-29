@@ -33,7 +33,6 @@ or by an expert adding their specialised code for novel particle behaviours or s
 
 Code is on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
 
-
 ====================
 Features
 ====================

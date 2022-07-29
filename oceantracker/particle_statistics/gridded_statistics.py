@@ -14,13 +14,13 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         super().__init__()
         # set up info/attributes
         self.add_default_params({
-                                 'grid_size':           PLC([100, 99],int, fixed_len=2),
+                                 'grid_size':           PLC([100, 99],[int], fixed_len=2),
                                  'release_group_centered_grids': PVC(False, bool),
-                                 'grid_center':         PLC(None, float, fixed_len=2),
-                                 'grid_span': PLC(None, float, fixed_len=2),
+                                 'grid_center':         PLC([], [float, int], fixed_len=2),
+                                 'grid_span': PLC([], [float], fixed_len=2),
                                  'case_output_file_tag' :    PVC('stats_gridded_time',str),
                                  'calculation_interval':PVC(3600., float,doc_str=' time in sec, between calculating statistics'),
-                                 'particle_property_list': PLC(None,str,  make_list_unique=True)})
+                                 'particle_property_list': PLC([],[str],  make_list_unique=True)})
         self.grid = {}
 
     def check_requirements(self):

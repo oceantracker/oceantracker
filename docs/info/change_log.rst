@@ -2,6 +2,28 @@
 Change log
 ###########################
 
+Version 0.3.00.23 30/7/22
+_____________________________
+
+
+New features
+--------------------
+
+#. added ability to split track output files into blocks with given number of time steps per file
+#. added individual timers to stats, events classes written to case info file
+
+Changes
+--------------------
+
+#. re ordered to ensue last time step is written to tracks files
+
+Bug fixes
+--------------------
+
+#. ??
+
+
+
 
 Version 0.2.774 20/7/22
 _____________________________

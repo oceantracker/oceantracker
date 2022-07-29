@@ -161,8 +161,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.case_log.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.model_duration / 24 / 3600))
 
-        # set up run
-        solver.initialize_run()
 
         # get hindcast step range
         nt0 = reader.time_to_global_time_step(si.model_start_time)
@@ -171,6 +169,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # get fist block of nt's into buffer
         num_in_buffer = reader.fill_time_buffer(nt)
+        # set up run now data in buffer
+        solver.initialize_run(0)
 
         # fill and process buffer until there is less than 2 steps
         si.case_log.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.model_duration / 24 / 3600))
@@ -389,18 +389,19 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'processor_number' : si.processor_number,
              'file_written': datetime.now().isoformat(),
              'code_version_info': si.case_runner_params['code_version_info'],
-             'output_files': si.output_files,
              'run_info' : info,
              'hindcast_info': r.get_hindcast_info(),
              'warnings': si.case_log.get_all_warnings_and_errors(),
              'timers': self.code_timer.time_sorted_timings(),
+             'time_updating': {},
+             'output_files': si.output_files,
              'particles': { 'num_released': si.classes['particle_group_manager'].particles_released,
                             'particle_status_flags': si.particle_status_flags},
-
              'shared_params': si.shared_params,
              'case_params': si.case_runner_params['case_params'],
              'full_params': {},
              'info': {},
+
               }
 
         for key, i in si.core_class_interator.items():
@@ -411,12 +412,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 d['output_files'][key] = i.info['output_file']
             else:
                 d['output_files'][key] = None
+            d['time_updating'][key] = {'time': i.info['time_spent_updating'], 'calls': i.info['calls']}
 
         for key, item in si.class_list_interators.items():
             # a class list type
             d['full_params'][key]=[]
             d['info'][key] = []
             d['output_files'][key] =[]
+            d['time_updating'][key] =[]
 
             for i in item['all'].values():
                 d['full_params'][key].append(i.params)
@@ -425,6 +428,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                     d['output_files'][key].append(i.info['output_file'])
                 else:
                     d['output_files'][key].append(None)
+                d['time_updating'][key].append({'time': i.info['time_spent_updating'], 'calls': i.info['calls']})
 
         d['particle_release_groups']= d['full_params']['particle_release_groups']
         d['info'].update(si.classes['particle_group_manager'].get_release_group_userIDmaps())  # adds maps

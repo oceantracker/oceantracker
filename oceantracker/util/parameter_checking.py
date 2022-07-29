@@ -210,11 +210,12 @@ class ParamDictValueChecker(object):
 class ParameterListChecker(object):
     # checks parameter list values
     # if default_list is None then list wil be None if user_list is not given
-    # todo do should defaulr value be a PVC() instance, to get control over  possible values in list , max, min etc?
+    # todo do should default value be a PVC() instance, to get control over  possible values in list , max, min etc?
     def __init__(self, default_list, list_type, is_required=False, can_be_empty_list= True, default_value=None,
                   fixed_len =None, min_length=None, doc_str=None, make_list_unique=None) :
 
-        self.info= locals() # get keyword args as dict
+
+        self.info= dict(locals()) # get keyword args as dict
         self.info.pop('self') # dont want self param
 
         requiredKW= ['default_list', 'list_type']
@@ -229,17 +230,13 @@ class ParameterListChecker(object):
         if self.info['is_required'] and user_list is None and base_list is None:
             append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" is required ', exception = GracefulExitError)
             
-        # check list is possible
-        possisble_types=[None, int, float, str, dict]
-        if i['list_type'] not in possisble_types:
-            append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" list_type is ' + str(i['list_type']) + 'must be one of ' + str(possisble_types), exception = GracefulExitError)
-
-        # check default_valle type
-        if i['default_value'] is not None and type(i['default_value']) != i['list_type']:
-            append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '"  type of default_value ' + str(i['default_value']) + ', must match list_type ' + str(i['list_type']), exception = GracefulExitError)
+        # check default_value type
+        for v in self.info['default_list']:
+            if v is not None and type(v) not in i['list_type']:
+                append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" in default list, type of item  ' + str(v) + ', must match list_type ' + str(i['list_type']), exception = GracefulExitError)
 
         # merge non vector lists, user, base and default lists
-        # two types of list merge, appendale or required max size
+        # two types of list merge, appendable or required max size
         ul = [] if user_list is None else deepcopy(user_list)
         bl = [] if base_list is None else deepcopy(base_list)
         dl = [] if i['default_list'] is None else deepcopy(i['default_list'])
@@ -261,14 +258,14 @@ class ParameterListChecker(object):
 
         # check each of the list items
         for item in complete_list:
-            if i['list_type']== float and type(item) == int : item = float(item) # make ints floats
 
-            if item is not None and type(item) != i['list_type']:
+            if item is not None and type(item) not in i['list_type']:
                 append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" list must all be type ' + str(i['list_type']), exception = GracefulExitError)
 
         if len(complete_list) ==0 and  not i['can_be_empty_list']:
             append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" list must must not be empty ' + str(i['list_type']), exception = GracefulExitError)
 
         return complete_list,  msg_list
+
 
 

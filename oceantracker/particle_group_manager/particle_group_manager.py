@@ -59,12 +59,15 @@ class ParticleGroupManager(ParameterBaseClass):
     def release_particles(self, nb, t):
         # see if any group is ready to release
         si = self.shared_info
+        new_buffer_indices = np.full((0,),0,np.int32)
         for g in si.class_list_interators['particle_release_groups']['all'].values():
             if g.index_of_next_release < g.release_schedule_times.shape[0] \
                     and np.any(t * si.model_direction >= g.release_schedule_times[g.index_of_next_release] * si.model_direction):
                 x0, IDrelease_group, IDpulse, user_release_group_ID, n_cell_guess = g.release_locations()
-                self.release_a_particle_group_pluse(nb, t,  x0, IDrelease_group, IDpulse, user_release_group_ID, n_cell_guess)
+                new_index = self.release_a_particle_group_pluse(nb, t,  x0, IDrelease_group, IDpulse, user_release_group_ID, n_cell_guess)
+                new_buffer_indices = np.concatenate((new_buffer_indices,new_index))
                 g.index_of_next_release += 1
+        return new_buffer_indices #inicies of all new particles
 
     def release_a_particle_group_pluse(self, nb, t,  x0, IDrelease_group, IDpulse, user_release_group_ID, n_cell_guess):
         # release one pulse of particles from given group
@@ -141,15 +144,9 @@ class ParticleGroupManager(ParameterBaseClass):
         # iterp from field etc to get new particlie prop values for those no manually updated
         self.update_PartProp(t, new_buffer_indices)
 
-        # to work in compact mode must write particle non-time varying  particle properties when released
-        #  eg ID etc, releaseGroupID  etc
-        if si.write_tracks and new_buffer_indices.shape[0] > 0:
-            for name, prop in si.classes['particle_properties'].items():
-                # parameters are not time varying, so done at ends in retangular writes, or on culling particles
-                if not prop.params['time_varying'] and prop.params['write']:
-                    si.classes['tracks_writer'].write_non_time_varying_particle_prop(name, prop.data, new_buffer_indices)
 
         self.code_timer.stop('release_particles')
+        return new_buffer_indices
 
     def add_time_varying_info(self,**kwargs):
         # property for group of particles, ie not properties of individual particles, eg time, number released
@@ -162,7 +159,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         if si.write_tracks and p.params['write']:
             w = si.classes['tracks_writer']
-            w.create_variable_to_write(p.params['name'], 'time', None,p.params['vector_dim'], attributes=None, dtype=p.params['dtype'] )
+            w.create_variable_to_write(p.params['name'], 'time', None,p.params['vector_dim'], attributes_dict=None, dtype=p.params['dtype'] )
 
     def create_particle_property(self,prop_type, prop_params):
         si = self.shared_info
@@ -189,7 +186,7 @@ class ParticleGroupManager(ParameterBaseClass):
                 w.create_variable_to_write(i.params['name'], is_time_varying=i.params['time_varying'],
                                            is_part_prop=True,
                                            vector_dim=i.params['vector_dim'],
-                                           attributes={'description': i.params['description']},
+                                           attributes_dict={'description': i.params['description']},
                                            dtype=i.params['dtype'])
 
     def get_particle_time(self): return self.time_varying_group_info['time'].get_values()
@@ -277,7 +274,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # write time vary info , eg "time"
         w = si.classes['tracks_writer']
-        w.pre_time_step_write_book_keeping()
+        w.pre_time_step_write_book_keeping()  # todo is this needed???
 
         # write group data
         for name,d in si.classes['time_varying_info'].items():
@@ -288,9 +285,21 @@ class ParticleGroupManager(ParameterBaseClass):
             if d.params['write'] and d.params['time_varying']:
                 w.write_time_varying_particle_prop(name, d.data)
 
-        w.post_time_step_write_book_keeping()
+        w.time_steps_written_to_current_file +=1 # time steps in current file
+        w.total_time_steps_written  += 1 # time steps written since the start
 
         self.code_timer.stop('write_output')
+
+    def write_non_time_varing_part_properties(self, new_particleIDs):
+    # to work in compact mode must write particle non-time varying  particle properties when released
+    #  eg ID etc, releaseGroupID  etc
+        si= self.shared_info
+        writer = si.classes['tracks_writer']
+        if si.write_tracks and new_particleIDs.shape[0] > 0:
+            for name, prop in si.classes['particle_properties'].items():
+                # parameters are not time varying, so done at ends in retangular writes, or on culling particles
+                if not prop.params['time_varying'] and prop.params['write']:
+                    writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs)
 
 
     def get_release_group_userIDmaps(self):
