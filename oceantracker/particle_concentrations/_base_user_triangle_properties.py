@@ -15,7 +15,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         self.add_default_params({'class_name' : PVC(None, str,is_required=True),
                                  'particle_properties_to_track': PLC([],[str],  make_list_unique=True),
                                  'write': PVC(True, bool),
-                                 'case_output_file_tag': PVC(None, str),
+                                 'role_output_file_tag': PVC(None, str),
                                  'count_status_equal_to': PVC(None, str, possible_values=particle_info['status_flags'].keys()),
                                  'release_group_to_track': PVC(None, int, min=0),
                                  'only_update_concentrations_on_write': PVC(False, bool),
@@ -32,7 +32,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
     def set_up_output_file(self):
         # set up output file
         si = self.shared_info
-        tag = '' if self.params['case_output_file_tag'] is None else '_' + self.params['case_output_file_tag']
+        tag = '' if self.params['role_output_file_tag'] is None else '_' + self.params['role_output_file_tag']
         self.info['output_file'] = si.output_file_base + '_concentrations_%03.0f' % (self.instanceID + 1) + tag + '.nc'
 
         si.case_log.write_progress_marker('opening concentrations output to : ' + self.info['output_file'])

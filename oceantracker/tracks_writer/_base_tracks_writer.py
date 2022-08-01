@@ -20,7 +20,7 @@ class _BaseWriter(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
 
         self.add_default_params({
-                                'case_output_file_tag': PVC('tracks', str),
+                                'role_output_file_tag': PVC('tracks', str),
                                  'output_step_count': PVC(1,int,min=1),
                                  'turn_on_write_particle_properties_list': PLC([], [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                                  'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity'], [str],
@@ -63,7 +63,7 @@ class _BaseWriter(ParameterBaseClass):
 
     def open_file_if_needed(self):
         si = self.shared_info
-        fn =si.output_file_base + '_' + self.params['case_output_file_tag']
+        fn =si.output_file_base + '_' + self.params['role_output_file_tag']
 
         if self.total_time_steps_written == 0:
             if self.params['time_steps_per_per_file'] is not None: # first of the split files

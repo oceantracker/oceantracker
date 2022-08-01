@@ -43,7 +43,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # BC walk stats
         info = self.info
         info['n_total_walking_steps'] = 0
-        info['n_total_vertical_search_steps'] = 0
         info['n_total_particles_located'] =0
         info['n_max_walking_steps'] =0
         info['failed_searches'] = 0
@@ -57,6 +56,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                        initial_value=0, vector_dim=2, prop_dim3=3))
             p.create_particle_property('manual_update',dict(name='z_fraction_nodes',  write=False, dtype=np.single,
                                        initial_value=0., vector_dim=2, prop_dim3=3))
+            info['vertical_search_steps_histogram'] = np.full( (si.grid['zlevel'].shape[2]+1,), 0, np.int32)
 
     def build_grid(self):
         si = self.shared_info
@@ -275,23 +275,25 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         BCcords     = part_prop['bc_cords'].data
         z_fraction_nodes = part_prop['z_fraction_nodes'].data
         #z=part_prop['x'].data[:10,2]
-        n_vertical_searches, count_maybe_below_bottom, count_maybe_above_surface = \
+        count_maybe_below_bottom, count_maybe_above_surface = \
                                 triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(
                                                         xq[:, 2], nb, step_dt_fraction, zlevel_nodes, si.grid['triangles'], n_cell,
                                                         nz_bottom, BCcords, status,
                                                         si.particle_status_flags['on_bottom'], si.particle_status_flags['moving'],
                                                         si.particle_status_flags['stranded_by_tide'],
-                nz_nodes, z_fraction_nodes, active)
+                                                        nz_nodes, z_fraction_nodes, active,
+                                                        self.info['vertical_search_steps_histogram'])
         info = self.info
-        info['n_total_vertical_search_steps'] += n_vertical_searches
         info['count_maybe_below_bottom'] += count_maybe_below_bottom
         info['count_maybe_above_surface'] += count_maybe_above_surface
 
     def close(self):
+        si=self.shared_info
         info = self.info
         info['mean_number_of_triangles_walked'] = info['n_total_walking_steps'] / info['n_total_particles_located']
         # there are vertical searches at 3 nodes and 2 time steps
-        info['mean_number_of_vertical_search_steps_per_cell_search'] = info['n_total_vertical_search_steps'] / info['n_total_particles_located']
+        if si.hindcast_is3D:
+            info['mean_number_of_vertical_search_steps_per_cell_search'] = np.sum(info['vertical_search_steps_histogram']) / info['n_total_particles_located']
 
         info['mean_count_maybe_below_bottom_per_cell_search' ] = info['count_maybe_below_bottom'] / info['n_total_particles_located']
         info['mean_count_maybe_above_surface_per_cell_search'] = info['count_maybe_above_surface'] / info['n_total_particles_located']

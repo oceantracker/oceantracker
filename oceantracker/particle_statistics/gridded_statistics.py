@@ -18,7 +18,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
                                  'release_group_centered_grids': PVC(False, bool),
                                  'grid_center':         PLC([], [float, int], fixed_len=2),
                                  'grid_span': PLC([], [float], fixed_len=2),
-                                 'case_output_file_tag' :    PVC('stats_gridded_time',str),
+                                 'role_output_file_tag' :    PVC('stats_gridded_time',str),
                                  'calculation_interval':PVC(3600., float,doc_str=' time in sec, between calculating statistics'),
                                  'particle_property_list': PLC([],[str],  make_list_unique=True)})
         self.grid = {}
@@ -239,7 +239,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag': PVC('stats_gridded_age',str),
+        self.add_default_params({'role_output_file_tag': PVC('stats_gridded_age',str),
                                  'min_age_to_bin':  PVC(0.,float),
                                  'max_age_to_bin':  PVC(30.*24*3600 ,float),
                                  'age_bin_size':    PVC(1.*24*3600.,float),

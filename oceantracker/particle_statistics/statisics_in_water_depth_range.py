@@ -59,25 +59,25 @@ class GriddedStats2D_timeBasedDepthRange(WaterDepthRangeStats, gridded_statistic
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag' : PVC('stats_gridded_time_depth_range', str)})
+        self.add_default_params({'role_output_file_tag' : PVC('stats_gridded_time_depth_range', str)})
 
 class GriddedStats2D_ageBasedDepthRange(WaterDepthRangeStats, gridded_statistics.GriddedStats2D_agedBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag' : PVC('stats_gridded_age_depth_range', str)})
+        self.add_default_params({'role_output_file_tag' : PVC('stats_gridded_age_depth_range', str)})
 
 class PolygonStats2D_timeBasedDepthRange(WaterDepthRangeStats, polygon_statistics.PolygonStats2D_timeBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag' : PVC('stats_polygon_time_depth_range',str)})
+        self.add_default_params({'role_output_file_tag' : PVC('stats_polygon_time_depth_range',str)})
 
 class PolygonStats2D_ageBasedDepthRange(WaterDepthRangeStats, polygon_statistics.PolygonStats2D_ageBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag' : PVC('stats_polygon_age_depth_range', str)})
+        self.add_default_params({'role_output_file_tag' : PVC('stats_polygon_age_depth_range', str)})

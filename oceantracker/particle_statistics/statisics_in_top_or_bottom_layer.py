@@ -51,25 +51,25 @@ class GriddedStats2D_timeBasedTopBottom(TopBottomLayerStats, gridded_statistics.
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag' : PVC('stats_gridded_time_layer', str)})
+        self.add_default_params({'role_output_file_tag' : PVC('stats_gridded_time_layer', str)})
 
 class GriddedStats2D_ageBasedTopBottom(TopBottomLayerStats, gridded_statistics.GriddedStats2D_agedBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag' : PVC('stats_gridded_age_layer', str)})
+        self.add_default_params({'role_output_file_tag' : PVC('stats_gridded_age_layer', str)})
 
 class PolygonStats2D_timeBasedTopBottom(TopBottomLayerStats, polygon_statistics.PolygonStats2D_timeBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag' : PVC('stats_polygon_time_depth_layer',str)})
+        self.add_default_params({'role_output_file_tag' : PVC('stats_polygon_time_depth_layer',str)})
 
 class PolygonStats2D_ageBasedTopBottom(TopBottomLayerStats, polygon_statistics.PolygonStats2D_ageBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag' : PVC('stats_polygon_age_depth_layer', str)})
+        self.add_default_params({'role_output_file_tag' : PVC('stats_polygon_age_depth_layer', str)})

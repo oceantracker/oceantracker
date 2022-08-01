@@ -12,7 +12,7 @@ class _BaseEventLogger(ParameterBaseClass):
     def __init__(self):
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag': PVC('event_logger',str),
+        self.add_default_params({'role_output_file_tag': PVC('event_logger',str),
                                  'write': PVC(True,bool),
                                  'chunk_size' : PVC(5000, int, min= 1),
                                  'particle_prop_to_write_list': PLC([ 'ID','x','IDpulse', 'IDrelease_group', 'user_release_group_ID', 'status', 'age'],[str])})
