@@ -11,3 +11,5 @@ reader
 	GenericUnstructuredReader.rst
 	SCHSIMreaderNCDF.rst
 
+**Role:** 
+

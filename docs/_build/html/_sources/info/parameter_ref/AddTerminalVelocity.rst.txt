@@ -21,9 +21,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``

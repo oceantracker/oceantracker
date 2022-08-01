@@ -11,3 +11,5 @@ tracks_writer
 	FlatTrackWriter.rst
 	RectangularTrackWriter.rst
 
+**Role:** 
+

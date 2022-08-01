@@ -21,9 +21,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``layer_thick_ness`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 		- min: ``0.0``

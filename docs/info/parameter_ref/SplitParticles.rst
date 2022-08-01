@@ -21,9 +21,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``particle_splitting``
 

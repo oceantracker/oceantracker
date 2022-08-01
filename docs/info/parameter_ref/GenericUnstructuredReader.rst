@@ -29,9 +29,6 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``dimension_map``: nested parameter dictionary
 		* ``node`` :   ``<class 'str'>``   *<optional>*
 			- default: ``node``

@@ -64,10 +64,16 @@
 <li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html">Post processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/documentation.html">Documentation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Change log</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#version-0-2-774-20-7-22">Version 0.2.774 20/7/22</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#version-0-3-00-23-30-7-22">Version 0.3.00.23 30/7/22</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#new-features">New features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#changes">Changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#version-0-2-774-20-7-22">Version 0.2.774 20/7/22</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Bug fixes</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#version-0-2-772-11-7-22">Version 0.2.772 11/7/22</a></li>
@@ -112,17 +118,39 @@
             
   <section id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
-<section id="version-0-2-774-20-7-22">
-<h2>Version 0.2.774 20/7/22<a class="headerlink" href="#version-0-2-774-20-7-22" title="Permalink to this headline">¶</a></h2>
+<section id="version-0-3-00-23-30-7-22">
+<h2>Version 0.3.00.23 30/7/22<a class="headerlink" href="#version-0-3-00-23-30-7-22" title="Permalink to this headline">¶</a></h2>
 <section id="new-features">
 <h3>New features<a class="headerlink" href="#new-features" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>added ability to split track output files into blocks with given number of time steps per file</p></li>
+<li><p>added individual timers to stats, events classes written to case info file</p></li>
+</ol>
+</section>
+<section id="changes">
+<h3>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>re ordered to ensue last time step is written to tracks files</p></li>
+</ol>
+</section>
+<section id="bug-fixes">
+<h3>Bug fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>??</p></li>
+</ol>
+</section>
+</section>
+<section id="version-0-2-774-20-7-22">
+<h2>Version 0.2.774 20/7/22<a class="headerlink" href="#version-0-2-774-20-7-22" title="Permalink to this headline">¶</a></h2>
+<section id="id1">
+<h3>New features<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>polygon release only releases into wet cells, not just those inside domain</p></li>
 <li><p>added pages giving full most of default parameters for each class to doc</p></li>
 </ol>
 </section>
-<section id="changes">
-<h3>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h3>
+<section id="id2">
+<h3>Changes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Restructured to move all core classes up one level and delete core dir</p></li>
 <li><dl class="simple">
@@ -137,8 +165,8 @@
 </li>
 </ol>
 </section>
-<section id="bug-fixes">
-<h3>Bug fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this headline">¶</a></h3>
+<section id="id3">
+<h3>Bug fixes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>reintroduced a lost feature, that blocked movement of particles into dry cells</p></li>
 </ol>

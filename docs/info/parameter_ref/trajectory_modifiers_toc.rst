@@ -13,3 +13,5 @@ trajectory_modifiers
 	SettleInPolygon.rst
 	SplitParticles.rst
 
+**Role:** 
+

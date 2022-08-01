@@ -21,9 +21,6 @@ Parameters:
 
 		- default: ``3600.0``
 
-	* ``case_output_file_tag`` :   ``<class 'str'>``   *<optional>*
-		- default: ``stats_polygon_time``
-
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
@@ -36,9 +33,6 @@ Parameters:
 	* ``count_status_greater_than`` :   ``<class 'str'>``   *<optional>*
 		- default: ``dead``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
-
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
 
 	* ``grid_center``:  *<optional>*
 		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
@@ -76,6 +70,9 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 	* ``release_group_centered_grids`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
+
+	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
+		- default: ``stats_polygon_time``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

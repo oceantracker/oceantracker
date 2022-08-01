@@ -42,7 +42,7 @@ def _read_rectangular_tracks(nc,var_list, release_group):
     # read rectangular output file, dim time and particle
     num_released= nc.get_global_attr('total_num_particles_released')
     rg = nc.read_a_variable('IDrelease_group')[:num_released]
-    d = {'total_num_particles_released' :num_released }
+    d = {'dimensions': {}, 'total_num_particles_released' :num_released }
     for var in set(var_list):
         dims= nc.get_var_dims(var)
         if 'particle' in dims and 'time' in dims:
@@ -54,13 +54,16 @@ def _read_rectangular_tracks(nc,var_list, release_group):
             if release_group is not None:   d[var] = d[var][rg == release_group, ...]
         else:
             d[var] = nc.read_a_variable(var)
+
+        d['dimensions'][var] = nc.get_var_dims(var)
+
     return d
 
 def _read_compact_tracks(nc,var_list,release_group):
     # read compact file with stream of values  with given in timestep and particle ID in time_particle dimension
     num_released = nc.get_global_attr('total_num_particles_released')
 
-    d = {'total_num_particles_released': num_released}
+    d = {'dimensions': {},'total_num_particles_released': num_released}
     particle_IDs = nc.read_a_variable('particle_ID') # this is time_particle particleID to allow unpacking
 
     time_steps_written= nc.get_global_attr('time_steps_written')
@@ -99,6 +102,11 @@ def _read_compact_tracks(nc,var_list,release_group):
         # non time_particle varying parameters, eg time
             d[var] = nc.read_a_variable(var)
 
+        d['dimensions'][var] = nc.get_var_dims(var)
+        if d['dimensions'][var][0] == 'time_particle':
+            # output wil be retangual so correct dim
+            d['dimensions'][var] = ['time', 'particle'] + d['dimensions'][var][1:]
+
     if release_group is not None:
         # finally get only  release group for status variable
         d['status'] = d['status'][:, rg == release_group]
@@ -109,6 +117,8 @@ def _read_compact_tracks(nc,var_list,release_group):
             _filIinDeadParticles(d[var], var, d['status'], -127)
 
     _filIinDeadParticles(d['status'], 'status', d['status'], -127) # do status last as needed to work on others
+
+
     return d
 
 @njit

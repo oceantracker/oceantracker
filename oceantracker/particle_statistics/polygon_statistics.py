@@ -39,7 +39,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
     def __init__(self):
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'case_output_file_tag': PVC('stats_polygon_time',str)})
+        self.add_default_params({'role_output_file_tag': PVC('stats_polygon_time',str)})
 
     def check_requirements(self):
         msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['x'])
@@ -121,7 +121,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
     def __init__(self):
         super().__init__()
-        self.add_default_params({'case_output_file_tag': PVC('stats_polygon_age',str)})\
+        self.add_default_params({'role_output_file_tag': PVC('stats_polygon_age',str)})\
 
 
     def check_requirements(self):

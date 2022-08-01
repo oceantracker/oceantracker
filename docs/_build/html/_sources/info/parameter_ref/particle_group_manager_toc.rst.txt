@@ -10,3 +10,5 @@ particle_group_manager
 
 	ParticleGroupManager.rst
 
+**Role:** 
+

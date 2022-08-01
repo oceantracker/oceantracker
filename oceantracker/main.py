@@ -33,7 +33,7 @@ from oceantracker.util.module_importing_util import import_module_from_string
 
 import subprocess
 
-code_version = '0.3.00.23'
+code_version = '0.3.00.24'
 
 run_info = {'user_note': {}, 'screen_log': [],
             'run_started': datetime.now(),

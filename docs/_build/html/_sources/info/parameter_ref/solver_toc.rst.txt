@@ -10,3 +10,5 @@ solver
 
 	Solver.rst
 
+**Role:** 
+

@@ -21,9 +21,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``max_water_depth`` :   ``<class 'float'>``   *<optional>*
 		- default: ``1000000000.0``
 

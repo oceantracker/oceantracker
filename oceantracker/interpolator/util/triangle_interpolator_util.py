@@ -179,12 +179,13 @@ def get_BC_transform_matrix(points, simplices):
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_level_at_nodes, tri, n_cell,
                                                  nz_with_bottom, BCcord, status,
                                                  part_status_onBottom, part_status_Active, part_stranded_by_tide,
-                                                 nz_nodes_particle, z_fraction_nodes_particle, active):
+                                                 nz_nodes_particle, z_fraction_nodes_particle, active,
+                                                 vertical_search_steps_histogram):
     # find the zlayer for each node of cell containing each particleand at two time slices of hindcast  between nz_bottom and number of z levels
     # nz_with_bottom is lowest cell in grid, is 0 for slayer vertical grids, but may be > 0 for LSC grids
     # must be at least two layer  ie, nz_bottom >=1 and zlevel with at least two layers in last dim
     # nz_with_bottom must be time independent
-    n_vertical_searches= 0
+
     tf2 = 1. - step_dt_fraction
     z_tol =0.001
     z_tol2 = z_tol /2.
@@ -206,6 +207,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
 
         maybe_below_bottom = False
         maybe_above_surface= False
+        n_vertical_searches = 0
 
         for nt_step in range(2):
 
@@ -222,6 +224,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
                     nz = nz_nodes_particle[n_part, 0, m] # for second slice use nz from first time slice as guess
 
                 nz = min(max(nz, nz_bottom_node), top_zlevel) # clip nz into bounds
+                nz0 = nz # starying nz for histogram data
 
                 # clip cells out of bounds
                 if zq[n_part] < zlevels[nz_bottom_node] + z_tol:
@@ -239,25 +242,36 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
                     while zq[n_part] > zlevels[nz + 1] and nz < top_zlevel :
                         nz += 1
                         n_vertical_searches += 1
-                    zfrac = (zq[n_part] - zlevels[nz]) / (zlevels[nz + 1] - zlevels[nz])
+
+                    if abs((zlevels[nz + 1] - zlevels[nz])) < z_tol:
+                        zfrac = 0.0
+                    else:
+                        zfrac = (zq[n_part] - zlevels[nz]) / (zlevels[nz + 1] - zlevels[nz])
 
                 elif zq[n_part] < zlevels[nz]:
                     # search downwards
                     while zlevels[nz] > zq[n_part] and nz > nz_bottom_node:
                         nz -= 1
                         n_vertical_searches += 1
-                    zfrac = (zq[n_part] - zlevels[nz]) / (zlevels[nz + 1] - zlevels[nz])
+                    if abs((zlevels[nz + 1] - zlevels[nz])) < z_tol:
+                        zfrac = 0.0
+                    else:
+                        zfrac = (zq[n_part] - zlevels[nz]) / (zlevels[nz + 1] - zlevels[nz])
 
                 else:
                     # missing case zq is nan??
                     # todo need better solution for non finite xq/zq?
                     nz = nz_bottom_node
-                    zfrac = 0.
+                    zfrac = 0.0
+
 
                 # record cell and fraction from search
                 # NOTE: ensured nz OK by having used debugger to see if any z frac > 1 or < 0
                 z_fraction_nodes_particle[n_part, nt_step, m] = zfrac
                 nz_nodes_particle[n_part, nt_step, m] = nz
+
+        # record number of vertical search steps made for this particle
+        vertical_search_steps_histogram[abs(nz-nz0)] += n_vertical_searches
 
         # check if this zq[n] is out of bounds and clip if needed
         if maybe_below_bottom:
@@ -290,7 +304,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
             if zq[n_part] >= z_particle_freeSurface - z_tol:
                 zq[n_part] = z_particle_freeSurface - z_tol2
 
-    return n_vertical_searches, count_maybe_below_bottom, count_maybe_above_surface
+    return count_maybe_below_bottom, count_maybe_above_surface
 
 @njit
 def find_depth_cell_at_a_node( zq, zlevels,nz_bottom, nz,  z_tol, z_fraction_node, maybe_below_bottom, maybe_above_surface, n_vertical_searches ):

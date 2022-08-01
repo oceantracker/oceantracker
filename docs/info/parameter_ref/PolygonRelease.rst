@@ -27,9 +27,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``maximum_age`` :   ``<class 'float'>``   *<optional>*
 		Description: - Particles older than this are killed off and removed from computation.
 

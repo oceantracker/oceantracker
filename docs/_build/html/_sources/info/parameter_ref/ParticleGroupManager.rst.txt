@@ -21,9 +21,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``max_age`` :   ``<class 'float'>``   *<optional>*
 		- default: ``100000000000.0``
 		- min: ``0.0``

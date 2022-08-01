@@ -25,9 +25,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``max_search_steps`` :   ``<class 'int'>``   *<optional>*
 		- default: ``100``
 		- min: ``1``

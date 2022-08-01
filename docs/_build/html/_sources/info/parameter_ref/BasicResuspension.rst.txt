@@ -25,9 +25,6 @@ Parameters:
 		- default: ``0.0``
 		- min: ``0.0``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``BasicResuspension``
 

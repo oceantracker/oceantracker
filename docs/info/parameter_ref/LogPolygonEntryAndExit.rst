@@ -16,9 +16,6 @@ LogPolygonEntryAndExit
 Parameters:
 ************
 
-	* ``case_output_file_tag`` :   ``<class 'str'>``   *<optional>*
-		- default: ``inside_polygon_events``
-
 	* ``chunk_size`` :   ``<class 'int'>``   *<optional>*
 		- default: ``5000``
 		- min: ``1``
@@ -26,9 +23,6 @@ Parameters:
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- default: ``None``
-
-	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
@@ -44,6 +38,9 @@ Parameters:
 	* ``polygon_list``:  *<optional>*
 
 polygon_list: still working on display  of lists of dict, eg nested polygon list 
+
+	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
+		- default: ``inside_polygon_events``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

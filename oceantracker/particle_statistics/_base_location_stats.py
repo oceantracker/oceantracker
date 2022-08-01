@@ -13,7 +13,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         super().__init__()
 
         self.add_default_params({ 'calculation_interval':       PVC(24*60*60.,float),
-                                  'case_output_file_tag' :           PVC('stats_base',str),
+                                  'role_output_file_tag' :           PVC('stats_base',str),
                                   'count_status_greater_than':   PVC('dead', str, possible_values=particle_info['status_flags'].keys()),
                                   'count_status_equal_to':       PVC(None, str, possible_values=particle_info['status_flags'].keys()),
                                   'write':                      PVC(True,bool)
@@ -32,7 +32,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def open_output_file(self):
         si=self.shared_info
         if self.params['write']:
-            self.info['output_file'] = si.output_file_base + '_' + self.params['case_output_file_tag'] + '_%03.0f' % (self.instanceID + 1) + '.nc'
+            self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_%03.0f' % (self.instanceID + 1) + '.nc'
             self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
         else:
             self.nc = None

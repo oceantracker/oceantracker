@@ -20,15 +20,9 @@ Parameters:
 		- default: ``24``
 		- min: ``1``
 
-	* ``case_output_file_tag`` :   ``<class 'str'>``   *<optional>*
-		- default: ``tracks``
-
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
-		- default: ``None``
-
-	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
@@ -40,6 +34,9 @@ Parameters:
 		- default: ``1``
 		- min: ``1``
 
+	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
+		- default: ``tracks``
+
 	* ``time_steps_per_per_file`` :   ``<class 'int'>``   *<optional>*
 		Description: - Split track output into files with given number of time steps
 
@@ -50,7 +47,7 @@ Parameters:
 		Description: - Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually
 
 		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``['water_velocity', 'particle_velocity', 'tide', 'water_depth']``
+		- default list : ``['water_velocity', 'particle_velocity']``
 		- can_be_empty_list: ``True``
 
 	* ``turn_on_write_particle_properties_list``:  *<optional>*

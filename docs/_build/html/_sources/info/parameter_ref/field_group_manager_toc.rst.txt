@@ -10,3 +10,5 @@ field_group_manager
 
 	FieldGroupManager.rst
 
+**Role:** 
+

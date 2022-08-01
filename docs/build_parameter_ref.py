@@ -114,6 +114,7 @@ class RSTfileBuilder(object):
             if type(item) == PVC:
                 self.add_lines('* ``' + key + '`` :   ``' + str(item.info['type']) + '`` '
                                + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
+
                 if item.info['doc_str'] is not None:
                     self.add_lines('Description: - ' + str(item.info['doc_str'].strip()), indent=indent+2)
                     self.add_lines()
@@ -169,13 +170,15 @@ def make_sub_pages(class_type):
 
     toc.add_lines('**Module:** ' + package_util.package_relative_file_name(mod.__name__).strip())
     toc.add_lines()
-    toc.add_new_toc_to_page(class_type, maxdepth=1,sort_body=True)
 
+    toc.add_new_toc_to_page(class_type, maxdepth=1,sort_body=True)
+    instance = None
     for f in glob(path.join( package_dir,class_type,'*.py')):
 
         mod_str= path.splitext(f)[0].split(package_util.get_root_package_dir() +'\\')[-1].replace('\\','.')
         mod = importlib.import_module(mod_str)
         package_util.get_package_name()
+
         for name, c in  inspect.getmembers(mod):
             if not inspect.isclass(c) : continue
             #print(name)
@@ -187,7 +190,8 @@ def make_sub_pages(class_type):
 
 
             p = RSTfileBuilder(name, name)
-            p.add_lines('**Description:** ' + instance.docs['description'])
+
+            p.add_lines('**Description:** ' + (instance.docs['description'] if instance.docs['description'] is not None else '' ) )
             p.add_lines()
             p.add_lines('**Class:** ' + c.__module__ + '.' + c.__name__)
             p.add_lines()
@@ -220,6 +224,10 @@ def make_sub_pages(class_type):
             p.write()
             toc.add_toc_link(class_type,p)
 
+    # add role from last instance, as it derives from base class
+    if instance is not None:
+        toc.add_lines('**Role:** ' + (instance.docs['role'] if instance.docs['role'] is not None else ''))
+        toc.add_lines()
     toc.write()
     return toc
 

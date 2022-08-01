@@ -25,9 +25,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``n_sub_steps`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``

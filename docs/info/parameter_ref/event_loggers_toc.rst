@@ -10,3 +10,5 @@ event_loggers
 
 	LogPolygonEntryAndExit.rst
 
+**Role:** 
+

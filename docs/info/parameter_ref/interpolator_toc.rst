@@ -10,3 +10,5 @@ interpolator
 
 	InterpTriangularNativeGrid_Slayer_and_LSCgrid.rst
 
+**Role:** 
+
