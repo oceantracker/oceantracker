@@ -1,5 +1,5 @@
 # make movies from demos
-source ../../oceantracker02/venv/bin/activate
+source ../venv/bin/activate
 
 python  run_demos.py -bu  --d 1 -mp4
 python  run_demos.py -bu  --d 2 -mp4
