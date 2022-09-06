@@ -78,6 +78,11 @@ Parameters:
 		* ``bottom_cell_index`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
 
+		* ``is_dry_cell`` :   ``<class 'numpy.int8'>``   *<optional>*
+			Description: - Time variable flag of when cell is dry, 1= is dry cell
+
+			- default: ``None``
+
 		* ``time`` :   ``<class 'str'>`` **<isrequired>**
 			- default: ``time``
 

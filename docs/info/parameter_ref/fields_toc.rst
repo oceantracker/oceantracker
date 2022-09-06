@@ -8,8 +8,8 @@ fields
 .. toctree::
 	:maxdepth: 1
 
+	FrictionVelocity.rst
 	ReaderField.rst
-	TotalWaterDepth.rst
 	UserFieldBase.rst
 
 **Role:** 

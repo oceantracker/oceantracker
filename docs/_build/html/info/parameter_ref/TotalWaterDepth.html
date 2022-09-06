@@ -15,8 +15,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="UserFieldBase" href="UserFieldBase.html" />
-    <link rel="prev" title="ReaderField" href="ReaderField.html" />
+    <link rel="next" title="particle_release_groups" href="particle_release_groups_toc.html" />
+    <link rel="prev" title="TimeVaryingInfo" href="TimeVaryingInfo.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -84,9 +84,9 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
-  <li><a href="fields_toc.html">fields</a><ul>
-      <li>Previous: <a href="ReaderField.html" title="previous chapter">ReaderField</a></li>
-      <li>Next: <a href="UserFieldBase.html" title="next chapter">UserFieldBase</a></li>
+  <li><a href="particle_properties_toc.html">particle_properties</a><ul>
+      <li>Previous: <a href="TimeVaryingInfo.html" title="previous chapter">TimeVaryingInfo</a></li>
+      <li>Next: <a href="particle_release_groups_toc.html" title="next chapter">particle_release_groups</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -114,9 +114,9 @@
   <section id="totalwaterdepth">
 <h1>TotalWaterDepth<a class="headerlink" href="#totalwaterdepth" title="Permalink to this headline">¶</a></h1>
 <p><strong>Description:</strong></p>
-<p><strong>Class:</strong> oceantracker.fields.total_water_depth.TotalWaterDepth</p>
-<p><strong>File:</strong> oceantracker/fields/total_water_depth.py</p>
-<p><strong>Inheritance:</strong> _BaseField&gt; UserFieldBase&gt; TotalWaterDepth</p>
+<p><strong>Class:</strong> oceantracker.particle_properties.total_water_depth.TotalWaterDepth</p>
+<p><strong>File:</strong> oceantracker/particle_properties/total_water_depth.py</p>
+<p><strong>Inheritance:</strong> _BasePropertyInfo&gt; ParticleProperty&gt; TotalWaterDepth</p>
 <p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;total_water_depth&quot;</span></code></p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
@@ -131,9 +131,8 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">create_particle_property_with_same_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<dt><code class="docutils literal notranslate"><span class="pre">description</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -141,6 +140,13 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">dtype</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'numpy.dtype'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">initial_value</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -177,8 +183,57 @@
 </dl>
 </li>
 <li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">prop_dim3</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">time_varying</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">type</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - particle property</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">user</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['manual_update',</span> <span class="pre">'from_fields',</span> <span class="pre">'user']</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">update</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">vector_dim</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">write</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -196,10 +251,10 @@
     <ul>
         <li>
           &larr;
-          <a href="ReaderField.html" title="Previous document">ReaderField</a>
+          <a href="TimeVaryingInfo.html" title="Previous document">TimeVaryingInfo</a>
         </li>
         <li>
-          <a href="UserFieldBase.html" title="Next document">UserFieldBase</a>
+          <a href="particle_release_groups_toc.html" title="Next document">particle_release_groups</a>
           &rarr;
         </li>
     </ul>

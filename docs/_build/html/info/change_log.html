@@ -64,16 +64,23 @@
 <li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html">Post processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/documentation.html">Documentation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Change log</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#version-0-3-00-23-30-7-22">Version 0.3.00.23 30/7/22</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#known-issues">Known issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#version-0-3-01-00-sept-6-2022">Version 0.3.01.00 Sept 6 2022</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#new-features">New features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#changes">Changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bug-fixes">Bug fixes</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#version-0-2-774-20-7-22">Version 0.2.774 20/7/22</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#version-0-3-00-23-30-7-22">Version 0.3.00.23 30/7/22</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">New features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">Changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#version-0-2-774-20-7-22">Version 0.2.774 20/7/22</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id4">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Bug fixes</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#version-0-2-772-11-7-22">Version 0.2.772 11/7/22</a></li>
@@ -118,23 +125,62 @@
             
   <section id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
-<section id="version-0-3-00-23-30-7-22">
-<h2>Version 0.3.00.23 30/7/22<a class="headerlink" href="#version-0-3-00-23-30-7-22" title="Permalink to this headline">¶</a></h2>
+<section id="known-issues">
+<h2>Known issues<a class="headerlink" href="#known-issues" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="version-0-3-01-00-sept-6-2022">
+<h2>Version 0.3.01.00 Sept 6 2022<a class="headerlink" href="#version-0-3-01-00-sept-6-2022" title="Permalink to this headline">¶</a></h2>
 <section id="new-features">
 <h3>New features<a class="headerlink" href="#new-features" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
-<li><p>added ability to split track output files into blocks with given number of time steps per file</p></li>
-<li><p>added individual timers to stats, events classes written to case info file</p></li>
+<li><p>3D water_velocity in bottom bin  now uses loglayer interpolation (as in schisim), by adjusting fraction of cell to make linear vertical interp behave like log layer interp</p></li>
+<li><dl class="simple">
+<dt>improved re-suspension physics</dt><dd><ul class="simple">
+<li><p>resuspension jump size, size is now based on friction velocity so varies with flow speed, eq 9.28 in book Lynch : particles in the coastal ocean</p></li>
+<li><p>resuspension jump size is adjusted for terminal velocity/fall velocity</p></li>
+<li><p>friction velocity is now a user field ( no longer a user particle_property, see below change) based on log layer in bottom cell velocity and z</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Track animation colours dry cells, tracks_writer adds grid dry cell data to file, set tracks_writer param ‘write_dry_cell_index’ to false to stop writing dry cell data</p></li>
 </ol>
 </section>
 <section id="changes">
 <h3>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
-<li><p>re ordered to ensue last time step is written to tracks files</p></li>
+<li><p>class AddTerminalVelocity is now TerminalVelocity in module oceantracker.velocity_modifiers.terminal_velocity</p></li>
+<li><p>friction velocity is now a custom field (no longer a particle property), to do resuspension user must now add friction_velocity to custom field parameter list,eg ‘fields’ : [{‘class_name’: ‘oceantracker.fields.friction_velocity.FrictionVelocity’}],</p></li>
+<li><p>removed polygon release zmin, zmax params, added zrange param for both point and polygon releases, so 3D releases random in this range</p></li>
+<li><p>tidied up particle release time span calc.</p></li>
+<li><p>???</p></li>
 </ol>
 </section>
 <section id="bug-fixes">
 <h3>Bug fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>divide by zero in depth cell search when grid has zero vertical thickness</p></li>
+<li><p>fixed- could  not read uncommented hgrid.gr3 files  for open boundary data, can now read whether hgrid file is with or without trailing comments on lines giving</p></li>
+</ol>
+</section>
+</section>
+<section id="version-0-3-00-23-30-7-22">
+<h2>Version 0.3.00.23 30/7/22<a class="headerlink" href="#version-0-3-00-23-30-7-22" title="Permalink to this headline">¶</a></h2>
+<section id="id1">
+<h3>New features<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>added ability to split track output files into blocks with given number of time steps per file</p></li>
+<li><p>added individual timers to stats, events classes written to case info file</p></li>
+</ol>
+</section>
+<section id="id2">
+<h3>Changes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>re ordered to ensue last time step is written to tracks files</p></li>
+</ol>
+</section>
+<section id="id3">
+<h3>Bug fixes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>??</p></li>
 </ol>
@@ -142,15 +188,15 @@
 </section>
 <section id="version-0-2-774-20-7-22">
 <h2>Version 0.2.774 20/7/22<a class="headerlink" href="#version-0-2-774-20-7-22" title="Permalink to this headline">¶</a></h2>
-<section id="id1">
-<h3>New features<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<section id="id4">
+<h3>New features<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>polygon release only releases into wet cells, not just those inside domain</p></li>
 <li><p>added pages giving full most of default parameters for each class to doc</p></li>
 </ol>
 </section>
-<section id="id2">
-<h3>Changes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<section id="id5">
+<h3>Changes<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Restructured to move all core classes up one level and delete core dir</p></li>
 <li><dl class="simple">
@@ -165,8 +211,8 @@
 </li>
 </ol>
 </section>
-<section id="id3">
-<h3>Bug fixes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<section id="id6">
+<h3>Bug fixes<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>reintroduced a lost feature, that blocked movement of particles into dry cells</p></li>
 </ol>

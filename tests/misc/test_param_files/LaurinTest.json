@@ -20,18 +20,19 @@
     "case_list": [
         {
             "run_params": {
-                "particle_buffer_size": 300000,
-                "minimum_water_depth": 0.2,
+                "particle_buffer_size": 100000,
                 "open_boundary_type": 1,
-                "duration": 172800.0,
+                "block_dry_cells": true,
+                "duration": 604800.0,
                 "write_tracks": true
             },
             "tracks_writer": {
-                "output_step_count": 4
+                "output_step_count": 15
             },
             "solver": {
                 "screen_output_step_count": 1,
-                "n_sub_steps": 12
+                "n_sub_steps": 30,
+                "RK_order": 2
             },
             "particle_release_groups": [
                 {
@@ -68,7 +69,7 @@
                         ]
                     ],
                     "pulse_size": 10,
-                    "release_interval": 1200
+                    "release_interval": 3600
                 },
                 {
                     "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
@@ -98,24 +99,23 @@
                             5917969.0
                         ]
                     ],
-                    "pulse_size": 10,
-                    "release_interval": 1200
+                    "pulse_size": 100,
+                    "release_interval": 3600
                 }
             ],
             "dispersion": {
-                "A_H": 1.0,
+                "A_H": 0.2,
                 "A_V": 0.001
             },
             "trajectory_modifiers": [
                 {
                     "class_name": "oceantracker.trajectory_modifiers.resuspension.BasicResuspension",
                     "critical_friction_velocity": 0.01
-                },
+                }
+            ],
+            "particle_properties": [
                 {
-                    "class_name": "oceantracker.trajectory_modifiers.split_particles.SplitParticles",
-                    "splitting_interval": 180,
-                    "split_status_greater_than": "dead",
-                    "probability_of_splitting": 0.01
+                    "class_name": "oceantracker.particle_properties.total_water_depth.TotalWaterDepth"
                 }
             ],
             "particle_concentrations": [
@@ -123,14 +123,14 @@
                     "class_name": "oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D"
                 }
             ],
-            "particle_properties": [
+            "fields": [
                 {
-                    "class_name": "oceantracker.particle_properties.friction_velocity.FrictionVelocity"
+                    "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
                 }
             ],
             "velocity_modifiers": [
                 {
-                    "class_name": "oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity",
+                    "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
                     "mean": -0.0
                 }
             ],

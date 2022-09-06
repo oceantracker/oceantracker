@@ -4,11 +4,11 @@ TotalWaterDepth
 
 **Description:** 
 
-**Class:** oceantracker.fields.total_water_depth.TotalWaterDepth
+**Class:** oceantracker.particle_properties.total_water_depth.TotalWaterDepth
 
-**File:** oceantracker/fields/total_water_depth.py
+**File:** oceantracker/particle_properties/total_water_depth.py
 
-**Inheritance:** _BaseField> UserFieldBase> TotalWaterDepth
+**Inheritance:** _BasePropertyInfo> ParticleProperty> TotalWaterDepth
 
 **Default internal name:** ``"total_water_depth"``
 
@@ -21,12 +21,14 @@ Parameters:
 
 		- default: ``None``
 
-	* ``create_particle_property_with_same_name`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
-		- possible_values: ``[True, False]``
+	* ``description`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``dtype`` :   ``<class 'numpy.dtype'>``   *<optional>*
 		- default: ``<class 'numpy.float64'>``
+
+	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
+		- default: ``0.0``
 
 	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
@@ -43,6 +45,32 @@ Parameters:
 		- default: ``1``
 		- possible_values: ``[True, False]``
 
+	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
+		- default: ``1``
+		- min: ``1``
+
+	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- possible_values: ``[True, False]``
+
+	* ``type`` :   ``<class 'str'>``   *<optional>*
+		Description: - particle property
+
+		- default: ``user``
+		- possible_values: ``['manual_update', 'from_fields', 'user']``
+
+	* ``update`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- possible_values: ``[True, False]``
+
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+
+	* ``vector_dim`` :   ``<class 'int'>``   *<optional>*
+		- default: ``1``
+		- min: ``1``
+
+	* ``write`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- possible_values: ``[True, False]``
 

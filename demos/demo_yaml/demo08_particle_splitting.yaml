@@ -50,14 +50,14 @@ base_case_params:
     pulse_size: 1
     release_interval: 0
   run_params:
-    block_dry_cells: false
+    block_dry_cells: true
     particle_buffer_size: 5000
     retain_culled_part_locations: true
   solver:
     n_sub_steps: 6
   tracks_writer:
     class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
-    time_steps_per_per_file: 96
+    write_dry_cell_index: true
   trajectory_modifiers:
   - class_name: oceantracker.trajectory_modifiers.split_particles.SplitParticles
     split_status_greater_than: frozen

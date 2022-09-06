@@ -33,7 +33,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         # set up output file
         si = self.shared_info
         tag = '' if self.params['role_output_file_tag'] is None else '_' + self.params['role_output_file_tag']
-        self.info['output_file'] = si.output_file_base + '_concentrations_%03.0f' % (self.instanceID + 1) + tag + '.nc'
+        self.info['output_file'] = si.output_file_base + '_concentrations_%03.0f' % (self.info['instanceID']  + 1) + tag + '.nc'
 
         si.case_log.write_progress_marker('opening concentrations output to : ' + self.info['output_file'])
 

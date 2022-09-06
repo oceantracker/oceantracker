@@ -31,6 +31,8 @@ Parameters:
 		- default: ``None``
 
 	* ``output_step_count`` :   ``<class 'int'>``   *<optional>*
+		Description: - Write track data every output_step_count steps of the model
+
 		- default: ``1``
 		- min: ``1``
 
@@ -59,4 +61,10 @@ Parameters:
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+
+	* ``write_dry_cell_index`` :   ``<class 'bool'>``   *<optional>*
+		Description: - Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots
+
+		- default: ``True``
+		- possible_values: ``[True, False]``
 

@@ -86,9 +86,6 @@ def plot_sample(runCaseInfo, num_to_plot=10 ** 3):
         plt.text(0.1, .1, 'Particle z', transform=ax.transAxes)
 
     plt.show()
-    a=1
-
-
 
 def plot_gridded_stats(log,seq_num, annotate_polygon=True, nfig=1):
     p = log['full_params']['particle_statistics'][seq_num]
@@ -268,7 +265,7 @@ def base_param(is3D=False, isBackwards = False):
         base_case['solver']['screen_output_step_count'] = 1
         base_case['dispersion'].update({'A_H': 0.,'A_V': 0.})
         base_case['velocity_modifiers'].append(
-            {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity', 'mean': 0*0.001})
+            {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0*0.001})
 
     return params
 

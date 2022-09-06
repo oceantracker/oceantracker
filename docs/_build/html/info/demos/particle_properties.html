@@ -142,7 +142,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
                             <span class="n">vmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                             <span class="n">movie_file</span><span class="o">=</span><span class="n">output_file</span> <span class="o">+</span> <span class="s1">&#39;.mp4&#39;</span> <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">fps</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
-                            <span class="n">interval</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+                            <span class="n">interval</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">show_dry_cells</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -295,10 +295,10 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
                                 <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Event logger, polygon aware particles&#39;</span><span class="p">,</span>
                                 <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
                                 <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                <span class="n">interval</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span>
                                 <span class="n">movie_file</span><span class="o">=</span><span class="n">output_file</span> <span class="o">+</span> <span class="s1">&#39;.mp4&#39;</span> <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                                 <span class="n">fps</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-                                <span class="n">polygon_list_to_plot</span><span class="o">=</span><span class="n">caseInfo</span><span class="p">[</span><span class="s1">&#39;full_params&#39;</span><span class="p">][</span><span class="s1">&#39;event_loggers&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;polygon_list&#39;</span><span class="p">])</span>
+                                <span class="n">polygon_list_to_plot</span><span class="o">=</span><span class="n">caseInfo</span><span class="p">[</span><span class="s1">&#39;full_params&#39;</span><span class="p">][</span><span class="s1">&#39;event_loggers&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;polygon_list&#39;</span><span class="p">],</span>
+                                <span class="n">show_dry_cells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -342,14 +342,14 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;base_case_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;run_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;block_dry_cells&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;block_dry_cells&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
 <span class="w">        </span><span class="p">},</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;dispersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;A_H&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="w"></span>
 <span class="w">        </span><span class="p">},</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;tracks_writer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;time_steps_per_per_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">96</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;write_dry_cell_index&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
 <span class="w">        </span><span class="p">},</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;solver&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;n_sub_steps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w"></span>
@@ -508,12 +508,12 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
 <span class="w">    </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10800</span><span class="w"></span>
 <span class="w">  </span><span class="nt">run_params</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">block_dry_cells</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">    </span><span class="nt">block_dry_cells</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">solver</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">n_sub_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span><span class="w"></span>
 <span class="w">  </span><span class="nt">tracks_writer</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter</span><span class="w"></span>
-<span class="w">    </span><span class="nt">time_steps_per_per_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span><span class="w"></span>
+<span class="w">    </span><span class="nt">write_dry_cell_index</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="nt">reader</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dimension_map</span><span class="p">:</span><span class="w"></span>
@@ -554,50 +554,49 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <p><code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'frozen',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p>
 <details>
 <summary> code </summary><div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo56_SCHISM_3D_always_resupend.py</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># demo56_SCHISM_3D_always_resupend.py</span>
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo56_SCHISM_3D_resupend_crtitical_friction_vel.py</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># demo56_SCHISM_3D_resupend_crtitical_friction_vel.py</span>
 <span class="c1">#---------------------------------------</span>
 <span class="kn">import</span> <span class="nn">oceantracker.main</span> <span class="k">as</span> <span class="nn">main</span>
 <span class="kn">from</span> <span class="nn">oceantracker.util</span> <span class="kn">import</span> <span class="n">json_util</span>
-<span class="n">params</span> <span class="o">=</span> <span class="n">json_util</span><span class="o">.</span><span class="n">read_JSON</span><span class="p">(</span><span class="s2">&quot;..\demo_json\demo56_SCHISM_3D_always_resupend.json&quot;</span><span class="p">)</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">json_util</span><span class="o">.</span><span class="n">read_JSON</span><span class="p">(</span><span class="s2">&quot;..\demo_json\demo56_SCHISM_3D_resupend_crtitical_friction_vel.json&quot;</span><span class="p">)</span>
 
 <span class="n">runInfo_file_name</span><span class="p">,</span> <span class="n">has_errors</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 
-<span class="c1"># output is now in output/demo56_SCHISM_3D_always_resupend</span>
+<span class="c1"># output is now in output/demo56_SCHISM_3D_resupend_crtitical_friction_vel</span>
 
 <span class="c1"># below only required for plotting</span>
 <span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files.load_output_files</span> <span class="kn">import</span> <span class="n">load_particle_track_vars</span><span class="p">,</span> <span class="n">get_case_info_file_from_run_file</span>
 <span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
 
-<span class="n">output_file</span><span class="o">=</span> <span class="s2">&quot;output\demo56_SCHISM_3D_always_resupend&quot;</span>
+<span class="n">output_file</span><span class="o">=</span> <span class="s2">&quot;output\demo56_SCHISM_3D_resupend_crtitical_friction_vel&quot;</span>
 
 <span class="n">case_info_file_name</span> <span class="o">=</span> <span class="n">get_case_info_file_from_run_file</span><span class="p">(</span><span class="n">runInfo_file_name</span><span class="p">)</span>
 
 <span class="n">track_data</span> <span class="o">=</span> <span class="n">load_particle_track_vars</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">,</span> <span class="n">fraction_to_read</span><span class="o">=</span><span class="mf">.9</span><span class="p">)</span>
 <span class="n">ax_lims</span><span class="o">=</span> <span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5478500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">]</span>
 <span class="n">animate_particles</span><span class="p">(</span><span class="n">track_data</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">ax_lims</span><span class="p">,</span>
-                  <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;SCHISIM 3D, fall velocity and always resuspend&#39;</span><span class="p">,</span>
+                  <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;SCHISIM 3D, fall velocity and crtitical friction velocity resuspension&#39;</span><span class="p">,</span>
                   <span class="n">movie_file</span><span class="o">=</span><span class="n">output_file</span> <span class="o">+</span> <span class="s1">&#39;_status.mp4&#39;</span> <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                  <span class="n">fps</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+                  <span class="n">fps</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">show_dry_cells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
 <span class="n">animate_particles</span><span class="p">(</span><span class="n">track_data</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">ax_lims</span><span class="p">,</span>
                             <span class="n">colour_using_data</span><span class="o">=</span><span class="n">track_data</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">],</span>
                             <span class="n">part_color_map</span><span class="o">=</span><span class="s1">&#39;winter_r&#39;</span><span class="p">,</span>
-                            <span class="n">interval</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
                             <span class="n">vmin</span><span class="o">=-</span><span class="mi">20</span><span class="p">,</span>
                             <span class="n">vmax</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                            <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;SCHISIM 3D, fall velocity and always resuspend, particles coloured by depth&#39;</span><span class="p">,</span>
+                            <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;SCHISIM 3D, fall velocity and crtitical friction velocity resuspension, particles coloured by depth&#39;</span><span class="p">,</span>
                             <span class="n">movie_file</span><span class="o">=</span><span class="n">output_file</span> <span class="o">+</span> <span class="s1">&#39;_depth.mp4&#39;</span> <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                            <span class="n">fps</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">back_ground_depth</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                            <span class="n">fps</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">back_ground_depth</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_dry_cells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </details><details>
 <summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo56_SCHISM_3D_always_resupend.json</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;shared_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo56_SCHISM_3D_always_resupend&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo56_SCHISM_3D_resupend_crtitical_friction_vel&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;debug&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;compact_mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="w"></span>
@@ -624,7 +623,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">            </span><span class="nt">&quot;A_V&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.001</span><span class="w"></span>
 <span class="w">        </span><span class="p">},</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;solver&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;n_sub_steps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;n_sub_steps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="w"></span>
 <span class="w">        </span><span class="p">},</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;particle_release_groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">            </span><span class="p">{</span><span class="w"></span>
@@ -686,9 +685,6 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">            </span><span class="p">{</span><span class="w"></span>
 <span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.age_decay.AgeDecay&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">                </span><span class="nt">&quot;decay_time_scale&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">86400.0</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.friction_velocity.FrictionVelocity&quot;</span><span class="w"></span>
 <span class="w">            </span><span class="p">}</span><span class="w"></span>
 <span class="w">        </span><span class="p">],</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;event_loggers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -765,8 +761,13 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">        </span><span class="p">],</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;velocity_modifiers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;mean&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.001</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;mean&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.0005</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.fields.friction_velocity.FrictionVelocity&quot;</span><span class="w"></span>
 <span class="w">            </span><span class="p">}</span><span class="w"></span>
 <span class="w">        </span><span class="p">],</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;particle_statistics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -795,7 +796,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 </div>
 </details><details>
 <summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo56_SCHISM_3D_always_resupend.yaml</span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo56_SCHISM_3D_resupend_crtitical_friction_vel.yaml</span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
 <div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base_case_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span><span class="w"></span>
@@ -837,10 +838,11 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
 <span class="w">      </span><span class="nt">user_polygon_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">B</span><span class="w"></span>
+<span class="w">  </span><span class="nt">fields</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.fields.friction_velocity.FrictionVelocity</span><span class="w"></span>
 <span class="w">  </span><span class="nt">particle_properties</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.age_decay.AgeDecay</span><span class="w"></span>
 <span class="w">    </span><span class="nt">decay_time_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">86400.0</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.friction_velocity.FrictionVelocity</span><span class="w"></span>
 <span class="w">  </span><span class="nt">particle_release_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span><span class="w"></span>
@@ -882,13 +884,13 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_depth</span><span class="w"></span>
 <span class="w">  </span><span class="nt">run_params</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w"></span>
 <span class="w">  </span><span class="nt">solver</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">n_sub_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span><span class="w"></span>
+<span class="w">    </span><span class="nt">n_sub_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span><span class="w"></span>
 <span class="w">  </span><span class="nt">trajectory_modifiers</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.trajectory_modifiers.resuspension.BasicResuspension</span><span class="w"></span>
 <span class="w">    </span><span class="nt">critical_friction_velocity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
 <span class="w">  </span><span class="nt">velocity_modifiers</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity</span><span class="w"></span>
-<span class="w">    </span><span class="nt">mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.001</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity</span><span class="w"></span>
+<span class="w">    </span><span class="nt">mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.0005</span><span class="w"></span>
 <span class="nt">reader</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.reader.schism_reader.SCHSIMreaderNCDF</span><span class="w"></span>
 <span class="w">  </span><span class="nt">depth_average</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
@@ -904,7 +906,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="nt">shared_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">compact_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">  </span><span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo56_SCHISM_3D_always_resupend</span><span class="w"></span>
+<span class="w">  </span><span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo56_SCHISM_3D_resupend_crtitical_friction_vel</span><span class="w"></span>
 <span class="w">  </span><span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span><span class="w"></span>
 </pre></div>
 </div>

@@ -47,9 +47,9 @@ class SplitParticles(_BaseTrajectoryModifier):
         split = self.select_particles_to_split(buffer_index, time, active)
 
         x0           = part_prop['x'].get_values(split)
-        user_release_group_ID   = part_prop['user_release_group_ID'].get_values(split)
+        user_release_groupID   = part_prop['user_release_groupID'].get_values(split)
         IDrelease_group    = part_prop['IDrelease_group'].get_values(split)
         n_cell_guess = part_prop['n_cell'].get_values(split)
         IDpulse      = part_prop['IDpulse'].get_values(split)
 
-        si.classes['particle_group_manager'].release_a_particle_group_pluse(buffer_index, time, x0, IDrelease_group, IDpulse, user_release_group_ID, n_cell_guess)
+        si.classes['particle_group_manager'].release_a_particle_group_pluse(buffer_index, time, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)

@@ -51,7 +51,7 @@ base_case_params:
     release_interval: 3600
   run_params: {}
   solver:
-    n_sub_steps: 6
+    n_sub_steps: 15
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: true

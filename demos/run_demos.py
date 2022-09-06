@@ -8,7 +8,7 @@ from oceantracker.util import time_util
 from oceantracker.post_processing.read_output_files import load_output_files
 from oceantracker import main
 from oceantracker.post_processing.plotting import plot_heat_maps,plot_tracks, plot_vertical_tracks, plot_utilities
-import build_demo_plots
+import make_demo_plots
 
 def mfn(movie_file, n=None):
     if movie_file is not None:
@@ -74,6 +74,7 @@ if __name__ == "__main__":
                 print('Error during demo')
                 exit()
 
+        runInfo_file_name = path.join( params['shared_params']['root_output_dir'],params['shared_params']['output_file_base'],params['shared_params']['output_file_base']+'_runInfo.json')
         case_info_file_name = load_output_files.get_case_info_file_from_run_file(runInfo_file_name)
         caseInfo = load_output_files.read_case_info_file(case_info_file_name)
 
@@ -90,7 +91,7 @@ if __name__ == "__main__":
 
         # do plots
         if n <90:
-            getattr(build_demo_plots,demo_name)(runInfo_file_name,output_file_base)
+            getattr(make_demo_plots,demo_name)(runInfo_file_name,output_file_base)
 
         else:
             ax_lims = [1591000, 1601500, 5478500, 5491000]

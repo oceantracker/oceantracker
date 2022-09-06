@@ -33,7 +33,7 @@ class NetCDFhandler(object):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
         if dtype is None: dtype = np.float64  # double by default
-        fill_value =-127 if dtype in [np.int8,np.int16,np.int32,np.int64] else np.nan
+        fill_value =-127 if dtype in [np.uint8, np.int8,np.int16,np.int32,np.int64] else np.nan
 
         if chunksizes is not None:
             if np.prod(chunksizes)*8 > self.max_bytes_per_chunk:

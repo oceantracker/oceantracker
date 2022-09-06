@@ -43,7 +43,7 @@ class ParticleGroupManager(ParameterBaseClass):
                                       description='unique particle ID number, zero based'))
         self.create_particle_property('manual_update',dict(name='IDrelease_group',  dtype=np.int32, initial_value=-1, time_varying=False,
                                            description='ID of group release location is in, zero based'))
-        self.create_particle_property('manual_update',dict(name='user_release_group_ID',  dtype=np.int32, initial_value=-1, time_varying= False,
+        self.create_particle_property('manual_update',dict(name='user_release_groupID',  dtype=np.int32, initial_value=-1, time_varying= False,
                                       description='ID of release location, zero based'))
         self.create_particle_property('manual_update',dict(name='IDpulse',  dtype=np.int32, initial_value=-1, time_varying= False,
                                       description='ID of pulse particle was released within, zero based'))
@@ -58,21 +58,51 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def release_particles(self, nb, t):
         # see if any group is ready to release
+        self.code_timer.start('release_particles')
         si = self.shared_info
         new_buffer_indices = np.full((0,),0,np.int32)
         for g in si.class_list_interators['particle_release_groups']['all'].values():
-            if g.index_of_next_release < g.release_schedule_times.shape[0] \
-                    and np.any(t * si.model_direction >= g.release_schedule_times[g.index_of_next_release] * si.model_direction):
-                x0, IDrelease_group, IDpulse, user_release_group_ID, n_cell_guess = g.release_locations()
-                new_index = self.release_a_particle_group_pluse(nb, t,  x0, IDrelease_group, IDpulse, user_release_group_ID, n_cell_guess)
+            if g.info['release_schedule_times'] is not None and g.info['index_of_next_release'] < g.info['release_schedule_times'].shape[0] \
+                    and np.any(t * si.model_direction >= g.info['release_schedule_times'][g.info['index_of_next_release']] * si.model_direction):
+                x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
+                new_index = self.release_a_particle_group_pluse(nb, t,  x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index))
-                g.index_of_next_release += 1
-        return new_buffer_indices #inicies of all new particles
+                g.info['index_of_next_release'] += 1
 
-    def release_a_particle_group_pluse(self, nb, t,  x0, IDrelease_group, IDpulse, user_release_group_ID, n_cell_guess):
+        # for all new particles update cell and bc cords for new particles all at same time
+        part_prop = si.classes['particle_properties']
+        si.classes['field_group_manager'].setup_interp_time_step(nb, t, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
+
+        # initial values  part prop derived from fields
+        for p in si.class_list_interators['particle_properties']['from_fields'].values():
+            p.initial_value_at_birth(new_buffer_indices)
+
+        # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
+        for p in si.class_list_interators['particle_properties']['user'].values():
+            p.initial_value_at_birth(new_buffer_indices)
+
+        # update new particles props
+        self.update_PartProp(t, new_buffer_indices)
+
+        # flag if any bad initial locations
+        if si.case_params['run_params']['open_boundary_type'] > 0:
+            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['outside_open_boundary'], out=self.get_particle_index_buffer())
+        else:
+            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+
+        if bad.shape[0] > 0:
+            si.case_log.write_warning(str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain')
+            si.case_log.write_warning(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)))
+
+
+
+        self.code_timer.stop('release_particles')
+
+        return new_buffer_indices #indices of all new particles
+
+    def release_a_particle_group_pluse(self, nb, t,  x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess):
         # release one pulse of particles from given group
         si = self.shared_info
-        self.code_timer.start('release_particles')
 
         info= self.info
 
@@ -112,7 +142,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         part_prop['ID'].set_values(self.particles_released + np.arange(num_released), new_buffer_indices)
 
-        part_prop['user_release_group_ID'].set_values(user_release_group_ID, new_buffer_indices)  # ID of release location
+        part_prop['user_release_groupID'].set_values(user_release_groupID, new_buffer_indices)  # ID of release location
         part_prop['IDrelease_group'].set_values(IDrelease_group, new_buffer_indices)  # ID of release location
         part_prop['IDpulse'].set_values(IDpulse, new_buffer_indices)  # gives a unique release ID, so that each pulse can be tracked
 
@@ -120,32 +150,7 @@ class ParticleGroupManager(ParameterBaseClass):
         self.particles_released  += num_released # total released
         self.particles_in_buffer += num_released # number in particle buffer
 
-        # now update cell and bc cords for new particles
-        si.classes['field_group_manager'].setup_interp_time_step(nb, t, part_prop['x'].dataInBufferPtr(), new_buffer_indices)  # new time is at end of sub step fraction =1
 
-        # give part prop derived from feilds
-        for p in si.class_list_interators['particle_properties']['from_fields'].values():
-            p.initial_value_at_birth(new_buffer_indices)
-
-        # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
-        for p in si.class_list_interators['particle_properties']['user'].values():
-                p.initial_value_at_birth(new_buffer_indices)
-
-        # flag if any bad initial locations are bad
-        if si.case_params['run_params']['open_boundary_type'] > 0 :
-            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['outside_open_boundary'], out=self.get_particle_index_buffer())
-        else:
-            bad=part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
-
-        if bad.shape[0] > 0 :
-            si.case_log.write_warning( str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain')
-            si.case_log.write_warning(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)))
-
-        # iterp from field etc to get new particlie prop values for those no manually updated
-        self.update_PartProp(t, new_buffer_indices)
-
-
-        self.code_timer.stop('release_particles')
         return new_buffer_indices
 
     def add_time_varying_info(self,**kwargs):
@@ -154,7 +159,7 @@ class ParticleGroupManager(ParameterBaseClass):
         params = kwargs
         params['class_name'] = 'oceantracker.particle_properties._base_properties.TimeVaryingInfo'
         si = self.shared_info
-        p = si.add_class_instance_to_list_and_merge_params('time_varying_info','core', kwargs)
+        p = si.add_class_instance_to_list_and_merge_params('time_varying_info','manual_update', kwargs)
         p.initialize()
 
         if si.write_tracks and p.params['write']:
@@ -173,7 +178,7 @@ class ParticleGroupManager(ParameterBaseClass):
         if 'class_name' not in prop_params: prop_params['class_name'] = 'oceantracker.particle_properties._base_properties.ParticleProperty'
 
         i = si.add_class_instance_to_list_and_merge_params('particle_properties', prop_type, prop_params,
-                                                           crumbs='Adding "particle_properties" of type=' +   prop_type)
+                                                           crumbs='Adding "particle_properties" name= "' + str(prop_params['name']) + '" of type=' +   prop_type)
         i.initialize()
 
         name = i.params['name']
@@ -205,9 +210,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # first interpolate to give particle properties from reader derived  fields
         for key,item in si.class_list_interators['particle_properties']['from_fields'].items():
-        #for key,item in {**si.class_list_interators['fields']['from_reader_field'],
-        #                 **si.class_list_interators['fields']['depth_averaged_from_reader_field'],
-        #                 **si.class_list_interators['fields']['user']}.items():
             si.classes['field_group_manager'].interp_named_field_at_particle_locations(key, active)
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for update
@@ -266,40 +268,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
                 self.particles_in_buffer = num_active # record new number in buffer
 
-    def write_time_varying_prop_and_data(self):
-        # write particle data at current time step, if none the a forced write
-
-        self.code_timer.start('write_output')
-        si= self.shared_info
-
-        # write time vary info , eg "time"
-        w = si.classes['tracks_writer']
-        w.pre_time_step_write_book_keeping()  # todo is this needed???
-
-        # write group data
-        for name,d in si.classes['time_varying_info'].items():
-            if d.params['write']:
-                w.write_time_varying_info(name, d)
-
-        for name,d in si.classes['particle_properties'].items():
-            if d.params['write'] and d.params['time_varying']:
-                w.write_time_varying_particle_prop(name, d.data)
-
-        w.time_steps_written_to_current_file +=1 # time steps in current file
-        w.total_time_steps_written  += 1 # time steps written since the start
-
-        self.code_timer.stop('write_output')
-
-    def write_non_time_varing_part_properties(self, new_particleIDs):
-    # to work in compact mode must write particle non-time varying  particle properties when released
-    #  eg ID etc, releaseGroupID  etc
-        si= self.shared_info
-        writer = si.classes['tracks_writer']
-        if si.write_tracks and new_particleIDs.shape[0] > 0:
-            for name, prop in si.classes['particle_properties'].items():
-                # parameters are not time varying, so done at ends in retangular writes, or on culling particles
-                if not prop.params['time_varying'] and prop.params['write']:
-                    writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs)
 
 
     def get_release_group_userIDmaps(self):
@@ -307,7 +275,7 @@ class ParticleGroupManager(ParameterBaseClass):
         releaseGroups_user_maps = {'particle_release_userRelease_groupID_map': {} , 'particle_release_user_release_group_name_map': {}}
 
         for n, x0 in enumerate(self.shared_info.class_list_interators['particle_release_groups']['all'].values()):
-            releaseGroups_user_maps['particle_release_userRelease_groupID_map'][str(x0.params['user_release_group_ID'])] = n
+            releaseGroups_user_maps['particle_release_userRelease_groupID_map'][str(x0.params['user_release_groupID'])] = n
             releaseGroups_user_maps['particle_release_user_release_group_name_map'][str(x0.params['user_release_group_name'])] = n
 
         return releaseGroups_user_maps

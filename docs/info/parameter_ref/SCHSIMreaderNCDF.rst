@@ -78,6 +78,11 @@ Parameters:
 		* ``bottom_cell_index`` :   ``<class 'str'>``   *<optional>*
 			- default: ``node_bottom_index``
 
+		* ``is_dry_cell`` :   ``<class 'str'>``   *<optional>*
+			Description: - Time variable flag of when cell is dry, 1= is dry cell
+
+			- default: ``wetdry_elem``
+
 		* ``time`` :   ``<class 'str'>``   *<optional>*
 			- default: ``time``
 

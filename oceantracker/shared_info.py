@@ -15,7 +15,7 @@ class SharedInfoClass(object):
         for key, item in default_case_param_template.items():
             if type(item) == list:
                 self.classes[key] = {}
-                self.class_list_interators[key] = {'all': {}, 'user': {} ,'core':{}}
+                self.class_list_interators[key] = {'all': {}, 'user': {} ,'manual_update':{}}
 
     def add_core_class(self,class_type,class_params,  make_core=False):
         cl= self.case_log
@@ -62,24 +62,25 @@ class SharedInfoClass(object):
         i, msg = import_module_from_string(class_params['class_name'])
         cl.write_msg(msg, raiseerrors=True, crumbs= 'Importing class >>> '+  crumbs)
 
-        i.instanceID = len(self.class_list_interators[class_type][iteration_group])
-        nseq = i.instanceID + 1
+        i.info['instanceID'] = len(self.class_list_interators[class_type][iteration_group])
+        nseq = i.info['instanceID']  + 1
 
         # merge to get any default class name and params
         msg_list = i.merge_with_class_defaults(class_params, {}, crumbs = crumbs+ ' >>> Merging with class defaults >>> ' + class_type + '[#' + str(nseq) + '] ')
         self.case_log.add_messages(msg_list, raiseerrors=True)
 
-        if 'name' not in class_params or class_params['name'] is None or class_params['name'] =='':
+        if i.params['name'] is None or i.params['name'] =='':
             if iteration_group == 'user':
-                class_params['name'] = 'unnamed%03.0f' %  (len(self.class_list_interators[class_type]['user'])+1)
+                i.params['name'] = 'unnamed%03.0f' %  (len(self.class_list_interators[class_type]['user'])+1)
             else:
-                # thi may be redudent if name param is required by class
+                # this may be redundent if name param is required by class
                 cl.write_msg('Only user added classes can be unnamed, all others must must have param["name"]' , exception = GracefulExitError, raiseerrors=True,
                              crumbs= crumbs + ' >>> ' + class_params['class_name'] )
-        name = class_params['name']
+
+        name = i.params['name']
 
         if name in self.classes[class_type]:
-            cl.write_msg('Class type"' + class_type + '" already has a class with name = "' + name
+            cl.write_msg('Class type"' + class_type + '" already has a class with name = "' + i.params['name']
                          + '", "name" parameter must be unique',
                          crumbs = ' Checking for unique class names >>> '+  crumbs, exception = GracefulExitError, raiseerrors=True)
 
@@ -101,6 +102,7 @@ class SharedInfoClass(object):
         self.classes[class_type][name] = i
         self.class_list_interators[class_type]['all'][name] = i
         self.class_list_interators[class_type][iteration_group][name] = i
+
         return i
 
     def all_class_instance_pointers_iterator(self, asdict=False):

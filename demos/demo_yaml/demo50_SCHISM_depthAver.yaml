@@ -43,7 +43,8 @@ base_case_params:
   - class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
   particle_release_groups:
-  - points:
+  - allow_release_in_dry_cells: true
+    points:
     - - 1595000
       - 5482600
       - -1
@@ -70,7 +71,7 @@ base_case_params:
     release_interval: 3600
   run_params: {}
   solver:
-    n_sub_steps: 6
+    n_sub_steps: 15
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: true

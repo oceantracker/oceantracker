@@ -18,7 +18,7 @@ run_params_defaults_template = {'shared_params': {'user_note': PVC('No user note
                                                  'max_duration':        PVC(1.0e20, float),  # limit all cases to this duration
                                                  'processors':          PVC(1, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
                                                  'replicates':          PVC(1, int, min=1,doc_str='number of replicates of each case to run, allows running larger particle numbers for each case in less time if running in parallel'),
-                                                'numba_function_cache_size' :  PVC(512, int, min=128),
+                                                'numba_function_cache_size' :  PVC(1024, int, min=128),
                                                 'multiprocessing_case_start_delay': PVC(0., float, min=0.), # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
                                                 'use_numpy_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!')
                                                   # params needed for later dev work
@@ -87,7 +87,7 @@ particle_info = {'status_flags': {'unknown': -127, 'bad_cord': -20, 'cell_search
                  'known_prop_types': ['manual_update', 'from_fields','user']
                  }
 
-a=1
+
 
 
 

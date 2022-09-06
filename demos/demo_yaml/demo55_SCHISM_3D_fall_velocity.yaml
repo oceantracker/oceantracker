@@ -39,6 +39,8 @@ base_case_params:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
+  fields:
+  - class_name: oceantracker.fields.friction_velocity.FrictionVelocity
   particle_properties:
   - class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
@@ -83,9 +85,9 @@ base_case_params:
     - water_depth
   run_params: {}
   solver:
-    n_sub_steps: 6
+    n_sub_steps: 15
   velocity_modifiers:
-  - class_name: oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity
+  - class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
     mean: -0.0005
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF

@@ -35,14 +35,14 @@
     },
     "base_case_params": {
         "run_params": {
-            "block_dry_cells": false
+            "block_dry_cells": true
         },
         "dispersion": {
             "A_H": 0.1
         },
         "tracks_writer": {
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
-            "time_steps_per_per_file": 96
+            "write_dry_cell_index": true
         },
         "solver": {
             "n_sub_steps": 6

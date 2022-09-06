@@ -8,7 +8,7 @@ velocity_modifiers
 .. toctree::
 	:maxdepth: 1
 
-	AddTerminalVelocity.rst
+	TerminalVelocity.rst
 	VelocityModiferBase.rst
 
 **Role:** 

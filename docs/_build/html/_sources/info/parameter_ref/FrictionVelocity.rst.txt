@@ -4,11 +4,11 @@ FrictionVelocity
 
 **Description:** 
 
-**Class:** oceantracker.particle_properties.friction_velocity.FrictionVelocity
+**Class:** oceantracker.fields.friction_velocity.FrictionVelocity
 
-**File:** oceantracker/particle_properties/friction_velocity.py
+**File:** oceantracker/fields/friction_velocity.py
 
-**Inheritance:** _BasePropertyInfo> ParticleProperty> FrictionVelocity
+**Inheritance:** _BaseField> UserFieldBase> FrictionVelocity
 
 **Default internal name:** ``"friction_velocity"``
 
@@ -21,45 +21,27 @@ Parameters:
 
 		- default: ``None``
 
-	* ``description`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
+	* ``create_particle_property_with_same_name`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- possible_values: ``[True, False]``
 
-	* ``dtype`` :   ``<class 'type'>``   *<optional>*
+	* ``dtype`` :   ``<class 'numpy.number'>``   *<optional>*
 		- default: ``<class 'numpy.float64'>``
-		- possible_values: ``[<class 'numpy.float32'>, <class 'numpy.float64'>, <class 'numpy.int8'>, <class 'numpy.int16'>, <class 'numpy.int32'>, <class 'bool'>]``
 
-	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
-		- default: ``0.0``
+	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``is_time_varying`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- possible_values: ``[True, False]``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``friction_velocity``
 
-	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
+	* ``num_components`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
-		- min: ``1``
-
-	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
-		- possible_values: ``[True, False]``
-
-	* ``type`` :   ``<class 'str'>``   *<optional>*
-		Description: - particle property
-
-		- default: ``user``
-		- possible_values: ``['manual_update', 'from_fields', 'user']``
-
-	* ``update`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
-		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-
-	* ``vector_dim`` :   ``<class 'int'>``   *<optional>*
-		- default: ``1``
-		- min: ``1``
-
-	* ``write`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
-		- possible_values: ``[True, False]``
 

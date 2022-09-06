@@ -13,8 +13,12 @@ class _BasePropertyInfo(ParameterBaseClass):
 
         self.add_default_params({ 'description': PVC(None,str), 'time_varying':PVC(True, bool),'name': PVC(None, str),
             'write': PVC(True, bool), 'vector_dim': PVC(1, int, min = 1 ), 'prop_dim3': PVC(1, int, min=1),
-             'dtype':PVC(np.float64,type,possible_values=[np.float32, np.float64, np.int8, np.int16, np.int32, bool]),
-             'initial_value':PVC(0., (int,float, bool)),'update':PVC(True,bool)})
+             'dtype':PVC(np.float64, np.dtype),
+             'initial_value':PVC(0., float),
+             'update':PVC(True,bool)
+              })
+
+
         self.class_doc(role='Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
 
     def initialize(self, **kwargs): pass

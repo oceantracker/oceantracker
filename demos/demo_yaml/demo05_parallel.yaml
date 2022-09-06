@@ -9,15 +9,16 @@ base_case_params:
   - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
   particle_release_groups: []
   run_params:
-    block_dry_cells: false
+    block_dry_cells: true
   solver:
     n_sub_steps: 6
   tracks_writer:
     class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
-    time_steps_per_per_file: 96
+    write_dry_cell_index: true
 case_list:
 - particle_release_groups:
-  - points:
+  - allow_release_in_dry_cells: true
+    points:
     - - 1594500
       - 5483000
     - - 1598000
@@ -27,7 +28,8 @@ case_list:
   run_params:
     case_output_file_tag: test_case_tag_0
 - particle_release_groups:
-  - points:
+  - allow_release_in_dry_cells: true
+    points:
     - - 1594500
       - 5483000
     - - 1598000
@@ -37,7 +39,8 @@ case_list:
   run_params:
     case_output_file_tag: test_case_tag_1
 - particle_release_groups:
-  - points:
+  - allow_release_in_dry_cells: true
+    points:
     - - 1594500
       - 5483000
     - - 1598000
@@ -47,7 +50,8 @@ case_list:
   run_params:
     case_output_file_tag: test_case_tag_2
 - particle_release_groups:
-  - points:
+  - allow_release_in_dry_cells: true
+    points:
     - - 1594500
       - 5483000
     - - 1598000
@@ -57,7 +61,8 @@ case_list:
   run_params:
     case_output_file_tag: test_case_tag_3
 - particle_release_groups:
-  - points:
+  - allow_release_in_dry_cells: true
+    points:
     - - 1594500
       - 5483000
     - - 1598000

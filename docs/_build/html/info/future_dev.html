@@ -66,7 +66,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Future development</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#future-additions">Future additions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#possible-additions">Possible additions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#minor-additions">Minor additions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#minor-features-fixes">Minor features/fixes</a></li>
 </ul>
 </li>
 </ul>
@@ -109,6 +109,8 @@
 <li><p>support for structured grids, eg. ROMS</p></li>
 <li><p>option for particle tracking to work natively in lat/log cords</p></li>
 <li><p>RK45 solver to allow adaptive time stepping to improve accuracy for those particles where flows are rapidly varying in time or space.</p></li>
+<li><p>warn if terminal_velocity movement per time step is larger than median cell height, ie vertical courant number to larger, makes re-suspension unlikely</p></li>
+<li><p>Read release points/polygons from file, eg shape files, csv</p></li>
 </ul>
 </section>
 <section id="possible-additions">
@@ -117,12 +119,14 @@
 <li><p>merge numerical solver and random walk by moving to numerical solution as a stochastic ODE?</p></li>
 </ul>
 </section>
-<section id="minor-additions">
-<h2>Minor additions<a class="headerlink" href="#minor-additions" title="Permalink to this headline">¶</a></h2>
+<section id="minor-features-fixes">
+<h2>Minor features/fixes<a class="headerlink" href="#minor-features-fixes" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>support short class_name’s given by user ie just AgeDecay,not  oceantracker.particle_properties.age_decay.AgeDecay</p></li>
 <li><p>show dry cells on plots</p></li>
 <li><p>ensure all classes are updated by and .update() method</p></li>
+<li><p>stats/heat maps work from given data as in other ploting</p></li>
+<li><p>status recorded in compact mode is always dead, after removal? so dont apear on plots</p></li>
 </ol>
 </section>
 </section>

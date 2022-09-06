@@ -20,7 +20,7 @@
             "A_V": 0.001
         },
         "solver": {
-            "n_sub_steps": 6
+            "n_sub_steps": 15
         },
         "particle_release_groups": [
             {
@@ -37,7 +37,8 @@
                     ]
                 ],
                 "pulse_size": 10,
-                "release_interval": 3600
+                "release_interval": 3600,
+                "allow_release_in_dry_cells": true
             },
             {
                 "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",

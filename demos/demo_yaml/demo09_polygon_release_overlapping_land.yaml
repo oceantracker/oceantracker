@@ -46,8 +46,8 @@ base_case_params:
   solver:
     n_sub_steps: 2
   tracks_writer:
-    turn_on_write_particle_properties_list:
-    - n_cell
+    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
+    time_steps_per_per_file: 200
 case_list:
 - particle_release_groups:
   - points:

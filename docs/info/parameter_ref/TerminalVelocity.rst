@@ -1,16 +1,16 @@
-####################
-AddTerminalVelocity
-####################
+#################
+TerminalVelocity
+#################
 
 **Description:** 
 
-**Class:** oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity
+**Class:** oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
 
 **File:** oceantracker/velocity_modifiers/terminal_velocity.py
 
-**Inheritance:** VelocityModiferBase> AddTerminalVelocity
+**Inheritance:** VelocityModiferBase> TerminalVelocity
 
-**Default internal name:** ``"not given in defaults"``
+**Default internal name:** ``"terminal_velocity"``
 
 
 Parameters:
@@ -29,12 +29,12 @@ Parameters:
 		- default: ``0.0``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
+		- default: ``terminal_velocity``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
 	* ``variance`` :   ``<class 'float'>``   *<optional>*
-		- default: ``0.0``
+		- default: ``None``
 		- min: ``0.0``
 

@@ -19,12 +19,12 @@ base_case_params:
     pulse_size: 1
     release_interval: 0
   run_params:
-    block_dry_cells: false
+    block_dry_cells: true
   solver:
     n_sub_steps: 60
   tracks_writer:
     class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
-    time_steps_per_per_file: 96
+    write_dry_cell_index: true
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:

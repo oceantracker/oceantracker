@@ -24,11 +24,10 @@ Parameters:
 	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``dtype`` :   ``<class 'type'>``   *<optional>*
+	* ``dtype`` :   ``<class 'numpy.dtype'>``   *<optional>*
 		- default: ``<class 'numpy.float64'>``
-		- possible_values: ``[<class 'numpy.float32'>, <class 'numpy.float64'>, <class 'numpy.int8'>, <class 'numpy.int16'>, <class 'numpy.int32'>, <class 'bool'>]``
 
-	* ``initial_value`` :   ``(<class 'int'>, <class 'float'>, <class 'bool'>)``   *<optional>*
+	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*

@@ -78,4 +78,5 @@ class MyEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
         except:
-            raise ValueError(' basic_util- catch JSON encode ' + str(obj) + ' of type ' + str(type(obj))+ ' as ' + str(obj))
+            raise ValueError(' basic_util- catch JSON encode error- object type ' + str(type(obj))+ ' as ' + str(obj))
+            return 'BadValue'

@@ -32,7 +32,7 @@ Parameters:
 
 	* ``particle_prop_to_write_list``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``['ID', 'x', 'IDpulse', 'IDrelease_group', 'user_release_group_ID', 'status', 'age']``
+		- default list : ``['ID', 'x', 'IDpulse', 'IDrelease_group', 'user_release_groupID', 'status', 'age']``
 		- can_be_empty_list: ``True``
 
 	* ``polygon_list``:  *<optional>*

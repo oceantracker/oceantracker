@@ -1,9 +1,11 @@
-# method to run ocean tracker from parmeters
+# method to run ocean tracker from parameters
 # eg run(params)
 
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
+
+
 # Dev notes
 # line debug?? python3.6 -m pyinstrument --show-all plasticsTrackOnLine_Main.py
 # python -m cProfile
@@ -33,7 +35,7 @@ from oceantracker.util.module_importing_util import import_module_from_string
 
 import subprocess
 
-code_version = '0.3.00.24'
+code_version = '0.3.01.00 Sept 6 2022'
 
 run_info = {'user_note': {}, 'screen_log': [],
             'run_started': datetime.now(),
@@ -505,8 +507,8 @@ class _RunOceanTrackerClass(object):
         d = {'processors': sparams['processors'],
              'num_cases': num_cases,
              'replicates': sparams['replicates'],
-             'average_active_particles': nPart / num_cases,
-             'nSecPerTimeStep': 1.E9 * (perf_counter() - t0) / n_part_steps,
+             'average_active_particles': nPart / num_cases if num_cases > 0 else None,
+             'nSecPerTimeStep': 1.E9 * (perf_counter() - t0) / n_part_steps if n_part_steps > 0 else None,
              'total_timeSteps': n_part_steps,
              }
         # put parallel info in first file base

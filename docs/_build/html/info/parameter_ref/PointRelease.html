@@ -123,6 +123,15 @@
 <blockquote>
 <div><ul>
 <li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">allow_release_in_dry_cells</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Class name as string A.B.C, used to import this class from python path</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
@@ -131,7 +140,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">maximum_age</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Particles older than this are killed off and removed from computation.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">maximum_age</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Particles older than this time in seconds are killed off and removed from computation.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">1e+32</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></li>
@@ -156,7 +165,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">pulse_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Number of particles is a single pulse.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">pulse_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Number of particles released in a single pulse, this number is released every release_interval.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
@@ -165,7 +174,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">release_duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Time particles are released for after they start being released, ie releases stop this time after first release.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">release_duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Time in seconds particles are released for after they start being released, ie releases stop this time after first release.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">1e+32</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
@@ -174,7 +183,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">release_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Time interval between released pulses.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">release_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Time interval between released pulses. To release at only one time use release_interval=0.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
@@ -207,7 +216,7 @@
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">user_particle_property_parameters</span></code>: nested parameter dictionary</p></li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">user_release_group_ID</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">user_release_groupID</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
 </ul>
@@ -218,6 +227,17 @@
 <dt><code class="docutils literal notranslate"><span class="pre">user_release_group_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - User given name/label to attached to this release groups to make it easier to distinguish.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">z_range</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - z range = [zmin, zmax] to randomly release in 3D, overrides any given release z value</p>
+<ul class="simple">
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'float'&gt;]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>min_length: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
 </ul>
 </dd>
 </dl>

@@ -38,8 +38,11 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
                       back_ground_depth=True, back_ground_color_map = None, credit=None, heading= None,
                       size_using_data= None,  part_color_map=None,
                       vmin=None, vmax=None,
-                      release_group=None):
+                      release_group=None, show_dry_cells = False):
     def draw_frame(nt):
+        if show_dry_cells:
+            dry_cell_plot.set_array(dry_cell_data[nt, :])
+
         # only plot alive particles
         x = track_data['x'][nt, :, :2].copy() # copy so as not to change original data
         sel = track_data['status'][nt, :] < min_status # get rid of dead particles
@@ -49,7 +52,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
         sc.set_zorder(5)
         if size_using_data is not None: sc.set_sizes(scaled_marker_size[nt, :])
         time_text.set_text(time_util.seconds_to_pretty_str(track_data['time'][nt], seconds=False))
-        return  sc,time_text
+        return  sc,time_text, dry_cell_plot
 
     if max_duration is  None:
         num_frames = track_data['time'].shape[0]
@@ -61,6 +64,8 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
     ax = plt.gca()
     plot_utilities.draw_base_map(track_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
                   back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
+
+    dry_cell_plot,dry_cell_data = plot_utilities.plot_dry_cells(track_data,show_dry_cells)
 
 
     s0 =size

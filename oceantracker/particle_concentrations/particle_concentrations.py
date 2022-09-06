@@ -11,7 +11,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
 
     def check_requirements(self):
         msg_list =self.check_class_required_fields_properties_grid_vars_and_3D(required_grid_vars=['triangle_area','x'],
-                                                                               required_fields=['total_water_depth'])
+                                                                               required_props=['total_water_depth'])
         return msg_list
 
     def set_up_data_buffers(self):
@@ -33,9 +33,8 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
     def update(self,n_buffer, time):
         si=self.shared_info
         sel = self.select_particles_to_count()
-        self.calcuate_concentration2D(n_buffer, si.classes['particle_properties']['n_cell'].data,
-                                      si.classes['fields']['total_water_depth'].data,
-                                      si.grid['triangles'],
+        self.calcuate_concentration2D(si.classes['particle_properties']['n_cell'].data,
+                                      si.classes['particle_properties']['total_water_depth'].data,
                                       si.grid['triangle_area'],
                                        self.particle_count,
                                         self.particle_concentration,  sel)
@@ -44,16 +43,13 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
 
     @staticmethod
     @njit()
-    def calcuate_concentration2D(n_buffer, n_cell, total_water_depth, triangles, triangle_area,particle_count, particle_concentration, sel_to_count):
+    def calcuate_concentration2D(n_cell, total_water_depth, triangle_area,particle_count, particle_concentration, sel_to_count):
         particle_count[:] = 0
         particle_concentration[:] = 0.
         for n in sel_to_count:
             c = n_cell[n]
-            tri = triangles[c, :]
-            # get triangle height fom mean of nodal/field values
-            twd= total_water_depth[n_buffer, :, 0, 0]
-            triangle_total_water_depth = np.nanmean(twd[tri])
-            vol = triangle_area[c] * triangle_total_water_depth
+            twd= total_water_depth[n]
+            vol = triangle_area[c] * twd
             if vol > .1:  # only calculate  if at least .1 cubic meter
                 particle_count[c] += 1
                 particle_concentration[c] += 1.0 / vol

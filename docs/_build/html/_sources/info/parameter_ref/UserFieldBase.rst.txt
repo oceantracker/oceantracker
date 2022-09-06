@@ -25,7 +25,7 @@ Parameters:
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``dtype`` :   ``<class 'numpy.dtype'>``   *<optional>*
+	* ``dtype`` :   ``<class 'numpy.number'>``   *<optional>*
 		- default: ``<class 'numpy.float64'>``
 
 	* ``is3D`` :   ``<class 'bool'>`` **<isrequired>**

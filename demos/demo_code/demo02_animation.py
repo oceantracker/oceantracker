@@ -22,4 +22,4 @@ animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],sho
                             heading='3 hourly point and polygon releases with tidal stranding',
                             release_group=None,
                             movie_file=output_file + '.mp4' if output_file is not None else None,
-                            fps=15, back_ground_depth=True)
+                            fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)

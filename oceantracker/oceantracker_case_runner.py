@@ -223,9 +223,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.case_log.add_messages(msg_list)
             si.case_log.check_messages_for_errors()
 
-        a=1
-
-
     def _make_core_class_instances(self, run_params):
         # parsm are full merged by oceantracker main and instance making tested, so m=no parm merge needed
         si=self.shared_info
@@ -265,12 +262,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # make instance and initialise
             pg = si.add_class_instance_to_list_and_merge_params('particle_release_groups', 'user', pg_params, crumbs='Adding release groups')
             pg.initialize()
+            pg.info['release_groupID'] = n
 
             # set up release times so duration of run known
-            release_times_ok = pg.set_up_release_times()
-            if not release_times_ok:
-                si.case_log.write_warning('No release times in range, ignoring release group ' + str(n))
-                continue
+            pg.set_up_release_times(n)
             estimated_total_particles += pg.estimated_total_number_released()  # used to give buffer size if needed
 
             # time range particles exist for, must be orderd forward
@@ -348,7 +343,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             i.initialize()
             # now add custom prop based on  this field
             if i.params['create_particle_property_with_same_name']:
-                pgm.create_particle_property('user', dict(name=i.params['name'], vector_dim=i.get_number_components(), time_varying=i.is_time_varying()))
+                pgm.create_particle_property('from_fields', dict(name=i.params['name'], vector_dim=i.get_number_components(), time_varying=i.is_time_varying()))
 
             # if not time varying can update once at start from other non-time varying fields
             if not i.is_time_varying(): i.update()
@@ -381,7 +376,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         info['time_zone'] = r.params['time_zone']
         info['model_timestep'] = si.model_substep_timestep
         info['model_start_date']  = time_util.seconds_to_iso8601str(si.model_start_time)
-        info['model_duration'] = time_util.duration_str_from_seconds(si.model_duration)
+        info['model_duration_days'] = si.model_duration/24/3600.
         info['backtracking'] = si.backtracking
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'run_user_note': si.shared_params['user_note'],

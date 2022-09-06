@@ -137,7 +137,7 @@ Particles coloured by their status property. Status can be one of following stri
    <details>
    <summary> code </summary>
 
-.. literalinclude:: ../../../demos/demo_code/demo56_SCHISM_3D_always_resupend.py
+.. literalinclude:: ../../../demos/demo_code/demo56_SCHISM_3D_resupend_crtitical_friction_vel.py
     :language: python
     :caption:
 
@@ -151,7 +151,7 @@ Particles coloured by their status property. Status can be one of following stri
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_json/demo56_SCHISM_3D_always_resupend.json
+.. literalinclude:: ../../../demos/demo_json/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json
     :language: json
     :caption:
 
@@ -164,7 +164,7 @@ Particles coloured by their status property. Status can be one of following stri
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_yaml/demo56_SCHISM_3D_always_resupend.yaml
+.. literalinclude:: ../../../demos/demo_yaml/demo56_SCHISM_3D_resupend_crtitical_friction_vel.yaml
     :language: Yaml
     :caption:
 
