@@ -63,7 +63,7 @@ Resuspension
 .. raw:: html
 
   <center>
-    <video width="95%" controls autoplay loop src="../../_static/demos/demo56_SCHISM_3D_always_resupend_status.mp4">
+    <video width="95%" controls autoplay loop src="../../_static/demos/demo56_SCHISM_3D_resupend_crtitical_friction_vel_status.mp4">
    </video>
   </center>
 
