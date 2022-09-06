@@ -25,6 +25,8 @@ class  RectangularTrackWriter(_BaseWriter):
 
 
     def initialize(self):
+        super().initialize()
+
         si = self.shared_info
         self.add_dimension('time',None)
         self.add_dimension('particle', si.particle_buffer_size)

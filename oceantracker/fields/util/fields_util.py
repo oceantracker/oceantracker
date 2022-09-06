@@ -12,6 +12,8 @@ def get_values_at_bottom(field_data4D, bottom_cell_index, out=None):
         out[:,n,:] = field_data4D[:, :, bottom_cell_index[n], :]
     return out
 
+
+
 @njit
 def depth_aver_SlayerLSC_in4D(data, zlevel, first_cell_offset, out=None):
     # depth average time varying reader 4D data dim(time, node, depth, components) and return for LSC vertical grid
@@ -41,6 +43,7 @@ def depth_aver_SlayerLSC_in4D(data, zlevel, first_cell_offset, out=None):
 @njit()
 def get_time_dependent_triangle_water_depth_from_total_water_depth_at_nodes(total_water_depth_at_nodes, buffer_index, triangles, out):
     # get total time dependent water for grid triangles for use in calc like depth averaged concentrations
+    # not used at the moment
     for nt in buffer_index:
         for m in range(triangles.shape[0]):
             out[nt, m] = 0.

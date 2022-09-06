@@ -46,20 +46,20 @@ class RSTfileBuilder(object):
 
     def collapsable_code(self,file_name):
         a=1
-    '''
+        '''
+            ..raw:: html
+        
+            < details >
+            < summary > code < / summary >
+        
+        ..literalinclude::../../../ demos / minimal_example.py
+        :language: python
+        :caption:
+        
         ..raw:: html
-    
-        < details >
-        < summary > code < / summary >
-    
-    ..literalinclude::../../../ demos / minimal_example.py
-    :language: python
-    :caption:
-    
-    ..raw:: html
-    
-    < / details >
-    '''
+        
+        < / details >
+        '''
 
     def write(self):
         file_name = path.join(root_param_ref_dir, self.file_name)
@@ -78,7 +78,6 @@ class RSTfileBuilder(object):
                     for b in o:
                         f.write(indent +'\t' +b +'\n')
                     f.write(indent + '\n')
-                    a=1
 
     def add_new_toc_to_page(self, toc_name, indent=0, maxdepth=2, sort_body=False):
         self.lines.append({'type':'directive','direct_type': 'toctree','body': [],'sort_body': sort_body, 'indent':indent,'params': {'maxdepth': maxdepth}})

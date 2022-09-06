@@ -1,5 +1,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.field_group_manager.util import field_group_manager_util
+import numpy as np
 #TODO allow feilds to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
 
@@ -24,6 +26,7 @@ class FieldGroupManager(ParameterBaseClass):
         si=self.shared_info
         si.create_class_interator('fields', known_iteration_groups=self.known_field_types)
 
+
     def add_field(self, field_type, class_params, crumbs=None):
         si = self.shared_info
         i = si.add_class_instance_to_list_and_merge_params('fields', field_type, class_params, crumbs=crumbs)
@@ -39,6 +42,9 @@ class FieldGroupManager(ParameterBaseClass):
         # when back tracking hindcast buffer is ordered  backwards in time, and time step is still positive
         # thus step fraction remains positive
         self.step_dt_fraction = abs(time_sec - si.grid['time'][nb]) / si.hindcast_time_step
+
+        # update 0-255 dry cell index
+        field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, si.grid['is_dry_cell'], si.grid['dry_cell_index'])
 
         # find cell for xq, node list and weight for interp at calls
         si.classes['interpolator'].find_cell(xq, nb, self.step_dt_fraction, active)

@@ -28,7 +28,7 @@
             "A_V": 0.002
         },
         "solver": {
-            "n_sub_steps": 6
+            "n_sub_steps": 15
         },
         "particle_release_groups": [
             {
@@ -47,9 +47,6 @@
             {
                 "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                 "decay_time_scale": 86400.0
-            },
-            {
-                "class_name": "oceantracker.particle_properties.friction_velocity.FrictionVelocity"
             }
         ],
         "event_loggers": [
@@ -126,8 +123,13 @@
         ],
         "velocity_modifiers": [
             {
-                "class_name": "oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity",
+                "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
                 "mean": -0.002
+            }
+        ],
+        "fields": [
+            {
+                "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
             }
         ],
         "particle_statistics": [

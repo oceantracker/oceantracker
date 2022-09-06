@@ -40,13 +40,16 @@ base_case_params:
         - 5489972.7479
       user_polygon_name: B
   particle_concentrations:
-  - case_output_file_tag: siteA
+  - calculation_interval: 1800
+    case_output_file_tag: siteA
     class_name: oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D
   particle_properties:
   - class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
+  - class_name: oceantracker.particle_properties.total_water_depth.TotalWaterDepth
   particle_release_groups:
-  - points:
+  - allow_release_in_dry_cells: true
+    points:
     - - 1595000
       - 5482600
       - -1
@@ -71,9 +74,10 @@ base_case_params:
       - 5489972.7479
     pulse_size: 1000
     release_interval: 3600
-  run_params: {}
+  run_params:
+    write_tracks: false
   solver:
-    n_sub_steps: 6
+    n_sub_steps: 15
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: true
@@ -83,6 +87,6 @@ reader:
   input_dir: demo_hindcast
 shared_params:
   debug: true
-  max_duration: 2592000.0
+  max_duration: 1296000.0
   output_file_base: demo61_concentration_test
   root_output_dir: output

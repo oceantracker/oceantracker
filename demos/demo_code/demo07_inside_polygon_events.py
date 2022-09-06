@@ -26,7 +26,7 @@ animate_particles(track_data, colour_using_data=track_data['event_polygon'],
                                 heading='Event logger, polygon aware particles',
                                 vmin=-1,
                                 vmax=1,
-                                interval=70,
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
                                 fps=15,
-                                polygon_list_to_plot=caseInfo['full_params']['event_loggers'][0]['polygon_list'])
+                                polygon_list_to_plot=caseInfo['full_params']['event_loggers'][0]['polygon_list'],
+                                show_dry_cells=True, interval=30)

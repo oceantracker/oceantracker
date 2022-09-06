@@ -20,7 +20,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                   })
         self.sum_binned_part_prop = {}
         self.info['output_file'] = None
-
+        self.class_doc(role='Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
 
     def initialize(self):
         si =self.shared_info
@@ -32,7 +32,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def open_output_file(self):
         si=self.shared_info
         if self.params['write']:
-            self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_%03.0f' % (self.instanceID + 1) + '.nc'
+            self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_%03.0f' % (self.info['instanceID']  + 1) + '.nc'
             self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
         else:
             self.nc = None

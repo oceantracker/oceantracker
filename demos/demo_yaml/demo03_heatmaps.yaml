@@ -55,6 +55,7 @@ base_case_params:
   tracks_writer:
     turn_on_write_particle_properties_list:
     - n_cell
+    write_dry_cell_flag: true
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:

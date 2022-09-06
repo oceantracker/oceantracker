@@ -7,9 +7,9 @@ from oceantracker.util import json_util
 
 
 def read_particle_tracks_file(file_name, var_list=[], release_group= None, fraction_to_read=None):
-
+    # release group is 1 based
     nc = NetCDFhandler(file_name, mode='r')
-    var_list = ['x', 'time','status', 'IDrelease_group', 'IDpulse', 'x0','x_last_good'] + var_list
+    var_list = ['x', 'time','status', 'IDrelease_group', 'IDpulse', 'x0','x_last_good','dry_cell_index'] + var_list
     # trim list to variables in the file
     working_var_list=[]
     for var in var_list:
@@ -47,11 +47,11 @@ def _read_rectangular_tracks(nc,var_list, release_group):
         dims= nc.get_var_dims(var)
         if 'particle' in dims and 'time' in dims:
             d[var] = nc.read_a_variable(var)[:, :num_released, ...]
-            if release_group is not None: d[var] = d[var][:, rg == release_group, ...]
+            if release_group is not None: d[var] = d[var][:, rg == release_group-1, ...]
 
         elif 'particle' in dims:
             d[var] = nc.read_a_variable(var)[:num_released,...]
-            if release_group is not None:   d[var] = d[var][rg == release_group, ...]
+            if release_group is not None:   d[var] = d[var][rg == release_group-1, ...]
         else:
             d[var] = nc.read_a_variable(var)
 
@@ -92,12 +92,12 @@ def _read_compact_tracks(nc,var_list,release_group):
             _insertMatrixValues(d[var], n_time_step, particle_IDs, data)
 
             if release_group is not None:
-                 d[var] = d[var][:, rg == release_group, ...]
+                 d[var] = d[var][:, rg == release_group-1, ...]
 
         elif   nc.is_var_dim(var,'particle'):
             d[var] =nc.read_a_variable(var)[:num_released]
             if release_group is not None:
-                d[var] = d[var][rg == release_group, ...]
+                d[var] = d[var][rg == release_group-1, ...]
         else:
         # non time_particle varying parameters, eg time
             d[var] = nc.read_a_variable(var)
@@ -109,7 +109,7 @@ def _read_compact_tracks(nc,var_list,release_group):
 
     if release_group is not None:
         # finally get only  release group for status variable
-        d['status'] = d['status'][:, rg == release_group]
+        d['status'] = d['status'][:, rg == release_group-1]
 
     #  fill in data for dead particles , as same as lastrecorded, but mark with status dead
     for var in var_list:

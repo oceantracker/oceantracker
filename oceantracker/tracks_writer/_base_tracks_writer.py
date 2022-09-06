@@ -21,11 +21,13 @@ class _BaseWriter(ParameterBaseClass):
 
         self.add_default_params({
                                 'role_output_file_tag': PVC('tracks', str),
-                                 'output_step_count': PVC(1,int,min=1),
+                                 'output_step_count': PVC(1,int,min=1, doc_str='Write track data every output_step_count steps of the model'),
                                  'turn_on_write_particle_properties_list': PLC([], [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                                  'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity'], [str],
                                                             doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),
                                  'time_steps_per_per_file': PVC(None, int,min=1, doc_str='Split track output into files with given number of time steps'),
+                                 'write_dry_cell_index': PVC(True, bool,
+                                              doc_str = 'Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots'),
                                  })
         self.info.update({'output_file': []})
         self.total_time_steps_written = 0
@@ -35,6 +37,15 @@ class _BaseWriter(ParameterBaseClass):
         self.add_dimension('vector2D', 2)
         self.add_dimension('vector3D', 3)
         self.nc = None
+
+    def initialize(self):
+        si= self.shared_info
+        if self.params['write_dry_cell_index']:
+            self.add_dimension('triangle', si.grid['triangles'].shape[0])
+            self.add_dimension('triplets', 3)
+            self.add_new_variable('dry_cell_index', ['time','triangle'], attributes_dict={'description': 'Time series of grid dry index 0-255'},
+                                  dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],si.grid['triangles'].shape[0]])
+
 
     def add_dimension(self, name, size):
         self.file_build_info['dimensions' ][name] ={'size': size}
@@ -51,7 +62,6 @@ class _BaseWriter(ParameterBaseClass):
             vn = ['vector2D','vector3D']
             dim_list.append(vn[vector_dim-2])
             chunking.append(vector_dim)
-
 
         var={'dim_list': dim_list,
              'attributes': attributes_dict if attributes_dict is not None else {},
@@ -97,13 +107,51 @@ class _BaseWriter(ParameterBaseClass):
             nc.create_a_variable(name,item['dim_list'], chunksizes=item['chunks'], dtype=item['dtype'], attributes=item['attributes'])
 
 
-    def initialize(self,**kwargs): pass
 
     def pre_time_step_write_book_keeping(self): pass
 
 
 
     def create_variable_to_write(self,name,first_dim_name,dim_len,**kwargs): pass
+
+
+    def write_all_non_time_varing_part_properties(self, new_particleIDs):
+    # to work in compact mode must write particle non-time varying  particle properties when released
+    #  eg ID etc, releaseGroupID  etc
+        si= self.shared_info
+        writer = si.classes['tracks_writer']
+        if si.write_tracks and new_particleIDs.shape[0] > 0:
+            for name, prop in si.classes['particle_properties'].items():
+                # parameters are not time varying, so done at ends in retangular writes, or on culling particles
+                if not prop.params['time_varying'] and prop.params['write']:
+                    writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs)
+
+
+    def write_all_time_varying_prop_and_data(self):
+        # write particle data at current time step, if none the a forced write
+
+        self.code_timer.start('write_output')
+        si= self.shared_info
+
+        # write time vary info , eg "time"
+        self.pre_time_step_write_book_keeping()
+
+        # write group data
+        for name,d in si.classes['time_varying_info'].items():
+            if d.params['write']:
+                self.write_time_varying_info(name, d)
+
+        for name,d in si.classes['particle_properties'].items():
+            if d.params['write'] and d.params['time_varying']:
+                self.write_time_varying_particle_prop(name, d.data)
+
+        if self.params['write_dry_cell_index']:
+            self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = si.grid['dry_cell_index'].reshape(1,-1)
+
+        self.time_steps_written_to_current_file +=1 # time steps in current file
+        self.total_time_steps_written  += 1 # time steps written since the start
+
+        self.code_timer.stop('write_output')
 
     def close(self):
         si= self.shared_info

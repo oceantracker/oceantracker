@@ -26,7 +26,7 @@
             "A_V": 0.001
         },
         "solver": {
-            "n_sub_steps": 6
+            "n_sub_steps": 15
         },
         "particle_release_groups": [
             {
@@ -164,8 +164,13 @@
         ],
         "velocity_modifiers": [
             {
-                "class_name": "oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity",
+                "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
                 "mean": -0.0005
+            }
+        ],
+        "fields": [
+            {
+                "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
             }
         ],
         "particle_statistics": [

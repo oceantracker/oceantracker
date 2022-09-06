@@ -24,7 +24,7 @@ def demo02_animation(runInfo_file_name,output_file=None):
                                 heading='3 hourly point and polygon releases with tidal stranding',
                                 release_group=None,
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
-                                fps=15, back_ground_depth=True)
+                                fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
 def demo03_heatmaps(runInfo_file_name,output_file=None):
@@ -77,7 +77,7 @@ def demo06_reefstranding(runInfo_file_name,output_file=None):
                                 heading='Trajectory Modifer example, particles liking a reef',
                                 release_group=None,
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
-                                fps=15, back_ground_depth=True)
+                                fps=15, back_ground_depth=True, show_dry_cells=True, interval=50)
     return None
 
 
@@ -97,10 +97,10 @@ def demo07_inside_polygon_events(runInfo_file_name,output_file=None):
                                     heading='Event logger, polygon aware particles',
                                     vmin=-1,
                                     vmax=1,
-                                    interval=70,
                                     movie_file=output_file + '.mp4' if output_file is not None else None,
                                     fps=15,
-                                    polygon_list_to_plot=caseInfo['full_params']['event_loggers'][0]['polygon_list'])
+                                    polygon_list_to_plot=caseInfo['full_params']['event_loggers'][0]['polygon_list'],
+                                    show_dry_cells=True, interval=30)
     return None
 
 
@@ -117,7 +117,7 @@ def demo08_particle_splitting(runInfo_file_name,output_file=None):
                                 release_group=0,
                                 min_status=-2,
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
-                                fps=15, back_ground_depth=True)
+                                fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
 def demo09_polygon_release_overlapping_land(runInfo_file_name,output_file=None):
@@ -131,7 +131,8 @@ def demo09_polygon_release_overlapping_land(runInfo_file_name,output_file=None):
     animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
                                 heading='Polygon release 1) overlaping land, and 2) min 30m,  water depth',
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
-                                fps=15, back_ground_depth=True)
+                                show_grid=False,
+                                fps=15, back_ground_depth=True, show_dry_cells=True, interval=50)
     return None
 
 def demo50_SCHISM_depthAver(runInfo_file_name,output_file=None):
@@ -145,7 +146,7 @@ def demo50_SCHISM_depthAver(runInfo_file_name,output_file=None):
     animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
                                 heading='Schsim',
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
-                                fps=15, back_ground_depth=True)
+                                fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
 def demo55_SCHISM_3D_fall_velocity(runInfo_file_name,output_file=None):
@@ -156,13 +157,13 @@ def demo55_SCHISM_3D_fall_velocity(runInfo_file_name,output_file=None):
 
     track_data = load_particle_track_vars(case_info_file_name)
 
-    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000], show_grid=True,
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000], show_grid=False,
                                 heading='SCHISIM reader, 3D, fall velocity and bottom stranding',
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
-                                fps=15, back_ground_depth=True)
+                                fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
-def demo56_SCHISM_3D_always_resupend(runInfo_file_name,output_file=None):
+def demo56_SCHISM_3D_resupend_crtitical_friction_vel(runInfo_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 
@@ -171,19 +172,18 @@ def demo56_SCHISM_3D_always_resupend(runInfo_file_name,output_file=None):
     track_data = load_particle_track_vars(case_info_file_name, fraction_to_read=.9)
     ax_lims= [1591000, 1601500, 5478500, 5491000]
     animate_particles(track_data, axis_lims=ax_lims,
-                      heading='SCHISIM 3D, fall velocity and always resuspend',
+                      heading='SCHISIM 3D, fall velocity and crtitical friction velocity resuspension',
                       movie_file=output_file + '_status.mp4' if output_file is not None else None,
-                      fps=15)
+                      fps=15, show_dry_cells=True, interval=20)
 
     animate_particles(track_data, axis_lims=ax_lims,
                                 colour_using_data=track_data['z'],
                                 part_color_map='winter_r',
-                                interval=200,
                                 vmin=-20,
                                 vmax=0,
-                                heading='SCHISIM 3D, fall velocity and always resuspend, particles coloured by depth',
+                                heading='SCHISIM 3D, fall velocity and crtitical friction velocity resuspension, particles coloured by depth',
                                 movie_file=output_file + '_depth.mp4' if output_file is not None else None,
-                                fps=15, back_ground_depth=True)
+                                fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
 def demo57_SCHISM_3D_lateralBoundaryTest(runInfo_file_name,output_file=None):
@@ -197,7 +197,7 @@ def demo57_SCHISM_3D_lateralBoundaryTest(runInfo_file_name,output_file=None):
     animate_particles(track_data, axis_lims=[1598000, 1601500, 5482000, 5488000],
                                 heading='SCHISIM reader, lateral boundary test',
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
-                                fps=15, back_ground_depth=True)
+                                fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
 def demo58_bottomBounce(runInfo_file_name,output_file=None):
@@ -209,11 +209,11 @@ def demo58_bottomBounce(runInfo_file_name,output_file=None):
 
     track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth'])
 
-    plot_path_in_vertical_section(track_data,  title= 'fall velocity, always resuspend ',
+    plot_path_in_vertical_section(track_data,  title= 'fall velocity, always resuspension_jump ',
                                           plot_file_name=output_file +  '_section.jpeg' if output_file is not None else None)
 
-    plot_relative_height(track_data, title='fall velocity, always resuspend ')
-    plot_relative_height(track_data, title='fall velocity, always resuspend ', bottom=False)
+    plot_relative_height(track_data, title='fall velocity, always resuspension_jump ')
+    plot_relative_height(track_data, title='fall velocity, always resuspension_jump ', bottom=False)
 
     animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000], heading='vertical section tracks')
     return None
@@ -246,7 +246,7 @@ def demo60_SCHISM_3D_decaying_particle(runInfo_file_name,output_file=None):
                                 vmax=1.0,
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
                                 fps=24,
-                                interval=20)
+                                interval=20, show_dry_cells=True)
     return None
 
 def demo61_concentration_test(runInfo_file_name,output_file=None):

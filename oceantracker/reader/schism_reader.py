@@ -37,7 +37,8 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
                                     'x':PLC(['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y'], [str], fixed_len= 2),
                                     'zlevel': PVC('zcor',str),
                                     'bottom_cell_index': PVC('node_bottom_index',str),
-                                     'triangles': PVC('SCHISM_hgrid_face_nodes',str),                                                                      },
+                                     'triangles': PVC('SCHISM_hgrid_face_nodes',str),
+                                     'is_dry_cell': PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
                                                })
         self.class_doc(description='Reads SCHISM netCDF output files')
 
@@ -101,17 +102,24 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
         with open(self.params['hgrid_file_name']) as f:lines = f.readlines()
 
+        vals= lines[1].split()
+        n_nodes= int(vals[0])
+        n_tri = int(vals[1])
+
+        n_line_open= n_nodes+n_tri+3 -1 # line with number of open boundies
+        n_open= int(lines[n_line_open].split()[0])
         id = []
-        for i, elem in enumerate(lines):
-            if 'Number of nodes for open boundary' in elem:
-                id.append(i)
-        if len(id) > 0:
-            tri_open_bound_node_list=   [ [] for _ in range( grid['triangles'].shape[0]) ]
-            for i in id:
-                n_nodes = int(lines[i].split('=')[0])
+
+        if n_open > 0:
+            tri_open_bound_node_list= [ [] for _ in range(grid['triangles'].shape[0]) ]
+            nl = n_line_open+1
+            for n in range(n_open):
+                nl += 1 # move to line with number of nodes in this open boundary
+                n_nodes = int(lines[nl].split()[0])
                 nodes=[]
                 for n in range(n_nodes):
-                    l = lines[i+1+n].strip('\n')
+                    nl += 1
+                    l = lines[nl].strip('\n')
                     nodes.append(int(l))
                 ob_nodes = np.asarray(nodes, dtype=np.int32)-1
                 grid['node_type'][ob_nodes] = 3 # mark as open nodes
@@ -126,7 +134,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
             # find triangles with 2 open nodes, and adjust adjacency from -1 to -2 for those faces
             for n, l in enumerate(tri_open_bound_node_list):
                 if len(l) > 1:
-                    # look at each boundary face in this triangle and see if it has two open boundary node, so is open
+                    # look at each boundary face in this triangle and see if it has two open boundary node, and  mark as  open
                     for nface in np.flatnonzero(grid['adjacency'][n,:] == -1):
                         face_nodes= grid['triangles'][n,(nface + 1+ np.arange(2) ) % 3]
                         if face_nodes[0] in tri_open_bound_node_list[n] and face_nodes[1] in tri_open_bound_node_list[n] :
@@ -134,15 +142,25 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         grid['has_open_boundary_data'] = True
         return grid
 
+
+    def preprocess_field_variable(self, name, data, nc):
+        si = self.shared_info
+
+        if name =='water_velocity' and data.shape[2] > 1:
+            # for 3D schism velocity patch non-zero hvel at nodes where cells in LSC grid span a change in bottom_cell_index
+            data = patch_bottom_velocity_to_make_it_zero(data, si.grid['bottom_cell_index'])
+
+        return data
+
 @njit
 def patch_bottom_velocity_to_make_it_zero(vel_data, bottom_cell_index):
     # ensure velocity vector at bottom is zero, as patch LSC vertical grid issue with nodal values spanning change in number of depth levels
     for nt in range(vel_data.shape[0]):
         for node in range(vel_data.shape[1]):
             bottom_node= bottom_cell_index[node]
-
             for component in range(vel_data.shape[3]):
                 vel_data[nt, node, bottom_node, component] = 0.
+    return vel_data
 
 
 

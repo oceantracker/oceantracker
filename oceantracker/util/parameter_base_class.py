@@ -68,13 +68,13 @@ class ParameterBaseClass(object):
         for name in required_fields:
             if name not in si.classes['fields']:
                 append_message(msg_list,'     class ' + self.params['class_name'] + ', "' + self.params['name']
-                                + '" requires field  "' + name + '"' + ' to work, add to reader["field_variables"], or to add user_fields ', exception = GracefulExitError)
+                                + '" requires field  "' + name + '"' + ' to work, add to reader["field_variables"], or add to fields param list', exception = GracefulExitError)
 
         for name in required_props:
             if name not in si.classes['particle_properties']:
                 append_message(msg_list,'     class ' + self.params['class_name'] + ', particle property "' + self.params['name']
                                 + '" requires particle property  "' + name + '"'
-                                + ' to work, add to reader["field_variables"], or to add user_fields, or add to particle_properties', exception = GracefulExitError)
+                                + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', exception = GracefulExitError)
 
         if requires3D and (requires3D and not si.hindcast_is3D):
                 append_message(msg_list,'     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', exception = GracefulExitError)

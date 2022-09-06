@@ -18,7 +18,7 @@ case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
 track_data = load_particle_track_vars(case_info_file_name)
 
-animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000], show_grid=True,
+animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000], show_grid=False,
                             heading='SCHISIM reader, 3D, fall velocity and bottom stranding',
                             movie_file=output_file + '.mp4' if output_file is not None else None,
-                            fps=15, back_ground_depth=True)
+                            fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)

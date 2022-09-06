@@ -4,7 +4,7 @@ from oceantracker.tracks_writer.track_writer_retangular import RectangularTrackW
 class FlatTrackWriter(RectangularTrackWriter):
 
     def initialize(self):
-
+        super().initialize()
         si = self.shared_info
         self.add_dimension('time', None)
         self.add_dimension('particle', None)
@@ -72,8 +72,10 @@ class FlatTrackWriter(RectangularTrackWriter):
         self.nc.file_handle.variables[prop_name][self.file_index[0]:self.file_index[1], ...] = data[self.sel_alive, ...]
 
     def close(self):
-        self.add_global_attribute('total_num_particles_released', self.shared_info.classes['particle_group_manager'].particles_released)
-        self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
+        si = self.shared_info
+        if si.write_tracks:
+            self.add_global_attribute('total_num_particles_released', self.shared_info.classes['particle_group_manager'].particles_released)
+            self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
         super().close()
 
 

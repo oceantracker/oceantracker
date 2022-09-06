@@ -16,7 +16,7 @@ status_cell_search_failed = int(particle_info['status_flags']['cell_search_faile
 
 #________ Barycentric triangle walk________
 @njit
-def BCwalk_with_move_backs_numba(xq, x_old, nb, step_dt_fraction, status, n_cell, BC, BCtransform, triNeighbours,is_dry_cell, block_dry_cells, tol, max_BC_walk_steps, has_open_boundary, active):
+def BCwalk_with_move_backs_numba(xq, x_old, status, n_cell, BC, BCtransform, triNeighbours, current_dry_cell_index, block_dry_cells, tol, max_BC_walk_steps, has_open_boundary, active):
    # Barycentric walk across triangles to find cells
 
     n_total_walking_steps=0
@@ -31,7 +31,7 @@ def BCwalk_with_move_backs_numba(xq, x_old, nb, step_dt_fraction, status, n_cell
         n_steps=0
         if np.any(~np.isfinite(xq[n,:])):
             if np.all(np.isfinite(x_old[n,:])):
-                xq[n,:] = x_old[n, :]
+                for i in range(2) : xq[n,i] = x_old[n, i]
             else:
                 status[n] = status_bad_cord
                 continue
@@ -44,7 +44,7 @@ def BCwalk_with_move_backs_numba(xq, x_old, nb, step_dt_fraction, status, n_cell
                 # are now inside triangle, leave particle status as is
                 # found cell in time, and interior point, so update cell
                 n_cell[n] = n_tri
-                BC[n, :] = bc
+                for i in range(3): BC[n, i] = bc[i]
                 break
 
             n_steps +=1
@@ -61,21 +61,21 @@ def BCwalk_with_move_backs_numba(xq, x_old, nb, step_dt_fraction, status, n_cell
                 else: # n_tri == -1 outside domain and any future -ve face types, attempt to move back to last good position
                     # solid boundary, so just move back
                     if np.all(np.isfinite(x_old[n, :])):
-                        xq[n, :] = x_old[n, :]
+                        for i in range(2): xq[n, i] = x_old[n, i]
                     else:
                         status[n] = status_bad_cord
                     break
 
             # check for dry cell
-            is_dry = is_dry_cell[nb,n_tri]*(1.-step_dt_fraction) +  is_dry_cell[nb,n_tri]*step_dt_fraction
-            if block_dry_cells and is_dry > 0.5:
-                # treats dry cell like a lateral boundary
-                # move back and keep triangle the same
-                if np.all(np.isfinite(x_old[n, :])):
-                    xq[n, :] = x_old[n, :]
-                else:
-                    status[n] = status_bad_cord
-                break
+            if block_dry_cells:
+                if  current_dry_cell_index[n_tri] > 128:
+                    # treats dry cell like a lateral boundary
+                    # move back and keep triangle the same
+                    if np.all(np.isfinite(x_old[n, :])):
+                        for i in range(2): xq[n, i] = x_old[n, i]
+                    else:
+                        status[n] = status_bad_cord
+                    break
 
         # not found in given number of search steps
         if n_steps >= max_BC_walk_steps: # dont update cell
@@ -98,17 +98,16 @@ def get_single_BC_cord_numba(x, BCtransform, bc):
 
     n_min = 0
     n_max = 0
-
     # does (2x2) martrix multiplication of  bc[:2]=BCtransform[:2,:2]*(x-transform[:,2]_
-    bc[:2] = 0.  # zero out bc to add to
+    for i in range(2): bc[i] = 0.
 
     for i in range(2):
         for j in range(2):
           bc[i] +=  BCtransform[i,j]*(x[j]-BCtransform[2,j])
 
        # record smallest BC of first two
-        if bc[i] < bc[n_min]: n_min =i
-        if bc[i] > bc[n_max]: n_max =i
+        if bc[i] < bc[n_min]: n_min = i
+        if bc[i] > bc[n_max]: n_max = i
 
     bc[2]= 1.-bc[0]-bc[1]
 
@@ -159,8 +158,7 @@ def get_BC_transform_matrix(points, simplices):
         for i in range(ndim):
             Tinvs[isimplex, ndim, i] = points[simplices[isimplex, ndim], i] # puts cords of last point as extra column, ie r_n vector
             for j in range(ndim):
-                T[i, j] = (points[simplices[isimplex, j], i]
-                           - Tinvs[isimplex, ndim, i])
+                T[i, j] = (points[simplices[isimplex, j], i] - Tinvs[isimplex, ndim, i])
             Tinvs[isimplex, i, i] = np.nan
 
         # form inverse of 2 by 2, https://mathworld.wolfram.com/MatrixInverse.html
@@ -187,7 +185,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
     # nz_with_bottom must be time independent
 
     tf2 = 1. - step_dt_fraction
-    z_tol =0.001
+    z_tol =0.005
     z_tol2 = z_tol /2.
     count_maybe_below_bottom = 0
     count_maybe_above_surface = 0
@@ -308,6 +306,8 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
 
 @njit
 def find_depth_cell_at_a_node( zq, zlevels,nz_bottom, nz,  z_tol, z_fraction_node, maybe_below_bottom, maybe_above_surface, n_vertical_searches ):
+    #todo not used?
+
     # find depth level just below zq and fraction of layer above this,  within  zlevels_at_node, using guess nz as a start
     # answers returned by reference
     # clip cells out of bounds
@@ -346,100 +346,4 @@ def find_depth_cell_at_a_node( zq, zlevels,nz_bottom, nz,  z_tol, z_fraction_nod
 
     return maybe_below_bottom, maybe_above_surface, n_vertical_searches
 
-@njit
-def eval_interp_spatial_timeIndependent_2Dfield_inPlace_numba(F_out, F_data, tri, n_cell, BCcord, active):
-    # do interpolation in place, ie write directly to F_interp for isActive particles
-    # time indpendent  fields
 
-    n_comp = F_data.shape[2]  # time step of data is always [node,z,comp] even in 2D
-    # loop over active particles and vector components
-    for n in active:
-        # loop over each node in triangle
-        F_out[n, :] = 0. # zero out for summing
-
-        for n_bc in range(3):
-            n_node = tri[n_cell[n], n_bc]
-            bc = BCcord[n, n_bc]
-            # loop over vector components
-            for c in range(n_comp):
-                F_out[n, c] += bc * F_data[0, n_node, 0, c]
-
-@njit
-def interp_2Dfield_inPlace_timeDependent(F_out, F_data_t1, F_data_t2, step_dt_fraction, tri, n_cell, BCcord, active):
-    # do interpolation in place, ie write directly to F_interp for isActive particles
-    # time dependent  fields from two time slices in hindcast
-
-    n_comp = F_data_t1.shape[2]  # time step of data is always [node,z,comp] even in 2D
-    tf2 = 1. - step_dt_fraction
-
-    # loop over isActive particles and vector components
-    for n in active:
-        F_out[n, :] = 0. # zero out for summing
-        # loop over each node in triangle
-        for n_bc in range(3):
-            n_node = tri[n_cell[n], n_bc]
-            bc = BCcord[n, n_bc]
-            # loop over vector components
-            for c in range(n_comp):
-                F_out[n, c] += bc * (tf2 * F_data_t1[n_node, 0, c] + step_dt_fraction * F_data_t2[n_node, 0, c])
-
-# do 3D interp evaluation
-@njit
-def interp_3Dfield_inPlace_time_indepenent(F_out, F_data, tri, n_cell, nz_node, z_fraction, BCcord, active):
-    #  non-time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
-
-    n_comp = F_data.shape[2]  # time step of data is always [node,z,comp] even in 2D
-
-    # loop over isActive particles and vector components
-    for n in active:
-        # loop over each node in triangle
-        F_out[n, :] = 0.# zero out for summing
-
-        # loop over each node in triangle
-        for n_bc in range(3):
-            n_node = tri[n_cell[n], n_bc]
-            bc = BCcord[n, n_bc]
-
-            nz = nz_node[n, n_bc]
-            zf = z_fraction[n, n_bc]
-            zf1 = 1. - zf
-            # loop over vector components
-            for c in range(n_comp):
-                # add contributions from layer above and below particle, for each spatial component
-                F_out[n, c] += bc * (F_data[n_node, nz, c] * zf1 + F_data[n_node, nz + 1, c] * zf)
-@njit
-def interp_3Dfield_inPlace_time_depenent(F_out, F_data1, F_data2, step_dt_fraction, tri, n_cell, nz_node, z_fraction, BCcord, active):
-    #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
-
-    n_comp = F_data1.shape[2]  # time step of data is always [node,z,comp] even in 2D
-    dtm1 = 1. - step_dt_fraction
-
-    # loop over isActive particles and vector components
-    for n in active:
-        F_out[n, :] = 0. # zero out for summing
-
-        # loop over each node in triangle
-        for m in range(3):
-            n_node = tri[n_cell[n], m]
-            bc = BCcord[n, m]
-
-            # depth cell and zfraction is required for each time slice of the field
-            nz1 = nz_node[n, 0, m]
-            nz2 = nz_node[n, 1, m]
-
-            zf1 = z_fraction[n ,0, m]
-            zf2 = z_fraction[n, 1, m]
-
-            zf1m1 = 1. - zf1
-            zf2m1 = 1. - zf2
-
-            # loop over vector components
-            for c in range(n_comp):
-                # add contributions from layer above and below particle, for each spatial component at two time steps
-                F_out[n, c] += bc * (F_data1[n_node, nz1, c] * zf1m1 + F_data1[n_node, nz1 + 1, c] * zf1)*dtm1  # first time step
-                F_out[n, c] += bc * (F_data2[n_node, nz2, c] * zf2m1 + F_data2[n_node, nz2 + 1, c] * zf2)*step_dt_fraction  # second time step
-
-
-# todo interpolate 3D feilds at free surface or bottom
-def interp_3Dfield_at_surfaces_time_indepenent(F_out, F_data, tri, n_cell, nz_bottom_cell, BCcord, active):
-    basic_util.nopass('interp_3Dfield_at_surfaces_time_indepenent not yet implemented')

@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import deepcopy, copy
 import numpy as np
 from oceantracker.util import time_util
 from oceantracker.util.message_and_error_logging import append_message
@@ -192,7 +192,8 @@ class ParamDictValueChecker(object):
         # if not one of special types above then value unchanged
         # check  value and type if not a None
         if value is not None:
-            if type(i['type']) != str and not isinstance(value, i['type']):
+
+            if type(i['type']) != str and not type(value) != i['type'] and not isinstance(value, i['type']):
                 append_message(msg_list, 'Parameter "' + crumb_trail + '" data must be of type ' + str(i['type']) + ' got type= ' + str(type(value)) + ' , value given =' +str(value), exception = GracefulExitError)
             if (type(value) in [float, int]):
                 # print(name, value , i['min'])

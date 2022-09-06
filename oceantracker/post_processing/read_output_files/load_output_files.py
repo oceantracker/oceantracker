@@ -7,9 +7,9 @@ from os import path
 from glob import glob
 
 
-def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0, run_output_dir= None):
+def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 1, run_output_dir= None):
     # get case_info.json file name from runInfo dict or json file name, can also set root_output_dir, if output moved to new location
-
+    # ncase is one based
     if type(runInfo_fileName_or_runInfoDict) is str:
        run_case_info = json_util.read_JSON(runInfo_fileName_or_runInfoDict)
     else:
@@ -22,7 +22,7 @@ def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0,
     if run_output_dir is None:
         run_output_dir = run_case_info['output_files']['run_output_dir']
 
-    case_info_file_name = run_case_info['output_files']['case_info'][ncase]
+    case_info_file_name = run_case_info['output_files']['case_info'][ncase-1]
 
     try:
         case_info_file_name = path.join(run_output_dir, case_info_file_name)
@@ -88,8 +88,11 @@ def load_particle_track_vars(case_info_file_name, var_list=None, release_group= 
     track_file = path.join( case_info['output_files']['run_output_dir'], case_info['output_files']['tracks_writer'][track_file_number-1])
     tracks = read_ncdf_output_files.read_particle_tracks_file(track_file, var_list, release_group=release_group, fraction_to_read=fraction_to_read)
     tracks['grid'] = load_grid(case_info_file_name)
-    tracks= _extract_useful_params(case_info, tracks)
 
+    tracks= _extract_useful_params(case_info, tracks)
+    x= tracks['x'][:,:,0]
+    y = tracks['x'][:, :, 1]
+    tracks['axis_lim'] = np.asarray([np.nanmin(x), np.nanmax(x),np.nanmin(y), np.nanmax(y)])
     return tracks
 
 def _get_user_class_filename(user_class_type, case_info,nsequence):

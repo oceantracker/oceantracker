@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     #params_that_work= json_util.read_JSON('../demos/demo_json/demo05_parallel.json')
     #params_that_work = json_util.read_JSON('../demos/demo_json/demo02_animation.json')
-    params_that_work = json_util.read_JSON('../demos/demo_json/demo56_SCHISM_3D_always_resupend.json')
+    params_that_work = json_util.read_JSON('../demos/demo_json/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json')
 
     params_that_work['shared_params']['max_duration']=3600
     params_that_work['case_list']=[]

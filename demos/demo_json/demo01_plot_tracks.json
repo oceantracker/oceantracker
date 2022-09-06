@@ -40,9 +40,8 @@
             "A_H": 0.1
         },
         "tracks_writer": {
-            "turn_on_write_particle_properties_list": [
-                "n_cell"
-            ]
+            "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
+            "time_steps_per_per_file": 200
         },
         "solver": {
             "n_sub_steps": 2

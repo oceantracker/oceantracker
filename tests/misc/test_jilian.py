@@ -22,20 +22,21 @@ if __name__ == '__main__':
 
     case ={'run_params':{
                 'duration': 8. * 24 * 3600,
-                'write_tracks': True},
+                'write_tracks': True,
+                'block_dry_cells': False},
         'tracks_writer' : {'output_step_count': 3},
         'solver': { 'screen_output_step_count': 1,  'n_sub_steps': 2},
         'particle_release_groups': [ {'points': x0 ,'pulse_size':10, 'release_interval': 600}],
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
-        'velocity_modifiers' : [{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity', 'mean': -0.001}],
+        'velocity_modifiers' : [{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.000}],
         'trajectory_modifiers':[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
-                                   'critical_friction_velocity': 0.01}],
+                                   'critical_friction_velocity': 0.00}],
                                 'particle_statistics' : [{
                                  'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                                  'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
                                 'grid_center': x0[0],'grid_span': [25000.,25000.],
                                  'grid_size': [120, 121]}],
-        'particle_properties': [{'class_name': 'oceantracker.particle_properties.friction_velocity.FrictionVelocity'}]
+         'fields' : [{'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocity'}]
         }
 
 

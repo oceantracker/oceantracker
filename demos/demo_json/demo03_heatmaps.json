@@ -44,7 +44,8 @@
         "tracks_writer": {
             "turn_on_write_particle_properties_list": [
                 "n_cell"
-            ]
+            ],
+            "write_dry_cell_flag": true
         },
         "solver": {
             "n_sub_steps": 2

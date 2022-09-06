@@ -3,13 +3,13 @@ from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.particle_properties.particle_parameter_from_normal_distribution import  ParticleParameterFromNormalDistribution
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 
-class AddTerminalVelocity(VelocityModiferBase):
+class TerminalVelocity(VelocityModiferBase):
     # add terminal velocity to particle velocity  < 0 is downwards ie sinking
 
     def __init__(self,):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'name': PVC(None,str),'mean': PVC(0.,float),'variance': PVC(0.,float, min=0.)})
+        self.add_default_params({'name': PVC('terminal_velocity',str),'mean': PVC(0.,float),'variance': PVC(None, float, min=0.)})
 
         # only possible in in 3D so tweak flag
 
@@ -21,7 +21,7 @@ class AddTerminalVelocity(VelocityModiferBase):
         super().initialize()
         particle= self.shared_info.classes['particle_group_manager']
 
-        if self.params['variance'] > 0.:
+        if self.params['variance'] is not None:
            # set up individual particle terminal velocties
             p = ParticleParameterFromNormalDistribution()
             particle.create_particle_property('user',dict(name='terminal_velocity', instance=p,
@@ -30,7 +30,7 @@ class AddTerminalVelocity(VelocityModiferBase):
     def modify_velocity(self,v, t, active):
         # modify vertical velocity, if backwards, make negative
         si = self.shared_info
-        if self.params['variance'] == 0.:
+        if self.params['variance'] is None:
             # constant fall vel
             particle_operations_util.add_value_to(v[:, 2], self.params['mean'] * si.model_direction, active)
         else:

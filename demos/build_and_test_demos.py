@@ -36,7 +36,7 @@ demo_base_params=\
  'base_case_params' : {
     'run_params' : {'user_note':'test of notes'},
     'dispersion': {'A_H': .1},
-    'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell']},
+    'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_flag': True},
     'solver': {'n_sub_steps': 2},
         'particle_release_groups': [{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}],
         'particle_properties': [
@@ -51,22 +51,25 @@ p1.update({'case_list': [{ 'particle_release_groups': [{
            'points':  [ [1598000, 5489100]],  'pulse_size': 1, 'release_interval': 3 * 3600}]
             }]
             } )
-
+p1['base_case_params'].update({
+                               'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
+                                                'time_steps_per_per_file':200}})
 
 params.append(p1)
 
 # demo 2 track animation
 p2= deepcopy(demo_base_params)
-p2['base_case_params']['particle_release_groups']=[
-        {'points': [[1594500, 5483000], [1598000, 5486100]], 'pulse_size': 10, 'release_interval': 3 * 3600},
+p2['base_case_params']['particle_release_groups']=[{'allow_release_in_dry_cells': True,
+        'points': [[1594500, 5483000], [1598000, 5486100]], 'pulse_size': 10, 'release_interval': 3 * 3600},
     {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
      'points': deepcopy(poly_points),
      'pulse_size': 10, 'release_interval': 3 * 3600}
 ]
 
-p2['base_case_params'].update({'solver': {'n_sub_steps': 6}, 'run_params': {'block_dry_cells': False},
+p2['base_case_params'].update({'solver': {'n_sub_steps': 6}, 'run_params': {'block_dry_cells': True},
                                'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
-                                                'time_steps_per_per_file':96}})
+                                                'write_dry_cell_index': True,
+                                               }})
 p2['shared_params'].update({'output_file_base' :'demo02_animation' ,'compact_mode': True})
 params.append(p2)
 
@@ -221,9 +224,10 @@ schsim_base_params=\
                           },
  'base_case_params' : { 'run_params' : {},
                  'dispersion': {'A_H': .2, 'A_V': 0.001},
-                        'solver': {'n_sub_steps': 6},
+                        'solver': {'n_sub_steps': 15},
                 'particle_release_groups': [{'points': [[1595000, 5482600, -1],[1599000, 5486200, -1] ],
-                                                     'pulse_size': 10, 'release_interval': 3600},
+                                                     'pulse_size': 10, 'release_interval': 3600,
+                                                    'allow_release_in_dry_cells': True},
                                                     {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
                                     'points': poly_points,
                                     'pulse_size': 10, 'release_interval':  3600}
@@ -254,9 +258,9 @@ s55['base_case_params']['particle_release_groups']=[{'points': [[1594500, 548700
                                     'pulse_size': 10, 'release_interval':  3600}
                                                     ]
 s55['base_case_params']['velocity_modifiers']= [
-       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity', 'mean': -0.0005}
+       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.0005}
 ]
-
+s55['base_case_params']['fields']=[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}]
 s55['base_case_params']['particle_statistics']=[
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
@@ -267,10 +271,10 @@ params.append(s55)
 # schsim 3D, sometimes resupend
 s56 = deepcopy(s55)
 s56['base_case_params']['trajectory_modifiers'] = [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension','critical_friction_velocity': .01}]
-s56['shared_params'].update({'output_file_base' : 'demo56_SCHISM_3D_always_resupend', 'compact_mode': True})
+s56['shared_params'].update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
 s56['base_case_params']['velocity_modifiers']= [
-       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity', 'mean': -0.001}]
-s56['base_case_params']['particle_properties'].append({'class_name': 'oceantracker.particle_properties.friction_velocity.FrictionVelocity'})
+       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.0005}]
+#s56['base_case_params']['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]], 'pulse_size': 20, 'release_interval': 0}]
 params.append (s56)
 
 # schsim 3D, dont resupend lateral boundary test
@@ -288,7 +292,7 @@ s58['base_case_params']['dispersion'].update({'A_H': 0.05, 'A_V': .002})
 bc = s58['base_case_params']
 
 bc['trajectory_modifiers'] =[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension'}]
-bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity', 'mean': -0.002}]
+bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002}]
 pg1= bc['particle_release_groups'][0]
 pg1.update({'pulse_size':10,'release_interval':0, 'points': [[1593000., 5484000.+2000, -1]] }) # 1 release only
 bc['particle_release_groups'] = [pg1] # only point release
@@ -302,7 +306,7 @@ s59['shared_params'].update({'output_file_base' : 'demo59_crit_shear_resupension
 bc = s59['base_case_params']
 bc['trajectory_modifiers'] =[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
                                    'critical_friction_velocity': .01}]
-bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity', 'mean': -0.002}]
+bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002}]
 params.append(s59)
 
 # decaying particles sized on c
@@ -319,9 +323,11 @@ params.append(s60)
 
 # triangle property/concetraaion plots particles sized on c
 s61 = deepcopy(schsim_base_params)
-s61['shared_params'].update({'max_duration': 30*24*3600.,'output_file_base': 'demo61_concentration_test'})
+s61['shared_params'].update({'max_duration': 15*24*3600.,'output_file_base': 'demo61_concentration_test'})
+s61['base_case_params']['run_params']['write_tracks']= False
 s61['base_case_params']['particle_concentrations']=[{'class_name':'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
-                                                          'case_output_file_tag': 'siteA'}]
+                                                          'case_output_file_tag': 'siteA','calculation_interval': 1800}]
+s61['base_case_params']['particle_properties'].append({'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'})
 
 for rg in s61['base_case_params']['particle_release_groups']:
     rg.update({'pulse_size': 1000, 'release_interval': 3600})
@@ -345,7 +351,7 @@ def make_demo_python(demo_name):
     out=['# ' + demo_name +'.py','#---------------------------------------',
          'import oceantracker.main as main','from oceantracker.util import json_util']
 
-    text_file = open('build_demo_plots.py', 'r')
+    text_file = open('make_demo_plots.py', 'r')
     lines = text_file.read().splitlines()
 
 

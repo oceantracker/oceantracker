@@ -2,7 +2,7 @@
     "shared_params": {
         "output_file_base": "demo61_concentration_test",
         "debug": true,
-        "max_duration": 2592000.0,
+        "max_duration": 1296000.0,
         "root_output_dir": "output"
     },
     "reader": {
@@ -15,13 +15,15 @@
         }
     },
     "base_case_params": {
-        "run_params": {},
+        "run_params": {
+            "write_tracks": false
+        },
         "dispersion": {
             "A_H": 0.2,
             "A_V": 0.001
         },
         "solver": {
-            "n_sub_steps": 6
+            "n_sub_steps": 15
         },
         "particle_release_groups": [
             {
@@ -38,7 +40,8 @@
                     ]
                 ],
                 "pulse_size": 1000,
-                "release_interval": 3600
+                "release_interval": 3600,
+                "allow_release_in_dry_cells": true
             },
             {
                 "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
@@ -76,6 +79,9 @@
             {
                 "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                 "decay_time_scale": 86400.0
+            },
+            {
+                "class_name": "oceantracker.particle_properties.total_water_depth.TotalWaterDepth"
             }
         ],
         "event_loggers": [
@@ -153,7 +159,8 @@
         "particle_concentrations": [
             {
                 "class_name": "oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D",
-                "case_output_file_tag": "siteA"
+                "case_output_file_tag": "siteA",
+                "calculation_interval": 1800
             }
         ]
     }

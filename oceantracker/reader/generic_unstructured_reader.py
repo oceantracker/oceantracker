@@ -12,6 +12,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from datetime import datetime
 
+
 from oceantracker.reader._base_reader import _BaseReader
 
 class GenericUnstructuredReader(_BaseReader):
@@ -53,7 +54,13 @@ class GenericUnstructuredReader(_BaseReader):
 
             if not i.params['is_time_varying']:
                 # if not time dependent read in now, eg water_depth
-                i.data[:] = self.read_field_variable_as4D(nc, i)
+                # do any customised tweaks on the hoindcadt data
+                data = self.read_field_variable_as4D(name, nc, i)
+                data = self.preprocess_field_variable(name, data, nc)
+
+                if i.info['requires_depth_averaging']:
+                    data = fields_util.depth_aver_SlayerLSC_in4D(data, si.grid['zlevel'], si.grid['bottom_cell_index'])
+                i.data[:] = data
 
             # set up depth averaged version if requested
             if name in self.params['field_variables_to_depth_average']:
@@ -68,15 +75,6 @@ class GenericUnstructuredReader(_BaseReader):
         # get dry cells from total water depth
         si.hindcast_is3D = si.classes['fields']['water_velocity'].is3D()
         nc.close()
-
-        # add total water depth as core field if possible
-        if si.grid['zlevel'] is not None or ('tide' in si.classes['fields'] and 'water_depth' in si.classes['fields']):
-            params={'name': 'total_water_depth','class_name':'oceantracker.fields.total_water_depth.TotalWaterDepth'}
-            i = fm.add_field('derived_from_reader_field', params, crumbs='Adding total water depth derived from  tide and water depth, or zlevel if 3D')
-            i.initialize()
-        else:
-            si.case_log.write_write_warning('No tidal stranding, requires total water depth derived from  tide and water depth, or zlevel if 3D')
-
 
         # needed for force read at first time step read to make
         self.buffer_info['n_filled'] = 0
@@ -105,11 +103,17 @@ class GenericUnstructuredReader(_BaseReader):
                 grid['vertical_grid_type'] = 'LSC'
                 grid['bottom_cell_index'] = self.read_bottom_cell_index(nc, num_tri= grid['triangles'].shape[0])
 
-        # dry cell buffer, default is not dry so no cel is blocked from entry
-        grid['is_dry_cell'] = np.full((self.params['time_buffer_size'],grid['triangles'].shape[0]), 1,np.int8)
 
         # split quad cells, find model outline, make adjacency matrix etc
         grid = self._build_grid_attributes(grid)
+
+        #now any quad cells are split
+
+        # space for dry cell info
+        grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
+        grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)  # 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
+
+        # other grid info
         grid = self.read_open_boundary_data(grid)
         return grid
 

@@ -15,7 +15,7 @@ class _BaseEventLogger(ParameterBaseClass):
         self.add_default_params({'role_output_file_tag': PVC('event_logger',str),
                                  'write': PVC(True,bool),
                                  'chunk_size' : PVC(5000, int, min= 1),
-                                 'particle_prop_to_write_list': PLC([ 'ID','x','IDpulse', 'IDrelease_group', 'user_release_group_ID', 'status', 'age'],[str])})
+                                 'particle_prop_to_write_list': PLC([ 'ID','x','IDpulse', 'IDrelease_group', 'user_release_groupID', 'status', 'age'],[str])})
     def check_requirements(self):
 
         msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['event_has_started_boolean'])
@@ -63,7 +63,7 @@ class _BaseEventLogger(ParameterBaseClass):
         # set up unique list of props to write
         info['prop_to_write'] = list(set(deepcopy(params['particle_prop_to_write_list']) + addition_prop_to_write))
 
-        info['output_file'] = si.output_file_base + '_events_%03.0f' % (self.instanceID + 1) + '.nc'
+        info['output_file'] = si.output_file_base + '_events_%03.0f' % (self.info['instanceID']  + 1) + '.nc'
         self.nc = NetCDFhandler(os.path.join(si.run_output_dir, info['output_file']), 'w')
 
         self.nc.add_a_Dimension('event', dim_size=None) # open dim

@@ -8,7 +8,8 @@ base_case_params:
     name: Oxygen
   - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
   particle_release_groups:
-  - points:
+  - allow_release_in_dry_cells: true
+    points:
     - - 1594500
       - 5483000
     - - 1598000
@@ -32,12 +33,12 @@ base_case_params:
     pulse_size: 10
     release_interval: 10800
   run_params:
-    block_dry_cells: false
+    block_dry_cells: true
   solver:
     n_sub_steps: 6
   tracks_writer:
     class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
-    time_steps_per_per_file: 96
+    write_dry_cell_index: true
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:

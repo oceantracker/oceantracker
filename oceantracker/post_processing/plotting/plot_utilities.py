@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as clr
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as font_manager
 
@@ -77,9 +78,10 @@ def display_grid(grid, ginput=0, axis_lims=None):
 def plot_field(grid, field_vals, ax=plt.gca(), color_map=None, vmin=None, vmax=None, zorder=3):
     # use tri surf to color map feild in 3D, defaul view is 2D from above
 
-    ax.tripcolor(grid['x'][:,0], grid['x'][:,1], field_vals, triangles=grid['triangles'],
+    pc = ax.tripcolor(grid['x'][:,0], grid['x'][:,1], field_vals, triangles=grid['triangles'],
                   shading='gouraud', cmap=color_map, edgecolors='none',
                   vmin=vmin, vmax=vmax, zorder=zorder)
+    return pc
 
 def plot_coloured_depth(grid, ax=plt.gca(), color_map=None, zorder=3):
     # find depth range inside axes to set max  and min depth
@@ -97,6 +99,25 @@ def plot_coloured_depth(grid, ax=plt.gca(), color_map=None, zorder=3):
         vmax=1.3*vmax
 
     plot_field(grid, depth, ax=ax, color_map=color_map, vmin= 0., vmax=vmax, zorder=zorder)
+
+def plot_dry_cells(track_data,show_dry_cells=True, nt=0):
+
+    grid = track_data['grid']
+    cmap = clr.LinearSegmentedColormap.from_list('custom sand', ['#FFFFFF', '#cba254'], N=128)
+
+    if show_dry_cells and 'dry_cell_index' in track_data :
+        dry_cell_data = track_data['dry_cell_index'].copy().astype(np.float32)
+        dry_cell_data[dry_cell_data < 128] = np.nan
+        pc = plt.gca().tripcolor(grid['x'][:, 0], grid['x'][:, 1], facecolors=dry_cell_data[nt, :], triangles=grid['triangles'],
+                                 zorder=3, vmin=128, vmax=255, edgecolors='none', alpha=.3, cmap=cmap, antialiaseds=True)
+    else:
+        # small fast dummy plot
+        dry_cell_data = np.full((track_data['time'].shape[0],1),np.nan)
+        pc = plt.gca().tripcolor(grid['x'][:3, 0],  grid['x'][:3, 1], grid['triangles'][0,:],
+                                 zorder=3, vmin=128, vmax=255, edgecolors='face', alpha=0.)
+
+    return pc, dry_cell_data
+
 
 def plot_release_points_and_polygons(d, release_group=None, ax = plt.gca(), color =[.2, .8, .2]):
     # release_group is 1 based

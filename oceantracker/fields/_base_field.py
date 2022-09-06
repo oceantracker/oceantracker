@@ -12,7 +12,7 @@ class _BaseField(ParameterBaseClass):
                                  'is_time_varying': PVC(True, bool,is_required=True),
                                  'is3D': PVC(True, bool,is_required=True ),
                                   'num_components': PVC(None, int,is_required=True),
-                                  'dtype': PVC(np.float64, np.dtype),
+                                  'dtype': PVC(np.float64, np.number),
                                   })
 
     def initialize(self):

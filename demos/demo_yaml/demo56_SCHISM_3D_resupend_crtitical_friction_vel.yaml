@@ -39,10 +39,11 @@ base_case_params:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
+  fields:
+  - class_name: oceantracker.fields.friction_velocity.FrictionVelocity
   particle_properties:
   - class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
-  - class_name: oceantracker.particle_properties.friction_velocity.FrictionVelocity
   particle_release_groups:
   - points:
     - - 1594500
@@ -84,13 +85,13 @@ base_case_params:
     - water_depth
   run_params: {}
   solver:
-    n_sub_steps: 6
+    n_sub_steps: 15
   trajectory_modifiers:
   - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
     critical_friction_velocity: 0.01
   velocity_modifiers:
-  - class_name: oceantracker.velocity_modifiers.terminal_velocity.AddTerminalVelocity
-    mean: -0.001
+  - class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
+    mean: -0.0005
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: false
@@ -106,5 +107,5 @@ reader:
 shared_params:
   compact_mode: true
   debug: true
-  output_file_base: demo56_SCHISM_3D_always_resupend
+  output_file_base: demo56_SCHISM_3D_resupend_crtitical_friction_vel
   root_output_dir: output

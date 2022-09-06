@@ -7,18 +7,23 @@ from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTra
 from numba import  njit
 
 class BasicResuspension(_BaseTrajectoryModifier):
+    # based on
+    # Lynch, Daniel R., David A. Greenberg, Ata Bilgili, Dennis J. McGillicuddy Jr, James P. Manning, and Alfredo L. Aretxabaleta.
+    # Particles in the coastal ocean: Theory and applications. Cambridge University Press, 2014.
+    # Equation 9.28
 
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'name': PVC('BasicResuspension',str),
-                                 'critical_friction_velocity': PVC(0.,float, min=0.),
+                                 'critical_friction_velocity': PVC(0., float, min=0.),
                                  })
 
     # is 3D test of parent
     def check_requirements(self):
         msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(
-                        required_props=['friction_velocity', 'status','water_depth'], requires3D=True)
+                        required_fields=['friction_velocity', 'water_velocity'],
+                        required_props=['status','water_velocity'], requires3D=True)
         return msg_list
 
     def initialize(self,**kwargs):pass
@@ -41,18 +46,43 @@ class BasicResuspension(_BaseTrajectoryModifier):
         si= self.shared_info
         # redsuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.classes['particle_properties']
-        resupend= self.select_particles_to_resupend(active)
+        resupend = self.select_particles_to_resupend(active)
 
-        # short cuts to random walk size in dispersion etc
-        rz = si.classes['dispersion'].info['rx'][2]
+        self.resuspension_jump(part_prop['friction_velocity'].data, si.z0, si.model_substep_timestep, part_prop['x'].data, resupend)
 
-        self.info['number_resupended'] = resupend.shape[0]
-
-        z = part_prop['x'].dataInBufferPtr()[:, 2]  # z as view of all of x
-
-        z[resupend] = -part_prop['water_depth'].get_values(resupend) + rz * np.abs(np.random.randn(resupend.shape[0]))
+        #  adjust resupension distance for terminal velocity
+        if 'terminal_velocity' in si.classes['velocity_modifiers']:
+            if 'terminal_velocity' in part_prop:
+                # each particle has terminal velocity
+                self.add_particle_terminal_velocity(part_prop['x'].data, part_prop['terminal_velocity'].data,si.model_substep_timestep, resupend)
+            else:
+                # single terminal velocity value
+                self.add_terminal_velocity_value(part_prop['x'].data, si.classes['velocity_modifiers']['terminal_velocity'].params['mean'],si.model_substep_timestep, resupend)
 
         # any z out of bounds will  be fixed by find_depth cell at start of next time step
-
+        self.info['number_resupended'] = resupend.shape[0]
         part_prop['status'].set_values(si.particle_status_flags['moving'], resupend)
 
+
+    @staticmethod
+    @njit
+    def resuspension_jump(friction_velocity, z0, dt, x, sel):
+        # add entrainment step up to particle z, Book: Lynch, Particles in the coastal ocean equation 9.28
+        f= 2*0.4*z0*dt/(1.- 2./np.pi)
+        for n in sel:
+            x[n, 2] += np.sqrt(f*friction_velocity[n]*np.abs(np.random.randn()))
+
+
+    @staticmethod
+    @njit
+    def add_terminal_velocity_value(x, terminal_velocity, dt, sel):
+        # add single valued terminal velocity
+        for n in sel:
+            x[n, 2] += terminal_velocity*dt
+
+    @staticmethod
+    @njit
+    def add_particle_terminal_velocity(x, terminal_velocity, dt, sel):
+        # add individual valued terminal velocity
+        for n in sel:
+            x[n, 2] += terminal_velocity[n]*dt

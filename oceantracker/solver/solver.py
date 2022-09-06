@@ -1,13 +1,11 @@
 from time import perf_counter
-from numba import njit
-
 from oceantracker.util import time_util
 from datetime import datetime
 
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
-
+from oceantracker.solver.util import solver_util
 
 
 class Solver(ParameterBaseClass):
@@ -46,6 +44,7 @@ class Solver(ParameterBaseClass):
         pgm, fgm, tracks_writer = si.classes['particle_group_manager'], si.classes['field_group_manager'], si.classes['tracks_writer']
         part_prop = si.classes['particle_properties']
 
+        info['computation_started'] = datetime.now()
         # set up particle velocity working space for solver
         info['n_time_steps_completed'] = 0
         info['total_num_particles_moving'] = 0
@@ -55,10 +54,11 @@ class Solver(ParameterBaseClass):
         new_particleIDs = pgm.release_particles(nb0, t0)
         fgm.setup_interp_time_step(nb0, t0, part_prop['x'].data, new_particleIDs)  # set up interp for first time step
         pgm.update_PartProp(t0, new_particleIDs)  # now update part prop with good cell and bc cords, eg  interp water_depth
+
         if si.write_output_files and si.write_tracks:
             tracks_writer.open_file_if_needed()
-            pgm.write_time_varying_prop_and_data()
-            pgm.write_non_time_varing_part_properties(new_particleIDs)
+            tracks_writer.write_all_time_varying_prop_and_data()
+            tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)
 
         self._update_stats(t0)
         self._update_concentrations(nb0, t0)
@@ -70,7 +70,7 @@ class Solver(ParameterBaseClass):
         si = self.shared_info
         info = self.info
         pgm, fgm, tracks_writer   = si.classes['particle_group_manager'], si.classes['field_group_manager'], si.classes['tracks_writer']
-        computation_started = datetime.now()
+        part_prop = si.classes['particle_properties']
 
 
         for nb in range(nb0,nb0 + num_in_buffer-1): # one less step as last step is initial condition for next block
@@ -91,19 +91,27 @@ class Solver(ParameterBaseClass):
                 moving = self.integration_step(nb,t1)
                 #--------------------------------------
                 self.code_timer.stop('integration_step')
-                info['total_num_particles_moving'] += moving.shape[0]
 
                 t2 = t1 + si.model_substep_timestep * si.model_direction
 
-                self.post_step_bookeeping_and_dispersion(si.model_start_time, nb, info['n_time_steps_completed'], t2, moving)
+                # dispersion
+                if moving.shape[0] > 0:
+                    si.classes['dispersion'].update(nb, t2, moving)
+                    # after dispersion some may be outside, update search cell status to see which are now outside domain etc
+                    fgm.setup_interp_time_step(nb, t2, part_prop['x'].data, moving)
+                    info['total_num_particles_moving'] += moving.shape[0]
+
+
+                self.post_step_bookeeping(nb, t2)
 
                 new_particleIDs = pgm.release_particles(nb, t2)
-                pgm.write_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
+                if si.write_tracks:
+                    tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
-                # write tracks file
-                if si.write_output_files and si.write_tracks and info['n_time_steps_completed'] % si.classes['tracks_writer'].params['output_step_count'] == 0:
-                    tracks_writer.open_file_if_needed()
-                    pgm.write_time_varying_prop_and_data()
+                    # write tracks file
+                    if info['n_time_steps_completed'] % si.classes['tracks_writer'].params['output_step_count'] == 0:
+                        tracks_writer.open_file_if_needed()
+                        tracks_writer.write_all_time_varying_prop_and_data()
 
                 # update outputs
                 self._update_stats(t2)
@@ -112,11 +120,12 @@ class Solver(ParameterBaseClass):
 
                 # print screen data
                 if (info['n_time_steps_completed']  + ns) % self.params['screen_output_step_count'] == 0:
-                    self.screen_output(info['n_time_steps_completed'] , nt0, nb0, nb, ns, t1, t0_step,computation_started)
+                    self.screen_output(info['n_time_steps_completed'] , nt0, nb0, nb, ns, t1, t0_step)
 
                 pgm.kill_old_particles(t2)
 
                 if si.compact_mode: pgm.remove_dead_particles_from_memory()
+
 
                 info['n_time_steps_completed']  += 1
 
@@ -150,13 +159,13 @@ class Solver(ParameterBaseClass):
 
         if RK_order==1:
             self.update_particle_velocity(t,v, is_moving) # put vel into permanent place
-            self.euler_substep(x2, x1, v, dt, is_moving)
-            return is_moving.shape[0]
+            solver_util.euler_substep(x2, x1, v, dt, is_moving)
+            return is_moving
 
         self.update_particle_velocity(t,v_temp, is_moving)  # velocity in temp place
 
         # do first half step location from RK1 to update values
-        self.euler_substep(x2, x1, v_temp, dt / 2., is_moving)
+        solver_util.euler_substep(x2, x1, v_temp, dt / 2., is_moving)
 
         # accumulate RK velocity to reduce space taken by temporary working variables
         particle_operations_util.copy(v, v_temp, is_moving, scale=1.0 / 6.0) # vel at start of step
@@ -167,20 +176,20 @@ class Solver(ParameterBaseClass):
 
         if RK_order==2:
             self.update_particle_velocity(t2,v, is_moving)
-            self.euler_substep(x2, x1, v, dt, is_moving)
-            return is_moving.shape[0]
+            solver_util.euler_substep(x2, x1, v, dt, is_moving)
+            return is_moving
 
         self.update_particle_velocity(t2, v_temp, is_moving)
 
         # step 3, a second half step
-        self.euler_substep(x2, x1, v_temp, dt / 2., is_moving)  # improve half step position
+        solver_util.euler_substep(x2, x1, v_temp, dt / 2., is_moving)  # improve half step position
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity step 2
 
         t2 = t + 0.5 * dt
         f.setup_interp_time_step(nb, t2, x2, is_moving)
         self.update_particle_velocity(t2,v_temp , is_moving)  # v3, better velocity at half step
 
-        self.euler_substep(x2, x1, v_temp, dt, is_moving)  # improve half step position values
+        solver_util.euler_substep(x2, x1, v_temp, dt, is_moving)  # improve half step position values
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity from step 3
 
         # step 4, full step
@@ -194,7 +203,7 @@ class Solver(ParameterBaseClass):
         # below is emulated by accumulation above of
         #  v = (v1 + 2.0 * (v2 + v3) + v4) /6
         #  x2 = x1 + v*dt
-        self.euler_substep(x2, x1, v, dt, is_moving)  # set final location directly to particle x property
+        solver_util.euler_substep(x2, x1, v, dt, is_moving)  # set final location directly to particle x property
 
         return  is_moving
 
@@ -207,28 +216,17 @@ class Solver(ParameterBaseClass):
         for key, vm in si.classes['velocity_modifiers'].items():
             v = vm.modify_velocity(v, t, active)
 
-    @staticmethod
-    @njit
-    def euler_substep(xnew, xold, velocity, dt, active):
-        # do euler substep, xnew = xold+velocity*dt for active particles
-        for n in active:
-            for m in range(xold.shape[1]):
-                xnew[n, m] = xold[n, m] + velocity[n, m] * dt
-                    
-    def post_step_bookeeping_and_dispersion(self, t, nb, n_steps, t2, moving):
+    def post_step_bookeeping(self, nb, t2):
         # do dispersion, modify trajectories,
         # do strandings etc to change particle status
         # update part prop, eg  interp mapped reader fields to particle locations
-        self.code_timer.start('post_step_bookeeping_and_dispersion')
+        self.code_timer.start('post_step_bookeeping')
         si = self.shared_info
         pm = si.classes['particle_group_manager'] # internal short cuts
         fgm = si.classes['field_group_manager']
         part_prop  =  si.classes['particle_properties']
 
-        si.classes['dispersion'].update(nb, t2, moving)
 
-        # after dispersion some may be outside, update search cell status to see which are now outside domain etc
-        fgm.setup_interp_time_step(nb, t2, part_prop['x'].data, moving)
 
         # user particle movements, eg resupension for all particles
         # re-find alive particles after above movements
@@ -236,7 +234,7 @@ class Solver(ParameterBaseClass):
         for i in si.class_list_interators['trajectory_modifiers']['all'].values():
             i.update(nb, t2, sel)
 
-        # after moves, update search cell status to see which are now outside domain etc
+        # after moves, update search cell status, dry cell index,  to see which are now outside domain etc
         fgm.setup_interp_time_step(nb, t2, part_prop['x'].data, sel)
 
         # now all  particle movements complete after trajectory changes, move backs, update cell and bc cords for latest locations, update particle properties
@@ -244,31 +242,23 @@ class Solver(ParameterBaseClass):
         # now update part prop with good cell and bc cords, eg  interp water_depth
         pm.update_PartProp(t2, sel)
 
-        # do any status only changes,
+        # do any status only changes, eg stranding by tide
         # eg total water depth used for tidal stranding must be up to date
-        if 'total_water_depth' in part_prop :
-            self.tidal_stranding_from_total_water_depth(part_prop['total_water_depth'].data,
-                                                    si.particle_status_flags['frozen'],
-                                                    si.particle_status_flags['stranded_by_tide'],
-                                                    si.particle_status_flags['moving'],
-                                                    si.minimum_total_water_depth,
-                                                    sel,
-                                                    part_prop['status'].data)
-        self.code_timer.stop('post_step_bookeeping_and_dispersion')
+        # (dry_cell_index, status_frozen, status_stranded ,status_moving, sel, status)
+        solver_util.tidal_stranding_from_dry_cell_index(
+                                           si.grid['dry_cell_index'],
+                                           part_prop['n_cell'].data,
+                                           si.particle_status_flags['frozen'],
+                                           si.particle_status_flags['stranded_by_tide'],
+                                           si.particle_status_flags['moving'],
+                                           sel,
+                                           part_prop['status'].data)
 
-    @staticmethod
-    @njit
-    def tidal_stranding_from_total_water_depth(total_water_depth, status_frozen, status_stranded,status_moving, min_water_depth, sel, status):
-        # look at all particles in buffer to check total water depth < min_water_depth
-        for n in sel:
-            if status[n] >= status_frozen:
-                if total_water_depth[n] < min_water_depth:
-                    status[n] = status_stranded
-                elif status[n] == status_stranded:
-                    # unstrand if already stranded, if status is on bottom,  remains as is
-                    status[n] = status_moving
+        self.code_timer.stop('post_step_bookeeping')
 
-    def screen_output(self,n_steps, nt0, nb0,  nb,  ns, t1, t0_step,computation_started):
+
+
+    def screen_output(self,n_steps, nt0, nb0,  nb,  ns, t1, t0_step):
 
         si= self.shared_info
         fraction_done= abs((t1 -si.model_start_time) / si.model_duration)
@@ -280,8 +270,8 @@ class Solver(ParameterBaseClass):
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(t1) + ':'
         s +=    si.classes['particle_group_manager'].screen_info()
-        s += ' Finishes: ' + (datetime.now() +(1.-fraction_done)*(datetime.now()-computation_started)).strftime('%y-%m-%d %H:%M')
         timePerStep = perf_counter() - t0_step
+        #s += ' Finishes: ' + (datetime.now() + timePerStep*n_steps/(1.-fraction_done)).strftime('%y-%m-%d %H:%M')
         s +=  ' Step-%4.0f ms' % (timePerStep * 1000.)
 
         si.case_log.write_msg(s)

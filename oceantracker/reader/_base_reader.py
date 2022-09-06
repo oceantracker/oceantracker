@@ -12,6 +12,7 @@ from oceantracker.util.basic_util import nopass
 from oceantracker.fields.util.fields_util import depth_aver_SlayerLSC_in4D
 from copy import copy
 from oceantracker.util.cord_transforms import WGS84_to_UTM
+from oceantracker.reader.util import reader_util
 
 class _BaseReader(ParameterBaseClass):
 
@@ -30,6 +31,7 @@ class _BaseReader(ParameterBaseClass):
                                                     'triangles': PVC(None, str, is_required=True),
                                                     'zlevel': PVC(None, str),
                                                     'bottom_cell_index': PVC(None, str),
+                                                    'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell'),
                                                     },
                                  'field_variables': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3),
                                                      'tide': PVC(None, str),
@@ -49,7 +51,8 @@ class _BaseReader(ParameterBaseClass):
     def _file_checks(self, file_name, msg_list): pass
     def read_hindcast_info(self,nc): pass  # read hindcast attibutes from first file, eg z transforms for ROMS files
     def _setup_grid(self, nc, reader_build_info): nopass('_setup_grid required')
-    def  preprocess_field_variable(self, name, data, nc=None): return data # allows tweaks to named fields, eg if name=='depth:
+    def  preprocess_field_variable(self, name, data, nc): return data # allows tweaks to named fields, eg if name=='depth:
+
     def _build_grid_attributes(self, grid): pass
 
     def initialize(self):
@@ -112,9 +115,6 @@ class _BaseReader(ParameterBaseClass):
         if type(var_list) is not list: var_list=[var_list] # if a string make a list of 1
         var_list = [v for v in var_list if v != None]
         var_file_name0=var_list[0]
-
-
-
 
 
         if self.params['dimension_map']['z'] is not None and nc.is_var_dim(var_file_name0, self.params['dimension_map']['z']):
@@ -183,7 +183,7 @@ class _BaseReader(ParameterBaseClass):
             buffer_index = b0 + np.arange(num_read)
             file_index = fi['file_offset'][nt_available]
 
-            s = 'Reading-file-' + ':%1.0f-' % n_file + path.basename(fi['names'][n_file]) + ':%04.0f' % file_index[0] + ':%04.0f:' % file_index[-1]
+            s = 'Reading-file-' + ':%1.0f-' % (n_file+1) + path.basename(fi['names'][n_file]) + ':%04.0f' % file_index[0] + ':%04.0f:' % file_index[-1]
             s += ', Steps in file %4.0f' % fi['n_time_steps'][n_file]
             s += ' nt available %4.0f' % nt_available[0] + ':%4.0f' % nt_available[-1]
             s += ' file offsets %4.0f' % file_index[0] + ':%4.0f' % file_index[-1]
@@ -196,13 +196,18 @@ class _BaseReader(ParameterBaseClass):
             # read time varying vector and scalar reader fields
             for name, field in si.class_list_interators['fields']['from_reader_field'].items():
                 if field.is_time_varying():
-                    data = self.read_field_variable_as4D(nc, field, file_index=file_index)
-                    field.data[buffer_index, ...] = self.preprocess_field_variable(name, data, nc=nc)
+                    data = self.read_field_variable_as4D(name, nc, field, file_index=file_index)
+                    data = self.preprocess_field_variable(name, data, nc) # do any customised tweaks
+
+                    if field.info['requires_depth_averaging']:
+                        data = fields_util.depth_aver_SlayerLSC_in4D(data, si.grid['zlevel'], si.grid['bottom_cell_index'])
+
+                    field.data[buffer_index, ...] = data
 
                     if name in self.params['field_variables_to_depth_average']:
                         data = fields_util.depth_aver_SlayerLSC_in4D(data, si.grid['zlevel'], si.grid['bottom_cell_index'])
                         si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = data
-            nc.close()
+
 
             # update user fields from newly read fields
             for field_types in ['derived_from_reader_field','user']:
@@ -210,12 +215,22 @@ class _BaseReader(ParameterBaseClass):
                     if field.is_time_varying():
                         field.update(buffer_index)
 
-            if 'total_water_depth' in si.classes['fields']:
-                # calculate dry cell flags, if any cell node is dry
-                si.grid['is_dry_cell'][:] = 0
-                for nn in range(3):
-                    sel = si.classes['fields']['total_water_depth'].data[:, si.grid['triangles'][:, nn], 0, 0] <= si.minimum_total_water_depth
-                    si.grid['is_dry_cell'][sel] = 1
+            # calculate dry cell flags, if any cell node is dry
+            if self.params['grid_variables']['is_dry_cell'] is None:
+                if si.grid['zlevel'] is None and 'tide' in si.classes['fields'] and 'water_depth' in si.classes['fields']:
+                    reader_util.set_dry_cell_flag_from_tide(buffer_index, si.grid['triangles'],
+                                                            si.classes['fields']['tide'].data, si.classes['fields']['water_depth'].data,
+                                                            si.minimum_total_water_depth, si.grid['is_dry_cell'])
+                else:
+                    reader_util.set_dry_cell_flag_from_zlevel(buffer_index, si.grid['triangles'],
+                                                              si.grid['zlevel'], si.grid['bottom_cell_index'],
+                                                              si.minimum_total_water_depth, si.grid['is_dry_cell'])
+            else:
+                # get dry cells for each triangle allowing for splitting quad cells
+                data = nc.read_a_variable(self.params['grid_variables']['is_dry_cell'],file_index)
+                si.grid['is_dry_cell'][buffer_index,:] =  np.concatenate((data, data[:, si.grid['triangles_to_split'] ]), axis=1)
+
+            nc.close()
 
             total_read += num_read
             s = '    read file at time ' + time_util.seconds_to_pretty_str(si.grid['time'][buffer_index[0]])
@@ -234,7 +249,7 @@ class _BaseReader(ParameterBaseClass):
         self.code_timer.stop('reading_to_fill_time_buffer')
         return total_read
 
-    def read_field_variable_as4D(self,nc, field, file_index=None):
+    def read_field_variable_as4D(self,name, nc, field, file_index=None):
         si= self.shared_info
         # set up space to read data into
         sd=[1,] + list(field.data.shape[1:])
@@ -255,8 +270,8 @@ class _BaseReader(ParameterBaseClass):
                 data[:, :, :, range(m, m + var['num_components'])] = nc.read_a_variable(var['name_in_file'], file_index).reshape(s)
             m += var['num_components']
 
-        if field.info['requires_depth_averaging']:
-            data = depth_aver_SlayerLSC_in4D(data, si.grid['zlevel'], si.grid['bottom_cell_index'])
+
+
         return data
 
     def is_in_buffer(self, nt):
@@ -305,7 +320,7 @@ class _BaseReader(ParameterBaseClass):
         d={'time_zone':  self.params['time_zone'],
            'hindcast_starts': time_util.seconds_to_iso8601str(self.get_first_time_in_hindcast()),
            'hindcast_ends':time_util.seconds_to_iso8601str(self.get_last_time_in_hindcast()),
-           'hindcast_duration':time_util.duration_str_from_seconds(self.get_last_time_in_hindcast() - self.get_first_time_in_hindcast()),  # info_file = BuildCaseInfoFile()
+           'hindcast_duration_days':(self.get_last_time_in_hindcast() - self.get_first_time_in_hindcast())/24/3600.,  # info_file = BuildCaseInfoFile()
            'hindcast_timestep': self.reader_build_info['sorted_file_info']['time_step'],
            'input_dir' : self.params['input_dir'],
            'first_file': self.reader_build_info['sorted_file_info']['names'][0],
@@ -313,4 +328,5 @@ class _BaseReader(ParameterBaseClass):
            }
 
         return d
+
 

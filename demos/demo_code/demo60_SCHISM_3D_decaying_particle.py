@@ -25,4 +25,4 @@ animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
                             vmax=1.0,
                             movie_file=output_file + '.mp4' if output_file is not None else None,
                             fps=24,
-                            interval=20)
+                            interval=20, show_dry_cells=True)

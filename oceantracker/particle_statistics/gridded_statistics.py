@@ -123,9 +123,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             sgrid['y_bin_edges'] = []
 
             # loop over release groups to get bin edges
-            pg =si.classes['particle_release_groups']
-            for ng  in range(ngroups):
-                x0 = pg[ng].info['points']
+            for name, prg  in si.classes['particle_release_groups'].items():
+                x0 = prg.info['points'] # works for point and polygon releases,
                 sgrid['x_bin_edges'].append( np.nanmean(x0[:, 0]) + base_x)
                 sgrid['y_bin_edges'].append(np.nanmean(x0[:, 1]) + base_y)
 
