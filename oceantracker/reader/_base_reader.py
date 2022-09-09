@@ -83,6 +83,7 @@ class _BaseReader(ParameterBaseClass):
             file_info['time_step'].append(time[1] - time[0])
             file_info['n_time_steps'].append(time.shape[0])
             if n + 1 >= self.params['max_numb_files_to_load']: break
+
         return file_info
 
     def _file_checks(self, file_name, msg_list):

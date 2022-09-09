@@ -7,7 +7,7 @@
     },
     "reader": {
         "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
-        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast",
+        "input_dir": "demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",
         "depth_average": false,
         "field_variables": {
@@ -79,8 +79,10 @@
                         5489972.7479
                     ]
                 ],
-                "z_min": -2,
-                "z_max": -4,
+                "z_range": [
+                    -2,
+                    -4.0
+                ],
                 "pulse_size": 10,
                 "release_interval": 3600
             }

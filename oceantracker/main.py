@@ -35,7 +35,7 @@ from oceantracker.util.module_importing_util import import_module_from_string
 
 import subprocess
 
-code_version = '0.3.01.00 Sept 6 2022'
+code_version = '0.3.01.01 Sept 9 2022'
 
 run_info = {'user_note': {}, 'screen_log': [],
             'run_started': datetime.now(),
@@ -497,8 +497,9 @@ class _RunOceanTrackerClass(object):
             if case_file is not None :
                 c= json_util.read_JSON(path.join(run_output_dir, case_file))
                 sinfo = c['info']['solver']
-                nPart += sinfo['total_num_particles_moving']/sinfo['n_time_steps_completed']
-                n_part_steps += sinfo['n_time_steps_completed'] * sinfo['total_num_particles_moving'] /float(sinfo['n_time_steps_completed'])  # number of steps times number of particles
+                ns = 1 if sinfo['n_time_steps_completed'] == 0 else sinfo['n_time_steps_completed']
+                nPart += sinfo['total_num_particles_moving']/ns
+                n_part_steps += sinfo['n_time_steps_completed'] * sinfo['total_num_particles_moving'] /float(ns)  # number of steps times number of particles
 
         n_part_steps = max(1, n_part_steps)
         num_cases = len(case_info_files)

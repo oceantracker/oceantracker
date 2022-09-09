@@ -40,5 +40,5 @@ anim = plot_tracks(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
 # animate particles
 anim = animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
                          title='Minimal example of OceanTracker with 3D point release',
-                         movie_file='output\\minimal_example.mp4')
+                         movie_file='output\\minimal_example.mp4', show_dry_cells=True)
 

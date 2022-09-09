@@ -14,6 +14,8 @@ class _CorePolygonMethods(ParameterBaseClass):
                                                      can_be_empty_list=False)
                                  })
 
+        self.remove_default_params(['grid_center','release_group_centered_grids', 'grid_span' ])
+
         self.file_tag = 'polygon_stats'
 
     def initialize(self, **kwargs):
@@ -40,6 +42,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         super().__init__()
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('stats_polygon_time',str)})
+
 
     def check_requirements(self):
         msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['x'])

@@ -21,7 +21,7 @@ poly_points_large=[[1597682.1237, 5489972.7479],
                        [1597682.1237, 5489972.7479]]
 demo_base_params=\
 {
- 'shared_params' :{'output_file_base' : 'demo01_plot_tracks',
+ 'shared_params' :{'output_file_base' : None,
                    'add_date_to_run_output_dir': False,
                    },
      'reader': {"class_name": 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
@@ -55,6 +55,7 @@ p1['base_case_params'].update({
                                'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
                                                 'time_steps_per_per_file':200}})
 
+p1['shared_params'].update({'output_file_base' :'demo01_plot_tracks' ,'backtracking': True})
 params.append(p1)
 
 # demo 2 track animation
@@ -254,7 +255,7 @@ s55['reader'].update({'depth_average': False,'field_variables_to_depth_average' 
 s55['base_case_params']['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
                                                      'pulse_size': 10, 'release_interval': 3600},
                                                     {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
-                                    'points': poly_points,'z_min' : -2,'z_max' : -4,
+                                    'points': poly_points, 'z_range' :[-2, -4.],
                                     'pulse_size': 10, 'release_interval':  3600}
                                                     ]
 s55['base_case_params']['velocity_modifiers']= [
