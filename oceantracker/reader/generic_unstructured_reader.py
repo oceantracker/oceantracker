@@ -72,9 +72,11 @@ class GenericUnstructuredReader(_BaseReader):
                 i2 = fm.add_field('depth_averaged_from_reader_field', p, crumbs='Adding depth averaged field, derived from reader field >>> ' + name)
                 i2.initialize()
 
-        # get dry cells from total water depth
-        si.hindcast_is3D = si.classes['fields']['water_velocity'].is3D()
+        # get dry cells from total water depth??
+
+
         nc.close()
+
 
         # needed for force read at first time step read to make
         self.buffer_info['n_filled'] = 0

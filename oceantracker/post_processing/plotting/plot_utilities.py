@@ -122,13 +122,13 @@ def plot_dry_cells(track_data,show_dry_cells=True, nt=0):
 def plot_release_points_and_polygons(d, release_group=None, ax = plt.gca(), color =[.2, .8, .2]):
     # release_group is 1 based
     if release_group is None :
-        sel= range(len(d['particle_release_groups'])) # show all
+        sel= range(len(d['particle_release_group_info'])) # show all
     else:
         sel = [release_group-1]
 
     for n in sel:
 
-        rg = d['particle_release_groups'][n]
+        rg = d['particle_release_group_info'][n]
         p = np.asarray(rg['points'])
         if 'user_polygonID' in rg:
             ax.plot(p[:, 0], p[:, 1], '-', color=color,zorder=8, linewidth=1)

@@ -228,6 +228,9 @@ class ParameterListChecker(object):
         i =self.info
         param_crumb_trail = crumbs + crumb_seperator + name
 
+        if user_list is not None and type(user_list) != list:
+            append_message(msg_list, 'ParameterListChecker: param "' + param_crumb_trail + '" must be a list ', exception=GracefulExitError)
+
         if self.info['is_required'] and user_list is None and base_list is None:
             append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" is required ', exception = GracefulExitError)
             

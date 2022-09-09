@@ -9,10 +9,6 @@ class ROMSreader(object):
 
         self.file_name=fn
         self.nc =NetCDFhandler(self.file_name)
-        # subset fro testing,  384.2305  539.9580  896.4186  995.9659
-        self.sel_lat=[384,539]
-        self.sel_lon = [896, 995]
-
         self.grid = self._build_grid()
 
     def read_ROMS_grid(self):
@@ -22,27 +18,39 @@ class ROMSreader(object):
         grid['lat'] = nc.read_a_variable('lat_psi')
         grid['lon'] = nc.read_a_variable('lon_psi')
 
-        # tag open bounday  open and land mask
+        # tag open boundary  open and land mask
 
         return grid
 
-    def read_water_velocity(self):
-        # read water veocity anf move to psi grid
+    def read_water_velocity(self, nb):
+        # read water velocity anf move to psi grid
         nc = self.nc
-        wv =[]
-        u = nc.read_a_variable('u')
-        u = (u[:,1:, :] + u[:,:-1, :])/2.0
+        grid= self.grid
+        nt = nc.get_dim_size('ocean_time')
+        nz = nc.get_dim_size('s_rho')
+        s1= (nt,nz, self.grid['nodes_to_keep'].size)
+        s2 = (nt, + grid['x'].shape[0], nz ,3)
+        nkeep = self.grid['nodes_to_keep'].flatten()
 
-        return wv
+        uv = np.full(s2,np.nan, dtype= np.float32)
+
+        u = nc.read_a_variable('u')
+        u = (u[:,:, 1:, :] + u[:,:, :-1, :]) / 2.0
+        uv[:, :, :, 0]  = u.reshape(s1)[:,:,nkeep].transpose((0,2,1))
+
+
+        u = nc.read_a_variable('v').transpose((0,2,3,1))
+        u = (u[:, :,:  1:] + u[:, :, :-1])/2.0
+        uv[:, :, :, 1] = u.reshape(s1)[:, :, nkeep].transpose((0, 2, 1))
+        # to add vertical vel if present
+
+        return uv
 
     def _build_grid(self):
 
         roms = self.read_ROMS_grid()
-        # subset for testing
-        for key in roms:
-            roms[key] = roms[key][self.sel_lon[0]:self.sel_lon[1],self.sel_lat[0]:self.sel_lat[1]]
 
-        # make tiangualtioon
+        # make triangualtioon
         grid={'x': np.hstack((roms['lon'].flatten().reshape(-1,1),
                               roms['lat'].flatten().reshape(-1,1)))}
 
@@ -65,7 +73,6 @@ class ROMSreader(object):
         DT = tri.Triangulation(grid['x'][:, 0], grid['x'][:, 1])
         grid['triangles'] = DT.triangles
 
-
         # find node types, add possible open boundary first
         grid['node_type']= np.full_like(grid['nodes_to_keep'], 0,dtype=np.int8)
         grid['node_type'][[0,-1],:] =   2
@@ -84,10 +91,13 @@ class ROMSreader(object):
 
 if __name__ == "__main__":
 
-    fn= 'F:\\Hindcasts\\ROMtestdata\\Nordic-4km_SLEVELS_avg_00_subset2Feb2016.nc'
     fn= 'F:\\Hindcasts\Hindcast_samples_tests\ROMS_samples\ocean_his_0001.nc'
+    fn = 'F:\\Hindcasts\Hindcast_samples_tests\ROMS_samples\\nz5km_his_201001.nc'
+
+
     R= ROMSreader(fn)
-    R.read_water_velocity()
+    nb= np.arange(10)
+    R.read_water_velocity(nb)
 
     if 1 == 1:
         plt.triplot(R.grid['x'][:, 0], R.grid['x'][:, 1], R.grid['triangles'], lw =0.3)

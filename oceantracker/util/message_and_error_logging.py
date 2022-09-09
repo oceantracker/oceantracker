@@ -71,6 +71,13 @@ def append_message(msg_list, msg, warning=False,note=False, hint=None, tag=None,
                              exception=exception, traceback_str=traceback_str,
                              tabs=tabs, hint=hint, crumbs=crumbs)
         msg_list.append(m)
+
+    if exception is not None:
+        for m in msg:
+            print('Fatal error >> ' + m)
+            #todo add to log file
+        #raise(FatalError)
+
     return msg_list
 
 class MessageLogging(object):

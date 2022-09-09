@@ -22,31 +22,31 @@ class PolygonRelease(PointRelease):
         # sort out list  polygon from points
         info = self.info
         si= self.shared_info
-        points = np.array(self.params['points']).astype(np.float64)
 
-        if points.shape[0] < 3:
-            si.case_log.write_msg('For polygon release group  "points" parameter have at least 3 points, given ' + str(points), exception = GracefulExitError)
 
-        self.polygon = InsidePolygon(verticies = points[:,:2])
+        info['points'] = np.asarray( self.params['points']).astype(np.float64)
 
-        info['points'] =  self.polygon.points
+        if info['points'].shape[0] < 3:
+            si.case_log.write_msg('For polygon release group  "points" parameter have at least 3 points, given ' + str(info['points']), exception=GracefulExitError)
 
-        area = self.polygon.get_area()
+        self.polygon = InsidePolygon(verticies = info['points'][:,:2])
 
-        if area < 1:
-            si.case_log.write_msg('Release group = ' + str(self.info['release_groupID'])
-                           + ', a Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(area), exception = GracefulExitError)
+        info['polygon_area'] = self.polygon.get_area()
+
+        if info['polygon_area']  < 1:
+            si.case_log.write_msg('Release group = ' + str(self.info['instanceID'])
+                           + ', a Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), exception = GracefulExitError)
 
         info['number_released'] = 0
         info['pulse_count'] = 0
 
 
-    def estimated_total_number_released(self):
+    def estimated_total_number_released(self, release_info):
         info = self.info
-        if info['release_schedule_times'] is None:
+        if release_info['release_schedule_times'] is None:
             return 0
         else:
-            npart = self.params['pulse_size'] * info['release_schedule_times'].shape[0]
+            npart = self.params['pulse_size'] * release_info['release_schedule_times'].shape[0]
             npart = int(npart + max(10, .03 * npart))  # add 3% more
             return npart
 
@@ -60,11 +60,6 @@ class PolygonRelease(PointRelease):
         # select those inside polygon and domain
         sel = self.polygon.inside_indices(xy_candidates)
         x = xy_candidates[sel, :]
-
-        if si.hindcast_is3D:
-            x  = np.hstack((x, np.zeros((x.shape[0], 1)) ))
-            if len(self.params['z_range']) > 0:
-                x[:, 2] = np.random.uniform(self.params['z_range'][0], self.params['z_range'][1])
 
         return x
 

@@ -30,6 +30,7 @@ class FieldGroupManager(ParameterBaseClass):
     def add_field(self, field_type, class_params, crumbs=None):
         si = self.shared_info
         i = si.add_class_instance_to_list_and_merge_params('fields', field_type, class_params, crumbs=crumbs)
+        si.add_class_instance_to_interators(i.params['name'], 'fields', field_type, i)
         return i
 
     def setup_interp_time_step(self,nb, time_sec, xq, active):

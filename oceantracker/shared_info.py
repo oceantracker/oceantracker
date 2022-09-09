@@ -24,7 +24,7 @@ class SharedInfoClass(object):
                          crumbs='Adding core class type=' + class_type,
                          exception = GracefulExitError, raiseerrors=True)
 
-        i, msg = import_module_from_string(class_params['class_name'])
+        i, msg = import_module_from_string(class_params['class_name'].strip())
         cl.add_messages(msg, raiseerrors=True)
 
         # merge params
@@ -99,11 +99,16 @@ class SharedInfoClass(object):
             cl.write_msg('add_to_class_list: iteration_group  for class_type=' + class_type + ', group="'
                                     + iteration_group + '", is not one of known types=' + str(self.class_list_interators[class_type].keys()), exception = GracefulExitError)
 
+        return i
+
+
+    def add_class_instance_to_interators(self, name, class_type, iteration_group, i):
+        i.info['instanceID'] = len(self.classes[class_type]) # needed for release group identification info etc
         self.classes[class_type][name] = i
         self.class_list_interators[class_type]['all'][name] = i
         self.class_list_interators[class_type][iteration_group][name] = i
 
-        return i
+
 
     def all_class_instance_pointers_iterator(self, asdict=False):
         # build list of all points for iteration, eg in calling all close methods

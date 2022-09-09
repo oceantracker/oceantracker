@@ -87,8 +87,7 @@ class ParameterBaseClass(object):
         for key in name_list:
             if key in self.default_params:
                 del self.default_params[key]
-            else:
-                si.case_log.write_msg('Trying to remove default parameter which does not exist, param =' + key, warning=True)
+
 
 
     def merge_with_class_defaults(self, case_param, base_case, msg_list=[], crumbs=None):

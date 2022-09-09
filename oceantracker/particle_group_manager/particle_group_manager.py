@@ -60,14 +60,16 @@ class ParticleGroupManager(ParameterBaseClass):
         # see if any group is ready to release
         self.code_timer.start('release_particles')
         si = self.shared_info
-        new_buffer_indices = np.full((0,),0,np.int32)
+        new_buffer_indices = np.full((0,), 0, np.int32)
+
         for g in si.class_list_interators['particle_release_groups']['all'].values():
-            if g.info['release_schedule_times'] is not None and g.info['index_of_next_release'] < g.info['release_schedule_times'].shape[0] \
-                    and np.any(t * si.model_direction >= g.info['release_schedule_times'][g.info['index_of_next_release']] * si.model_direction):
+            ri = g.info['release_info']
+            if ri['release_schedule_times'] is not None and ri['index_of_next_release'] < ri['release_schedule_times'].shape[0] \
+                    and np.any(t * si.model_direction >= ri['release_schedule_times'][ri['index_of_next_release']] * si.model_direction):
                 x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
-                new_index = self.release_a_particle_group_pluse(nb, t,  x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
+                new_index = self.release_a_particle_group_pulse(nb, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index))
-                g.info['index_of_next_release'] += 1
+                ri['index_of_next_release'] += 1
 
         # for all new particles update cell and bc cords for new particles all at same time
         part_prop = si.classes['particle_properties']
@@ -100,7 +102,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         return new_buffer_indices #indices of all new particles
 
-    def release_a_particle_group_pluse(self, nb, t,  x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess):
+    def release_a_particle_group_pulse(self, nb, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess):
         # release one pulse of particles from given group
         si = self.shared_info
 
@@ -160,6 +162,7 @@ class ParticleGroupManager(ParameterBaseClass):
         params['class_name'] = 'oceantracker.particle_properties._base_properties.TimeVaryingInfo'
         si = self.shared_info
         p = si.add_class_instance_to_list_and_merge_params('time_varying_info','manual_update', kwargs)
+        si.add_class_instance_to_interators(p.params['name'],'time_varying_info','manual_update', p)
         p.initialize()
 
         if si.write_tracks and p.params['write']:
@@ -179,6 +182,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         i = si.add_class_instance_to_list_and_merge_params('particle_properties', prop_type, prop_params,
                                                            crumbs='Adding "particle_properties" name= "' + str(prop_params['name']) + '" of type=' +   prop_type)
+        si.add_class_instance_to_interators(i.params['name'], 'particle_properties', prop_type, i)
         i.initialize()
 
         name = i.params['name']

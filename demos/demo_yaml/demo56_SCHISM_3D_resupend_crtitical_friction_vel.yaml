@@ -73,8 +73,9 @@ base_case_params:
       - 5489972.7479
     pulse_size: 10
     release_interval: 3600
-    z_max: -4
-    z_min: -2
+    z_range:
+    - -2
+    - -4.0
   particle_statistics:
   - calculation_interval: 3600
     class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
@@ -103,7 +104,7 @@ reader:
   - salt
   - water_temperature
   file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast
+  input_dir: demo_hindcast
 shared_params:
   compact_mode: true
   debug: true
