@@ -227,6 +227,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def eval_field_interpolation_at_given_locations(self, fieldObj,x, time=None,  output=None, n_cell= None):
         # in  evaluation of field interpolation at specific locations, ie not particle locations
+        #todo not working - eval_field_interpolation_at_given_locations
+
         si = self.shared_info
         part_prop= si.classes['particle_properties']
         reader = si.classes['reader']

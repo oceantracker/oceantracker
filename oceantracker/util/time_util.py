@@ -31,8 +31,6 @@ def diff(date1,date2) :  return  (date1 - date2).total_seconds()
 
 def duration_str_from_dates(date1, date2) : return  str(date2 - date1)
 
-
-
 def date_from_iso8601str(s, err_msg='')  :
     try:
         d = dateutil.parser.isoparse(s)

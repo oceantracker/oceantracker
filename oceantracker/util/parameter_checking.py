@@ -60,7 +60,7 @@ def  merge_params_with_defaults(params, default_params, base_case, crumbs='', ms
     if check_for_unknown_keys:
         for key in list(base_case.keys())+list(params.keys()):
            if key not in default_params:
-               append_message(new_msg,'unrecognised parameter:' + crumbs + crumb_seperator + key, warning=True, tag=tag)
+               append_message(new_msg,'non-standard parameter:' + crumbs + crumb_seperator + key, warning=True, tag=tag)
 
 
     for key, item in default_params.items():
@@ -77,7 +77,7 @@ def  merge_params_with_defaults(params, default_params, base_case, crumbs='', ms
             params[key], new_msg = item.check_list(key,params[key], base_case[key], new_msg, crumbs)
 
             # process list of param dicts and merge with default param dict
-            if item.info['list_type'] == dict:
+            if item.info['acceptable_types'] == dict:
                 dd = {} if item.info['default_value'] is None else item.info['default_value']
                 for n in range(len(params[key])):
                     params[key][n], new_msg = merge_params_with_defaults(params[key][n], dd, {}, msg_list=new_msg, crumbs=parent_crumb + crumb_seperator + key + '[#' + str(n) + ']')
@@ -121,7 +121,8 @@ class ParamDictValueChecker(object):
                  min=None, max=None,
                  possible_values=None,
                  doc_str=None,
-                 class_doc_feature=None):
+                 class_doc_feature=None,
+                obsolete = None):
 
         if value is not None and type(value) == dict:
             raise ValueError('"value" of default set by ParamValueChecker (PVC) can not be a dictionary, as all dict in default_params are assumed to also be parameter dict in their own right')
@@ -134,7 +135,8 @@ class ParamDictValueChecker(object):
                  max=max,
                  possible_values=possible_values,
                  is_required=is_required,
-                 list_contains_type=list_contains_type)
+                 list_contains_type=list_contains_type,
+                 obsolete = obsolete)
 
         if dtype == bool: i['possible_values'] = [True, False]  # set possible values for boolean
 
@@ -145,26 +147,29 @@ class ParamDictValueChecker(object):
 
     def check_value(self, crumb_trail, value, msg_list):
         # check given value against defaults  in class instance info
-        i = self.info
+        info = self.info
+
+        if info['obsolete'] is not None:
+            append_message(msg_list, 'Param "' + crumb_trail + '" is obsolete  - ' + info['obsolete'],warning=True)
 
         if value is None:
             # check default exits
-            if self.info['is_required']:
+            if info['is_required']:
                 append_message(msg_list,'Required parameter: user parameter "' + crumb_trail + '" is required, must be type '
-                               + str(i['type']) + ', Variable description:' + str(self.info['doc_str']), )
-            value = i['default_value']  # this might be a None default
+                               + str(info['type']) + ', Variable description:' + str(self.info['doc_str']), )
+            value = info['default_value']  # this might be a None default
 
-        elif i['type'] == str:
+        elif info['type'] == str:
             if type(value) in [np.str_]:
                 value = str(value)
             elif type(value) != str:
                 append_message(msg_list,'Value for  "' + crumb_trail + '" must be a string, value is  "' + str(value) + '"', exception = GracefulExitError)
 
-        elif i['type'] == float and type(value) == int:
+        elif info['type'] == float and type(value) == int:
             # ensure  ints are floats
             value = float(value)
 
-        elif i['type'] == 'vector':
+        elif info['type'] == 'vector':
             # a position, eg release location, needs to be a numpy array
             m='Coordinate vector "' + crumb_trail + '" must be a list of coordinate pairs or triples, eg [[ 34., 56.]], convertible to N by 2 or 3 numpy array  '
             if type(value)  not in [list , np.ndarray]:
@@ -180,10 +185,10 @@ class ParamDictValueChecker(object):
                     append_message(msg_list, m, exception = GracefulExitError)
 
         # deal with numpy versions of params, convert to python types
-        elif i['type'] == int and type(value) in [np.int8, np.int32, np.int16, np.int64]:
+        elif info['type'] == int and type(value) in [np.int8, np.int32, np.int16, np.int64]:
             value = int(value)
 
-        elif i['type'] == 'iso8601date':
+        elif info['type'] == 'iso8601date':
             try:
                 time_util.date_from_iso8601str(value)
             except Exception as e:
@@ -193,18 +198,18 @@ class ParamDictValueChecker(object):
         # check  value and type if not a None
         if value is not None:
 
-            if type(i['type']) != str and not type(value) != i['type'] and not isinstance(value, i['type']):
-                append_message(msg_list, 'Parameter "' + crumb_trail + '" data must be of type ' + str(i['type']) + ' got type= ' + str(type(value)) + ' , value given =' +str(value), exception = GracefulExitError)
+            if type(info['type']) != str and not type(value) != info['type'] and not isinstance(value, info['type']):
+                append_message(msg_list, 'Parameter "' + crumb_trail + '" data must be of type ' + str(info['type']) + ' got type= ' + str(type(value)) + ' , value given =' +str(value), exception = GracefulExitError)
             if (type(value) in [float, int]):
                 # print(name, value , i['min'])
-                if i['min'] is not None and value < i['min']:
-                    append_message(msg_list, 'Parameter "' + crumb_trail + '" must be >=' + str(i['min']) + ', value given =  ' + str(value), exception = GracefulExitError)
+                if info['min'] is not None and value < info['min']:
+                    append_message(msg_list, 'Parameter "' + crumb_trail + '" must be >=' + str(info['min']) + ', value given =  ' + str(value), exception = GracefulExitError)
 
-                if i['min'] is not None and i['max'] is not None and value > i['max']:
-                    append_message(msg_list, 'Parameter "' + crumb_trail + '" must be <= ' + str(i['min']) + ', value given=  ' + str(value), exception = GracefulExitError)
+                if info['min'] is not None and info['max'] is not None and value > info['max']:
+                    append_message(msg_list, 'Parameter "' + crumb_trail + '" must be <= ' + str(info['min']) + ', value given=  ' + str(value), exception = GracefulExitError)
 
-            if i['possible_values'] is not None and len(i['possible_values']) > 0 and value not in i['possible_values']:
-                append_message(msg_list, 'Parameter "' + crumb_trail + '" must be one of ' + str(i['possible_values']) + ', value given =  ' + str(value), exception = GracefulExitError)
+            if info['possible_values'] is not None and len(info['possible_values']) > 0 and value not in info['possible_values']:
+                append_message(msg_list, 'Parameter "' + crumb_trail + '" must be one of ' + str(info['possible_values']) + ', value given =  ' + str(value), exception = GracefulExitError)
 
         return value, msg_list  # value may be None if default or given value is None
 
@@ -212,63 +217,74 @@ class ParameterListChecker(object):
     # checks parameter list values
     # if default_list is None then list wil be None if user_list is not given
     # todo do should default value be a PVC() instance, to get control over  possible values in list , max, min etc?
-    def __init__(self, default_list, list_type, is_required=False, can_be_empty_list= True, default_value=None,
-                  fixed_len =None, min_length=None, doc_str=None, make_list_unique=None) :
+    def __init__(self, default_list, acceptable_types, is_required=False, can_be_empty_list= True, default_value=None,
+                  fixed_len =None, min_length=None, max_length=None, doc_str=None, make_list_unique=None, obsolete = None,
+                 possible_values=None,
+                 ) :
 
 
         self.info= dict(locals()) # get keyword args as dict
         self.info.pop('self') # dont want self param
 
-        requiredKW= ['default_list', 'list_type']
+        requiredKW= ['default_list', 'acceptable_types']
         for name in requiredKW:
             if name not in self.info:
                 raise ValueError('ParameterListChecker > default_list, required key words ' + str(requiredKW))
 
     def check_list(self, name, user_list, base_list, msg_list, crumbs):
-        i =self.info
-        param_crumb_trail = crumbs + crumb_seperator + name
+        info =self.info
+        crumb_trail = crumbs + crumb_seperator + name
+
+        if info['obsolete'] is not None:
+            append_message(msg_list, 'Param "' + crumb_trail + '" is obsolete  - ' + info['obsolete'],warning=True)
+
 
         if user_list is not None and type(user_list) != list:
-            append_message(msg_list, 'ParameterListChecker: param "' + param_crumb_trail + '" must be a list ', exception=GracefulExitError)
+            append_message(msg_list, 'ParameterListChecker: param "' + crumb_trail + '" must be a list ', exception=GracefulExitError)
 
         if self.info['is_required'] and user_list is None and base_list is None:
-            append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" is required ', exception = GracefulExitError)
+            append_message(msg_list,'ParameterListChecker: param "' + crumb_trail + '" is required ', exception = GracefulExitError)
             
         # check default_value type
         for v in self.info['default_list']:
-            if v is not None and type(v) not in i['list_type']:
-                append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" in default list, type of item  ' + str(v) + ', must match list_type ' + str(i['list_type']), exception = GracefulExitError)
+            if v is not None and type(v) not in info['acceptable_types']:
+                append_message(msg_list,'ParameterListChecker: param "' + crumb_trail + '" in default list, type of item  ' + str(v) + ', must match list_type ' + str(info['acceptable_types']), exception = GracefulExitError)
 
         # merge non vector lists, user, base and default lists
         # two types of list merge, appendable or required max size
         ul = [] if user_list is None else deepcopy(user_list)
         bl = [] if base_list is None else deepcopy(base_list)
-        dl = [] if i['default_list'] is None else deepcopy(i['default_list'])
+        dl = [] if info['default_list'] is None else deepcopy(info['default_list'])
 
         # check if user and base param are lists
         if type(bl) != list or type(ul) != list:
-            append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" both base and case parameters must be a lists ', exception = GracefulExitError)
+            append_message(msg_list,'ParameterListChecker: param "' + crumb_trail + '" both base and case parameters must be a lists ', exception = GracefulExitError)
 
-        if i['fixed_len'] is None:
+        if info['fixed_len'] is None:
             complete_list = dl + bl + ul
-            if i['make_list_unique'] is not None and i['make_list_unique']: complete_list = list(set(complete_list)) # only keep unique list
+            if info['make_list_unique'] is not None and info['make_list_unique']: complete_list = list(set(complete_list)) # only keep unique list
 
-        elif i['fixed_len'] is not None:
-            complete_list = i['fixed_len']*[None]
+        elif info['fixed_len'] is not None:
+            complete_list = info['fixed_len']*[None]
             complete_list[:len(dl)] = dl
             complete_list[:len(bl)] = bl  # over write with base list
             complete_list[:len(ul)] = ul # over write with user/case_lit param
-            if complete_list == i['fixed_len']*[None]: complete_list=[] # make empty if nothing set
+            if complete_list == info['fixed_len']*[None]: complete_list=[] # make empty if nothing set
 
         # check each of the list items
         for item in complete_list:
 
-            if item is not None and type(item) not in i['list_type']:
-                append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" list must all be type ' + str(i['list_type']), exception = GracefulExitError)
+            if item is not None and type(item) not in info['acceptable_types']:
+                append_message(msg_list,'ParameterListChecker: param "' + crumb_trail + '" list must all be type ' + str(info['acceptable_types']), exception = GracefulExitError)
 
-        if len(complete_list) ==0 and  not i['can_be_empty_list']:
-            append_message(msg_list,'ParameterListChecker: param "' + param_crumb_trail + '" list must must not be empty ' + str(i['list_type']), exception = GracefulExitError)
+        if len(complete_list) ==0 and  not info['can_be_empty_list']:
+            append_message(msg_list,'ParameterListChecker: param "' + crumb_trail + '" list must must not be empty ' + str(info['acceptable_types']), exception = GracefulExitError)
 
+        # check is all in acceptable values
+        if info['possible_values'] is not None:
+            for val in complete_list:
+                if val not in info['possible_values']:
+                    a=1
         return complete_list,  msg_list
 
 

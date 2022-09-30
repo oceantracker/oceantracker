@@ -23,6 +23,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si= self.shared_info
         si.create_class_interator('particle_properties', known_iteration_groups=self.known_prop_types)
         si.create_class_interator('time_varying_info')
+        info=self.info
         # is data 3D
         self.particles_in_buffer = 0
         self.particles_released = 0
@@ -62,7 +63,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         new_buffer_indices = np.full((0,), 0, np.int32)
 
-        for g in si.class_list_interators['particle_release_groups']['all'].values():
+        for g in si.class_interators_using_name['particle_release_groups']['all'].values():
             ri = g.info['release_info']
             if ri['release_schedule_times'] is not None and ri['index_of_next_release'] < ri['release_schedule_times'].shape[0] \
                     and np.any(t * si.model_direction >= ri['release_schedule_times'][ri['index_of_next_release']] * si.model_direction):
@@ -76,11 +77,11 @@ class ParticleGroupManager(ParameterBaseClass):
         si.classes['field_group_manager'].setup_interp_time_step(nb, t, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
 
         # initial values  part prop derived from fields
-        for p in si.class_list_interators['particle_properties']['from_fields'].values():
+        for p in si.class_interators_using_name['particle_properties']['from_fields'].values():
             p.initial_value_at_birth(new_buffer_indices)
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
-        for p in si.class_list_interators['particle_properties']['user'].values():
+        for p in si.class_interators_using_name['particle_properties']['user'].values():
             p.initial_value_at_birth(new_buffer_indices)
 
         # update new particles props
@@ -125,7 +126,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # as in compact mode cant rely on initial value set at array creation, due to re use of buffer
         # important for prop, for which intial values is meaning full, eg polygon events writer, where initial -1 means in no polygon
 
-        for p in si.class_list_interators['particle_properties']['manual_update'].values():  # catch any not manually updated with their initial value
+        for p in si.class_interators_using_name['particle_properties']['manual_update'].values():  # catch any not manually updated with their initial value
                 p.initial_value_at_birth(new_buffer_indices)
 
         #  set initial conditions/properties of new particles
@@ -213,11 +214,11 @@ class ParticleGroupManager(ParameterBaseClass):
                                                    part_prop['time_released'].dataInBufferPtr(), active, scale= -1.)
 
         # first interpolate to give particle properties from reader derived  fields
-        for key,item in si.class_list_interators['particle_properties']['from_fields'].items():
+        for key,item in si.class_interators_using_name['particle_properties']['from_fields'].items():
             si.classes['field_group_manager'].interp_named_field_at_particle_locations(key, active)
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for update
-        for p in si.class_list_interators['particle_properties']['user'].values():
+        for p in si.class_interators_using_name['particle_properties']['user'].values():
                 p.update(active)
 
         self.code_timer.stop('update_part_prop')
@@ -227,7 +228,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
-        for n,p in enumerate(si.class_list_interators['particle_release_groups']['all'].values()):
+        for n,p in enumerate(si.class_interators_using_name['particle_release_groups']['all'].values()):
 
             if p.params['maximum_age'] is not None:
 
@@ -254,13 +255,12 @@ class ParticleGroupManager(ParameterBaseClass):
         num_active = ID_alive.shape[0]
         nDead = self.particles_in_buffer - num_active
 
-        # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
+        # kill if fraction of buffer are dead or > 15% active particles are, only if buffer at least 25% full
         if nDead > 0 and self.particles_in_buffer > 0.25*si.particle_buffer_size:
-            if  nDead >= 0.25*num_active  or self.particles_in_buffer > 0.95*si.particle_buffer_size:
+            if  nDead >= 0.15*num_active  or self.particles_in_buffer > 0.9*si.particle_buffer_size:
                 # if too many dead then delete from memory
                 si.case_log.write_msg('removing dead '+ str(nDead)
-                        +' particles from memory, fraction of active dead %3.0f%% (particles removed if >25%%)' % (100*nDead/num_active)
-                        + ' fraction buffer filled %3.0f%% (particles removed if >95%%)' % (100 *self.particles_in_buffer / si.particle_buffer_size), tabs=3)
+                                      +' particles from memory, as more than 15% are dead or buffer 90% full', tabs=3)
 
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():
@@ -278,7 +278,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # make dict masp from userId and user_release_group_name to sequence number
         releaseGroups_user_maps = {'particle_release_userRelease_groupID_map': {} , 'particle_release_user_release_group_name_map': {}}
 
-        for n, x0 in enumerate(self.shared_info.class_list_interators['particle_release_groups']['all'].values()):
+        for n, x0 in enumerate(self.shared_info.class_interators_using_name['particle_release_groups']['all'].values()):
             releaseGroups_user_maps['particle_release_userRelease_groupID_map'][str(x0.params['user_release_groupID'])] = n
             releaseGroups_user_maps['particle_release_user_release_group_name_map'][str(x0.params['user_release_group_name'])] = n
 
@@ -293,7 +293,7 @@ class ParticleGroupManager(ParameterBaseClass):
         c = self._do_status_counts(part_prop['status'].dataInBufferPtr(), np.asarray(list(si.particle_status_flags.values())))
 
         # put numba counts back in dict with proper names
-        counts = {'active' : sum(c)}
+        counts={'active': sum(c)}
         for n, key in enumerate(si.particle_status_flags.keys()):
             counts[key] = c[n]
         return counts

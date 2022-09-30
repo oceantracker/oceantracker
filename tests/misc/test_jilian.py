@@ -1,9 +1,9 @@
 from oceantracker.main import run
-from oceantracker.post_processing.plotting import plot_heat_maps
+from oceantracker.post_processing.plotting import plot_statistics
 from oceantracker.post_processing.read_output_files import load_output_files
 import oceantracker.util.basic_util  as basic_util
 from oceantracker.util import  json_util, yaml_util
-from oceantracker.post_processing.plotting import plot_tracks, plot_vertical_tracks, plot_heat_maps
+from oceantracker.post_processing.plotting import plot_tracks, plot_vertical_tracks, plot_statistics
 from os import path
 import argparse
 

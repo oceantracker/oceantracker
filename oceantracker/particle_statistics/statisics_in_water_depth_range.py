@@ -19,25 +19,22 @@ class WaterDepthRangeStats(ParameterBaseClass):
         msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['water_depth'])
         return msg_list
 
-#todo add min status to sel and as param
     def select_particles_to_count(self, out):
         # count particles in less than given water depth with status large enough
         part_prop= self.shared_info.classes['particle_properties']
 
-        if self.params['count_status_equal_to'] is None:
-            sel= self.select_depth_rangeGT(part_prop['status'].dataInBufferPtr(), self.params['count_status_greater_than'],
+
+        sel= self.select_depth_rangeGT(part_prop['status'].dataInBufferPtr(), self.params['count_status_in_range'],
                                      part_prop['water_depth'].dataInBufferPtr(), self.params['min_depth'], self.params['max_water_depth'], out)
-        else:
-            sel = self.select_depth_range_statusEQ(part_prop['status'].dataInBufferPtr(), self.params['count_status_equal_to'],
-                                            part_prop['water_depth'].dataInBufferPtr(), self.params['min_depth'], self.params['max_water_depth'], out)
         return sel
 
     @staticmethod
     @njit
-    def select_depth_range_statusGT(status,min_status, depth,min_depth,max_depth, out):
+    def select_depth_range_statusGT(status,count_status_in_range, depth,min_depth,max_depth, out):
         nfound = 0
         for n in range(status.shape[0]):
-           if status[n] > min_status and min_depth < depth[n] < max_depth:
+           if (count_status_in_range[0] <= status[n] > count_status_in_range[1]) and \
+                   (min_depth < depth[n] < max_depth):
                 out[nfound] = n
                 nfound += 1
 

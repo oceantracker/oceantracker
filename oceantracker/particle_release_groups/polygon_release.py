@@ -24,12 +24,12 @@ class PolygonRelease(PointRelease):
         si= self.shared_info
 
 
-        info['points'] = np.asarray( self.params['points']).astype(np.float64)
+        info['points'] = np.asarray( self.params['points']).astype(np.float64)[:,:2] # make sure i is 2D
 
         if info['points'].shape[0] < 3:
             si.case_log.write_msg('For polygon release group  "points" parameter have at least 3 points, given ' + str(info['points']), exception=GracefulExitError)
 
-        self.polygon = InsidePolygon(verticies = info['points'][:,:2])
+        self.polygon = InsidePolygon(verticies = info['points'])
 
         info['polygon_area'] = self.polygon.get_area()
 

@@ -5,7 +5,7 @@ from oceantracker.util  import yaml_util
 from os import path
 
 import argparse
-from oceantracker.post_processing.plotting import plot_tracks, plot_vertical_tracks, plot_heat_maps, plot_utilities
+from oceantracker.post_processing.plotting import plot_tracks, plot_vertical_tracks, plot_statistics, plot_utilities
 statistical_polygon_list = [
     {
         "user_polygon_name": "geesthacht",
@@ -462,7 +462,7 @@ if __name__ == '__main__':
     #x0 = [[502096, 5968781, -2]]
     pulse_size = int(1000000/8) # 7 releases points/groups
     release_interval = 0
-    pulse_size= 10
+    pulse_size= 100
 
     release_interval = 3600
     case ={'run_params':{ 'particle_buffer_size': 100000,

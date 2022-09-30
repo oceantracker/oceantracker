@@ -93,7 +93,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         # do counts
         self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
 
-        self.write_stats(self.nWrites,time)
+        self.write_time_varying_stats(self.nWrites,time)
         self.nWrites += 1
 
     def info_to_write_at_end(self):pass  # nothing extra to write

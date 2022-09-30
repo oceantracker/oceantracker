@@ -29,7 +29,7 @@ def demo02_animation(runInfo_file_name,output_file=None):
 
 def demo03_heatmaps(runInfo_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
-    from oceantracker.post_processing.plotting.plot_heat_maps import plot_heat_map, animate_heat_map
+    from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
     case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
@@ -46,7 +46,7 @@ def demo03_heatmaps(runInfo_file_name,output_file=None):
 
 def demo04_ageBasedHeatmaps(runInfo_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
-    from oceantracker.post_processing.plotting.plot_heat_maps import plot_heat_map, animate_heat_map
+    from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
     case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
@@ -60,7 +60,7 @@ def demo04_ageBasedHeatmaps(runInfo_file_name,output_file=None):
 
 def demo05_parallel(runInfo_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
-    from oceantracker.post_processing.plotting.plot_heat_maps import plot_heat_map, animate_heat_map
+    from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
     # parallel run no plot
     return None
 
@@ -133,6 +133,26 @@ def demo09_polygon_release_overlapping_land(runInfo_file_name,output_file=None):
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
                                 show_grid=False,
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=50)
+    return None
+
+def demo10_polygon_residence_demo(runInfo_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file,load_residence_file
+    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+    from oceantracker.post_processing.plotting.plot_statistics import plot_residence
+
+    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
+    residence_data = load_residence_file(case_info_file_name)
+    plot_residence(residence_data, heading='Number residence in release polygon demo',
+                   plot_file_name=output_file + '.jpeg' if output_file is not None else None)
+
+    track_data = load_particle_track_vars(case_info_file_name, fraction_to_read=0.9)
+    animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],show_grid=True,
+                                heading='Residence in release polygon counts demo',
+                                release_group=None,
+                                movie_file=output_file + '.mp4' if output_file is not None else None,
+                                fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
+
     return None
 
 def demo50_SCHISM_depthAver(runInfo_file_name,output_file=None):
@@ -251,7 +271,7 @@ def demo60_SCHISM_3D_decaying_particle(runInfo_file_name,output_file=None):
 
 def demo61_concentration_test(runInfo_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_concentration_vars, get_case_info_file_from_run_file
-    from oceantracker.post_processing.plotting.plot_heat_maps import animate_concentrations
+    from oceantracker.post_processing.plotting.plot_statistics import animate_concentrations
 
     case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 

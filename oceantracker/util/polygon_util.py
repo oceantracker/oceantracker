@@ -17,7 +17,7 @@ class InsidePolygon(object):
 
     def is_inside(self, xq,  out = None, active = None):
         # returns vector of booleans if each point in (N,2) numpy array of points
-        # sel only proceses id numbers in sel
+
 
         # guard against single xq as [x,y], not [[x,y]]
         if xq.size ==2 and xq.ndim ==1:  xq = xq.reshape((-1,2))
@@ -163,6 +163,27 @@ class InsidePolygon(object):
                 n_outside +=1
 
         return inside_IDs[:n_inside], outside_IDs[:n_outside]
+
+@njit
+def inside_ray_tracing_single_point(xq, lb, slope_inv, bounds):
+    # finds if a single point is inside polygon based on ray from point to +ve x
+    b1, b2, b3, b4 = bounds
+    x = xq[0]
+    y = xq[1]
+    xints = 0
+    inside = False
+    if b1 <= x <= b2 and b3 <= y <= b4:  # inside bounds of polygon
+        for i in range(lb.shape[0]):
+            # get line's bounding box, faster to do this in one line tuple assignment
+            p1x, p1y, p2x, p2y = lb[i, 0, 0], lb[i, 0, 1], lb[i, 1, 0], lb[i, 1, 1]
+            if p1y < y <= p2y:
+                if x <= p2x:
+                    if p1y != p2y:
+                        xints = (y - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
+                    if p1x == p2x or x <= xints:
+                        inside = not inside
+
+    return inside
 
 def set_up_list_of_polygon_instances(polygon_list):
     msg=[]

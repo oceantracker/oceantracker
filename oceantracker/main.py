@@ -35,15 +35,9 @@ from oceantracker.util.module_importing_util import import_module_from_string
 
 import subprocess
 
-code_version = '0.3.01.01 Sept 9 2022'
+code_version = '0.3.01.03 Oct 01 2022'
 
-run_info = {'user_note': {}, 'screen_log': [],
-            'run_started': datetime.now(),
-            'run_ended': None,
-            'elasped_time': None,
-            'performance': {},
-            'output_files': {},
-            }
+
 
 def run(user_params):
     OT= _RunOceanTrackerClass()
@@ -77,7 +71,7 @@ class _RunOceanTrackerClass(object):
         rl = self.run_log
         rl.set_up_log_file(output_files['run_output_dir'], output_files['output_file_base'], 'runLog')
         self.package_info, msg_list = check_package(__file__)
-        rl.add_messages(msg_list, raiseerrors=True)
+        rl.add_messages(msg_list)
 
         try:
             full_runInfoJSON_file_name, has_errors = self._A2_do_run(user_params, output_files)
@@ -141,11 +135,16 @@ class _RunOceanTrackerClass(object):
         return output_files
 
     def _A2_do_run(self, params, output_files):
-        run_info[ 'screen_log'] = []
+        run_info = {'user_note': {}, 'screen_log': [],
+                    'run_started': datetime.now(),
+                    'run_ended': None,
+                    'elasped_time': None,
+                    'performance': {},
+                    'output_files': {},
+                    }
         rl= self.run_log
         t0 = time.perf_counter()
 
-        rl.insert_screen_line()
         rl.write_msg('Starting ' + package_fancy_name+ '  Version ' + code_version )
 
         # clean up params
@@ -155,6 +154,7 @@ class _RunOceanTrackerClass(object):
 
         # get defaults for shared params, to set up output locations etc, todo moved to dev above
         working_params['shared_params'], msg_list = merge_params_with_defaults(params['shared_params'], run_params_defaults_template['shared_params'], {}, msg_list=[], tag='shared_params')
+
 
         rl.set_max_warnings(working_params['shared_params']['max_warnings'])
         rl.insert_screen_line()
@@ -196,11 +196,9 @@ class _RunOceanTrackerClass(object):
 
         # the end
         rl.show_all_warnings_and_errors()
-        rl.insert_screen_line()
         rl.write_progress_marker('Finished ' + package_fancy_name + ' at ' + time_util.iso8601_str(datetime.now()))
         rl.write_progress_marker('Output in ' + output_files['run_output_dir'])
         rl.write_progress_marker('Run time  =  ' + str(run_info['elasped_time']))
-        rl.insert_screen_line()
         rl.close()
 
         has_errors= any(v is not None for v in case_error)
@@ -314,7 +312,7 @@ class _RunOceanTrackerClass(object):
                 class_params['class_name'] = self.package_info['short_class_name_map'][class_params['class_name']]
 
         i, msg = import_module_from_string(class_params['class_name'])
-        rl.add_msg(msg, raiseerrors=True)
+        rl.add_msg(msg)
         if msg is not None:
             msg_list += [msg]
         # use new  merge
@@ -334,10 +332,10 @@ class _RunOceanTrackerClass(object):
         params['reader']['input_dir'] = path.abspath(params['reader']['input_dir'])
 
         reader, msg = import_module_from_string(params['reader']['class_name'])  # temporary  reader to get defaults
-        rl.add_msg(msg, raiseerrors=True)
+        rl.add_msg(msg)
 
         msg_list = reader.merge_with_class_defaults(params['reader'], {}, crumbs='reader')
-        rl.add_messages(msg_list, raiseerrors=True)
+        rl.add_messages(msg_list)
 
         return  reader
 
@@ -490,28 +488,28 @@ class _RunOceanTrackerClass(object):
     def _U1_get_all_cases_performance_info(self, case_info_files, case_error_list, sparams, run_output_dir, t0):
         # finally get run totals of steps and particles
 
-        n_part_steps = 0.
-        nPart = 0
+        n_time_steps = 0.
+        total_active_particles = 0
         # load log files to get info on run from solver info
         for n, case_file, case_error in zip(range(len(case_info_files)), case_info_files,case_error_list) :
             if case_file is not None :
                 c= json_util.read_JSON(path.join(run_output_dir, case_file))
                 sinfo = c['info']['solver']
-                ns = 1 if sinfo['n_time_steps_completed'] == 0 else sinfo['n_time_steps_completed']
-                nPart += sinfo['total_num_particles_moving']/ns
-                n_part_steps += sinfo['n_time_steps_completed'] * sinfo['total_num_particles_moving'] /float(ns)  # number of steps times number of particles
+                n_time_steps += sinfo['n_time_steps_completed']
+                total_active_particles += sinfo['total_active_particles']
 
-        n_part_steps = max(1, n_part_steps)
         num_cases = len(case_info_files)
 
         # JSON parallel run info data
         d = {'processors': sparams['processors'],
              'num_cases': num_cases,
              'replicates': sparams['replicates'],
-             'average_active_particles': nPart / num_cases if num_cases > 0 else None,
-             'nSecPerTimeStep': 1.E9 * (perf_counter() - t0) / n_part_steps if n_part_steps > 0 else None,
-             'total_timeSteps': n_part_steps,
+                'elapsed_time' :perf_counter() - t0,
+            'average_active_particles': total_active_particles / num_cases if num_cases > 0 else None,
+             'average_number_of_time_steps': n_time_steps/num_cases  if num_cases > 0 else None,
+             'particles_processed_per_second': total_active_particles /(perf_counter() - t0)
              }
+
         # put parallel info in first file base
         return d
 

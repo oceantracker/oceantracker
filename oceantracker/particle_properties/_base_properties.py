@@ -77,10 +77,10 @@ class ParticleProperty(_BasePropertyInfo):
         # set up data buffer
         self.data = np.full(s, self.params['initial_value'], dtype=  self.params['dtype'])
 
-    def initial_value_at_birth(self, released_IDs):
+    def initial_value_at_birth(self, new_part_IDs):
         # need to set at birth, as in compact mode particle buffer changes,
         # so cant rely on value at matrix construction in initialize
-        self.set_values(self.params['initial_value'], released_IDs)
+        self.set_values(self.params['initial_value'], new_part_IDs)  # sets this properties values
 
     def update(self): pass # manual update by default
 
@@ -123,7 +123,10 @@ class ParticleProperty(_BasePropertyInfo):
             raise Exception('compare_all_to_a_value: particle property ' + self.params['name'] +'>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
 
         # to search only those in buffer use dataInBufferPtr()
-        return particle_comparisons_util.prop_compared_to_value(self.dataInBufferPtr(), test, value, out)
+        data = self.dataInBufferPtr()
+        if out is None: out = np.full((data.shape[0],), -127, np.int32)
+        found = particle_comparisons_util.prop_compared_to_value(data, test, value, out)
+        return found
 
     def find_subset_where(self, active, test, value, out=None):
         # searches a subset of active particles to find indicies
@@ -135,3 +138,9 @@ class ParticleProperty(_BasePropertyInfo):
 
         return particle_comparisons_util.prop_subset_compared_to_value(active, self.dataInBufferPtr(), test, value, out)
 
+    def find_those_in_range_of_values(self,value1,value2, out):
+        data = self.dataInBufferPtr()
+        if out is None: out = np.full((data.shape[0],), -127, np.int32)
+
+        found= particle_comparisons_util._find_all_in_range(data, value1,value2, out)
+        return found

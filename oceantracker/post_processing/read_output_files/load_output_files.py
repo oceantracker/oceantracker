@@ -166,6 +166,22 @@ def load_stats_file(case_info_file_name, nsequence = 1, var_list=[]):
     d['grid'] = load_grid(case_info_file_name)
     return d
 
+def load_residence_file(case_info_file_name,nsequence=1, var_list=[]):
+    # load residence time in relese polygon
+
+    case_info = read_case_info_file(case_info_file_name)
+    nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
+
+    params= case_info['full_params']['particle_statistics'][nsequence-1]
+    s= case_info['info']['particle_statistics'][nsequence-1]
+
+    d= read_ncdf_output_files.read_residence_file(nc_file_name, var_list)
+    d['info']= s
+
+    d = _extract_useful_params(case_info, d)
+    d['grid'] = load_grid(case_info_file_name)
+    return d
+
 def load_events_file(case_info_file_name, nsequence = 1, ncase=0):
     # load  flat events
     #todo finish

@@ -57,15 +57,11 @@ class MyEncoder(json.JSONEncoder):
                 # make single numpy int values
                 return int(obj)
 
-            elif isinstance(obj,(np.float32, np.float64)) :
+            elif isinstance(obj,(float, np.float32, np.float64)) :
                 # make single numpy float values
-                return float(obj)  if np.isfinite(obj) else None
+                val =float(obj)  if np.isfinite(obj) else None
+                return val
 
-            elif type(obj) == float and not np.isfinite(obj):
-                # trap nan floats
-                return  None
-
-            # dates
             elif isinstance(obj, (datetime, date)):
                 return obj.isoformat()
 

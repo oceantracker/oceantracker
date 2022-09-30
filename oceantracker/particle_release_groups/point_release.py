@@ -169,7 +169,7 @@ class PointRelease(ParameterBaseClass):
 
         if si.hindcast_is3D and (len(self.params['z_range']) > 0 or x0.shape[1] < 3):
 
-            if len(self.params['z_range']) == 0:  self.params['z_range']= [-np.inf,np.inf]
+            if len(self.params['z_range']) == 0:  self.params['z_range']= [-1.0E30,1.0E30]
 
             z = self.get_z_release_in_depth_range(np.asarray(self.params['z_range']), n_cell_guess,
                                             si.grid['zlevel'], si.grid['bottom_cell_index'] , si.grid['triangles'],
@@ -188,9 +188,10 @@ class PointRelease(ParameterBaseClass):
         z = np.full((nx,1),0.)
 
         for n in range(nx):
+            # get mean depth of triangle by summing
             ztop, zbot = 0., 0.
             for m in range(3):
-                node = triangles[n,m]
+                node = triangles[ncell[n],m]
                 ztop += zlevel[nb, node, -1]
                 zbot += zlevel[nb, node, bottom_cell_index[node]]
 

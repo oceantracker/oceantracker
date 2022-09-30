@@ -6,6 +6,8 @@ from oceantracker.util.basic_util import nopass
 from oceantracker.util.time_util import seconds_to_short_date
 from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
+from oceantracker.util.message_and_error_logging import GracefulExitError, FatalError
+
 
 # class to write with, outline methods needed
 # a non-writer, as all methods are None
@@ -104,9 +106,19 @@ class _BaseWriter(ParameterBaseClass):
             nc.add_a_Dimension(name,item['size'])
 
         for name, item in self.file_build_info['variables'].items():
-            nc.create_a_variable(name,item['dim_list'], chunksizes=item['chunks'], dtype=item['dtype'], attributes=item['attributes'])
 
+            # check chunk size under 4GB
+            if item['chunks'] is not None:
+                c = np.asarray(item['chunks'],dtype=np.int64) # avoids float 32 over flow
+                b = np.prod(c)*np.full((0,),0 ).astype(item['dtype']).itemsize # btypes in a chunk
+                if float(b) >= 4.0e9 :
+                    si.case_log.write_msg('Netcdf chunk size for variable "' + name+ '" exceeds 4GB, chunks=' + str(c), exception=FatalError,
+                       hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time',)
 
+            try:
+                nc.create_a_variable(name,item['dim_list'], chunksizes=item['chunks'], dtype=item['dtype'], attributes=item['attributes'])
+            except:
+                A=1
 
     def pre_time_step_write_book_keeping(self): pass
 

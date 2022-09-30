@@ -61,13 +61,13 @@ base_case_params:
     - water_depth
   run_params: {}
   solver:
-    n_sub_steps: 15
+    n_sub_steps: 30
   trajectory_modifiers:
   - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
     critical_friction_velocity: 0.01
   velocity_modifiers:
   - class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
-    mean: -0.002
+    mean: -0.0005
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: false

@@ -23,11 +23,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
                         'field_variables': {'water_velocity': PLC(['hvel'], [str], fixed_len=2),
                                               'water_depth': PVC('depth', str),
                                               'tide': PVC('elev', str),
-                                              'water_temperature': PVC(None, str),
-                                               'water_salinity': PVC(None, str)},
-                                               'water_velocity_depth_average': PVC(None, str),
-
-
+                                               'water_velocity_depth_average': PLC(['hvel'], [str], fixed_len=1)},
                         'dimension_map': {'node': PVC('nSCHISM_hgrid_node', str),
                                                                      'z': PVC('nSCHISM_vgrid_layers', str),
                                                                      'time': PVC('time', str),

@@ -77,7 +77,7 @@ base_case_params:
   run_params:
     write_tracks: false
   solver:
-    n_sub_steps: 15
+    n_sub_steps: 30
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: true

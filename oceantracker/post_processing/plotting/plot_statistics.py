@@ -168,3 +168,23 @@ def get_stats_data(nt, d, var, logscale=False, release_group=None, zmin=None):
     return x, y, z
 
 
+def plot_residence(residence_data, heading=None, plot_file_name=None):
+    # time series of number resident in release polygon for each pulse
+
+    fig = plt.gcf()
+    ax  = plt.gca()
+    ax.set_xlabel('Days since first pulse release')
+    ax.set_ylabel('Number of each pulse residence in polygon')
+
+    npulses= residence_data['count'].shape[1]
+    t= (residence_data['time']-residence_data['time'][0])/3600/24.
+    for npulse in range(npulses):
+        d =residence_data['count'][:, npulse]
+        i = (d > 0).argmax()
+        ax.plot(t[i:],d[i:] )
+
+    plot_utilities.add_heading(heading)
+
+    plot_utilities.show_output(plot_file_name= plot_file_name)
+
+    return plot_file_name

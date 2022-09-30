@@ -3,12 +3,15 @@ import test_base
 import argparse
 import numpy as np
 import time
-from oceantracker.util import basic_util
+from oceantracker.util import json_util, basic_util
 import matplotlib.pyplot as plt,matplotlib.ticker as ticker
+from copy import copy, deepcopy
+from os import path
+from datetime import datetime
 
-def get_file_times(ot):
+def get_file_times(runInfoFile):
 
-    r=json_util.read_JSON(ot.solver_ptr.get_full_file_name())
+    r=json_util.read_JSON(runInfoFile)
 
     d={}
     d['solver']=r['times']['solver']['total_model_all']['time']
@@ -39,120 +42,92 @@ if __name__ == '__main__':
     # windows/linux  data source
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--file_dir', nargs='?', const=0, type=int, default=0)
-    parser.add_argument('--size', nargs='?', const=0, type=int, default=0)
-    parser.add_argument('--testList', nargs='?', const=None, type=int, default=None,)
-    parser.add_argument('-doplot', action='store_true')
-    parser.add_argument('-is3D', action='store_true')
-    parser.add_argument('--cpu', nargs='?', const=1, type=int, default=1)
+    parser.add_argument('-sounds',action='store_true')
+    parser.add_argument('-norun', action='store_true')
+
+    d = [1.0E30]
 
     args = parser.parse_args()
 
 
-# large size grid
-    args.size = 3
-    args.file_dir = 1
-    args.cpu = 1
 
-    paramsWorking= {'dispersion': {'A_H': 0.1},
-                    'solver': {'duration': 2.,'screen_output_step_count': 24*3},
-                    'particle_group_manager':{'release_interval': 0},
-                    'tracks_writer': {'class_name': 'oceantracker.tracks_writer.writerBase.BaseWriter'}  # a non-writer
-                    }
+    params =test_base.base_param(is3D=False)
+    basecase=params['base_case_params']
+    basecase['dispersion'].update( {'A_H': 0.1})
+    basecase['solver'].update( {'screen_output_step_count': 24*3})
+    basecase['run_params'].update({'write_tracks': False})
+    pgr=basecase['particle_release_groups']
+    pgr.pop(0)  # only use polygon release
+    pgr[0].update({'release_interval': 0})
 
-    nt=1
-    if nt==0:
-        # one cpu
+    if args.sounds:
+        params['reader']={'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+                          'time_buffer_size':12,
+                                'file_mask': 'schism_marl200801*.nc',
+                                 'input_dir': 'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2008',
+               }
+        poly_points = [[1597682.1237, 5489972.7479],
+                   [1598604.1667, 5490275.5488],
+                   [1598886.4247, 5489464.0424],
+                   [1597917.3387, 5489000],
+                   [1597300, 5489000], [1597682.1237, 5489972.7479]]
+        basecase['particle_release_groups'][0].update({'points': poly_points})
+        params['shared_params'].update({'output_file_base': 'sounds_speed',})
 
-        ot = test_base.run_test(args, params=paramsWorking)  # dummy run to compile numba
-        r = {}
-        for n in [1000,2500,5000,10000,25000,100000, 250000]:
+    w={'cpu':np.asarray( [1,2, 3,4,6, 10, 15, 20,25]),#[1, 2, 4, 10, 15, 20, 25],# ,
+       'particles':np.asarray([5*10**4,10**5,5*10**5]),#[10**3,10**4,10**5,10**6],#,
+       'nSecPerpartPerRKsubstep':[],
+       'run_info':[]}
+    w['computer'] = basic_util.get_computer_info()
+
+
+    te= np.full((w['particles'].shape[0],w['cpu'].shape[0]),0.)
+    nfile=0
+    params['shared_params']['root_output_dir']='F:\\OceanTrackerOuput\\speedTests'
+    for n, n_part in enumerate( w['particles'].tolist()):
+        for nc, cpu in enumerate(w['cpu'].tolist() ):
+            p= deepcopy(params)
+            nfile += 1
+            p['shared_params']['output_file_base'] += str(nfile)
             t0 = time.perf_counter()
-            paramsWorking['particle']['pulse_size']=n
-            ot = test_base.run_test(args, params=paramsWorking )
-            d=get_file_times(ot)
 
-            te=time.perf_counter()-t0
-            # gather results into lists
-            for key in d:
-                if key not in r: r[key]=[]
-                r[key].append(d[key])
+            basecase['particle_release_groups'][0].update({'pulse_size': n_part})
 
-        plt.subplot(2, 2, 1)
-        x=np.array(r['particles'])
-        gca=plt.gca()
-        gca.plot(x, 1.0e9/np.array(r['solver_nSecPerRKstep']))
-        gca.set_xscale('log')
+            del p['base_case_params']['particle_release_groups']
+            p['case_list']=[]
+            for nr in range(cpu) :
+                p['case_list'].append({'particle_release_groups' : basecase['particle_release_groups']})
 
-        plt.subplot(2, 2, 2)
-        gca = plt.gca()
-        gca.plot(x, 1.0e9/np.array(r['find_cells_and_weights_nSecPerRKstep']))
-        gca.set_xscale('log')
-        plt.show()
-        plt.savefig(ot.log_file + '_particles.png', format='png')
+            p['shared_params'].update({'processors': cpu })
 
-    elif nt==1:
+            if not args.norun:
+                runInfoFile = test_base.run_test(p)
 
+            runInfo_file_name = path.join(p['shared_params']['root_output_dir'], p['shared_params']['output_file_base'], p['shared_params']['output_file_base'] + '_runInfo.json')
 
-        w={'cpu':[1, 2, 4, 10, 15, 20, 25],# [1, 2, 4],
-           'particles':[10**3,10**4,10**5,10**6],#,[250]
-           'nSecPerpartPerRKsubstep':[],
-           'run_info':[]}
-        w['computer'] = basic_util.get_computer_info()
-        for n_part in w['particles']:
-            paramsWorking['write_log_file'] = True
-            paramsWorking['particle']['pulse_size'] =int(n_part/4)# 4 release points
+            runInfo=json_util.read_JSON(runInfo_file_name)
+            te[n,nc]=runInfo['performance']['particles_processed_per_second']
 
-            T=[]
-            R=[]
-            for cpu in w['cpu'] :
+    tn = te/1e06
 
-                args.cpu=cpu
-                t0 = time.perf_counter()
+    lab=['50k particles','100k particles','500k particles']
+    ax= plt.gca()
+    for n in range(tn.shape[0]):
+        ax.plot(w['cpu'],tn[n,:], label=lab[n], zorder=5)
+    ax.plot(w['cpu'], tn[-1, 0] * w['cpu'], '--', color=[.8, .8, .8], label='Linear scaling', zorder=3)
 
-                paramsWorking['write_log_file'] = True if cpu == 1 else False
+    plt.xlabel('Processors')
+    plt.ylabel('Speed, million particles per second')
 
-                ot = test_base.run_test(args, params=paramsWorking)
+    ax.legend()
+    plt.grid(ls='-',color=[.9,.9,.9])
+    plt.axis([1, 25, 0, 30])
 
-                if cpu==1:
-                    d=get_file_times(ot)
-                    T.append(d['solver_nSecPerRKstep'])
-                else:
-
-                    d=json_util.read_JSON(ot.parallel_log_file)
-                    T.append(d['nSecPerpartPerRKsubstep'])
-
-                R.append(ot.run_info)
-
-            # Form ncpu by case particle lists
-            w['run_info'].append(R)
-            w['nSecPerpartPerRKsubstep'].append(T)
-
-
-        plt.subplot(1, 1, 1)
-        ax = plt.gca()
-        for p,s in zip(w['particles'],w['nSecPerpartPerRKsubstep']):
-            ax.plot(w['cpu'], 1e09/np.array(s),label='Particles per core %3.1e' % p)
-
-
-        ax.legend()
-        ax.set_xlabel('CPUs')
-        ax.set_ylabel('Particle time steps per sec')
-        ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%0.0f'))
-
-        #lab = 'Benchmark_AMD_32_2020_08_25_BCwalkBCordsOutputByRef'
-        lab = ''
-        ax.set_title('Oceantracker 0.2 '+lab,fontsize= 8)
-
-
-
-        plt.savefig(ot.parallel_log_file + '_' + lab + '_cpu.png', format='png')
-        #plt.show()
-
-        w['label']=lab
-
-
-        json_util.write_JSON(ot.parallel_log_file+ lab ,w)
-
-
+    if args.sounds:
+        plt.title('Large grid')
+        plt.text(-.075, 1.075, 'b)', transform=ax.transAxes)
+    else:
+        plt.title('Small demo. grid')
+        plt.text(-.075,1.075, 'a)', transform=ax.transAxes)
+    plt.show()
 
