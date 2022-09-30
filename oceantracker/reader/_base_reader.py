@@ -37,7 +37,7 @@ class _BaseReader(ParameterBaseClass):
                                                      'tide': PVC(None, str),
                                                      'water_depth': PVC(None, str),
                                                      'water_temperature': PVC(None, str),
-                                                     'water_salinity': PVC(None, str)},
+                                                     'salinity': PVC(None, str)},
 
                                  'dimension_map': {'time': PVC('time', str), 'node': PVC('node', str), 'z': PVC(None, str),
                                                    'vector2Ddim': PVC(None, str), 'vector3Ddim': PVC(None, str)},
@@ -195,7 +195,7 @@ class _BaseReader(ParameterBaseClass):
             self.read_time_variable_grid_variables(nc, buffer_index, file_index)
 
             # read time varying vector and scalar reader fields
-            for name, field in si.class_list_interators['fields']['from_reader_field'].items():
+            for name, field in si.class_interators_using_name['fields']['from_reader_field'].items():
                 if field.is_time_varying():
                     data = self.read_field_variable_as4D(name, nc, field, file_index=file_index)
                     data = self.preprocess_field_variable(name, data, nc) # do any customised tweaks
@@ -212,7 +212,7 @@ class _BaseReader(ParameterBaseClass):
 
             # update user fields from newly read fields
             for field_types in ['derived_from_reader_field','user']:
-                for field in si.class_list_interators['fields'][field_types].values():
+                for field in si.class_interators_using_name['fields'][field_types].values():
                     if field.is_time_varying():
                         field.update(buffer_index)
 

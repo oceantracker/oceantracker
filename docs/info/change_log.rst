@@ -1,3 +1,4 @@
+
 ###########################
 Change log
 ###########################
@@ -5,7 +6,24 @@ Change log
 Known issues
 __________________
 
+Version 0.3.01.02 Sept 13 2022
+_____________________________
 
+New features
+--------------------
+
+#. Added residence count particle statistic, counts number of particles still inside designated release polygon at given time inervals, . Can be used to find residence time with release polygon, eg residence time in an estuary. See new demo 10
+
+Changes
+--------------------
+
+#. in stats classes count_staus_equal_to and count_status_greater tha, replae by 'count_status_in_range' param, see github pages
+#. post proceesing plot_heat_maps module now names plot_statistics
+
+Bug fixes
+--------------------
+
+#. ??
 
 
 Version 0.3.01.00 Sept 6 2022

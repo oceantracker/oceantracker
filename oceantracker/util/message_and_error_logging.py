@@ -21,7 +21,6 @@ class MessageClass():
         self.text = msg
         self.is_warning = warning
         self.is_note = note
-        self.is_error = exception is not None
         self.hint = hint
         self.tag = tag
         self.tabs = tabs
@@ -29,37 +28,37 @@ class MessageClass():
         self.traceback_str = traceback_str
         self.crumbs= crumbs
 
-
-
     def to_str(self):
         m=''
-        tabs= '  '
-        if self.tag is not None: m += self.tag
-        if self.exception is not None: m += 'Error raised \n' + str(self.exception)    +'\n'
+        tab= '  '
+        tabs=''
+        for n in range(self.tabs): tabs += tab
 
-        for n in range(self.tabs): m = tabs + m
-        if self.is_error:  m += '>>> Error: '
+        if self.tag is not None: m += self.tag
+
+        if self.exception is not None: m +='>>> Error raised :' + str(self.exception) +'\n'
+
 
         if self.exception is not None:
-            m += str(self.exception) +'\n'
+            m+= '>>> Error: ' +  self.text +'\n'
+            m+=tab + 'Exception =' + str(self.exception) +'\n'
             if self.traceback_str is not None:
-                m += str(self.traceback_str) +'\n'
-        if self.is_warning: m += '>>> Warning: '
-        if self.is_note: m += '>>> Note: '
-        m += self.text
+                m+= tab + 'Traceback =' +str(self.traceback_str)+'\n'
+
+        elif self.is_warning:
+            m+='>>> Warning: '+ self.text +'\n'
+        elif self.is_note:
+            m+='>>> Note: ' + self.text +'\n'
+        else:
+            m+=self.text +'\n'
 
         if self.hint is not None:
-            m_add = ''
-            for n in range(self.tabs+2): m_add = tabs + m_add
-            m_add += 'Hint : ' + self.hint
-            m += '\n' + m_add
+            m+=tab + 'Hint: ' + self.hint +'\n'
 
         if self.crumbs is not None:
-            m_add = ''
-            for n in range(self.tabs+2): m_add = tabs + m_add
-            m_add += 'Crumb trail: ' + self.crumbs
-            m += '\n' + m_add
+            m+= tab+ 'Crumb trail: ' + self.crumbs +'\n'
 
+        if m[-1:]=='\n': m= m[:-1]  # strip last \n, added by write log
         return m
 
 def append_message(msg_list, msg, warning=False,note=False, hint=None, tag=None, tabs=0,exception=None,traceback_str=None, crumbs=None):
@@ -115,11 +114,11 @@ class MessageLogging(object):
         if len(self.error_list) > 0:
             raise GracefulExitError()
 
-    def add_msg(self, msg, raiseerrors = False):
+    def add_msg(self, msg):
         if msg is not None:
-            self.add_messages( [msg], raiseerrors = raiseerrors)
+            self.add_messages( [msg])
 
-    def add_messages(self, msg_list: list, raiseerrors=False):
+    def add_messages(self, msg_list: list):
         if msg_list is None : return
         if type(msg_list) != list : msg_list=[msg_list]
         if  len(msg_list) == 0 :return
@@ -128,23 +127,25 @@ class MessageLogging(object):
         for m in msg_list:
             self._log(m)
             if (m.is_warning or m.is_note) and len(self.msg_list) < self.max_warnings: self.msg_list.append(m)
-            if m.is_error:
+            if m.exception is not None:
                 self.error_list.append(m)
                 has_errors = True
-        if has_errors and raiseerrors:
+        if has_errors:
             raise FatalError('Messages contain a fatal error')
 
-    def write_msg(self, msg_text, warning=False, note=False, hint=None, tag=None, tabs=0, crumbs=None, exception=None, traceback_str=None,raiseerrors=False):
+    def write_msg(self, msg_text, warning=False, note=False, hint=None, tag=None, tabs=0, crumbs=None, exception=None, traceback_str=None):
         if msg_text is not None and len(msg_text) > 0:
             m = MessageClass(msg_text, warning=warning,note=note,  exception=exception, traceback_str=traceback_str, hint=hint, tag=tag, tabs=tabs, crumbs=crumbs)
-            self.add_messages([m],raiseerrors=raiseerrors)
+            self.add_messages([m])
 
     def write_warning(self,msg, hint=None): self.write_msg(msg, warning=True,hint=hint)
 
     def write_note(self, msg, hint=None):
         self.write_msg(msg, note=True, hint=hint)
 
-    def write_progress_marker(self, msg, tabs=0):  self.write_msg('- ' + msg, tabs=tabs+1)
+    def write_progress_marker(self, msg, tabs=0):
+        self.write_msg('- ' + msg, tabs=tabs+1)
+
 
     def show_all_warnings_and_errors(self):
         if len(self.msg_list) > 0 or len(self.error_list)> 0:

@@ -132,18 +132,18 @@ class RSTfileBuilder(object):
                     self.add_lines('Description: - ' + str(item.info['doc_str'].strip()), indent=indent + 2)
                     self.add_lines()
 
-                if  type(item.info['list_type']) == dict or type(item.info['default_list']) == dict or type(item.info['default_value']) == dict:
+                if  type(item.info['acceptable_types']) == dict or type(item.info['default_list']) == dict or type(item.info['default_value']) == dict:
                     self.add_lines()
                     self.add_lines(key + ': still working on display  of lists of dict, eg nested polygon list ', indent=indent+0)
                     self.add_lines()
                     continue
 
-                self.add_lines('- a list containing type:  ``' + str(item.info['list_type']) + '``', indent=indent+2)
+                self.add_lines('- a list containing type:  ``' + str(item.info['acceptable_types']) + '``', indent=indent+2)
                 self.add_lines('- default list : ``'
                                + str(item.info['default_list']) + '``', indent=indent+2)
 
                 for k, v in item.info.items():
-                    if k not in ['default_list','list_type', 'default_value', 'is_required', 'doc_str'] and v is not None:
+                    if k not in ['default_list','acceptable_types', 'default_value', 'is_required', 'doc_str'] and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 
                 self.add_lines()

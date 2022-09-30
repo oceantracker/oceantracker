@@ -86,7 +86,7 @@ base_case_params:
     - water_depth
   run_params: {}
   solver:
-    n_sub_steps: 15
+    n_sub_steps: 30
   trajectory_modifiers:
   - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
     critical_friction_velocity: 0.01

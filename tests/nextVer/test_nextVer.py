@@ -3,7 +3,7 @@ import argparse
 import glob
 from oceantracker.util import basic_util
 from oceantracker.main import run
-import  oceantracker.post_processing.plotting.plot_heat_maps as otPlot
+import  oceantracker.post_processing.plotting.plot_statistics as otPlot
 
 
 if __name__ == "__main__":

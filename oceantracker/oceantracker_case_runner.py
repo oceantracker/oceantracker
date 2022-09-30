@@ -75,7 +75,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         finally:
             # reshow warnings
             si.case_log.show_all_warnings_and_errors()
-            si.case_log.insert_screen_line()
+
             si.case_log.write_progress_marker('Finished case number %3.0f, ' % si.processor_number + ' '
                                   + si.output_files['output_file_base']
                                   + ' at ' + time_util.iso8601_str(datetime.now()))
@@ -174,8 +174,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         solver.initialize_run(0)
 
         # fill and process buffer until there is less than 2 steps
-        si.case_log.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.model_duration / 24 / 3600))
         si.case_log.insert_screen_line()
+        si.case_log.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.model_duration / 24 / 3600))
+
         t = si.model_start_time
 
         while num_in_buffer > 1:
@@ -196,7 +197,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         info['end_date'] = time_util.seconds_to_date(t)
 
         info['time_steps_completed'] = 1 if solver.info['n_time_steps_completed'] == 0 else solver.info['n_time_steps_completed']
-        info['average_number_moving_particles'] = solver.info['total_num_particles_moving'] /info['time_steps_completed']
 
         # close all instances
         for i in si.all_class_instance_pointers_iterator():
@@ -366,7 +366,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # create prop particle properties derived from fields loaded from reader on the fly
         for prop_type in ['from_reader_field','derived_from_reader_field','depth_averaged_from_reader_field']:
-            for name, fd in si.class_list_interators['fields'][prop_type].items():
+            for name, fd in si.class_interators_using_name['fields'][prop_type].items():
                 pgm.create_particle_property('from_fields', dict(name=name,  vector_dim=fd.get_number_components(), time_varying=True))
 
         # any custom particle properties added by user
@@ -387,6 +387,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     # ____________________________
     def _get_case_info(self):
         si = self.shared_info
+        pgm= si.classes['particle_group_manager']
         info = self.info
         info['date_of_time_zero'] = time_util.ot_time_zero()
         r = si.classes['reader']
@@ -408,7 +409,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'timers': self.code_timer.time_sorted_timings(),
              'time_updating': {},
              'output_files': si.output_files,
-             'particles': { 'num_released': si.classes['particle_group_manager'].particles_released,
+             'particles': { 'num_released': pgm.particles_released,
                             'particle_status_flags': si.particle_status_flags},
              'shared_params': si.shared_params,
              'case_params': si.case_runner_params['case_params'],
@@ -427,7 +428,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 d['output_files'][key] = None
             d['time_updating'][key] = {'time': i.info['time_spent_updating'], 'calls': i.info['calls']}
 
-        for key, item in si.class_list_interators.items():
+        for key, item in si.class_interators_using_name.items():
             # a class list type
             d['full_params'][key]=[]
             d['info'][key] = []

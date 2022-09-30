@@ -29,7 +29,9 @@ base_case_params:
     - water_depth
   - calculation_interval: 1800
     class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
-    count_status_equal_to: moving
+    count_status_in_range:
+    - moving
+    - moving
     particle_property_list:
     - water_depth
     polygon_list:

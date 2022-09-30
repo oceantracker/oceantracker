@@ -1,5 +1,5 @@
 from oceantracker.main import run
-from oceantracker.post_processing.plotting import plot_heat_maps
+from oceantracker.post_processing.plotting import plot_statistics
 from oceantracker.post_processing.read_output_files import load_output_files
 from os import path
 import argparse

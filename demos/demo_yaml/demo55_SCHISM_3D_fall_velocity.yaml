@@ -86,7 +86,7 @@ base_case_params:
     - water_depth
   run_params: {}
   solver:
-    n_sub_steps: 15
+    n_sub_steps: 30
   velocity_modifiers:
   - class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
     mean: -0.0005

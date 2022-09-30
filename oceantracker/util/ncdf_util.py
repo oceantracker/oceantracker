@@ -35,12 +35,10 @@ class NetCDFhandler(object):
         if dtype is None: dtype = np.float64  # double by default
         fill_value =-127 if dtype in [np.uint8, np.int8,np.int16,np.int32,np.int64] else np.nan
 
-        if chunksizes is not None:
-            if np.prod(chunksizes)*8 > self.max_bytes_per_chunk:
-                raise ValueError('chunking too large may exceed 4GB limit')
 
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compressionLevel > 0),
-                                            complevel=compressionLevel, fill_value=fill_value)
+                                                complevel=compressionLevel, fill_value=fill_value)
+
 
         # set attributes the hard way, must be easier way!
         if attributes is not None:

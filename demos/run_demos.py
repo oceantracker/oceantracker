@@ -7,7 +7,7 @@ from oceantracker.util import json_util
 from oceantracker.util import time_util
 from oceantracker.post_processing.read_output_files import load_output_files
 from oceantracker import main
-from oceantracker.post_processing.plotting import plot_heat_maps,plot_tracks, plot_vertical_tracks, plot_utilities
+from oceantracker.post_processing.plotting import plot_statistics,plot_tracks, plot_vertical_tracks, plot_utilities
 import make_demo_plots
 
 def mfn(movie_file, n=None):

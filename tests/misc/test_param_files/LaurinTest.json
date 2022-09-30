@@ -22,7 +22,7 @@
             "run_params": {
                 "particle_buffer_size": 100000,
                 "open_boundary_type": 1,
-                "block_dry_cells": false,
+                "block_dry_cells": true,
                 "duration": 604800.0,
                 "write_tracks": true
             },
@@ -68,7 +68,7 @@
                             -2
                         ]
                     ],
-                    "pulse_size": 10,
+                    "pulse_size": 100,
                     "release_interval": 3600
                 },
                 {
@@ -99,7 +99,7 @@
                             5917969.0
                         ]
                     ],
-                    "pulse_size": 100,
+                    "pulse_size": 1000,
                     "release_interval": 3600
                 }
             ],

@@ -47,7 +47,7 @@ class Solver(ParameterBaseClass):
         info['computation_started'] = datetime.now()
         # set up particle velocity working space for solver
         info['n_time_steps_completed'] = 0
-        info['total_num_particles_moving'] = 0
+        info['total_active_particles'] = 0
 
         # initial release , writes and statistics etc
         t0 = si.grid['time'][nb0]
@@ -99,7 +99,7 @@ class Solver(ParameterBaseClass):
                     si.classes['dispersion'].update(nb, t2, moving)
                     # after dispersion some may be outside, update search cell status to see which are now outside domain etc
                     fgm.setup_interp_time_step(nb, t2, part_prop['x'].data, moving)
-                    info['total_num_particles_moving'] += moving.shape[0]
+
 
 
                 self.post_step_bookeeping(nb, t2)
@@ -139,7 +139,7 @@ class Solver(ParameterBaseClass):
         # nb is buffer offset
         si = self.shared_info
         RK_order =self.params['RK_order']
-        f = si.classes['field_group_manager']
+        fgm = si.classes['field_group_manager']
         part_prop =  si.classes['particle_properties']
 
         # note here subStep_time_step has sign of forwards/backwards
@@ -155,7 +155,7 @@ class Solver(ParameterBaseClass):
         particle_operations_util.copy(x1, x2, is_moving)
 
         #  step 1 from current location and time
-        f.setup_interp_time_step(nb, t,  x1, is_moving)
+        fgm.setup_interp_time_step(nb, t,  x1, is_moving)
 
         if RK_order==1:
             self.update_particle_velocity(t,v, is_moving) # put vel into permanent place
@@ -172,7 +172,7 @@ class Solver(ParameterBaseClass):
 
         # step 2, get improved half step velocity
         t2=t + 0.5*dt
-        f.setup_interp_time_step(nb, t2, x2, is_moving)
+        fgm.setup_interp_time_step(nb, t2, x2, is_moving)
 
         if RK_order==2:
             self.update_particle_velocity(t2,v, is_moving)
@@ -186,7 +186,7 @@ class Solver(ParameterBaseClass):
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity step 2
 
         t2 = t + 0.5 * dt
-        f.setup_interp_time_step(nb, t2, x2, is_moving)
+        fgm.setup_interp_time_step(nb, t2, x2, is_moving)
         self.update_particle_velocity(t2,v_temp , is_moving)  # v3, better velocity at half step
 
         solver_util.euler_substep(x2, x1, v_temp, dt, is_moving)  # improve half step position values
@@ -194,7 +194,7 @@ class Solver(ParameterBaseClass):
 
         # step 4, full step
         t2 = t + dt
-        f.setup_interp_time_step(nb, t2,  x2, is_moving)
+        fgm.setup_interp_time_step(nb, t2,  x2, is_moving)
         self.update_particle_velocity( t2, v_temp, is_moving)  # full step for v4
 
         particle_operations_util.add_to(v, v_temp, is_moving, scale=1.0 / 6.0)  # last accumulation of velocity for v4
@@ -231,7 +231,8 @@ class Solver(ParameterBaseClass):
         # user particle movements, eg resupension for all particles
         # re-find alive particles after above movements
         sel = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
-        for i in si.class_list_interators['trajectory_modifiers']['all'].values():
+        self.info['total_active_particles'] += sel.shape[0]
+        for i in si.class_interators_using_name['trajectory_modifiers']['all'].values():
             i.update(nb, t2, sel)
 
         # after moves, update search cell status, dry cell index,  to see which are now outside domain etc
@@ -281,7 +282,7 @@ class Solver(ParameterBaseClass):
         # update and write stats
         si= self.shared_info
         self.code_timer.start('on_the_fly_statistics')
-        for s in si.class_list_interators['particle_statistics']['all'].values():
+        for s in si.class_interators_using_name['particle_statistics']['all'].values():
 
             if abs(t - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
                 t0 = perf_counter()
@@ -294,7 +295,7 @@ class Solver(ParameterBaseClass):
         # update triangle concentrations
         si = self.shared_info
         self.code_timer.start('particle_concentrations')
-        for s in si.class_list_interators['particle_concentrations']['all'].values():
+        for s in si.class_interators_using_name['particle_concentrations']['all'].values():
             if abs(t - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
                 t0 = perf_counter()
                 s.update(nb, t)
@@ -306,7 +307,7 @@ class Solver(ParameterBaseClass):
         si = self.shared_info
 
         self.code_timer.start('event_logging')
-        for e in si.class_list_interators['event_loggers']['all'].values():
+        for e in si.class_interators_using_name['event_loggers']['all'].values():
             t0 = perf_counter()
             e.update(time=t)
             e.update_timer(t0)

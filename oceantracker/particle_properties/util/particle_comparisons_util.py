@@ -17,6 +17,9 @@ def is_gt(a, b): return a > b
 @njit
 def is_gteq(a, b): return a >= b
 
+@njit
+def is_inrange(a, a1 ,a2): return  a1 <=a <= a2
+
 comparison_function_map= {  'eq'  : is_eq,
                             'noteq': is_noteq,
                             'gt'   : is_gt,
@@ -51,7 +54,7 @@ def _prop_compared_to_value(part_prop, comparison_func, value, out):
 
     return out[:nfound]
 
-def prop_subset_compared_to_value(active, part_prop, test, value, out=None):
+def prop_subset_compared_to_value(active, part_prop, test, value, out):
     # return a view of  indices where  part_prop (test) value, is true for active particles
     if out is None: out = np.full((part_prop.shape[0],), -127, np.int32)
 
@@ -75,6 +78,16 @@ def random_selection(active, probability_of_selection, out):
     nfound = 0
     for n in active:
         if np.random.rand() <= probability_of_selection:
+            out[nfound] = n
+            nfound += 1
+    return out[:nfound]
+
+# dual comparisons
+@njit
+def _find_all_in_range(part_prop, prop_value1, propvalue2, out):
+    nfound = 0
+    for n in range(part_prop.shape[0]):
+        if prop_value1 <= part_prop[n] <= propvalue2:
             out[nfound] = n
             nfound += 1
     return out[:nfound]

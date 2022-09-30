@@ -162,6 +162,7 @@ def read_stats_file(file_name, var_list=[]):
         d['stats_type'] = 'grid'
 
     # read count first fot mean value calc
+    #todo why id count al particls not done here
     d['count'] = nc.read_a_variable('count')
     d['limits']['count'] = {'min': np.nanmin(d['count']), 'max': np.nanmax(d['count'])}
 
@@ -196,6 +197,34 @@ def read_concentration_file(file_name, var_list=[]):
 
     nc.close()
 
+    return d
+
+def read_residence_file(file_name, var_list=[]):
+    # read stats files
+    var_list =  var_list  # make sure count is first, do to means
+    nc = NetCDFhandler(file_name, mode='r')
+    num_released = nc.get_global_attr('total_num_particles_released')
+    d = {'total_num_particles_released': num_released,'limits' : {}}
+
+    # read count first for mean value calc
+    for v in ['count','count_all_particles','time']:
+        d[v]  = nc.read_a_variable(v)
+        d['limits'][v] = {'min': np.nanmin(d[v]), 'max': np.nanmax(d[v])}
+        if v in var_list: var_list.remove(v)
+
+    for var in set(var_list):
+        if nc.is_var(var):
+            d[var]=  nc.read_a_variable(var)
+        elif nc.is_var('sum_'+ var) :
+            # check if summed version is in file and calc mean
+            d['sum_'+ var] = nc.read_a_variable('sum_'+ var)
+            with np.errstate(divide='ignore', invalid='ignore'):
+                d[var] = d['sum_' + var]/d['count'] # calc mean
+
+        else:
+            print('Warning reading residence file ' + file_name + ', cannot load variable' + var + ', is not in file ')
+        d['limits'][var] = {'min': np.nanmin(d[var]), 'max': np.nanmax(d[var])}
+    nc.close()
     return d
 
 def read_grid_file(file_name):

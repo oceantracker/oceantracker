@@ -10,7 +10,7 @@ runInfo_file_name, has_errors = main.run(params)
 
 # below only required for plotting
 from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
-from oceantracker.post_processing.plotting.plot_heat_maps import plot_heat_map, animate_heat_map
+from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
 output_file= "output\demo03_heatmaps"
 

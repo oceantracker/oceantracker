@@ -3,7 +3,7 @@ import argparse
 
 from oceantracker.util import basic_util
 from next_oceanTrackerSim import OceanTrackerRunner
-import  oceantracker.post_processing.plotting.plot_heat_maps as otPlot
+import  oceantracker.post_processing.plotting.plot_statistics as otPlot
 
 
 def get_params(args):

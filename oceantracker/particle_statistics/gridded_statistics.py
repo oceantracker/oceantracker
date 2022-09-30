@@ -1,6 +1,6 @@
 import numpy as np
 from numba import njit
-from numba.typed import List as NumbaList
+
 
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC, GracefulExitError
@@ -20,7 +20,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
                                  'grid_span': PLC([], [float], fixed_len=2),
                                  'role_output_file_tag' :    PVC('stats_gridded_time',str),
                                  'calculation_interval':PVC(3600., float,doc_str=' time in sec, between calculating statistics'),
-                                 'particle_property_list': PLC([],[str],  make_list_unique=True)})
+                                 })
         self.grid = {}
 
     def check_requirements(self):
@@ -45,40 +45,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.info['type'] = 'gridded'
         self.set_up_part_prop_lists()
 
-    def  set_up_part_prop_lists(self):
-        # set up list of part prop and sums to enable averaging of particle properties
-        si=self.shared_info
-        part_prop = si.classes['particle_properties']
-        self.prop_list, self.sum_prop_list = [],[]
 
-        for key, prop in self.sum_binned_part_prop.items():
-            if part_prop[key].is_vector():
-                si.case_log.write_warning('On the fly statistical Binning of vector particle property  "' + key + '" not yet implemented')
-            else:
-                self.prop_list.append(part_prop[key].data) # must used dataptr here
-                self.sum_prop_list.append(self.sum_binned_part_prop[key][:])
 
-        # convert to a numba list
-        if len(self.prop_list) ==0:
-            # must set yp typed empty lists for numba to have right signatures of numba functions
-            # make list the right shape and pop to make it empty
-            #todo a cleaner way to do this with NumbaList.empty??
-            self.prop_list =  NumbaList([np.empty( (1,))])
-            self.prop_list.pop(0)
-            self.sum_prop_list = NumbaList([np.empty((1,1,1,1))])
-            self.sum_prop_list.pop(0)
-        else:
-            # otherwise use types of arrays
-            self.prop_list = NumbaList(self.prop_list)
-            self.sum_prop_list = NumbaList(self.sum_prop_list)
-
-    def set_up_time_bins(self,nc):
-        # stats time variables commute to all 	for progressive writing
-        nc.add_a_Dimension('time', None)  # unlimited time
-        nc.create_a_variable('time', ['time'], {'notes': 'time in seconds'}, np.double)
-
-        # other output common to all types of stats
-        nc.create_a_variable('num_released', ['time'], {'notes': 'total number released'}, np.int32)
 
 
     def info_to_write_at_end(self):
@@ -190,18 +158,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.do_counts_and_summing_numba(p_groupID, p_x, sgrid['x_bin_edges'], sgrid['y_bin_edges'],
                                          self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
 
-        self.write_stats(self.nWrites, time)
+        self.write_time_varying_stats(self.nWrites, time)
         self.nWrites += 1
-
-    def write_stats(self, n,time):
-        # write nth step in file
-        fh = self.nc.file_handle
-        fh['time'][n]= time
-        fh['count'][n, ...] = self.count_time_slice[:, ...]
-        fh['count_all_particles'][n, ...] = self.count_all_particles_time_slice[:, ...]
-
-        for key, item in self.sum_binned_part_prop.items():
-            self.nc.file_handle['sum_' + key][n, ...] = item[:]  # write sums  working in original view
 
     @staticmethod
     @njit
