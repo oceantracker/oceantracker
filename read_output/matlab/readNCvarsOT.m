@@ -1,4 +1,4 @@
-function [d, info] = OTreadNCvars(filename,var_names_cell,index_vars)
+function [d, info] = readNCvarsOT(filename,var_names_cell,index_vars)
 
 ncid = netcdf.open(filename,'NC_NOWRITE');
 
@@ -6,7 +6,7 @@ if nargin < 2,  var_names_cell={}; end
 if nargin < 3,  index_vars={}; end
 
 info=ncinfo(filename);
-d= struct;
+d= struct('dim_info',struct,'var_info',struct);
 for v = info.Variables(:)'
     vname=v.Name;
     if  length(var_names_cell) > 0  && ~any(contains(var_names_cell,vname)), continue;end
@@ -27,25 +27,30 @@ for v = info.Variables(:)'
         d.(vname)= d.(vname)+1;        
     end
     
-    d.([vname '_info'])= struct;
+    d.var_info.(vname)= struct;
     for a = v.Attributes(:)'
-        d.([vname '_info']).(strip(a.Name,'_')) = a.Value;
-    end
+        d.var_info.(vname).(strip(a.Name,'_')) = a.Value;
+    end   
     
-    d.([vname '_info']).dims={};
-    for n= 1:length(v.Dimensions(:))
-         d.([vname '_info']).dims{length(v.Dimensions(:))-n+1} = v.Dimensions(n).Name;
+    % get dims for var in reversed order to match permute above
+    d.var_info.(vname).dims={};
+    
+    for nn=1:length(v.Dimensions)
+        d.var_info.(vname).dims{length(v.Dimensions) -nn +1} = v.Dimensions(nn).Name;
     end
+    a=1;
+    
+   
    
 
 end
 
 for a = info.Attributes(:)'
-    d.(['attr_' a.Name])=a.Value;
+    d.(a.Name)=a.Value;
 end
 
 for dim= info.Dimensions(:)'
-    d.(['dim_' dim.Name])=dim.Length;
+    d.dim_info.(dim.Name)=dim.Length;
 end
 
 netcdf.close(ncid);

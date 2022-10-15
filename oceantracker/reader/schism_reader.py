@@ -23,7 +23,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
                         'field_variables': {'water_velocity': PLC(['hvel'], [str], fixed_len=2),
                                               'water_depth': PVC('depth', str),
                                               'tide': PVC('elev', str),
-                                               'water_velocity_depth_average': PLC(['hvel'], [str], fixed_len=1)},
+                                               },
                         'dimension_map': {'node': PVC('nSCHISM_hgrid_node', str),
                                                                      'z': PVC('nSCHISM_vgrid_layers', str),
                                                                      'time': PVC('time', str),
@@ -65,9 +65,9 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
     def read_time(self, nc, file_index=None):
         vname=self.params['grid_variables']['time']
-        if file_index is None : file_index =np.arange(nc.get_var_shape(vname)[0])
+        if file_index is None: file_index = np.arange(nc.get_var_shape(vname)[0])
 
-        time = nc.read_a_variable(vname,file_index)
+        time = nc.read_a_variable(vname,sel=file_index)
         base_date=  [ int(float(x)) for x in nc.get_var_attr('time','base_date').split()]
 
         d0= datetime(base_date[0], base_date[1], base_date[2], base_date[3], base_date[4])
@@ -140,11 +140,10 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
 
     def preprocess_field_variable(self, name, data, nc):
-        si = self.shared_info
 
         if name =='water_velocity' and data.shape[2] > 1:
             # for 3D schism velocity patch non-zero hvel at nodes where cells in LSC grid span a change in bottom_cell_index
-            data = patch_bottom_velocity_to_make_it_zero(data, si.grid['bottom_cell_index'])
+            data = patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
 
         return data
 

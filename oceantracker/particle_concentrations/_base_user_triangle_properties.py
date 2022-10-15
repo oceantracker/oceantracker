@@ -32,6 +32,8 @@ class _BaseTriangleProperties(ParameterBaseClass):
     def set_up_output_file(self):
         # set up output file
         si = self.shared_info
+        grid = si.classes['reader'].grid
+
         tag = '' if self.params['role_output_file_tag'] is None else '_' + self.params['role_output_file_tag']
         self.info['output_file'] = si.output_file_base + '_concentrations_%03.0f' % (self.info['instanceID']  + 1) + tag + '.nc'
 
@@ -41,7 +43,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         nc = self.nc
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
         nc.add_a_Dimension('time', None)
-        nc.add_a_Dimension('face', si.grid['triangles'].shape[0])
+        nc.add_a_Dimension('face', grid['triangles'].shape[0])
 
         nc.create_a_variable('time', ['time'])
         self.time_steps_written = 0

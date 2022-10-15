@@ -9,7 +9,7 @@ from oceantracker.util import json_util
 def read_particle_tracks_file(file_name, var_list=[], release_group= None, fraction_to_read=None):
     # release group is 1 based
     nc = NetCDFhandler(file_name, mode='r')
-    var_list = ['x', 'time','status', 'IDrelease_group', 'IDpulse', 'x0','x_last_good','dry_cell_index'] + var_list
+    var_list = ['x', 'time','status', 'IDrelease_group', 'IDpulse', 'x0','dry_cell_index'] + var_list
     # trim list to variables in the file
     working_var_list=[]
     for var in var_list:

@@ -29,9 +29,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.code_timer.start('intialize_interplolation_grid')
         si= self.shared_info
         self.build_grid()
-
+        grid = si.classes['reader'].grid
         # build kd tree for initial triangle find of particle initial locations
-        xy_centriod = np.mean(si.grid['x'][si.grid['triangles']], axis=1)
+        xy_centriod = np.mean(grid['x'][grid['triangles']], axis=1)
         self.KDtree = cKDTree(xy_centriod)
 
         self.code_timer.stop('intialize_interplolation_grid')
@@ -58,13 +58,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                        initial_value=0, vector_dim=2, prop_dim3=3))
             p.create_particle_property('manual_update',dict(name='z_fraction_nodes',  write=False, dtype=np.single,
                                        initial_value=0., vector_dim=2, prop_dim3=3))
-            info['vertical_search_steps_histogram'] = np.full( (si.grid['zlevel'].shape[2]+1,), 0, np.int32)
+            info['vertical_search_steps_histogram'] = np.full( (grid['zlevel'].shape[2]+1,), 0, np.int32)
 
     def build_grid(self):
         si = self.shared_info
-
+        grid = si.classes['reader'].grid
         # build transformation matrix to calculate bc cords in same form as scipy qhulll
-        si.grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(si.grid['x'].data, si.grid['triangles'].data)
+        grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles'].data)
 
 
     def find_cell(self, xq, nb,step_dt_fraction, active):
@@ -89,6 +89,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def locate_BCwalk(self,xq, nb,step_dt_fraction, active):
         # Bary Centric walk, flags land triangles in numba code
         si = self.shared_info
+        grid = si.classes['reader'].grid
         part_prop = si.classes['particle_properties']
 
         nsteps, nmax = triangle_interpolator_util.BCwalk_with_move_backs_numba(
@@ -97,9 +98,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                     part_prop['status'].data,
                                                     part_prop['n_cell'].data,
                                                     part_prop['bc_cords'].data,
-                                                    si.grid['bc_transform'],
-                                                    si.grid['adjacency'],
-                                                    si.grid['dry_cell_index'],
+                                                    grid['bc_transform'],
+                                                    grid['adjacency'],
+                                                    grid['dry_cell_index'],
                                                     si.run_params['block_dry_cells'],
                                                     self.params['bc_walk_tol'],
                                                     self.params['max_search_steps'],
@@ -116,9 +117,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                             part_prop['status'].data,
                                             part_prop['n_cell'].data,
                                             part_prop['bc_cords'].data,
-                                            si.grid['bc_transform'],
-                                            si.grid['adjacency'],
-                                            si.grid['dry_cell_index'],
+                                            grid['bc_transform'],
+                                            grid['adjacency'],
+                                            grid['dry_cell_index'],
                                             si.run_params['block_dry_cells'],
                                             self.params['bc_walk_tol'],
                                             self.params['max_search_steps'],
@@ -141,8 +142,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.info['n_total_walking_steps'] += nsteps
 
     def initial_cell_guess(self, xq):
-        # find nearest cell   #todo not sure error checking is used
+        # find nearest cell
         si=self.shared_info
+        grid = si.classes['reader'].grid
         dist, n_cell = self.KDtree.query(xq[:, :2])
         n_cell[np.any(~np.isfinite(xq), axis=1)] = -1 # stops walking for non-finite initial cords
 
@@ -155,9 +157,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             status,
             n_cell,
             bc,
-            si.grid['bc_transform'],
-            si.grid['adjacency'],
-            si.grid['dry_cell_index'],
+            grid['bc_transform'],
+            grid['adjacency'],
+            grid['dry_cell_index'],
             False,  # dont block dry cells, just block at domain boundary
             self.params['bc_walk_tol'],
             self.params['max_search_steps'],
@@ -175,6 +177,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def eval_field_interpolation_at_particle_locations(self, fieldObj, nb  , output, active, step_dt_fraction=None):
         # in place evaluation of field interpolation
         si = self.shared_info
+        grid = si.classes['reader'].grid
         part_prop= si.classes['particle_properties']
         n_cell   = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
@@ -190,17 +193,17 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                   fieldObj.data,
                                                   nb,
                                                   step_dt_fraction,
-                                                  si.grid['triangles'],
+                                                  grid['triangles'],
                                                   n_cell,
                                                   nz_nodes, z_fraction_nodes, bc_cords,
-                                                  si.grid['zlevel'], si.grid['bottom_cell_index'], si.z0,
+                                                  grid['zlevel'], grid['bottom_cell_index'], si.z0,
                                                   active)
                 else:
                     eval_interp.time_dependent_3Dfield(basic_util.atLeast_Nby1(output),
                                                        fieldObj.data,
                                                        nb,
                                                        step_dt_fraction,
-                                                       si.grid['triangles'],
+                                                       grid['triangles'],
                                                        n_cell,
                                                        nz_nodes, z_fraction_nodes, bc_cords, active)
             else:
@@ -208,7 +211,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                    fieldObj.data,
                                                    nb,
                                                    step_dt_fraction,
-                                                   si.grid['triangles'],
+                                                   grid['triangles'],
                                                    n_cell,
                                                    bc_cords, active)
         else:
@@ -221,7 +224,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             else:
                 eval_interp.time_independent_2Dfield(basic_util.atLeast_Nby1(output),
                                                      fieldObj.data,
-                                                     si.grid['triangles'],
+                                                     grid['triangles'],
                                                      n_cell,
                                                      bc_cords, active)
 
@@ -230,6 +233,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         #todo not working - eval_field_interpolation_at_given_locations
 
         si = self.shared_info
+        grid = si.classes['reader'].grid
         part_prop= si.classes['particle_properties']
         reader = si.classes['reader']
 
@@ -263,17 +267,17 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                   fieldObj.data,
                                                   nb,
                                                   step_dt_fraction,
-                                                  si.grid['triangles'],
+                                                  grid['triangles'],
                                                   n_cell,
                                                   nz_nodes, z_fraction_nodes, bc_cords,
-                                                  si.grid['zlevel'], si.grid['bottom_cell_index'], si.z0,
+                                                  grid['zlevel'], grid['bottom_cell_index'], si.z0,
                                                   active)
                 else:
                     eval_interp.time_dependent_3Dfield(basic_util.atLeast_Nby1(output),
                                                        fieldObj.get_data(nt_buffer=nb),
                                                        fieldObj.get_data(nt_buffer=nb + 1),
                                                        step_dt_fraction,
-                                                       si.grid['triangles'],
+                                                       grid['triangles'],
                                                        n_cell,
                                                        nz_nodes, z_fraction_nodes, bc_cords, active)
             else:
@@ -282,7 +286,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                    fieldObj.data,
                                                    nb,
                                                    step_dt_fraction,
-                                                   si.grid['triangles'],
+                                                   grid['triangles'],
                                                    n_cell,
                                                    bc_cords, active)
         else:
@@ -296,7 +300,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 # is working
                 eval_interp.time_independent_2Dfield(basic_util.atLeast_Nby1(output),
                                                      fieldObj.data,
-                                                     si.grid['triangles'],
+                                                     grid['triangles'],
                                                      n_cell,
                                                      bc_cords, active)
                 return  output
@@ -305,10 +309,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # find depth cell number starting with a guess of previous depth cell
         # for fixed fractional depth grid
         si = self.shared_info
+        grid = si.classes['reader'].grid
         part_prop = si.classes['particle_properties']
 
-        zlevel_nodes= si.grid['zlevel']
-        nz_bottom = si.grid['bottom_cell_index']
+        zlevel_nodes= grid['zlevel']
+        nz_bottom = grid['bottom_cell_index']
         n_cell      = part_prop['n_cell'].data
         nz_nodes    = part_prop['nz_cell_nodes'].data
         status      = part_prop['status'].data
@@ -318,7 +323,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         #z=part_prop['x'].data[:10,2]
         count_maybe_below_bottom, count_maybe_above_surface = \
                                 triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(
-                                                        xq[:, 2], nb, step_dt_fraction, zlevel_nodes, si.grid['triangles'], n_cell,
+                                                        xq[:, 2], nb, step_dt_fraction, zlevel_nodes, grid['triangles'], n_cell,
                                                         nz_bottom, BCcords, status,
                                                         si.particle_status_flags['on_bottom'], si.particle_status_flags['moving'],
                                                         si.particle_status_flags['stranded_by_tide'],
@@ -330,8 +335,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def get_bc_cords(self,x,n_cells):
         si= self.shared_info
+        grid = si.classes['reader'].grid
         bc_cords = np.full((x.shape[0],3), 0.)
-        triangle_interpolator_util.get_BC_cords_numba(x, n_cells, si.grid['bc_transform'], bc_cords)
+        triangle_interpolator_util.get_BC_cords_numba(x, n_cells, grid['bc_transform'], bc_cords)
         return bc_cords
 
     def close(self):
@@ -353,7 +359,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # barycentric cords, only for use with non-improved scipy and KDtree for al time steps
         # numba code does this faster
         si = self.shared_info
-        TT = np.take(si.grid['bc_transform'], n_cell, axis=0,)
+        grid = si.classes['reader'].grid
+
+        TT = np.take(grid['bc_transform'], n_cell, axis=0,)
         b = np.full((x.shape[0],3), np.nan, order='C')
         b[:,:2] = np.einsum('ijk,ik->ij', TT[:, :2], x[:, :2] - TT[:, 2], order='C')  # Einstein summation
         b[:,2] = 1. - b[:,:2].sum(axis=1)

@@ -46,14 +46,14 @@ Parameters:
 			- default: ``nSCHISM_vgrid_layers``
 
 	* ``field_variables``: nested parameter dictionary
+		* ``salinity`` :   ``<class 'str'>``   *<optional>*
+			- default: ``None``
+
 		* ``tide`` :   ``<class 'str'>``   *<optional>*
 			- default: ``elev``
 
 		* ``water_depth`` :   ``<class 'str'>``   *<optional>*
 			- default: ``depth``
-
-		* ``water_salinity`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
 
 		* ``water_temperature`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
@@ -136,8 +136,5 @@ Parameters:
 		- max: ``23``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
-	* ``water_velocity_depth_average`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

@@ -4,7 +4,7 @@ if nargin < 2
     var_names_cell={};     
 end
 
-[d, info] = readNCvars(filename,var_names_cell,{''});
+[d, info] = readNCvarsOT(filename,var_names_cell,{''});
 
 % turn sums into mean values
 for var = info.Variables(:)'

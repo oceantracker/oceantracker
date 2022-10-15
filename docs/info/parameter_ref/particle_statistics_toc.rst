@@ -20,6 +20,7 @@ particle_statistics
 	PolygonStats2D_timeBased.rst
 	PolygonStats2D_timeBasedDepthRange.rst
 	PolygonStats2D_timeBasedTopBottom.rst
+	ResidentInPolygon.rst
 	TopBottomLayerStats.rst
 	WaterDepthRangeStats.rst
 

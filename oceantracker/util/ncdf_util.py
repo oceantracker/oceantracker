@@ -46,7 +46,7 @@ class NetCDFhandler(object):
                 setattr(self.file_handle.variables[name], key, self._sanitize_attribute(value))
         return v
 
-    def read_a_variable(self,name,sel=None):
+    def read_a_variable(self,name, sel=None):
         if sel is None:
             data= self.file_handle.variables[name][:]   #read a whole variable
         else:

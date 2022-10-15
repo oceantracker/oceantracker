@@ -26,13 +26,17 @@ Parameters:
 
 		- default: ``None``
 
-	* ``count_status_equal_to`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
+	* ``count_status_in_range``:  *<optional>*
+		Description: - Count only those particles with status which fall in the given range
 
-	* ``count_status_greater_than`` :   ``<class 'str'>``   *<optional>*
-		- default: ``dead``
-		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``['frozen', 'moving']``
+		- can_be_empty_list: ``True``
+		- min_length: ``2``
+		- max_length: ``2``
+
+	* ``file_tag`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``grid_center``:  *<optional>*
 		- a list containing type:  ``[<class 'float'>, <class 'int'>]``

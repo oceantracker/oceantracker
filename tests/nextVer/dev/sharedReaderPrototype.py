@@ -2,6 +2,8 @@ import multiprocessing as mp
 from multiprocessing import Pool
 import traceback
 import time, random
+from typing import Dict, Any
+
 import numpy as np
 from copy import deepcopy, copy
 
@@ -45,7 +47,7 @@ class SharedMemArray():
         self.data = np.ndarray(sm_dict_map['shape'], dtype=sm_dict_map['dtype'], buffer=self.sm.buf)
 
         self.map = sm_dict_map
-        print('connecting', sm_dict_map)
+        #print('connecting', sm_dict_map)
 
     def get_shared_mem_map(self): return self.map
 
@@ -63,154 +65,133 @@ class SharedMemArray():
 
 
 def worker(d):
-    work(d)
-    #try :
 
-    #except Exception:
-    #    print(traceback.format_exc())
-def work(d):
-    workerID= d['processor_number']
+    workerID= d['processID']
 
-    rm = d['run_management']
+    rm = d['shared_read_build_info']['run_management']
 
     vars={}
-    for sm_map in d['shared_arrays']:
-        v = SharedMemArray(sm_map=sm_map)
-        vars[v.map['var_name']] = v
+    for s in d['shared_read_build_info']['vars']:
+        vars[s['var_name']] =  SharedMemArray(sm_map=s)
 
     #print('data mapped',n)
 
     rm['workers_alive'][workerID]= True
     print("Worker alive ", workerID, rm['workers_alive'][workerID])
-    last_msg = time.perf_counter()
-    while rm['workers_alive'][workerID]:
 
-        if rm['buffer_filled'].get() ==0 or rm['steps_completed_workers'][workerID] == rm['buffer_filled'].get():
-            # wait on reader
-            if time.perf_counter()- last_msg > 1:
-                print('  worker ', workerID, ' waiting on reader or other workers, steps completed=', rm['buffer_filled'].get())
-                last_msg = time.perf_counter()
+    nt =0
+    while rm['workers_alive'][workerID]:
+        if rm['nt_first'].value <= nt <= rm['nt_last'].value :
+
+            print('W:%02.0f- calc' % workerID,nt)
+            nt +=1
             time.sleep(.1)
         else:
-            # do work on buffer
-            for nb in range(rm['buffer_filled'].get()):
-                vars['a0'].data[nb, 1] += 2
-                time.sleep(.2 * np.random.random())
-                rm['steps_completed_workers'][workerID] += 1
+            print('W:%02.0f-waiting' % workerID, nt)
+            time.sleep(.1)
 
-            print('Worker', workerID, '  steps completed ', rm['steps_completed_workers'][workerID])
-
+    rm['workers_alive'][workerID] = False
     print('Worker stopped', workerID)
-
-    for name, v in vars.items():   v.disconnect()
 
     return (workerID,'done')
 
+class dummy_shared_reader(object):
+    def __init__(self):
+        self.vars={}
+        self.run_management = {'nt_first': mp.Manager().Value(int, -1),
+                          'nt_last': mp.Manager().Value(int, -1),
+                          'workers_alive': mp.Manager().list(n_workers * [False]),
+                          'steps_completed_workers': mp.Manager().list(n_workers * [0])
+                          }
+        buffer_size = 31
+        s = (buffer_size, 30)
+
+        self._add_shared_var('time', (buffer_size,), np.float64, fill_value=np.nan)
+        self._add_shared_var('x', (buffer_size,20), np.float64, fill_value=np.nan)
+        self._add_shared_var('status', (buffer_size, 20), np.int8, fill_value=-1)
+
+    def _add_shared_var(self,name,shape,data_type,fill_value=None):
+          self.vars[name] =  SharedMemArray(var_name=name, shape=shape, dtype=data_type, fill_value=fill_value)
+
+    def get_shared_mem_build_info(self):
+        out= {'run_management':self.run_management,'vars': {}}
+        out['vars']=[]
+        for name, s in self.vars.items():
+            out['vars'].append(s.map)
+
+        return out
+
+    def update(self):
+        a=1
+
+def run_reader(shared_mem_vars):
+
+    sm={}
+    for s in shared_mem_vars['vars']:
+        sm[s['var_name']] =  SharedMemArray(sm_map=s)
+
+    rm = shared_mem_vars['run_management']
+    b= 24
+
+    for nt in range(100):
+        print('reader', nt)
+        while np.any(np.array(rm['steps_completed_workers']) <= nt):
+            time.sleep(.1)
+            print('Reader waiting',nt,str(rm['steps_completed_workers']))
+        else:
+            print('Reader advance', str(rm['steps_completed_workers']))
+            sm['time'].data[nt] = n
+            rm['nt_last'] +=1
+
+        print('R1',rm['steps_completed_workers'],sm['time'].data[0], sm['time'].data[nt])
+        # range of time steps in buffer
+        rm['nt_first'] = n
+        rm['nt_last'] = n+b-1
 
 if __name__ == '__main__':
+
+
     n_workers= 3
 
     mp.set_start_method('spawn')
-    pool = mp.Pool(6)
 
-    run_management= {'buffer_filled': mp.Manager().Value(int, -1),
-                     'nt_start_buffer': mp.Manager().Value(int, -1),
-                    'workers_alive': mp.Manager().list(n_workers * [False]),
-                    'steps_completed_workers': mp.Manager().list(n_workers * [0])
-                     }
-    buffer_size=31
-    s=(buffer_size,2)
-
-    sm_vars= {}
-    sm_maps = []
-    dtypes=[np.float64, np.float32, np.int32, bool,  np.int8]
-    for n in range(len(dtypes)):
-        vn='a'+str(n)
-        sm_vars[vn] = SharedMemArray(var_name=vn, shape=s, dtype=dtypes[n], fill_value=8)
-        sm_maps.append(sm_vars[vn].get_shared_mem_map())
+    reader=dummy_shared_reader()
+    bi = reader.get_shared_mem_build_info()
+    rm=reader.run_management
 
     tasks=[]
     for n in range(n_workers):
-        tasks.append({'processor_number': n, 'shared_arrays': sm_maps,
-                      'run_management': run_management})
+        tasks.append({'processID': n, 'shared_read_build_info' :bi})
+    worker_status = rm['workers_alive']
 
+    reader_pool = mp.Pool(1)
+    reader_out = reader_pool.apply_async(run_reader,args= (bi,))
 
-    # test call
-    #worker(tasks[0])
-    out =  pool.map_async(worker,tasks)
+    #time.sleep(.5)
 
-    print('running')
-    # watch for end
-    #time.slep(3)
-
-    # wake up workers
-    rm=run_management
-
-    tstart =time.perf_counter()
-    nt0=10
-    time_chunking =11
-
-    nt_first =0
-    nt_last= 300
-    n_chunk =0
-    nt=21+np.arange(121) # time steps to rin
-
-    while nt.shape[0] >1 :
-
-        rm['buffer_filled'].set(0)
-        # read block
-
-        print('Reader filled buffer, chunk', n_chunk,'time step', nt[0])
-        time.sleep(.1*np.random.random())
-        ntb0=rm['nt_start_buffer'].get()
-        buffer_index = nt[:time_chunking] % buffer_size
-
-        sm_vars['a0'].data[buffer_index, 0] = buffer_index
-        n_chunk += 1
-        # tell workers buffer is full
-        # first set next buffer step to be proces to zero for all workers
-        for n in range(len(rm['steps_completed_workers'])): rm['steps_completed_workers'][n] = 0
-        rm['nt_start_buffer'].set(nt[0])
-        rm['buffer_filled'].set(20)
-
-        # wait for workers to catch  up to end of buffer
-        t0 =time.perf_counter()
-        last_msg = time.perf_counter()
-
-        while not all([ (x == rm['buffer_filled'].get()) for x in rm['steps_completed_workers']]):
-            # get current state of workers
-
-            worker_steps_completed = [n for n in rm['steps_completed_workers']]
-            #print('master',worker_steps_completed)
-            time.sleep(.01)
-            #print(int(time.perf_counter()-t0),t_warning)
-            if time.perf_counter() - last_msg > 1:
-                print('  master block time step', nt[0], ' waiting',time.perf_counter()-t0,
-                      'buffer has filled ',  rm['buffer_filled'].get() ,
-                      'Worker step range', min(worker_steps_completed),'-', max(worker_steps_completed),
-                      ', workers are at steps ',worker_steps_completed)
-                last_msg = time.perf_counter()
-
-            if tstart - time.perf_counter() > 60:
-                print('engine break')
-                break
-
-        nt = nt[time_chunking:]
-
-        if tstart - time.perf_counter() > 60:
-            print('engine break')
-            break
-    # stop all workers
-    for n in range(n_workers) : run_management['workers_alive'][n] = False
     time.sleep(1)
+    rm['workers_alive'][0] = False
+    print( rm['workers_alive'])
 
-    pool.close()
-    pool.terminate()
-    pool.join()
+    worker_pool = mp.Pool(n_workers)
+    worker_out = worker_pool.map_async(worker, tasks)
+    #worker_pool.wait()
+
+    time.sleep(5)
+    #worker_pool.close()
+    #worker_pool.join()
+    #print(worker_out)
+
+    # reader_pool.close()
+    # reader_pool.join()
+    #for w in worker_status:
+    #    w=False
+
+
 
      #clear shared menory
-    for name, v in sm_vars.items():
-        v.delete()
+    #for name, v in sm_vars.items():
+    #    v.delete()
 
 
 

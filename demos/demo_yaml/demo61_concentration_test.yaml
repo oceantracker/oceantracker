@@ -84,7 +84,7 @@ reader:
   field_variables:
     water_temperature: temp
   file_mask: demoHindcastSchism3D.nc
-  input_dir: demo_hindcast
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast
 shared_params:
   debug: true
   max_duration: 1296000.0

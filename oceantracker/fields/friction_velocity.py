@@ -24,7 +24,8 @@ class FrictionVelocity(UserFieldBase):
 
     def update(self, buffer_index):
         si = self.shared_info
-        self.calc_fiction_velocity(buffer_index, si.grid['zlevel'], si.grid['bottom_cell_index'], si.z0, si.classes['fields']['water_velocity'].data , self.data)
+        grid = si.classes['reader'].grid
+        self.calc_fiction_velocity(buffer_index, grid['zlevel'], grid['bottom_cell_index'], si.z0, si.classes['fields']['water_velocity'].data , self.data)
 
     @staticmethod
     @njit()

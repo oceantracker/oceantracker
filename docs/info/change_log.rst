@@ -6,8 +6,30 @@ Change log
 Known issues
 __________________
 
+
+Version 0.3.01.04-06, Oct 04 2022
+_____________________________________
+
+New features
+--------------------
+
+#.?? internal rebuilt of buffered reader, as step towards using ring buffer needed for share reader
+
+Changes
+--------------------
+
+#. internal rebuilt of buffered reader, as step towards developing ring buffer for hindcast needed for share reader
+#.  grid variable now attached to reader, ie si.grid is now si.classes['reader'].grid
+#. changed reading of hindcast variables to normally avoid temporary copies  and be read direct into place to smooth out memory demand
+#. by default x_last_good is no longer written to tracks file
+
+Bug fixes
+--------------------
+
+#. trapped error with warning if netcdf chunk size of tracks file variable is over 4gb
+
 Version 0.3.01.02 Sept 13 2022
-_____________________________
+________________________________
 
 New features
 --------------------

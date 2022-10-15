@@ -46,13 +46,13 @@ Parameters:
 			- default: ``None``
 
 	* ``field_variables``: nested parameter dictionary
+		* ``salinity`` :   ``<class 'str'>``   *<optional>*
+			- default: ``None``
+
 		* ``tide`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
 
 		* ``water_depth`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-
-		* ``water_salinity`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
 
 		* ``water_temperature`` :   ``<class 'str'>``   *<optional>*

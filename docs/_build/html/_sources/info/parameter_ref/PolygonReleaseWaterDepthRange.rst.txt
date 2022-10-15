@@ -93,7 +93,7 @@ Parameters:
 	* ``z_range``:  *<optional>*
 		Description: - z range = [zmin, zmax] to randomly release in 3D, overrides any given release z value
 
-		- a list containing type:  ``[<class 'float'>]``
+		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- min_length: ``2``

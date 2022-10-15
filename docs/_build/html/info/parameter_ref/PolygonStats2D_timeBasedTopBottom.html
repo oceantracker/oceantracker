@@ -15,7 +15,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="TopBottomLayerStats" href="TopBottomLayerStats.html" />
+    <link rel="next" title="ResidentInPolygon" href="ResidentInPolygon.html" />
     <link rel="prev" title="PolygonStats2D_timeBasedDepthRange" href="PolygonStats2D_timeBasedDepthRange.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -86,7 +86,7 @@
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="particle_statistics_toc.html">particle_statistics</a><ul>
       <li>Previous: <a href="PolygonStats2D_timeBasedDepthRange.html" title="previous chapter">PolygonStats2D_timeBasedDepthRange</a></li>
-      <li>Next: <a href="TopBottomLayerStats.html" title="next chapter">TopBottomLayerStats</a></li>
+      <li>Next: <a href="ResidentInPolygon.html" title="next chapter">ResidentInPolygon</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -138,28 +138,21 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">count_status_equal_to</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">dict_keys(['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'frozen',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving'])</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">count_status_greater_than</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">dead</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">dict_keys(['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'frozen',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving'])</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">grid_center</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<dt><code class="docutils literal notranslate"><span class="pre">count_status_in_range</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Count only those particles with status which fall in the given range</p>
+<ul class="simple">
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['frozen',</span> <span class="pre">'moving']</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+<li><p>min_length: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+<li><p>max_length: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -168,16 +161,6 @@
 <dt><code class="docutils literal notranslate"><span class="pre">grid_size</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'int'&gt;]</span></code></p></li>
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">[100,</span> <span class="pre">99]</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">grid_span</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'float'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
 </ul>
@@ -226,20 +209,12 @@
 </dd>
 </dl>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">polygon_list</span></code>:  <em>&lt;optional&gt;</em></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">polygon_list</span></code>:<strong>&lt;isrequired&gt;</strong></p></li>
 </ul>
 </div></blockquote>
 <p>polygon_list: still working on display  of lists of dict, eg nested polygon list</p>
 <blockquote>
 <div><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">release_group_centered_grids</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">role_output_file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">stats_polygon_time_depth_layer</span></code></p></li>
@@ -286,7 +261,7 @@
           <a href="PolygonStats2D_timeBasedDepthRange.html" title="Previous document">PolygonStats2D_timeBasedDepthRange</a>
         </li>
         <li>
-          <a href="TopBottomLayerStats.html" title="Next document">TopBottomLayerStats</a>
+          <a href="ResidentInPolygon.html" title="Next document">ResidentInPolygon</a>
           &rarr;
         </li>
     </ul>

@@ -26,29 +26,21 @@ Parameters:
 
 		- default: ``None``
 
-	* ``count_status_equal_to`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
+	* ``count_status_in_range``:  *<optional>*
+		Description: - Count only those particles with status which fall in the given range
 
-	* ``count_status_greater_than`` :   ``<class 'str'>``   *<optional>*
-		- default: ``dead``
-		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
-
-	* ``grid_center``:  *<optional>*
-		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
-		- default list : ``[]``
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``['frozen', 'moving']``
 		- can_be_empty_list: ``True``
-		- fixed_len: ``2``
+		- min_length: ``2``
+		- max_length: ``2``
+
+	* ``file_tag`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``grid_size``:  *<optional>*
 		- a list containing type:  ``[<class 'int'>]``
 		- default list : ``[100, 99]``
-		- can_be_empty_list: ``True``
-		- fixed_len: ``2``
-
-	* ``grid_span``:  *<optional>*
-		- a list containing type:  ``[<class 'float'>]``
-		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
@@ -75,13 +67,9 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 
-	* ``polygon_list``:  *<optional>*
+	* ``polygon_list``:**<isrequired>**
 
 polygon_list: still working on display  of lists of dict, eg nested polygon list 
-
-	* ``release_group_centered_grids`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_polygon_time_depth_layer``

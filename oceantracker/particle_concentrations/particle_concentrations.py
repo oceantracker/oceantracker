@@ -16,8 +16,9 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
 
     def set_up_data_buffers(self):
         si = self.shared_info
+        grid = si.classes['reader'].grid
         # set up data buffer
-        s = (si.grid['triangles'].shape[0],)
+        s = (grid['triangles'].shape[0],)
 
         self.particle_count = np.full(s, 0, dtype=np.int32)
         self.particle_concentration = np.full(s, 0.)
@@ -32,10 +33,12 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
 
     def update(self,n_buffer, time):
         si=self.shared_info
+        grid = si.classes['reader'].grid
+
         sel = self.select_particles_to_count()
         self.calcuate_concentration2D(si.classes['particle_properties']['n_cell'].data,
                                       si.classes['particle_properties']['total_water_depth'].data,
-                                      si.grid['triangle_area'],
+                                      grid['triangle_area'],
                                        self.particle_count,
                                         self.particle_concentration,  sel)
         self.write(n_buffer, time)

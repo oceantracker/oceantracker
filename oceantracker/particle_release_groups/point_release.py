@@ -126,6 +126,7 @@ class PointRelease(ParameterBaseClass):
     def release_locations(self):
         # set up full set of release locations inside  polygons
         si = self.shared_info
+        grid = si.classes['reader'].grid
         info= self.info
 
         n_required = self.get_number_required()
@@ -172,7 +173,7 @@ class PointRelease(ParameterBaseClass):
             if len(self.params['z_range']) == 0:  self.params['z_range']= [-1.0E30,1.0E30]
 
             z = self.get_z_release_in_depth_range(np.asarray(self.params['z_range']), n_cell_guess,
-                                            si.grid['zlevel'], si.grid['bottom_cell_index'] , si.grid['triangles'],
+                                            grid['zlevel'], grid['bottom_cell_index'] , grid['triangles'],
                                             si.classes['field_group_manager'].get_current_reader_time_buffer_index())
             x0 = np.hstack((x0[:, :2], z))
 
@@ -229,6 +230,7 @@ class PointRelease(ParameterBaseClass):
 
     def check_potential_release_locations_in_bounds(self, x):
         si= self.shared_info
+        grid = si.classes['reader'].grid
         # use KD tree to find points those outside model domain
 
         sel, n_cell = si.classes['interpolator'].are_points_inside_domain(x[:,:2])
@@ -239,7 +241,7 @@ class PointRelease(ParameterBaseClass):
 
         # add keep only those in wet cells, crudely this is those not in dry cell at this and the next time step
         if not self.params['allow_release_in_dry_cells']:
-            sel =si.grid['dry_cell_index'][n_cell] < 128
+            sel =grid['dry_cell_index'][n_cell] < 128
             x = x[sel, :]
             n_cell = n_cell[sel]
 

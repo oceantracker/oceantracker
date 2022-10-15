@@ -35,6 +35,8 @@ Parameters:
 		- min: ``1``
 
 	* ``retain_culled_part_locations`` :   ``<class 'bool'>``   *<optional>*
+		Description: - When particle marked dead/culled keep its position value, ie dont set position to nan so it does not appear in plots etc after death
+
 		- default: ``False``
 		- possible_values: ``[True, False]``
 

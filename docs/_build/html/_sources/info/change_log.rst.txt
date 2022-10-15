@@ -1,3 +1,4 @@
+
 ###########################
 Change log
 ###########################
@@ -6,6 +7,45 @@ Known issues
 __________________
 
 
+Version 0.3.01.04-06, Oct 04 2022
+_____________________________________
+
+New features
+--------------------
+
+#.?? internal rebuilt of buffered reader, as step towards using ring buffer needed for share reader
+
+Changes
+--------------------
+
+#. internal rebuilt of buffered reader, as step towards developing ring buffer for hindcast needed for share reader
+#.  grid variable now attached to reader, ie si.grid is now si.classes['reader'].grid
+#. changed reading of hindcast variables to normally avoid temporary copies  and be read direct into place to smooth out memory demand
+#. by default x_last_good is no longer written to tracks file
+
+Bug fixes
+--------------------
+
+#. trapped error with warning if netcdf chunk size of tracks file variable is over 4gb
+
+Version 0.3.01.02 Sept 13 2022
+________________________________
+
+New features
+--------------------
+
+#. Added residence count particle statistic, counts number of particles still inside designated release polygon at given time inervals, . Can be used to find residence time with release polygon, eg residence time in an estuary. See new demo 10
+
+Changes
+--------------------
+
+#. in stats classes count_staus_equal_to and count_status_greater tha, replae by 'count_status_in_range' param, see github pages
+#. post proceesing plot_heat_maps module now names plot_statistics
+
+Bug fixes
+--------------------
+
+#. ??
 
 
 Version 0.3.01.00 Sept 6 2022
