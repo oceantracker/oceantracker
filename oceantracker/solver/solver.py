@@ -40,6 +40,7 @@ class Solver(ParameterBaseClass):
 
     def initialize_run(self, nb0):
         si = self.shared_info
+        grid = si.classes['reader'].grid
         info = self.info
         pgm, fgm, tracks_writer = si.classes['particle_group_manager'], si.classes['field_group_manager'], si.classes['tracks_writer']
         part_prop = si.classes['particle_properties']
@@ -50,7 +51,7 @@ class Solver(ParameterBaseClass):
         info['total_active_particles'] = 0
 
         # initial release , writes and statistics etc
-        t0 = si.grid['time'][nb0]
+        t0 = grid['time'][nb0]
         new_particleIDs = pgm.release_particles(nb0, t0)
         fgm.setup_interp_time_step(nb0, t0, part_prop['x'].data, new_particleIDs)  # set up interp for first time step
         pgm.update_PartProp(t0, new_particleIDs)  # now update part prop with good cell and bc cords, eg  interp water_depth
@@ -68,6 +69,7 @@ class Solver(ParameterBaseClass):
     def solve_for_data_in_buffer(self, nb0, num_in_buffer, nt0):
         # solve for data in buffer
         si = self.shared_info
+        grid = si.classes['reader'].grid
         info = self.info
         pgm, fgm, tracks_writer   = si.classes['particle_group_manager'], si.classes['field_group_manager'], si.classes['tracks_writer']
         part_prop = si.classes['particle_properties']
@@ -75,7 +77,7 @@ class Solver(ParameterBaseClass):
 
         for nb in range(nb0,nb0 + num_in_buffer-1): # one less step as last step is initial condition for next block
 
-            t_hindcast = si.grid['time'][nb]  # make time exactly that of grid
+            t_hindcast = grid['time'][nb]  # make time exactly that of grid
 
             # do sub steps with hindcast model step
             for ns in range(self.params['n_sub_steps']):
@@ -222,6 +224,7 @@ class Solver(ParameterBaseClass):
         # update part prop, eg  interp mapped reader fields to particle locations
         self.code_timer.start('post_step_bookeeping')
         si = self.shared_info
+        grid = si.classes['reader'].grid
         pm = si.classes['particle_group_manager'] # internal short cuts
         fgm = si.classes['field_group_manager']
         part_prop  =  si.classes['particle_properties']
@@ -247,7 +250,7 @@ class Solver(ParameterBaseClass):
         # eg total water depth used for tidal stranding must be up to date
         # (dry_cell_index, status_frozen, status_stranded ,status_moving, sel, status)
         solver_util.tidal_stranding_from_dry_cell_index(
-                                           si.grid['dry_cell_index'],
+                                           grid['dry_cell_index'],
                                            part_prop['n_cell'].data,
                                            si.particle_status_flags['frozen'],
                                            si.particle_status_flags['stranded_by_tide'],

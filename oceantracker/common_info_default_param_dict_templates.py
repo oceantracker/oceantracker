@@ -39,7 +39,7 @@ default_case_param_template={
                                     'write_tracks':             PVC(True, bool),
                                     'particle_buffer_size':     PVC(None, int, min=1),
                                     'z0':                       PVC(0.005, float, min=0.0001),  # default bottom roughness
-                                    'retain_culled_part_locations': PVC(False, bool),
+                                    'retain_culled_part_locations': PVC(False, bool, doc_str='When particle marked dead/culled keep its position value, ie dont set position to nan so it does not appear in plots etc after death'),
                                     'duration':                 PVC(1.0 * 10 ** 300, float),
                                     'open_boundary_type' :  PVC(0, int, min=0, max=1),
                                     'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
@@ -51,7 +51,7 @@ default_case_param_template={
              'tracks_writer':   {},
              'dispersion':      {},
      # class lists
-             'particle_release_groups':  [],  #
+             'particle_release_groups':  [],  #bbbbbbbbbbbbbbbbbbbbbbbbb
 
     # above classes are required classes/family members/ parameters, below are user classes held in named lists
     # below are optional user classes held in named lists

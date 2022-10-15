@@ -35,8 +35,7 @@ from oceantracker.util.module_importing_util import import_module_from_string
 
 import subprocess
 
-code_version = '0.3.01.03 Oct 01 2022'
-
+code_version = '0.3.01.05 Oct 15 2022'
 
 
 def run(user_params):
@@ -407,7 +406,8 @@ class _RunOceanTrackerClass(object):
         # write a netcdf of the grid from first hindcast file
         msg_list=[]
         hindcast = NetCDFhandler(reader_build_info['sorted_file_info']['names'][0], 'r')
-        grid = reader._setup_grid(hindcast, reader_build_info)
+        reader._setup_grid(hindcast, reader_build_info)
+        grid= reader.grid
         hindcast.close()
 
         # write grid file

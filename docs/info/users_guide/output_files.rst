@@ -49,7 +49,7 @@ _________________
 _runLog.txt
 _________________
 
-    Has the screen output associated with main.rum(), ie lines starting with "M" on the screen. This covers setup progress, parameter checking, ....
+    Has the screen output associated with main.run(), ie lines starting with "M" on the screen. This covers setup progress, parameter checking, ....
 
 
 _caseInfo.json

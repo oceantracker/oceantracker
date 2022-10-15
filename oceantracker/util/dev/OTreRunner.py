@@ -108,6 +108,8 @@ class OceanTrackerReRunner(object):
     def _get_engine_info(self):
         otsim = self.otsim
         si= otsim.shared_info
+        grid = si.classes['reader'].grid
+
         reader = otsim.shared_info.reader
         t1 = reader.get_first_time_in_hindcast()
         t2 = reader.get_last_time_in_hindcast()
@@ -117,11 +119,11 @@ class OceanTrackerReRunner(object):
                           'end_time': t2,
                           'start_date': time_util.seconds_to_iso8601str(t1),
                           'end_date': time_util.seconds_to_iso8601str(t2),
-                          'nodes': si.grid['x'].shape[0],
+                          'nodes': grid['x'].shape[0],
                           },
              }
 
-        return {'model_info' : d, 'grid_outline' : self.otsim.shared_info.grid['grid_outline'] }
+        return {'model_info' : d, 'grid_outline' : grid['grid_outline'] }
 
     def emit_engine_info(self):
         d= self._get_engine_info()

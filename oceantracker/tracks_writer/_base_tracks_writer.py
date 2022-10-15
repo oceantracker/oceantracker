@@ -42,11 +42,12 @@ class _BaseWriter(ParameterBaseClass):
 
     def initialize(self):
         si= self.shared_info
+        grid = si.classes['reader'].grid
         if self.params['write_dry_cell_index']:
-            self.add_dimension('triangle', si.grid['triangles'].shape[0])
+            self.add_dimension('triangle', grid['triangles'].shape[0])
             self.add_dimension('triplets', 3)
             self.add_new_variable('dry_cell_index', ['time','triangle'], attributes_dict={'description': 'Time series of grid dry index 0-255'},
-                                  dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],si.grid['triangles'].shape[0]])
+                                  dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])
 
 
     def add_dimension(self, name, size):
@@ -112,7 +113,7 @@ class _BaseWriter(ParameterBaseClass):
                 c = np.asarray(item['chunks'],dtype=np.int64) # avoids float 32 over flow
                 b = np.prod(c)*np.full((0,),0 ).astype(item['dtype']).itemsize # btypes in a chunk
                 if float(b) >= 4.0e9 :
-                    si.case_log.write_msg('Netcdf chunk size for variable "' + name+ '" exceeds 4GB, chunks=' + str(c), exception=FatalError,
+                    si.case_log.write_msg('Netcdf chunk size for variable "' + name+ '" exceeds 4GB, chunks=' + str(c), exception=GracefulExitError,
                        hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time',)
 
             try:
@@ -144,6 +145,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.code_timer.start('write_output')
         si= self.shared_info
+        grid = si.classes['reader'].grid
 
         # write time vary info , eg "time"
         self.pre_time_step_write_book_keeping()
@@ -158,7 +160,7 @@ class _BaseWriter(ParameterBaseClass):
                 self.write_time_varying_particle_prop(name, d.data)
 
         if self.params['write_dry_cell_index']:
-            self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = si.grid['dry_cell_index'].reshape(1,-1)
+            self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid['dry_cell_index'].reshape(1,-1)
 
         self.time_steps_written_to_current_file +=1 # time steps in current file
         self.total_time_steps_written  += 1 # time steps written since the start

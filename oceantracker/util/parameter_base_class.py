@@ -59,9 +59,10 @@ class ParameterBaseClass(object):
 
     def check_class_required_fields_properties_grid_vars_and_3D(self, required_props=[], required_fields=[], required_grid_vars=[], requires3D=None, msg_list=[]):
         si = self.shared_info
+        grid = si.classes['reader'].grid
 
         for name in required_grid_vars:
-            if name not in si.grid:
+            if name not in grid:
                append_message(msg_list, '     class ' + self.params['class_name'] + ', ' + self.params['name']
                                 + ' requires grid variable  "' + name + '"' + ' to work', exception = GracefulExitError)
 

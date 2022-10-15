@@ -206,6 +206,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
     def _do_run_integrity_checks(self):
         si=self.shared_info
+        grid = si.classes['reader'].grid
         msg_list = []
 
         # check all have required, fields, part props and grid data
@@ -215,7 +216,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # other checks and warnings
         if si.run_params['open_boundary_type'] > 0:
-            if not si.grid['has_open_boundary_data']:
+            if not grid['has_open_boundary_data']:
                 si.case_log.write_warning('Open boundary requested, but no open boundary node data available, boundaries will be closed,',
                                         hint='For Schism open boundaries requires hgrid file to named in reader params')
         else:

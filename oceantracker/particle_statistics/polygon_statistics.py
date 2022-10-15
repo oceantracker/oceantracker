@@ -11,7 +11,7 @@ class _CorePolygonMethods(ParameterBaseClass):
         super().__init__()
         # set up info/attributes
         self.add_default_params({'polygon_list': PLC([], [dict], default_value= default_polygon_dict_params,
-                                                     can_be_empty_list=False)
+                                                     can_be_empty_list=False, is_required=True)
                                  })
 
         self.remove_default_params(['grid_center','release_group_centered_grids', 'grid_span' ])

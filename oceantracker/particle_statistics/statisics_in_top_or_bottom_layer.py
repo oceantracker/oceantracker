@@ -27,9 +27,11 @@ class TopBottomLayerStats(ParameterBaseClass):
     def select_particles_to_count(self, out):
         # count particles in less than given water depth with status large enough
         si = self.shared_info
+        grid = si.classes['reader'].grid
+
         status = si.classes['particle_properties']['status'].dataInBufferPtr()
         z  = si.classes['particle_properties']['x'].dataInBufferPtr()[:,2]
-        bottom_cell_index = si.grid['bottom_cell_index']
+        bottom_cell_index = grid['bottom_cell_index']
 
         sel= self.select_inlayer(z, status, self.params['min_status'],self.params['max_status'],tide, water_depth,
                                            self.params['layer_thick_ness'], self.params['top_layer'], out)

@@ -1,0 +1,34 @@
+{
+    "shared_params": {
+        "output_file_base": "minimal_example",
+        "root_output_dir": "output"
+    },
+    "reader": {
+        "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
+        "input_dir": "demo_hindcast",
+        "file_mask": "demoHindcastSchism3D.nc"
+    },
+    "base_case_params": {
+        "solver": {
+            "n_sub_steps": 12
+        },
+        "particle_release_groups": [
+            {
+                "points": [
+                    [
+                        1595000,
+                        5483300,
+                        -2
+                    ],
+                    [
+                        1596000,
+                        5487200,
+                        -2
+                    ]
+                ],
+                "pulse_size": 10,
+                "release_interval": 3600
+            }
+        ]
+    }
+}

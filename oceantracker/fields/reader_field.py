@@ -15,10 +15,11 @@ class ReaderField(_BaseField):
 
     def initialize(self):
         si = self.shared_info
+        grid = si.classes['reader'].grid
         # work out size from grid etc, tuple to garud against change
         self.info['shape_in_file']= tuple([si.classes['reader'].params['time_buffer_size'] if self.params['is_time_varying'] else 1,
-                                   si.grid['x'].shape[0],
-                                   si.grid['nz'] if self.info['is3D_in_file'] else 1,
+                                   grid['x'].shape[0],
+                                   grid['nz'] if self.info['is3D_in_file'] else 1,
                                    self.params['num_components'] if self.params['num_components'] is not None else 1 ])
 
         buffer_shape = list( self.info['shape_in_file'])

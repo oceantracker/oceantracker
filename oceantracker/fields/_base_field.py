@@ -17,10 +17,11 @@ class _BaseField(ParameterBaseClass):
 
     def initialize(self):
         si = self.shared_info
+        grid = si.classes['reader'].grid
         # work out size from grid etc, tuple to garud against change
         buffer_shape = tuple([si.classes['reader'].params['time_buffer_size'] if self.params['is_time_varying'] else 1,
-                            si.grid['x'].shape[0],
-                            si.grid['nz'] if self.params['is3D'] else 1,
+                            grid['x'].shape[0],
+                            grid['nz'] if self.params['is3D'] else 1,
                             self.params['num_components'] if self.params['num_components'] is not None else 1 ])
 
         self.data = np.full(buffer_shape, 0, dtype=self.params[ 'dtype'])

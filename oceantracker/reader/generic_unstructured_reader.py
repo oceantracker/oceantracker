@@ -34,7 +34,8 @@ class GenericUnstructuredReader(_BaseReader):
         nc = NetCDFhandler(reader_build_info['sorted_file_info']['names'][0], 'r')
 
         self.read_hindcast_info(nc)
-        si.grid = self._setup_grid(nc,reader_build_info)
+        self._setup_grid(nc,reader_build_info)
+        grid = si.classes['reader'].grid
 
         # setup fields
         for name, item in self.params['field_variables'].items():
@@ -59,7 +60,7 @@ class GenericUnstructuredReader(_BaseReader):
                 data = self.preprocess_field_variable(name, data, nc)
 
                 if i.info['requires_depth_averaging']:
-                    data = fields_util.depth_aver_SlayerLSC_in4D(data, si.grid['zlevel'], si.grid['bottom_cell_index'])
+                    data = fields_util.depth_aver_SlayerLSC_in4D(data, grid['zlevel'], grid['bottom_cell_index'])
                 i.data[:] = data
 
             # set up depth averaged version if requested
@@ -86,7 +87,7 @@ class GenericUnstructuredReader(_BaseReader):
 
     def _setup_grid(self, nc,reader_build_info):
 
-        grid={'x': None, 'triangles': None, 'zlevel' : None,
+        grid = {'x': None, 'triangles': None, 'zlevel' : None,
               'has_open_boundary_data': False}
         # load grid variables
         grid['time'] = np.full((self.params['time_buffer_size'],),0.) # time buffer
@@ -98,33 +99,28 @@ class GenericUnstructuredReader(_BaseReader):
         if self.params['grid_variables']['zlevel'] is not None:
             grid['zlevel'] = self.read_zlevel(nc,setup=True)
             grid['nz'] = grid['zlevel'].shape[2]
-
-            if self.params['grid_variables']['bottom_cell_index'] is None:
-                grid['vertical_grid_type'] = 'Slayer'
-            else:
-                grid['vertical_grid_type'] = 'LSC'
-                grid['bottom_cell_index'] = self.read_bottom_cell_index(nc, num_tri= grid['triangles'].shape[0])
-
+            grid['vertical_grid_type'] = 'Slayer' if self.params['grid_variables']['bottom_cell_index'] is None else 'LSC'
+            grid['bottom_cell_index'] = self.read_bottom_cell_index(nc, num_tri= grid['triangles'].shape[0])
 
         # split quad cells, find model outline, make adjacency matrix etc
         grid = self._build_grid_attributes(grid)
 
         #now any quad cells are split
-
         # space for dry cell info
         grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)  # 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
 
         # other grid info
         grid = self.read_open_boundary_data(grid)
-        return grid
+        self.grid = grid
+
 
 
     def read_time(self, nc, file_index=None):
         vname=self.params['grid_variables']['time']
-        if file_index is None : file_index =np.arange(nc.get_var_shape(vname)[0])
+        if file_index is None : file_index = np.arange(nc.get_var_shape(vname)[0])
 
-        time = nc.read_a_variable(vname,file_index)
+        time = nc.read_a_variable(vname, sel=file_index)
 
         if self.params['isodate_of_hindcast_time_zero'] is not None:
             time = time + time_util.date_to_seconds(time_util.date_from_iso8601str(self.params['isodate_of_hindcast_time_zero']))
@@ -134,10 +130,11 @@ class GenericUnstructuredReader(_BaseReader):
 
     def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
         # read time and  grid vaiables
-        grid= self.shared_info.grid
+        grid = self.grid
+
         grid['time'][buffer_index] = self.read_time(nc, file_index=file_index)
         if grid['zlevel'] is not None:
-            grid['zlevel'][buffer_index, :] = self.read_zlevel(nc, file_index=file_index)
+            grid['zlevel'][buffer_index, :] = self.read_zlevel(nc,file_index=file_index)
 
     def read_triangles(self, nc):
         return nc.read_a_variable(self.params['grid_variables']['triangles'])

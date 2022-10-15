@@ -60,10 +60,11 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
     def set_up_spatial_bins(self,nc):
         si = self.shared_info
+        grid = si.classes['reader'].grid
         sgrid= self.grid
         params= self.params
 
-        x = si.grid['x']
+        x = grid['x']
         xlims= [np.amin(x[:, 0]), np.amax(x[:, 0]), np.amin(x[:, 1]), np.amax(x[:, 1])]
 
         # if not given choose grid center/bounds based on extent of the grid

@@ -37,15 +37,17 @@ class FieldGroupManager(ParameterBaseClass):
         # set up stuff needed by all fields before any 2D interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
         si=self.shared_info
+        grid = si.classes['reader'].grid
+
         self.code_timer.start('setup_interp_time_step')
         self.n_buffer = nb  # buffer offset just before given time ,
 
         # when back tracking hindcast buffer is ordered  backwards in time, and time step is still positive
         # thus step fraction remains positive
-        self.step_dt_fraction = abs(time_sec - si.grid['time'][nb]) / si.hindcast_time_step
+        self.step_dt_fraction = abs(time_sec - grid['time'][nb]) / si.hindcast_time_step
 
         # update 0-255 dry cell index
-        field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, si.grid['is_dry_cell'], si.grid['dry_cell_index'])
+        field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, grid['is_dry_cell'], grid['dry_cell_index'])
 
         # find cell for xq, node list and weight for interp at calls
         si.classes['interpolator'].find_cell(xq, nb, self.step_dt_fraction, active)

@@ -43,15 +43,15 @@ class ParticleGroupManager(ParameterBaseClass):
         self.create_particle_property('manual_update',dict(name='ID', dtype=np.int32, initial_value=-1, time_varying= False,
                                       description='unique particle ID number, zero based'))
         self.create_particle_property('manual_update',dict(name='IDrelease_group',  dtype=np.int32, initial_value=-1, time_varying=False,
-                                           description='ID of group release location is in, zero based'))
+                                           description='ID of group release particle is part of  is in, zero based'))
         self.create_particle_property('manual_update',dict(name='user_release_groupID',  dtype=np.int32, initial_value=-1, time_varying= False,
-                                      description='ID of release location, zero based'))
+                                      description='user given integer ID of release group'))
         self.create_particle_property('manual_update',dict(name='IDpulse',  dtype=np.int32, initial_value=-1, time_varying= False,
-                                      description='ID of pulse particle was released within, zero based'))
+                                      description='ID of pulse particle was released within its release group, zero based'))
 
-        self.create_particle_property('manual_update',dict(name='time_released',
+        self.create_particle_property('manual_update',dict(name='time_released',time_varying= False,
                                       description='time (sec) each particle was released'))
-        self.create_particle_property('manual_update',dict(name='x_last_good', write=True, vector_dim=nDim))  # location when last moving
+        self.create_particle_property('manual_update',dict(name='x_last_good', write=False, vector_dim=nDim))  # location when last moving
         self.create_particle_property('manual_update',dict(name='x0',  vector_dim=nDim, time_varying=False,
                                       description='initial location of each particle'))  # exact location released including any randomization
 

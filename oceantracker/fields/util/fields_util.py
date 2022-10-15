@@ -6,23 +6,21 @@ def get_values_at_bottom(field_data4D, bottom_cell_index, out=None):
     # get values from bottom cell of LSC grid from a 3D time dependent field, (ie 4D with time)
     if out is None:
         s=field_data4D.shape
-        out = np.full(s[:2]+(s[3],), np.nan)
+        out = np.full(s[:2]+(s[3],), np.nan,dtype=field_data4D.dtype)
 
     for n in range(field_data4D.shape[1]):
         out[:,n,:] = field_data4D[:, :, bottom_cell_index[n], :]
     return out
 
 
-
 @njit
-def depth_aver_SlayerLSC_in4D(data, zlevel, first_cell_offset, out=None):
+def depth_aver_SlayerLSC_in4D(field_data4D, zlevel, first_cell_offset):
     # depth average time varying reader 4D data dim(time, node, depth, components) and return for LSC vertical grid
     # return as 4D variable dim(time, node, 1, components)
 
     # set up with depth dim
-    if out is None:
-        s = data.shape
-        out = np.zeros((s[0], s[1], 1, min(s[3], 2)), dtype=data.dtype)
+    s = field_data4D.shape
+    out = np.zeros((s[0], s[1], 1, min(s[3], 2)), dtype=field_data4D.dtype)
 
     for nt in range(out.shape[0]):  # time
         for n in range(out.shape[1]):  # loop over node
@@ -34,8 +32,8 @@ def depth_aver_SlayerLSC_in4D(data, zlevel, first_cell_offset, out=None):
                 continue
             for m in range(out.shape[3]):  # loop over vector components
                 d = 0.
-                for nz in range(n0, data.shape[2] - 1):
-                    d += 0.5 * (data[nt, n, nz, m] + data[nt, n, nz + 1, m]) * (zlevel[nt, n, nz + 1] - zlevel[nt, n, nz])
+                for nz in range(n0, field_data4D.shape[2] - 1):
+                    d += 0.5 * (field_data4D[nt, n, nz, m] + field_data4D[nt, n, nz + 1, m]) * (zlevel[nt, n, nz + 1] - zlevel[nt, n, nz])
                 out[nt, n, 0, m] = d / h
     return out
 

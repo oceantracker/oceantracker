@@ -60,7 +60,7 @@ def plot_sample(runCaseInfo, num_to_plot=10 ** 3):
 
     ax=plt.subplot(2, 2, 2)
     mag = np.sqrt(x[:, :, 0]**2 + x [:, :, 1]**2)
-    mag0 = np.sqrt(x0[ :, 0]**2 + x0[ :, 1  ]**2)
+    mag0 = np.sqrt(x0[:, 0]**2 + x0[ :, 1]**2)
     plt.plot(t, mag - mag0)
     plt.text(0.1, .1, 'deviation from circle, m', transform=ax.transAxes)
 
@@ -218,11 +218,12 @@ def base_param(is3D=False, isBackwards = False):
             'particle_group_manager' : {},
             'particle_release_groups': [
                                         {'points': p0, 'pulse_size': 1, 'release_interval': 3600,'userRelease_groupID':5,
-                                          'maximum_age' : 7*24*3600, 'user_release_group_name': 'A group',
+                                          'maximum_age' : 7*24*3600, 'user_release_group_name': 'A group','z_range' :[-1,0],
                                          },
                                        {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
                                        'points': poly0, 'pulse_size': 1, 'release_interval': 3600,'userRelease_groupID':200,
                                       'maximum_age' : 4*24*3600, 'user_release_group_name': 'B group',
+                                        'z_range' :[-1,0],
                                             }
                                         ],
             'dispersion': {'A_H': 0.},
@@ -265,8 +266,7 @@ def base_param(is3D=False, isBackwards = False):
         r['file_mask'] = params['reader']['file_mask'].replace('2D', '3D')
         base_case['solver']['screen_output_step_count'] = 1
         base_case['dispersion'].update({'A_H': 0.,'A_V': 0.})
-        base_case['velocity_modifiers'].append(
-            {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0*0.001})
+        #base_case['velocity_modifiers'].append({'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0*0.001})
 
     return params
 
@@ -306,8 +306,8 @@ if __name__ == '__main__':
             for is3D in [True,False ]:
                 for isBackwards in[ False, True]:
                     params = base_param(is3D=is3D, isBackwards=isBackwards)
-                    params['shared_params']['max_duration']= 1 * 24 * 3600.
-                    params['base_case_params']['dispersion'].update( {'A_H': 0.})
+                    params['shared_params']['max_duration']= 3 * 24 * 3600.
+                    params['base_case_params']['dispersion'].update( {'A_H': 0.,'A_V':0.0})
                     runInfoFile = run_test(params)
                     plot_sample(runInfoFile)
                     time_check_plot(runInfoFile)

@@ -159,7 +159,8 @@ class _BaseReader(ParameterBaseClass):
         # fil buffer frpom global time step ntb0
         self.code_timer.start('reading_to_fill_time_buffer')
         si = self.shared_info
-        grid= si.grid
+        grid = self.grid
+
         fi = self.reader_build_info['sorted_file_info']
 
         # get indicies of first block
@@ -192,23 +193,16 @@ class _BaseReader(ParameterBaseClass):
             s += ' Required:%4.0f ' % nt_required.shape[0]
 
             si.case_log.write_progress_marker(s)
-            self.read_time_variable_grid_variables(nc, buffer_index, file_index)
+            self.read_time_variable_grid_variables(nc, buffer_index,file_index)
 
             # read time varying vector and scalar reader fields
             for name, field in si.class_interators_using_name['fields']['from_reader_field'].items():
                 if field.is_time_varying():
-                    data = self.read_field_variable_as4D(name, nc, field, file_index=file_index)
-                    data = self.preprocess_field_variable(name, data, nc) # do any customised tweaks
-
-                    if field.info['requires_depth_averaging']:
-                        data = fields_util.depth_aver_SlayerLSC_in4D(data, si.grid['zlevel'], si.grid['bottom_cell_index'])
-
-                    field.data[buffer_index, ...] = data
+                    data_added_to_buffer = self.read_field_variable_as4D(name, nc,field, buffer_index=buffer_index, file_index=file_index)
+                    data_added_to_buffer = self.preprocess_field_variable(name, data_added_to_buffer, nc) # do any customised tweaks
 
                     if name in self.params['field_variables_to_depth_average']:
-                        data = fields_util.depth_aver_SlayerLSC_in4D(data, si.grid['zlevel'], si.grid['bottom_cell_index'])
-                        si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = data
-
+                        si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] =  fields_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid['zlevel'], grid['bottom_cell_index'])
 
             # update user fields from newly read fields
             for field_types in ['derived_from_reader_field','user']:
@@ -218,23 +212,23 @@ class _BaseReader(ParameterBaseClass):
 
             # calculate dry cell flags, if any cell node is dry
             if self.params['grid_variables']['is_dry_cell'] is None:
-                if si.grid['zlevel'] is None and 'tide' in si.classes['fields'] and 'water_depth' in si.classes['fields']:
-                    reader_util.set_dry_cell_flag_from_tide(buffer_index, si.grid['triangles'],
+                if grid['zlevel'] is None and 'tide' in si.classes['fields'] and 'water_depth' in si.classes['fields']:
+                    reader_util.set_dry_cell_flag_from_tide(buffer_index, grid['triangles'],
                                                             si.classes['fields']['tide'].data, si.classes['fields']['water_depth'].data,
-                                                            si.minimum_total_water_depth, si.grid['is_dry_cell'])
+                                                            si.minimum_total_water_depth, grid['is_dry_cell'])
                 else:
-                    reader_util.set_dry_cell_flag_from_zlevel(buffer_index, si.grid['triangles'],
-                                                              si.grid['zlevel'], si.grid['bottom_cell_index'],
-                                                              si.minimum_total_water_depth, si.grid['is_dry_cell'])
+                    reader_util.set_dry_cell_flag_from_zlevel(buffer_index, grid['triangles'],
+                                                              grid['zlevel'], grid['bottom_cell_index'],
+                                                              si.minimum_total_water_depth, grid['is_dry_cell'])
             else:
                 # get dry cells for each triangle allowing for splitting quad cells
-                data = nc.read_a_variable(self.params['grid_variables']['is_dry_cell'],file_index)
-                si.grid['is_dry_cell'][buffer_index,:] =  np.concatenate((data, data[:, si.grid['triangles_to_split'] ]), axis=1)
+                data_added_to_buffer = nc.read_a_variable(self.params['grid_variables']['is_dry_cell'],file_index)
+                grid['is_dry_cell'][buffer_index,:] =  np.concatenate((data_added_to_buffer, data_added_to_buffer[:, grid['triangles_to_split'] ]), axis=1)
 
             nc.close()
 
             total_read += num_read
-            s = '    read file at time ' + time_util.seconds_to_pretty_str(si.grid['time'][buffer_index[0]])
+            s = '    read file at time ' + time_util.seconds_to_pretty_str(grid['time'][buffer_index[0]])
             s += ' file offsets %4.0f' % file_index[0] + ':%4.0f' % file_index[-1]
             s += ' buffer offsets-%4.0f' % buffer_index[0] + ':%4.0f' % buffer_index[-1]
             s += ' Read:%4.0f ' % num_read + ' time:%4.0f ' % (1000. * (perf_counter() - t0)) + ' ms '
@@ -250,30 +244,37 @@ class _BaseReader(ParameterBaseClass):
         self.code_timer.stop('reading_to_fill_time_buffer')
         return total_read
 
-    def read_field_variable_as4D(self,name, nc, field, file_index=None):
+    def read_field_variable_as4D(self, name, nc, field, buffer_index=None, file_index=None):
         si= self.shared_info
+        grid = self.grid
         # set up space to read data into
-        sd=[1,] + list(field.data.shape[1:])
-        if field.info['requires_depth_averaging'] and field.info['is3D_in_file']:
-            sd[2] = nc.get_dim_size(self.params['dimension_map']['z'])
-        if file_index is not None: sd[0] = file_index.shape[0]
 
-        data = np.full(sd,0, dtype=field.data.dtype)
         m = 0
         for var in field.info['variable_list']:
-            s= [file_index.shape[0] if field.params['is_time_varying'] else 1,
-                   si.grid['x'].shape[0],
-                   si.grid['nz'] if field.info['is3D_in_file'] else 1,
-                   var['num_components']]
-            if  var['num_components'] == 1:
-                data[:, :,:, m] = nc.read_a_variable(var['name_in_file'], file_index).reshape(s[:-1])
+            sfile= field.data.shape[1:3]+ (var['num_components'],)
+            file_data = nc.file_handle[var['name_in_file']]
+            m1 = m + var['num_components']
+
+            # shape for use in reading any depth averaged data
+            sda= (1,) + field.info['shape_in_file'][1:3] +(var['num_components'],)
+
+            if  field.params['is_time_varying']:
+                for nb, nf in zip(buffer_index, file_index):
+                    if field.info['requires_depth_averaging']:
+                        data = file_data[nf, ...].reshape(sda)
+                        field.data[nb, :, :, m:m1] = fields_util.depth_aver_SlayerLSC_in4D(data, grid['zlevel'], grid['bottom_cell_index'])
+                    else:
+                        field.data[nb, :, :, m:m1] = file_data[nf, ...].reshape(sfile)
             else:
-                data[:, :, :, range(m, m + var['num_components'])] = nc.read_a_variable(var['name_in_file'], file_index).reshape(s)
+                if field.info['requires_depth_averaging']:
+                    data = file_data[:].reshape(sda)
+                    field.data[0, ...] = fields_util.depth_aver_SlayerLSC_in4D(data, grid['zlevel'], grid['bottom_cell_index'])
+                else:
+                    field.data[0, :, :, m:m1] = file_data[:].reshape(sfile) # read whole variable
+
             m += var['num_components']
 
-
-
-        return data
+        return  field.data[buffer_index, :, :, :]
 
     def is_in_buffer(self, nt):
         return self.buffer_info['nt_buffer0'] <= nt < self.buffer_info['nt_buffer0'] + self.buffer_info['n_filled']
