@@ -25,11 +25,7 @@ class ParameterBaseClass(object):
     def close(self):  pass
 
     def __init__(self):
-        #  set some parameters by keywords, over write  defaults using ParamDictValueChecker
-        #  1) use add defaults
-        # 2) merge with class defaults
-        # 3 ) intiaialse
-        # 4) check requirements
+
 
         self.params={}
         self.info={'time_spent_updating': 0., 'calls': 0}  # stores info about object
@@ -37,7 +33,7 @@ class ParameterBaseClass(object):
                    }
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
-                                 'name':  PVC(None, str, doc_str='The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code'),
+                                 'name':  PVC(None, 'random_walk_varyingAz', doc_str='The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code'),
                                  'user_note': PVC(None, str),
                                  })
 

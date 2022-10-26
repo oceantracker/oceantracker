@@ -50,14 +50,8 @@ class BasicResuspension(_BaseTrajectoryModifier):
 
         self.resuspension_jump(part_prop['friction_velocity'].data, si.z0, si.model_substep_timestep, part_prop['x'].data, resupend)
 
-        #  adjust resupension distance for terminal velocity
-        if 'terminal_velocity' in si.classes['velocity_modifiers']:
-            if 'terminal_velocity' in part_prop:
-                # each particle has terminal velocity
-                self.add_particle_terminal_velocity(part_prop['x'].data, part_prop['terminal_velocity'].data,si.model_substep_timestep, resupend)
-            else:
-                # single terminal velocity value
-                self.add_terminal_velocity_value(part_prop['x'].data, si.classes['velocity_modifiers']['terminal_velocity'].params['mean'],si.model_substep_timestep, resupend)
+        #  dont adjust resupension distance for terminal velocity,
+        #  Lynch ( Particiles in the Ocean Book, says dont adjust as a fal velocity  affects prior that particle resupends)
 
         # any z out of bounds will  be fixed by find_depth cell at start of next time step
         self.info['number_resupended'] = resupend.shape[0]
@@ -72,17 +66,3 @@ class BasicResuspension(_BaseTrajectoryModifier):
         for n in sel:
             x[n, 2] += np.sqrt(f*friction_velocity[n]*np.abs(np.random.randn()))
 
-
-    @staticmethod
-    @njit
-    def add_terminal_velocity_value(x, terminal_velocity, dt, sel):
-        # add single valued terminal velocity
-        for n in sel:
-            x[n, 2] += terminal_velocity*dt
-
-    @staticmethod
-    @njit
-    def add_particle_terminal_velocity(x, terminal_velocity, dt, sel):
-        # add individual valued terminal velocity
-        for n in sel:
-            x[n, 2] += terminal_velocity[n]*dt

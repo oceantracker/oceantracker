@@ -38,7 +38,7 @@ def BCwalk_with_move_backs_numba(xq, x_old, status, n_cell, BC, BCtransform, tri
 
         while n_steps < max_BC_walk_steps:
 
-            n_min, n_max= get_single_BC_cord_numba(xq[n, :2], BCtransform[n_tri, :, :], bc)
+            n_min, n_max= _get_single_BC_cord_numba(xq[n, :2], BCtransform[n_tri, :, :], bc)
 
             if bc[n_max] < 1. + tol and bc[n_min] > -tol:
                 # are now inside triangle, leave particle status as is
@@ -89,8 +89,8 @@ def BCwalk_with_move_backs_numba(xq, x_old, status, n_cell, BC, BCtransform, tri
 
     return n_total_walking_steps, n_max_steps  # return total number of steps for calculating step stats
 
-@njit
-def get_single_BC_cord_numba(x, BCtransform, bc):
+@njit(inline='always')
+def _get_single_BC_cord_numba(x, BCtransform, bc):
     # get BC cord of x for one triangle from DT transform matrix inverse, see scipy.spatial.Delaunay
     # also return index smallest BC for walk and largest
     # returns n_min the index of smallest bc used to choose next triangle
@@ -98,18 +98,21 @@ def get_single_BC_cord_numba(x, BCtransform, bc):
 
     n_min = 0
     n_max = 0
-    # does (2x2) martrix multiplication of  bc[:2]=BCtransform[:2,:2]*(x-transform[:,2]_
-    for i in range(2): bc[i] = 0.
 
+    # do (2x2) matrix multiplication of  bc[:2]=BCtransform[:2,:2]*(x-transform[:,2]
+    #for i in range(2): bc[i] = 0.
     for i in range(2):
-        for j in range(2):
-          bc[i] +=  BCtransform[i,j]*(x[j]-BCtransform[2,j])
+        #for j in range(2):
+        #  bc[i] +=  BCtransform[i,j]*(x[j]-BCtransform[2,j])
+        # replace loop with faster explicit adds, as no need to zero bc[:] above
+        bc[i]  = BCtransform[i, 0] * (x[0] - BCtransform[2, 0])
+        bc[i] += BCtransform[i, 1] * (x[1] - BCtransform[2, 1])
 
        # record smallest BC of first two
         if bc[i] < bc[n_min]: n_min = i
         if bc[i] > bc[n_max]: n_max = i
 
-    bc[2]= 1.-bc[0]-bc[1]
+    bc[2]= 1.0 - bc[0] - bc[1]
 
     # see if last one is smaller, or largest
     if bc[2] < bc[n_min]: n_min = 2
@@ -120,7 +123,7 @@ def get_single_BC_cord_numba(x, BCtransform, bc):
 def get_BC_cords_numba(x, n_cells, BCtransform, bc):
     # get BC cords of set of points x inside given cells and return in bc
     for n in range(x.shape[0]):
-        get_single_BC_cord_numba(x[n,:], BCtransform[n_cells[n],:,:], bc[n,:])
+        _get_single_BC_cord_numba(x[n, :], BCtransform[n_cells[n], :, :], bc[n, :])
 
 @njit
 def get_BC_transform_matrix(points, simplices):

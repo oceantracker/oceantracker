@@ -1,16 +1,33 @@
-function [d, info] = readNCvarsOT(filename,var_names_cell,index_vars)
-
+function [d, info] = readNCvarsOT(filename,var_names_cell,index_vars,default_vars)
+% indev vars are those to convert from zero based to one based 
 ncid = netcdf.open(filename,'NC_NOWRITE');
+
+
 
 if nargin < 2,  var_names_cell={}; end
 if nargin < 3,  index_vars={}; end
+if nargin < 4,  default_vars={}; end
 
-info=ncinfo(filename);
+info= readNCinfoOT(filename);
+
+% load all if varnames not given
+if length(var_names_cell)==0
+        var_names_cell=fieldnames(info.Variables)';
+end
+
+var_names_cell= unique([var_names_cell(:)'  default_vars(:)' ]);
+
 d= struct('dim_info',struct,'var_info',struct);
-for v = info.Variables(:)'
-    vname=v.Name;
-    if  length(var_names_cell) > 0  && ~any(contains(var_names_cell,vname)), continue;end
+
+for v = var_names_cell
+    vname=v{1};
+    if ~isfield(info.Variables,vname)
+        disp(['OT read netcdf, cannot find variable ' v ])
+        continue
+    end
     
+    vi=info.Variables.(vname);    
+
     % read data
     varid = netcdf.inqVarID(ncid,vname);
     data= netcdf.getVar(ncid,varid); 
@@ -28,15 +45,15 @@ for v = info.Variables(:)'
     end
     
     d.var_info.(vname)= struct;
-    for a = v.Attributes(:)'
+    for a = vi.Attributes(:)'
         d.var_info.(vname).(strip(a.Name,'_')) = a.Value;
     end   
     
     % get dims for var in reversed order to match permute above
     d.var_info.(vname).dims={};
     
-    for nn=1:length(v.Dimensions)
-        d.var_info.(vname).dims{length(v.Dimensions) -nn +1} = v.Dimensions(nn).Name;
+    for nn=1:length(vi.Dimensions)
+        d.var_info.(vname).dims{length(vi.Dimensions) -nn +1} = vi.Dimensions(nn).Name;
     end
     a=1;
     
@@ -45,12 +62,13 @@ for v = info.Variables(:)'
 
 end
 
-for a = info.Attributes(:)'
-    d.(a.Name)=a.Value;
+
+for fn=  fieldnames(info.Attributes)'
+    d.(fn{1})=info.Attributes.(fn{1});
 end
 
-for dim= info.Dimensions(:)'
-    d.dim_info.(dim.Name)=dim.Length;
+for  fn=  fieldnames(info.Dimensions)' 
+    d.dim_info.(fn{1})=info.Dimensions.(fn{1});
 end
 
 netcdf.close(ncid);

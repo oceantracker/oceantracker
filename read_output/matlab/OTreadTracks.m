@@ -1,12 +1,22 @@
 function d= OTreadTracks(filename, var_names_cell)
 
 if nargin < 2
-    var_names_cell={};     
+    var_names_cell={};
 end
 
-[d, info] = readNCvarsOT(filename,var_names_cell,{'x','ID','IDrelease_group','IDpulse','n_cell'}); 
 
-    
+info= readNCinfoOT(filename);
+
+if isfield(info.Dimensions, 'time_particle')
+    default_vars= {'time','x','write_step_index','particle_ID'};    
+else
+    default_vars={'time','x'};
+end
+
+
+d = readNCvarsOT(filename,var_names_cell,{'ID','IDrelease_group','IDpulse','n_cell'},default_vars);
+
+
 f=fieldnames(d.var_info);
 wID=d.write_step_index+1; % copy for use in reshaping
 pID=d.particle_ID;
@@ -21,7 +31,7 @@ for n=1:length(f)
         for nn = 1:ncomp
             data(nn, pID*d.dim_info.time+ wID) = d.(vn)(:,nn);
         end
-     
+        
         d.(vn)= squeeze(shiftdim(data,1));
     end
     
