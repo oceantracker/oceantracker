@@ -6,7 +6,7 @@ package_fancy_name= 'OceanTracker'
 
 # template for oceanTracker params, with defaults to check against
 run_params_defaults_template = {'shared_params': {'user_note': PVC('No user note', str),
-                                                 'root_output_dir':     PVC('default_root_output_dir', str, doc_str='base dir for all ouput files'),
+                                                 'root_output_dir':     PVC('default_root_output_dir', str, doc_str='base dir for all output files'),
                                                  'add_date_to_run_output_dir':  PVC(False, bool),
                                                  'output_file_base':    PVC('default_output_file_base', str),
                                                  'backtracking':        PVC(False, bool),

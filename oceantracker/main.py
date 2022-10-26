@@ -35,7 +35,7 @@ from oceantracker.util.module_importing_util import import_module_from_string
 
 import subprocess
 
-code_version = '0.3.01.05 Oct 15 2022'
+code_version = '0.3.01.06 Oct 27 2022'
 
 
 def run(user_params):

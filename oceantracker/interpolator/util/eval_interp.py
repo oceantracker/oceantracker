@@ -2,8 +2,62 @@ import numpy as np
 from numba import njit
 from oceantracker.util import  basic_util
 
+
+
+@njit(inline='always')
+def _evalBCinterp(bc, f_nodes, fout):
+    # kernel for linear interp  within a triangle from values at the 3 nodes
+    for c in range(fout.shape[0]):
+        fout[c] = 0.
+        for m in range(3):
+            fout[c] += bc[m]*f_nodes[m,c]
+
 @njit
 def time_independent_2Dfield(F_out, F_data, tri, n_cell, BCcord, active):
+    # do interpolation in place, ie write directly to F_interp for isActive particles
+    # time independent  2D fields, eg water_depth
+    F = F_data[0, :, 0, :]
+    n_comp = F.shape[1]  # time step of data is always [node,z,comp] even in 2D
+    f_nodes= np.full((3,n_comp), 0.)
+
+    # loop over active particles and vector components
+
+    for n in active:
+        # loop over each node in triangle
+        for n_bc in range(3):
+            n_node = tri[n_cell[n], n_bc]
+            # loop over vector components
+            for c in range(n_comp):
+                f_nodes[n_bc, c] = F[n_node, c]
+
+        _evalBCinterp(BCcord[n, :], f_nodes, F_out[n, :])
+
+
+@njit
+def time_dependent_2Dfield(F_out, F_data, nb, step_dt_fraction, tri, n_cell, BCcord, active):
+    # do interpolation in place, ie write directly to F_interp for isActive particles
+    # time dependent  fields from two time slices in hindcast
+
+    n_comp = F_data.shape[3]  # time step of data is always [node,z,comp] even in 2D
+    tf2 = 1. - step_dt_fraction
+
+    f1 = F_data[nb  , :, 0, :]
+    f2 = F_data[nb+1, :, 0, :]
+    f_nodes = np.full((3, n_comp), 0.)
+
+    # loop over active particles and vector components to get values at nodes
+    for n in active:
+        # loop over each node in triangle
+        for n_bc in range(3):
+            n_node = tri[n_cell[n], n_bc]
+            # loop over vector components
+            for c in range(n_comp):
+                f_nodes[n_bc, c] = tf2 * f1[ n_node, c] + step_dt_fraction * f2[n_node, c]
+
+        _evalBCinterp(BCcord[n, :], f_nodes, F_out[n, :])
+
+@njit
+def time_independent_2Dfield_depricated(F_out, F_data, tri, n_cell, BCcord, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
     # time independent  2D fields, eg water_depth
     F = F_data[0, :, 0, :]
@@ -22,7 +76,7 @@ def time_independent_2Dfield(F_out, F_data, tri, n_cell, BCcord, active):
                 F_out[n, c] += bc * F[n_node, c]
 
 @njit
-def time_dependent_2Dfield(F_out, F_data, nb, step_dt_fraction, tri, n_cell, BCcord, active):
+def time_dependent_2Dfield_depricated(F_out, F_data, nb, step_dt_fraction, tri, n_cell, BCcord, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
     # time dependent  fields from two time slices in hindcast
 

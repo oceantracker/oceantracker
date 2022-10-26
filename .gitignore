@@ -4,3 +4,4 @@ venv
 /demos/output/
 /tests/nextVer/output/
 /docs/_build/doctrees/
+/profiling/output/

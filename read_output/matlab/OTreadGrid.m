@@ -4,7 +4,7 @@ if nargin < 2
     var_names_cell={};     
 end
 
-[d, info] = readNCvarsOT(filename,var_names_cell,{'triangles','adjacency'});
+[d, info] = readNCvarsOT(filename,var_names_cell,{'triangles','adjacency'},{'triangles','x'});
 
 d.y= d.x(:,2);
 d.x= d.x(:,1);

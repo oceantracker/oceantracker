@@ -288,10 +288,10 @@ params.append(s55)
 # schsim 3D, sometimes resupend
 s56 = deepcopy(s55)
 s56['base_case_params']['trajectory_modifiers'] = [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
-                                                    'critical_friction_velocity': .01}]
+                                                    'critical_friction_velocity': .001}]
 s56['shared_params'].update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
 s56['base_case_params']['velocity_modifiers']= [
-       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.0005}]
+       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.0000}]
 #s56['base_case_params']['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]], 'pulse_size': 20, 'release_interval': 0}]
 params.append (s56)
 
@@ -306,10 +306,11 @@ params.append(s57)
 # schsim 3D, vertical section
 s58 = deepcopy(s56)
 s58['shared_params'].update({'output_file_base' : 'demo58_bottomBounce', 'backtracking': False})
-s58['base_case_params']['dispersion'].update({'A_H': 0.05, 'A_V': .002})
+s58['base_case_params']['dispersion'].update({'A_H': 0.1, 'A_V': .005})
+s58['base_case_params']['solver'] = {'n_sub_steps': 48}
 bc = s58['base_case_params']
 
-bc['trajectory_modifiers'] =[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension'}]
+bc['trajectory_modifiers'] =[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension','critical_friction_velocity': .01}]
 bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002}]
 pg1= bc['particle_release_groups'][0]
 pg1.update({'pulse_size':10,'release_interval':0, 'points': [[1593000., 5484000.+2000, -1]] }) # 1 release only
@@ -330,7 +331,7 @@ params.append(s59)
 # decaying particles sized on c
 s60 = deepcopy(schsim_base_params)
 s60['shared_params'].update({'output_file_base' : 'demo60_SCHISM_3D_decaying_particle','compact_mode':True})
-s60['base_case_params']['solver'] = {'n_sub_steps': 24}
+s60['base_case_params']['solver'] = {'n_sub_steps': 48}
 s60['base_case_params']['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
                                                      'pulse_size': 1, 'release_interval': 2.5*60, 'maximum_age': .2*24*3600}
                                                     ]

@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from oceantracker.dispersion._base_dispersion import _BaseTrajectoryModifer
-
+from numba import njit
 
 class RandomWalk(_BaseTrajectoryModifer):
 
@@ -32,6 +32,16 @@ class RandomWalk(_BaseTrajectoryModifer):
     # apply random walk
     def update(self,nb,  time, active):
         # add up 2D/3D diffusion coeff as random walk vector
-        prop_x= self.shared_info.classes['particle_properties']['x']
+        si= self.shared_info
 
-        prop_x.add_values_to(np.random.randn(active.shape[0], prop_x.num_vector_dimensions()) * self.rx, active)
+        # below requies temp array, numba version uses less memory, but no faster
+        # prop_x.add_values_to(np.random.randn(active.shape[0], prop_x.num_vector_dimensions()) * self.rx, active)
+
+        self._add_random_walk(si.classes['particle_properties']['x'].data, self.rx, active)
+
+    @staticmethod
+    @njit(fastmath=True)
+    def _add_random_walk(x, rx, active):
+        for n in active:
+            for m in range(rx.shape[0]) :
+                x[n,m] += rx[m]*np.random.randn()
