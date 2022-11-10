@@ -6,8 +6,8 @@ from itertools import count
 from numba import njit
 class PointRelease(ParameterBaseClass):
     # releases particles at fixed points, inside optional radius
-    # todo add checks to see if points inside domain and dry if released in a radius
-
+    # add checks to see if points inside domain and dry if released in a radius
+    #todo make a parent release base class
 
     def __init__(self):
         # set up info/attributes
@@ -18,6 +18,7 @@ class PointRelease(ParameterBaseClass):
                                  'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles released in a single pulse, this number is released every release_interval.'),
                                  'release_interval':PVC(0., float, min =0., doc_str= 'Time interval between released pulses. To release at only one time use release_interval=0.'),
                                  'release_start_date': PVC(None, 'iso8601date'),
+                                 # to do add ability to release on set dates/times 'release_dates': PLC([], 'iso8601date'),
                                  'release_duration': PVC(1.0e32, float,min=0,
                                                     doc_str='Time in seconds particles are released for after they start being released, ie releases stop this time after first release.' ),
                                  'maximum_age': PVC(1.0e32,float,min=1.,
@@ -55,11 +56,13 @@ class PointRelease(ParameterBaseClass):
         hindcast_end = si.classes['reader'].get_last_time_in_hindcast()
         hindcast_duration = abs(hindcast_end-hindcast_start)
 
-        release_info={'first_release_date': None, 'last_release_date':None,'last_date_alive':None,
+        self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,'last_date_alive':None,
                       'estimated_number_released' : 0,
                       'first_release_time': None, 'last_release_time':None, 'last_time_alive':None,
                       'release_schedule_times': None, 'index_of_next_release' : 0}
 
+        # short cut
+        release_info =self.info['release_info']
 
 
         if params['release_start_date'] is None:
@@ -72,34 +75,37 @@ class PointRelease(ParameterBaseClass):
 
         # now check if start in range
         if not hindcast_start <= release_info['first_release_time'] <= hindcast_end:
-            si.case_log.write_msg('Release group= ' + str(n+1) + ',  parameter release_start_time is ' +
+            si.case_log.write_msg('Release group= ' + str(n+1) + ', name= ' + self.params['name'] + ',  parameter release_start_time is ' +
                                time_util.seconds_to_iso8601str(release_info['first_release_time']) + '  is outside hindcast range ' + time_util.seconds_to_iso8601str(hindcast_start)
                                + ' to ' + time_util.seconds_to_iso8601str(hindcast_end), warning=True)
 
         # todo allow a list of release dates for the group, eg elif params['release_dates']:
-        if params['release_interval'] == 0:
+        if params['release_interval'] == 0.:
             release_times = np.asarray([release_info['first_release_time']])
         else:
             release_times = release_info['first_release_time'] +  si.model_direction*np.arange(0,hindcast_duration, abs(params['release_interval']))
 
+        # todo is there a less complex way to to this release times set up??
         # clip release times to be within hindcast range
         sel = np.logical_and(release_times >= hindcast_start, release_times <= hindcast_end)
         release_times = release_times[sel]
 
         if release_times.shape[0] == 0:
-              return release_info
+            release_info['release_schedule_times'] = np.zeros((0,), dtype=np.float64) # empty list
+            return
 
         # clip release times to be less than that of release duration
         sel = (release_times - release_times[0])*si.model_direction <= self.params['release_duration']
         release_info['release_schedule_times'] = release_times[sel]
 
+        release_info['first_release_time'] = release_times[0]
         release_info['last_release_time'] = release_times[-1]
         release_info['last_time_alive'] = release_times[-1] + self.params['maximum_age']*si.model_direction
 
 
         # get life span of group in forward time order
         if si.backtracking:
-            release_info['last_time_alive']  = max(release_info['last_time_alive'], hindcast_start)
+            release_info['last_time_alive'] = max(release_info['last_time_alive'], hindcast_start)
         else:
             release_info['last_time_alive'] = min(release_info['last_time_alive'], hindcast_end)
 
@@ -111,8 +117,8 @@ class PointRelease(ParameterBaseClass):
         release_info['estimated_number_released'] =  self.estimated_total_number_released(release_info)
 
         release_info.update(self.params)
-        self.info['release_info']= release_info
-        return release_info
+
+
 
     def estimated_total_number_released(self,release_info):
         info = self.info
@@ -132,7 +138,7 @@ class PointRelease(ParameterBaseClass):
         n_required = self.get_number_required()
 
         x0           = np.full((0, info['points'].shape[1]), 0.)
-        n_cell_guess = np.full((0,), 0)
+        n_cell_guess = np.full((0,), 0, dtype=np.int32)
         count = 0
         n_found = 0
 

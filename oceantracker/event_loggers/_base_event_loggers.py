@@ -18,7 +18,7 @@ class _BaseEventLogger(ParameterBaseClass):
                                  'particle_prop_to_write_list': PLC([ 'ID','x','IDpulse', 'IDrelease_group', 'user_release_groupID', 'status', 'age'],[str])})
     def check_requirements(self):
 
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['event_has_started_boolean'])
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['event_has_started_boolean'])
         return msg_list
 
     def initialize(self):

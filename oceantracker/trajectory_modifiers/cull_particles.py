@@ -17,7 +17,7 @@ class CullParticles(_BaseTrajectoryModifier):
                                   })
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['x', 'status'])
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['x', 'status'])
         return msg_list
 
     def initialize(self):

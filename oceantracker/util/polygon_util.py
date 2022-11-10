@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 #import matplotlib.patches as patches
 #from matplotlib import gridspec
-from numba import njit
+from numba import njit, float64, int32
 #from  matplotlib import nxutils
 from matplotlib import path
 import numpy as np
@@ -27,7 +27,7 @@ class InsidePolygon(object):
 
         if active is None: active = np.arange(xq.shape[0])
 
-        self.inside_ray_tracing(xq, self.line_bounds, self.slope_inv, self.polygon_bounds, out, active)
+        inside_ray_tracing(xq, self.line_bounds, self.slope_inv, self.polygon_bounds, out, active)
 
         # return a view of output buffer
         return out[:xq.shape[0]]
@@ -49,7 +49,7 @@ class InsidePolygon(object):
         if active is None:  active = np.arange(xq.shape[0]) # search all xq for those inside
 
         # get tuple of found and not found
-        indices = self.inside_ray_tracing_indices(xq, self.line_bounds, self.slope_inv, self.polygon_bounds, active, out, out_outside)
+        indices = inside_ray_tracing_indices(xq, self.line_bounds, self.slope_inv, self.polygon_bounds, active, out, out_outside)
 
         if also_return_indices_outside:
             return indices # return both  those inside and outside
@@ -97,90 +97,54 @@ class InsidePolygon(object):
         return abs(a / 2)
 
 
+@njit
+def inside_ray_tracing(xq, lb, slope_inv, bounds, inside,active):
+    # finds if points inside polygon based on ray from point to +ve x
+    # based on odd number of crossings of lines of polygon, result is a boolean working space, "inside"
 
-    @staticmethod
-    @njit
-    def inside_ray_tracing(xq, lb, slope_inv, bounds, inside,active):
-        # finds if points indsde poygon based on ray from point to +ve x
-        # based on odd number of crossings of lines of polygon, result is a boolean working space, "inside"
-
-        nlines = lb.shape[0]
-        b1, b2, b3, b4 = bounds
-
-        for n in active:
-            x = xq[n,0]
-            y = xq[n,1]
-            inside[n]= False
-            xints = 0
-            if b1 <= x <= b2 and b3 <= y <= b4: # check if inside bounds of polygon
-                for i in range(nlines):
-                    # get line bounding box, faster to do this in one line tuple assignment
-                    p1x, p1y, p2x, p2y = lb[i, 0, 0], lb[i, 0, 1],lb[i, 1, 0], lb[i, 1, 1]
-
-                    if p1y < y <= p2y :
-                        if x <= p2x:
-                            if p1y != p2y:
-                                xints = (y -  lb[i, 2, 1]) * slope_inv[i]  + lb[i, 2, 0]
-                            if p1x == p2x or x <= xints :
-                                inside[n] = not inside[n]  # why not just say true
-
-    @staticmethod
-    @njit
-    def inside_ray_tracing_indices(xq, lb, slope_inv, bounds, active, inside_IDs, outside_IDs):
-        # finds if points indsde poygon based on ray from point to +ve x
-        # based on odd number of crossings of lines of polygon, resilt is in boolean working space, "inside"
-        # this version returns the indices of those inside,  in first n_found values of index buffer
-        # if outside.shape[0] > 1 then those outside are also put in outside buffer
-        nlines = lb.shape[0]
-        b1, b2, b3, b4 = bounds
-        n_inside = 0
-        n_outside= 0
-
-        for n in active:
-            x = xq[n, 0]
-            y = xq[n, 1]
-            xints = 0
-            inside = False
-            if b1 <= x <= b2 and b3 <= y <= b4:  # inside bounds of polygon
-                for i in range(nlines):
-                    # get line's bounding box, faster to do this in one line tuple assignment
-                    p1x, p1y, p2x, p2y = lb[i, 0, 0], lb[i, 0, 1], lb[i, 1, 0], lb[i, 1, 1]
-                    if p1y < y <= p2y:
-                        if x <= p2x:
-                            if p1y != p2y:
-                                xints = (y - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
-                            if p1x == p2x or x <= xints:
-                                inside = not inside
-
-            if inside :
-                # add to index list if inside
-                inside_IDs[n_inside] = n
-                n_inside += 1
-
-            elif outside_IDs.shape[0] > 1:
-                # only insert not found if outside_IDs is given as full size
-                outside_IDs[n_outside] = n
-                n_outside +=1
-
-        return inside_IDs[:n_inside], outside_IDs[:n_outside]
+    for n in active:
+        inside[n]= inside_ray_tracing_single_point(xq[n,:], lb, slope_inv, bounds)
 
 @njit
+def inside_ray_tracing_indices(xq, lb, slope_inv, bounds, active, inside_IDs, outside_IDs):
+    # finds if points indsde poygon based on ray from point to +ve x
+    # based on odd number of crossings of lines of polygon, resilt is in boolean working space, "inside"
+    # this version returns the indices of those inside,  in first n_found values of index buffer
+    # if outside.shape[0] > 1 then those outside are also put in outside buffer
+
+    n_inside = 0
+    n_outside= 0
+
+    for n in active:
+        inside = inside_ray_tracing_single_point(xq[n, :], lb, slope_inv, bounds)
+
+        if inside :
+            # add to index list if inside
+            inside_IDs[n_inside] = n
+            n_inside += 1
+
+        elif outside_IDs.shape[0] > 1:
+            # only insert not found if outside_IDs is given as full size
+            outside_IDs[n_outside] = n
+            n_outside +=1
+
+    return inside_IDs[:n_inside], outside_IDs[:n_outside]
+
+@njit()
 def inside_ray_tracing_single_point(xq, lb, slope_inv, bounds):
     # finds if a single point is inside polygon based on ray from point to +ve x
-    b1, b2, b3, b4 = bounds
-    x = xq[0]
-    y = xq[1]
+
     xints = 0
     inside = False
-    if b1 <= x <= b2 and b3 <= y <= b4:  # inside bounds of polygon
+    if bounds[0] <=  xq[0] <= bounds[1] and bounds[2] <= xq[1] <= bounds[3]:  # inside bounds of polygon
         for i in range(lb.shape[0]):
             # get line's bounding box, faster to do this in one line tuple assignment
             p1x, p1y, p2x, p2y = lb[i, 0, 0], lb[i, 0, 1], lb[i, 1, 0], lb[i, 1, 1]
-            if p1y < y <= p2y:
-                if x <= p2x:
+            if p1y < xq[1] <= p2y:
+                if  xq[0] <= p2x:
                     if p1y != p2y:
-                        xints = (y - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
-                    if p1x == p2x or x <= xints:
+                        xints = (xq[1] - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
+                    if p1x == p2x or xq[0] <= xints:
                         inside = not inside
 
     return inside
@@ -249,6 +213,6 @@ if __name__ == '__main__':
         plt.text(v[n,0],v[n,1],str(n))
 
     plt.plot(xtest[0,0],xtest[0,1],'o',markersize=10)
-    print(plt.ginput())
+    #print(plt.ginput())
     plt.show()
 

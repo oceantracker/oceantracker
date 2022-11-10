@@ -7,7 +7,7 @@
     },
     "reader": {
         "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
-        "input_dir": "demo_hindcast",
+        "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast",
         "file_mask": "demoHindcast2D*.nc",
         "search_sub_dirs": true,
         "dimension_map": {

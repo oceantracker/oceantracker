@@ -24,11 +24,12 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
                                               'water_depth': PVC('depth', str),
                                               'tide': PVC('elev', str),
                                                },
+                        'one_based_indices': PVC(True, bool, doc_str=' schism indcies are 1 based , not zero, eg. triangulation nodes start at 1 not zero as in python'),
                         'dimension_map': {'node': PVC('nSCHISM_hgrid_node', str),
-                                                                     'z': PVC('nSCHISM_vgrid_layers', str),
-                                                                     'time': PVC('time', str),
-                                                                      'vector2Ddim': PVC('two', str)
-                                                                    },
+                                                                                 'z': PVC('nSCHISM_vgrid_layers', str),
+                                                                                 'time': PVC('time', str),
+                                                                                  'vector2Ddim': PVC('two', str)
+                                                                                },
                         'grid_variables': {'time':PVC('time',str),
                                     'x':PLC(['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y'], [str], fixed_len= 2),
                                     'zlevel': PVC('zcor',str),
@@ -77,19 +78,6 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
             time += self.params['time_zone']*3600.
         return time
 
-    def read_triangles(self, nc):
-        # schism has 1 based index
-        data = super().read_triangles(nc)
-        data  -=1 # reserve zeros in 4th colum
-        return data
-
-    def read_bottom_cell_index(self, nc, num_tri=None):
-        si= self.shared_info
-        data = super().read_bottom_cell_index(nc, num_tri=num_tri)
-        if nc.is_var(self.params['grid_variables']['bottom_cell_index']):
-            # if read from file, then need to make zero based
-            data -= 1
-        return data
 
     def read_open_boundary_data(self, grid):
         # read hgrid file for open boundary data
@@ -136,7 +124,6 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
                         if face_nodes[0] in tri_open_bound_node_list[n] and face_nodes[1] in tri_open_bound_node_list[n] :
                             grid['adjacency'][n, nface] = -2 # mark as open
         grid['has_open_boundary_data'] = True
-        return grid
 
 
     def preprocess_field_variable(self, name, data, nc):

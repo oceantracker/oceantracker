@@ -2,22 +2,23 @@
     "run_user_note": "No user note",
     "case_user_note": "No user note",
     "processor_number": 1,
-    "file_written": "2022-10-24T10:48:07.977228",
+    "file_written": "2022-11-08T15:00:55.841876",
     "code_version_info": {
-        "version": "0.3.01.05 Oct 15 2022",
-        "git_revision": "a8b9a76742d4fee51d9445c04c22b0754dc1ace6"
+        "version": "0.3.02.003 2022-11-04",
+        "git_revision": "1210e7e2ce46e1d073faa317ddc94254d6e0887c"
     },
     "run_info": {
         "time_spent_updating": 0.0,
-        "calls": 0,
-        "model_run_started": "2022-10-24T10:43:36.630736",
+        "update_calls": 0,
+        "time_first_update_call": 0.0,
+        "model_run_started": "2022-11-08T14:56:31.667679",
         "start_time": 1483230600.0,
         "end_time": 1483309800.0,
         "start_date": "2017-01-01T00:30:00",
         "end_date": "2017-01-01T22:30:00",
         "time_steps_completed": 1320,
-        "model_run_ended": "2022-10-24T10:48:07.977228",
-        "model_run_duration": "0:04:31.346492",
+        "model_run_ended": "2022-11-08T15:00:55.841876",
+        "model_run_duration": "0:04:24.174197",
         "date_of_time_zero": "1970-01-01T00:00:00",
         "time_zone": null,
         "model_timestep": 60.0,
@@ -31,9 +32,9 @@
         "hindcast_ends": "2017-01-01T23:30:00",
         "hindcast_duration_days": 0.9583333333333334,
         "hindcast_timestep": 3600.0,
-        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast",
-        "first_file": "E:\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast\\demoHindcastSchism3D.nc",
-        "last_file": "E:\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast\\demoHindcastSchism3D.nc"
+        "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast",
+        "first_file": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast\\demoHindcastSchism3D.nc",
+        "last_file": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast\\demoHindcastSchism3D.nc"
     },
     "particle_release_group_info": [
         {
@@ -424,231 +425,53 @@
             "user_polygon_name": null
         }
     ],
+    "particle_release_group_user_maps": {
+        "particle_release_userRelease_groupID_map": {
+            "0": 1
+        },
+        "particle_release_user_release_group_name_map": {
+            "None": 1
+        }
+    },
     "warnings": [
-        ">>> Warning: On the fly statistical Binning of vector particle property  \"water_velocity\" not yet implemented",
-        ">>> Note: No open boundaries requested, as run_params[\"open_boundary_type\"] = 0\n  Hint: For Schism open boundaries requires hgrid file to named in reader params and run_params[\"open_boundary_type\"] = 1",
         ">>> Warning: When use aged binned particle stats, to get un biases stats., need to stop releasing particles \"max_age_to_bin\"  or max(\"user_age_bin_edges\")  before end of run, by setting  particle param \"release_duration\"",
+        ">>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1",
+        ">>> Note: No open boundaries requested, as run_params[\"open_boundary_type\"] = 0\n  Hint: For Schism open boundaries requires hgrid file to named in reader params and run_params[\"open_boundary_type\"] = 1",
         ">>> Warning: Running in debug mode"
     ],
     "timers": [
-        "  143.86s  50% calls 09242: setup_interp_time_step,  (first call=     7.72s)",
-        "  135.04s  47% calls 01320: integration_step,  (first call=     1.53s)",
-        "   77.51s  27% calls 09242: find_depth_cell,  (first call=     3.22s)",
-        "   66.13s  23% calls 18490: interp_named_field_at_particle_locations,  (first call=     1.52s)",
-        "   65.92s  23% calls 09242: find_cells_and_weights,  (first call=     4.25s)",
-        "   50.52s  18% calls 01320: post_step_bookeeping,  (first call=     1.74s)",
-        "   35.46s  12% calls 01321: release_particles,  (first call=    34.34s)",
-        "   33.78s  12% calls 02642: update_part_prop,  (first call=     8.08s)",
-        "    3.97s   1% calls 01321: event_logging,  (first call=     0.92s)",
-        "    3.56s   1% calls 01321: on_the_fly_statistics,  (first call=     3.54s)",
-        "    1.36s   0% calls 00001: build_hindcast_reader,  (first call=     1.36s)",
-        "    1.35s   0% calls 00002: reading_to_fill_time_buffer,  (first call=     1.33s)",
-        "    1.09s   0% calls 00001: intialize_interplolation_grid,  (first call=     1.09s)",
-        "    0.00s   0% calls 01321: particle_concentrations,  (first call=     0.00s)",
-        "    0.00s   0% calls 00001: solver_initialization,  (first call=     0.00s)",
-        "    0.00s   0% calls 00000: total_model_all,  (first call=     0.00s)"
+        "  264.17s  97% calls 00001: total_model_all,  (first call/remainder = 264.17s/ 0.00s",
+        "  165.19s  60% calls 01320: integration_step,  (first call/remainder =  0.51s/164.68s",
+        "  131.47s  48% calls 07924: setup_interp_time_step,  (first call/remainder =  2.70s/128.78s",
+        "   91.66s  34% calls 18500: interp_named_field_at_particle_locations,  (first call/remainder =  0.53s/91.13s",
+        "   82.64s  30% calls 07924: find_depth_cell,  (first call/remainder =  1.63s/81.01s",
+        "   68.27s  25% calls 01321: pre_step_bookkeeping,  (first call/remainder =  1.59s/66.68s",
+        "   48.58s  18% calls 07924: find_cells_and_weights,  (first call/remainder =  0.94s/47.63s",
+        "   35.23s  13% calls 02644: update_part_prop,  (first call/remainder =  2.74s/32.49s",
+        "   11.70s   4% calls 01322: release_particles,  (first call/remainder = 10.51s/ 1.19s",
+        "    2.88s   1% calls 01322: event_logging,  (first call/remainder =  0.48s/ 2.40s",
+        "    1.82s   1% calls 01322: on_the_fly_statistics,  (first call/remainder =  1.76s/ 0.06s",
+        "    0.82s   0% calls 00001: build_hindcast_reader,  (first call/remainder =  0.82s/ 0.00s",
+        "    0.74s   0% calls 00002: reading_to_fill_time_buffer,  (first call/remainder =  0.73s/ 0.02s",
+        "    0.47s   0% calls 00001: intialize_interplolation_grid,  (first call/remainder =  0.47s/ 0.00s",
+        "    0.00s   0% calls 01322: particle_concentrations,  (first call/remainder =  0.00s/ 0.00s",
+        "    0.00s   0% calls 00001: solver_initialization,  (first call/remainder =  0.00s/ 0.00s"
     ],
     "time_updating": {
-        "solver": {
-            "time": 0.0,
-            "calls": 0
-        },
-        "field_group_manager": {
-            "time": 0.0,
-            "calls": 0
-        },
-        "interpolator": {
-            "time": 0.0,
-            "calls": 0
-        },
-        "particle_group_manager": {
-            "time": 0.0,
-            "calls": 0
-        },
-        "tracks_writer": {
-            "time": 0.0,
-            "calls": 0
-        },
-        "dispersion": {
-            "time": 0.0,
-            "calls": 0
-        },
-        "reader": {
-            "time": 0.0,
-            "calls": 0
-        },
-        "particle_release_groups": [
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            }
-        ],
-        "fields": [
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            }
-        ],
-        "particle_properties": [
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            },
-            {
-                "time": 0.0,
-                "calls": 0
-            }
-        ],
+        "particle_release_groups": [],
+        "fields": [],
+        "particle_properties": [],
+        "status_modifiers": [],
         "velocity_modifiers": [],
-        "trajectory_modifiers": [
-            {
-                "time": 0.0,
-                "calls": 0
-            }
-        ],
-        "particle_statistics": [
-            {
-                "time": 2.051332500000008,
-                "calls": 2
-            },
-            {
-                "time": 1.4921915000000183,
-                "calls": 2
-            }
-        ],
-        "event_loggers": [
-            {
-                "time": 3.9668475999994612,
-                "calls": 1321
-            }
-        ],
+        "trajectory_modifiers": [],
+        "particle_statistics": [],
+        "event_loggers": [],
         "particle_concentrations": [],
-        "time_varying_info": [
-            {
-                "time": 0.0,
-                "calls": 0
-            }
-        ]
+        "time_varying_info": []
     },
     "output_files": {
-        "root_output_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker03\\profiling\\output",
-        "run_output_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker03\\profiling\\output\\demo_SCHISM_3D",
+        "root_output_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\profiling\\output",
+        "run_output_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\profiling\\output\\demo_SCHISM_3D",
         "output_file_base": "demo_SCHISM_3D",
         "runInfo_file": "demo_SCHISM_3D_runInfo.json",
         "runLog_file": "demo_SCHISM_3D_runScreen.log",
@@ -698,9 +521,18 @@
             null,
             null,
             null,
+            null,
+            null,
+            null,
+            null,
             null
         ],
-        "velocity_modifiers": [],
+        "status_modifiers": [
+            null
+        ],
+        "velocity_modifiers": [
+            null
+        ],
         "trajectory_modifiers": [
             null
         ],
@@ -776,7 +608,7 @@
                 "user_note": null
             },
             "interpolator": {
-                "class_name": "oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid",
+                "class_name": "oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid",
                 "name": "interpolator",
                 "user_note": null,
                 "bc_walk_tol": 1e-06,
@@ -797,7 +629,8 @@
                 "turn_on_write_particle_properties_list": [],
                 "turn_off_write_particle_properties_list": [
                     "water_velocity",
-                    "particle_velocity"
+                    "particle_velocity",
+                    "velocity_modifier"
                 ],
                 "time_steps_per_per_file": null,
                 "write_dry_cell_index": true,
@@ -935,7 +768,22 @@
                     "type": "user"
                 }
             ],
-            "velocity_modifiers": [],
+            "status_modifiers": [
+                {
+                    "name": "tidal_stranding",
+                    "class_name": "oceantracker.status_modifiers.tidal_stranding.TidalStranding"
+                }
+            ],
+            "velocity_modifiers": [
+                {
+                    "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
+                    "variance": 0.001,
+                    "name": "terminal_velocity",
+                    "user_note": null,
+                    "is3D": false,
+                    "mean": 0.0
+                }
+            ],
             "trajectory_modifiers": [
                 {
                     "class_name": "oceantracker.trajectory_modifiers.resuspension.BasicResuspension",
@@ -948,7 +796,7 @@
             "particle_statistics": [
                 {
                     "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased",
-                    "calculation_interval": 43200.0,
+                    "calculation_interval": 10800.0,
                     "particle_property_list": [
                         "water_depth"
                     ],
@@ -974,10 +822,9 @@
                 },
                 {
                     "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased",
-                    "calculation_interval": 43200.0,
+                    "calculation_interval": 10800.0,
                     "particle_property_list": [
-                        "water_depth",
-                        "water_velocity"
+                        "water_depth"
                     ],
                     "min_age_to_bin": 0.0,
                     "max_age_to_bin": 259200.0,
@@ -1101,7 +948,7 @@
             "user_note": null
         },
         "interpolator": {
-            "class_name": "oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid",
+            "class_name": "oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid",
             "name": "interpolator",
             "user_note": null,
             "bc_walk_tol": 1e-06,
@@ -1123,8 +970,10 @@
             "turn_off_write_particle_properties_list": [
                 "water_velocity",
                 "particle_velocity",
+                "velocity_modifier",
                 "water_velocity",
-                "particle_velocity"
+                "particle_velocity",
+                "velocity_modifier"
             ],
             "time_steps_per_per_file": null,
             "write_dry_cell_index": true,
@@ -1140,7 +989,7 @@
         },
         "reader": {
             "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
-            "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast",
+            "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast",
             "file_mask": "demoHindcastSchism3D.nc",
             "field_variables": {
                 "water_temperature": "temp",
@@ -1361,6 +1210,20 @@
                 "type": "user"
             },
             {
+                "name": "velocity_modifier",
+                "vector_dim": 3,
+                "class_name": "oceantracker.particle_properties._base_properties.ParticleProperty",
+                "user_note": null,
+                "description": null,
+                "time_varying": true,
+                "write": true,
+                "prop_dim3": 1,
+                "dtype": "float64",
+                "initial_value": 0.0,
+                "update": true,
+                "type": "user"
+            },
+            {
                 "name": "status",
                 "dtype": "int8",
                 "initial_value": -10.0,
@@ -1515,30 +1378,58 @@
                 "type": "user"
             },
             {
-                "name": "nz_cell_nodes",
+                "name": "nz_cell",
                 "write": false,
-                "dtype": "int8",
-                "initial_value": 0.0,
-                "vector_dim": 2,
-                "prop_dim3": 3,
+                "dtype": "int32",
+                "initial_value": 14.0,
                 "class_name": "oceantracker.particle_properties._base_properties.ParticleProperty",
                 "user_note": null,
                 "description": null,
+                "time_varying": true,
+                "vector_dim": 1,
+                "prop_dim3": 1,
+                "update": true,
+                "type": "user"
+            },
+            {
+                "name": "nz_nodes",
+                "write": false,
+                "dtype": "int32",
+                "initial_value": 0.0,
+                "vector_dim": 2,
+                "prop_dim3": 3,
+                "description": "z nodes for levels above and below particle, used to get reference used in field interpolation",
+                "class_name": "oceantracker.particle_properties._base_properties.ParticleProperty",
+                "user_note": null,
                 "time_varying": true,
                 "update": true,
                 "type": "user"
             },
             {
-                "name": "z_fraction_nodes",
+                "name": "bottom_layer_thickness",
                 "write": false,
                 "dtype": "float32",
                 "initial_value": 0.0,
-                "vector_dim": 2,
-                "prop_dim3": 3,
+                "description": " thickness of bottom layer in metres, used for log layer velocity interp in bottom layer",
+                "class_name": "oceantracker.particle_properties._base_properties.ParticleProperty",
+                "user_note": null,
+                "time_varying": true,
+                "vector_dim": 1,
+                "prop_dim3": 1,
+                "update": true,
+                "type": "user"
+            },
+            {
+                "name": "z_fraction",
+                "write": false,
+                "dtype": "float32",
+                "initial_value": 0.0,
                 "class_name": "oceantracker.particle_properties._base_properties.ParticleProperty",
                 "user_note": null,
                 "description": null,
                 "time_varying": true,
+                "vector_dim": 1,
+                "prop_dim3": 1,
                 "update": true,
                 "type": "user"
             },
@@ -1638,6 +1529,22 @@
                 "prop_dim3": 1,
                 "dtype": "float64",
                 "initial_value": 1.0,
+                "update": true,
+                "type": "user"
+            },
+            {
+                "name": "terminal_velocity",
+                "class_name": "oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution",
+                "mean": 0.0,
+                "variance": 0.001,
+                "user_note": null,
+                "description": null,
+                "time_varying": false,
+                "write": true,
+                "vector_dim": 1,
+                "prop_dim3": 1,
+                "dtype": "float64",
+                "initial_value": 0.0,
                 "update": true,
                 "type": "user"
             },
@@ -1759,7 +1666,24 @@
                 "type": "user"
             }
         ],
-        "velocity_modifiers": [],
+        "status_modifiers": [
+            {
+                "name": "tidal_stranding",
+                "class_name": "oceantracker.status_modifiers.tidal_stranding.TidalStranding",
+                "user_note": null,
+                "requires_3D": false
+            }
+        ],
+        "velocity_modifiers": [
+            {
+                "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
+                "variance": 0.001,
+                "name": "terminal_velocity",
+                "user_note": null,
+                "is3D": false,
+                "mean": 0.0
+            }
+        ],
         "trajectory_modifiers": [
             {
                 "class_name": "oceantracker.trajectory_modifiers.resuspension.BasicResuspension",
@@ -1772,7 +1696,7 @@
         "particle_statistics": [
             {
                 "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased",
-                "calculation_interval": 43200.0,
+                "calculation_interval": 10800.0,
                 "particle_property_list": [
                     "water_depth"
                 ],
@@ -1810,10 +1734,9 @@
             },
             {
                 "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased",
-                "calculation_interval": 43200.0,
+                "calculation_interval": 10800.0,
                 "particle_property_list": [
-                    "water_depth",
-                    "water_velocity"
+                    "water_depth"
                 ],
                 "min_age_to_bin": 0.0,
                 "max_age_to_bin": 259200.0,
@@ -1944,63 +1867,158 @@
             }
         ]
     },
-    "info": {
+    "class_info": {
         "solver": {
             "time_spent_updating": 0.0,
-            "calls": 0,
-            "computation_started": "2022-10-24T10:43:37.966804",
+            "update_calls": 0,
+            "time_first_update_call": 0.0,
+            "computation_started": "2022-11-08T14:56:32.392156",
             "n_time_steps_completed": 1320,
-            "total_active_particles": 122892000
+            "total_alive_particles": 123078200
         },
         "field_group_manager": {
             "time_spent_updating": 0.0,
-            "calls": 0
+            "update_calls": 0,
+            "time_first_update_call": 0.0
         },
         "interpolator": {
             "time_spent_updating": 0.0,
-            "calls": 0,
-            "n_total_walking_steps": 107150171,
-            "n_total_particles_located": 686253505,
-            "n_max_walking_steps": 4,
-            "failed_searches": 0,
-            "count_maybe_below_bottom": 25015053,
-            "count_maybe_above_surface": 56308107,
-            "vertical_search_steps_histogram": [
-                314308172,
-                401722629,
-                41619856,
-                37205417,
-                40860892,
-                43153187,
-                31406267,
-                28800672,
-                22947413,
-                14183807,
-                7806728,
-                6799891,
-                1491424,
-                49130,
-                0,
-                0,
-                0
-            ],
-            "mean_number_of_triangles_walked": 0.15613788522653885,
-            "mean_number_of_vertical_search_steps_per_cell_search": 1.4460479659043781,
-            "mean_count_maybe_below_bottom_per_cell_search": 0.03645162147477848,
-            "mean_count_maybe_above_surface_per_cell_search": 0.08205146726354424
+            "update_calls": 0,
+            "time_first_update_call": 0.0,
+            "bc_walk": {
+                "particles_located": 562151981,
+                "total_steps": 103202537,
+                "longest_walk": 6,
+                "failed_walks": 0,
+                "histogram": [
+                    459563115,
+                    102181082,
+                    201974,
+                    205734,
+                    75,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "average_number_of_triangles_walked": 0.18358476086202746
+            },
+            "vertical_walk": {
+                "particles_located": 552163057,
+                "total_steps": 35884065,
+                "longest_walk": 14,
+                "failed_walks": 0,
+                "histogram": [
+                    532107535,
+                    12022084,
+                    5761866,
+                    762099,
+                    433803,
+                    278633,
+                    189337,
+                    136947,
+                    104549,
+                    84910,
+                    71232,
+                    64995,
+                    84794,
+                    60273,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "average_number_of_triangles_walked": 0.06498816707326364
+            }
         },
         "particle_group_manager": {
             "time_spent_updating": 0.0,
-            "calls": 0
+            "update_calls": 0,
+            "time_first_update_call": 0.0
         },
         "tracks_writer": {
             "time_spent_updating": 0.0,
-            "calls": 0,
+            "update_calls": 0,
+            "time_first_update_call": 0.0,
             "output_file": []
         },
         "dispersion": {
             "time_spent_updating": 0.0,
-            "calls": 0,
+            "update_calls": 0,
+            "time_first_update_call": 0.0,
             "rx": [
                 4.898979485566356,
                 4.898979485566356,
@@ -2009,12 +2027,14 @@
         },
         "reader": {
             "time_spent_updating": 0.0,
-            "calls": 0
+            "update_calls": 0,
+            "time_first_update_call": 0.0
         },
         "particle_release_groups": [
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
                 "instanceID": 0,
                 "points": [
                     [
@@ -2249,7 +2269,8 @@
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
                 "instanceID": 1,
                 "points": [
                     [
@@ -2476,7 +2497,8 @@
         "fields": [
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
                 "requires_depth_averaging": false,
                 "is3D_in_file": true,
                 "variable_list": [
@@ -2495,7 +2517,8 @@
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
                 "requires_depth_averaging": false,
                 "is3D_in_file": true,
                 "variable_list": [
@@ -2514,7 +2537,8 @@
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
                 "requires_depth_averaging": false,
                 "is3D_in_file": false,
                 "variable_list": [
@@ -2533,7 +2557,8 @@
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
                 "requires_depth_averaging": false,
                 "is3D_in_file": false,
                 "variable_list": [
@@ -2552,183 +2577,353 @@
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
                 "instanceID": 4
             }
         ],
         "particle_properties": [
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 0
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 0,
+                "array_size": [
+                    397992,
+                    3
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 1
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 1,
+                "array_size": [
+                    397992,
+                    3
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 2
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 2,
+                "array_size": [
+                    397992,
+                    3
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 3
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 3,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 4
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 4,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 5
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 5,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 6
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 6,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 7
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 7,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 8
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 8,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 9
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 9,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 10
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 10,
+                "array_size": [
+                    397992,
+                    3
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 11
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 11,
+                "array_size": [
+                    397992,
+                    3
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 12
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 12,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 13
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 13,
+                "array_size": [
+                    397992,
+                    3
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 14
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 14,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 15
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 15,
+                "array_size": [
+                    397992,
+                    2,
+                    3
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 16
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 16,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 17
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 17,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 18
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 18,
+                "array_size": [
+                    397992,
+                    3
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 19
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 19,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 20
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 20,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 21
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 21,
+                "array_size": [
+                    397992,
+                    3
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 22
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 22,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 23
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 23,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 24
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 24,
+                "array_size": [
+                    397992
+                ]
             },
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
-                "instanceID": 25
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 25,
+                "array_size": [
+                    397992
+                ]
+            },
+            {
+                "time_spent_updating": 0.0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 26,
+                "array_size": [
+                    397992
+                ]
+            },
+            {
+                "time_spent_updating": 0.0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 27,
+                "array_size": [
+                    397992
+                ]
+            },
+            {
+                "time_spent_updating": 0.0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 28,
+                "array_size": [
+                    397992
+                ]
+            },
+            {
+                "time_spent_updating": 0.0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 29,
+                "array_size": [
+                    397992
+                ]
             }
         ],
-        "velocity_modifiers": [],
-        "trajectory_modifiers": [
+        "status_modifiers": [
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 0
+            }
+        ],
+        "velocity_modifiers": [
+            {
+                "time_spent_updating": 0.0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 0
+            }
+        ],
+        "trajectory_modifiers": [
+            {
+                "time_spent_updating": 1.3797303999997048,
+                "update_calls": 1321,
+                "time_first_update_call": 0.9216401999999988,
                 "instanceID": 0,
-                "number_resupended": 2627
+                "number_resupended": 13063
             }
         ],
         "particle_statistics": [
             {
-                "time_spent_updating": 2.051332500000008,
-                "calls": 2,
+                "time_spent_updating": 1.2571568000000077,
+                "update_calls": 8,
+                "time_first_update_call": 1.2214062000000006,
                 "output_file": "demo_SCHISM_3D_stats_gridded_age_001.nc",
                 "instanceID": 0,
-                "time_last_stats_recorded": 1483273800.0,
+                "time_last_stats_recorded": 1483306200.0,
                 "type": "gridded"
             },
             {
-                "time_spent_updating": 1.4921915000000183,
-                "calls": 2,
+                "time_spent_updating": 0.0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
                 "output_file": "demo_SCHISM_3D_stats_polygon_age_002.nc",
                 "instanceID": 1,
-                "time_last_stats_recorded": 1483273800.0,
+                "time_last_stats_recorded": 1483306200.0,
                 "type": "polygon"
             }
         ],
         "event_loggers": [
             {
-                "time_spent_updating": 3.9668475999994612,
-                "calls": 1321,
+                "time_spent_updating": 2.8672658000003004,
+                "update_calls": 1322,
+                "time_first_update_call": 0.48029149999999987,
                 "instanceID": 0,
                 "prop_to_write": [
-                    "age",
                     "ID",
-                    "x",
-                    "IDrelease_group",
-                    "user_release_groupID",
-                    "event_polygon",
                     "IDpulse",
-                    "status"
+                    "age",
+                    "event_polygon",
+                    "x",
+                    "status",
+                    "user_release_groupID",
+                    "IDrelease_group"
                 ],
                 "output_file": "demo_SCHISM_3D_events_001.nc"
             }
@@ -2737,15 +2932,10 @@
         "time_varying_info": [
             {
                 "time_spent_updating": 0.0,
-                "calls": 0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
                 "instanceID": 0
             }
-        ],
-        "particle_release_userRelease_groupID_map": {
-            "0": 1
-        },
-        "particle_release_user_release_group_name_map": {
-            "None": 1
-        }
+        ]
     }
 }

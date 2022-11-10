@@ -192,7 +192,7 @@ def demo56_SCHISM_3D_resupend_crtitical_friction_vel(runInfo_file_name,output_fi
     track_data = load_particle_track_vars(case_info_file_name, fraction_to_read=.9)
     ax_lims= [1591000, 1601500, 5478500, 5491000]
     animate_particles(track_data, axis_lims=ax_lims,
-                      heading='SCHISIM 3D, fall velocity and crtitical friction velocity resuspension',
+                      heading='SCHISIM 3D, fall velocity and critical friction velocity resuspension',
                       movie_file=output_file + '_status.mp4' if output_file is not None else None,
                       fps=15, show_dry_cells=True, interval=20)
 
@@ -229,7 +229,7 @@ def demo58_bottomBounce(runInfo_file_name,output_file=None):
 
     track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth'])
 
-    plot_path_in_vertical_section(track_data,  title= 'fall velocity, always resuspension_jump ',
+    plot_path_in_vertical_section(track_data,  title= 'fall velocity and resuspension with critical friction velocity ',
                                           plot_file_name=output_file +  '_section.jpeg' if output_file is not None else None)
 
     plot_relative_height(track_data, title='fall velocity, always resuspension_jump ')

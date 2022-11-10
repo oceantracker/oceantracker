@@ -149,7 +149,7 @@ def load_stats_file(case_info_file_name, nsequence = 1, var_list=[]):
     nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
 
     params= case_info['full_params']['particle_statistics'][nsequence-1]
-    s= case_info['info']['particle_statistics'][nsequence-1]
+    s= case_info['class_info']['particle_statistics'][nsequence-1]
 
     d= read_ncdf_output_files.read_stats_file(nc_file_name, var_list)
     d['info']= s
@@ -173,7 +173,7 @@ def load_residence_file(case_info_file_name,nsequence=1, var_list=[]):
     nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
 
     params= case_info['full_params']['particle_statistics'][nsequence-1]
-    s= case_info['info']['particle_statistics'][nsequence-1]
+    s= case_info['class_info']['particle_statistics'][nsequence-1]
 
     d= read_ncdf_output_files.read_residence_file(nc_file_name, var_list)
     d['info']= s

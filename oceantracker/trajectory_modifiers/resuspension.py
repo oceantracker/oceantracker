@@ -21,9 +21,9 @@ class BasicResuspension(_BaseTrajectoryModifier):
 
     # is 3D test of parent
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(
-                        required_fields=['friction_velocity', 'water_velocity'],
-                        required_props=['status','water_velocity'], requires3D=True)
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(
+                        required_fields_list=['friction_velocity', 'water_velocity'],
+                        required_props_list=['status','water_velocity'], requires3D=True)
         return msg_list
 
     def initialize(self,**kwargs):pass
@@ -43,6 +43,7 @@ class BasicResuspension(_BaseTrajectoryModifier):
     # all particles checked to see if they need status changing
     def update(self, nb, time, active):
         # do resupension
+        self.start_update_timer()
         si= self.shared_info
         # redsuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.classes['particle_properties']
@@ -51,12 +52,13 @@ class BasicResuspension(_BaseTrajectoryModifier):
         self.resuspension_jump(part_prop['friction_velocity'].data, si.z0, si.model_substep_timestep, part_prop['x'].data, resupend)
 
         #  dont adjust resupension distance for terminal velocity,
-        #  Lynch ( Particiles in the Ocean Book, says dont adjust as a fal velocity  affects prior that particle resupends)
+        #  Lynch (Particles in the Ocean Book, says dont adjust as a fall velocity  affects prior that particle resuspends)
 
         # any z out of bounds will  be fixed by find_depth cell at start of next time step
         self.info['number_resupended'] = resupend.shape[0]
         part_prop['status'].set_values(si.particle_status_flags['moving'], resupend)
 
+        self.stop_update_timer()
 
     @staticmethod
     @njit

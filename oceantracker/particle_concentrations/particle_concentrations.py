@@ -10,8 +10,8 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
 
 
     def check_requirements(self):
-        msg_list =self.check_class_required_fields_properties_grid_vars_and_3D(required_grid_vars=['triangle_area','x'],
-                                                                               required_props=['total_water_depth'])
+        msg_list =self.check_class_required_fields_list_properties_grid_vars_and_3D(required_grid_var_list=['triangle_area','x'],
+                                                                               required_props_list=['total_water_depth'])
         return msg_list
 
     def set_up_data_buffers(self):

@@ -24,4 +24,4 @@ class ParticleParameterFromNormalDistribution(ParticleProperty):
         self.set_values(self.params['mean']+ self.params['variance']*np.random.normal(size=s), new_part_IDs)
 
 
-    def update(self): pass # manual update by default
+    def update(self, active): pass # manual update by default

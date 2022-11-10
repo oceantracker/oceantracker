@@ -13,8 +13,9 @@ class VelocityModiferBase(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'name': PVC(None,str),'is3D': PVC(False,bool)})
 
+        self.class_doc(role='These classes add additional particle velocities to water velocity, eg terminal velocity, by updating  particle property "velocity_modifier" once per time step, which is added to water velocity every RK substep')
     def initialize(self):pass
 
 
     # prototype for velocity modification of v, at some space and time for isActive particles
-    def modify_velocity(self, v, time, active): basic_util.nopass('velocity modify must have a  modify_velocity method ')
+    def update(self, v, time, active): basic_util.nopass('velocity modify must have a  modify_velocity method ')

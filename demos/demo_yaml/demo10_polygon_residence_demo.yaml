@@ -9,6 +9,7 @@ base_case_params:
   - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
   particle_release_groups:
   - class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
+    name: near_shore
     points:
     - - 1594682.1237
       - 5483472.7479
@@ -27,7 +28,7 @@ base_case_params:
   particle_statistics:
   - calculation_interval: 1800
     class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
-    count_release_group: 1
+    name_of_polygon_release_group: near_shore
   run_params:
     block_dry_cells: true
   solver:
@@ -53,7 +54,7 @@ reader:
     x:
     - east
     - north
-  input_dir: demo_hindcast
+  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 24

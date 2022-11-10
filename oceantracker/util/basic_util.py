@@ -44,7 +44,8 @@ class BlockTimer(object):
         for key,d in self.timer_dict.items():
             times.append(d['time'])
             txt = '%8.2fs' % d['time'] +  ' %3.0f%%' % (100*d['time']/total_time)
-            txt += ' calls %05.0f: ' % d['calls'] + key  + ',  (first call= %8.2fs)' %  d['time_first_call']
+            txt += ' calls %05.0f: ' % d['calls'] + key
+            txt += ',  (first call/remainder = %5.2fs' %   d['time_first_call'] + '/%5.2fs' % (d['time']-d['time_first_call'])
             all_text.append(txt)
         out=[]
         for  s in np.argsort(-abs(np.asarray(times))):

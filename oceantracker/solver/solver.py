@@ -31,10 +31,10 @@ class Solver(ParameterBaseClass):
 
     def check_requirements(self):
 
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(
-            required_fields=['water_velocity'],
-            required_props=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'],
-            required_grid_vars=[])
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(
+            required_fields_list=['water_velocity'],
+            required_props_list=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'],
+            required_grid_var_list=[])
 
         return msg_list
 
@@ -48,9 +48,11 @@ class Solver(ParameterBaseClass):
         info['computation_started'] = datetime.now()
         # set up particle velocity working space for solver
         info['n_time_steps_completed'] = 0
-        info['total_active_particles'] = 0
+        info['total_alive_particles'] = 0
 
         # initial release , writes and statistics etc
+
+        #todo make prebookkepping do this for the first step move or delete, release, updates
         t0 = grid['time'][nb0]
         new_particleIDs = pgm.release_particles(nb0, t0)
         fgm.setup_interp_time_step(nb0, t0, part_prop['x'].data, new_particleIDs)  # set up interp for first time step
@@ -71,7 +73,7 @@ class Solver(ParameterBaseClass):
         si = self.shared_info
         grid = si.classes['reader'].grid
         info = self.info
-        pgm, fgm, tracks_writer   = si.classes['particle_group_manager'], si.classes['field_group_manager'], si.classes['tracks_writer']
+        pgm, fgm   = si.classes['particle_group_manager'], si.classes['field_group_manager']
         part_prop = si.classes['particle_properties']
 
 
@@ -83,7 +85,20 @@ class Solver(ParameterBaseClass):
             for ns in range(self.params['n_sub_steps']):
                 # round start time to nearest hindcast step
                 t0_step = perf_counter()
+
                 t1 = t_hindcast + ns*si.model_substep_timestep*si.model_direction
+
+                # release particles, update cell location/interp, update status, write tracks etc,
+                self.pre_step_bookkeeping(nb, t1, info['n_time_steps_completed'])
+
+
+                # update particle velocity modifcation
+                alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+                part_prop['velocity_modifier'].set_values(0., alive)  # zero out  modifier, to add in current values
+
+                for i in si.class_interators_using_name['velocity_modifiers']['all'].values():
+                    i.update(nb, t1, alive)
+
 
                 #  Main integration step
                 #  --------------------------------------
@@ -96,44 +111,85 @@ class Solver(ParameterBaseClass):
 
                 t2 = t1 + si.model_substep_timestep * si.model_direction
 
+
                 # dispersion
                 if moving.shape[0] > 0:
                     si.classes['dispersion'].update(nb, t2, moving)
-                    # after dispersion some may be outside, update search cell status to see which are now outside domain etc
-                    fgm.setup_interp_time_step(nb, t2, part_prop['x'].data, moving)
 
 
-
-                self.post_step_bookeeping(nb, t2)
-
-                new_particleIDs = pgm.release_particles(nb, t2)
-                if si.write_tracks:
-                    tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
-
-                    # write tracks file
-                    if info['n_time_steps_completed'] % si.classes['tracks_writer'].params['output_step_count'] == 0:
-                        tracks_writer.open_file_if_needed()
-                        tracks_writer.write_all_time_varying_prop_and_data()
-
-                # update outputs
-                self._update_stats(t2)
-                self._update_concentrations(nb, t2)
-                self._update_events(t2)
+                # at this point interp is not set up for current positions this is done in pre_step_bookeeping, and after last step
 
                 # print screen data
                 if (info['n_time_steps_completed']  + ns) % self.params['screen_output_step_count'] == 0:
                     self.screen_output(info['n_time_steps_completed'] , nt0, nb0, nb, ns, t1, t0_step)
 
-                pgm.kill_old_particles(t2)
-
-                if si.compact_mode: pgm.remove_dead_particles_from_memory()
-
-
                 info['n_time_steps_completed']  += 1
 
                 if abs(t2 - si.model_start_time) > si.model_duration:  break
 
+        self.pre_step_bookkeeping(nb, t2, info['n_time_steps_completed']) # update interp and write out props at last step
+
         return info['n_time_steps_completed'], t2
+
+    def pre_step_bookkeeping(self, nb, t, n_time_steps_completed):
+        self.code_timer.start('pre_step_bookkeeping')
+        si = self.shared_info
+        part_prop = si.classes['particle_properties']
+        pgm= si.classes['particle_group_manager']
+
+        # release particles
+        #todo remove setp interp from particle release as done just below
+        new_particleIDs = pgm.release_particles(nb, t)
+
+
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+        self.info['total_alive_particles'] += alive.shape[0]
+        
+        # modify status
+        for i in si.class_interators_using_name['status_modifiers']['all'].values():
+            i.update(nb, t, alive)
+
+        pgm.kill_old_particles(t) # todo convert to status modifier
+        if si.compact_mode: pgm.remove_dead_particles_from_memory()
+
+
+        # some may now have status dead so update
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+
+        # trajectory modifiers,
+        for i in si.class_interators_using_name['trajectory_modifiers']['all'].values():
+            i.update(nb, t, alive)
+
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+
+
+        # setup_interp_time_step
+        si.classes['field_group_manager'].setup_interp_time_step(nb, t, part_prop['x'].data, alive)
+
+        # update particle properties
+        si.classes['particle_group_manager'] .update_PartProp(t, alive)
+
+      
+        #todo move velocity_modfiers from update_velocity below to velocity_modfiers,to here
+        
+        
+        # update writable class lists and stats at current time step
+        self._update_stats(t)
+        self._update_concentrations(nb, t)
+        self._update_events(t)
+
+        # write tracks
+        if si.write_tracks:
+            tracks_writer = si.classes['tracks_writer']
+            tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
+
+            # write tracks file
+            if n_time_steps_completed % si.classes['tracks_writer'].params['output_step_count'] == 0:
+                tracks_writer.open_file_if_needed()
+                tracks_writer.write_all_time_varying_prop_and_data()
+
+        self.code_timer.stop('pre_step_bookkeeping')
+
 
     def integration_step(self, nb, t):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
@@ -146,11 +202,13 @@ class Solver(ParameterBaseClass):
 
         # note here subStep_time_step has sign of forwards/backwards
         dt = si.model_substep_timestep*si.model_direction
+        dt2=dt/2.
         # set up views of  working variable space
         x1      = part_prop['x_last_good'].data
         x2      = part_prop['x'].data
         v       = part_prop['particle_velocity'].data
         v_temp  = part_prop['v_temp'].data  # temp vel from interp at each RK substeps
+        velocity_modifier= part_prop['velocity_modifier'].data
         is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out = self.get_particle_index_buffer())
 
         # this makes x1, ['x_last_good']  at start of new integration step for moving particles, allowing updates to x2 ['x']
@@ -160,105 +218,48 @@ class Solver(ParameterBaseClass):
         fgm.setup_interp_time_step(nb, t,  x1, is_moving)
 
         if RK_order==1:
-            self.update_particle_velocity(t,v, is_moving) # put vel into permanent place
-            solver_util.euler_substep(x2, x1, v, dt, is_moving)
+            fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v)
+            solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)
             return is_moving
 
-        self.update_particle_velocity(t,v_temp, is_moving)  # velocity in temp place
-
         # do first half step location from RK1 to update values
-        solver_util.euler_substep(x2, x1, v_temp, dt / 2., is_moving)
-
-        # accumulate RK velocity to reduce space taken by temporary working variables
-        particle_operations_util.copy(v, v_temp, is_moving, scale=1.0 / 6.0) # vel at start of step
+        fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
+        solver_util.euler_substep( x1, v_temp, velocity_modifier, dt2, is_moving, x2)
+        particle_operations_util.copy(v, v_temp, is_moving, scale=1.0 / 6.0)   # accumulate RK velocity to reduce space taken by temporary working variables
 
         # step 2, get improved half step velocity
         t2=t + 0.5*dt
         fgm.setup_interp_time_step(nb, t2, x2, is_moving)
 
         if RK_order==2:
-            self.update_particle_velocity(t2,v, is_moving)
-            solver_util.euler_substep(x2, x1, v, dt, is_moving)
+            fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v)
+            solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)
             return is_moving
 
-        self.update_particle_velocity(t2, v_temp, is_moving)
-
-        # step 3, a second half step
-        solver_util.euler_substep(x2, x1, v_temp, dt / 2., is_moving)  # improve half step position
+        fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
+        solver_util.euler_substep( x1, v_temp, velocity_modifier, dt2, is_moving, x2)
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity step 2
 
+        # step 3, a second half step
         t2 = t + 0.5 * dt
         fgm.setup_interp_time_step(nb, t2, x2, is_moving)
-        self.update_particle_velocity(t2,v_temp , is_moving)  # v3, better velocity at half step
-
-        solver_util.euler_substep(x2, x1, v_temp, dt, is_moving)  # improve half step position values
+        fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
+        solver_util.euler_substep( x1, v_temp, velocity_modifier, dt, is_moving, x2)  # improve half step position values
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity from step 3
 
         # step 4, full step
         t2 = t + dt
         fgm.setup_interp_time_step(nb, t2,  x2, is_moving)
-        self.update_particle_velocity( t2, v_temp, is_moving)  # full step for v4
-
+        fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
         particle_operations_util.add_to(v, v_temp, is_moving, scale=1.0 / 6.0)  # last accumulation of velocity for v4
 
         # final location using  accumulation in "v"
         # below is emulated by accumulation above of
         #  v = (v1 + 2.0 * (v2 + v3) + v4) /6
         #  x2 = x1 + v*dt
-        solver_util.euler_substep(x2, x1, v, dt, is_moving)  # set final location directly to particle x property
+        solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)  # set final location directly to particle x property
 
         return  is_moving
-
-    def update_particle_velocity(self, t, v, active):
-        # get water velocity plus any particle affects on velocity in particle_velocity, eg terminal velocity
-        si= self.shared_info
-        si.classes['field_group_manager'].interp_named_field_at_particle_locations('water_velocity', active, output=v)
-
-        # any effects of super-imposable modifiers of the velocity, eg terminal  velocity in 3D to be added to w component
-        for key, vm in si.classes['velocity_modifiers'].items():
-            v = vm.modify_velocity(v, t, active)
-
-    def post_step_bookeeping(self, nb, t2):
-        # do dispersion, modify trajectories,
-        # do strandings etc to change particle status
-        # update part prop, eg  interp mapped reader fields to particle locations
-        self.code_timer.start('post_step_bookeeping')
-        si = self.shared_info
-        grid = si.classes['reader'].grid
-        pm = si.classes['particle_group_manager'] # internal short cuts
-        fgm = si.classes['field_group_manager']
-        part_prop  =  si.classes['particle_properties']
-
-
-
-        # user particle movements, eg resupension for all particles
-        # re-find alive particles after above movements
-        sel = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
-        self.info['total_active_particles'] += sel.shape[0]
-        for i in si.class_interators_using_name['trajectory_modifiers']['all'].values():
-            i.update(nb, t2, sel)
-
-        # after moves, update search cell status, dry cell index,  to see which are now outside domain etc
-        fgm.setup_interp_time_step(nb, t2, part_prop['x'].data, sel)
-
-        # now all  particle movements complete after trajectory changes, move backs, update cell and bc cords for latest locations, update particle properties
-        sel = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
-        # now update part prop with good cell and bc cords, eg  interp water_depth
-        pm.update_PartProp(t2, sel)
-
-        # do any status only changes, eg stranding by tide
-        # eg total water depth used for tidal stranding must be up to date
-        # (dry_cell_index, status_frozen, status_stranded ,status_moving, sel, status)
-        solver_util.tidal_stranding_from_dry_cell_index(
-                                           grid['dry_cell_index'],
-                                           part_prop['n_cell'].data,
-                                           si.particle_status_flags['frozen'],
-                                           si.particle_status_flags['stranded_by_tide'],
-                                           si.particle_status_flags['moving'],
-                                           sel,
-                                           part_prop['status'].data)
-
-        self.code_timer.stop('post_step_bookeeping')
 
 
 
@@ -286,11 +287,8 @@ class Solver(ParameterBaseClass):
         si= self.shared_info
         self.code_timer.start('on_the_fly_statistics')
         for s in si.class_interators_using_name['particle_statistics']['all'].values():
-
             if abs(t - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
-                t0 = perf_counter()
                 s.update(time=t)
-                s.update_timer(t0)
 
         self.code_timer.stop('on_the_fly_statistics')
 
@@ -300,9 +298,8 @@ class Solver(ParameterBaseClass):
         self.code_timer.start('particle_concentrations')
         for s in si.class_interators_using_name['particle_concentrations']['all'].values():
             if abs(t - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
-                t0 = perf_counter()
                 s.update(nb, t)
-                s.update_timer(t0)
+
         self.code_timer.stop('particle_concentrations')
 
     def _update_events(self, t):
@@ -311,9 +308,8 @@ class Solver(ParameterBaseClass):
 
         self.code_timer.start('event_logging')
         for e in si.class_interators_using_name['event_loggers']['all'].values():
-            t0 = perf_counter()
             e.update(time=t)
-            e.update_timer(t0)
+
         self.code_timer.stop('event_logging')
 
     def close(self):

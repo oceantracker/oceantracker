@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit
+from copy import copy
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util import time_util
@@ -35,6 +36,8 @@ class ParticleGroupManager(ParameterBaseClass):
         # core particle props. , write at each required time step
         self.create_particle_property('manual_update',dict(name='x',  vector_dim=nDim))  # particle location
         self.create_particle_property('manual_update',dict(name='particle_velocity',  vector_dim=nDim))
+        self.create_particle_property('manual_update', dict(name='velocity_modifier', vector_dim=nDim))
+
         self.create_particle_property('manual_update',dict(name='status', dtype=np.int8,
                                       initial_value=si.particle_status_flags['notReleased']))
         self.create_particle_property('manual_update',dict(name='age',  initial_value=0.))
@@ -74,6 +77,8 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # for all new particles update cell and bc cords for new particles all at same time
         part_prop = si.classes['particle_properties']
+
+        #todo does this setup_interp_time_step have to be here?
         si.classes['field_group_manager'].setup_interp_time_step(nb, t, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
 
         # initial values  part prop derived from fields
@@ -85,6 +90,7 @@ class ParticleGroupManager(ParameterBaseClass):
             p.initial_value_at_birth(new_buffer_indices)
 
         # update new particles props
+        # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
         self.update_PartProp(t, new_buffer_indices)
 
         # flag if any bad initial locations
@@ -322,6 +328,41 @@ class ParticleGroupManager(ParameterBaseClass):
         s += self.screen_msg
         return s
 
+
+    def  create_particle_prop_memory_block(self):
+        # todo create_particle_prop_memory_block is development work
+        si=self.shared_info
+
+        # get all names sizes and dtypes of all particle properties
+        array_types=[]
+        for name,prop in si.classes['particle_properties'].items():
+
+            if prop.params['vector_dim'] > 1:
+                s = (prop.params['vector_dim'],)
+            else:
+                s = (1,)
+
+            # third matrix dim, so far only used recording vertical cell at each node  3D for 2 time steps
+            if prop.params['prop_dim3'] > 0 and prop.params['prop_dim3'] > 1:
+                s += (prop.params['prop_dim3'],)
+
+            array_types.append((name,prop.params['dtype'],s  ))
+
+        # make array of sub arrays with all properties stored next to each other in memory
+        #todo this is in development
+        #self.particle_prop_memory_block = np.full((si.particle_buffer_size,),0,dtype=array_types)
+
+        # make pointer from each variable to its named block/sub array
+        for name, prop in si.classes['particle_properties'].items():
+            prop.data=self.particle_prop_memory_block[name]
+
+            # make pointer to data without any trailing unit dimension to be compatible with numba particle operations on 1D  vectors
+            if prop.data.size > 1 and prop.data.shape[-1] == 1:
+                prop.data = prop.data.reshape(prop.data.shape[:-1])
+
+            prop.data[:] = prop.params['initial_value']
+
+        si.particle_prop_memory_block= self.particle_prop_memory_block
 
 
 

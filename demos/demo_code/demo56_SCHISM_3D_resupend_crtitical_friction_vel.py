@@ -19,7 +19,7 @@ case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 track_data = load_particle_track_vars(case_info_file_name, fraction_to_read=.9)
 ax_lims= [1591000, 1601500, 5478500, 5491000]
 animate_particles(track_data, axis_lims=ax_lims,
-                  heading='SCHISIM 3D, fall velocity and crtitical friction velocity resuspension',
+                  heading='SCHISIM 3D, fall velocity and critical friction velocity resuspension',
                   movie_file=output_file + '_status.mp4' if output_file is not None else None,
                   fps=15, show_dry_cells=True, interval=20)
 

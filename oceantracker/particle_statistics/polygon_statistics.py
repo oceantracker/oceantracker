@@ -45,7 +45,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
 
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['x'])
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['x'])
         return msg_list
 
     def set_up_binned_variables(self,nc):
@@ -128,7 +128,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['age'])
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['age'])
         return msg_list
 
     def set_up_binned_variables(self,nc):

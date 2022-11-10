@@ -1,25 +1,16 @@
-from numba import njit
+from numba import njit, float64, int32, guvectorize
 
-@njit
-def euler_substep(xnew, xold, velocity, dt, active):
+#@njit()
+# experiment with guvectorize, guvectorize 40-50% faster than njit,  parallel  no faster as too small an operation, ?
+@guvectorize([(float64[:,:], float64[:,:],float64[:,:], float64, int32[:],float64[:,:])], '(n,m),(n,m),(n,m),(),(l)->(n,m)')
+#@guvectorize([(float64[:,:], float64[:,:],float64[:,:], float64, int32[:],float64[:,:])], '(n,m),(n,m),(n,m),(),(l)->(n,m)',target='parallel')
+def euler_substep(xold, water_velocity, velocity_modifier, dt, active, xnew):
     # do euler substep, xnew = xold+velocity*dt for active particles
     for n in active:
-        for m in range(xold.shape[1]):
-            xnew[n, m] = xold[n, m] + velocity[n, m] * dt
+        for m in range(water_velocity.shape[1]):
+            xnew[n, m] = xold[n, m] + (water_velocity[n, m] + velocity_modifier[n, m]) * dt
 
 
-@njit
-def tidal_stranding_from_dry_cell_index(dry_cell_index, n_cell, status_frozen, status_stranded ,status_moving, sel, status):
-    # look at all particles in buffer to check total water depth < min_water_depth
-    #  use  0-255 dry cell index updated at each interpolation update
-    for n in sel:
-        if status[n] >= status_frozen:
 
-            if dry_cell_index[n_cell[n]] > 128: # more than 50% dry
-                status[n] = status_stranded
-
-            elif status[n] == status_stranded:
-                # unstrand if already stranded, if status is on bottom,  remains as is
-                status[n] = status_moving
 
 

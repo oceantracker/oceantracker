@@ -17,6 +17,7 @@ base_case_params:
     pulse_size: 10
     release_interval: 10800
   - class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
+    name: userA
     points:
     - - 1597682.1237
       - 5489972.7479
@@ -57,7 +58,7 @@ reader:
     x:
     - east
     - north
-  input_dir: demo_hindcast
+  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 24
