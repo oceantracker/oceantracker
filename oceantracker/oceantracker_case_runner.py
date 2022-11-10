@@ -22,7 +22,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         case_info_file = None
         case_exception = None
 
-
         msg_list=[]
         try:
             self._set_up_run(runner_params)
@@ -34,6 +33,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             si.classes['dispersion'].initialize()  # is not done in _initialize_solver_and_core_classes as it may depend on user classes to work
 
+            # todo set up memory for all defined particle properties
+            # todo memory packing is being developed and evaluated for speed
+            #si.classes['particle_group_manager'].create_particle_prop_memory_block()
 
             # check particle properties have other particle properties, fields and other compatibles they require
             self._do_run_integrity_checks()
@@ -47,7 +49,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             try:
                 self._do_a_run()
                 case_info = self._get_case_info()
-                self.code_timer.stop('total_model_all')
+
 
                 if si.shared_params['write_output_files']:
                     case_info_file = si.output_file_base + '_caseInfo.json'
@@ -81,13 +83,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                   + ' at ' + time_util.iso8601_str(datetime.now()))
             si.case_log.close()
 
+
         return case_info_file, case_exception
 
     def _set_up_run(self,runner_params):
         # builds shared_info class variable with data and classes initialized  ready for run
         # from single run case_runner_params
 
-        self.code_timer.start('total_model_all')
+
         # put needed variables in shared info
         self.user_set_params = deepcopy(runner_params)  # used for log file
         si = self.shared_info
@@ -148,10 +151,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             environ['NUMBA_FULL_TRACEBACKS'] = '1'
             si.case_log.write_warning('Running in debug mode')
 
+
+
+
     def _do_a_run(self):
         # build and run solver from parameter dictionary
         # run from a given dictionary to enable particle tracking on demand from JSON type parameter set
         # also used for parallel  version
+        self.code_timer.start('total_model_all')
         si = self.shared_info
         info= self.info
         info['model_run_started'] = datetime.now()
@@ -202,7 +209,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for i in si.all_class_instance_pointers_iterator():
             i.close()
         info['model_run_ended'] = datetime.now()
+        #info['model_run_time_sec'] = info['model_run_started']-datetime.now()
         info['model_run_duration'] = time_util.duration_str_from_dates(info['model_run_started'], datetime.now())
+
+        self.code_timer.stop('total_model_all')
 
     def _do_run_integrity_checks(self):
         si=self.shared_info
@@ -254,7 +264,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def _setup_particle_release_groups(self, particle_release_groups_params_list):
         # particle_release groups setup and instances,
         # find extremes of  particle existence to calculate model start time and duration
-
+        #todo move to particle group manager and run in main at set up to get reader range etc , better for shared reader development
         si = self.shared_info
         estimated_total_particles = 0
 
@@ -274,17 +284,20 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
             # set up release times so duration of run known
-            release_info = pg.set_up_release_times(n)
+            pg.set_up_release_times(n)
+            release_info = pg.info['release_info']
 
-            if release_info['release_schedule_times'] is not None:
-                si.add_class_instance_to_interators(pg.params['name'],'particle_release_groups', 'user', pg)
+            # add class even if no release times
+            si.add_class_instance_to_interators(pg.params['name'], 'particle_release_groups', 'user', pg)
 
+            if release_info['release_schedule_times'].shape[0]==0:
+                si.case_log.write_msg('Release group= ' + str(n + 1) + ', name= ' + pg.params['name'] + ',  no release times in range of hindcast and given release duration', warning=True)
+                continue
+            else:
                 estimated_total_particles += release_info['estimated_number_released'] # used to give buffer size if needed
                 first_release_time.append(release_info['first_release_time'])
                 last_time_alive.append(release_info['last_time_alive'])
 
-            else:
-                si.case_log.write_msg('Release group= ' + str(n + 1) + ',  no release times in range of hindcast and given release duration', warning=True)
 
         if len(si.classes['particle_release_groups']) == 0:
             # guard against there being no release groups
@@ -374,10 +387,15 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for p in si.case_params['class_lists']['particle_properties']:
             pgm.create_particle_property('user',p)
 
+        # add default classes, eg tidal stranding
+        #todo this may be better else where
+        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.case_params['class_lists']['status_modifiers']:
+            si.case_params['class_lists']['status_modifiers'].append({'name':'tidal_stranding','class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'})
+
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for type in ['velocity_modifiers', 'trajectory_modifiers',
                      'particle_statistics',
-                     'particle_concentrations', 'event_loggers']:
+                     'particle_concentrations', 'event_loggers','status_modifiers']:
             for n, params in enumerate(si.case_params['class_lists'][type]):
                 i= si.add_class_instance_to_list_and_merge_params(type,'user', params)
                 si.add_class_instance_to_interators(i.params['name'], type,'user', i)
@@ -406,6 +424,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'run_info' : info,
              'hindcast_info': r.get_hindcast_info(),
              'particle_release_group_info' : [],
+             'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),
              'warnings': si.case_log.get_all_warnings_and_errors(),
              'timers': self.code_timer.time_sorted_timings(),
              'time_updating': {},
@@ -415,41 +434,39 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'shared_params': si.shared_params,
              'case_params': si.case_runner_params['case_params'],
              'full_params': {},
-             'info': {},
+             'class_info': {},
 
               }
 
         for key, i in si.core_class_interator.items():
             if i is None: continue
             d['full_params'][key] = i.params
-            d['info'][key] = i.info
+            d['class_info'][key] = i.info
             if 'output_file' in i.info:
                 d['output_files'][key] = i.info['output_file']
             else:
                 d['output_files'][key] = None
-            d['time_updating'][key] = {'time': i.info['time_spent_updating'], 'calls': i.info['calls']}
+
 
         for key, item in si.class_interators_using_name.items():
             # a class list type
             d['full_params'][key]=[]
-            d['info'][key] = []
+            d['class_info'][key] = []
             d['output_files'][key] =[]
             d['time_updating'][key] =[]
 
             for i in item['all'].values():
                 d['full_params'][key].append(i.params)
-                d['info'][key].append(i.info)
+                d['class_info'][key].append(i.info)
                 if 'output_file' in i.info:
                     d['output_files'][key].append(i.info['output_file'])
                 else:
                     d['output_files'][key].append(None)
-                d['time_updating'][key].append({'time': i.info['time_spent_updating'], 'calls': i.info['calls']})
-
 
         for key, item in si.classes['particle_release_groups'].items():
             d['particle_release_group_info'].append(item.info['release_info'])
 
 
-        d['info'].update(si.classes['particle_group_manager'].get_release_group_userIDmaps())  # adds maps
+          # adds maps
 
         return d

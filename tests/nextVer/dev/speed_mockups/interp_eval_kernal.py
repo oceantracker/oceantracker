@@ -41,7 +41,7 @@ def F3(nt,tri, BCcord,n_cell, F, F_out,  sel,tfrac):
     for n in sel:
         K(tri[n_cell[n], :], BCcord[n, :],  F1, F2, F_out[n,:],tfrac)
 
-@njit(inline='always')
+@njit()
 def K(tri, bcc, f1,f2, f_out,tfrac):
     for c in range(f_out.shape[0]): f_out[c] = 0.  # zero out for summing
     for n_bc in range(3):
@@ -50,35 +50,35 @@ def K(tri, bcc, f1,f2, f_out,tfrac):
             f_out[c] += bcc[n_bc] *  ((1.0-tfrac)*f1[n_node, c] +tfrac*f2[n_node, c])
 
 
-@njit(inline='always')
+@njit()
 def NodeVals1(tri, f1,f2,tfrac, f_nodes):
     if f_nodes.shape[0] == 0:
         NodeValsScaler(tri, f1,f2,tfrac, f_nodes)
     else:
         NodeValsVector(tri, f1,f2,tfrac, f_nodes)
 
-@njit(inline='always')
+@njit()
 def NodeValsVector(tri, f1,f2,tfrac, f_nodes):
     for n_bc in range(3):
         n_node = tri[n_bc]
         for c in range(f_nodes.shape[0]):
             f_nodes[n_bc, c] = (1.0-tfrac)*f1[n_node, c] + tfrac*f2[n_node, c]
 
-@njit(inline='always')
+@njit()
 def NodeValsScaler(tri, f1,f2,tfrac, f_nodes):
     for n_bc in range(3):
         n_node = tri[n_bc]
         f_nodes[n_bc, 0] = (1.0-tfrac)*f1[n_node, 0] + tfrac*f2[n_node, 0]
 
 
-@njit(inline='always')
+@njit()
 def BCinterp1(bc, f_nodes, fout):
     if fout.shape[0] == 0:
         BCinterpScaler(bc, f_nodes, fout)
     else:
         BCinterpVector(bc, f_nodes, fout)
 
-@njit(inline='always')
+@njit()
 def BCinterp(bc, f_nodes, fout):
     if fout.shape[0]==0:
         fout[0] = 0.
@@ -90,14 +90,14 @@ def BCinterp(bc, f_nodes, fout):
             for m in range(3):
                 fout[c] += bc[m] * f_nodes[m, c]
 
-@njit(inline='always')
+@njit()
 def BCinterpVector(bc, f_nodes, fout):
     for c in range(fout.shape[0]):
         fout[c] = 0.
         for m in range(3):
             fout[c] += bc[m]*f_nodes[m,c]
 
-@njit(inline='always')
+@njit()
 def BCinterpScaler(bc, f_nodes, fout):
     fout[0] = 0.
     for m in range(3):

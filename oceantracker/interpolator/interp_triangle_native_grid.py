@@ -1,5 +1,5 @@
 # linear interploation for triangles in both space and time
-
+import numpy as np
 
 #todo  are BC cords as np.float32, faster as lower memory transfer demand and good enough?
 import numpy as np
@@ -44,21 +44,16 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         # BC walk stats
         info = self.info
-        info['n_total_walking_steps'] = 0
-        info['n_total_particles_located'] =0
-        info['n_max_walking_steps'] =0
-        info['failed_searches'] = 0
-        info['count_maybe_below_bottom'] = 0
-        info['count_maybe_above_surface'] = 0
+        self.walk_stats = np.zeros((2,),dtype=triangle_interpolator_util.walk_stats)
+
 
         if si.hindcast_is3D:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
-            # used to do 3D time dependent interploation
-            p.create_particle_property('manual_update',dict(name='nz_cell_nodes',  write=False, dtype=np.int8,
-                                       initial_value=0, vector_dim=2, prop_dim3=3))
+            # used to do 3D time dependent interpolation
+            p.create_particle_property('manual_update',dict(name='nz_cell',  write=False, dtype=np.int8,
+                                       initial_value=grid['zlevel'].shape[2]-1, vector_dim=2, prop_dim3=3)) # initialize at top
             p.create_particle_property('manual_update',dict(name='z_fraction_nodes',  write=False, dtype=np.single,
                                        initial_value=0., vector_dim=2, prop_dim3=3))
-            info['vertical_search_steps_histogram'] = np.full( (grid['zlevel'].shape[2]+1,), 0, np.int32)
 
     def build_grid(self):
         si = self.shared_info
@@ -76,8 +71,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.locate_BCwalk(xq, nb,step_dt_fraction, active)  # best method!
         self.code_timer.stop('find_cells_and_weights')
 
-        self.info['n_total_particles_located'] += active.shape[0]
-
         if si.hindcast_is3D:
             self.code_timer.start('find_depth_cell')
             # insert depth cells and fractions
@@ -92,39 +85,40 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         grid = si.classes['reader'].grid
         part_prop = si.classes['particle_properties']
 
-        nsteps, nmax = triangle_interpolator_util.BCwalk_with_move_backs_numba(
-                                                    xq,
-                                                    part_prop['x_last_good'].data,
-                                                    part_prop['status'].data,
-                                                    part_prop['n_cell'].data,
-                                                    part_prop['bc_cords'].data,
-                                                    grid['bc_transform'],
-                                                    grid['adjacency'],
-                                                    grid['dry_cell_index'],
-                                                    si.run_params['block_dry_cells'],
-                                                    self.params['bc_walk_tol'],
-                                                    self.params['max_search_steps'],
-                                                    si.case_params['run_params']['open_boundary_type'] == 1,
-                                                    active)
+        triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
+                                                xq,
+                                                part_prop['x_last_good'].data,
+                                                part_prop['status'].data,
+
+                                                part_prop['bc_cords'].data,
+                                                grid['bc_transform'],
+                                                grid['adjacency'],
+                                                grid['dry_cell_index'],
+                                                si.run_params['block_dry_cells'],
+                                                self.params['bc_walk_tol'],
+                                                self.params['max_search_steps'],
+                                                si.case_params['run_params']['open_boundary_type'] == 1,
+                                                active,self.walk_stats[0],  part_prop['n_cell'].data)
         sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_particle_subset_buffer())
+
         if sel.shape[0] > 0:
             self.code_timer.start('kd-tree_retrys')
             new_cell, status, bc = self.initial_cell_guess(xq[sel,:2])
             part_prop['n_cell'].set_values(new_cell, sel)
-            nsteps, nmax = triangle_interpolator_util.BCwalk_with_move_backs_numba(
-                                            xq,
-                                            part_prop['x_last_good'].data,
-                                            part_prop['status'].data,
-                                            part_prop['n_cell'].data,
-                                            part_prop['bc_cords'].data,
-                                            grid['bc_transform'],
-                                            grid['adjacency'],
-                                            grid['dry_cell_index'],
-                                            si.run_params['block_dry_cells'],
-                                            self.params['bc_walk_tol'],
-                                            self.params['max_search_steps'],
-                                            si.case_params['run_params']['open_boundary_type'] == 1,
-                                            sel)
+            triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
+                                        xq,
+                                        part_prop['x_last_good'].data,
+                                        part_prop['status'].data,
+
+                                        part_prop['bc_cords'].data,
+                                        grid['bc_transform'],
+                                        grid['adjacency'],
+                                        grid['dry_cell_index'],
+                                        si.run_params['block_dry_cells'],
+                                        self.params['bc_walk_tol'],
+                                        self.params['max_search_steps'],
+                                        si.case_params['run_params']['open_boundary_type'] == 1,
+                                        sel,    self.walk_stats[0],part_prop['n_cell'].data)
 
             sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_particle_subset_buffer())
             if sel.shape[0] > 0:
@@ -136,26 +130,25 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
             self.code_timer.stop('kd-tree_retrys')
 
-        # note largest number of triangles walked
-        if nmax > self.info['n_max_walking_steps']:
-            self.info['n_max_walking_steps'] = nmax
-        self.info['n_total_walking_steps'] += nsteps
 
     def initial_cell_guess(self, xq):
         # find nearest cell
         si=self.shared_info
         grid = si.classes['reader'].grid
         dist, n_cell = self.KDtree.query(xq[:, :2])
+
+        n_cell = n_cell.astype(np.int32)  # KD tre gives in64need for compartibilty of types
+
         n_cell[np.any(~np.isfinite(xq), axis=1)] = -1 # stops walking for non-finite initial cords
 
         # KD tree is not perfect as finds nearest centriod, so do a walk to correct
         status  = np.full((xq.shape[0],),10, dtype=np.int32)
         bc      = np.full((xq.shape[0],3),  0., dtype=np.float64)
-        nsteps, nmax = triangle_interpolator_util.BCwalk_with_move_backs_numba(
+        triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
             xq,
             xq,# use xq for last good
             status,
-            n_cell,
+
             bc,
             grid['bc_transform'],
             grid['adjacency'],
@@ -164,7 +157,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             self.params['bc_walk_tol'],
             self.params['max_search_steps'],
             False, # no open boundary, as must start inside
-            np.arange(xq.shape[0]))
+            np.arange(xq.shape[0]), self.walk_stats[0], n_cell)
 
         return n_cell
 
@@ -184,20 +177,20 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         if fieldObj.is_time_varying():
             if fieldObj.is3D():
-                nz_nodes = part_prop['nz_cell_nodes'].data
+                nz_nodes = part_prop['nz_cell'].data
                 z_fraction_nodes = part_prop['z_fraction_nodes'].data
 
                 if fieldObj.params['name']=='water_velocity':
                     # 3D vel needs log layer interp in bottom cell
-                    eval_interp.water_velocity_3D(basic_util.atLeast_Nby1(output),
-                                                  fieldObj.data,
-                                                  nb,
-                                                  step_dt_fraction,
-                                                  grid['triangles'],
-                                                  n_cell,
-                                                  nz_nodes, z_fraction_nodes, bc_cords,
-                                                  grid['zlevel'], grid['bottom_cell_index'], si.z0,
-                                                  active)
+                    eval_interp.eval_water_velocity_3D(basic_util.atLeast_Nby1(output),
+                                                       fieldObj.data,
+                                                       nb,
+                                                       step_dt_fraction,
+                                                       grid['triangles'],
+                                                       n_cell,
+                                                       nz_nodes, z_fraction_nodes, bc_cords,
+                                                       grid['zlevel'], grid['bottom_cell_index'], si.z0,
+                                                       active)
                 else:
                     eval_interp.time_dependent_3Dfield(basic_util.atLeast_Nby1(output),
                                                        fieldObj.data,
@@ -218,7 +211,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             # 2D or 3D non-time varying
             if fieldObj.is3D():
                 # todo eval_interp3D_timeIndependent not implented for 3D non-time varying fields
-                nz_nodes = part_prop['nz_cell_nodes'].data
+                nz_nodes = part_prop['nz_cell'].data
                 z_fraction_nodes = part_prop['z_fraction_nodes'].data
                 raise Exception('eval_field_interpolation_at_particle_locations : spatial interp using eval_interp3D_timeIndependent not implemented yet ')
             else:
@@ -259,19 +252,19 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
             if fieldObj.is3D():
                 z_fraction_nodes = part_prop['z_fraction_nodes'].data
-                nz_nodes = part_prop['nz_cell_nodes'].data
+                nz_nodes = part_prop['nz_cell'].data
 
                 if fieldObj.params['name']=='water_velocity':
                     # 3D vel needs log layer interp in bottom cell
-                    eval_interp.water_velocity_3D(basic_util.atLeast_Nby1(output),
-                                                  fieldObj.data,
-                                                  nb,
-                                                  step_dt_fraction,
-                                                  grid['triangles'],
-                                                  n_cell,
-                                                  nz_nodes, z_fraction_nodes, bc_cords,
-                                                  grid['zlevel'], grid['bottom_cell_index'], si.z0,
-                                                  active)
+                    eval_interp.eval_water_velocity_3D(basic_util.atLeast_Nby1(output),
+                                                       fieldObj.data,
+                                                       nb,
+                                                       step_dt_fraction,
+                                                       grid['triangles'],
+                                                       n_cell,
+                                                       nz_nodes, z_fraction_nodes, bc_cords,
+                                                       grid['zlevel'], grid['bottom_cell_index'], si.z0,
+                                                       active)
                 else:
                     eval_interp.time_dependent_3Dfield(basic_util.atLeast_Nby1(output),
                                                        fieldObj.get_data(nt_buffer=nb),
@@ -293,7 +286,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             # 2D or 3D non-time varying
             if fieldObj.is3D():
                 # todo eval_interp3D_timeIndependent not implemented for 3D non-time varying fields
-                nz_nodes = part_prop['nz_cell_nodes'].data
+                nz_nodes = part_prop['nz_cell'].data
                 z_fraction_nodes = part_prop['z_fraction_nodes'].data
                 raise Exception('eval_field_interpolation_at_given_locations: spatial interp using eval_interp3D_timeIndependent not implemented yet ')
             else:
@@ -315,23 +308,19 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         zlevel_nodes= grid['zlevel']
         nz_bottom = grid['bottom_cell_index']
         n_cell      = part_prop['n_cell'].data
-        nz_nodes    = part_prop['nz_cell_nodes'].data
+        nz_nodes    = part_prop['nz_cell'].data
         status      = part_prop['status'].data
         BCcords     = part_prop['bc_cords'].data
         z_fraction_nodes = part_prop['z_fraction_nodes'].data
 
         #z=part_prop['x'].data[:10,2]
-        count_maybe_below_bottom, count_maybe_above_surface = \
-                                triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(
-                                                        xq[:, 2], nb, step_dt_fraction, zlevel_nodes, grid['triangles'], n_cell,
-                                                        nz_bottom, BCcords, status,
-                                                        si.particle_status_flags['on_bottom'], si.particle_status_flags['moving'],
-                                                        si.particle_status_flags['stranded_by_tide'],
-                                                        nz_nodes, z_fraction_nodes, active,
-                                                        self.info['vertical_search_steps_histogram'])
+        triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(
+                                            xq[:, 2], nb, step_dt_fraction, zlevel_nodes, grid['triangles'], n_cell,
+                                            nz_bottom, BCcords, status,
+                                            nz_nodes, z_fraction_nodes, active,
+                                            self.walk_stats[1])
         info = self.info
-        info['count_maybe_below_bottom'] += count_maybe_below_bottom
-        info['count_maybe_above_surface'] += count_maybe_above_surface
+
 
     def get_bc_cords(self,x,n_cells):
         si= self.shared_info
@@ -344,14 +333,23 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         si=self.shared_info
         info = self.info
         # guard against no particle tracking done, eg all points outside domain so zero active
-        nlocated = info['n_total_particles_located'] if info['n_total_particles_located'] >  0 else 1
-        info['mean_number_of_triangles_walked'] = info['n_total_walking_steps'] / nlocated
-        # there are vertical searches at 3 nodes and 2 time steps
-        if si.hindcast_is3D:
-            info['mean_number_of_vertical_search_steps_per_cell_search'] = np.sum(info['vertical_search_steps_histogram']) / nlocated
 
-        info['mean_count_maybe_below_bottom_per_cell_search' ] = info['count_maybe_below_bottom'] / nlocated
-        info['mean_count_maybe_above_surface_per_cell_search'] = info['count_maybe_above_surface'] / nlocated
+        # note walk statistics
+
+        info['bc_walk'] ={}
+        for name in self.walk_stats[0].dtype.names:
+            info['bc_walk'][name]= self.walk_stats[0][name]
+        info['bc_walk']['average_number_of_triangles_walked'] =  info['bc_walk']['total_steps'] /  max(info['bc_walk']['particles_located'], 1)
+
+        # there are vertical walk stats
+        if si.hindcast_is3D:
+            info['vertical_walk'] = {}
+            for name in self.walk_stats[1].dtype.names:
+                info['vertical_walk'][name] = self.walk_stats[1][name]
+
+            info['vertical_walk']['average_number_of_triangles_walked'] =  info['vertical_walk']['total_steps'] /  max(info['vertical_walk']['particles_located'], 1)
+
+
 
 # Below is numpy version of numba BC cord code, now only used as check
 #________________________________________________

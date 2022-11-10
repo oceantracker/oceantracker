@@ -16,7 +16,7 @@ class WaterDepthRangeStats(ParameterBaseClass):
         self.add_default_params({'min_depth': PVC(-1.0e09, float), 'max_water_depth': PVC(1.0e09, float)})
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['water_depth'])
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['water_depth'])
         return msg_list
 
     def select_particles_to_count(self, out):

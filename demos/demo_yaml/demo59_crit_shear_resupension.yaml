@@ -1,6 +1,6 @@
 base_case_params:
   dispersion:
-    A_H: 0.0
+    A_H: 0.1
     A_V: 0.005
   event_loggers:
   - class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
@@ -79,7 +79,7 @@ reader:
   - salt
   - water_temperature
   file_mask: demoHindcastSchism3D.nc
-  input_dir: demo_hindcast
+  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast
 shared_params:
   backtracking: false
   compact_mode: true

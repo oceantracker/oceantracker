@@ -1,6 +1,6 @@
 # method to run ocean tracker from parameters
 # eg run(params)
-
+code_version = '0.3.02.003 2022-11-04'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -35,7 +35,6 @@ from oceantracker.util.module_importing_util import import_module_from_string
 
 import subprocess
 
-code_version = '0.3.01.06 Oct 27 2022'
 
 
 def run(user_params):
@@ -489,14 +488,14 @@ class _RunOceanTrackerClass(object):
         # finally get run totals of steps and particles
 
         n_time_steps = 0.
-        total_active_particles = 0
+        total_alive_particles = 0
         # load log files to get info on run from solver info
         for n, case_file, case_error in zip(range(len(case_info_files)), case_info_files,case_error_list) :
             if case_file is not None :
                 c= json_util.read_JSON(path.join(run_output_dir, case_file))
-                sinfo = c['info']['solver']
+                sinfo = c['class_info']['solver']
                 n_time_steps += sinfo['n_time_steps_completed']
-                total_active_particles += sinfo['total_active_particles']
+                total_alive_particles += sinfo['total_alive_particles']
 
         num_cases = len(case_info_files)
 
@@ -505,9 +504,9 @@ class _RunOceanTrackerClass(object):
              'num_cases': num_cases,
              'replicates': sparams['replicates'],
                 'elapsed_time' :perf_counter() - t0,
-            'average_active_particles': total_active_particles / num_cases if num_cases > 0 else None,
+            'average_active_particles': total_alive_particles / num_cases if num_cases > 0 else None,
              'average_number_of_time_steps': n_time_steps/num_cases  if num_cases > 0 else None,
-             'particles_processed_per_second': total_active_particles /(perf_counter() - t0)
+             'particles_processed_per_second': total_alive_particles /(perf_counter() - t0)
              }
 
         # put parallel info in first file base

@@ -26,6 +26,7 @@ class _BaseReader(ParameterBaseClass):
                                  'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
                                  'depth_average': PVC(False, bool),  # turns 3D hindcast into a 2D one
                                  'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
+                                 'one_based_indices' :  PVC(False, bool,doc_str='indcies in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
                                  'grid_variables': {'time': PVC('time', str, is_required=True),
                                                     'x': PLC(['x', 'y'], [str], fixed_len=2),
                                                     'triangles': PVC(None, str, is_required=True),
@@ -202,7 +203,7 @@ class _BaseReader(ParameterBaseClass):
                     data_added_to_buffer = self.preprocess_field_variable(name, data_added_to_buffer, nc) # do any customised tweaks
 
                     if name in self.params['field_variables_to_depth_average']:
-                        si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] =  fields_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid['zlevel'], grid['bottom_cell_index'])
+                        si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = fields_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid['zlevel'], grid['bottom_cell_index'])
 
             # update user fields from newly read fields
             for field_types in ['derived_from_reader_field','user']:
@@ -297,7 +298,6 @@ class _BaseReader(ParameterBaseClass):
 
     def read_open_boundary_data(self, grid):
         grid['grid_outline']['open_boundary_nodes'] = []
-        return grid
 
     def get_first_time_in_hindcast(self):
         return self.reader_build_info['sorted_file_info']['time_start'][0]

@@ -62,7 +62,7 @@ params.append(p1)
 p2= deepcopy(demo_base_params)
 p2['base_case_params']['particle_release_groups']=[{'allow_release_in_dry_cells': True,
         'points': [[1594500, 5483000], [1598000, 5486100]], 'pulse_size': 10, 'release_interval': 3 * 3600},
-    {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+    {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease','name':'userA',
      'points': deepcopy(poly_points),
      'pulse_size': 10, 'release_interval': 3 * 3600}
 ]
@@ -219,12 +219,12 @@ p10['shared_params'].update({'output_file_base' :'demo10_polygon_residence_demo'
 
 p10['base_case_params']['particle_release_groups']=[
         {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
-         'points': (np.asarray(poly_points) + np.asarray([[-3000.,-6500]])).tolist(),
+         'points': (np.asarray(poly_points) + np.asarray([[-3000.,-6500]])).tolist(),'name': 'near_shore',
          'pulse_size': 100, 'release_interval': 12 * 3600}
         ]
 p10['base_case_params']['particle_statistics']=[
                   {'class_name': 'oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon',
-                  'count_release_group':1, 'calculation_interval': 1800}]
+                  'name_of_polygon_release_group':'near_shore', 'calculation_interval': 1800}]
 
 params.append(p10)
 
@@ -288,10 +288,10 @@ params.append(s55)
 # schsim 3D, sometimes resupend
 s56 = deepcopy(s55)
 s56['base_case_params']['trajectory_modifiers'] = [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
-                                                    'critical_friction_velocity': .001}]
+                                                    'critical_friction_velocity': .01}]
 s56['shared_params'].update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
 s56['base_case_params']['velocity_modifiers']= [
-       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.0000}]
+       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}]
 #s56['base_case_params']['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]], 'pulse_size': 20, 'release_interval': 0}]
 params.append (s56)
 
@@ -311,7 +311,7 @@ s58['base_case_params']['solver'] = {'n_sub_steps': 48}
 bc = s58['base_case_params']
 
 bc['trajectory_modifiers'] =[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension','critical_friction_velocity': .01}]
-bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002}]
+bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002,'variance': 0.0002}]
 pg1= bc['particle_release_groups'][0]
 pg1.update({'pulse_size':10,'release_interval':0, 'points': [[1593000., 5484000.+2000, -1]] }) # 1 release only
 bc['particle_release_groups'] = [pg1] # only point release

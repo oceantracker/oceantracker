@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from oceantracker.dispersion._base_dispersion import _BaseTrajectoryModifer
-from numba import njit
+from numba import njit, guvectorize, int32, int64, float64
 
 class RandomWalk(_BaseTrajectoryModifer):
 
@@ -37,11 +37,12 @@ class RandomWalk(_BaseTrajectoryModifer):
         # below requies temp array, numba version uses less memory, but no faster
         # prop_x.add_values_to(np.random.randn(active.shape[0], prop_x.num_vector_dimensions()) * self.rx, active)
 
-        self._add_random_walk(si.classes['particle_properties']['x'].data, self.rx, active)
+        self._add_random_walk(self.rx, active,si.classes['particle_properties']['x'].data)
 
     @staticmethod
     @njit(fastmath=True)
-    def _add_random_walk(x, rx, active):
+    # @guvectorize([(int32[:],float64[:,:])],' (m), (l)->(n,m)') , does not work
+    def _add_random_walk(rx, active, x):
         for n in active:
-            for m in range(rx.shape[0]) :
-                x[n,m] += rx[m]*np.random.randn()
+            for m in range(x.shape[1]):
+                x[n,m] += rx[m]* np.random.randn() #todo this is slow as allcating memory, try math.random random.Genetaor.normal  and get 2-3 at same time above

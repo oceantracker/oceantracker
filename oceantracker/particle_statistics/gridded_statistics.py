@@ -24,7 +24,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.grid = {}
 
     def check_requirements(self):
-        msg_list=self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['x', 'status'], required_grid_vars=['x'])
+        msg_list=self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['x', 'status'], required_grid_var_list=['x'])
         return msg_list
 
     def initialize(self):
@@ -144,6 +144,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
     def update(self, **kwargs):
         # do counts for each release  location and grid cell
+        self.start_update_timer()
         time = kwargs['time']
         self.record_time_stats_last_recorded(time)
 
@@ -161,6 +162,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         self.write_time_varying_stats(self.nWrites, time)
         self.nWrites += 1
+        self.stop_update_timer()
 
     @staticmethod
     @njit
@@ -208,7 +210,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         super().initialize()
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['age'])
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['age'])
         return msg_list
 
 
@@ -262,7 +264,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
     def update(self, **kwargs):
         # do counts for each release  location and grid cell, over rides parent
-
+        self.start_update_timer()
         time = kwargs['time']
         self.record_time_stats_last_recorded(time)
         sgrid = self.grid
@@ -276,6 +278,8 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         sel = self.select_particles_to_count(self.get_particle_index_buffer())
 
         self.do_counts_and_summing_numba(p_groupID, p_x, sgrid['x_bin_edges'], sgrid['y_bin_edges'], self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, sgrid['age_bin_edges'], p_age, sel)
+
+        self.stop_update_timer()
 
     @staticmethod
     @njit

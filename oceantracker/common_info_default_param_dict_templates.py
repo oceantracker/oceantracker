@@ -57,6 +57,7 @@ default_case_param_template={
     # below are optional user classes held in named lists
     'fields': [],  # prop calculated from other fields  on reading
     'particle_properties': [],  # user added particle properties, eg DistanceTraveled
+    'status_modifiers': [],  # chnage status of particles, eg tidal stranding
     'velocity_modifiers': [],  # user added velocity effects, eg TerminalVelocity
     'trajectory_modifiers': [],  # change particle paths, eg. re-suspension
     'particle_statistics': [],  # heat map inside polygon statitics calculated on the fly

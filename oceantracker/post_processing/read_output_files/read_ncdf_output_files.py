@@ -205,6 +205,7 @@ def read_residence_file(file_name, var_list=[]):
     nc = NetCDFhandler(file_name, mode='r')
     num_released = nc.get_global_attr('total_num_particles_released')
     d = {'total_num_particles_released': num_released,'limits' : {}}
+    d['release_schedule_times']= nc.read_a_variable('release_schedule_times')
 
     # read count first for mean value calc
     for v in ['count','count_all_particles','time']:

@@ -8,7 +8,7 @@
     },
     "reader": {
         "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
-        "input_dir": "demo_hindcast",
+        "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",
         "depth_average": false,
         "field_variables": {
@@ -24,7 +24,7 @@
     "base_case_params": {
         "run_params": {},
         "dispersion": {
-            "A_H": 0.0,
+            "A_H": 0.1,
             "A_V": 0.005
         },
         "solver": {
@@ -124,7 +124,8 @@
         "velocity_modifiers": [
             {
                 "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
-                "mean": -0.002
+                "mean": -0.002,
+                "variance": 0.0002
             }
         ],
         "fields": [

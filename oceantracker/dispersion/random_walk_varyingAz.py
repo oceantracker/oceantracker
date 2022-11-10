@@ -1,9 +1,8 @@
 import numpy as np
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 
 from numba import njit
 from oceantracker.dispersion.random_walk import RandomWalk
-from oceantracker.interpolator.util.eval_interp import _evalBCinterp
+from oceantracker.interpolator.util.dev.vertical_walk_at_particle_location_eval_interp import _evalBCinterp
 
 class RandomWalkVaryingAz(RandomWalk):
     # dispersion for PDE of  the form d(A_z d(V)/dz)/dz if turbulent eddy viscosity A_z depends on z adds  vertical advection to random walk equal to d A_z/dz
@@ -20,20 +19,21 @@ class RandomWalkVaryingAz(RandomWalk):
         si.case_log.write_warning('RandomWalkVaryingAz: varying Az adds vertical velocity to dispersion, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1')
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_fields=['turbulent_vertical_eddy_viscosity','nz_cell_nodes','x','n_cell'],
-                                                                                requires3D=True, required_props='turbulent_vertical_eddy_viscosity')
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_fields_list=['turbulent_vertical_eddy_viscosity','nz_cell','x','n_cell'],
+                                                                                requires3D=True, required_props_list='turbulent_vertical_eddy_viscosity')
         return msg_list
 
     # apply random walk
     def update(self,nb,  time, active):
         # add up 2D/3D diffusion coeff as random walk vector
+        t
         si= self.shared_info
         prop = si.classes['particle_properties']
         fields= si.classes['fields']
         self._add_random_walk(prop['x'].data,
                               si.grid['zlevel'][nb, :, :],
                               prop['n_cell'],
-                              prop['nz_cell_nodes'],
+                              prop['nz_cell'],
                               si.grid['tiangles'],
                               fields['turbulent_vertical_eddy_viscosity'].data[nb, :, :],
                               fields['turbulent_vertical_eddy_viscosity'].data[nb, :, :],

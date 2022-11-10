@@ -28,7 +28,7 @@ class ParameterBaseClass(object):
 
 
         self.params={}
-        self.info={'time_spent_updating': 0., 'calls': 0}  # stores info about object
+        self.info={'time_spent_updating': 0., 'update_calls': 0,'time_first_update_call':0.}  # stores info about object
         self.docs={'description': None, 'role': None # role is only set in base class
                    }
         self.default_params={}
@@ -50,24 +50,24 @@ class ParameterBaseClass(object):
 
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D()
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D()
         return msg_list
 
-    def check_class_required_fields_properties_grid_vars_and_3D(self, required_props=[], required_fields=[], required_grid_vars=[], requires3D=None, msg_list=[]):
+    def check_class_required_fields_list_properties_grid_vars_and_3D(self, required_props_list=[], required_fields_list=[], required_grid_var_list=[], requires3D=None, msg_list=[]):
         si = self.shared_info
         grid = si.classes['reader'].grid
 
-        for name in required_grid_vars:
+        for name in required_grid_var_list:
             if name not in grid:
                append_message(msg_list, '     class ' + self.params['class_name'] + ', ' + self.params['name']
                                 + ' requires grid variable  "' + name + '"' + ' to work', exception = GracefulExitError)
 
-        for name in required_fields:
+        for name in required_fields_list:
             if name not in si.classes['fields']:
                 append_message(msg_list,'     class ' + self.params['class_name'] + ', "' + self.params['name']
                                 + '" requires field  "' + name + '"' + ' to work, add to reader["field_variables"], or add to fields param list', exception = GracefulExitError)
 
-        for name in required_props:
+        for name in required_props_list:
             if name not in si.classes['particle_properties']:
                 append_message(msg_list,'     class ' + self.params['class_name'] + ', particle property "' + self.params['name']
                                 + '" requires particle property  "' + name + '"'
@@ -115,8 +115,14 @@ class ParameterBaseClass(object):
         return self.particle_subset_buffer_data[:]
 
 
-    def update_timer(self, t0):
-        self.info['time_spent_updating'] += perf_counter() - t0
-        self.info['calls'] += 1
+    def start_update_timer(self): self.update_timer_t0 = perf_counter()
+
+    def stop_update_timer(self):
+        dt= perf_counter() -  self.update_timer_t0
+        self.info['time_spent_updating'] += dt
+        self.info['update_calls'] += 1
+
+        # note effect of any numba compilation on first call
+        if self.info['update_calls'] == 1: self.info['time_first_update_call'] = dt
 
 

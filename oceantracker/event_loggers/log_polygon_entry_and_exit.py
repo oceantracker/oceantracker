@@ -3,7 +3,7 @@ import numpy as np
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from oceantracker.util.message_and_error_logging import FatalError
-
+from time import perf_counter
 class LogPolygonEntryAndExit(_BaseEventLogger):
     # assumes non over lapping polygons
 
@@ -16,7 +16,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
                                                             })
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D(required_props=['event_polygon', 'current_polygon_for_event_logging'])
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['event_polygon', 'current_polygon_for_event_logging'])
         return msg_list
 
 
@@ -39,7 +39,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         self.set_up_output_file(['event_polygon'] )
 
     def update(self,**kwargs):
-
+        self.start_update_timer()
         part_prop = self.shared_info.classes['particle_properties']
 
         # find where polygon number has changed due to entry or exit
@@ -54,3 +54,5 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
 
         # now updates written change polygon ID to no polygon for those exiting
         part_prop['event_polygon'].set_values(-1, IDs_event_ended)
+
+        self.stop_update_timer()

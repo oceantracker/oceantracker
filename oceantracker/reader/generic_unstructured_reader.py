@@ -86,21 +86,25 @@ class GenericUnstructuredReader(_BaseReader):
         self.code_timer.stop('build_hindcast_reader')
 
     def _setup_grid(self, nc,reader_build_info):
-
-        grid = {'x': None, 'triangles': None, 'zlevel' : None,
+        si= self.shared_info
+        self.grid = {'x': None, 'triangles': None, 'zlevel' : None,
               'has_open_boundary_data': False}
+        grid= self.grid
         # load grid variables
         grid['time'] = np.full((self.params['time_buffer_size'],),0.) # time buffer
         grid['x'] =  self.read_x(nc)
 
         grid['triangles'] = self.read_triangles(nc)
+
+
         grid['nz'] = 1
 
         if self.params['grid_variables']['zlevel'] is not None:
             grid['zlevel'] = self.read_zlevel(nc,setup=True)
             grid['nz'] = grid['zlevel'].shape[2]
             grid['vertical_grid_type'] = 'Slayer' if self.params['grid_variables']['bottom_cell_index'] is None else 'LSC'
-            grid['bottom_cell_index'] = self.read_bottom_cell_index(nc, num_tri= grid['triangles'].shape[0])
+            grid['bottom_cell_index'] = self.read_bottom_cell_index(nc)
+
 
         # split quad cells, find model outline, make adjacency matrix etc
         grid = self._build_grid_attributes(grid)
@@ -111,8 +115,8 @@ class GenericUnstructuredReader(_BaseReader):
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)  # 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
 
         # other grid info
-        grid = self.read_open_boundary_data(grid)
-        self.grid = grid
+        self.read_open_boundary_data(grid)
+
 
 
 
@@ -137,7 +141,14 @@ class GenericUnstructuredReader(_BaseReader):
             grid['zlevel'][buffer_index, :] = self.read_zlevel(nc,file_index=file_index)
 
     def read_triangles(self, nc):
-        return nc.read_a_variable(self.params['grid_variables']['triangles'])
+        si = self.shared_info
+        data = nc.read_a_variable(self.params['grid_variables']['triangles'])
+        if self.params['one_based_indices']:
+            data -= 1
+        elif np.min(data) == 1:
+            si.case_log.write_msg('Grid set up, smallest node index in triangulation ==1, require zero based indices', warning=True, hint='May need to set reader parameter "one_based_indices" to True')
+
+        return data.astype(np.int32)
 
     def read_zlevel(self, nc, file_index=None, setup=False):
         var_name = self.params['grid_variables']['zlevel']
@@ -149,12 +160,14 @@ class GenericUnstructuredReader(_BaseReader):
             data = nc.read_a_variable(self.params['grid_variables']['zlevel'], sel=file_index)
             return data
 
-    def read_bottom_cell_index(self, nc, num_tri= None):
+    def read_bottom_cell_index(self, nc):
         if nc.is_var(self.params['grid_variables']['bottom_cell_index']):
             data = nc.read_a_variable(self.params['grid_variables']['bottom_cell_index'])
+            if self.params['one_based_indices']:
+                data -= 1
         else:
             # Slayer grid, bottom cell is zero
-            data = np.zeros((num_tri,),dtype=np.int8)
+            data = np.zeros((self.grid['x'].shape[0],),dtype=np.int8)
         return data
 
 

@@ -39,12 +39,12 @@ def M3(x, sel):
     return  s/x.size
 
 N = 10 ** 5
-frac = .9 # 0.5
+frac = .7 # 0.5
 sel1 = np.random.choice(N, size=int(N * frac), replace=False)
 sel2 = np.sort(sel1)
 
 M=3
-nspep=5
+nspep=50
 t1= np.dtype([('x',np.float64,(M,3)),('y',np.float64,(nspep*M, 3)),('z',np.float64,(M,3))])
 A= np.full((N,),0,dtype=t1)
 A['x']= np.random.random(A['x'].shape)
@@ -106,5 +106,5 @@ for n in range(nreps):
 tnumpy= perf_counter() - t0
 print('pure numpy', m/3, tc)
 
-print(tc/tn, tcn/tn, tserial/tn, tnumpy/tn)
+print('Compound n=',tcn/tc,', Separate np arrays=',tn/tc, ', Serial np arrays=', tserial/tc, ', Pure numpy=',tnumpy/tc)
 print(A.nbytes,B.nbytes)

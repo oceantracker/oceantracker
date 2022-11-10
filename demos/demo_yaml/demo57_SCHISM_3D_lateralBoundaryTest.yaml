@@ -58,7 +58,7 @@ reader:
   field_variables:
     water_temperature: temp
   file_mask: demoHindcastSchism3D.nc
-  input_dir: demo_hindcast
+  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast
 shared_params:
   debug: true
   output_file_base: demo57_SCHISM_3D_lateralBoundaryTest

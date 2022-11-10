@@ -19,7 +19,7 @@ case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
 track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth'])
 
-plot_path_in_vertical_section(track_data,  title= 'fall velocity, always resuspension_jump ',
+plot_path_in_vertical_section(track_data,  title= 'fall velocity and resuspension with critical friction velocity ',
                                       plot_file_name=output_file +  '_section.jpeg' if output_file is not None else None)
 
 plot_relative_height(track_data, title='fall velocity, always resuspension_jump ')

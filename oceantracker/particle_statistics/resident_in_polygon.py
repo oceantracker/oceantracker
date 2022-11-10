@@ -12,8 +12,8 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         # set up info/attributes
         super().__init__()
 
-        self.add_default_params({'count_release_group':  PVC(None, int, min=1,is_required=True,
-                                     doc_str='Numer of polygon,release group to count particles inside, 1-N'),
+        self.add_default_params({'name_of_polygon_release_group':  PVC(None, str,is_required=True,
+                                     doc_str='"name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time'),
                                  'role_output_file_tag': PVC('residence', str),
                                  'z_range': PLC([], [float, int], min_length=2, doc_str='z range = [zmin, zmax] count particles in this z range in 3D'),
                                  })
@@ -24,19 +24,23 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         # do standard stats initialize
         super().initialize()  # set up using regular grid for  stats
 
-        # get associated release group
-        if params['count_release_group'] > len(si.classes['particle_release_groups']):
-            si.case_log.write_msg('Parameter count_release_group be  range 1- number of release groups, given  value=' + str(params['count_release_group'], exception=GracefulExitError))
+        # find associated release group
+        if params['name_of_polygon_release_group']  not in si.classes['particle_release_groups']:
+            #todo add crumb trail to error
+            si.case_log.write_msg( params['class_name'].split('.')[-1] + ' no polygon release group of name ' + params['name_of_polygon_release_group'] +
+                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.classes['particle_release_groups'].keys())), exception=GracefulExitError)
 
-        self.release_group = si.classes_as_lists['particle_release_groups'][params['count_release_group'] - 1]
+        rg = si.classes['particle_release_groups'][params['name_of_polygon_release_group']]
+        if not isinstance(rg, PolygonRelease) :
+            si.case_log.write_msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params['name_of_polygon_release_group'] +
+                                  '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ' , exception=GracefulExitError)
 
-        if not isinstance( self.release_group, PolygonRelease):
-            #todo fixed
-            si.case_log.write_warning(
-                'Parameter count_release_group be  range 1- number of release groups, given  value='
-                    + str(params['count_release_group']), exception=GracefulExitError)
+        self.release_group_to_count = rg
+        self.info['release_group_name'] = rg.params['name']
+        self.info['release_group_ID_to_count'] = rg.info['instanceID']
 
-        self.polygon = InsidePolygon(self.release_group.params['points'])
+
+        self.polygon = InsidePolygon(self.release_group_to_count.params['points'])
 
         # tag file with release group number
         #params['role_output_file_tag'] += '_RG%3.0f ' % params['count_release_group']
@@ -55,16 +59,15 @@ class ResidentInPolygon(_BaseParticleLocationStats):
     def check_requirements(self):
         si= self.shared_info
         params = self.params
-        msg_list = self.check_class_required_fields_properties_grid_vars_and_3D()
+        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D()
         return msg_list
 
     def set_up_binned_variables(self, nc):
         si = self.shared_info
         if not self.params['write']: return
-        rg_info = self.release_group.info['release_info']
 
         dim_names = ('time', 'pulse')
-        num_pulses= len(rg_info['release_schedule_times'])
+        num_pulses= len(self.release_group_to_count.info['release_info']['release_schedule_times'])
         nc.add_a_Dimension('pulse', dim_size=num_pulses)
         nc.create_a_variable('count', dim_names,
                              {'notes': 'counts of particles in each pulse of release group inside release polygon at given times'},
@@ -90,20 +93,21 @@ class ResidentInPolygon(_BaseParticleLocationStats):
     def update(self,**kwargs):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
-        rg  = self.release_group
+        rg  = self.release_group_to_count
         poly= self.polygon
 
         # update time stats  recorded
         time = kwargs['time']
         self.record_time_stats_last_recorded(time)
 
+        # any overloaded selection of particles given in child classes
         sel = self.select_particles_to_count(self.get_particle_index_buffer())
 
         # do counts
         self.do_counts_and_summing_numba(poly.line_bounds, poly.slope_inv, poly.polygon_bounds,
                                     part_prop['IDrelease_group'].data,
                                     part_prop['IDpulse'].data,
-                                    rg.info['instanceID'],
+                                    self.info['release_group_ID_to_count'],
                                     self.params['z_range'],
                                     part_prop['x'].data,
                                     self.count_time_slice, self.count_all_particles_time_slice,
@@ -112,7 +116,10 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         self.write_time_varying_stats(self.nWrites,time)
         self.nWrites += 1
 
-    def info_to_write_at_end(self):pass  # nothing extra to write
+    def info_to_write_at_end(self):
+        nc = self.nc
+        nc.write_a_new_variable('release_schedule_times', self.release_group_to_count.info['release_info']['release_schedule_times'],['pulse'], dtype=np.float64,attributesDict={'times_pulses_released': ' times in seconds since 1970'})
+
 
     @staticmethod
     @njit
