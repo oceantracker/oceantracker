@@ -1,6 +1,6 @@
 # method to run ocean tracker from parameters
 # eg run(params)
-code_version = '0.3.02.003 2022-11-04'
+code_version = '0.3.02.006 2022-12-01'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -158,12 +158,13 @@ class _RunOceanTrackerClass(object):
         rl.insert_screen_line()
         rl.write_progress_marker('Running '+ package_fancy_name + ' started ' + str(datetime.now()))
         rl.write_progress_marker('Starting: ' + working_params['shared_params']['output_file_base'])
-        rl.insert_screen_line()
+
 
         # get info to build a reader
         reader =self._C1_build_reader(params)
         reader_build_info = self._C2_get_hindcast_files_info(working_params['shared_params'],reader)
-
+        rl.write_progress_marker('Input directory: ' + reader.params['input_dir'])
+        rl.insert_screen_line()
         # write grid and outline and record file names
         if working_params['shared_params']['write_output_files']:
             output_files['grid'], output_files['grid_outline'] = self._U3_write_run_grid_netCDF(output_files, reader_build_info, reader)
@@ -310,7 +311,7 @@ class _RunOceanTrackerClass(object):
                 class_params['class_name'] = self.package_info['short_class_name_map'][class_params['class_name']]
 
         i, msg = import_module_from_string(class_params['class_name'])
-        rl.add_msg(msg)
+        rl.add_messages(msg)
         if msg is not None:
             msg_list += [msg]
         # use new  merge
@@ -330,7 +331,8 @@ class _RunOceanTrackerClass(object):
         params['reader']['input_dir'] = path.abspath(params['reader']['input_dir'])
 
         reader, msg = import_module_from_string(params['reader']['class_name'])  # temporary  reader to get defaults
-        rl.add_msg(msg)
+        reader.shared_info.case_log=self.run_log #todo make shared info messages more consistent, ie this is not a case
+        rl.add_messages(msg)
 
         msg_list = reader.merge_with_class_defaults(params['reader'], {}, crumbs='reader')
         rl.add_messages(msg_list)

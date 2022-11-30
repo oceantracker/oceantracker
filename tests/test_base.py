@@ -67,7 +67,8 @@ def plot_sample(runCaseInfo, num_to_plot=10 ** 3):
 # particle speed from change in positions is harsher test
     ax=plt.subplot(2, 2, 3)
     #v=nc.variables['particle_velocity'][:,sel,:]
-    v=np.diff(x,axis=0)/(data['time'][1]-data['time'][0])
+    dt = (data['time'][-1]-data['time'][0])/data['time'].shape[0]
+    v=np.diff(x,axis=0)/dt
     vmag = np.sqrt(v[:, :, 0] ** 2 + v[:, :, 1] ** 2)
     plt.plot(t[1:], vmag, linewidth=.5)
     plt.xlabel('days')
@@ -210,11 +211,11 @@ def base_param(is3D=False, isBackwards = False):
 
 
     base_case={ 'run_params' :{'write_tracks': True,
-                               'duration':3.*24*3600,
+                               'duration':6.*24*3600,
 
                                 },
 
-            'solver' : { 'RK_order': 4, 'n_sub_steps': 6 }, # 5min steps to mact OT v01 paper
+            'solver' : { 'RK_order': 4, 'n_sub_steps': 9 }, # 5min steps to mact OT v01 paper
             'particle_group_manager' : {},
             'particle_release_groups': [
                                         {'points': p0, 'pulse_size': 1, 'release_interval': 3600,'userRelease_groupID':5,
@@ -239,7 +240,7 @@ def base_param(is3D=False, isBackwards = False):
     input_dir =path.normpath(path.join(path.split(__file__)[0],'testData'))
 
     params={  'shared_params': { 'debug': True,
-                'root_output_dir': outputdir,
+                                'root_output_dir': outputdir,
                                   'output_file_base': 'test_particle',
                                   'backtracking': isBackwards,
                                   },
@@ -282,12 +283,9 @@ if __name__ == '__main__':
     # windows/linux  data source
 
     parser = argparse.ArgumentParser()
-
+    parser.add_argument('-test', nargs='?', const=0, type=int, default=1)
     parser.add_argument('--size', nargs='?', const=0, type=int, default=0)
-    parser.add_argument('--test', nargs='?', const=None, type=int, default=None,)
-
-
-
+    parser.add_argument('-dev', action='store_true')
     args = parser.parse_args()
     args.parallel= False
 
@@ -300,14 +298,20 @@ if __name__ == '__main__':
     t0 = time.time()
 
     for ntest in testList:
+        # tests or development choices of classes
 
         if ntest==1:
             # zero dispersion test 2d/3D
-            for is3D in [True,False ]:
-                for isBackwards in[ False, True]:
+            for is3D in [False, True]:
+                for isBackwards in[True, False ]:
                     params = base_param(is3D=is3D, isBackwards=isBackwards)
-                    params['shared_params']['max_duration']= 3 * 24 * 3600.
+                    params['shared_params']['max_duration']= 14 * 24 * 3600.
                     params['base_case_params']['dispersion'].update( {'A_H': 0.,'A_V':0.0})
+                    if args.dev:
+                        params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
+                        # params['base_case_params']['dispersion'].update({'A_V':0., 'A_H':0.})
+                        # params['base_case_params']['particle_release_groups'][0]['pulse_size']=1
+
                     runInfoFile = run_test(params)
                     plot_sample(runInfoFile)
                     time_check_plot(runInfoFile)

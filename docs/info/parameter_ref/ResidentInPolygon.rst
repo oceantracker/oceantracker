@@ -24,12 +24,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``count_release_group`` :   ``<class 'int'>`` **<isrequired>**
-		Description: - Numer of polygon,release group to count particles inside, 1-N
-
-		- default: ``None``
-		- min: ``1``
-
 	* ``count_status_in_range``:  *<optional>*
 		Description: - Count only those particles with status which fall in the given range
 
@@ -42,8 +36,13 @@ Parameters:
 	* ``file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
+	* ``name`` :   ``random_walk_varyingAz``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
+
+		- default: ``None``
+
+	* ``name_of_polygon_release_group`` :   ``<class 'str'>`` **<isrequired>**
+		Description: - "name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time
 
 		- default: ``None``
 

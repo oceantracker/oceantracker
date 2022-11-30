@@ -62,7 +62,7 @@ Parameters:
 		- min: ``1``
 
 	* ``root_output_dir`` :   ``<class 'str'>``   *<optional>*
-		Description: - base dir for all ouput files
+		Description: - base dir for all output files
 
 		- default: ``default_root_output_dir``
 

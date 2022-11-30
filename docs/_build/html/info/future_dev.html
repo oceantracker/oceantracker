@@ -105,13 +105,36 @@
 <h1>Future development<a class="headerlink" href="#future-development" title="Permalink to this headline">¶</a></h1>
 <section id="future-additions">
 <h2>Future additions<a class="headerlink" href="#future-additions" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
+<ol class="arabic simple">
+<li><p>add status_modifier list of classes, to hold tidal stranding, kill old particles etc</p></li>
+<li><p>more post step bookkeeping to pre step bookkeeping to eliminate 2 costly update_cell</p></li>
+<li><p>Add velocity_modfier part prop used inside RK substeps which is updated by velocity_modfier classes every time step, eg terminal velocity</p></li>
+<li><p>find a number container suitable for passing all fields and part prop as a group by name, to allow assess to all and reduce arguments needed</p></li>
+<li><dl class="simple">
+<dt>Fuse looping for field interpolation for particle properties to reduce RAM-CPU memory traffic</dt><dd><ul class="simple">
+<li><p>kernal version of interpolate fields</p></li>
+<li><p>fuse velocity interpolation and euler step</p></li>
+<li><p>Update field derived particle properties as a group with kernel interpolator</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>make error trapping reponse  more consistent</p></li>
+<li><dl class="simple">
+<dt>Fuse Runge-kutta steps loops to reduce RAM-CPU memory traffic</dt><dd><ul class="simple">
+<li><p>kernal versions of BC walk and vertical walk</p></li>
+<li><p>fuse BC walk and velocity interpolation using kernals</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Reader memory shared between parallel cases</p></li>
 <li><p>support for structured grids, eg. ROMS</p></li>
 <li><p>option for particle tracking to work natively in lat/log cords</p></li>
 <li><p>RK45 solver to allow adaptive time stepping to improve accuracy for those particles where flows are rapidly varying in time or space.</p></li>
-<li><p>warn if terminal_velocity movement per time step is larger than median cell height, ie vertical courant number to larger, makes re-suspension unlikely</p></li>
 <li><p>Read release points/polygons from file, eg shape files, csv</p></li>
-</ul>
+<li><p>attach interpolator to reader, as step towards working with multiple readers/grids, eg waves on different grid to currents</p></li>
+</ol>
 </section>
 <section id="possible-additions">
 <h2>Possible additions<a class="headerlink" href="#possible-additions" title="Permalink to this headline">¶</a></h2>
@@ -122,11 +145,32 @@
 <section id="minor-features-fixes">
 <h2>Minor features/fixes<a class="headerlink" href="#minor-features-fixes" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
+<li><p>automatic particle buffer size estimate factor of 2 too large</p></li>
+<li><p>add class crumb trail method to be displayed in errors and warnings</p></li>
+<li><p>do full parameter set up and release group params and release times in main?</p></li>
+<li><p>use date class consistently through code, ie drop time in independent use of seconds, dates in netcdf files</p></li>
+<li><p>move fom looping over reader buffer to looping over global time step, as step towards shared reader</p></li>
+<li><p>reader buffer as ring buffer</p></li>
+<li><p>move kill old particles to a status modifier</p></li>
+<li><p>add update timer to all classes</p></li>
+<li><dl class="simple">
+<dt>convert to new status modifier classes</dt><dd><ul class="simple">
+<li><p>cull particles</p></li>
+<li><p>tidal stranding</p></li>
+<li><p>kill old particles</p></li>
+</ul>
+</dd>
+</dl>
+</li>
 <li><p>support short class_name’s given by user ie just AgeDecay,not  oceantracker.particle_properties.age_decay.AgeDecay</p></li>
-<li><p>show dry cells on plots</p></li>
 <li><p>ensure all classes are updated by and .update() method</p></li>
-<li><p>stats/heat maps work from given data as in other ploting</p></li>
-<li><p>status recorded in compact mode is always dead, after removal? so dont apear on plots</p></li>
+<li><p>stats/heat maps work from given data as in other plotting</p></li>
+<li><p>fields manager updated dry cell, move and/or generalize to cases where only tide and depth available</p></li>
+<li><p>velocities as float32 is significantly faster??</p></li>
+<li><p>move to looping over reader global time, remove passing nb, the buffer time step to methods</p></li>
+<li><p>see if numba &#64;guvectorize with threading can increase overall speed on particle operations</p></li>
+<li><p>move velocity reading in al readers to own method to give more flexibility, make it a core particle property with write off by default</p></li>
+<li><p>???</p></li>
 </ol>
 </section>
 </section>

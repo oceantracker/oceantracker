@@ -2,23 +2,23 @@
     "run_user_note": "No user note",
     "case_user_note": "No user note",
     "processor_number": 1,
-    "file_written": "2022-11-08T15:00:55.841876",
+    "file_written": "2022-11-14T09:39:16.351903",
     "code_version_info": {
         "version": "0.3.02.003 2022-11-04",
-        "git_revision": "1210e7e2ce46e1d073faa317ddc94254d6e0887c"
+        "git_revision": "6866c24dca573438666ac94d8eea89f0d9cfba37"
     },
     "run_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2022-11-08T14:56:31.667679",
+        "model_run_started": "2022-11-14T09:35:22.242895",
         "start_time": 1483230600.0,
         "end_time": 1483309800.0,
         "start_date": "2017-01-01T00:30:00",
         "end_date": "2017-01-01T22:30:00",
         "time_steps_completed": 1320,
-        "model_run_ended": "2022-11-08T15:00:55.841876",
-        "model_run_duration": "0:04:24.174197",
+        "model_run_ended": "2022-11-14T09:39:16.351903",
+        "model_run_duration": "0:03:54.109008",
         "date_of_time_zero": "1970-01-01T00:00:00",
         "time_zone": null,
         "model_timestep": 60.0,
@@ -434,26 +434,68 @@
         }
     },
     "warnings": [
-        ">>> Warning: When use aged binned particle stats, to get un biases stats., need to stop releasing particles \"max_age_to_bin\"  or max(\"user_age_bin_edges\")  before end of run, by setting  particle param \"release_duration\"",
-        ">>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1",
-        ">>> Note: No open boundaries requested, as run_params[\"open_boundary_type\"] = 0\n  Hint: For Schism open boundaries requires hgrid file to named in reader params and run_params[\"open_boundary_type\"] = 1",
-        ">>> Warning: Running in debug mode"
+        "q",
+        "1",
+        "]",
+        "o",
+        "x",
+        "r",
+        "s",
+        "t",
+        "w",
+        "i",
+        "F",
+        "p",
+        "N",
+        ",",
+        "d",
+        "l",
+        ">",
+        "W",
+        "H",
+        "e",
+        "v",
+        ".",
+        "b",
+        "_",
+        "\"",
+        "0",
+        "=",
+        "y",
+        "<",
+        "\n",
+        "u",
+        "R",
+        "h",
+        "[",
+        "g",
+        ")",
+        "c",
+        ":",
+        "m",
+        "C",
+        "f",
+        "a",
+        "n",
+        "(",
+        " ",
+        "S"
     ],
     "timers": [
-        "  264.17s  97% calls 00001: total_model_all,  (first call/remainder = 264.17s/ 0.00s",
-        "  165.19s  60% calls 01320: integration_step,  (first call/remainder =  0.51s/164.68s",
-        "  131.47s  48% calls 07924: setup_interp_time_step,  (first call/remainder =  2.70s/128.78s",
-        "   91.66s  34% calls 18500: interp_named_field_at_particle_locations,  (first call/remainder =  0.53s/91.13s",
-        "   82.64s  30% calls 07924: find_depth_cell,  (first call/remainder =  1.63s/81.01s",
-        "   68.27s  25% calls 01321: pre_step_bookkeeping,  (first call/remainder =  1.59s/66.68s",
-        "   48.58s  18% calls 07924: find_cells_and_weights,  (first call/remainder =  0.94s/47.63s",
-        "   35.23s  13% calls 02644: update_part_prop,  (first call/remainder =  2.74s/32.49s",
-        "   11.70s   4% calls 01322: release_particles,  (first call/remainder = 10.51s/ 1.19s",
-        "    2.88s   1% calls 01322: event_logging,  (first call/remainder =  0.48s/ 2.40s",
-        "    1.82s   1% calls 01322: on_the_fly_statistics,  (first call/remainder =  1.76s/ 0.06s",
-        "    0.82s   0% calls 00001: build_hindcast_reader,  (first call/remainder =  0.82s/ 0.00s",
-        "    0.74s   0% calls 00002: reading_to_fill_time_buffer,  (first call/remainder =  0.73s/ 0.02s",
-        "    0.47s   0% calls 00001: intialize_interplolation_grid,  (first call/remainder =  0.47s/ 0.00s",
+        "  234.10s  96% calls 00001: total_model_all,  (first call/remainder = 234.10s/ 0.00s",
+        "  140.62s  58% calls 01320: integration_step,  (first call/remainder =  0.49s/140.12s",
+        "  133.67s  55% calls 07924: setup_interp_time_step,  (first call/remainder =  2.76s/130.91s",
+        "   84.75s  35% calls 07924: find_depth_cell,  (first call/remainder =  1.72s/83.04s",
+        "   62.01s  26% calls 01321: pre_step_bookkeeping,  (first call/remainder =  1.34s/60.67s",
+        "   58.90s  24% calls 18500: interp_named_field_at_particle_locations,  (first call/remainder =  0.52s/58.39s",
+        "   48.68s  20% calls 07924: find_cells_and_weights,  (first call/remainder =  0.92s/47.76s",
+        "   28.12s  12% calls 02644: update_part_prop,  (first call/remainder =  2.63s/25.48s",
+        "   11.28s   5% calls 01322: release_particles,  (first call/remainder = 10.35s/ 0.93s",
+        "    2.92s   1% calls 01322: event_logging,  (first call/remainder =  0.47s/ 2.45s",
+        "    1.77s   1% calls 01322: on_the_fly_statistics,  (first call/remainder =  1.72s/ 0.05s",
+        "    0.80s   0% calls 00001: build_hindcast_reader,  (first call/remainder =  0.80s/ 0.00s",
+        "    0.73s   0% calls 00002: reading_to_fill_time_buffer,  (first call/remainder =  0.71s/ 0.02s",
+        "    0.46s   0% calls 00001: intialize_interplolation_grid,  (first call/remainder =  0.46s/ 0.00s",
         "    0.00s   0% calls 01322: particle_concentrations,  (first call/remainder =  0.00s/ 0.00s",
         "    0.00s   0% calls 00001: solver_initialization,  (first call/remainder =  0.00s/ 0.00s"
     ],
@@ -496,6 +538,7 @@
             null
         ],
         "particle_properties": [
+            null,
             null,
             null,
             null,
@@ -1009,6 +1052,7 @@
             "time_buffer_size": 48,
             "depth_average": false,
             "field_variables_to_depth_average": [],
+            "one_based_indices": true,
             "grid_variables": {
                 "time": "time",
                 "x": [
@@ -1406,7 +1450,21 @@
                 "type": "user"
             },
             {
-                "name": "bottom_layer_thickness",
+                "name": "z_fraction",
+                "write": false,
+                "dtype": "float32",
+                "initial_value": 0.0,
+                "class_name": "oceantracker.particle_properties._base_properties.ParticleProperty",
+                "user_note": null,
+                "description": null,
+                "time_varying": true,
+                "vector_dim": 1,
+                "prop_dim3": 1,
+                "update": true,
+                "type": "user"
+            },
+            {
+                "name": "z_fraction_bottom_layer",
                 "write": false,
                 "dtype": "float32",
                 "initial_value": 0.0,
@@ -1420,13 +1478,13 @@
                 "type": "user"
             },
             {
-                "name": "z_fraction",
+                "name": "is_in_bottom_layer",
                 "write": false,
-                "dtype": "float32",
+                "dtype": "int8",
                 "initial_value": 0.0,
+                "description": " flag particle sin bottom layer fore log layer velocity interp",
                 "class_name": "oceantracker.particle_properties._base_properties.ParticleProperty",
                 "user_note": null,
-                "description": null,
                 "time_varying": true,
                 "vector_dim": 1,
                 "prop_dim3": 1,
@@ -1872,7 +1930,7 @@
             "time_spent_updating": 0.0,
             "update_calls": 0,
             "time_first_update_call": 0.0,
-            "computation_started": "2022-11-08T14:56:32.392156",
+            "computation_started": "2022-11-14T09:35:22.949192",
             "n_time_steps_completed": 1320,
             "total_alive_particles": 123078200
         },
@@ -1886,36 +1944,16 @@
             "update_calls": 0,
             "time_first_update_call": 0.0,
             "bc_walk": {
-                "particles_located": 562151981,
-                "total_steps": 103202537,
-                "longest_walk": 6,
+                "particles_located": 560939697,
+                "total_steps": 99138632,
+                "longest_walk": 4,
                 "failed_walks": 0,
                 "histogram": [
-                    459563115,
-                    102181082,
-                    201974,
-                    205734,
-                    75,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
+                    462369188,
+                    98192118,
+                    188775,
+                    189500,
+                    116,
                     0,
                     0,
                     0,
@@ -1942,48 +1980,28 @@
                     0,
                     0
                 ],
-                "average_number_of_triangles_walked": 0.18358476086202746
+                "average_number_of_triangles_walked": 0.17673670187759952
             },
             "vertical_walk": {
-                "particles_located": 552163057,
-                "total_steps": 35884065,
+                "particles_located": 550844254,
+                "total_steps": 46476825,
                 "longest_walk": 14,
                 "failed_walks": 0,
                 "histogram": [
-                    532107535,
-                    12022084,
-                    5761866,
-                    762099,
-                    433803,
-                    278633,
-                    189337,
-                    136947,
-                    104549,
-                    84910,
-                    71232,
-                    64995,
-                    84794,
-                    60273,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
+                    521412685,
+                    20847959,
+                    6161263,
+                    791157,
+                    458524,
+                    301252,
+                    208466,
+                    151977,
+                    115152,
+                    91987,
+                    76524,
+                    68806,
+                    53853,
+                    104649,
                     0,
                     0,
                     0,
@@ -2001,7 +2019,7 @@
                     0,
                     0
                 ],
-                "average_number_of_triangles_walked": 0.06498816707326364
+                "average_number_of_triangles_walked": 0.08437380377938916
             }
         },
         "particle_group_manager": {
@@ -2019,7 +2037,7 @@
             "time_spent_updating": 0.0,
             "update_calls": 0,
             "time_first_update_call": 0.0,
-            "rx": [
+            "random_walk_size": [
                 4.898979485566356,
                 4.898979485566356,
                 0.34641016151377546
@@ -2759,8 +2777,7 @@
                 "time_first_update_call": 0.0,
                 "instanceID": 18,
                 "array_size": [
-                    397992,
-                    3
+                    397992
                 ]
             },
             {
@@ -2769,7 +2786,8 @@
                 "time_first_update_call": 0.0,
                 "instanceID": 19,
                 "array_size": [
-                    397992
+                    397992,
+                    3
                 ]
             },
             {
@@ -2787,8 +2805,7 @@
                 "time_first_update_call": 0.0,
                 "instanceID": 21,
                 "array_size": [
-                    397992,
-                    3
+                    397992
                 ]
             },
             {
@@ -2797,7 +2814,8 @@
                 "time_first_update_call": 0.0,
                 "instanceID": 22,
                 "array_size": [
-                    397992
+                    397992,
+                    3
                 ]
             },
             {
@@ -2862,6 +2880,15 @@
                 "array_size": [
                     397992
                 ]
+            },
+            {
+                "time_spent_updating": 0.0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "instanceID": 30,
+                "array_size": [
+                    397992
+                ]
             }
         ],
         "status_modifiers": [
@@ -2882,18 +2909,18 @@
         ],
         "trajectory_modifiers": [
             {
-                "time_spent_updating": 1.3797303999997048,
+                "time_spent_updating": 1.1288680999997212,
                 "update_calls": 1321,
-                "time_first_update_call": 0.9216401999999988,
+                "time_first_update_call": 0.6916285999999978,
                 "instanceID": 0,
-                "number_resupended": 13063
+                "number_resupended": 13624
             }
         ],
         "particle_statistics": [
             {
-                "time_spent_updating": 1.2571568000000077,
+                "time_spent_updating": 1.0441744999999756,
                 "update_calls": 8,
-                "time_first_update_call": 1.2214062000000006,
+                "time_first_update_call": 1.0089011999999968,
                 "output_file": "demo_SCHISM_3D_stats_gridded_age_001.nc",
                 "instanceID": 0,
                 "time_last_stats_recorded": 1483306200.0,
@@ -2911,19 +2938,19 @@
         ],
         "event_loggers": [
             {
-                "time_spent_updating": 2.8672658000003004,
+                "time_spent_updating": 2.9075870999999296,
                 "update_calls": 1322,
-                "time_first_update_call": 0.48029149999999987,
+                "time_first_update_call": 0.471229000000001,
                 "instanceID": 0,
                 "prop_to_write": [
                     "ID",
+                    "user_release_groupID",
+                    "IDrelease_group",
+                    "x",
+                    "event_polygon",
                     "IDpulse",
                     "age",
-                    "event_polygon",
-                    "x",
-                    "status",
-                    "user_release_groupID",
-                    "IDrelease_group"
+                    "status"
                 ],
                 "output_file": "demo_SCHISM_3D_events_001.nc"
             }

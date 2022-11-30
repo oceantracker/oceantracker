@@ -25,7 +25,7 @@ Parameters:
 
 		- default: ``None``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
+	* ``name`` :   ``random_walk_varyingAz``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
 		- default: ``None``
@@ -49,7 +49,7 @@ Parameters:
 		Description: - Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually
 
 		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``['water_velocity', 'particle_velocity']``
+		- default list : ``['water_velocity', 'particle_velocity', 'velocity_modifier']``
 		- can_be_empty_list: ``True``
 
 	* ``turn_on_write_particle_properties_list``:  *<optional>*

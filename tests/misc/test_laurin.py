@@ -462,10 +462,10 @@ if __name__ == '__main__':
     #x0 = [[502096, 5968781, -2]]
     pulse_size = int(1000000/8) # 7 releases points/groups
     release_interval = 0
-    pulse_size= 100
+    pulse_size= 10
 
     release_interval = 3600
-    case ={'run_params':{ 'particle_buffer_size': 100000,
+    case ={'run_params':{ 'particle_buffer_size': 120000,
                           'open_boundary_type':1,
                           'block_dry_cells': True,
             'duration': 7. * 24 * 3600,
@@ -475,7 +475,8 @@ if __name__ == '__main__':
         'particle_release_groups': [{'points': x0,'pulse_size': pulse_size, 'release_interval': release_interval},
                                     {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
                                      'points': statistical_polygon_list[1]['points'],'pulse_size': 10*pulse_size, 'release_interval': release_interval}],
-        'dispersion': {'A_H': 0.2 ,'A_V': 0.001},
+        # 'dispersion': {'A_H': 0.2 ,'A_V': 0.001},
+        'dispersion': {'A_H': 0.2 ,'A_V': 0.001,'class_name':'oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ'},
         'trajectory_modifiers': [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
                                        'critical_friction_velocity': .01},
             #{    "class_name": "oceantracker.trajectory_modifiers.split_particles.SplitParticles",  "splitting_interval": 180,  "split_status_greater_than": 'dead',   "probability_of_splitting": 0.01},
@@ -483,7 +484,8 @@ if __name__ == '__main__':
 
          'particle_properties': [{ 'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'}],
          'particle_concentrations': [{'class_name': 'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D'}],
-         'fields' : [{'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocity'}],
+         'fields' : [{'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocity'},
+                     {'class_name': 'oceantracker.fields.field_vertical_gradient.VerticalGradient','name_of_field': 'A_Z','name':'A_Z_vertical_gradient'}],
 
          'velocity_modifiers': [{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.00}],
         "particle_statistics": [
@@ -520,7 +522,7 @@ if __name__ == '__main__':
             'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
                           'file_mask': 'schout_*.nc', 'input_dir': input_dir,
                       'hgrid_file_name': path.join(input_dir,'hgrid.gr3'),
-                          'field_variables': { 'ECO_no3': 'ECO_no3'},# fields to track at particle locations
+                          'field_variables': { 'ECO_no3': 'ECO_no3','A_Z':'diffusivity'},# fields to track at particle locations
                        'field_variables_to_depth_average':['water_velocity']
                        },
                'case_list': [case]}

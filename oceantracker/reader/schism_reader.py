@@ -8,7 +8,7 @@ from copy import  copy
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import time_util
-from oceantracker.fields._base_field import _BaseField
+from oceantracker.fields.reader_field import ReaderField
 
 
 class SCHSIMreaderNCDF(GenericUnstructuredReader):
@@ -56,8 +56,8 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
             fv['water_velocity_depth_average'] = ['dahv']
 
         if  nc.is_var('minimum_depth'):
-            # use schism min depth times 1.5 to allow for diff due to interp cell tide to nodes in schisms output
-            params['minimum_total_water_depth']= 1.5*float(nc.read_a_variable('minimum_depth'))
+            # use schism min depth times 1.2 to allow for diff due to interp cell tide to nodes in schisms output
+            params['minimum_total_water_depth']= 1.2*float(nc.read_a_variable('minimum_depth'))
 
         nc.close()
 

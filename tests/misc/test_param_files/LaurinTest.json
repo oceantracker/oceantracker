@@ -11,7 +11,8 @@
         "input_dir": "F:\\Hindcasts\\Hindcast_samples_tests\\LaurinGermany",
         "hgrid_file_name": "F:\\Hindcasts\\Hindcast_samples_tests\\LaurinGermany\\hgrid.gr3",
         "field_variables": {
-            "ECO_no3": "ECO_no3"
+            "ECO_no3": "ECO_no3",
+            "A_Z": "diffusivity"
         },
         "field_variables_to_depth_average": [
             "water_velocity"
@@ -20,7 +21,7 @@
     "case_list": [
         {
             "run_params": {
-                "particle_buffer_size": 100000,
+                "particle_buffer_size": 120000,
                 "open_boundary_type": 1,
                 "block_dry_cells": true,
                 "duration": 604800.0,
@@ -68,7 +69,7 @@
                             -2
                         ]
                     ],
-                    "pulse_size": 100,
+                    "pulse_size": 10,
                     "release_interval": 3600
                 },
                 {
@@ -99,13 +100,14 @@
                             5917969.0
                         ]
                     ],
-                    "pulse_size": 1000,
+                    "pulse_size": 100,
                     "release_interval": 3600
                 }
             ],
             "dispersion": {
                 "A_H": 0.2,
-                "A_V": 0.001
+                "A_V": 0.001,
+                "class_name": "oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ"
             },
             "trajectory_modifiers": [
                 {
@@ -126,6 +128,11 @@
             "fields": [
                 {
                     "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
+                },
+                {
+                    "class_name": "oceantracker.fields.field_vertical_gradient.VerticalGradient",
+                    "name_of_field": "A_Z",
+                    "name": "A_Z_vertical_gradient"
                 }
             ],
             "velocity_modifiers": [

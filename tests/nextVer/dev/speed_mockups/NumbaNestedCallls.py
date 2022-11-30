@@ -1,7 +1,6 @@
 from numba import njit, prange
 import  numpy as np
 from time import perf_counter
-from oceantracker.interpolator.util.triangle_interpolator_util import _get_single_BC_cord_numba
 
 para= False
 @njit(parallel=para)

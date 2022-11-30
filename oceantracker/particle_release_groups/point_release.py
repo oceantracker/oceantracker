@@ -159,7 +159,7 @@ class PointRelease(ParameterBaseClass):
             if count > 50: break
 
         if n_found < n_required:
-            si.case_log.write_warning('Release, only found ' + str(n_found) + ' of ' + str(n_required) + ' required points inside domain after 50 cycles')
+            self.write_msg('Release, only found ' + str(n_found) + ' of ' + str(n_required) + ' required points inside domain after 50 cycles',warning=True)
             n_required = n_found #
 
         # trim initial location and cell  to required number

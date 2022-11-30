@@ -100,8 +100,8 @@ class ParticleGroupManager(ParameterBaseClass):
             bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
 
         if bad.shape[0] > 0:
-            si.case_log.write_warning(str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain')
-            si.case_log.write_warning(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)))
+            self.write_msg(str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain',warning=True)
+            self.write_msg(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)),warning=True)
 
 
 
@@ -119,8 +119,8 @@ class ParticleGroupManager(ParameterBaseClass):
 
         if smax >= si.particle_buffer_size:
             self.screen_msg += '; Out of particle buffer'
-            si.case_log.write_warning('Ran out of particle buffer- no more releases, increase parameter "particle_buffer_size", size=' \
-                               + str(si.particle_buffer_size) +' at ' + time_util.seconds_to_iso8601str(t))
+            self.write_msg('Ran out of particle buffer- no more releases, increase parameter "particle_buffer_size", size=' \
+                               + str(si.particle_buffer_size) +' at ' + time_util.seconds_to_iso8601str(t), warning=True)
             return  np.full((0,),0)# return if no more space
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index

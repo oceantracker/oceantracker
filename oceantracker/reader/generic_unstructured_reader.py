@@ -3,9 +3,10 @@ from copy import copy, deepcopy
 from oceantracker.util import triangle_utilities_code
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.util.message_and_error_logging import append_message, GracefulExitError
+from oceantracker.util.message_and_error_logging import append_message, GracefulExitError, FatalError
 from oceantracker.util import time_util
 from oceantracker.fields.util import fields_util
+import traceback
 from os import path, walk
 from glob import glob
 from oceantracker.util.ncdf_util import NetCDFhandler
@@ -41,13 +42,8 @@ class GenericUnstructuredReader(_BaseReader):
         for name, item in self.params['field_variables'].items():
             if item is None: continue
 
-            #if type(item) == list:
-            #    # add vector fields by method
-            #    class_params = getattr(self,'read_' + name)(nc, name, setup=True)
-            #else:
-                # add scalar fields by read_scalar_field
             class_params, unpacking_info = self.get_field_variable_info(nc,name)
-                #class_params = self.read_scalar_field(nc, name, setup=True)
+
             class_params['class_name']='oceantracker.fields.reader_field.ReaderField'
             i = fm.add_field('from_reader_field', class_params, crumbs = 'Adding field derived from reader field >>> ' + name)
             i.info.update(unpacking_info) # info to unpack vaiabes in file
@@ -92,6 +88,7 @@ class GenericUnstructuredReader(_BaseReader):
         grid= self.grid
         # load grid variables
         grid['time'] = np.full((self.params['time_buffer_size'],),0.) # time buffer
+        grid['nt_hindcast'] = np.full((self.params['time_buffer_size'],),0, dtype=np.int32) # what global hindcast timestesps are in the buffer
         grid['x'] =  self.read_x(nc)
 
         grid['triangles'] = self.read_triangles(nc)
@@ -100,24 +97,26 @@ class GenericUnstructuredReader(_BaseReader):
         grid['nz'] = 1
 
         if self.params['grid_variables']['zlevel'] is not None:
-            grid['zlevel'] = self.read_zlevel(nc,setup=True)
+            # set up zlevel
+            zlevel_name =self.params['grid_variables']['zlevel']
+            s = list(nc.get_var_shape(zlevel_name))
+            s[0] = self.params['time_buffer_size']
+            grid['zlevel'] = np.full(s, 0., dtype=np.float32)
+
             grid['nz'] = grid['zlevel'].shape[2]
             grid['vertical_grid_type'] = 'Slayer' if self.params['grid_variables']['bottom_cell_index'] is None else 'LSC'
             grid['bottom_cell_index'] = self.read_bottom_cell_index(nc)
 
 
         # split quad cells, find model outline, make adjacency matrix etc
-        grid = self._build_grid_attributes(grid)
+        self._build_grid_attributes(grid)
 
-        #now any quad cells are split
-        # space for dry cell info
+        #now any quad cells are split set up, space for dry cell info
         grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)  # 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
 
         # other grid info
         self.read_open_boundary_data(grid)
-
-
 
 
     def read_time(self, nc, file_index=None):
@@ -137,37 +136,38 @@ class GenericUnstructuredReader(_BaseReader):
         grid = self.grid
 
         grid['time'][buffer_index] = self.read_time(nc, file_index=file_index)
+
         if grid['zlevel'] is not None:
             grid['zlevel'][buffer_index, :] = self.read_zlevel(nc,file_index=file_index)
 
     def read_triangles(self, nc):
-        si = self.shared_info
         data = nc.read_a_variable(self.params['grid_variables']['triangles'])
         if self.params['one_based_indices']:
             data -= 1
+
+        if np.max(data[:,:3]) >= self.grid['x'].shape[0] or np.min(data[:,:3]) < 0:
+            self.write_msg('Grid set up, out of bounds node number  node in triangulation, require zero based indices',
+                           exception=FatalError,
+                           hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
+
         elif np.min(data) == 1:
-            si.case_log.write_msg('Grid set up, smallest node index in triangulation ==1, require zero based indices', warning=True, hint='May need to set reader parameter "one_based_indices" to True')
+            self.write_msg('Grid set up, smallest node index in triangulation ==1, require zero based indices', warning=True, hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
 
         return data.astype(np.int32)
 
-    def read_zlevel(self, nc, file_index=None, setup=False):
-        var_name = self.params['grid_variables']['zlevel']
-        if setup:
-            s = list(nc.get_var_shape(var_name))
-            s[0] = self.params['time_buffer_size']
-            return np.full(s, 0, nc.get_var_dtype(var_name))
-        else:
-            data = nc.read_a_variable(self.params['grid_variables']['zlevel'], sel=file_index)
-            return data
+    def read_zlevel(self, nc, file_index=None):
+        data = nc.read_a_variable(self.params['grid_variables']['zlevel'], sel=file_index)
+        return data
 
     def read_bottom_cell_index(self, nc):
+        # time invariant bottom cell index, which varies across gris in LSC vertical grid
         if nc.is_var(self.params['grid_variables']['bottom_cell_index']):
             data = nc.read_a_variable(self.params['grid_variables']['bottom_cell_index'])
             if self.params['one_based_indices']:
                 data -= 1
         else:
-            # Slayer grid, bottom cell is zero
-            data = np.zeros((self.grid['x'].shape[0],),dtype=np.int8)
+            # Slayer grid, bottom cell index = zero
+            data = np.zeros((self.grid['x'].shape[0],),dtype=np.int32)
         return data
 
 
@@ -197,7 +197,6 @@ class GenericUnstructuredReader(_BaseReader):
 
         grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
 
-        return grid
 
 
 

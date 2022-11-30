@@ -36,7 +36,7 @@ demo_base_params=\
  'base_case_params' : {
     'run_params' : {'user_note':'test of notes'},
     'dispersion': {'A_H': .1},
-    'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_flag': True},
+    'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_index': True},
     'solver': {'n_sub_steps': 2},
         'particle_release_groups': [{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}],
         'particle_properties': [
@@ -290,6 +290,7 @@ s56 = deepcopy(s55)
 s56['base_case_params']['trajectory_modifiers'] = [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
                                                     'critical_friction_velocity': .01}]
 s56['shared_params'].update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
+s56['base_case_params']['solver'] = {'n_sub_steps': 60}
 s56['base_case_params']['velocity_modifiers']= [
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}]
 #s56['base_case_params']['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]], 'pulse_size': 20, 'release_interval': 0}]
@@ -307,7 +308,7 @@ params.append(s57)
 s58 = deepcopy(s56)
 s58['shared_params'].update({'output_file_base' : 'demo58_bottomBounce', 'backtracking': False})
 s58['base_case_params']['dispersion'].update({'A_H': 0.1, 'A_V': .005})
-s58['base_case_params']['solver'] = {'n_sub_steps': 48}
+s58['base_case_params']['solver'] = {'n_sub_steps': 60}
 bc = s58['base_case_params']
 
 bc['trajectory_modifiers'] =[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension','critical_friction_velocity': .01}]

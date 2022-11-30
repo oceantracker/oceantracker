@@ -65,7 +65,7 @@ Parameters:
 	* ``min_age_to_bin`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
+	* ``name`` :   ``random_walk_varyingAz``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
 		- default: ``None``

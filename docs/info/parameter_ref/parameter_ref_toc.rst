@@ -60,6 +60,7 @@ ___________________
 	particle_properties_toc.rst
 	particle_release_groups_toc.rst
 	particle_statistics_toc.rst
+	status_modifiers_toc.rst
 	time_varying_info_toc.rst
 	trajectory_modifiers_toc.rst
 	velocity_modifiers_toc.rst

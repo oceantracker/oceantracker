@@ -39,7 +39,7 @@ Parameters:
 	* ``min_water_depth`` :   ``<class 'float'>``   *<optional>*
 		- default: ``-1e+37``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
+	* ``name`` :   ``random_walk_varyingAz``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
 		- default: ``None``

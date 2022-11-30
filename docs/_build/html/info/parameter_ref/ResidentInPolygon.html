@@ -15,8 +15,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="TopBottomLayerStats" href="TopBottomLayerStats.html" />
-    <link rel="prev" title="PolygonStats2D_timeBasedTopBottom" href="PolygonStats2D_timeBasedTopBottom.html" />
+    <link rel="next" title="WaterDepthRangeStats" href="WaterDepthRangeStats.html" />
+    <link rel="prev" title="PolygonStats2D_timeBasedDepthRange" href="PolygonStats2D_timeBasedDepthRange.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -85,8 +85,8 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="particle_statistics_toc.html">particle_statistics</a><ul>
-      <li>Previous: <a href="PolygonStats2D_timeBasedTopBottom.html" title="previous chapter">PolygonStats2D_timeBasedTopBottom</a></li>
-      <li>Next: <a href="TopBottomLayerStats.html" title="next chapter">TopBottomLayerStats</a></li>
+      <li>Previous: <a href="PolygonStats2D_timeBasedDepthRange.html" title="previous chapter">PolygonStats2D_timeBasedDepthRange</a></li>
+      <li>Next: <a href="WaterDepthRangeStats.html" title="next chapter">WaterDepthRangeStats</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -137,15 +137,6 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">count_release_group</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: - Numer of polygon,release group to count particles inside, 1-N</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">count_status_in_range</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Count only those particles with status which fall in the given range</p>
 <ul class="simple">
@@ -166,7 +157,15 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name “water_velocity” would refers to a particle property or field used within the code</p>
+<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">random_walk_varyingAz</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name “water_velocity” would refers to a particle property or field used within the code</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">name_of_polygon_release_group</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: - “name” parameter of polygon release group to count paticles for residence time , (release group “name”  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
@@ -229,10 +228,10 @@
     <ul>
         <li>
           &larr;
-          <a href="PolygonStats2D_timeBasedTopBottom.html" title="Previous document">PolygonStats2D_timeBasedTopBottom</a>
+          <a href="PolygonStats2D_timeBasedDepthRange.html" title="Previous document">PolygonStats2D_timeBasedDepthRange</a>
         </li>
         <li>
-          <a href="TopBottomLayerStats.html" title="Next document">TopBottomLayerStats</a>
+          <a href="WaterDepthRangeStats.html" title="Next document">WaterDepthRangeStats</a>
           &rarr;
         </li>
     </ul>

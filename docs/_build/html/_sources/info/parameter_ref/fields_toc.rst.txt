@@ -11,6 +11,7 @@ fields
 	FrictionVelocity.rst
 	ReaderField.rst
 	UserFieldBase.rst
+	VerticalGradient.rst
 
 **Role:** 
 

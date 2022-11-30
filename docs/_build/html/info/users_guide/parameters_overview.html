@@ -218,7 +218,7 @@ the computational pipeline by the ParticleGroupManager. Then it will automatical
         <span class="bp">self</span><span class="o">.</span><span class="n">class_doc</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Exponentially decaying particle property based on age.&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">check_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">msg_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_class_required_fields_properties_grid_vars_and_3D</span><span class="p">(</span><span class="n">required_props</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">])</span>
+        <span class="n">msg_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_class_required_fields_prop_etc</span><span class="p">(</span><span class="n">required_props_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">msg_list</span>
 
 

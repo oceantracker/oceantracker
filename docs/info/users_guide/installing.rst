@@ -52,5 +52,36 @@ Linux
 Windows
 =======================
 
-Install Anaconda and create a conda virtual envioment with this, TDDO more details coming.
+To create a Vonda virtual environment
 
+#. Install Anaconda, then
+
+#. From within folder/dir where oceantracker is to be installed, clone repository
+
+    ``git clone https://github.com/oceantracker/oceantracker.git``
+
+#. Open adaconda command prompt as administrator
+
+#. Create a conda virtual environment
+
+    ``conda create -n oceantracker``
+
+#. Activate virtual environment
+
+    ``conda activate oceantracker``
+
+#. From within   directory containing  oceantracker install dir
+
+    ``conda install --yes --file oceantracker\requirements.txt``
+
+#. To make oceantracker accessible to running code, do one of
+
+        * to use in environment within Pycharm etc  ( in Pycharm, need to add env. to those available from existing conda env., and add oceantracker as source root code)
+
+        * to make accessible to the virtual environment, from within the folder with oceantracker (which has setup.py file), run
+
+                ``python setup.py install``
+
+            or for developers
+
+                ``python setup.py develop``

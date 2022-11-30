@@ -48,7 +48,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         nc.create_a_variable('time', ['time'], {'notes': 'time in seconds'}, np.double)
 
         # other output common to all types of stats
-        nc.create_a_variable('num_released', ['time'], {'notes': 'total number released'}, np.int32)
+        nc.create_a_variable('num_released', ['time'], {'notes': 'total number released'}, np.int64)
 
     def  set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
@@ -58,7 +58,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         for key, prop in self.sum_binned_part_prop.items():
             if part_prop[key].is_vector():
-                si.case_log.write_warning('On the fly statistical Binning of vector particle property  "' + key + '" not yet implemented')
+                self.write_msg('On the fly statistical Binning of vector particle property  "' + key + '" not yet implemented', warning=None)
             else:
                 self.prop_list.append(part_prop[key].data) # must used dataptr here
                 self.sum_prop_list.append(self.sum_binned_part_prop[key][:])
@@ -115,7 +115,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         if self.params['write']:
             self.info_to_write_at_end()
-            nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int32), ['releaseGroups'], {'Notes': 'Total number released in each release group'})
+            nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['releaseGroups'], {'Notes': 'Total number released in each release group'})
             nc.write_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].particles_released)
             nc.close()
         nc = None  # parallel pool cant pickle nc

@@ -1,10 +1,10 @@
 import numpy as np
-
+from random import normalvariate
 from numba import njit
 from oceantracker.dispersion.random_walk import RandomWalk
-from oceantracker.interpolator.util.dev.vertical_walk_at_particle_location_eval_interp import _evalBCinterp
+#from oceantracker.interpolator.util.dev.vertical_walk_at_particle_location_eval_interp import _evalBCinterp
 
-class RandomWalkVaryingAz(RandomWalk):
+class RandomWalkVaryingAZ(RandomWalk):
     # dispersion for PDE of  the form d(A_z d(V)/dz)/dz if turbulent eddy viscosity A_z depends on z adds  vertical advection to random walk equal to d A_z/dz
     # see Lynch Particles in the Coastal Ocean: Theory and Applications
     def __init__(self):
@@ -14,72 +14,50 @@ class RandomWalkVaryingAz(RandomWalk):
 
 
     def initialize(self):
-        si=self.shared_info
         super().initialize()
-        si.case_log.write_warning('RandomWalkVaryingAz: varying Az adds vertical velocity to dispersion, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1')
+        si=self.shared_info
+        pgm = si.classes['particle_group_manager']
+
+        self.write_msg('RandomWalkVaryingAz: varying Az adds vertical velocity to dispersion to avoid particle accumulation at surface and bottom, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',warning=True)
+
+
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_fields_list=['turbulent_vertical_eddy_viscosity','nz_cell','x','n_cell'],
-                                                                                requires3D=True, required_props_list='turbulent_vertical_eddy_viscosity')
+        msg_list = self.check_class_required_fields_prop_etc(required_fields_list=['A_Z','A_Z_vertical_gradient'],
+                                                             requires3D=True,
+                                                             required_props_list=['A_Z','A_Z_vertical_gradient','nz_cell', 'x', 'n_cell'])
         return msg_list
 
     # apply random walk
     def update(self,nb,  time, active):
-        # add up 2D/3D diffusion coeff as random walk vector
-        t
+        # add up 2D/3D diffusion coeff as random walk vector, plus vertical advection given by
+
         si= self.shared_info
         prop = si.classes['particle_properties']
-        fields= si.classes['fields']
-        self._add_random_walk(prop['x'].data,
-                              si.grid['zlevel'][nb, :, :],
-                              prop['n_cell'],
-                              prop['nz_cell'],
-                              si.grid['tiangles'],
-                              fields['turbulent_vertical_eddy_viscosity'].data[nb, :, :],
-                              fields['turbulent_vertical_eddy_viscosity'].data[nb, :, :],
-                              si.model_substep_timestep,
-                              t_fraction,
-                              self.rx, active)
+        self._add_random_walk_velocity_modifier(prop['A_Z'].data, prop['A_Z_vertical_gradient'].data,
+                                                self.info['random_walk_velocity'], si.model_substep_timestep,
+                                                active, prop['velocity_modifier'].data)
 
     @staticmethod
     @njit(fastmath=True)
-    def _add_random_walk(x, z_level, n_cell, nz_nodes, tri, A_z1,A, dt, rx, bc_cords, active):
+    def _add_random_walk_velocity_modifier(A_Z,A_Z_vertical_gradient,random_walk_velocity,timestep, active, velocity_modifier):
         # add vertical advection effect of dispersion to random walk, see Lynch Particles in the Coastal Ocean: Theory and Applications
-        gradAz_nodes=np.full((3,), 0.)
-        vertVel_Az = np.full((1,), 0.)
+        # this avoids particle accumulating in areas of high vertical gradient of A_Z, ie top and bottom
 
         for n in active:
 
-            # random walk in horizontal
+            # random walk velocity in horizontal
             for m in range(2):
-                x[n,m] += rx[m]*np.random.randn()
+                velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
 
+            # advection required by random walk to avoid accumulation
+            velocity_modifier[n, 2] += A_Z_vertical_gradient[n]  # todo limit excursion by this velocity ?
 
-            # if linear interp in vertical so gradient Az constant within a zlevel, so dont need vertical interplation
-            for m in range(3):
-                node = tri[n_cell[n],m]
-                nz = nz_nodes[n,m]
-                dz= z_level[node, nz + 1] - z_level[node, nz]
-                if dz > 1.0E-3:
-                    gradAz_nodes[m] = (A_z[node, nz + 1] - A_z[node, nz]) / dz
-                else:
-                    gradAz_nodes[m] = 0.
+            # random walk in vertical
+            dz_advection = A_Z_vertical_gradient[n]*timestep
+            a_z = A_Z[n] + A_Z_vertical_gradient[n]*dz_advection/2.0 # estimate of A_z at mid-point of the time step
 
-            # take nodal values and get gradient at particle location
-            _evalBCinterp(bc_cords[n, :], gradAz_nodes, vertVel_Az)
-
-            dz_w = vertVel_Az[0]*dt
-            dz_random = rx[2]*np.random.randn()
-
-            # limit size of advection as Az may be so large that dz_z is greater than water depth
-            # limit to 2 sigma times random walk as advection
-            if np.abs(dz_w) < 2.0*rx[2]:
-                dz= dz_random + dz_w
-            else:
-                dz = dz_random + 2.0*rx[2]*np.sign(dz_w)
-
-            # add random walk in the vertical
-            x[n,2] += dz
+            velocity_modifier[n, 2] += normalvariate(0., a_z /timestep)  # todo limit A_Z?
 
 
 

@@ -181,10 +181,11 @@
 <span class="go">python setup.py develop   # add package to path</span>
 <span class="go">pip install -r ./requirements.txt</span>
 
-<span class="gp"># </span><span class="nb">test</span> by running one demo
+<span class="gp"># </span><span class="nb">test</span> by running demos
 <span class="go">echo &quot;Test run demo 60&quot;</span>
 <span class="go">cd ./demos</span>
 <span class="go">python run_demos.py -n --d 2</span>
+<span class="go">python run_demos.py -n --d 56</span>
 <span class="go">cd ..</span>
 <span class="go">cd ..</span>
 </pre></div>
@@ -193,7 +194,32 @@
 </section>
 <section id="windows">
 <h2>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h2>
-<p>Install Anaconda and create a conda virtual envioment with this, TDDO more details coming.</p>
+<p>To create a Vonda virtual environment</p>
+<ol class="arabic">
+<li><p>Install Anaconda, then</p></li>
+<li><p>From within folder/dir where oceantracker is to be installed, clone repository</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/oceantracker/oceantracker.git</span></code></p>
+</div></blockquote>
+</li>
+<li><p>Open adaconda command prompt as administrator</p></li>
+<li><p>Create a conda virtual environment</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">oceantracker</span></code></p>
+</div></blockquote>
+</li>
+<li><p>Activate virtual environment</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
+</div></blockquote>
+</li>
+<li><p>From within   directory containing  oceantracker install dir</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">--yes</span> <span class="pre">--file</span> <span class="pre">oceantracker\requirements.txt</span></code></p>
+</div></blockquote>
+</li>
+<li><p>Use enviromnent within Pycharm etc  ( in Pycharm, need to add env. to those available from existing conda env., and add oceantracker as source root code)</p></li>
+</ol>
 </section>
 </section>
 

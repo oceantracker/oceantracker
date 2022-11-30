@@ -27,7 +27,7 @@
             "A_V": 0.001
         },
         "solver": {
-            "n_sub_steps": 30
+            "n_sub_steps": 60
         },
         "particle_release_groups": [
             {

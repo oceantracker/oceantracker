@@ -117,10 +117,16 @@ Parameters:
 		- default: ``0.25``
 		- min: ``0.0``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
+	* ``name`` :   ``random_walk_varyingAz``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
 		- default: ``None``
+
+	* ``one_based_indices`` :   ``<class 'bool'>``   *<optional>*
+		Description: - schism indcies are 1 based , not zero, eg. triangulation nodes start at 1 not zero as in python
+
+		- default: ``True``
+		- possible_values: ``[True, False]``
 
 	* ``search_sub_dirs`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``

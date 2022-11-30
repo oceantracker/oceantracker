@@ -2,6 +2,7 @@ import numpy as np
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from oceantracker.dispersion._base_dispersion import _BaseTrajectoryModifer
 from numba import njit, guvectorize, int32, int64, float64
+from random import normalvariate
 
 class RandomWalk(_BaseTrajectoryModifer):
 
@@ -16,13 +17,11 @@ class RandomWalk(_BaseTrajectoryModifer):
         # get time step from solver
         dt = si.model_substep_timestep
 
-        if si.hindcast_is3D: #3D
-            info['rx'] = np.array((self.calc_walk(self.params['A_H'],dt),self.calc_walk(self.params['A_H'],dt),self.calc_walk(self.params['A_V'],dt)))
-        else:# 2D
-            info['rx']  = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt) ))
+        info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
+        if not si.hindcast_is3D:
+            info['random_walk_size'] =  info['random_walk_size'][:2]
 
-        # set up shortcut to data requried to modify velocity  below      eg.
-        self.rx = info['rx']
+        info['random_walk_velocity'] = info['random_walk_size'] /dt  # velocity equvalend of random walk distance
 
     def calc_walk(self, A_turb, dt):
         # this is variance of particle motion in each vector direction,
@@ -31,18 +30,16 @@ class RandomWalk(_BaseTrajectoryModifer):
 
     # apply random walk
     def update(self,nb,  time, active):
-        # add up 2D/3D diffusion coeff as random walk vector
+        # add up 2D/3D diffusion coeff as random walk done using velocity_modifier
         si= self.shared_info
-
-        # below requies temp array, numba version uses less memory, but no faster
-        # prop_x.add_values_to(np.random.randn(active.shape[0], prop_x.num_vector_dimensions()) * self.rx, active)
-
-        self._add_random_walk(self.rx, active,si.classes['particle_properties']['x'].data)
+        self._add_random_walk_velocity_modifier(self.info['random_walk_velocity'], active, si.classes['particle_properties']['velocity_modifier'].data)
 
     @staticmethod
+
     @njit(fastmath=True)
-    # @guvectorize([(int32[:],float64[:,:])],' (m), (l)->(n,m)') , does not work
-    def _add_random_walk(rx, active, x):
+    #@guvectorize([(float64[:],int32[:],float64[:,:])],' (m), (l)->(n,m)') #, does not work needs n on LHS
+    def _add_random_walk_velocity_modifier(random_walk_velocity, active, velocity_modifier):
         for n in active:
-            for m in range(x.shape[1]):
-                x[n,m] += rx[m]* np.random.randn() #todo this is slow as allcating memory, try math.random random.Genetaor.normal  and get 2-3 at same time above
+            for m in range(velocity_modifier.shape[1]):
+                # todo below slow? is allocating memory??, try math.random random.Genetaor.normal  and get 2-3 at same time above?
+                velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
