@@ -59,7 +59,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
     def check_requirements(self):
         si= self.shared_info
         params = self.params
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D()
+        msg_list = self.check_class_required_fields_prop_etc()
         return msg_list
 
     def set_up_binned_variables(self, nc):
@@ -71,13 +71,13 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         nc.add_a_Dimension('pulse', dim_size=num_pulses)
         nc.create_a_variable('count', dim_names,
                              {'notes': 'counts of particles in each pulse of release group inside release polygon at given times'},
-                             np.int32)
+                             np.int64)
         nc.create_a_variable('count_all_particles', ['time', 'pulse'],
-                             {'notes': 'counts of particles in each, whether inside polygon or not at given times'}, np.int32)
+                             {'notes': 'counts of particles in each, whether inside polygon or not at given times'}, np.int64)
         # set up space for requested particle properties
         # working count space
-        self.count_time_slice = np.full((num_pulses,), 0, np.int32)
-        self.count_all_particles_time_slice = np.full_like(self.count_time_slice, 0, np.int32)
+        self.count_time_slice = np.full((num_pulses,), 0, np.int64)
+        self.count_all_particles_time_slice = np.full_like(self.count_time_slice, 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
             if p_name in si.classes['particle_properties']:

@@ -15,7 +15,7 @@ class TerminalVelocity(VelocityModiferBase):
         # only possible in in 3D so tweak flag
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(requires3D=True,required_props_list=['velocity_modifier'])
+        msg_list = self.check_class_required_fields_prop_etc(requires3D=True, required_props_list=['velocity_modifier'])
         return msg_list
 
     def initialize(self):
@@ -23,7 +23,7 @@ class TerminalVelocity(VelocityModiferBase):
         particle= self.shared_info.classes['particle_group_manager']
 
         si = self.shared_info
-        si.case_log.write_warning('When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1')
+        self.write_msg('When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',warning=True)
 
         if self.params['variance'] is not None:
            # set up individual particle terminal velocties

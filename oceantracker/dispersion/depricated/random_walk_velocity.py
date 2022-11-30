@@ -2,7 +2,6 @@ import numpy as np
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from oceantracker.dispersion._base_dispersion import _BaseTrajectoryModifer
 from numba import njit, guvectorize, int32, int64, float64
-from random import normalvariate
 
 class RandomWalk(_BaseTrajectoryModifer):
 
@@ -21,7 +20,9 @@ class RandomWalk(_BaseTrajectoryModifer):
         if not si.hindcast_is3D:
             info['random_walk_size'] =  info['random_walk_size'][:2]
 
-        info['random_walk_velocity'] = info['random_walk_size'] /dt  # velocity equvalend of random walk distance
+        # set up shortcut to data required to modify velocity  below
+        info['random_velocity_size'] = info['random_walk_size']/dt
+        self.random_velocity = info['random_velocity_size']
 
     def calc_walk(self, A_turb, dt):
         # this is variance of particle motion in each vector direction,
@@ -30,16 +31,16 @@ class RandomWalk(_BaseTrajectoryModifer):
 
     # apply random walk
     def update(self,nb,  time, active):
-        # add up 2D/3D diffusion coeff as random walk done using velocity_modifier
+        # add up 2D/3D diffusion coeff as random walk vector
         si= self.shared_info
-        self._add_random_walk_velocity_modifier(self.info['random_walk_velocity'], active, si.classes['particle_properties']['velocity_modifier'].data)
+        self._add_random_walk_velocity(self.random_velocity, active,si.classes['particle_properties']['velocity_modifier'].data)
 
     @staticmethod
 
     @njit(fastmath=True)
     #@guvectorize([(float64[:],int32[:],float64[:,:])],' (m), (l)->(n,m)') #, does not work needs n on LHS
-    def _add_random_walk_velocity_modifier(random_walk_velocity, active, velocity_modifier):
+    def _add_random_walk_velocity(random_velocity_size, active, velocity_modifier):
         for n in active:
             for m in range(velocity_modifier.shape[1]):
-                # todo below slow? is allocating memory??, try math.random random.Genetaor.normal  and get 2-3 at same time above?
-                velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
+                # todo below slow? is allcating memory??, try math.random random.Genetaor.normal  and get 2-3 at same time above
+                velocity_modifier[n,m] += random_velocity_size[m]* np.random.randn()

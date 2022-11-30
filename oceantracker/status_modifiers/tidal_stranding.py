@@ -16,7 +16,7 @@ class TidalStranding(_BaseStatusModifer):
 
     def check_requirements(self):
         si = self.shared_info
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_grid_var_list=['dry_cell_index'])
+        msg_list = self.check_class_required_fields_prop_etc(required_grid_var_list=['dry_cell_index'])
         return msg_list
 
     def update(self, nb,t,sel):

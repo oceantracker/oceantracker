@@ -16,7 +16,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
                                                             })
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['event_polygon', 'current_polygon_for_event_logging'])
+        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['event_polygon', 'current_polygon_for_event_logging'])
         return msg_list
 
 

@@ -1,11 +1,11 @@
 import numpy as np
-from numba import njit, float64,int32, guvectorize,int8, int64, boolean, uint8
+from numba import njit, float64,int32, float32, int8, int64, boolean, uint8
 from oceantracker.util import  basic_util
 from oceantracker.common_info_default_param_dict_templates import particle_info
 # flags for bc walk status
 
 
-walk_stats=np.dtype([('particles_located',np.int32), ('total_steps',np.int32), ('longest_walk',np.int32), ('failed_walks',np.int32), ('histogram', np.int32, (50,))])
+walk_stats=np.dtype([('particles_located',np.int64), ('total_steps',np.int64), ('longest_walk',np.int32), ('failed_walks',np.int32), ('histogram', np.int64, (30,))])
 
 # globals
 status_moving = int(particle_info['status_flags']['moving'])
@@ -49,13 +49,9 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 
 
 #________ Barycentric triangle walk________
-# experiment with gu functions
-ty= [(float64[:,:],float64[:,:], int8[:], float64[:,:],float64[:,:,:], int32[:,:], uint8[:], boolean, float64, int32, boolean, int32[:],walk_stats, int32[:])]
-amap='(n,m),      (n,m),        (n),      (n,n3),     (t,n3,i2),         (t,n3),     (t),       (),       (),     (),    (),  (l), () -> (n)'
 @njit
-#@guvectorize(ty,amap)
 def BCwalk_with_move_backs_numba2D(xq, x_old, status, BC, BCtransform, triNeighbours, current_dry_cell_index, block_dry_cells,
-                                 tol, max_BC_walk_steps, has_open_boundary, active,walk_stats, n_cell):
+                                   tol, max_BC_walk_steps, has_open_boundary, active, walk_stats, n_cell):
    # Barycentric walk across triangles to find cells
 
     bc = np.full((3,), 0.)
@@ -68,56 +64,59 @@ def BCwalk_with_move_backs_numba2D(xq, x_old, status, BC, BCtransform, triNeighb
         n_steps=0
         if np.any(~np.isfinite(xq[n,:])):
             if np.all(np.isfinite(x_old[n,:])):
-                for i in range(2) : xq[n,i] = x_old[n, i]
+                for i in range(xq.shape[1]) : xq[n,i] = x_old[n, i]
             else:
                 status[n] = status_bad_cord
                 continue
 
-        while n_steps < max_BC_walk_steps:
+        move_back= False
 
+        while n_steps < max_BC_walk_steps:
+            # update barcentric cords of xq
             n_min, n_max= _get_single_BC_cord_numba(xq[n, :2], BCtransform[n_tri, :, :], bc)
 
-            if bc[n_max] < 1. + tol and bc[n_min] > -tol:
-                # are now inside triangle, leave particle status as is
-                # found cell in time, and interior point, so update cell
-                n_cell[n] = n_tri
-                for i in range(3): BC[n, i] = bc[i]
-                break
+            if bc[n_max] < 1.+ tol and  tol and bc[n_min] > -tol:
+                    # are now inside triangle, leave particle status as is
+                    break
 
-            n_steps +=1
+            n_steps += 1
             # move to neighbour triangle at face with smallest bc then test bc cord again
-            n_tri = triNeighbours[n_tri,n_min]  # n_min is the face num in  tri to move across
+            next_tri = triNeighbours[n_tri, n_min]  # n_min is the face num in  tri to move across
 
-            if n_tri < 0:
+            if next_tri < 0:
                 # if no new adjacent triangle, then are trying to exit domain at a boundary triangle,
                 # keep n_cell, bc  unchanged
-                if has_open_boundary and n_tri == -2: # outside domain
-                    # leave bc, cell, location  unchanged as outside
+                if has_open_boundary and next_tri == -2: # outside domain
+                    # leave x, bc, cell, location  unchanged as outside
                     status[n] = status_outside_open_boundary
                     break
-                else: # n_tri == -1 outside domain and any future -ve face types, attempt to move back to last good position
+                else: # n_tri == -1 outside domain and any future
                     # solid boundary, so just move back
-                    if np.all(np.isfinite(x_old[n, :])):
-                        for i in range(2): xq[n, i] = x_old[n, i]
-                    else:
-                        status[n] = status_bad_cord
+                    move_back = True
                     break
 
             # check for dry cell
-            if block_dry_cells:
-                if  current_dry_cell_index[n_tri] > 128:
-                    # treats dry cell like a lateral boundary
-                    # move back and keep triangle the same
-                    if np.all(np.isfinite(x_old[n, :])):
-                        for i in range(2): xq[n, i] = x_old[n, i]
-                    else:
-                        status[n] = status_bad_cord
+            if block_dry_cells: # is faster split into 2 ifs, not sure why
+                if  current_dry_cell_index[next_tri] > 128:
+                    # treats dry cell like a lateral boundary,  move back and keep triangle the same
+                    move_back = True
                     break
+
+            n_tri = next_tri
 
         # not found in given number of search steps
         if n_steps >= max_BC_walk_steps: # dont update cell
             status[n] = status_cell_search_failed
             walk_stats['failed_walks'] += 1
+            move_back = True
+
+        if move_back:
+            # move back dont update
+            for i in range(xq.shape[1]): xq[n, i] = x_old[n, i]
+        else:
+            # update cell anc BC for new triangle
+            n_cell[n] = n_tri
+            for i in range(3): BC[n, i] = bc[i]
 
         # step count stats
         walk_stats['particles_located'] += 1
@@ -162,7 +161,7 @@ def get_BC_transform_matrix(points, simplices):
     These are stacked into the `Tinvs` returned.
     """
 
-    ndim = 2 # onluy works on 2D triangles
+    ndim = 2 # only works on 2D triangles
     nsimplex = simplices.shape[0]
 
     T = np.empty((ndim, ndim), dtype=np.double)
@@ -190,100 +189,96 @@ def get_BC_transform_matrix(points, simplices):
 @njit
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_level_at_nodes, tri, n_cell,
                                                  nz_with_bottom, BCcord, status,
-                                                 nz_nodes_particle, z_fraction_nodes_particle, active,
-                                                 walk_stats):
-    # find the zlayer for each node of cell containing each particleand at two time slices of hindcast  between nz_bottom and number of z levels
+                                                 nz_cell,nz_nodes, z_fraction,
+                                                  z_fraction_bottom_layer, is_in_bottom_layer,
+                                                  z0, active,  walk_stats):
+    # find the zlayer for each node of cell containing each particl eand at two time slices of hindcast  between nz_bottom and number of z levels
+    # LSC grid means must track vertical nodes for each particle
     # nz_with_bottom is lowest cell in grid, is 0 for slayer vertical grids, but may be > 0 for LSC grids
-    # must be at least two layer  ie, nz_bottom >=1 and zlevel with at least two layers in last dim
     # nz_with_bottom must be time independent
 
     tf2 = 1. - step_dt_fraction
-    z_tol =0.005
-    z_tol2 = z_tol /2.
 
-    top_zlevel = z_level_at_nodes.shape[2] - 2
+    top_nz_cell = z_level_at_nodes.shape[2] - 2
+    top_zlevel3= np.full((3,),top_nz_cell,dtype=np.int32)
 
-    for n_part in active:  # loop over active particles
-        nodes = tri[n_cell[n_part], :]  # nodes for the particle's cell
+    for n in active:  # loop over active particles
+        nodes = tri[n_cell[n], :]  # nodes for the particle's cell
+        bottom_nz_nodes = nz_with_bottom[nodes]
+        nz_below = nz_nodes[n, 0, :]
+        nz_above = nz_nodes[n, 1, :]
+
+        n_vertical_steps = 0
+
+        # current cell number
+        bottom_nz_cell = np.min(bottom_nz_nodes) # cell at bottom
 
         # preserve status if stranded by tide
-        if status[n_part] == status_stranded_by_tide:
-            z_fraction_nodes_particle[n_part, :, :] = 0.
-            nz_nodes_particle[n_part, :, :] = nz_with_bottom[nodes]
+        if status[n] == status_stranded_by_tide:
+            nz_cell[n] = bottom_nz_cell
+            # update nodes above and below
+            z_below = _eval_z_at_nz_cell(nb, bottom_nz_cell  , z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_below)
+            z_above = _eval_z_at_nz_cell(nb, bottom_nz_cell+1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_above)
+            zq[n] = z_below
+            z_fraction[n] = 0.0
             continue
 
         # make any already on bottom active, may be flagged on bottom if found on bottom, below
-        if status[n_part] == status_on_bottom:   status[n_part] = status_moving
+        if status[n] == status_on_bottom:   status[n] = status_moving
 
-        maybe_below_bottom = False
-        maybe_above_surface= False
+        # find zlevel above and below  current vertical cell
+        z_below = _eval_z_at_nz_cell(nb,nz_cell[n], z_level_at_nodes,bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_below)
+        z_above = _eval_z_at_nz_cell(nb,nz_cell[n]+1, z_level_at_nodes,bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_above)
 
-        n_vertical_steps = 0
-        for nt_step in range(2):
+        if zq[n] >= z_below:
+            # search upwards, do nothing if z_above > zq[n] > z_below, ie current nodes are correct
+            if zq[n] > z_above:
+                while nz_cell[n] < top_nz_cell:
+                    n_vertical_steps += 1
+                    nz_cell[n] += 1
+                    z_below = z_above
+                    nz_below[:] = nz_above.copy()
+                    z_above = _eval_z_at_nz_cell(nb,nz_cell[n], z_level_at_nodes,bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_above)
+                    if zq[n] <= z_above: break
+        else:
+            # search downwards
+            while nz_cell[n] >  bottom_nz_cell:
+                n_vertical_steps += 1
+                nz_cell[n] -= 1
+                z_above = z_below
+                nz_above[:] = nz_below.copy()
+                z_below = _eval_z_at_nz_cell(nb,nz_cell[n], z_level_at_nodes,bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_below)
+                if zq[n] >= z_below: break  # found cell
 
-            for m in range(3):  # loop over each node of containing triangle
+        # clip zq to be in bounds before calc. z_fraction
+        z_bot = _eval_z_at_nz_nodes(nb, z_level_at_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, bottom_nz_nodes)
+        if zq[n]  < z_bot + z0:
+            zq[n] = z_bot
+            status[n] = status_on_bottom
+        else:
+            # clip to surface only if not below bottom
+            z_surf = _eval_z_at_nz_nodes(nb, z_level_at_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, top_zlevel3)
+            if zq[n] >= z_surf:
+                zq[n] = z_surf
 
-                # short cuts
-                node_m = nodes[m]
-                nz_bottom_node = nz_with_bottom[node_m]
-                zlevels = z_level_at_nodes[nb + nt_step, node_m ,:]  # view of zlevel profile at this node of cell containing this particle
+        # get z fraction
+        dz = z_above - z_below
+        if dz < z0:
+            z_fraction[n] = 0.0
+        else:
+            z_fraction[n] = (zq[n]-z_below) / dz
 
-
-
-                # for zq  guess its depth layer nz for this node and hindcast time slice
-                if nt_step ==0:
-                    nz= nz_nodes_particle[n_part, 0, 0]  # guess is current nz for first node, but once found is  guess for nodes 2 and 3
-                else:
-                    nz = nz_nodes_particle[n_part, 0, m] # for second slice use nz from first time slice as guess
-
-                nz = min(max(nz, nz_bottom_node), top_zlevel) # clip nz into bounds
-                nz0 = nz # starying nz for histogram data
-
-                # clip cells out of bounds
-                if zq[n_part] < zlevels[nz_bottom_node] + z_tol:
-                    nz = nz_bottom_node  # clip this node to nz_bottom_cell
-                    zfrac = 0.
-                    maybe_below_bottom = True
-
-                elif zq[n_part] > zlevels[-1] - z_tol:
-                    nz = top_zlevel  # clip into top cell
-                    zfrac = 1.
-                    maybe_above_surface = True
-
-                elif zq[n_part] >= zlevels[nz]:
-                    # search upwards
-                    while zq[n_part] > zlevels[nz + 1] and nz < top_zlevel :
-                        nz += 1
-                        n_vertical_steps += 1
-
-                    if abs((zlevels[nz + 1] - zlevels[nz])) < z_tol:
-                        zfrac = 0.0
-                    else:
-                        zfrac = (zq[n_part] - zlevels[nz]) / (zlevels[nz + 1] - zlevels[nz])
-
-                elif zq[n_part] < zlevels[nz]:
-                    # search downwards
-                    while zlevels[nz] > zq[n_part] and nz > nz_bottom_node:
-                        nz -= 1
-                        n_vertical_steps += 1
-                    if abs((zlevels[nz + 1] - zlevels[nz])) < z_tol:
-                        zfrac = 0.0
-                    else:
-                        zfrac = (zq[n_part] - zlevels[nz]) / (zlevels[nz + 1] - zlevels[nz])
-
-                else:
-                    # missing case zq is nan??
-                    # todo need better solution for non finite xq/zq?
-                    nz = nz_bottom_node
-                    zfrac = 0.0
-
-                # record cell and fraction from search
-                # NOTE: ensured nz OK by having used debugger to see if any z frac > 1 or < 0
-                z_fraction_nodes_particle[n_part, nt_step, m] = zfrac
-                nz_nodes_particle[n_part, nt_step, m] = nz
+        if nz_cell[n] == bottom_nz_cell:
+            is_in_bottom_layer[n] = 1
+            if dz < z0:
+                z_fraction_bottom_layer[n] = 0.0
+            else:
+                # adjust z fraction so that linear interp acts like log layer
+                z0p = z0 / dz
+                z_fraction_bottom_layer[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
 
         # record number of vertical search steps made for this particle
-        # step count stats
+        # step count stats, tidal stranded particles are not counted
         walk_stats['particles_located'] += 1
         walk_stats['total_steps'] += n_vertical_steps
         # record max number of steps
@@ -293,76 +288,22 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
         walk_stats['histogram'][min(n_vertical_steps, walk_stats['histogram'].shape[0] - 1)] += 1
 
 
-        # check if this zq[n] is out of bounds and clip if needed
-        if maybe_below_bottom:
-            #  zq[n] is below one of the three nodes, so maybe below bottom,
-            #  check if below bottom and clip zq[n] if needed
-            # get z_bottom at particle location from interpolation using Barycentric  cords to interpolate
-            z_particle_bottom = 0.
-            for nn in range(3):
-                node_nn = nodes[nn]
-                z_particle_bottom += z_level_at_nodes[nb    , node_nn, nz_with_bottom[node_nn]] * BCcord[n_part, nn] * tf2
-                z_particle_bottom += z_level_at_nodes[nb + 1, node_nn, nz_with_bottom[node_nn]] * BCcord[n_part, nn] * step_dt_fraction
+@njit([(int64, float32[:,:,:],float64[:],float64,float64,int32[:], int32[:])])
+def _eval_z_at_nz_nodes(nb, z_level_at_nodes, BCcord, tf, tf2, nodes, nz_nodes):
+    # eval a at given zlevel given nodes
+    z = 0.
+    for m in range(3):
+        node_nn = nodes[m]
+        z += z_level_at_nodes[nb    , node_nn, nz_nodes[m]] * BCcord[m] * tf2 \
+            + z_level_at_nodes[nb + 1, node_nn, nz_nodes[m]] * BCcord[m] * tf
+    return  z
 
-            if zq[n_part] <= z_particle_bottom + z_tol:
-                zq[n_part] = z_particle_bottom + z_tol2
-                status[n_part] = status_on_bottom
-
-
-        if maybe_above_surface:
-            #  zq[n] is above one of the three nodes, so maybe above free surface
-            #  check if below bottom and clip zq[n] if needed
-            # get z_surface at particle location from interpolation using Barycentric  cords to interpolate
-            z_particle_freeSurface = 0.
-            for nn in range(3):
-                node_nn = nodes[nn]
-                z_particle_freeSurface += z_level_at_nodes[nb    , node_nn, -1] * BCcord[n_part, nn] * tf2
-                z_particle_freeSurface += z_level_at_nodes[nb + 1, node_nn, -1] * BCcord[n_part, nn] * step_dt_fraction
-
-            if zq[n_part] >= z_particle_freeSurface - z_tol:
-                zq[n_part] = z_particle_freeSurface - z_tol2
-
-
-@njit
-def find_depth_cell_at_a_node( zq, zlevels,nz_bottom, nz,  z_tol, z_fraction_node, maybe_below_bottom, maybe_above_surface, n_vertical_searches ):
-    #todo not used?
-
-    # find depth level just below zq and fraction of layer above this,  within  zlevels_at_node, using guess nz as a start
-    # answers returned by reference
-    # clip cells out of bounds
-    # NOTE: this reprodues the core of the above, but for use in making custom fields, but to use it above takes 50% longer due to function call overhead
-    top_zlevel = zlevels.shape[0] - 2
-
-    if zq < zlevels[nz_bottom] + z_tol:
-        nz = nz_bottom  # clip this node to nz_bottom_cell
-        z_fraction_node = 0.
-        maybe_below_bottom = True
-
-    elif zq > zlevels[-1] - z_tol:
-        nz = top_zlevel- 2  # clip into top cell
-        z_fraction_node = 1.
-        maybe_above_surface = True
-
-    elif zq >= zlevels[nz]:
-        # search upwards
-        while zq > zlevels[nz + 1] and nz < top_zlevel:
-            nz += 1
-            n_vertical_searches += 1
-        z_fraction_node = (zq - zlevels[nz]) / (zlevels[nz + 1] - zlevels[nz])
-
-    elif zq < zlevels[nz]:
-        # search downwards
-        while zlevels[nz] > zq and nz > nz_bottom:
-            nz -= 1
-            n_vertical_searches += 1
-        z_fraction_node = (zq- zlevels[nz]) / (zlevels[nz + 1] - zlevels[nz])
-
-    else:
-        # missing case zq in nan??
-        # todo need better solution for non finite xq/zq
-        nz = nz_bottom
-        z_fraction_node = 0.
-
-    return maybe_below_bottom, maybe_above_surface, n_vertical_searches
-
-
+@njit([(int64,int32, float32[:,:,:], int32[:],float64[:],float64,float64,int32[:], int32[:])])
+def _eval_z_at_nz_cell(nb,nz_cell, z_level_at_nodes,bottom_nodes, BCcord, tf, tf2, nodes, nz_nodes):
+    # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
+    z = 0.
+    for m in range(3):
+        nz_nodes[m] = max(nz_cell, bottom_nodes[m])
+        z += z_level_at_nodes[nb    , nodes[m], nz_nodes[m]] * BCcord[m] * tf2 \
+             + z_level_at_nodes[nb + 1, nodes[m], nz_nodes[m]] * BCcord[m] * tf
+    return  z

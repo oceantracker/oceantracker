@@ -5,3 +5,4 @@ venv
 /tests/nextVer/output/
 /docs/_build/doctrees/
 /profiling/output/
+/oceantracker.egg-info/

@@ -21,7 +21,7 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
                                  })
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['x'])
+        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['x'])
         return msg_list
 
     def initialize(self,**kwargs):

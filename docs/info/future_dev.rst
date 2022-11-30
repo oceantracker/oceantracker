@@ -53,7 +53,8 @@ Minor features/fixes
 #. velocities as float32 is significantly faster??
 #. move to looping over reader global time, remove passing nb, the buffer time step to methods
 #. see if numba @guvectorize with threading can increase overall speed on particle operations
-
-
-
-
+#. move velocity reading in al readers to own method to give more flexibility, make it a core particle property with write off by default
+#. tidy up case info file, eg have full class params, full params merged in setup in main.py to core and class lists
+#. in main do full requirements checked, wit errors communicated, before running up cases
+#. to guide users time step choice when using terminal velocities add calc of vertical courant number in top and bottom cell, ie likely the smallest cells)  ( also check vertical random wall size and terminal vel displacement?)
+#. move residence time to auto gerate class based on param of polygon release polygon with mutli release groups?

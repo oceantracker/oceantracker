@@ -1,6 +1,6 @@
 from oceantracker.fields._base_field import UserFieldBase
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
-from oceantracker.util.parameter_checking import append_message
+
 from numba import njit
 import numpy as np
 
@@ -16,7 +16,7 @@ class FrictionVelocity(UserFieldBase):
     def check_requirements(self):
         si = self.shared_info
 
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(
+        msg_list = self.check_class_required_fields_prop_etc(
             required_fields_list=['water_velocity'],
             required_grid_var_list=['zlevel'],
             requires3D=True)

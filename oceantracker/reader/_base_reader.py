@@ -46,8 +46,7 @@ class _BaseReader(ParameterBaseClass):
                                  'search_sub_dirs': PVC(False, bool),
                                  'max_numb_files_to_load': PVC(10 ** 7, int, min=1)
                                  })  # list of normal required dimensions
-
-        self.buffer_info = {'n_filled': None}
+        self.info['buffer_info'] = {'n_filled': None, 'first_nt_hindcast_in_buffer': -10 ,'last_nt_hindcast_in_buffer': -10 }
 
     def _file_checks(self, file_name, msg_list): pass
     def read_hindcast_info(self,nc): pass  # read hindcast attibutes from first file, eg z transforms for ROMS files
@@ -60,6 +59,7 @@ class _BaseReader(ParameterBaseClass):
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         si = self.shared_info
+
 
     def get_list_of_files_and_hindcast_times(self, input_dir):
         # get list of files matching mask
@@ -148,7 +148,6 @@ class _BaseReader(ParameterBaseClass):
         if is3D_in_file and n_total_comp> 1: n_total_comp =3
 
         params = {'name': name,
-             'dtype': nc.get_var_dtype(var_file_name0),
              'is_time_varying': nc.is_var_dim(var_file_name0, self.params['dimension_map']['time']),
              'num_components' : n_total_comp,
              'is3D' :  False if unpacking_info['requires_depth_averaging'] else is3D_in_file
@@ -156,19 +155,25 @@ class _BaseReader(ParameterBaseClass):
 
         return params, unpacking_info
 
-    def fill_time_buffer(self, nt):
-        # fil buffer frpom global time step ntb0
+    def fill_time_buffer(self, nt_hindcast_remaining):
+        # fil buffer with as much of  nt_hindcast as possible, nt
+        si = self.shared_info
+        # check if first and second nt's are  in buffer
+        info= self.info
+        buffer_info = info['buffer_info']
+
+        nt_in_buffer= buffer_info['first_nt_hindcast_in_buffer']*si.model_direction <= nt_hindcast_remaining[0]*si.model_direction <=  buffer_info['last_nt_hindcast_in_buffer']*si.model_direction
+        nt_in_buffer = nt_in_buffer and buffer_info['first_nt_hindcast_in_buffer']*si.model_direction <= nt_hindcast_remaining[1]*si.model_direction <=  buffer_info['last_nt_hindcast_in_buffer']*si.model_direction
+        if  nt_in_buffer : return
+
+        # fill buffer starting at nt_hindcast_remaining[0]
         self.code_timer.start('reading_to_fill_time_buffer')
         si = self.shared_info
         grid = self.grid
-
         fi = self.reader_build_info['sorted_file_info']
 
-        # get indicies of first block
-        nt_required = nt[:self.params['time_buffer_size']].copy()
-
-        # trim required global time steps to hindcast range
-        nt_required = nt_required[np.logical_and(nt_required >= fi['nt'][0], nt_required <= fi['nt'][-1])]
+        # get hindcast global time indices of first block
+        nt_required = nt_hindcast_remaining[:self.params['time_buffer_size']].copy()
 
         t0 = perf_counter()
         b0 = 0
@@ -176,8 +181,9 @@ class _BaseReader(ParameterBaseClass):
 
         while len(nt_required) > 0:
             # find block of time step with same file number as that of first required time step
-            n_file = fi['file_number'][nt_required[0]]
-            nt_available = nt_required[fi['file_number'][nt_required] == n_file]  # global time steps to load
+            n_file = fi['file_number'][nt_required[0]]  # nt_hindcast to file map
+            nt_available = nt_required[fi['file_number'][nt_required] == n_file]  # todo smarter/faster way to do this wayglobal time steps to loadtodo,
+            # use list with groups of nt to map each file to the nt it holds, ie a file to nt map
 
             # read from this file
             nc = NetCDFhandler(fi['names'][n_file], 'r')
@@ -186,15 +192,13 @@ class _BaseReader(ParameterBaseClass):
             buffer_index = b0 + np.arange(num_read)
             file_index = fi['file_offset'][nt_available]
 
-            s = 'Reading-file-' + ':%1.0f-' % (n_file+1) + path.basename(fi['names'][n_file]) + ':%04.0f' % file_index[0] + ':%04.0f:' % file_index[-1]
-            s += ', Steps in file %4.0f' % fi['n_time_steps'][n_file]
-            s += ' nt available %4.0f' % nt_available[0] + ':%4.0f' % nt_available[-1]
-            s += ' file offsets %4.0f' % file_index[0] + ':%4.0f' % file_index[-1]
-            s += ' nt start of buffer-%4.0f' % nt[0]
-            s += ' Required:%4.0f ' % nt_required.shape[0]
+            s =  f'Reading-file-{(n_file+1):02}' + path.basename(fi['names'][n_file]) + f'{file_index[0]:04}:{file_index[-1]:04}'
+            s += f', Steps in file {fi["n_time_steps"][-1]:4} nt available {nt_available[0]:03} :{nt_available[-1]:03}'
+            s += f' file offsets {file_index[0]:4} : {file_index[-1]:4}  nt required {nt_required[0]:4}:{nt_required[-1]:4}, number required: {nt_required.shape[0]:4}'
 
             si.case_log.write_progress_marker(s)
             self.read_time_variable_grid_variables(nc, buffer_index,file_index)
+            grid['nt_hindcast'][buffer_index] = nt_available  # add a grid variable with buffer time steps
 
             # read time varying vector and scalar reader fields
             for name, field in si.class_interators_using_name['fields']['from_reader_field'].items():
@@ -203,7 +207,7 @@ class _BaseReader(ParameterBaseClass):
                     data_added_to_buffer = self.preprocess_field_variable(name, data_added_to_buffer, nc) # do any customised tweaks
 
                     if name in self.params['field_variables_to_depth_average']:
-                        si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = fields_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid['zlevel'], grid['bottom_cell_index'])
+                       si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = fields_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid['zlevel'], grid['bottom_cell_index'])
 
             # update user fields from newly read fields
             for field_types in ['derived_from_reader_field','user']:
@@ -211,39 +215,29 @@ class _BaseReader(ParameterBaseClass):
                     if field.is_time_varying():
                         field.update(buffer_index)
 
-            # calculate dry cell flags, if any cell node is dry
-            if self.params['grid_variables']['is_dry_cell'] is None:
-                if grid['zlevel'] is None and 'tide' in si.classes['fields'] and 'water_depth' in si.classes['fields']:
-                    reader_util.set_dry_cell_flag_from_tide(buffer_index, grid['triangles'],
-                                                            si.classes['fields']['tide'].data, si.classes['fields']['water_depth'].data,
-                                                            si.minimum_total_water_depth, grid['is_dry_cell'])
-                else:
-                    reader_util.set_dry_cell_flag_from_zlevel(buffer_index, grid['triangles'],
-                                                              grid['zlevel'], grid['bottom_cell_index'],
-                                                              si.minimum_total_water_depth, grid['is_dry_cell'])
-            else:
-                # get dry cells for each triangle allowing for splitting quad cells
-                data_added_to_buffer = nc.read_a_variable(self.params['grid_variables']['is_dry_cell'],file_index)
-                grid['is_dry_cell'][buffer_index,:] =  np.concatenate((data_added_to_buffer, data_added_to_buffer[:, grid['triangles_to_split'] ]), axis=1)
+            self.read_dry_cell_data(nc,file_index, buffer_index)
 
             nc.close()
 
             total_read += num_read
             s = '    read file at time ' + time_util.seconds_to_pretty_str(grid['time'][buffer_index[0]])
-            s += ' file offsets %4.0f' % file_index[0] + ':%4.0f' % file_index[-1]
-            s += ' buffer offsets-%4.0f' % buffer_index[0] + ':%4.0f' % buffer_index[-1]
-            s += ' Read:%4.0f ' % num_read + ' time:%4.0f ' % (1000. * (perf_counter() - t0)) + ' ms '
+            s += f' file offsets {file_index[0] :04}:{file_index[-1]:04}'
+            s += f' buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03}'
+            s += f' Read:{num_read:4}  time: {int(1000. * (perf_counter() - t0)):3} ms'
 
             si.case_log.write_progress_marker(s)
             b0 += num_read
             n_file += int(si.model_direction)
             nt_required = nt_required[num_read:]
 
-        self.buffer_info['n_filled'] = total_read
-        self.buffer_info['nt_buffer0'] = nt[0]  # global index of buffer zero
+
+        buffer_info['n_filled'] = total_read
+        buffer_info['first_nt_hindcast_in_buffer'] = grid['nt_hindcast'][0]  # global index of buffer zero
+        buffer_info['last_nt_hindcast_in_buffer']  = grid['nt_hindcast'][total_read-1]
 
         self.code_timer.stop('reading_to_fill_time_buffer')
         return total_read
+
 
     def read_field_variable_as4D(self, name, nc, field, buffer_index=None, file_index=None):
         si= self.shared_info
@@ -295,6 +289,25 @@ class _BaseReader(ParameterBaseClass):
         if self.params['cords_in_lat_long']:
             x = WGS84_to_UTM(x)
         return x
+
+    def read_dry_cell_data(self,nc,file_index, buffer_index):
+        # calculate dry cell flags, if any cell node is dry
+        si = self.shared_info
+        grid = self.grid
+
+        if self.params['grid_variables']['is_dry_cell'] is None:
+            if grid['zlevel'] is None and 'tide' in si.classes['fields'] and 'water_depth' in si.classes['fields']:
+                reader_util.set_dry_cell_flag_from_tide(buffer_index, grid['triangles'],
+                                                        si.classes['fields']['tide'].data, si.classes['fields']['water_depth'].data,
+                                                        si.minimum_total_water_depth, grid['is_dry_cell'])
+            else:
+                reader_util.set_dry_cell_flag_from_zlevel(buffer_index, grid['triangles'],
+                                                          grid['zlevel'], grid['bottom_cell_index'],
+                                                          si.minimum_total_water_depth, grid['is_dry_cell'])
+        else:
+            # get dry cells for each triangle allowing for splitting quad cells
+            data_added_to_buffer = nc.read_a_variable(self.params['grid_variables']['is_dry_cell'], file_index)
+            grid['is_dry_cell'][buffer_index, :] = np.concatenate((data_added_to_buffer, data_added_to_buffer[:, grid['triangles_to_split']]), axis=1)
 
     def read_open_boundary_data(self, grid):
         grid['grid_outline']['open_boundary_nodes'] = []

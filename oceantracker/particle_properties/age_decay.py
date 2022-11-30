@@ -11,7 +11,7 @@ class AgeDecay(ParticleProperty):
         self.class_doc(description='Exponentially decaying particle property based on age.')
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['age'])
+        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['age'])
         return msg_list
 
 

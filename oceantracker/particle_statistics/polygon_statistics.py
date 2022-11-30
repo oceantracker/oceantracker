@@ -45,7 +45,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
 
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['x'])
+        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['x'])
         return msg_list
 
     def set_up_binned_variables(self,nc):
@@ -57,15 +57,15 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
 
         nc.add_a_Dimension('releaseGroups', dim_sizes[1])
         nc.create_a_variable('count', dim_names,
-                             {'notes': 'counts of particles in each polygon at given times, for each release group'}, np.int32)
+                             {'notes': 'counts of particles in each polygon at given times, for each release group'}, np.int64)
         nc.create_a_variable('count_all_particles', ['time', 'releaseGroups'],
-                             {'notes': 'counts of particles whether in a polygon or not'}, np.int32)
+                             {'notes': 'counts of particles whether in a polygon or not'}, np.int64)
         # set up space for requested particle properties
         # working count space, row are (y,x)
-        self.count_time_slice = np.full(dim_sizes[1:], 0, np.int32)
+        self.count_time_slice = np.full(dim_sizes[1:], 0, np.int64)
 
         # counts in each age bin, whether inside polygon or not
-        self.count_all_particles_time_slice =  np.full((len(si.classes['particle_release_groups']),) , 0, np.int32)
+        self.count_all_particles_time_slice =  np.full((len(si.classes['particle_release_groups']),) , 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
             if p_name in si.classes['particle_properties']:
@@ -128,7 +128,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D(required_props_list=['age'])
+        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['age'])
         return msg_list
 
     def set_up_binned_variables(self,nc):
@@ -136,15 +136,15 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
         # set up space for requested particle properties
         dims= ( self.grid['age_bins'].shape[0], len(si.classes['particle_release_groups']), len(self.params['polygon_list']))
         # working count space, row are (y,x)
-        self.count_age_bins = np.full(dims, 0, np.int32)
+        self.count_age_bins = np.full(dims, 0, np.int64)
         # counts in each age bin, whether inside polygon or not
-        self.count_all_particles = np.full(dims[:-1] , 0, np.int32)
+        self.count_all_particles = np.full(dims[:-1] , 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
             if p_name in si.classes['particle_properties']:
                 self.sum_binned_part_prop[p_name] = np.full(dims, 0.)  # zero for  summing
             else:
-                si.case_log.write_warning('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
+                self.write_msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
     def update(self,**kwargs):
 
@@ -173,9 +173,9 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
         sgrid = self.grid
 
         nc.write_a_new_variable('count', self.count_age_bins, ['age_bins', 'releaseGroups', 'polygon'],
-                                {'notes': 'counts of particles in grid at given ages, for each release group'}, np.int32)
+                                {'notes': 'counts of particles in grid at given ages, for each release group'}, np.int64)
 
-        nc.write_a_new_variable('count_all_particles', self.count_all_particles, ['age_bins', 'releaseGroups'], {'notes': 'counts of  particles in all age bands for each release group, whether inside a polygon or not'}, np.int32)
+        nc.write_a_new_variable('count_all_particles', self.count_all_particles, ['age_bins', 'releaseGroups'], {'notes': 'counts of  particles in all age bands for each release group, whether inside a polygon or not'}, np.int64)
 
         nc.write_a_new_variable('age_bins'     , sgrid['age_bins']     , ['age_bins']         , {'notes': 'center of age bin, ie age axis in seconds'}, np.float64)
         nc.write_a_new_variable('age_bin_edges', sgrid['age_bin_edges'], ['num_age_bin_edges'], {'notes': 'edges of age bins in seconds'}, np.float64)

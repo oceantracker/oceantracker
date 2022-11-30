@@ -8,23 +8,35 @@ class _BaseField(ParameterBaseClass):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params
         self.add_default_params({'name': PVC( None, str, is_required=True),
-                                'create_particle_property_with_same_name': PVC( True, bool),
+                                 'write_interp_particle_prop_to_tracks_file': PVC(True, bool),
+                               # 'create_particle_property_with_same_name': PVC( True, bool),
                                  'is_time_varying': PVC(True, bool,is_required=True),
                                  'is3D': PVC(True, bool,is_required=True ),
                                   'num_components': PVC(None, int,is_required=True),
-                                  'dtype': PVC(np.float64, np.number),
                                   })
 
     def initialize(self):
+        super().initialize()
+        si = self.shared_info
+        grid = si.classes['reader'].grid
+        # work out size from grid etc, tuple to garud against change
+        self.info['shape_in_file'] = tuple([si.classes['reader'].params['time_buffer_size'] if self.params['is_time_varying'] else 1,
+                                            grid['x'].shape[0],
+                                            grid['nz'] if self.params['is3D'] else 1,
+                                            self.params['num_components'] if self.params['num_components'] is not None else 1])
+
+        buffer_shape = self.get_buffer_shape()
+        self.data = np.full(buffer_shape, 0, dtype=np.float32)  # all fields are float 32
+
+    def get_buffer_shape(self) :
         si = self.shared_info
         grid = si.classes['reader'].grid
         # work out size from grid etc, tuple to garud against change
         buffer_shape = tuple([si.classes['reader'].params['time_buffer_size'] if self.params['is_time_varying'] else 1,
-                            grid['x'].shape[0],
-                            grid['nz'] if self.params['is3D'] else 1,
-                            self.params['num_components'] if self.params['num_components'] is not None else 1 ])
-
-        self.data = np.full(buffer_shape, 0, dtype=self.params[ 'dtype'])
+                                            grid['x'].shape[0],
+                                            grid['nz'] if self.params['is3D'] else 1,
+                                            self.params['num_components'] if self.params['num_components'] is not None else 1])
+        return buffer_shape
 
     def is_time_varying(self): return self.data.shape[0] > 1
     def is3D(self): return  self.data.shape[2] > 1

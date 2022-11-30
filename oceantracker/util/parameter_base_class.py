@@ -1,8 +1,11 @@
 from  oceantracker.util import basic_util
 import numpy as np
+import traceback
 from time import perf_counter
 from oceantracker.shared_info import SharedInfoClass
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, merge_params_with_defaults, append_message,GracefulExitError
+from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, merge_params_with_defaults
+from oceantracker.util.message_and_error_logging import append_message, GracefulExitError, FatalError
+
 # parameter dictionaries are nested dictionaries or lists of dictionaries
 
 class ParameterBaseClass(object):
@@ -25,7 +28,6 @@ class ParameterBaseClass(object):
     def close(self):  pass
 
     def __init__(self):
-
 
         self.params={}
         self.info={'time_spent_updating': 0., 'update_calls': 0,'time_first_update_call':0.}  # stores info about object
@@ -50,10 +52,10 @@ class ParameterBaseClass(object):
 
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_list_properties_grid_vars_and_3D()
+        msg_list = self.check_class_required_fields_prop_etc()
         return msg_list
 
-    def check_class_required_fields_list_properties_grid_vars_and_3D(self, required_props_list=[], required_fields_list=[], required_grid_var_list=[], requires3D=None, msg_list=[]):
+    def check_class_required_fields_prop_etc(self, required_props_list=[], required_fields_list=[], required_grid_var_list=[], requires3D=None, msg_list=[]):
         si = self.shared_info
         grid = si.classes['reader'].grid
 
@@ -84,8 +86,6 @@ class ParameterBaseClass(object):
         for key in name_list:
             if key in self.default_params:
                 del self.default_params[key]
-
-
 
     def merge_with_class_defaults(self, case_param, base_case, msg_list=[], crumbs=None):
         # merge class defaults, base_case and given case_params
@@ -126,3 +126,13 @@ class ParameterBaseClass(object):
         if self.info['update_calls'] == 1: self.info['time_first_update_call'] = dt
 
 
+    def write_msg(self,text,warning=False,note=False,exception=None, hint=None,traceback_str=None):
+        si = self.shared_info
+        if exception is None:
+            crumbs= None
+        else:
+            n = str(self.params['name']) if 'name' in self.params else str(None)
+            crumbs='Class: ' + self.__module__ + '.' + self.__class__.__name__ +'(internal name=' + n +')'
+
+        si.case_log.write_msg(text, warning=warning,note=note, hint=hint,
+                exception=exception,traceback_str=traceback_str, crumbs=crumbs)

@@ -29,12 +29,14 @@ if __name__ == "__main__":
     parser.add_argument('--root_output_dir', default='output', type=str)
     parser.add_argument('-mp4', action='store_true')
     parser.add_argument('-build', action='store_true')
-
+    parser.add_argument('-testing', action='store_true')
     args = parser.parse_args()
+
 
     if args.build:
         # build json and yamls
         system('python build_and_test_demos.py')
+
 
     if args.root_output_dir is None:  args.root_output_dir = getcwd()
 
@@ -60,6 +62,13 @@ if __name__ == "__main__":
             exit('runOTdemos.py: No demo file number ' + str(n))
 
         params = json_util.read_JSON(f[0])
+
+        # tests or development choices of classes
+        if args.testing:
+            params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
+            #params['base_case_params']['dispersion'].update({'A_V':0., 'A_H':0.})
+            #params['base_case_params']['particle_release_groups'][0]['pulse_size']=1
+
         demo_name= params['shared_params']['output_file_base']
         params['reader']['input_dir'] = path.join(path.dirname(__file__),'demo_hindcast')
 
