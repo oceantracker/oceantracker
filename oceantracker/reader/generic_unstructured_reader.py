@@ -88,7 +88,7 @@ class GenericUnstructuredReader(_BaseReader):
         grid= self.grid
         # load grid variables
         grid['time'] = np.full((self.params['time_buffer_size'],),0.) # time buffer
-        grid['nt_hindcast'] = np.full((self.params['time_buffer_size'],),0, dtype=np.int32) # what global hindcast timestesps are in the buffer
+        grid['nt_hindcast'] = np.full((self.params['time_buffer_size'],),-10, dtype=np.int32) # what global hindcast timestesps are in the buffer
         grid['x'] =  self.read_x(nc)
 
         grid['triangles'] = self.read_triangles(nc)

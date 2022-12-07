@@ -35,8 +35,6 @@ from oceantracker.util.module_importing_util import import_module_from_string
 
 import subprocess
 
-
-
 def run(user_params):
     OT= _RunOceanTrackerClass()
     full_runInfoJSON_file_name, has_errors = OT._run(deepcopy(user_params))

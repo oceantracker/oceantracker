@@ -50,7 +50,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 self._do_a_run()
                 case_info = self._get_case_info()
 
-
                 if si.shared_params['write_output_files']:
                     case_info_file = si.output_file_base + '_caseInfo.json'
                     json_util.write_JSON(path.join(si.run_output_dir, case_info_file), case_info)
@@ -206,69 +205,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         self.code_timer.stop('total_model_all')
 
-    def _do_a_run_v1(self):
-        # build and run solver from parameter dictionary
-        # run from a given dictionary to enable particle tracking on demand from JSON type parameter set
-        # also used for parallel  version
-        self.code_timer.start('total_model_all')
-        si = self.shared_info
-        info= self.info
-        info['model_run_started'] = datetime.now()
 
-        solver = si.classes['solver']
-        p, reader, f = si.classes['particle_group_manager'], si.classes['reader'], si.classes['field_group_manager']  # for later use
-
-
-        si.case_log.write_progress_marker('Starting ' + si.output_file_base + f',  duration: {(si.model_duration / 24 / 3600):4}' )
-
-
-        # get hindcast step range
-        nt0 = reader.time_to_global_time_step(si.model_start_time)
-        nt1 = reader.time_to_global_time_step(si.model_start_time +  int(si.model_direction)*si.model_duration)
-        nt_hindcast = nt0 + int(si.model_direction)*np.arange(0 , abs(nt1-nt0))
-
-        # trim required global time steps to fit in hindcast range
-        fi = reader.reader_build_info['sorted_file_info']
-        nt_hindcast = nt_hindcast[np.logical_and(nt_hindcast >= fi['nt'][0], nt_hindcast <= fi['nt'][-1])]
-
-        # get fist block of nt's into buffer
-        num_in_buffer = reader.fill_time_buffer(nt_hindcast)
-        # set up run now data in buffer
-        solver.initialize_run(0)
-
-        # fill and process buffer until there is less than 2 steps
-        si.case_log.insert_screen_line()
-        si.case_log.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.model_duration / 24 / 3600))
-
-        t = si.model_start_time
-
-        while num_in_buffer > 2:
-
-            time_steps_completed, t = solver.solve_for_data_in_buffer(0, num_in_buffer, nt0)
-
-            if abs(t-si.model_start_time) > si.model_duration: break
-
-            # set up for next block
-            nt_hindcast = nt_hindcast[num_in_buffer-1:] # discard time steps done, but reload last step
-            num_in_buffer = reader.fill_time_buffer(nt_hindcast)
-
-        # post run stuff
-        info = self.info
-        info['start_time'] = si.model_start_time
-        info['end_time'] = t
-        info['start_date'] = time_util.seconds_to_date(si.model_start_time)
-        info['end_date'] = time_util.seconds_to_date(t)
-
-        info['time_steps_completed'] = 1 if solver.info['n_time_steps_completed'] == 0 else solver.info['n_time_steps_completed']
-
-        # close all instances
-        for i in si.all_class_instance_pointers_iterator():
-            i.close()
-        info['model_run_ended'] = datetime.now()
-        #info['model_run_time_sec'] = info['model_run_started']-datetime.now()
-        info['model_run_duration'] = time_util.duration_str_from_dates(info['model_run_started'], datetime.now())
-
-        self.code_timer.stop('total_model_all')
 
     def _do_run_integrity_checks(self):
         si=self.shared_info
@@ -278,7 +215,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # check all have required, fields, part props and grid data
         for i in si.all_class_instance_pointers_iterator():
             msg_list += i.check_requirements()
-
 
         # other checks and warnings
         if si.run_params['open_boundary_type'] > 0:
@@ -294,11 +230,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.case_log.check_messages_for_errors()
 
     def _make_core_class_instances(self, run_params):
-        # parsm are full merged by oceantracker main and instance making tested, so m=no parm merge needed
+        # params are full merged by oceantracker main and instance making tested, so m=no parm merge needed
         si=self.shared_info
         case_params= run_params['case_params']
 
-        # chage writer for compact mode
+        # change writer for compact mode
         if si.shared_params['compact_mode']:
             case_params['core_classes']['tracks_writer']['class_name']='oceantracker.tracks_writer.track_writer_compact.FlatTrackWriter'
 
