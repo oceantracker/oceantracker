@@ -1,4 +1,3 @@
-import numpy as np
 from random import normalvariate
 from numba import njit
 from oceantracker.dispersion.random_walk import RandomWalk
