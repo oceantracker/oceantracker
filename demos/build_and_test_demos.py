@@ -278,6 +278,7 @@ s55['base_case_params']['velocity_modifiers']= [
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.0005}
 ]
 s55['base_case_params']['fields']=[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}]
+s55['base_case_params']['solver'] = {'n_sub_steps': 30}
 s55['base_case_params']['particle_statistics']=[
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
@@ -290,7 +291,6 @@ s56 = deepcopy(s55)
 s56['base_case_params']['trajectory_modifiers'] = [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
                                                     'critical_friction_velocity': .01}]
 s56['shared_params'].update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
-s56['base_case_params']['solver'] = {'n_sub_steps': 60}
 s56['base_case_params']['velocity_modifiers']= [
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}]
 #s56['base_case_params']['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]], 'pulse_size': 20, 'release_interval': 0}]
@@ -308,7 +308,6 @@ params.append(s57)
 s58 = deepcopy(s56)
 s58['shared_params'].update({'output_file_base' : 'demo58_bottomBounce', 'backtracking': False})
 s58['base_case_params']['dispersion'].update({'A_H': 0.1, 'A_V': .005})
-s58['base_case_params']['solver'] = {'n_sub_steps': 60}
 bc = s58['base_case_params']
 
 bc['trajectory_modifiers'] =[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension','critical_friction_velocity': .01}]
