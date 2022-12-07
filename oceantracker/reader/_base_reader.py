@@ -46,7 +46,7 @@ class _BaseReader(ParameterBaseClass):
                                  'search_sub_dirs': PVC(False, bool),
                                  'max_numb_files_to_load': PVC(10 ** 7, int, min=1)
                                  })  # list of normal required dimensions
-        self.info['buffer_info'] = {'n_filled': None, 'first_nt_hindcast_in_buffer': -10 ,'last_nt_hindcast_in_buffer': -10 }
+        self.info['buffer_info'] = {'n_filled': None }
 
     def _file_checks(self, file_name, msg_list): pass
     def read_hindcast_info(self,nc): pass  # read hindcast attibutes from first file, eg z transforms for ROMS files
@@ -59,7 +59,6 @@ class _BaseReader(ParameterBaseClass):
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         si = self.shared_info
-
 
     def get_list_of_files_and_hindcast_times(self, input_dir):
         # get list of files matching mask
@@ -155,16 +154,16 @@ class _BaseReader(ParameterBaseClass):
 
         return params, unpacking_info
 
+    def time_steps_in_buffer(self, nt_hindcast_remaining):
+        # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
+        nt_hindcast = self.grid['nt_hindcast']
+        return np.any(nt_hindcast == nt_hindcast_remaining[0]) and np.any(nt_hindcast == nt_hindcast_remaining[1])
+
     def fill_time_buffer(self, nt_hindcast_remaining):
         # fil buffer with as much of  nt_hindcast as possible, nt
         si = self.shared_info
         # check if first and second nt's are  in buffer
         info= self.info
-        buffer_info = info['buffer_info']
-
-        nt_in_buffer= buffer_info['first_nt_hindcast_in_buffer']*si.model_direction <= nt_hindcast_remaining[0]*si.model_direction <=  buffer_info['last_nt_hindcast_in_buffer']*si.model_direction
-        nt_in_buffer = nt_in_buffer and buffer_info['first_nt_hindcast_in_buffer']*si.model_direction <= nt_hindcast_remaining[1]*si.model_direction <=  buffer_info['last_nt_hindcast_in_buffer']*si.model_direction
-        if  nt_in_buffer : return
 
         # fill buffer starting at nt_hindcast_remaining[0]
         self.code_timer.start('reading_to_fill_time_buffer')
@@ -183,8 +182,8 @@ class _BaseReader(ParameterBaseClass):
             # find block of time step with same file number as that of first required time step
             n_file = fi['file_number'][nt_required[0]]  # nt_hindcast to file map
             nt_available = nt_required[fi['file_number'][nt_required] == n_file]  # todo smarter/faster way to do this wayglobal time steps to loadtodo,
-            # use list with groups of nt to map each file to the nt it holds, ie a file to nt map
 
+            # use list with groups of nt to map each file to the nt it holds, ie a file to nt map
             # read from this file
             nc = NetCDFhandler(fi['names'][n_file], 'r')
 
@@ -193,7 +192,7 @@ class _BaseReader(ParameterBaseClass):
             file_index = fi['file_offset'][nt_available]
 
             s =  f'Reading-file-{(n_file+1):02}' + path.basename(fi['names'][n_file]) + f'{file_index[0]:04}:{file_index[-1]:04}'
-            s += f', Steps in file {fi["n_time_steps"][-1]:4} nt available {nt_available[0]:03} :{nt_available[-1]:03}'
+            s += f' Steps in file {fi["n_time_steps"][-1]:4} nt available {nt_available[0]:03} :{nt_available[-1]:03},'
             s += f' file offsets {file_index[0]:4} : {file_index[-1]:4}  nt required {nt_required[0]:4}:{nt_required[-1]:4}, number required: {nt_required.shape[0]:4}'
 
             si.case_log.write_progress_marker(s)
@@ -230,13 +229,13 @@ class _BaseReader(ParameterBaseClass):
             n_file += int(si.model_direction)
             nt_required = nt_required[num_read:]
 
-
+        # record useful info/diagnostics
+        buffer_info = info['buffer_info']
         buffer_info['n_filled'] = total_read
         buffer_info['first_nt_hindcast_in_buffer'] = grid['nt_hindcast'][0]  # global index of buffer zero
         buffer_info['last_nt_hindcast_in_buffer']  = grid['nt_hindcast'][total_read-1]
 
         self.code_timer.stop('reading_to_fill_time_buffer')
-        return total_read
 
 
     def read_field_variable_as4D(self, name, nc, field, buffer_index=None, file_index=None):
@@ -271,12 +270,9 @@ class _BaseReader(ParameterBaseClass):
 
         return  field.data[buffer_index, :, :, :]
 
-    def is_in_buffer(self, nt):
-        return self.buffer_info['nt_buffer0'] <= nt < self.buffer_info['nt_buffer0'] + self.buffer_info['n_filled']
-
     def global_index_to_buffer_index(self, nt):
         if self.shared_info.backtracking:
-            # nt decreases through model run, but buffer goes forward trhrough buffer
+            # nt decreases through model run, but buffer goes forward through buffer
             return self.buffer_info['nt_buffer0'] - nt
         else:
             # nt increases through model run
