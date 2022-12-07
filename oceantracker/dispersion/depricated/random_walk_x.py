@@ -4,7 +4,7 @@ from oceantracker.dispersion._base_dispersion import _BaseTrajectoryModifer
 from numba import njit, guvectorize, int32, int64, float64
 
 class RandomWalk(_BaseTrajectoryModifer):
-
+    # add random walk using velocity modifier
     def __init__(self):
         # set up default params
         super().__init__()  # required in children to get parent defaults
@@ -36,7 +36,6 @@ class RandomWalk(_BaseTrajectoryModifer):
         self._add_random_walk_velocity(self.random_velocity, active,si.classes['particle_properties']['velocity_modifier'].data)
 
     @staticmethod
-
     @njit(fastmath=True)
     #@guvectorize([(float64[:],int32[:],float64[:,:])],' (m), (l)->(n,m)') #, does not work needs n on LHS
     def _add_random_walk_velocity(random_velocity_size, active, velocity_modifier):

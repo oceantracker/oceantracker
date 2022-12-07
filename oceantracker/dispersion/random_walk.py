@@ -21,7 +21,7 @@ class RandomWalk(_BaseTrajectoryModifer):
         if not si.hindcast_is3D:
             info['random_walk_size'] =  info['random_walk_size'][:2]
 
-        info['random_walk_velocity'] = info['random_walk_size'] /dt  # velocity equvalend of random walk distance
+        info['random_walk_velocity'] = info['random_walk_size'] /dt  # velocity equivalent of random walk distance
 
     def calc_walk(self, A_turb, dt):
         # this is variance of particle motion in each vector direction,

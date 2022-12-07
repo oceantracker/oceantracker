@@ -182,11 +182,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.case_log.insert_screen_line()
         si.case_log.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.model_duration / 24 / 3600))
 
-        t = si.model_start_time
-
+        #------------------------------------------
         solver.initialize_run()
         time_steps_completed, t = solver.solve(nt_hindcast)
-
+        # ------------------------------------------
         # post run stuff
         info = self.info
         info['start_time'] = si.model_start_time
