@@ -5,7 +5,7 @@ from numba import njit, guvectorize, int32, int64, float64
 from random import normalvariate
 
 class RandomWalk(_BaseTrajectoryModifer):
-
+    # add random walk using velocity modifier
     def __init__(self):
         # set up default params
         super().__init__()  # required in children to get parent defaults
@@ -35,7 +35,6 @@ class RandomWalk(_BaseTrajectoryModifer):
         self._add_random_walk_velocity_modifier(self.info['random_walk_velocity'], active, si.classes['particle_properties']['velocity_modifier'].data)
 
     @staticmethod
-
     @njit(fastmath=True)
     #@guvectorize([(float64[:],int32[:],float64[:,:])],' (m), (l)->(n,m)') #, does not work needs n on LHS
     def _add_random_walk_velocity_modifier(random_walk_velocity, active, velocity_modifier):

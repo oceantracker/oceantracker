@@ -83,25 +83,21 @@ class Solver(ParameterBaseClass):
                 # todo refactor all to use nt_hindcast not nb
                 self.pre_step_bookkeeping(nb, t1, info['n_time_steps_completed'])
 
+                # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
+                is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out=self.get_particle_index_buffer())
+
                 # update particle velocity modification
-                alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
-
-
-                part_prop['velocity_modifier'].set_values(0., alive)  # zero out  modifier, to add in current values
-
+                part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
                 for i in si.class_interators_using_name['velocity_modifiers']['all'].values():
-                    i.update(nb, t1, alive)
+                    i.update(nb, t1, is_moving)
 
                 # dispersion is done by random walk velocity modification prior to integration step
-                # todo check bottom bounce with no random walk
-                si.classes['dispersion'].update(nb, t1, alive)
+                si.classes['dispersion'].update(nb, t1, is_moving)
 
                 #  Main integration step
-                #  --------------------------------------
                 self.code_timer.start('integration_step')
-                #  --------------------------------------
-
-                moving = self.integration_step(nb,t1)
+                #--------------------------------------
+                self.integration_step(nb,t1, is_moving)
                 #--------------------------------------
                 self.code_timer.stop('integration_step')
 
@@ -175,7 +171,7 @@ class Solver(ParameterBaseClass):
         self.code_timer.stop('pre_step_bookkeeping')
 
 
-    def integration_step(self, nb, t):
+    def integration_step(self, nb, t, is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties
         # nb is buffer offset
@@ -193,7 +189,6 @@ class Solver(ParameterBaseClass):
         v       = part_prop['particle_velocity'].data
         v_temp  = part_prop['v_temp'].data  # temp vel from interp at each RK substeps
         velocity_modifier= part_prop['velocity_modifier'].data
-        is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out = self.get_particle_index_buffer())
 
         # this makes x1, ['x_last_good']  at start of new integration step for moving particles, allowing updates to x2 ['x']
         particle_operations_util.copy(x1, x2, is_moving)
@@ -242,9 +237,6 @@ class Solver(ParameterBaseClass):
         #  v = (v1 + 2.0 * (v2 + v3) + v4) /6
         #  x2 = x1 + v*dt
         solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)  # set final location directly to particle x property
-
-        return  is_moving
-
 
 
     def screen_output(self,n_steps, nt,  nb,  ns, t1, t0_step):
