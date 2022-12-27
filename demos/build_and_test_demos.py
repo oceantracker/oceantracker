@@ -30,7 +30,7 @@ demo_base_params=\
                 'search_sub_dirs': True,
                 'dimension_map': {'time': 'time', 'node': 'nodes'},
                 'grid_variables'  : {'time': 'time_sec', 'x':['east','north'],  'triangles': 'tri'},
-                'field_variables': {'water_velocity' : ['east_vel','north_vel'], 'water_depth': 'depth','tide':'tide'},
+                'field_variables': {'water_velocity' : ['east_vel','north_vel'],'water_depth': 'depth','tide':'tide'},
                 'time_buffer_size': 24,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
  'base_case_params' : {
@@ -275,7 +275,7 @@ s55['base_case_params']['particle_release_groups']=[{'points': [[1594500, 548700
                                     'pulse_size': 10, 'release_interval':  3600}
                                                     ]
 s55['base_case_params']['velocity_modifiers']= [
-       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.0005}
+       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
 ]
 s55['base_case_params']['fields']=[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}]
 s55['base_case_params']['solver'] = {'n_sub_steps': 30}
@@ -283,7 +283,7 @@ s55['base_case_params']['particle_statistics']=[
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
                       'grid_size': [120, 121]}]
-
+#s55['base_case_params']['dispersion'] = {'A_V': 0,'A_H': 0} # testing
 params.append(s55)
 
 # schsim 3D, sometimes resupend

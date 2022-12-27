@@ -89,7 +89,7 @@ base_case_params:
     n_sub_steps: 30
   velocity_modifiers:
   - class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
-    mean: -0.0005
+    mean: -0.001
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: false

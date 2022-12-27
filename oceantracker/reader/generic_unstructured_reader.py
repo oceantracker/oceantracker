@@ -6,13 +6,7 @@ from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, P
 from oceantracker.util.message_and_error_logging import append_message, GracefulExitError, FatalError
 from oceantracker.util import time_util
 from oceantracker.fields.util import fields_util
-import traceback
-from os import path, walk
-from glob import glob
-from oceantracker.util.ncdf_util import NetCDFhandler
-from time import perf_counter
-from datetime import datetime
-
+from oceantracker.util.cord_transforms import WGS84_to_UTM
 
 from oceantracker.reader._base_reader import _BaseReader
 
@@ -25,63 +19,8 @@ class GenericUnstructuredReader(_BaseReader):
         self.buffer_info ={'n_filled' : None}
         self.class_doc(description='Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names')
 
-    def build_reader(self, reader_build_info):
-        si = self.shared_info
-        self.reader_build_info = reader_build_info
 
-        fm = si.classes['field_group_manager']
-
-        self.code_timer.start('build_hindcast_reader')
-        nc = NetCDFhandler(reader_build_info['sorted_file_info']['names'][0], 'r')
-
-        self.read_hindcast_info(nc)
-        self._setup_grid(nc,reader_build_info)
-        grid = si.classes['reader'].grid
-
-        # setup fields
-        for name, item in self.params['field_variables'].items():
-            if item is None: continue
-
-            class_params, unpacking_info = self.get_field_variable_info(nc,name)
-
-            class_params['class_name']='oceantracker.fields.reader_field.ReaderField'
-            i = fm.add_field('from_reader_field', class_params, crumbs = 'Adding field derived from reader field >>> ' + name)
-            i.info.update(unpacking_info) # info to unpack vaiabes in file
-            i.initialize()
-
-            if not i.params['is_time_varying']:
-                # if not time dependent read in now, eg water_depth
-                # do any customised tweaks on the hoindcadt data
-                data = self.read_field_variable_as4D(name, nc, i)
-                data = self.preprocess_field_variable(name, data, nc)
-
-                if i.info['requires_depth_averaging']:
-                    data = fields_util.depth_aver_SlayerLSC_in4D(data, grid['zlevel'], grid['bottom_cell_index'])
-                i.data[:] = data
-
-            # set up depth averaged version if requested
-            if name in self.params['field_variables_to_depth_average']:
-                # tweak shape to fit depth average of scalar or 3D vector
-                p = deepcopy(i.params)
-                p['is3D'] = False
-                if i.get_number_components() == 3: p['num_components'] = 2
-                p['name'] = name + '_depth_average'
-                i2 = fm.add_field('depth_averaged_from_reader_field', p, crumbs='Adding depth averaged field, derived from reader field >>> ' + name)
-                i2.initialize()
-
-        # get dry cells from total water depth??
-
-
-        nc.close()
-
-
-        # needed for force read at first time step read to make
-        self.buffer_info['n_filled'] = 0
-        self.buffer_info['nt_buffer0'] = 0
-
-        self.code_timer.stop('build_hindcast_reader')
-
-    def _setup_grid(self, nc,reader_build_info):
+    def setup_grid(self, nc,reader_build_info):
         si= self.shared_info
         self.grid = {'x': None, 'triangles': None, 'zlevel' : None,
               'has_open_boundary_data': False}
@@ -131,6 +70,14 @@ class GenericUnstructuredReader(_BaseReader):
             time += self.params['time_zone']*3600.
         return time
 
+    def read_x(self, nc):
+        x = np.full((nc.get_dim_size(self.params['dimension_map']['node']), 2), 0.)
+        x[:, 0] = nc.read_a_variable(self.params['grid_variables']['x'][0])
+        x[:, 1] = nc.read_a_variable(self.params['grid_variables']['x'][1])
+        if self.params['cords_in_lat_long']:
+            x = WGS84_to_UTM(x)
+        return x
+
     def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
         # read time and  grid vaiables
         grid = self.grid
@@ -139,6 +86,8 @@ class GenericUnstructuredReader(_BaseReader):
 
         if grid['zlevel'] is not None:
             grid['zlevel'][buffer_index, :] = self.read_zlevel(nc,file_index=file_index)
+
+
 
     def read_triangles(self, nc):
         data = nc.read_a_variable(self.params['grid_variables']['triangles'])
@@ -155,19 +104,13 @@ class GenericUnstructuredReader(_BaseReader):
 
         return data.astype(np.int32)
 
-    def read_zlevel(self, nc, file_index=None):
+    def read_zlevel(self, nc, file_index):
         data = nc.read_a_variable(self.params['grid_variables']['zlevel'], sel=file_index)
         return data
 
     def read_bottom_cell_index(self, nc):
-        # time invariant bottom cell index, which varies across gris in LSC vertical grid
-        if nc.is_var(self.params['grid_variables']['bottom_cell_index']):
-            data = nc.read_a_variable(self.params['grid_variables']['bottom_cell_index'])
-            if self.params['one_based_indices']:
-                data -= 1
-        else:
-            # Slayer grid, bottom cell index = zero
-            data = np.zeros((self.grid['x'].shape[0],),dtype=np.int32)
+        # Slayer grid, bottom cell index = zero
+        data = np.zeros((self.grid['x'].shape[0],), dtype=np.int32)
         return data
 
 

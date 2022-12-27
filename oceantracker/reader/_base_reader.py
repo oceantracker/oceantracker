@@ -10,8 +10,8 @@ from time import perf_counter
 from oceantracker.fields.util import fields_util
 from oceantracker.util.basic_util import nopass
 from oceantracker.fields.util.fields_util import depth_aver_SlayerLSC_in4D
-from copy import copy
-from oceantracker.util.cord_transforms import WGS84_to_UTM
+from copy import copy ,deepcopy
+
 from oceantracker.reader.util import reader_util
 
 class _BaseReader(ParameterBaseClass):
@@ -34,7 +34,7 @@ class _BaseReader(ParameterBaseClass):
                                                     'bottom_cell_index': PVC(None, str),
                                                     'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell'),
                                                     },
-                                 'field_variables': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3),
+                                 'field_variables': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3,is_required=True),
                                                      'tide': PVC(None, str),
                                                      'water_depth': PVC(None, str),
                                                      'water_temperature': PVC(None, str),
@@ -48,9 +48,18 @@ class _BaseReader(ParameterBaseClass):
                                  })  # list of normal required dimensions
         self.info['buffer_info'] = {'n_filled': None }
 
+    #required read methods non time dependent variables
+    def read_x(self, nc): nopass('reader method: read_x is required')
+    def read_bottom_cell_index(self, nc):nopass('reader method: read_bottom_cell_index is required')
+    def read_bottom_cell_index(self, nc):nopass('reader method: read_bottom_cell_index is required')
+
+    # required methods time dependent variables, also require a set up method
+    def read_zlevel(self, nc, file_index): nopass('reader method: read_zlevel is required for 3D hindcasts')
+    def setup_zlevel(self, nc): nopass('reader method: setup_zlevel is required for 3D hindcasts')
+
     def _file_checks(self, file_name, msg_list): pass
     def read_hindcast_info(self,nc): pass  # read hindcast attibutes from first file, eg z transforms for ROMS files
-    def _setup_grid(self, nc, reader_build_info): nopass('_setup_grid required')
+    def setup_grid(self, nc, reader_build_info): nopass('setup_grid required')
     def  preprocess_field_variable(self, name, data, nc): return data # allows tweaks to named fields, eg if name=='depth:
 
     def _build_grid_attributes(self, grid): pass
@@ -86,6 +95,56 @@ class _BaseReader(ParameterBaseClass):
 
         return file_info
 
+    def build_reader(self, reader_build_info):
+        si = self.shared_info
+        self.reader_build_info = reader_build_info
+
+        fm = si.classes['field_group_manager']
+
+        self.code_timer.start('build_hindcast_reader')
+        nc = NetCDFhandler(reader_build_info['sorted_file_info']['names'][0], 'r')
+
+        self.read_hindcast_info(nc)
+        self.setup_grid(nc,reader_build_info)
+
+        # setup fields
+        for name, item in self.params['field_variables'].items():
+            if item is None: continue
+            class_params, unpacking_info = self.get_field_variable_info(nc,name,item)
+            class_params['class_name'] = 'oceantracker.fields.reader_field.ReaderField'
+            i = fm.add_field('from_reader_field', class_params, crumbs='Adding field derived from reader field >>> ' + name)
+            i.info.update(unpacking_info)  # info to unpack vaiabes in file
+            i.initialize()
+
+            if not i.params['is_time_varying']:
+                # if not time dependent read in now, eg water_depth
+                # do any customised tweaks on the hoindcadt data
+                data = self.read_field_variable_as4D(name, nc, i)
+                data = self.preprocess_field_variable(name, data, nc)
+
+                if i.info['requires_depth_averaging']:
+                    data = fields_util.depth_aver_SlayerLSC_in4D(data, grid['zlevel'], grid['bottom_cell_index'])
+                i.data[:] = data
+
+            # set up depth averaged version if requested
+            if name in self.params['field_variables_to_depth_average']:
+                # tweak shape to fit depth average of scalar or 3D vector
+                p = deepcopy(i.params)
+                p['is3D'] = False
+                if i.get_number_components() == 3: p['num_components'] = 2
+                p['name'] = name + '_depth_average'
+                i2 = fm.add_field('depth_averaged_from_reader_field', p, crumbs='Adding depth averaged field, derived from reader field >>> ' + name)
+                i2.initialize()
+
+        # get dry cells from total water depth??
+        nc.close()
+
+        # needed for force read at first time step read to make
+        self.buffer_info['n_filled'] = 0
+        self.buffer_info['nt_buffer0'] = 0
+
+        self.code_timer.stop('build_hindcast_reader')
+        
     def _file_checks(self, file_name, msg_list):
         # check named variables are in first file
         si = self.shared_info
@@ -109,14 +168,13 @@ class _BaseReader(ParameterBaseClass):
         nc.close()
         return msg_list
 
-    def get_field_variable_info(self, nc, name):
+    def get_field_variable_info(self, nc, name,var_list):
         # get info from list of component eg ['temp'], ['u','v']
         si= self.shared_info
-        var_list = self.params['field_variables'][name]
+
         if type(var_list) is not list: var_list=[var_list] # if a string make a list of 1
         var_list = [v for v in var_list if v != None]
         var_file_name0=var_list[0]
-
 
         if self.params['dimension_map']['z'] is not None and nc.is_var_dim(var_file_name0, self.params['dimension_map']['z']):
             is3D_in_file = True
@@ -153,6 +211,10 @@ class _BaseReader(ParameterBaseClass):
             }
 
         return params, unpacking_info
+    
+    
+
+
 
     def time_steps_in_buffer(self, nt_hindcast_remaining):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
@@ -278,13 +340,7 @@ class _BaseReader(ParameterBaseClass):
             # nt increases through model run
             return nt - self.buffer_info['nt_buffer0']
 
-    def read_x(self, nc):
-        x = np.full((nc.get_dim_size(self.params['dimension_map']['node']),2),0.)
-        x[:, 0] = nc.read_a_variable(self.params['grid_variables']['x'][0])
-        x[:, 1] = nc.read_a_variable(self.params['grid_variables']['x'][1])
-        if self.params['cords_in_lat_long']:
-            x = WGS84_to_UTM(x)
-        return x
+
 
     def read_dry_cell_data(self,nc,file_index, buffer_index):
         # calculate dry cell flags, if any cell node is dry

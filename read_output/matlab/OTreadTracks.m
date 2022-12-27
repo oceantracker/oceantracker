@@ -8,7 +8,7 @@ end
 info= readNCinfoOT(filename);
 
 if isfield(info.Dimensions, 'time_particle')
-    default_vars= {'time','x','write_step_index','particle_ID'};    
+    default_vars= {'time','x','write_step_index','particle_ID'};
 else
     default_vars={'time','x'};
 end
@@ -17,9 +17,13 @@ end
 d = readNCvarsOT(filename,var_names_cell,{'ID','IDrelease_group','IDpulse','n_cell'},default_vars);
 
 
+% copy for use in reshaping compact mode tracks file
+if isfield(d.dim_info, 'time_particle')
+    wID=d.write_step_index+1;
+    pID=d.particle_ID;
+end
+
 f=fieldnames(d.var_info);
-wID=d.write_step_index+1; % copy for use in reshaping
-pID=d.particle_ID;
 for n=1:length(f)
     vn = f{n};
     if any(strcmp(d.var_info.(vn).dims, 'time_particle'))
@@ -36,4 +40,3 @@ for n=1:length(f)
     end
     
 end
-a=1;
