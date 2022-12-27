@@ -1,18 +1,10 @@
 # utils for particle tracking
 from  copy import deepcopy, copy
-import math
 import time
 import numpy as np
-import json
-from os import path
 import platform
 from psutil import  cpu_count, cpu_freq
-from importlib import import_module
-from datetime import datetime,date
-import traceback
 from numba import  njit
-import yaml
-
 
 class OceanTrackerDummyClass(object): pass
 

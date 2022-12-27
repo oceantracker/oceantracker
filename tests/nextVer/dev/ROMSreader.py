@@ -91,15 +91,15 @@ class ROMSreader(object):
 
 if __name__ == "__main__":
 
-    fn= 'F:\\Hindcasts\Hindcast_samples_tests\ROMS_samples\ocean_his_0001.nc'
-    fn = 'F:\\Hindcasts\Hindcast_samples_tests\ROMS_samples\\nz5km_his_201001.nc'
-
+    fn= 'F:\Hindcasts\Hindcast_samples_tests\ROMS_samples\ocean_his_0001.nc'
+    #fn = 'F:\Hindcasts\Hindcast_samples_tests\ROMS_samples\\Nordic_subset_day1.nc' has zero pho cords
 
     R= ROMSreader(fn)
     nb= np.arange(10)
     R.read_water_velocity(nb)
 
     if 1 == 1:
+
         plt.triplot(R.grid['x'][:, 0], R.grid['x'][:, 1], R.grid['triangles'], lw =0.3)
 
         sel= R.grid['node_type'] == 1
@@ -110,5 +110,8 @@ if __name__ == "__main__":
         plt.show()
 
     a=1
+
+    # build small version 25 by 25
+    
 
     R.close()

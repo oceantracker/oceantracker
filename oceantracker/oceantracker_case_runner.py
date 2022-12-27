@@ -347,7 +347,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.classes['tracks_writer'].initialize()
 
         # initialize the rest of the core classes
-        for name in ['particle_group_manager', 'interpolator', 'solver'] : # order may matters?
+        for name in ['particle_group_manager', 'interpolator', 'solver'] : # order may matter?
             si.classes[name].initialize()
 
         si.case_log.write_progress_marker('initialized all classes')

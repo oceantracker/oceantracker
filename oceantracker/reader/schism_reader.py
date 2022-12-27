@@ -78,6 +78,16 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
             time += self.params['time_zone']*3600.
         return time
 
+    def read_bottom_cell_index(self, nc):
+        # time invariant bottom cell index, which varies across gris in LSC vertical grid
+        if nc.is_var(self.params['grid_variables']['bottom_cell_index']):
+            data = nc.read_a_variable(self.params['grid_variables']['bottom_cell_index'])
+            if self.params['one_based_indices']:
+                data -= 1
+        else:
+            # Slayer grid, bottom cell index = zero
+            data = np.zeros((self.grid['x'].shape[0],),dtype=np.int32)
+        return data
 
     def read_open_boundary_data(self, grid):
         # read hgrid file for open boundary data

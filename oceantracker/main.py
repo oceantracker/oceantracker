@@ -1,6 +1,6 @@
 # method to run ocean tracker from parameters
 # eg run(params)
-code_version = '0.3.02.006 2022-12-01'
+code_version = '0.3.02.004 2022-12-28'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -405,7 +405,7 @@ class _RunOceanTrackerClass(object):
         # write a netcdf of the grid from first hindcast file
         msg_list=[]
         hindcast = NetCDFhandler(reader_build_info['sorted_file_info']['names'][0], 'r')
-        reader._setup_grid(hindcast, reader_build_info)
+        reader.setup_grid(hindcast, reader_build_info)
         grid= reader.grid
         hindcast.close()
 
