@@ -46,8 +46,10 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
 
     if show_grid:
         ax.triplot(grid['x'][:, 0], grid['x'][:, 1], grid['triangles'], color=(0.8, 0.8, 0.8), linewidth=.5, zorder=1)
-    for o in grid['grid_outline']['open_boundary_nodes']:
-        plt.plot(grid['x'][o, 0], grid['x'][o, 1], '--','red')
+
+    sel = grid['node_type'] == 3 # open_boundary_nodes
+    plt.plot(grid['x'][sel, 0], grid['x'][sel, 1], '--','darkgreen')
+
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.tick_params(axis="both", direction="in", right=True, top=True)

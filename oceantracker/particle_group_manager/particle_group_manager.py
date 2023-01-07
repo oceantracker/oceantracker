@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
 from copy import copy
-from oceantracker.util.parameter_base_class import ParameterBaseClass
+from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
@@ -168,13 +168,13 @@ class ParticleGroupManager(ParameterBaseClass):
         params = kwargs
         params['class_name'] = 'oceantracker.particle_properties._base_properties.TimeVaryingInfo'
         si = self.shared_info
-        p = si.add_class_instance_to_list_and_merge_params('time_varying_info','manual_update', kwargs)
-        si.add_class_instance_to_interators(p.params['name'],'time_varying_info','manual_update', p)
-        p.initialize()
+        i, msg_list = make_class_instance_from_params(params)
+        si.add_class_instance_to_interator_lists('time_varying_info', 'manual_update', i)
+        i.initialize()
 
-        if si.write_tracks and p.params['write']:
+        if si.write_tracks and i.params['write']:
             w = si.classes['tracks_writer']
-            w.create_variable_to_write(p.params['name'], 'time', None,p.params['vector_dim'], attributes_dict=None, dtype=p.params['dtype'] )
+            w.create_variable_to_write(i.params['name'], 'time', None,i.params['vector_dim'], attributes_dict=None, dtype=i.params['dtype'] )
 
     def create_particle_property(self,prop_type, prop_params):
         si = self.shared_info
@@ -186,12 +186,10 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # set default class
         if 'class_name' not in prop_params: prop_params['class_name'] = 'oceantracker.particle_properties._base_properties.ParticleProperty'
-
-        i = si.add_class_instance_to_list_and_merge_params('particle_properties', prop_type, prop_params,
-                                                           crumbs='Adding "particle_properties" name= "' + str(prop_params['name']) + '" of type=' +   prop_type)
-        si.add_class_instance_to_interators(i.params['name'], 'particle_properties', prop_type, i)
+        i, msg_list = make_class_instance_from_params(prop_params)
+        si.add_class_instance_to_interator_lists('particle_properties', prop_type, i,
+                                                 crumbs='Adding "particle_properties" name= "' + str(prop_params['name']) + '" of type=' +   prop_type)
         i.initialize()
-
         name = i.params['name']
         if si.write_tracks:
             # tweak write flag if in param lists

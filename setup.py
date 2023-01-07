@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(name='oceantracker',
-      python_requires='>=3.8',
+      python_requires='=3.10.8',
       version='0.3',
       description='Off line Lagrangian particle tracking in the Ocean',
       author='',

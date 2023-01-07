@@ -9,6 +9,7 @@ from oceantracker.post_processing.read_output_files import load_output_files
 from oceantracker import main
 from oceantracker.post_processing.plotting import plot_statistics,plot_tracks, plot_vertical_tracks, plot_utilities
 import make_demo_plots
+import build_and_test_demos
 
 def mfn(movie_file, n=None):
     if movie_file is not None:
@@ -28,14 +29,11 @@ if __name__ == "__main__":
     parser.add_argument('--demo', default=None, type= int)
     parser.add_argument('--root_output_dir', default='output', type=str)
     parser.add_argument('-mp4', action='store_true')
-    parser.add_argument('-build', action='store_true')
     parser.add_argument('-testing', action='store_true')
     args = parser.parse_args()
 
 
-    if args.build:
-        # build json and yamls
-        system('python build_and_test_demos.py')
+    build_and_test_demos.build_demos()
 
 
     if args.root_output_dir is None:  args.root_output_dir = getcwd()

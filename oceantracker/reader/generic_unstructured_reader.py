@@ -5,58 +5,129 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.message_and_error_logging import append_message, GracefulExitError, FatalError
 from oceantracker.util import time_util
+from oceantracker.util import shared_memory
 from oceantracker.fields.util import fields_util
 from oceantracker.util.cord_transforms import WGS84_to_UTM
-
+from numba import typed as numba_type
 from oceantracker.reader._base_reader import _BaseReader
+from oceantracker.reader.util import reader_util
 
 class GenericUnstructuredReader(_BaseReader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
-        self.add_default_params({ 'dimension_map': {'node': PVC('node', str)}} )
+        self.add_default_params({ 'dimension_map': {'node': PVC('node', str)},
+                                'grid_variables': {'triangles': PVC(None, str, is_required=True)}})
 
         self.buffer_info ={'n_filled' : None}
         self.class_doc(description='Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names')
 
+    def make_non_time_varying_grid(self,nc, grid):
+        # set up grid variables which don't vary in time and are shared by all case runners and main
+        # add to reader build info
+        grid['x'] = self.read_nodal_x_float32(nc)
+        grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
+        grid['quad_cell_to_split_index'] = np.flatnonzero(grid['quad_cells_to_split']).tolist() # make as list of indcies for calculations
+        grid['open_boundary_nodes'], grid['open_boundary_adjacency'] = self.read_open_boundary_data(grid)
 
-    def setup_grid(self, nc,reader_build_info):
-        si= self.shared_info
-        self.grid = {'x': None, 'triangles': None, 'zlevel' : None,
-              'has_open_boundary_data': False}
-        grid= self.grid
-        # load grid variables
-        grid['time'] = np.full((self.params['time_buffer_size'],),0.) # time buffer
-        grid['nt_hindcast'] = np.full((self.params['time_buffer_size'],),-10, dtype=np.int32) # what global hindcast timestesps are in the buffer
-        grid['x'] =  self.read_x(nc)
+        if self.is_hindcast3D(nc):
+            grid['bottom_cell_index'] = self.read_bottom_cell_index_as_int32(nc)
 
-        grid['triangles'] = self.read_triangles(nc)
+        # find model outline, make adjacency matrix etc
+        grid = self._add_grid_attributes(grid)
 
+        # convert node to cell map to an numpy array
+        max_cells = 0
+        for l in grid['node_to_tri_map']:
+            if len(l) > max_cells: max_cells = len(l)
+        grid['node_to_tri_map_asarray']= np.full((len(grid['node_to_tri_map']),max_cells),-999999,dtype=np.int32)
+        for n,l in enumerate(grid['node_to_tri_map']):
+            grid['node_to_tri_map_asarray'][n, :len(l)]= np.asarray(l)
 
-        grid['nz'] = 1
+        return grid
 
-        if self.params['grid_variables']['zlevel'] is not None:
-            # set up zlevel
-            zlevel_name =self.params['grid_variables']['zlevel']
-            s = list(nc.get_var_shape(zlevel_name))
-            s[0] = self.params['time_buffer_size']
-            grid['zlevel'] = np.full(s, 0., dtype=np.float32)
+        # adjust node type and adjacent for open boundaries
+        # todo define node and adjacent types  in dict
+        sel = grid['open_boundary_nodes'] != 0
+        grid['node_type'][sel] = 3
+        grid['has_open_boundary_data'] = True if np.any(sel) else False
+        grid['adjacency'][grid['open_boundary_adjacency'] != 0] = -2
 
-            grid['nz'] = grid['zlevel'].shape[2]
-            grid['vertical_grid_type'] = 'Slayer' if self.params['grid_variables']['bottom_cell_index'] is None else 'LSC'
-            grid['bottom_cell_index'] = self.read_bottom_cell_index(nc)
+    def make_grid_time_buffers(self,nc, grid, grid_time_buffers):
+        # now set up time buffers
+        time_buffer_size = self.params['time_buffer_size']
+        grid_time_buffers['time'] = np.full((self.params['time_buffer_size'],), 0.)  # time buffer
+        grid_time_buffers['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
+        # set up zlevel
+        if self.is_hindcast3D(nc):
+            s = [self.params['time_buffer_size'], grid['x'].shape[0], self.get_number_of_z_levels(nc)]
+            grid_time_buffers['zlevel'] = np.full(s, 0., dtype=np.float32)
 
+        # space for dry cell info
+        grid_time_buffers['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0] ), 1, np.int8)
 
-        # split quad cells, find model outline, make adjacency matrix etc
-        self._build_grid_attributes(grid)
+        # working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
+        grid_time_buffers['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
 
-        #now any quad cells are split set up, space for dry cell info
-        grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
-        grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)  # 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
+        # note which are time buffers
+        return grid_time_buffers
 
-        # other grid info
-        self.read_open_boundary_data(grid)
+    def build_case_runner_reader(self, reader_build_info):
+        # todo move to base_reader or case runner??
+        grid = self.grid
+        self.reader_build_info = reader_build_info
+        
+        # shared constant arrays of grid
+        for key, item in reader_build_info['grid_constant_arrays_builder'].items():
+            sm = shared_memory.SharedMemArray(sm_map=item)
+            self.shared_memory['grid'][key] = sm # need to retain a reference to shared or will be deleted
+            grid[key] = sm.data
 
+        grid['quad_cell_to_split_index'] = np.flatnonzero(grid['quad_cells_to_split']).tolist()
+
+        # convert node to cell list from an array back into a list of lists, needs to be a numba list for number interation
+        grid['node_to_tri_map']= reader_util.convert_numpy_node_to_tri_map_to_numba_list(grid['node_to_tri_map_asarray'])
+
+        # time buffers , eg time
+        grid_time_buffers = self.grid_time_buffers
+        grid_time_buffers.update({'zlevel': None, 'dry_cell_index': None})
+
+        for key, item in reader_build_info['grid_time_buffers_builder'].items():
+            if 'mem_block_name' in item:
+                #
+                sm = shared_memory.SharedMemArray(sm_map=item)
+                self.shared_memory['grid'][key] = sm # need to retain a reference to shared or will be deleted
+                grid_time_buffers[key] = sm.data
+            else:
+                grid_time_buffers[key] = np.full(item['shape'],0, dtype=item['dtype'])
+
+        # note if 3D
+        grid['nz'] = 1 if grid_time_buffers['zlevel'] is None else grid_time_buffers['zlevel'].shape[2]
+
+        # set up reader fields, using shared memory if requested
+        self.setup_reader_fields(reader_build_info)
+        pass
+
+    def check_grid(self,grid):
+        tt='Grid Check, '
+        # check types of grid variables
+        type_checks={'x': np.float32,'triangles':np.int32}
+        for name,t in type_checks.items():
+            if grid[name] is not None and grid[name].dtype != t:
+                self.write_msg(tt + 'array dtype of grid variable"' + name + '" does not match required type "' +str(t)+ '"',
+                               exception=FatalError,
+                               hint='Check read method for this varaible converts to required type')
+
+        # check triangulation appears to be zero based index
+        if np.max(grid['triangles'][:, :3]) >= self.grid['x'].shape[0] or np.min(grid['triangles'][:, :3]) < 0:
+            self.write_msg(tt+ 'out of bounds node number  node in triangulation, require zero based indices',
+                           exception=FatalError,
+                           hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
+
+        elif np.min(grid['triangles']) == 1:
+            self.write_msg(tt+ 'smallest node index in triangulation ==1, require zero based indices',
+                           warning=True,
+                           hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
 
     def read_time(self, nc, file_index=None):
         vname=self.params['grid_variables']['time']
@@ -70,65 +141,46 @@ class GenericUnstructuredReader(_BaseReader):
             time += self.params['time_zone']*3600.
         return time
 
-    def read_x(self, nc):
-        x = np.full((nc.get_dim_size(self.params['dimension_map']['node']), 2), 0.)
-        x[:, 0] = nc.read_a_variable(self.params['grid_variables']['x'][0])
-        x[:, 1] = nc.read_a_variable(self.params['grid_variables']['x'][1])
+    def read_nodal_x_float32(self, nc):
+        gv= self.params['grid_variables']
+        x = np.stack((nc.read_a_variable(gv['x'][0]), nc.read_a_variable(gv['x'][1])), axis=1).astype(np.float32)
         if self.params['cords_in_lat_long']:
             x = WGS84_to_UTM(x)
         return x
 
     def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
-        # read time and  grid vaiables
-        grid = self.grid
+        # read time and  grid variables, eg time, tide, zlevel
+        grid_time_buffers = self.grid_time_buffers
 
-        grid['time'][buffer_index] = self.read_time(nc, file_index=file_index)
+        grid_time_buffers['time'][buffer_index] = self.read_time(nc, file_index=file_index)
+        self.read_dry_cell_data(nc, file_index, grid_time_buffers['is_dry_cell'],buffer_index)
 
-        if grid['zlevel'] is not None:
-            grid['zlevel'][buffer_index, :] = self.read_zlevel(nc,file_index=file_index)
+        if grid_time_buffers['zlevel'] is not None:
+            # read zlevel inplace to save memory?
+            self.read_zlevel_as_float32(nc, file_index, grid_time_buffers['zlevel'], buffer_index)
 
-
-
-    def read_triangles(self, nc):
+    def read_triangles_as_int32(self, nc):
         data = nc.read_a_variable(self.params['grid_variables']['triangles'])
-        if self.params['one_based_indices']:
-            data -= 1
+        if self.params['one_based_indices']:  data -= 1
+        quad_cells_to_split = np.full((data.shape[0],),False,dtype=bool)
+        return data[:,:3].astype(np.int32), quad_cells_to_split
 
-        if np.max(data[:,:3]) >= self.grid['x'].shape[0] or np.min(data[:,:3]) < 0:
-            self.write_msg('Grid set up, out of bounds node number  node in triangulation, require zero based indices',
-                           exception=FatalError,
-                           hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
+    def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
+        # read in place
+        zlevel_buffer[buffer_index,:] = nc.read_a_variable(self.params['grid_variables']['zlevel'], sel=file_index).astype(np.float32)
 
-        elif np.min(data) == 1:
-            self.write_msg('Grid set up, smallest node index in triangulation ==1, require zero based indices', warning=True, hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
-
-        return data.astype(np.int32)
-
-    def read_zlevel(self, nc, file_index):
-        data = nc.read_a_variable(self.params['grid_variables']['zlevel'], sel=file_index)
-        return data
-
-    def read_bottom_cell_index(self, nc):
+    def read_bottom_cell_index_as_int32(self, nc):
         # Slayer grid, bottom cell index = zero
         data = np.zeros((self.grid['x'].shape[0],), dtype=np.int32)
         return data
 
 
-    def _build_grid_attributes(self, grid):
+    def _add_grid_attributes(self, grid):
         # build adjacency etc from triangulation
-
-        ntri_in_file = grid['triangles'].shape[0]
-        grid['triangles'], grid['triangles_to_split'] = triangle_utilities_code.split_quad_cells(grid['triangles'])
-
-        # expand time varying triangle properties buffers to include new cells, eg drycell buffer
-        if grid['triangles_to_split'] is not None:
-            for name, item in grid.items():
-                if  isinstance(item,np.ndarray)  and len(item.shape) > 1 and item.shape[1] == ntri_in_file:  # those arrays matching  triangle size in file
-                    grid[name]= np.full((item.data.shape[0], grid['triangles'].shape[0]), 0, dtype=grid[name].dtype)
-
         grid['node_to_tri_map'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
         grid['adjacency'] =  triangle_utilities_code.build_adjacency_from_node_cell_map(  grid['node_to_tri_map']  , grid['triangles'])
         grid['boundary_triangles'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
+
         grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid['triangles'], grid['adjacency'], grid['x'],   grid['node_to_tri_map']  )
 
         # make island and domain nodes
@@ -140,7 +192,7 @@ class GenericUnstructuredReader(_BaseReader):
 
         grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
 
-
+        return grid
 
 
 

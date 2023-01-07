@@ -75,11 +75,10 @@ reader:
     water_temperature: temp
   field_variables_to_depth_average:
   - water_velocity
-  - water_depth
   - salt
   - water_temperature
   file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast
+  input_dir: D:\A_Working\oceantracker_work\demos\demo_hindcast
 shared_params:
   backtracking: false
   compact_mode: true

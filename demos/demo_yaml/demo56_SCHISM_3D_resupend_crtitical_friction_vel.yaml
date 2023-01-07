@@ -89,7 +89,7 @@ base_case_params:
     n_sub_steps: 30
   trajectory_modifiers:
   - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
-    critical_friction_velocity: 0.01
+    critical_friction_velocity: 0.005
   velocity_modifiers:
   - class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
     mean: -0.001
@@ -100,11 +100,10 @@ reader:
     water_temperature: temp
   field_variables_to_depth_average:
   - water_velocity
-  - water_depth
   - salt
   - water_temperature
   file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast
+  input_dir: D:\A_Working\oceantracker_work\demos\demo_hindcast
 shared_params:
   compact_mode: true
   debug: true

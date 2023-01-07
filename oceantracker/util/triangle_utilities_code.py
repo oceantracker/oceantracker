@@ -165,23 +165,18 @@ def mark_open_boundary_faces_in_adjacency_matrix(tri, boundary_triangles, bounda
 
     return adjacency_matrix
 
+def split_quad_cells(triangles_and_quads,quad_cells_to_split):
+    # find indices flagged for splitting
+    if quad_cells_to_split is not None:
+        qtri = triangles_and_quads[quad_cells_to_split, :]  # those to split
+        triangles = np.vstack((triangles_and_quads[:,:3], qtri[:, [0, 2, 3]]))
 
-def split_quad_cells(triangles):
-    # those with 4 cols are quad elements, so split into triangles
-    # eg can be in schism quad cells, or regular grid viewed as triangles
-    if triangles.shape[1] == 4:
-        # split quad grids buy making new triangles
-        sel = triangles[:, 3] > 0
-        if sel.shape[0] > 0:
-            triangles_to_split= np.flatnonzero(sel)  # needed when loading triangle properties, eg dry cells if used
+    return triangles
 
-            qtri = triangles[sel, :]  # those with 4 columns
+def append_split_cell_data(grid,data,axis=0):
+    # for cell based data add split cell data below given data
+    return  np.concatenate((data, data[:, grid['quad_cell_to_split_index']]), axis=axis)
 
-            triangles = np.vstack((triangles[:, :3], qtri[:, [0, 2, 3]]))
-
-    else:
-        triangles_to_split = None
-    return triangles, triangles_to_split
 
 def calcuate_triangle_areas(xy, tri):
     x= xy[tri,0]

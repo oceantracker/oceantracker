@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
     # 1) prebuild reader
     ot0 = OceanTrackerReRunner()
-    reader = ot0.build_reader(params)
+    reader = ot0.setup_reader_fields(params)
 
     # 2) set up an rerunnable engine using first run
     ot_rerunner = OceanTrackerReRunner(reader)

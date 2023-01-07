@@ -266,7 +266,7 @@ params.append (s50)
 # schsim 3D
 s55 = deepcopy(schsim_base_params)
 s55['shared_params'].update({'output_file_base' : 'demo55_SCHISM_3D_fall_velocity'})
-s55['reader'].update({'depth_average': False,'field_variables_to_depth_average' :[ 'water_velocity','water_depth', 'salt', 'water_temperature']})
+s55['reader'].update({'depth_average': False,'field_variables_to_depth_average' :[ 'water_velocity', 'salt', 'water_temperature']})
 
 s55['base_case_params']['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
                                                      'pulse_size': 10, 'release_interval': 3600},
@@ -289,7 +289,7 @@ params.append(s55)
 # schsim 3D, sometimes resupend
 s56 = deepcopy(s55)
 s56['base_case_params']['trajectory_modifiers'] = [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
-                                                    'critical_friction_velocity': .01}]
+                                                    'critical_friction_velocity': .005}]
 s56['shared_params'].update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
 s56['base_case_params']['velocity_modifiers']= [
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}]
@@ -365,6 +365,39 @@ p90['base_case_params']['dispersion'].update({'A_H' : 0., 'A_V': 0.})
 
 params.append(p90)
 
+
+# demo 100 ROMS test
+# Sample data subset
+# https://www.seanoe.org/data/00751/86286/
+
+ROMS_params={'shared_params' :{'output_file_base' :'demo70_ROMS_reader_test', 'debug': True},
+ 'reader': {'class_name': 'oceantracker.reader.dev_ROMS_reader.ROMS',
+                    'input_dir': 'demo_hindcast',
+                     'file_mask': 'ROMS_DopAnV2R3-ini2007_da_his.nc',
+                     'field_variables':{'water_temperature':'temp'}
+                          },
+ 'base_case_params' : { 'run_params' : {}, 'dispersion': {'A_H': .2, 'A_V': 0.001},
+                        'solver': {'n_sub_steps': 30},
+                'particle_release_groups': [{'points': [[1595000, 5482600, -1],[1599000, 5486200, -1] ],
+                                                     'pulse_size': 10, 'release_interval': 3600,
+                                                    'allow_release_in_dry_cells': True},
+                                                    {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+                                    'points': poly_points,
+                                    'pulse_size': 10, 'release_interval':  3600}
+                                                    ],
+                'particle_properties': [{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
+                                                      'decay_time_scale': 1. * 3600 * 24} ],
+                'event_loggers':[{'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
+                                                    'particle_prop_to_write_list' : [ 'ID','x', 'IDrelease_group', 'status', 'age'],
+                                                        'polygon_list': [{'user_polygon_name' : 'A','points': (np.asarray(poly_points) + np.asarray([-5000,0])).tolist()},
+                                                                         {'user_polygon_name' : 'B', 'points': poly_points_large}
+                                                                         ]
+                                              }]
+                }
+}
+
+params.append(ROMS_params)
+
 def make_demo_python(demo_name):
     # write a simplified version of code to add to docs
     out=['# ' + demo_name +'.py','#---------------------------------------',
@@ -408,15 +441,9 @@ def make_demo_python(demo_name):
             f.write(l + "\n")
 
 
-
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-testrun', action='store_true')
-    args = parser.parse_args()
-
-
+def build_demos(testrun=False):
     # make json/ymal
+
     JSONdir ='demo_json'
     if not path.isdir(JSONdir): mkdir(JSONdir)
     YAMLdir = 'demo_yaml'
@@ -439,7 +466,7 @@ if __name__ == "__main__":
         yaml_util.write_YAML(yaml_file, demo)
 
         make_demo_python(demo_name)
-        if args.testrun:
+        if testrun:
             # test generated python code
             cwd= getcwd()
             chdir('demo_code')
@@ -449,8 +476,17 @@ if __name__ == "__main__":
 
     # special case of minimal example demo
 
-    if args.testrun:
+    if testrun:
         from minimal_example import params as min_params
 
         json_util.write_JSON(path.join(JSONdir, 'minimal_example.json'), min_params)
         yaml_util.write_YAML(path.join(YAMLdir, 'minimal_example.yaml'), min_params)
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-testrun', action='store_true')
+    args = parser.parse_args()
+
+    build_demos(args.testrun)
