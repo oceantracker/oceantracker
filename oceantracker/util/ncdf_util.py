@@ -23,6 +23,14 @@ class NetCDFhandler(object):
 
         self.max_bytes_per_chunk= 4*10**9 # looks like chunks cant exceeded 4gb each
 
+        self.variable_info ={}
+        if mode == 'r':
+            # get variable info
+            v = self.file_handle.variables
+            for name in v.keys():
+                    self.variable_info[name] ={'dimensions':v[name].dimensions, 'shape': v[name].shape,'dtype': v[name].datatype}
+
+
     def add_a_Dimension(self, name, dim_size=None):
         # add a dimension for use in netcdf
         # print('AD',name,dim_size)
@@ -46,11 +54,14 @@ class NetCDFhandler(object):
                 setattr(self.file_handle.variables[name], key, self._sanitize_attribute(value))
         return v
 
-    def read_a_variable(self,name, sel=None):
+    def read_a_variable(self,name, sel=None, time_first_dim=True):
         if sel is None:
             data= self.file_handle.variables[name][:]   #read a whole variable
         else:
-            data = self.file_handle.variables[name][sel, ...] # selection from first dimension
+            if time_first_dim:
+                data = self.file_handle.variables[name][sel, ...] # selection from first dimension
+            else:
+                data = self.file_handle.variables[name][..., sel]  # selection from last dimension
         return np.array(data)
 
     def read_variables(self, name_list,output=None):

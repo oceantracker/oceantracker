@@ -1,7 +1,7 @@
-from oceantracker.util.parameter_base_class import ParameterBaseClass
+from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
-from oceantracker.field_group_manager.util import field_group_manager_util
-import numpy as np
+from oceantracker.field_group_manager.util import  field_group_manager_util
+
 #TODO allow feilds to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
 
@@ -16,38 +16,29 @@ class FieldGroupManager(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'name': PVC('field_group_manager', str)})
 
-        # set up fields shared info
-        si = self.shared_info
-
         self.n_buffer = 0
-
 
     def initialize(self):
         si=self.shared_info
         si.create_class_interator('fields', known_iteration_groups=self.known_field_types)
 
 
-    def add_field(self, field_type, class_params, crumbs=None):
-        si = self.shared_info
-        i = si.add_class_instance_to_list_and_merge_params('fields', field_type, class_params, crumbs=crumbs)
-        si.add_class_instance_to_interators(i.params['name'], 'fields', field_type, i)
-        return i
-
     def setup_interp_time_step(self,nb, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
         si=self.shared_info
         grid = si.classes['reader'].grid
+        grid_time_buffers = si.classes['reader'].grid_time_buffers
 
         self.code_timer.start('setup_interp_time_step')
         self.n_buffer = nb  # buffer offset just before given time ,
 
         # when back tracking hindcast buffer is ordered  backwards in time, and time step is still positive
         # thus step fraction remains positive
-        self.step_dt_fraction = abs(time_sec - grid['time'][nb]) / si.hindcast_time_step
+        self.step_dt_fraction = abs(time_sec - grid_time_buffers['time'][nb]) / si.hindcast_time_step
 
         # update 0-255 dry cell index
-        field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, grid['is_dry_cell'], grid['dry_cell_index'])
+        field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, grid_time_buffers['is_dry_cell'],   grid_time_buffers['dry_cell_index'])
 
         # find cell for xq, node list and weight for interp at calls
         si.classes['interpolator'].find_cell(xq, nb, self.step_dt_fraction, active)

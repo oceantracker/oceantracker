@@ -145,7 +145,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.code_timer.start('write_output')
         si= self.shared_info
-        grid = si.classes['reader'].grid
+        grid_time_buffers = si.classes['reader'].grid_time_buffers
 
         # write time vary info , eg "time"
         self.pre_time_step_write_book_keeping()
@@ -160,7 +160,7 @@ class _BaseWriter(ParameterBaseClass):
                 self.write_time_varying_particle_prop(name, d.data)
 
         if self.params['write_dry_cell_index']:
-            self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid['dry_cell_index'].reshape(1,-1)
+            self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid_time_buffers['dry_cell_index'].reshape(1,-1)
 
         self.time_steps_written_to_current_file +=1 # time steps in current file
         self.total_time_steps_written  += 1 # time steps written since the start

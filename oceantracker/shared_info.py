@@ -1,5 +1,5 @@
 from oceantracker.common_info_default_param_dict_templates import default_case_param_template, default_class_names
-from oceantracker.util.parameter_checking import GracefulExitError
+from oceantracker.util.message_and_error_logging import GracefulExitError, FatalError
 from oceantracker.util.module_importing_util import import_module_from_string
 
 class SharedInfoClass(object):
@@ -20,22 +20,16 @@ class SharedInfoClass(object):
                 self.class_interators_using_name[key] = {'all': {}, 'user': {} , 'manual_update':{}}
 
 
-    def add_core_class(self,class_type,class_params,  make_core=False):
+    def add_core_class(self,class_type, instance,  check_if_core_class=True):
         cl= self.case_log
-        if class_type not in default_case_param_template and not make_core:
+
+        if class_type not in default_case_param_template and check_if_core_class:
             cl.write_msg('add_core_class, name is not a known core class, name=' + class_type,
                          crumbs='Adding core class type=' + class_type,
                          exception = GracefulExitError)
 
-        i, msg = import_module_from_string(class_params['class_name'].strip())
-        cl.add_messages(msg)
-
-        # merge params
-        msg_list = i.merge_with_class_defaults(class_params, {}, crumbs='Merging core classes with defaults >>> ' + class_type )
-        self.case_log.add_messages(msg_list)
-
-        self.classes[class_type]= i
-        self.core_class_interator[class_type] = i
+        self.classes[class_type]= instance
+        self.core_class_interator[class_type] = instance
 
 
     def create_class_interator(self,class_type, known_iteration_groups=None):
@@ -46,66 +40,45 @@ class SharedInfoClass(object):
             for g in known_iteration_groups:
                 self.class_interators_using_name[class_type].update({g :{}})
 
-    def add_class_instance_to_list_and_merge_params(self, class_type, iteration_group, class_params, crumbs=''):
+    def add_class_instance_to_interator_lists(self, class_type, iteration_group, i, crumbs=''):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         cl= self.case_log
         crumbs += ' >>> Adding_class type >> ' + class_type + '(group= ' + iteration_group +')'
 
-        known_types= []
+        known_list_classes= []
         for key, item in default_case_param_template.items():
             if type(item) == list:
-                known_types.append(key)
+                known_list_classes.append(key)
 
-        if class_type not in known_types:
+        if class_type not in known_list_classes:
             cl.write_msg('add_to_class_list: name is not a known class list,class_type=' + class_type , exception = GracefulExitError, crumbs = crumbs)
 
-        if 'class_name' not in class_params and class_type in default_class_names:
-            class_params['class_name']= default_class_names[class_type]
+        # now add to class lists and interators
+        # firts check it is known interation group
+        if iteration_group not in self.class_interators_using_name[class_type]:
+            cl.write_msg('add_to_class_list: iteration_group  for class_type=' + class_type + ', group="'
+                         + iteration_group + '", is not one of known types=' + str(
+                self.class_interators_using_name[class_type].keys()), exception=GracefulExitError)
 
-        i, msg = import_module_from_string(class_params['class_name'])
-        cl.write_msg(msg,  crumbs= 'Importing class >>> '+  crumbs)
+        i.info['instanceID'] = len(self.classes[class_type])  # needed for release group identification info etc, zero based
 
-        i.info['instanceID'] = len(self.class_interators_using_name[class_type][iteration_group])
-        nseq = i.info['instanceID']  + 1
-
-        # merge to get any default class name and params
-        msg_list = i.merge_with_class_defaults(class_params, {}, crumbs = crumbs+ ' >>> Merging with class defaults >>> ' + class_type + '[#' + str(nseq) + '] ')
-        self.case_log.add_messages(msg_list)
-
-        if i.params['name'] is None or i.params['name'] =='':
-            if iteration_group == 'user':
-                i.params['name'] = 'unnamed%03.0f' %  (len(self.class_interators_using_name[class_type]['user']) + 1)
-            else:
-                # this may be redundent if name param is required by class
-                cl.write_msg('Only user added classes can be unnamed, all others must must have param["name"]' , exception = GracefulExitError,
-                             crumbs= crumbs + ' >>> ' + class_params['class_name'] )
+        if 'name' not in i.params or i.params['name'] is None:
+            i.params['name'] = f"{ i.info['instanceID']:04}"
 
         name = i.params['name']
-
         if name in self.classes[class_type]:
             cl.write_msg('Class type"' + class_type + '" already has a class with name = "' + i.params['name']
                          + '", "name" parameter must be unique',
-                         crumbs = ' Checking for unique class names >>> '+  crumbs, exception = GracefulExitError)
-
-        # check class type OK
-        known_types= []
-        for key, item in default_case_param_template.items():
-            if type(item) == list:
-                known_types.append(key)
-
-        if class_type not in known_types:
-            return  cl.write_msg('add_to_class_list: name is not a known class list,class_type=' + class_type + ', name=' + name, exception = GracefulExitError)
-
-        # now add to class lists and interators
-
-        if iteration_group not in self.class_interators_using_name[class_type]:
-            cl.write_msg('add_to_class_list: iteration_group  for class_type=' + class_type + ', group="'
-                         + iteration_group + '", is not one of known types=' + str(self.class_interators_using_name[class_type].keys()), exception = GracefulExitError)
-
-        return i
+                         crumbs = ' Checking for unique class names >>> '+  crumbs, exception = FatalError)
 
 
-    def add_class_instance_to_interators(self, name, class_type, iteration_group, i):
+        self.classes[class_type][name] = i
+        self.classes_as_lists[class_type].append(i)
+
+        self.class_interators_using_name[class_type]['all'][name] = i
+        self.class_interators_using_name[class_type][iteration_group][name] = i
+
+    def delete_add_class_instance_to_interators(self, name, class_type, iteration_group, i):
         i.info['instanceID'] = len(self.classes[class_type]) # needed for release group identification info etc
         self.classes[class_type][name] = i
         self.classes_as_lists[class_type].append(i)

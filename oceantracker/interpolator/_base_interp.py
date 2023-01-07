@@ -11,8 +11,6 @@ class _BaseInterp(ParameterBaseClass):
 
     def initialize(self,**kwargs): pass
 
-    def build_grid(self): basic_util.nopass(' must supply find_build_grid')
-
     # find hori and vertical cell containing each particle
     def find_cell(self, xq, nb, active): basic_util.nopass(' must supply find_cells method')
 

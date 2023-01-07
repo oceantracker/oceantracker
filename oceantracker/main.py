@@ -1,6 +1,6 @@
 # method to run ocean tracker from parameters
 # eg run(params)
-code_version = '0.3.02.004 2022-12-28'
+code_version = '0.3.03.001 2023-01-07'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -14,7 +14,8 @@ code_version = '0.3.02.004 2022-12-28'
 import time
 from copy import deepcopy
 from datetime import datetime
-import multiprocessing
+
+
 from os import path, makedirs
 import traceback
 import shutil
@@ -26,14 +27,21 @@ from oceantracker.util.package_util import check_package
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import basic_util
 from oceantracker.util import json_util
+from oceantracker.util import shared_memory
 from oceantracker.util.message_and_error_logging import MessageLogging, append_message, GracefulExitError,FatalError
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import merge_params_with_defaults, check_top_level_param_keys_and_structure
 from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
 from oceantracker.common_info_default_param_dict_templates import  default_case_param_template, run_params_defaults_template, default_class_names, package_fancy_name
-from oceantracker.util.module_importing_util import import_module_from_string
+from oceantracker.util.parameter_base_class import make_class_instance_from_params
 
 import subprocess
+
+import multiprocessing
+
+if multiprocessing.get_start_method() != 'spawn':
+    multiprocessing.set_start_method('spawn') # use spawn on linux platforms, default on windows
+
 
 def run(user_params):
     OT= _RunOceanTrackerClass()
@@ -141,6 +149,7 @@ class _RunOceanTrackerClass(object):
         rl= self.run_log
         t0 = time.perf_counter()
 
+        rl.insert_screen_line()
         rl.write_msg('Starting ' + package_fancy_name+ '  Version ' + code_version )
 
         # clean up params
@@ -151,7 +160,6 @@ class _RunOceanTrackerClass(object):
         # get defaults for shared params, to set up output locations etc, todo moved to dev above
         working_params['shared_params'], msg_list = merge_params_with_defaults(params['shared_params'], run_params_defaults_template['shared_params'], {}, msg_list=[], tag='shared_params')
 
-
         rl.set_max_warnings(working_params['shared_params']['max_warnings'])
         rl.insert_screen_line()
         rl.write_progress_marker('Running '+ package_fancy_name + ' started ' + str(datetime.now()))
@@ -159,8 +167,8 @@ class _RunOceanTrackerClass(object):
 
 
         # get info to build a reader
-        reader =self._C1_build_reader(params)
-        reader_build_info = self._C2_get_hindcast_files_info(working_params['shared_params'],reader)
+        reader_build_info, reader =self._C1_build_reader(params)
+
         rl.write_progress_marker('Input directory: ' + reader.params['input_dir'])
         rl.insert_screen_line()
         # write grid and outline and record file names
@@ -171,8 +179,7 @@ class _RunOceanTrackerClass(object):
         # self.run_log.write_messages(msg_list)
         # run the cases, return list of case info json files which make up the run of all cases
         #----------------------------------------------------------------------------------------------
-        #output_files['case_info'], case_error = self._F1_run_case_list(runner_params_case_list)
-        output_files['case_info'], case_error = self._F1_run_case_list(runner_params_test)
+        output_files['case_info'], case_error = self._F1_run_case_list(runner_params_test, reader)
         # ----------------------------------------------------------------------------------------------
 
         # tidy up run
@@ -253,17 +260,15 @@ class _RunOceanTrackerClass(object):
                                                                                    base_case_params['run_params'],   msg_list=msg_list, tag='case_run_params')
                     elif type(item) == dict and key != 'reader':
                         # core classes
-                        # merge templae with base case first
-                        base_case_params[key], msg_list = merge_params_with_defaults(base_case_params[key],default_case_param_template[key],{}, check_for_unknown_keys=False,
-                                                                                     crumbs='merging core clasess base case with case template', msg_list=msg_list)
-                        cout['core_classes'][key], i, msg_list=  self._make_instance_and_merge_params(key, item, base_case_params[key], msg_list=msg_list)
-
+                        i, msg_list = make_class_instance_from_params(item,class_type_name=key,crumbs ='class param ' + key +' >> ',
+                                                                      base_case_params= base_case_params[key], msg_list=msg_list)
+                        cout['core_classes'][key]= i.params
                     elif type(item) == list:
                         if key not in cout['class_lists']: cout['class_lists'][key] =[]
                         for n, cli in enumerate( item + base_case_params[key]):
-                            clp, i, msg_list=  self._make_instance_and_merge_params(key, cli, {},
-                                                                 msg_list=msg_list, nseq=n,crumbs ='class list param ' + key +' >> ')
-                            cout['class_lists'][key].append(clp)
+                            i, msg_list = make_class_instance_from_params(cli,class_type_name=key, msg_list=msg_list,
+                                                                    nseq=n,crumbs ='class list param ' + key +' >> ')
+                            cout['class_lists'][key].append(i.params)
 
                     else: pass # top level checks ensures items are dict or lists
 
@@ -290,36 +295,14 @@ class _RunOceanTrackerClass(object):
         self.run_log.check_messages_for_errors()
         return runner_params, shared_params, msg_list
 
-    def _make_instance_and_merge_params(self, name, class_params, base_class_params, msg_list=[], nseq=None, crumbs=''):
-        # dynamically  get instance of class from string eg oceantracker.solver.Solver
-        rl = self.run_log
-        if 'class_name' not in class_params:  class_params['class_name'] = None
 
-        if class_params['class_name'] is None:
-            if 'class_name' in base_class_params and  base_class_params['class_name'] is not None:
-                class_params['class_name'] = base_class_params['class_name']
-            elif name in default_class_names:
-                class_params['class_name'] = default_class_names[name]
-            else:
-                append_message(msg_list, 'params for ' + crumbs + ' must contain class_name ' + name, exception = GracefulExitError, nseq= nseq)
-                return None, None, msg_list
-        else:
-            # try to convert to long name
-            if class_params['class_name'] in self.package_info['short_class_name_map']:
-                class_params['class_name'] = self.package_info['short_class_name_map'][class_params['class_name']]
-
-        i, msg = import_module_from_string(class_params['class_name'])
-        rl.add_messages(msg)
-        if msg is not None:
-            msg_list += [msg]
-        # use new  merge
-        msg_list = i.merge_with_class_defaults(class_params, base_class_params, msg_list=msg_list, crumbs=name if nseq == None else name + '[#' + str(nseq) + ']')
-
-        return i.params, i, msg_list
 
 
     def _C1_build_reader(self, params):
+
         rl= self.run_log
+
+
         if 'class_name' not in params['reader']:
             FatalError('Reader must have class_name parameter')
 
@@ -328,17 +311,51 @@ class _RunOceanTrackerClass(object):
 
         params['reader']['input_dir'] = path.abspath(params['reader']['input_dir'])
 
-        reader, msg = import_module_from_string(params['reader']['class_name'])  # temporary  reader to get defaults
-        reader.shared_info.case_log=self.run_log #todo make shared info messages more consistent, ie this is not a case
-        rl.add_messages(msg)
-
-        msg_list = reader.merge_with_class_defaults(params['reader'], {}, crumbs='reader')
+        reader, msg_list = make_class_instance_from_params(params['reader'],class_type_name= 'reader')  # temporary  reader to get defaults
+        reader.shared_info.case_log = self.run_log #todo make shared info messages more consistent???, ie this is not a case
         rl.add_messages(msg_list)
 
-        return  reader
+        # construct reader_build_info to be used by case_runners to build their reader
+        reader_build_info = {'reader_params': reader.params}
+        reader_build_info = self._C2_get_hindcast_files_info(reader_build_info, reader) # get file lists
 
-    def _C2_get_hindcast_files_info(self, shared_params, reader):
-        # read though files to get start and finish times of each file
+        # read and set up reader grid now as  required for writing grid file
+        # also if requested shared grid memory is set up
+        # and shared memory info will be also added to reader_build_info for case runner to build reader
+        grid = reader.grid
+        grid_time_buffers = reader.grid_time_buffers
+        nc = reader._open_grid_file(reader_build_info)
+        grid = reader.make_non_time_varying_grid(nc, grid)
+        grid_time_buffers = reader.make_grid_time_buffers(nc,grid,grid_time_buffers)
+
+        # add information to build grid and grid_time_buffers to reader_build_info
+        reader_build_info = reader.make_grid_builder(grid, grid_time_buffers, reader_build_info)
+
+        # get information required to build reader fields
+        reader_build_info= reader.maker_field_builder(nc, reader_build_info)
+
+        # special case read water depth field, so it can be wrtten to grid file
+        #add_a_reader_field(self, nc, name, field_variable_comps)
+
+        nc.close()
+
+        if reader.params['share_reader']:
+            reader.set_up_shared_grid_memory(reader_build_info)
+
+            # add to class to shared info, alows fileds to be built
+            si = reader.shared_info
+            si.classes['reader'] = reader
+
+            # set up reader fields
+            reader.setup_reader_fields(reader_build_info)
+            sm_fields = {}
+            for name, sm in reader.shared_memory['fields'].items():
+                sm_fields[name] = sm.get_shared_mem_map()
+
+        return  reader_build_info, reader
+
+    def _C2_get_hindcast_files_info(self, reader_build_info, reader):
+        # read through files to get start and finish times of each file
         # create a time sorted list of files given by file mask in file_info dictionary
         # sorts based on time from read time,  assumes a global time across all files
         # note this is only called once by OceantrackRunner to form file info list,
@@ -348,8 +365,8 @@ class _RunOceanTrackerClass(object):
         # add defaults from template, ie get reader class_name default, no warnings, but get these below
         # check cals name
         rl = self.run_log
-        reader.initialize()
         file_info =reader.get_list_of_files_and_hindcast_times(reader.params['input_dir'])
+
         # check some files found
         if len(file_info['names']) == 0:
             rl.write_msg('reader: cannot find any files matching mask "' + reader.params['file_mask']
@@ -358,6 +375,7 @@ class _RunOceanTrackerClass(object):
         msg_list = reader._file_checks(file_info['names'][0], msg_list=[])
         self.run_log.add_messages(msg_list)
 
+        # convert file info to numpy arrays for sorting
         keys = ['names','n_time_steps', 'time_start', 'time_end', 'time_step']
         for key in keys:
             file_info[key] = np.asarray(file_info[key])
@@ -396,7 +414,7 @@ class _RunOceanTrackerClass(object):
         if np.any(np.abs(dt - file_info['time_step'])) > 1200:
             rl.write_warning('Some time steps differ in files by more than 1200 sec')
 
-        reader_build_info = {'reader_params': reader.params} # add full reader params to build from
+
         reader_build_info['sorted_file_info'] = file_info
         rl.check_messages_for_errors()
         return reader_build_info
@@ -404,9 +422,18 @@ class _RunOceanTrackerClass(object):
     def _U3_write_run_grid_netCDF(self, output_files, reader_build_info, reader):
         # write a netcdf of the grid from first hindcast file
         msg_list=[]
-        hindcast = NetCDFhandler(reader_build_info['sorted_file_info']['names'][0], 'r')
-        reader.setup_grid(hindcast, reader_build_info)
+
         grid= reader.grid
+
+        # get depth frtom first hincast file
+        hindcast = NetCDFhandler(reader_build_info['sorted_file_info']['names'][0], 'r')
+        depth_var = reader.params['field_variables']['water_depth']
+        if depth_var is not None and hindcast.is_var(depth_var):
+            # world around to ensure depth read in right format
+            field_params,var_info = reader.get_field_variable_info(hindcast,'water_depth',reader.params['field_variables']['water_depth'])
+            water_depth = reader.read_file_field_variable_as4D(hindcast,var_info['component_list'][0],var_info['is_time_varying'], file_index=None)
+            water_depth = reader.preprocess_field_variable(hindcast,'water_depth',water_depth)
+            water_depth = np.squeeze(water_depth)
         hindcast.close()
 
         # write grid file
@@ -420,51 +447,35 @@ class _RunOceanTrackerClass(object):
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('faces', 'vertex'))
         nc.write_a_new_variable('node_type', grid['node_type'], ('nodes',), attributesDict={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
         nc.write_a_new_variable('boundary_triangles', grid['boundary_triangles'].astype(np.int8), ('faces',))
-
-        # add depth to output grid if present, useful for plots
-        fieldvar = reader.params['field_variables']
-        if 'water_depth' in fieldvar and fieldvar['water_depth'] is not None:
-            hindcast = NetCDFhandler(reader_build_info['sorted_file_info']['names'][0], 'r')
-            grid['water_depth'] = hindcast.read_a_variable(fieldvar['water_depth'])
-            hindcast.close()
-            depth = grid['water_depth'] if grid['water_depth'].ndim < 2 else grid['water_depth'][0, :]  # if depth time dependent
-            nc.write_a_new_variable('water_depth', depth, ('nodes',))
+        nc.write_a_new_variable('water_depth', water_depth, ('nodes',))
 
         nc.close()
+
         grid_outline_file = output_files['output_file_base'] + '_grid_outline.json'
         json_util.write_JSON(path.join(output_files['run_output_dir'], grid_outline_file), grid['grid_outline'])
 
         self.run_log.add_messages(msg_list)
         return grid_file, grid_outline_file
 
-    def _F1_run_case_list(self, case_param_list):
+    def _F1_run_case_list(self, case_param_list, reader):
         # do run of all cases
-        rl= self.run_log
-        msg_list=[]
         shared_params = case_param_list[0]['shared_params']
         case_results = []
-        if shared_params['processors'] == 1:
+
+        if reader.params['share_reader']:
+            case_results = self.run_with_shared_reader(case_param_list, reader)
+
+        elif shared_params['processors'] == 1:
             # serial or non-parallel mode,   run a single case non parallel to makes debuging easier and allows reruns of single case
-            for c in case_param_list:
-                a  = self._run1_case(c)
-                case_results.append(a)
+            case_results = self.run_serial(case_param_list)
         else:
             # run parallel
-            shared_params['processors'] = min(shared_params['processors'], len(case_param_list))
-            rl.write_progress_marker('oceantracker:multiProcessing: processors:' + str(shared_params['processors']))
-
-            try:
-                with multiprocessing.Pool(processes=shared_params['processors']) as pool:
-                    case_results = pool.map(self._run1_case, case_param_list)
-                append_message(msg_list, 'parallel pool complete')
-
-            except Exception as e:
-                append_message(msg_list,'Error setting up parallel run')
-                rl.write_error_log_file(e)
+            case_results = self.run_parallel(case_param_list)
 
         # unpack case output
         case_info_file_list, case_errors_list = [],[]
         n=0
+        msg_list =[]
         for case_file,case_error  in case_results:
             case_info_file_list.append(case_file)
             case_errors_list.append(case_error)
@@ -473,8 +484,50 @@ class _RunOceanTrackerClass(object):
                                    + ', or other error, case may have not completed, check for .err file!!!!!!, error type= ' + case_error.__class__.__name__, warning=True)
             n+=1
 
-        rl.add_messages(msg_list)
+        self.run_log.add_messages(msg_list)
         return case_info_file_list,  case_errors_list
+
+    def run_serial(self,case_param_list):
+        # serial or non-parallel mode,   run a single case non parallel to makes debuging easier and allows reruns of single case
+        case_results = []
+        for c in case_param_list:
+            a = self._run1_case(c)
+            case_results.append(a)
+        return case_results
+
+    def run_parallel(self,case_param_list):
+        rl = self.run_log
+        msg_list = []
+        shared_params = case_param_list[0]['shared_params']
+        shared_params['processors'] = min(shared_params['processors'], len(case_param_list))
+        rl.write_progress_marker('oceantracker:multiProcessing: processors:' + str(shared_params['processors']))
+
+        try:
+            with multiprocessing.Pool(processes=shared_params['processors']) as pool:
+                case_results = pool.map(self._run1_case, case_param_list)
+            append_message(msg_list, 'parallel pool complete')
+
+        except Exception as e:
+            append_message(msg_list, 'Error setting up parallel run')
+            rl.write_error_log_file(e)
+        return case_results
+
+    def run_with_shared_reader(self, case_param_list, reader):
+        # complete reader build then run cases asynchronously with shared reader
+
+        # shared grid is already to allow grid to be written  and case
+
+
+        # shared reader control arrays
+        time_steps_in_buffer = shared_memory.SharedMemArray(shape=(2,0),dtype=np.int2)
+        c = {'time_steps_in_buffer':time_steps_in_buffer.get_shared_mem_map() }
+
+        # add field shared memory build info to each case
+        for case in case_param_list:
+            case['reader_build_info']['shared_memory']['fields'] = sm_fields
+            case['reader_build_info']['shared_memory']['control'] = c
+        #todo make shared fields and grid arrays read only in children sm.data.setflags(write=False)
+        pass
 
     @staticmethod
     def _run1_case(run_params):

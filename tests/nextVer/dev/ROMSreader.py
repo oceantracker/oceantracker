@@ -9,7 +9,7 @@ class ROMSreader(object):
 
         self.file_name=fn
         self.nc =NetCDFhandler(self.file_name)
-        self.grid = self._build_grid()
+        self.grid = self.setup_grid()
 
     def read_ROMS_grid(self):
         nc = self.nc
@@ -46,7 +46,7 @@ class ROMSreader(object):
 
         return uv
 
-    def _build_grid(self):
+    def setup_grid(self):
 
         roms = self.read_ROMS_grid()
 

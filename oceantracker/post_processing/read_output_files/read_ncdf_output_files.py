@@ -232,10 +232,8 @@ def read_grid_file(file_name):
     # load OT output file grid
     d={}
     nc = NetCDFhandler(file_name,'r')
-    for var in ['x', 'triangles', 'adjacency', 'boundary_triangles','water_depth']:
-        if nc.is_var(var):
-            d[var]= nc.read_a_variable(var)
-
+    for var in nc.file_handle.variables.keys():
+        d[var]= nc.read_a_variable(var)
     nc.close()
 
     return d

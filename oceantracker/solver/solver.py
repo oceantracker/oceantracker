@@ -59,6 +59,8 @@ class Solver(ParameterBaseClass):
         si = self.shared_info
         reader = si.classes['reader']
         grid = reader.grid
+        grid_time_buffers = reader.grid_time_buffers
+
         info = self.info
         pgm, fgm   = si.classes['particle_group_manager'], si.classes['field_group_manager']
         part_prop = si.classes['particle_properties']
@@ -69,8 +71,8 @@ class Solver(ParameterBaseClass):
                 reader.fill_time_buffer(nt_remaining) # get next steps into buffer if not in buffer
 
             # set up run now data in buffer
-            nb = (nt -grid['nt_hindcast'][0])*si.model_direction
-            t_hindcast = grid['time'][nb]  # make time exactly that of hindcast
+            nb = (nt -grid_time_buffers['nt_hindcast'][0])*si.model_direction
+            t_hindcast = grid_time_buffers['time'][nb]  # make time exactly that of hindcast
 
             # do sub steps with hind-cast model step
             for ns in range(self.params['n_sub_steps']):

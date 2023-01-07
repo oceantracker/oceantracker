@@ -1,6 +1,6 @@
 from copy import deepcopy
 from os import path, environ, remove
-from oceantracker.util.parameter_base_class import ParameterBaseClass
+from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
 from oceantracker.util.message_and_error_logging import MessageLogging, GracefulExitError, FatalError
 import numpy as np
 from oceantracker.util import time_util
@@ -15,6 +15,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required
+
 
     def run(self, runner_params):
         si=self.shared_info
@@ -177,7 +178,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         nt_hindcast = nt_hindcast[np.logical_and(nt_hindcast >= fi['nt'][0], nt_hindcast <= fi['nt'][-1])]
 
 
-
         # fill and process buffer until there is less than 2 steps
         si.case_log.insert_screen_line()
         si.case_log.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.model_duration / 24 / 3600))
@@ -231,26 +231,28 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def _make_core_class_instances(self, run_params):
         # params are full merged by oceantracker main and instance making tested, so m=no parm merge needed
         si=self.shared_info
+        msg_list =[]
         case_params= run_params['case_params']
 
         # change writer for compact mode
         if si.shared_params['compact_mode']:
             case_params['core_classes']['tracks_writer']['class_name']='oceantracker.tracks_writer.track_writer_compact.FlatTrackWriter'
 
-        # make core classes
+        # make core classes, eg. field group
         for key, params in case_params['core_classes'].items():
-            params['name'] = key
-            si.add_core_class(key, params) # use cor ecars as name
+            # merge params
+            i, msg_list = make_class_instance_from_params(params,class_type_name=key,  msg_list=msg_list)
+            si.add_core_class(key, i)
+
 
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags
-        self._make_reader_instance()
 
-    def _make_reader_instance(self):
-        # make reader, seperstly to allow for a prebuilt full hindcast in memory reader to be used
-        si = self.shared_info
-        si.add_core_class('reader', si.reader_build_info['reader_params'],make_core=True)  # use cor ecars as name
+        i, msg_list = make_class_instance_from_params( si.reader_build_info['reader_params'], class_type_name='reader',msg_list=msg_list)
+        si.add_core_class('reader', i,check_if_core_class=False)  # use cor ecars as name
 
-
+        # some core classes required the presence of others to initialize so do all here in given order, with solver last
+        #for name in ['reader','field_group_manager','particle_group_manager','interpolator','tracks_writer','dispersion','solver']:
+        #    si.classes[name].initialize()
 
     def _setup_particle_release_groups(self, particle_release_groups_params_list):
         # particle_release groups setup and instances,
@@ -270,19 +272,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if 'class_name' not in pg_params: pg_params['class_name'] = 'oceantracker.particle_release_groups.point_release.PointRelease'
 
             # make instance and initialise
-            pg = si.add_class_instance_to_list_and_merge_params('particle_release_groups', 'user', pg_params, crumbs='Adding release groups')
-            pg.initialize()
-
+            i, msg_list = make_class_instance_from_params(pg_params)
+            si.add_class_instance_to_interator_lists('particle_release_groups', 'user', i, crumbs='Adding release groups')
+            i.initialize()
 
             # set up release times so duration of run known
-            pg.set_up_release_times(n)
-            release_info = pg.info['release_info']
-
-            # add class even if no release times
-            si.add_class_instance_to_interators(pg.params['name'], 'particle_release_groups', 'user', pg)
+            i.set_up_release_times(n)
+            release_info = i.info['release_info']
 
             if release_info['release_schedule_times'].shape[0]==0:
-                si.case_log.write_msg('Release group= ' + str(n + 1) + ', name= ' + pg.params['name'] + ',  no release times in range of hindcast and given release duration', warning=True)
+                si.case_log.write_msg('Release group= ' + str(n + 1) + ', name= ' + i.params['name'] + ',  no release times in range of hindcast and given release duration', warning=True)
                 continue
             else:
                 estimated_total_particles += release_info['estimated_number_released'] # used to give buffer size if needed
@@ -310,7 +309,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # start with setting up reader as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
         si.classes['field_group_manager'].initialize() # needed here to add reader fields inside reader build
-        si.classes['reader'].build_reader(si.reader_build_info)  # initialize here as need to find out if 3D for set up of other clsasses
+        si.classes['reader'].build_case_runner_reader(si.reader_build_info)
 
         # now know if 3D hindcast
         si.hindcast_is3D = si.classes['fields']['water_velocity'].is3D()
@@ -356,7 +355,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # complete build of particle by adding reade, custom properties and modifiers
         si= self.shared_info
         pgm = si.classes['particle_group_manager']
-        fgm = si.classes['field_group_manager']
 
         # create prop particle properties derived from fields loaded from reader on the fly
         for prop_type in ['from_reader_field','derived_from_reader_field','depth_averaged_from_reader_field']:
@@ -366,7 +364,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for n, params in enumerate(si.case_params['class_lists']['fields']):
-            i = fgm.add_field('user', params, crumbs='Adding "fields" from user params')
+            i, msg_list = make_class_instance_from_params(params)
+            si.add_class_instance_to_interator_lists('fields','user', i, crumbs='Adding "fields" from user params')
             i.initialize()
             # now add custom prop based on  this field
             pgm.create_particle_property('from_fields', dict(name=i.params['name'], vector_dim=i.get_number_components(),
@@ -376,15 +375,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # if not time varying can update once at start from other non-time varying fields
             if not i.is_time_varying(): i.update()
 
-
-
         # any custom particle properties added by user
         for p in si.case_params['class_lists']['particle_properties']:
             pgm.create_particle_property('user',p)
 
         # add default classes, eg tidal stranding
         #todo this may be better else where
-        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.case_params['class_lists']['status_modifiers']:
+        if 'dry_cell_index' in si.classes['reader'].grid_time_buffers and 'tidal_stranding' not in  si.case_params['class_lists']['status_modifiers']:
             si.case_params['class_lists']['status_modifiers'].append({'name':'tidal_stranding','class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'})
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
@@ -392,9 +389,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                      'particle_statistics',
                      'particle_concentrations', 'event_loggers','status_modifiers']:
             for n, params in enumerate(si.case_params['class_lists'][type]):
-                i= si.add_class_instance_to_list_and_merge_params(type,'user', params)
-                si.add_class_instance_to_interators(i.params['name'], type,'user', i)
-                i.initialize()
+                i, msg_list = make_class_instance_from_params(params)
+                si.add_class_instance_to_interator_lists(type, 'user', i)
+                i.initialize()  # some require instanceID from above add class to initialise
 
     # ____________________________
     # internal methods below

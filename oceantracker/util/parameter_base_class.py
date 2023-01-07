@@ -5,8 +5,57 @@ from time import perf_counter
 from oceantracker.shared_info import SharedInfoClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, merge_params_with_defaults
 from oceantracker.util.message_and_error_logging import append_message, GracefulExitError, FatalError
+from oceantracker.util.module_importing_util import import_module_from_string
+from oceantracker.common_info_default_param_dict_templates import default_class_names, default_case_param_template
 
 # parameter dictionaries are nested dictionaries or lists of dictionaries
+
+def make_class_instance_from_params(params,class_type_name=None, base_case_params =None, msg_list=[], nseq=None, crumbs='', merge_params=True):
+    # make a class insance from dynamically  get instance of class from string eg oceantracker.solver.Solver
+    if base_case_params is None : base_case_params={}
+
+    # add class sequence number, used for in class list
+    if nseq is None:
+        nseq= 0
+        sequ_tag = ''
+    else:
+        sequ_tag = '[#' + str(nseq) + '] '
+    crumbs += sequ_tag
+
+    # work out class name
+    if 'class_name' not in params:  params['class_name'] = None
+
+    if params['class_name'] is None and class_type_name is not None:
+        if 'class_name' in base_case_params and base_case_params['class_name'] is not None:
+            params['class_name'] = base_case_params['class_name']
+        elif class_type_name in default_class_names:
+            params['class_name'] = default_class_names[class_type_name]
+        else:
+            append_message(msg_list, 'params for ' + crumbs + ' must contain class_name ' + class_type_name,
+                           exception=GracefulExitError, nseq=nseq)
+            return None, None, msg_list
+    #else:
+    #    # try to convert to long name
+    #    if class_params['class_name'] in self.package_info['short_class_name_map']:
+    #        class_params['class_name'] = self.package_info['short_class_name_map'][class_params['class_name']]
+
+    i, msg = import_module_from_string(params['class_name'])
+    if msg is not None:  msg_list.append(msg)
+    i.info['nseq']= nseq
+    i.info['class_type'] = class_type_name
+
+    if merge_params:
+        # merge templae with base case first
+        if class_type_name in default_case_param_template and type(default_case_param_template[class_type_name]) != list:
+            base_case_params, msg_list = merge_params_with_defaults(base_case_params,
+                                                    default_case_param_template[class_type_name], {},
+                                                    check_for_unknown_keys=False,
+                                                    crumbs=crumbs+'merging core clasess base case with case template',
+                                                    msg_list=msg_list)
+
+        i.params, msg_list = merge_params_with_defaults(params, i.default_params, base_case_params, msg_list=msg_list, crumbs=crumbs)
+
+    return i, msg_list
 
 class ParameterBaseClass(object):
     # object with default parameters as class dictionary, that are check against expections
@@ -55,12 +104,20 @@ class ParameterBaseClass(object):
         msg_list = self.check_class_required_fields_prop_etc()
         return msg_list
 
-    def check_class_required_fields_prop_etc(self, required_props_list=[], required_fields_list=[], required_grid_var_list=[], requires3D=None, msg_list=[]):
+    def check_class_required_fields_prop_etc(self, required_props_list=[], required_fields_list=[],
+                                             required_grid_time_buffers_var_list=[],
+                                             required_grid_var_list=[], requires3D=None, msg_list=[]):
         si = self.shared_info
         grid = si.classes['reader'].grid
+        grid_time_buffers=  si.classes['reader'].grid_time_buffers
 
         for name in required_grid_var_list:
             if name not in grid:
+               append_message(msg_list, '     class ' + self.params['class_name'] + ', ' + self.params['name']
+                                + ' requires grid variable  "' + name + '"' + ' to work', exception = GracefulExitError)
+
+        for name in required_grid_time_buffers_var_list:
+            if name not in grid_time_buffers:
                append_message(msg_list, '     class ' + self.params['class_name'] + ', ' + self.params['name']
                                 + ' requires grid variable  "' + name + '"' + ' to work', exception = GracefulExitError)
 
@@ -87,12 +144,13 @@ class ParameterBaseClass(object):
             if key in self.default_params:
                 del self.default_params[key]
 
-    def merge_with_class_defaults(self, case_param, base_case, msg_list=[], crumbs=None):
-        # merge class defaults, base_case and given case_params
-        if crumbs is None: crumbs = self.__class__.__module__ +'.' + self.__class__.__name__
-        self.params, msg_list = merge_params_with_defaults(case_param, self.default_params, base_case, msg_list=msg_list,  crumbs = crumbs)
+    def clear_default_params(self, name_list):
+        # used to clear all defaults when not needed
+        for key in name_list:
+            self.default_params[key] ={}
 
-        return msg_list
+
+
 
     # below dynamical adds shared particle index buffers when first used within in a class instance
     # buffers are used to hold selections of particles, saving memory and time by reuse
