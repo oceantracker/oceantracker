@@ -1,4 +1,4 @@
-from oceantracker.util.message_and_error_logging import MessageClass
+from oceantracker.util.message_and_error_logging import MessageClass, FatalError
 from importlib import import_module
 import traceback
 
@@ -14,7 +14,7 @@ def import_module_from_string(s):
     except Exception as e:
         msg =MessageClass('Failed to find/load module given by string in or before __init__() "' + s + '"',
                           hint='Module names are case sensitive?, sytax error in module?, import error within module?',
-                          exception=e, traceback_str=traceback.print_exc())
+                          exception=FatalError, traceback_str=traceback.print_exc())
         return None, msg
     # make instance
     try:

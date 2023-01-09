@@ -106,6 +106,9 @@ class GenericUnstructuredReader(_BaseReader):
 
         # set up reader fields, using shared memory if requested
         self.setup_reader_fields(reader_build_info)
+
+        #useful info fro json output
+        self.info['hindcast_average_time_step'] = reader_build_info['sorted_file_info']['average_time_step']
         pass
 
     def check_grid(self,grid):
@@ -145,7 +148,7 @@ class GenericUnstructuredReader(_BaseReader):
         gv= self.params['grid_variables']
         x = np.stack((nc.read_a_variable(gv['x'][0]), nc.read_a_variable(gv['x'][1])), axis=1).astype(np.float32)
         if self.params['cords_in_lat_long']:
-            x = WGS84_to_UTM(x)
+            x = self.convert_lat_long_to_meters_grid(x)
         return x
 
     def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
@@ -181,7 +184,7 @@ class GenericUnstructuredReader(_BaseReader):
         grid['adjacency'] =  triangle_utilities_code.build_adjacency_from_node_cell_map(  grid['node_to_tri_map']  , grid['triangles'])
         grid['boundary_triangles'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
 
-        grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid['triangles'], grid['adjacency'], grid['x'],   grid['node_to_tri_map']  )
+        grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid)
 
         # make island and domain nodes
         grid['node_type'] = np.zeros(grid['x'].shape[0], dtype=np.int8)

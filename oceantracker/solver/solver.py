@@ -71,8 +71,13 @@ class Solver(ParameterBaseClass):
                 reader.fill_time_buffer(nt_remaining) # get next steps into buffer if not in buffer
 
             # set up run now data in buffer
+            #nb = reader.time_to_global_time_step(t) #todo needed when substeping removed
             nb = (nt -grid_time_buffers['nt_hindcast'][0])*si.model_direction
             t_hindcast = grid_time_buffers['time'][nb]  # make time exactly that of hindcast
+
+            # todo remove when getting rid of substepping
+            si.hindcast_time_step = reader.grid_time_buffers['time'][nb+1]-t_hindcast
+            si.model_substep_timestep = si.hindcast_time_step/self.params['n_sub_steps']
 
             # do sub steps with hind-cast model step
             for ns in range(self.params['n_sub_steps']):
@@ -94,7 +99,7 @@ class Solver(ParameterBaseClass):
                     i.update(nb, t1, is_moving)
 
                 # dispersion is done by random walk velocity modification prior to integration step
-                si.classes['dispersion'].update(nb, t1, is_moving)
+                si.classes['dispersion'].update(nb, t1,  is_moving)
 
                 #  Main integration step
                 self.code_timer.start('integration_step')
@@ -173,7 +178,7 @@ class Solver(ParameterBaseClass):
         self.code_timer.stop('pre_step_bookkeeping')
 
 
-    def integration_step(self, nb, t, is_moving):
+    def integration_step(self, nb, t,is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties
         # nb is buffer offset

@@ -2,8 +2,6 @@ import numpy as np
 from numba import  njit
 from datetime import  datetime, timedelta
 from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredReader
-from oceantracker.fields.util.fields_util import  depth_aver_SlayerLSC_in4D
-from oceantracker.util.cord_transforms import WGS84_to_UTM
 from copy import  copy
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.ncdf_util import NetCDFhandler
@@ -118,7 +116,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
     def read_nodal_x_float32(self, nc):
         x = np.stack((nc.read_a_variable('SCHISM_hgrid_node_x'), nc.read_a_variable('SCHISM_hgrid_node_y')), axis=1).astype(np.float32)
         if self.params['cords_in_lat_long']:
-            x  = WGS84_to_UTM(x)
+            x  = self.convert_lat_long_to_meters_grid(x)
         return x
 
     def read_triangles_as_int32(self, nc):

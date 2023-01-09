@@ -34,6 +34,7 @@ def NZTM_to_WGS84(xy, out=None):
 def _get_WGS84_UTM_transformer(lon_lat):
     # (lat, lng) to NZTM for numpy arays
     # make row vector if needed
+    lon_lat[lon_lat[:,0]> 180., 0] -= 180
 
     utm_crs_list = query_utm_crs_info(
         datum_name="WGS 84",
@@ -53,5 +54,5 @@ def WGS84_to_UTM(lon_lat, out=None):
     # uses mean latlon to work out zone
     if out is None: out = np.full_like(lon_lat,0.)
     T = _get_WGS84_UTM_transformer(lon_lat)
-    out[:, 0], out[:, 1] = T.transform(lon_lat[:, 0], lon_lat[:, 1]) # not sure why is y, x
-    return out
+    out[:, 0], out[:, 1], = T.transform(lon_lat[:, 0], lon_lat[:, 1]) # not sure why is y, x
+    return out, T

@@ -58,7 +58,7 @@ class ROMS(GenericUnstructuredReader):
         grid['lat_psi'] = nc.read_a_variable('lat_psi').astype(np.float32)
         grid['lon_psi'] = nc.read_a_variable('lon_psi').astype(np.float32)
         grid['lon_lat'] =  np.stack((grid['lon_psi'].flatten('F'),grid['lat_psi'].flatten('F')),  axis=1)
-        return WGS84_to_UTM(grid['lon_lat'])
+        return self.convert_lat_long_to_meters_grid(grid['lon_lat'])
 
     def read_triangles_as_int32(self, nc):
         grid = self.grid

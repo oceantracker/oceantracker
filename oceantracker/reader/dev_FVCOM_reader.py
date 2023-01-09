@@ -47,7 +47,15 @@ class unstructured_FVCOM(GenericUnstructuredReader):
         return grid
 
     def read_nodal_x_float32(self, nc):
-        return np.stack((nc.read_a_variable('x'), nc.read_a_variable('y')), axis=1).astype(np.float32)
+
+        if  self.params['cords_in_lat_long'] or np.all(nc.read_a_variable('x')==0): #  use lat long? as x may sometimes be all be zeros
+            x = np.stack((nc.read_a_variable('lon'), nc.read_a_variable('lat')), axis=1).astype(np.float32)
+            x= self.convert_lat_long_to_meters_grid(x)
+            #todo use user given grid projection??
+        else:
+            x = np.stack((nc.read_a_variable('x'), nc.read_a_variable('y')))
+
+        return x
 
     def read_triangles_as_int32(self, nc):
         data = nc.read_a_variable('nv').T - 1

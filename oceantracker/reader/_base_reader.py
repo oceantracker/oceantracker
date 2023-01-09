@@ -10,6 +10,7 @@ from time import perf_counter
 from oceantracker.fields.util import fields_util
 from oceantracker.util.basic_util import nopass
 from oceantracker.util.triangle_utilities_code import append_split_cell_data
+from oceantracker.util import  cord_transforms
 from oceantracker.fields.util.fields_util import depth_aver_SlayerLSC_in4D
 from copy import copy ,deepcopy
 from oceantracker.util import  shared_memory
@@ -22,6 +23,7 @@ class _BaseReader(ParameterBaseClass):
         self.add_default_params({'input_dir': PVC(None, str),
                                  'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
                                  'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
+                                 'coordinate_projection' : PVC(None, str, doc_str='string map project for meters grid for use by pyproj module, eg  "proj=utm +zone=16 +datum=NAD83" '),
                                  'share_reader': PVC(False, bool),
                                  'minimum_total_water_depth': PVC(0.25, float, min=0.0,doc_str= 'Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
                                  'time_zone': PVC(None, int, min=-12, max=23),
@@ -111,15 +113,14 @@ class _BaseReader(ParameterBaseClass):
         else:
             file_names = glob(path.normpath(path.join(input_dir, self.params['file_mask'])))
 
-        file_info = {'names': file_names, 'n_time_steps': [], 'time_start': [], 'time_end': [], 'time_step': []}
+        file_info = {'names': file_names, 'n_time_steps': [], 'time_start': [], 'time_end': []}
         for n, fn in enumerate(file_names):
             # get first/second/last time from each file,
             nc = NetCDFhandler(fn, 'r')
             time = self.read_time(nc)
             nc.close()
             file_info['time_start'].append(time[0])
-            file_info['time_end'].append(time[-1])
-            file_info['time_step'].append(time[1] - time[0])
+            file_info['time_end'].append(time[-1]) # -1 guards against there being only one time step in the file
             file_info['n_time_steps'].append(time.shape[0])
             if n + 1 >= self.params['max_numb_files_to_load']: break
 
@@ -451,12 +452,16 @@ class _BaseReader(ParameterBaseClass):
             nt = np.floor(nt)
         return int(nt)
 
+    def get_buffer_index(self,nt_global):
+        fi = self.reader_build_info['sorted_file_info']
+
     def get_hindcast_info(self):
+        pass
         d={'time_zone':  self.params['time_zone'],
            'hindcast_starts': time_util.seconds_to_iso8601str(self.get_first_time_in_hindcast()),
            'hindcast_ends':time_util.seconds_to_iso8601str(self.get_last_time_in_hindcast()),
            'hindcast_duration_days':(self.get_last_time_in_hindcast() - self.get_first_time_in_hindcast())/24/3600.,  # info_file = BuildCaseInfoFile()
-           'hindcast_timestep': self.reader_build_info['sorted_file_info']['time_step'],
+           'average_hindcast_timestep': self.reader_build_info['sorted_file_info']['average_time_step'],
            'input_dir' : self.params['input_dir'],
            'first_file': self.reader_build_info['sorted_file_info']['names'][0],
            'last_file' : self.reader_build_info['sorted_file_info']['names'][-1]
@@ -487,6 +492,15 @@ class _BaseReader(ParameterBaseClass):
             for key, item in reader_build_info['shared_memory']['grid'].items():
                 self.shared_memory['grid'][key] = shared_memory.SharedMemArray(sm_map=item)
                 self.grid[key] = self.shared_memory['grid'][key].data  # grid variables is shared version
+
+    def convert_lat_long_to_meters_grid(self,x):
+
+        if self.params['coordinate_projection'] is None:
+            x_out, self.cord_transformer= cord_transforms.WGS84_to_UTM( x, out=None)
+        else:
+            #todo make it work with users transform?
+            x_out = cord_transforms.WGS84_to_UTM(x, out=None)
+        return x_out
 
     def close(self):
         # release any shared memory

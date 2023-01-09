@@ -54,7 +54,7 @@ reader:
     x:
     - east
     - north
-  input_dir: D:\A_Working\oceantracker_work\demos\demo_hindcast
+  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 24
