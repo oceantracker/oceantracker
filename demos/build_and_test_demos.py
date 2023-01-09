@@ -396,7 +396,7 @@ ROMS_params={'shared_params' :{'output_file_base' :'demo70_ROMS_reader_test', 'd
                 }
 }
 
-params.append(ROMS_params)
+#params.append(ROMS_params)
 
 def make_demo_python(demo_name):
     # write a simplified version of code to add to docs

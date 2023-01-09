@@ -29,9 +29,6 @@ class BasicResuspension(_BaseTrajectoryModifier):
     def initialize(self,**kwargs):
         si = self.shared_info
         info = self.info
-        info['resuspension_factor']= 2.0*0.4*si.z0*si.model_substep_timestep/(1. - 2./np.pi)
-        info['min_resuspension_jump']  = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
-
         info['number_resupended'] = 0
 
     def select_particles_to_resupend(self, active):
@@ -49,8 +46,13 @@ class BasicResuspension(_BaseTrajectoryModifier):
     # all particles checked to see if they need status changing
     def update(self, nb, time, active):
         # do resupension
+        #todo move 'resuspension_factor' calc to initialise when substeping removed
         self.start_update_timer()
         si= self.shared_info
+        info = self.info
+        info['resuspension_factor']= 2.0*0.4*si.z0*si.model_substep_timestep/(1. - 2./np.pi)
+        info['min_resuspension_jump']  = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
+
         # redsuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.classes['particle_properties']
         resupend = self.select_particles_to_resupend(active)

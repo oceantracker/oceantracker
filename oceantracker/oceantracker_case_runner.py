@@ -317,17 +317,15 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # Timings, sort out start and run duration
         n_substeps = float(max(1, si.classes['solver'].params['n_sub_steps']))
 
-        si.hindcast_time_step = si.reader_build_info['sorted_file_info']['time_step']
-        model_time_step = abs(si.hindcast_time_step / float(n_substeps))
-          # always >0
-        si.model_substep_timestep = model_time_step
+
 
         # set up start time and duration based on particle releases
         t_start, t_end, estimated_total_particles = self._setup_particle_release_groups(si.case_params['class_lists']['particle_release_groups'])
         si.case_log.write_progress_marker('set up particle_release_groups')
 
         duration = min(abs(t_end - t_start), si.run_params['duration'], si.shared_params['max_duration'])
-        duration = max(duration, 2 * si.hindcast_time_step)  # do at least 2 time steps
+
+        #todo make part of si info to ease write to json case_info??
         si.model_start_time = t_start
         si.model_duration = duration
 

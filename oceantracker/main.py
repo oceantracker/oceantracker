@@ -1,6 +1,6 @@
 # method to run ocean tracker from parameters
 # eg run(params)
-code_version = '0.3.03.001 2023-01-07'
+code_version = '0.3.03.002 2023-01-10'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -11,6 +11,16 @@ code_version = '0.3.03.001 2023-01-07'
 # python -m cProfile
 # python -m vmprof  <program.py> <program parameters>
 # python -m cProfile -s cumtime
+
+# do first to ensure its right
+import multiprocessing
+print('mutil_procesing Start method is currebntly', multiprocessing.get_start_method() )
+if multiprocessing.get_start_method() != 'spawn':
+    try:
+        multiprocessing.set_start_method('spawn',force=True)  # use spawn on linux platforms, default on windows
+    except exec:
+        print('mutil_procesing Start method is currently', multiprocessing.get_start_method() )
+
 import time
 from copy import deepcopy
 from datetime import datetime
@@ -36,12 +46,6 @@ from oceantracker.common_info_default_param_dict_templates import  default_case_
 from oceantracker.util.parameter_base_class import make_class_instance_from_params
 
 import subprocess
-
-import multiprocessing
-
-if multiprocessing.get_start_method() != 'spawn':
-    multiprocessing.set_start_method('spawn') # use spawn on linux platforms, default on windows
-
 
 def run(user_params):
     OT= _RunOceanTrackerClass()
@@ -271,6 +275,7 @@ class _RunOceanTrackerClass(object):
                             cout['class_lists'][key].append(i.params)
 
                     else: pass # top level checks ensures items are dict or lists
+                    self.run_log.add_messages(msg_list)
 
                 case_output_files= deepcopy(output_files) # need to make a copy
                 case_output_files['output_file_base']  = copy(shared_params['output_file_base'])
@@ -291,7 +296,7 @@ class _RunOceanTrackerClass(object):
                                     })  # add case/ copy to list for the pool
 
 
-        self.run_log.add_messages(msg_list)
+
         self.run_log.check_messages_for_errors()
         return runner_params, shared_params, msg_list
 
@@ -376,7 +381,7 @@ class _RunOceanTrackerClass(object):
         self.run_log.add_messages(msg_list)
 
         # convert file info to numpy arrays for sorting
-        keys = ['names','n_time_steps', 'time_start', 'time_end', 'time_step']
+        keys = ['names','n_time_steps', 'time_start', 'time_end']
         for key in keys:
             file_info[key] = np.asarray(file_info[key])
 
@@ -402,18 +407,18 @@ class _RunOceanTrackerClass(object):
         # make above as numpy arrays
         for key in ['nt','file_number','file_offset'] :  file_info[key] = np.asarray(file_info[key])
 
-        # hindcast time step
-        dt = (file_info['time_end']-file_info['time_start']) / (file_info['n_time_steps'] - 1)
+        # checks on hindcast
+        if  file_info['n_time_steps_in_hindcast']< 2:
+            rl.write_msg('Hincast must have at least two time steps, found ' + str(file_info['n_time_steps_in_hindcast']),exception=FatalError)
 
-        #todo these time step checks need to be better
-        if abs(np.max(dt) - np.min(dt)) > 1.10 * np.mean(file_info['time_step']):
-            rl.write_warning('Range of hindcast time step size in files is more than 1.1 times of mean time step, time step in each file are ' + str(dt))
+        # check for large time gaps between files
+        file_info['average_time_step'] = (file_info['time_end'][-1]-file_info['time_start'][0])/file_info['n_time_steps_in_hindcast']
 
-        file_info['time_step'] = np.mean(dt, axis=0)  # reader time step always positive
-
-        if np.any(np.abs(dt - file_info['time_step'])) > 1200:
-            rl.write_warning('Some time steps differ in files by more than 1200 sec')
-
+        # check if time diff between starts of file and end of last are larger than average time step
+        if len(file_info['time_start']) > 1:
+            dt_gaps = file_info['time_start'][1:] -file_info['time_end'][:-1]
+            if np.any(np.abs(dt_gaps) > 1.8 * file_info['average_time_step']):
+                rl.write_msg('Some time gap between hindcast files is are > 1.8 time average time step, check hindcast files are all present??', hint='check hindcast files are all present a, and times in files consistent')
 
         reader_build_info['sorted_file_info'] = file_info
         rl.check_messages_for_errors()

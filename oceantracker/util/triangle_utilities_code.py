@@ -61,18 +61,15 @@ def build_adjacency_from_node_cell_map(node_to_tri_map, tri):
     return  adjacency
 
 def get_boundary_triangles(adjacency_matrix):
-    # true false for boundary triangles
-    nedges = np.sum(adjacency_matrix == -1, axis=1)
-    boundary_tri = np.logical_and(nedges > 0, nedges < 3)
-    return boundary_tri
+    # true false for boundary triangles where adjacency < 0
+    return np.any(adjacency_matrix < 0,axis=1)
 
-def build_grid_outlines(triangles,adjacency_matrix,x, node_triangle_map):
+def build_grid_outlines(grid):
 
     @njit
     def build_edge_node_pairs(triangles, adjacency_matrix, boundary_tri):
 
         # find triangles with edges ( but not those with 3 edges, which are not connected to the domain)
-
 
         edge_node_pairs = np.full((2*boundary_tri.shape[0],2), -100, dtype=np.int32) # space for maximum number of edges at 1 or 2 per triangle
 
@@ -127,10 +124,10 @@ def build_grid_outlines(triangles,adjacency_matrix,x, node_triangle_map):
         return segment_list
 
     # build pairs of edge nodes from boundary triangles
-    boundary_tri= np.flatnonzero(get_boundary_triangles(adjacency_matrix))
-    edge_node_pairs = build_edge_node_pairs(triangles, adjacency_matrix, boundary_tri)
+    edge_node_pairs = build_edge_node_pairs(grid['triangles'], grid['adjacency'], np.flatnonzero(grid['boundary_triangles']))
 
     # join segments into continuous lines
+    #todo this is slow
     segs = join_segments(edge_node_pairs)
 
     # use first segment to work out if an island
@@ -139,11 +136,11 @@ def build_grid_outlines(triangles,adjacency_matrix,x, node_triangle_map):
         nodes=np.asarray(s).astype(np.int32)
 
         # find tri containing first segment
-        tri1 = node_triangle_map[s[0]]
-        tri2 = node_triangle_map[s[1]]
+        tri1 = grid['node_to_tri_map'][s[0]]
+        tri2 = grid['node_to_tri_map'][s[1]]
         ntri= list(set(tri1) & set(tri2))[0] # triangle in common to both nodes
-        x1= np.mean(x[triangles[ntri,:],:],axis=0)  # mid point of tri holding first segment
-        points = x[s, :]
+        x1= np.mean(grid['x'][grid['triangles'][ntri,:],:],axis=0)  # mid point of tri holding first segment
+        points = grid['x'][s, :]
         poly=InsidePolygon(points)
 
         face_nodes= np.stack((nodes[:-1],nodes[1:]), axis=1)

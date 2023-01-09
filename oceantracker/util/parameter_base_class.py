@@ -40,12 +40,17 @@ def make_class_instance_from_params(params,class_type_name=None, base_case_param
     #        class_params['class_name'] = self.package_info['short_class_name_map'][class_params['class_name']]
 
     i, msg = import_module_from_string(params['class_name'])
-    if msg is not None:  msg_list.append(msg)
+    if msg is not None:
+        msg_list.append(msg)
+        return i, msg_list
+
+
+
     i.info['nseq']= nseq
     i.info['class_type'] = class_type_name
 
     if merge_params:
-        # merge templae with base case first
+        # merge template with base case first
         if class_type_name in default_case_param_template and type(default_case_param_template[class_type_name]) != list:
             base_case_params, msg_list = merge_params_with_defaults(base_case_params,
                                                     default_case_param_template[class_type_name], {},

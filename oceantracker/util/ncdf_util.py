@@ -13,7 +13,7 @@ class NetCDFhandler(object):
         self.file_name = file_name
         self.mode = mode
         try:
-            self.file_handle = Dataset(path.join(self.file_name), mode)
+            self.file_handle = Dataset(self.file_name, mode)
         except Exception as e:
             print('Ocean tracker could not create/find/read netCDF file="' + file_name + '"' + ', mode =' + mode)
             raise(e)
@@ -56,7 +56,7 @@ class NetCDFhandler(object):
 
     def read_a_variable(self,name, sel=None, time_first_dim=True):
         if sel is None:
-            data= self.file_handle.variables[name][:]   #read a whole variable
+            data= self.file_handle.variables[name][:]   # read whole variable
         else:
             if time_first_dim:
                 data = self.file_handle.variables[name][sel, ...] # selection from first dimension
