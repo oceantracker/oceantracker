@@ -11,25 +11,43 @@ from oceantracker.util import  basic_util
 def build_node_to_cell_map(tri,x):
     # build list  giving map from each node to list of cells which contain that node
 
-    n_nodes = x.shape[0]
     # make empty list for each node
     node_to_tri_map = NumbaList()
-    for n in range(n_nodes):
+
+
+    for n in range(x.shape[0]):
         node_to_tri_map.append(NumbaList([np.int32(0)]))
         del node_to_tri_map[-1][-1]  # make it empty
 
     #  build a node to triangles map
+
+
     for nTri  in range(tri.shape[0]):
         for m  in range(tri.shape[1]):
             node = tri[nTri,m]
             # log one more triangle for this node
             node_to_tri_map[node].append(np.int32(nTri))
 
-    return node_to_tri_map
+    # find max number of cells per triangle
+    max_cells_per_node = 0
+    for triangles in node_to_tri_map:
+        max_cells_per_node = max(max_cells_per_node,len(triangles))
+
+    # reform as numpy array
+    node_to_tri_map_array = np.full((x.shape[0],max_cells_per_node),-1, dtype=np.int32)
+    tri_Per_node = np.full((x.shape[0],), 0,dtype=np.int32)
+    for n in range(len(node_to_tri_map)):
+        for c in  node_to_tri_map[n]:
+            node_to_tri_map_array[n,tri_Per_node[n]] = c
+            tri_Per_node[n] += 1
+
+            pass
+
+    return node_to_tri_map_array, tri_Per_node
 
 # build adjacency matrix from node to triangles map
 @njit
-def build_adjacency_from_node_cell_map(node_to_tri_map, tri):
+def build_adjacency_from_node_cell_map(node_to_tri_map,tri_per_node, tri):
     # build adjacency matrix for use in triangle walk and as lateral boundary of model
     adjacency = np.full(tri.shape, -1, dtype=np.int32)
 
@@ -42,11 +60,11 @@ def build_adjacency_from_node_cell_map(node_to_tri_map, tri):
 
             # find intersection of triangle sets for nodes n1, n2
             in_common = -1
-            for tri1 in node_to_tri_map[n1]:
+            for tri1 in node_to_tri_map[n1,:tri_per_node[n1]]:
                 if tri1 == nTri: continue # don't search if same as current tri
 
                 # search triangles of second node
-                for tri2 in node_to_tri_map[n2]:
+                for tri2 in node_to_tri_map[n2,:tri_per_node[n2]]:
                     if tri2 == nTri:
                         continue  # don't find current triangle
                     elif tri2 == tri1:
@@ -58,11 +76,11 @@ def build_adjacency_from_node_cell_map(node_to_tri_map, tri):
             if in_common != -1:
                 adjacency[nTri, m] = in_common
 
-    return  adjacency
+    return adjacency
 
 def get_boundary_triangles(adjacency_matrix):
     # true false for boundary triangles where adjacency < 0
-    return np.any(adjacency_matrix < 0,axis=1)
+    return np.any(adjacency_matrix < 0, axis=1)
 
 def build_grid_outlines(grid):
 
@@ -118,13 +136,13 @@ def build_grid_outlines(grid):
                     seg.append(next_node)
 
             if len(seg) >= 3:
-                # add if 3 or more segmentss
+                # add if 3 or more segments
                 segment_list.append(seg)
 
         return segment_list
 
     # build pairs of edge nodes from boundary triangles
-    edge_node_pairs = build_edge_node_pairs(grid['triangles'], grid['adjacency'], np.flatnonzero(grid['boundary_triangles']))
+    edge_node_pairs = build_edge_node_pairs(grid['triangles'], grid['adjacency'], np.flatnonzero(grid['is_boundary_triangle']))
 
     # join segments into continuous lines
     #todo this is slow
@@ -150,17 +168,6 @@ def build_grid_outlines(grid):
         else:
             out['domain'].update({'nodes': nodes, 'points': points, 'face_nodes': face_nodes})
     return out
-
-def mark_open_boundary_faces_in_adjacency_matrix(tri, boundary_triangles, boundary_nodes, adjacency_matrix):
-
-    for ntri in np.flatnonzero(boundary_triangles):
-
-        for nodes in boundary_nodes:
-            a=1
-
-
-
-    return adjacency_matrix
 
 def split_quad_cells(triangles_and_quads,quad_cells_to_split):
     # find indices flagged for splitting

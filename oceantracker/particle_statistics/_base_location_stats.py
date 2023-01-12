@@ -44,11 +44,11 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def set_up_time_bins(self,nc):
         # stats time variables commute to all 	for progressive writing
-        nc.add_a_Dimension('time', None)  # unlimited time
-        nc.create_a_variable('time', ['time'], {'notes': 'time in seconds'}, np.double)
+        nc.add_dimension('time_dim', None)  # unlimited time
+        nc.create_a_variable('time', ['time_dim'], {'notes': 'time in seconds'}, np.double)
 
         # other output common to all types of stats
-        nc.create_a_variable('num_released', ['time'], {'notes': 'total number released'}, np.int64)
+        nc.create_a_variable('num_released', ['time_dim'], {'notes': 'total number released'}, np.int64)
 
     def  set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
@@ -115,7 +115,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         if self.params['write']:
             self.info_to_write_at_end()
-            nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['releaseGroups'], {'Notes': 'Total number released in each release group'})
+            nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], {'Notes': 'Total number released in each release group'})
             nc.write_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].particles_released)
             nc.close()
         nc = None  # parallel pool cant pickle nc

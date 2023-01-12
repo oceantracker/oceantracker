@@ -12,11 +12,14 @@ class RandomWalk(_BaseTrajectoryModifer):
         self.add_default_params({'name': PVC('random_walk',str),'A_H': PVC(1.0,float,min=0.), 'A_V': PVC(0.001,float,min=0.), } )
 
     def initialize(self):
-        si=self.shared_info
-        info= self.info
+        si = self.shared_info
+        info = self.info
+        dt = si.model_substep_timestep
+        info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
+        if not si.hindcast_is3D:
+            info['random_walk_size'] = info['random_walk_size'][:2]
 
-
-
+        info['random_walk_velocity'] = info['random_walk_size'] / si.model_substep_timestep  # velocity equivalent of random walk distance
 
     def calc_walk(self, A_turb, dt):
         # this is variance of particle motion in each vector direction,
@@ -27,14 +30,6 @@ class RandomWalk(_BaseTrajectoryModifer):
     def update(self,nb,  time, active):
         # add up 2D/3D diffusion coeff as random walk done using velocity_modifier
         #todo remove nb param,  when changed to using arbitary time step, not substeping
-        si=self.shared_info
-        info= self.info
-        dt = si.model_substep_timestep
-        info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
-        if not si.hindcast_is3D:
-            info['random_walk_size'] =  info['random_walk_size'][:2]
-
-        info['random_walk_velocity'] = info['random_walk_size'] /si.model_substep_timestep  # velocity equivalent of random walk distance
 
         si= self.shared_info
         self._add_random_walk_velocity_modifier(self.info['random_walk_velocity'], active, si.classes['particle_properties']['velocity_modifier'].data)

@@ -54,9 +54,8 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         data_added_to_buffer = nc.read_a_variable('wetdry_elem', file_index)
         is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
-    def _file_checks(self, file_name, msg_list):
+    def additional_setup_and_hindcast_file_checks(self, nc, msg_list):
         # sort out which velocity etc are there and adjust field variables
-        nc = NetCDFhandler(file_name, 'r')
         params = self.params
         fv= params['field_variables']
 
@@ -74,9 +73,6 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
             # use schism min depth times 1.2 to allow for diff due to interp cell tide to nodes in schisms output
             params['minimum_total_water_depth']= 1.2*float(nc.read_a_variable('minimum_depth'))
 
-        nc.close()
-
-        msg_list= super()._file_checks(file_name,msg_list)
         return msg_list
 
     def make_non_time_varying_grid(self,nc, grid):
@@ -113,8 +109,8 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
         return data.astype(np.int32)
 
-    def read_nodal_x_float32(self, nc):
-        x = np.stack((nc.read_a_variable('SCHISM_hgrid_node_x'), nc.read_a_variable('SCHISM_hgrid_node_y')), axis=1).astype(np.float32)
+    def read_nodal_x_float64(self, nc):
+        x = np.stack((nc.read_a_variable('SCHISM_hgrid_node_x'), nc.read_a_variable('SCHISM_hgrid_node_y')), axis=1).astype(np.float64)
         if self.params['cords_in_lat_long']:
             x  = self.convert_lat_long_to_meters_grid(x)
         return x
@@ -139,11 +135,10 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         # and make this part of the read grid method
 
         # read hgrid file for open boundary data
-        open_boundary_nodes = np.full((grid['x'].shape[0]),0,np.int8)
-        open_boundary_adjacency= np.full_like(grid['triangles'],0,dtype=np.int8)
+        is_open_boundary_node = np.full((grid['x'].shape[0],),False)
 
         if self.params['hgrid_file_name'] is  None:
-            return open_boundary_nodes,open_boundary_adjacency
+            return is_open_boundary_node
 
         with open(self.params['hgrid_file_name']) as f:lines = f.readlines()
 
@@ -155,10 +150,11 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         n_open= int(lines[n_line_open].split()[0])
 
         if n_open > 0:
-            open_boundary_nodes =[]
+
             tri_open_bound_node_list= [ [] for _ in range(grid['triangles'].shape[0]) ]
             nl = n_line_open+1
             for n in range(n_open):
+                # get block of open node numbers
                 nl += 1 # move to line with number of nodes in this open boundary
                 n_nodes = int(lines[nl].split()[0])
                 nodes=[]
@@ -167,26 +163,10 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
                     l = lines[nl].strip('\n')
                     nodes.append(int(l))
                 ob_nodes = np.asarray(nodes, dtype=np.int32)-1
-                open_boundary_nodes  = 1
-                grid['node_type'][ob_nodes] = 3 # mark as open nodes
-                open_boundary_nodes.append(ob_nodes) # get zero based node number
 
-                # build triangle to open nodes map
-                for node in ob_nodes:
-                    for tri in grid['node_to_tri_map'][node]:
-                        tri_open_bound_node_list[tri].append(node)
+                is_open_boundary_node[ob_nodes] = True # get zero based node number
 
-
-            # find triangles with 2 open nodes, and adjust adjacency from -1 to -2 for those faces
-            for n, l in enumerate(tri_open_bound_node_list):
-                if len(l) > 1:
-                    # look at each boundary face in this triangle and see if it has two open boundary node, and  mark as  open
-                    for nface in np.flatnonzero(grid['adjacency'][n,:] == -1):
-                        face_nodes= grid['triangles'][n,(nface + 1+ np.arange(2) ) % 3]
-                        if face_nodes[0] in tri_open_bound_node_list[n] and face_nodes[1] in tri_open_bound_node_list[n] :
-                            open_boundary_adjacency[n, nface] = 1 # mark as open
-
-        return open_boundary_nodes,open_boundary_adjacency
+        return is_open_boundary_node
 
 
 

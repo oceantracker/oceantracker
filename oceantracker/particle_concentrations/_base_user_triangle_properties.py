@@ -42,10 +42,10 @@ class _BaseTriangleProperties(ParameterBaseClass):
         self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
         nc = self.nc
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
-        nc.add_a_Dimension('time', None)
-        nc.add_a_Dimension('face', grid['triangles'].shape[0])
+        nc.add_dimension('time_dim', None)
+        nc.add_dimension('triangle_dim', grid['triangles'].shape[0])
 
-        nc.create_a_variable('time', ['time'])
+        nc.create_a_variable('time', ['time_dim'])
         self.time_steps_written = 0
         # need to add other variables in children
         self.info['time_last_stats_recorded'] = si.time_of_nominal_first_occurrence

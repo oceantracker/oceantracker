@@ -1,6 +1,6 @@
 # method to run ocean tracker from parameters
 # eg run(params)
-code_version = '0.3.03.002 2023-01-10'
+code_version = '0.3.03.003 2023-01-12'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -14,7 +14,7 @@ code_version = '0.3.03.002 2023-01-10'
 
 # do first to ensure its right
 import multiprocessing
-print('mutil_procesing Start method is currebntly', multiprocessing.get_start_method() )
+print('mutil_processsing Start method is currently', multiprocessing.get_start_method() )
 if multiprocessing.get_start_method() != 'spawn':
     try:
         multiprocessing.set_start_method('spawn',force=True)  # use spawn on linux platforms, default on windows
@@ -244,6 +244,9 @@ class _RunOceanTrackerClass(object):
         # build full shared params
         shared_params, msg_list = merge_params_with_defaults(params['shared_params'], run_params_defaults_template['shared_params'], {},msg_list=msg_list, tag='shared_params')
         base_case_params = deepcopy(params['base_case_params'])
+        base_case_params, msg_list = check_top_level_param_keys_and_structure(base_case_params, default_case_param_template,
+                                                                              required_keys=[],
+                                                                              tag='Checking base case  params', msg_list=msg_list)
 
         # build each case params
         processor_number = 0
@@ -255,6 +258,10 @@ class _RunOceanTrackerClass(object):
             for n_replicate in range(shared_params['replicates']):
                 # parameter list to run same particle on multiple threads
                 c  = deepcopy(case)  # a set of parameters for this case
+                c, msg_list = check_top_level_param_keys_and_structure(c, default_case_param_template,
+                                                                       required_keys=[],
+                                                                       tag='Checking case params', msg_list=msg_list)
+
                 cout = {'run_params': {}, 'core_classes': {}, 'class_lists': {}}
 
                 for key, item in c.items():
@@ -262,6 +269,8 @@ class _RunOceanTrackerClass(object):
                     if key =='run_params':
                         cout['run_params'], msg_list = merge_params_with_defaults(c['run_params'],default_case_param_template['run_params'],
                                                                                    base_case_params['run_params'],   msg_list=msg_list, tag='case_run_params')
+
+                        pass
                     elif type(item) == dict and key != 'reader':
                         # core classes
                         i, msg_list = make_class_instance_from_params(item,class_type_name=key,crumbs ='class param ' + key +' >> ',
@@ -376,8 +385,12 @@ class _RunOceanTrackerClass(object):
         if len(file_info['names']) == 0:
             rl.write_msg('reader: cannot find any files matching mask "' + reader.params['file_mask']
                            + '"  in input_dir : "' + reader.params['input_dir'] + '"', exception = GracefulExitError)
-
-        msg_list = reader._file_checks(file_info['names'][0], msg_list=[])
+        
+        # checks on hindcast using first hindcast file 
+        nc = NetCDFhandler(file_info['names'][0], 'r')
+        msg_list = reader._basic_file_checks(nc, msg_list=[])
+        msg_list = reader.additional_setup_and_hindcast_file_checks(nc, msg_list=msg_list)
+        nc.close()
         self.run_log.add_messages(msg_list)
 
         # convert file info to numpy arrays for sorting
@@ -412,13 +425,16 @@ class _RunOceanTrackerClass(object):
             rl.write_msg('Hincast must have at least two time steps, found ' + str(file_info['n_time_steps_in_hindcast']),exception=FatalError)
 
         # check for large time gaps between files
-        file_info['average_time_step'] = (file_info['time_end'][-1]-file_info['time_start'][0])/file_info['n_time_steps_in_hindcast']
+        file_info['hydro_model_time_step'] = (file_info['time_end'][-1]-file_info['time_start'][0])/(file_info['n_time_steps_in_hindcast']-1)
 
         # check if time diff between starts of file and end of last are larger than average time step
         if len(file_info['time_start']) > 1:
             dt_gaps = file_info['time_start'][1:] -file_info['time_end'][:-1]
-            if np.any(np.abs(dt_gaps) > 1.8 * file_info['average_time_step']):
-                rl.write_msg('Some time gap between hindcast files is are > 1.8 time average time step, check hindcast files are all present??', hint='check hindcast files are all present a, and times in files consistent')
+            sel = np.abs(dt_gaps) > 1.8 * file_info['hydro_model_time_step']
+            if np.any(sel):
+                rl.write_msg('Some time gaps between hindcast files is are > 1.8 times average time step, check hindcast files are all present??', hint='check hindcast files are all present and times in files consistent', warning=True)
+                for n in np.flatnonzero(sel):
+                    rl.write_msg('file gaps between ' + file_info['names'][n] + ' and ' + file_info['names'][n+1],tabs=1)
 
         reader_build_info['sorted_file_info'] = file_info
         rl.check_messages_for_errors()
@@ -439,6 +455,7 @@ class _RunOceanTrackerClass(object):
             water_depth = reader.read_file_field_variable_as4D(hindcast,var_info['component_list'][0],var_info['is_time_varying'], file_index=None)
             water_depth = reader.preprocess_field_variable(hindcast,'water_depth',water_depth)
             water_depth = np.squeeze(water_depth)
+
         hindcast.close()
 
         # write grid file
@@ -447,13 +464,13 @@ class _RunOceanTrackerClass(object):
         nc.write_global_attribute('Notes', ' all indices are zero based')
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
 
-        nc.write_a_new_variable('x', grid['x'], ('nodes', 'vector2D'))
-        nc.write_a_new_variable('triangles', grid['triangles'], ('faces', 'vertex'))
-        nc.write_a_new_variable('adjacency', grid['adjacency'], ('faces', 'vertex'))
-        nc.write_a_new_variable('node_type', grid['node_type'], ('nodes',), attributesDict={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
-        nc.write_a_new_variable('boundary_triangles', grid['boundary_triangles'].astype(np.int8), ('faces',))
-        nc.write_a_new_variable('water_depth', water_depth, ('nodes',))
-
+        nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
+        nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
+        nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
+        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
+        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributesDict={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
+        nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'].astype(np.int8), ('triangle_dim',))
+        nc.write_a_new_variable('water_depth', water_depth, ('node_dim',))
         nc.close()
 
         grid_outline_file = output_files['output_file_base'] + '_grid_outline.json'

@@ -33,7 +33,7 @@ class _CorePolygonMethods(ParameterBaseClass):
                                                class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=self.params['polygon_list'],
                                                 write=False))
-        nc.add_a_Dimension('polygon', len(self.params['polygon_list']))
+        nc.add_dimension('polygon_dim', len(self.params['polygon_list']))
 
 class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_timeBased):
     # class to hold counts of particles inside 2D polygons squares
@@ -52,13 +52,13 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         si = self.shared_info
         if not self.params['write']: return
         
-        dim_names = ('time', 'releaseGroups', 'polygon')
-        dim_sizes  = ( None, len(si.classes['particle_release_groups']), nc.get_dim_size('polygon') )
+        dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
+        dim_sizes  = ( None, len(si.classes['particle_release_groups']), nc.get_dim_size('polygon_dim') )
 
-        nc.add_a_Dimension('releaseGroups', dim_sizes[1])
+        nc.add_dimension('release_group_dim', dim_sizes[1])
         nc.create_a_variable('count', dim_names,
                              {'notes': 'counts of particles in each polygon at given times, for each release group'}, np.int64)
-        nc.create_a_variable('count_all_particles', ['time', 'releaseGroups'],
+        nc.create_a_variable('count_all_particles', ['time_dim', 'release_group_dim'],
                              {'notes': 'counts of particles whether in a polygon or not'}, np.int64)
         # set up space for requested particle properties
         # working count space, row are (y,x)
@@ -149,7 +149,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
     def update(self,**kwargs):
 
         part_prop = self.shared_info.classes['particle_properties']
-        sgrid = self.grid
+        stats_grid = self.grid
 
         # update time stats  recorded
         time = kwargs['time']
@@ -165,25 +165,25 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
         sel = self.select_particles_to_count(self.get_particle_index_buffer())
 
         # loop over statistics polygons
-        self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, sel, sgrid['age_bin_edges'], p_age)
+        self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, sel, stats_grid['age_bin_edges'], p_age)
 
     def info_to_write_at_end(self):
         # write variables whole
         nc = self.nc
-        sgrid = self.grid
+        stats_grid = self.grid
 
-        nc.write_a_new_variable('count', self.count_age_bins, ['age_bins', 'releaseGroups', 'polygon'],
+        nc.write_a_new_variable('count', self.count_age_bins, ['age_bin_dim', 'release_group_dim', 'polygon_dim'],
                                 {'notes': 'counts of particles in grid at given ages, for each release group'}, np.int64)
 
-        nc.write_a_new_variable('count_all_particles', self.count_all_particles, ['age_bins', 'releaseGroups'], {'notes': 'counts of  particles in all age bands for each release group, whether inside a polygon or not'}, np.int64)
+        nc.write_a_new_variable('count_all_particles', self.count_all_particles, ['age_bin_dim', 'release_group_dim'], {'notes': 'counts of  particles in all age bands for each release group, whether inside a polygon or not'}, np.int64)
 
-        nc.write_a_new_variable('age_bins'     , sgrid['age_bins']     , ['age_bins']         , {'notes': 'center of age bin, ie age axis in seconds'}, np.float64)
-        nc.write_a_new_variable('age_bin_edges', sgrid['age_bin_edges'], ['num_age_bin_edges'], {'notes': 'edges of age bins in seconds'}, np.float64)
+        nc.write_a_new_variable('age_bins'     , stats_grid['age_bins']     , ['age_bin_dim']         , {'notes': 'center of age bin, ie age axis in seconds'}, np.float64)
+        nc.write_a_new_variable('age_bin_edges', stats_grid['age_bin_edges'], ['num_age_bin_edges'], {'notes': 'edges of age bins in seconds'}, np.float64)
 
         # particle property sums
         for key, item in self.sum_binned_part_prop.items():
             # need to write final sums of properties  after all age counts done across all times
-            nc.write_a_new_variable('sum_' + key, item[:], ('age_bins', 'releaseGroups', 'polygon'), {'notes': 'sum of particle property inside bin  ' + key}, np.float64)
+            nc.write_a_new_variable('sum_' + key, item[:], ('age_bin_dim', 'release_group_dim', 'polygon_dim'), {'notes': 'sum of particle property inside bin  ' + key}, np.float64)
 
     @staticmethod
     @njit

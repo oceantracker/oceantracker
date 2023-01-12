@@ -87,7 +87,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
             colour_using_data[track_data['status']==val] = n # replace status with range(status_list)
 
         colour_using_data = colour_using_data.astype(np.float64)
-        status_colour_map = np.asarray([[0.9961,    0.8906,    0.7070],[0, 0., 0.],[.8, 0, 0.],  [0, .5, 0.], [0.5, 0.5, .5], [0, 0, 1.] ])
+        status_colour_map = np.asarray([[0.6,    0.2,    0.2],[0, 0., 0.],[.8, 0, 0.],  [0, .5, 0.], [0.5, 0.5, .5], [0, 0, 1.] ])
         cmap = colors.ListedColormap(status_colour_map)
 
         sc = ax.scatter(track_data['x'][nt, :, 0], track_data['x'][nt, :, 1], c=colour_using_data[nt, :], vmin=0,

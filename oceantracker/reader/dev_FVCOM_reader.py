@@ -9,6 +9,9 @@ from oceantracker.interpolator.util.interp_kernals import kernal_linear_interp1D
 
 from oceantracker.reader.util import reader_util
 
+#todo distance weight cell center to nodal values with pre-cacluated matrix
+#todo friction velocity from bottom stress magnitude, tauc if present
+#todo use A_H and A_V fields in random walk
 
 class unstructured_FVCOM(GenericUnstructuredReader):
     # loads a standard SCHISM netcdf output file with nodal data
@@ -37,23 +40,29 @@ class unstructured_FVCOM(GenericUnstructuredReader):
         # add time invariant vertical grid variables needed for transformations
         # sigma level fractions required to build zlevel after reading  tide
         # siglay, siglev are <0 and  look like layer fraction from free surface starting at top moving down, convert to fraction from bottom starting at bottom
-        grid['z_fractions_layer_center'] =  1.+np.flip(nc.read_a_variable('siglay', sel=None).astype(np.float32).T,axis=1)  # layer center frractions
+
+        # first values in z axis is the top? so flip
+        grid['z_fractions_layer_center'] =  1.+np.flip(nc.read_a_variable('siglay', sel=None).astype(np.float32).T,axis=1)  # layer center fractions
         grid['z_fractions_layer_boundaries'] = 1.+np.flip(nc.read_a_variable('siglev', sel=None).astype(np.float32).T,axis=1)  # layer boundary fractions
-
-        # record cell center x as well to be used for gett nodal field vals from values at center
-        grid['x_center'] = np.stack((nc.read_a_variable('xc'), nc.read_a_variable('yc')), axis=1)
-
-        grid['vertical_grid_type'] = 'sigma'
+        grid['vertical_grid_type'] = 'S-sigma'
         return grid
 
-    def read_nodal_x_float32(self, nc):
+    def read_nodal_x_float64(self, nc):
+        # get node location in meters
+        # also record cell center x as well to be used for get nodal field vals from values at center, eg velocity
+        grid= self.grid
 
         if  self.params['cords_in_lat_long'] or np.all(nc.read_a_variable('x')==0): #  use lat long? as x may sometimes be all be zeros
-            x = np.stack((nc.read_a_variable('lon'), nc.read_a_variable('lat')), axis=1).astype(np.float32)
+            x = np.stack((nc.read_a_variable('lon'), nc.read_a_variable('lat')), axis=1).astype(np.float64)
             x= self.convert_lat_long_to_meters_grid(x)
-            #todo use user given grid projection??
+
+            grid['x_center'] = np.stack((nc.read_a_variable('lonc'), nc.read_a_variable('latc')), axis=1)
+            grid['x_center'] = self.convert_lat_long_to_meters_grid(grid['x_center'] ).astype(np.float64)
+
         else:
-            x = np.stack((nc.read_a_variable('x'), nc.read_a_variable('y')))
+            x = np.stack((nc.read_a_variable('x'), nc.read_a_variable('y'))).astype(np.float64)
+
+            grid['x_center'] = np.stack((nc.read_a_variable('xc'), nc.read_a_variable('yc')), axis=1).astype(np.float64)
 
         return x
 
@@ -80,13 +89,19 @@ class unstructured_FVCOM(GenericUnstructuredReader):
         zlevel_buffer[buffer_index, ...] = grid['z_fractions_layer_boundaries'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
 
     def read_dry_cell_data(self, nc, file_index,is_dry_cell_buffer,buffer_index):
-        # get dry cells from water depth and tide
         si = self.shared_info
-        grid = self.grid
-        fields = self.shared_info.classes['fields']
 
-        reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
-                                                si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
+        if nc.is_var('wet_cells'):
+            wet_cells= nc.read_a_variable('wet_cells',sel=file_index)
+            is_dry_cell_buffer[buffer_index,:]  = wet_cells != 1
+
+        else:
+            # get dry cells from water depth and tide
+
+            grid = self.grid
+            fields = self.shared_info.classes['fields']
+            reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
+                                                    si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
 
     def read_time(self, nc, file_index=None):
 
@@ -111,7 +126,6 @@ class unstructured_FVCOM(GenericUnstructuredReader):
         grid = self.grid
 
         var_name= file_var_info['name_in_file']
-        var_dims = nc.get_var_dims(var_name)
 
         data = nc.read_a_variable(var_name, sel= file_index if is_time_varying else None) # allow for time independent data
 
@@ -130,7 +144,7 @@ class unstructured_FVCOM(GenericUnstructuredReader):
         # some variables at nodes, some at cell center ( eg u,v,w)
         if 'nele' in nc.get_var_dims(var_name) :
             # data is at cell/element and layers, move to nodes and layer boundaries
-            data = get_node_layer_field_values(data,grid['node_to_tri_map'])
+            data = get_node_layer_field_values(data,grid['node_to_tri_map'],grid['tri_per_node'])
 
         if  'siglay' in nc.get_var_dims(var_name):
             # convert layer values to values at layer boundaries, ie zlevels
@@ -144,25 +158,27 @@ class unstructured_FVCOM(GenericUnstructuredReader):
 
     def preprocess_field_variable(self, nc,name, data):
 
-        if name =='water_velocity' and data.shape[2] > 1:
+        if name =='water_velocity' and data.shape[2] > 1: # process if 3D velocity
             # linear extrapolation of 3D velocity to bottom zlevel, may not give zero vel at bottom so set to zero
-            data[:, :, 0, :]= 0.
+            data[:, :, 0, :] = 0.
 
         return data
 
 @njit
-def get_node_layer_field_values(data,node_to_tri_map):
+def get_node_layer_field_values(data, node_to_tri_map, tri_per_node):
     # todo very rough cell to node converted averages values in cells center to layer boundary below,
-    #  make better interpolator, eg distance weighted?!!!
+    #  make better interpolator, eg with pre-calculated distance weighted?!!!
 
     data_nodes= np.full( (data.shape[0],) + (len(node_to_tri_map),) +(data.shape[2],) , 0., dtype=np.float32)
 
-    for nt in range(data.shape[0]):
-        for n in range(len(node_to_tri_map)):
+    for nt in range(data.shape[0]): # loop over time steps
+        # loop over triangles
+        for node in range(node_to_tri_map.shape[0]):
             for nz in range(data.shape[2]):
-                for cell in node_to_tri_map[n]:
-                    data_nodes[nt, n, nz] += data[nt, cell, nz]
-                data_nodes[nt, n, nz] =  data_nodes[nt, n, nz]/len(node_to_tri_map[n])
+                # loop over cells containing this node
+                for cell in node_to_tri_map[node,:tri_per_node[node]]:
+                    data_nodes[nt, node, nz] += data[nt, cell, nz]
+                data_nodes[nt, node, nz] =  data_nodes[nt, node, nz]/len(node_to_tri_map[node])
     return data_nodes
 
 @njit

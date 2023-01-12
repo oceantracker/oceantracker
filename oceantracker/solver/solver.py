@@ -65,7 +65,7 @@ class Solver(ParameterBaseClass):
         pgm, fgm   = si.classes['particle_group_manager'], si.classes['field_group_manager']
         part_prop = si.classes['particle_properties']
 
-        for n, nt in enumerate(nt_hindcast[:-2]): # one less step as last step is initial condition for next block
+        for n, nt in enumerate(nt_hindcast[:-1]): # one less step as last step is initial condition for next block
             nt_remaining= nt_hindcast[n:] # remaining hindcast time steps to run
             if not reader.time_steps_in_buffer(nt_remaining):
                 reader.fill_time_buffer(nt_remaining) # get next steps into buffer if not in buffer
@@ -75,9 +75,6 @@ class Solver(ParameterBaseClass):
             nb = (nt -grid_time_buffers['nt_hindcast'][0])*si.model_direction
             t_hindcast = grid_time_buffers['time'][nb]  # make time exactly that of hindcast
 
-            # todo remove when getting rid of substepping
-            si.hindcast_time_step = reader.grid_time_buffers['time'][nb+1]-t_hindcast
-            si.model_substep_timestep = si.hindcast_time_step/self.params['n_sub_steps']
 
             # do sub steps with hind-cast model step
             for ns in range(self.params['n_sub_steps']):

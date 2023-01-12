@@ -29,6 +29,7 @@ class _BaseReader(ParameterBaseClass):
                                  'time_zone': PVC(None, int, min=-12, max=23),
                                  'cords_in_lat_long': PVC(False, bool),
                                  'time_buffer_size': PVC(48, int, min=2),
+                                 'water_density': PVC(48, int, min=2),
                                  'depth_average': PVC(False, bool),  # turns 3D hindcast into a 2D one
                                  'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
                                  'one_based_indices' :  PVC(False, bool,doc_str='indcies in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
@@ -42,7 +43,10 @@ class _BaseReader(ParameterBaseClass):
                                                      'water_depth': PVC(None, str),
                                                      'tide': PVC(None, str),
                                                      'water_temperature': PVC(None, str),
-                                                     'salinity': PVC(None, str)},
+                                                     'salinity': PVC(None, str),
+                                                     'wind_stress': PVC(None, str),
+                                                     'bottom_stress': PVC(None, str),
+                                                     },
 
                                  'dimension_map': {'time': PVC('time', str), 'node': PVC('node', str), 'z': PVC(None, str),
                                                    'vector2Ddim': PVC(None, str), 'vector3Ddim': PVC(None, str)},
@@ -58,13 +62,14 @@ class _BaseReader(ParameterBaseClass):
         self.shared_memory= {'grid' :{}, 'fields':{},'control':{}}
 
     #required read methods non time dependent variables
-    def read_nodal_x_float32(self, nc): nopass('reader method: read_x is required')
+    def read_nodal_x_float64(self, nc): nopass('reader method: read_x is required')
     def read_bottom_cell_index_as_int32(self, nc):nopass('reader method: read_bottom_cell_index_as_int32 is required for 3D hindcasts')
 
     # required methods time dependent variables, also require a set up method
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index): nopass('reader method: read_zlevel_as_float32 is required for 3D hindcasts')
 
-    def _file_checks(self, file_name, msg_list): pass
+    # checks on first hindcast file
+    def additional_setup_and_hindcast_file_checks(self, nc, msg_list): pass
 
     def make_non_time_varying_grid(self,nc, grid): nopass('setup_grid required')
 
@@ -202,10 +207,8 @@ class _BaseReader(ParameterBaseClass):
 
         self.code_timer.stop('build_hindcast_reader')
 
-    def _file_checks(self, file_name, msg_list):
+    def _basic_file_checks(self, nc, msg_list):
         # check named variables are in first file
-        si = self.shared_info
-        nc = NetCDFhandler(file_name, 'r')
 
         # check dim
         for name, d in self.params['dimension_map'].items():
@@ -222,7 +225,7 @@ class _BaseReader(ParameterBaseClass):
 
                 elif d is not None and not nc.is_var(d) :
                     append_message(msg_list,'For "' + vm + '" for param,  "' + name + ' ", cannot find variable in file "' + str(d) + '"', exception=GracefulExitError)
-        nc.close()
+
         return msg_list
 
     def get_field_variable_info(self, nc, name,var_list):
@@ -295,13 +298,14 @@ class _BaseReader(ParameterBaseClass):
 
             # use list with groups of nt to map each file to the nt it holds, ie a file to nt map
             # read from this file
+            t0_file = perf_counter()
             nc = NetCDFhandler(fi['names'][n_file], 'r')
 
             num_read = len(nt_available)
             buffer_index = b0 + np.arange(num_read)
             file_index = fi['file_offset'][nt_available]
 
-            s =  f'Reading-file-{(n_file+1):02}' + path.basename(fi['names'][n_file]) + f'{file_index[0]:04}:{file_index[-1]:04}'
+            s =  f'Reading-file-{(n_file+1):02} ' + path.basename(fi['names'][n_file]) + f'{file_index[0]:04}:{file_index[-1]:04}'
             s += f' Steps in file {fi["n_time_steps"][-1]:4} nt available {nt_available[0]:03} :{nt_available[-1]:03},'
             s += f' file offsets {file_index[0]:4} : {file_index[-1]:4}  nt required {nt_required[0]:4}:{nt_required[-1]:4}, number required: {nt_required.shape[0]:4}'
 
@@ -337,7 +341,7 @@ class _BaseReader(ParameterBaseClass):
             s = '    read file at time ' + time_util.seconds_to_pretty_str(grid_time_buffers['time'][buffer_index[0]])
             s += f' file offsets {file_index[0] :04}:{file_index[-1]:04}'
             s += f' buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03}'
-            s += f' Read:{num_read:4}  time: {int(1000. * (perf_counter() - t0)):3} ms'
+            s += f' Read:{num_read:4}  time: {int(1000. * (perf_counter() - t0_file)):3} ms'
 
             si.case_log.write_progress_marker(s)
             b0 += num_read
@@ -350,6 +354,7 @@ class _BaseReader(ParameterBaseClass):
         buffer_info['first_nt_hindcast_in_buffer'] = grid_time_buffers['nt_hindcast'][0]  # global index of buffer zero
         buffer_info['last_nt_hindcast_in_buffer']  = grid_time_buffers['nt_hindcast'][total_read-1]
 
+        si.case_log.write_progress_marker(f'Total time to fill buffer  {(perf_counter() - t0):4.1f} sec',tabs=1)
         self.code_timer.stop('reading_to_fill_time_buffer')
 
     def assemble_field_components(self,nc, field, buffer_index=None, file_index=None):
@@ -428,9 +433,8 @@ class _BaseReader(ParameterBaseClass):
             #grid['is_dry_cell'][buffer_index, :] =  np.concatenate((data_added_to_buffer, data_added_to_buffer[:, grid['quad_cell_to_split_index']]), axis=1)
 
     def read_open_boundary_data(self, grid):
-        open_boundary_nodes = np.full((grid['x'].shape[0]),0,np.int8)
-        open_boundary_adjacency= np.full_like(grid['triangles'],0,dtype=np.int8)
-        return open_boundary_nodes, open_boundary_adjacency
+        is_open_boundary_node = np.full((grid['x'].shape[0],), False)
+        return is_open_boundary_node
 
 
     def get_first_time_in_hindcast(self):
@@ -461,7 +465,7 @@ class _BaseReader(ParameterBaseClass):
            'hindcast_starts': time_util.seconds_to_iso8601str(self.get_first_time_in_hindcast()),
            'hindcast_ends':time_util.seconds_to_iso8601str(self.get_last_time_in_hindcast()),
            'hindcast_duration_days':(self.get_last_time_in_hindcast() - self.get_first_time_in_hindcast())/24/3600.,  # info_file = BuildCaseInfoFile()
-           'average_hindcast_timestep': self.reader_build_info['sorted_file_info']['average_time_step'],
+           'average_hindcast_timestep': self.reader_build_info['sorted_file_info']['hydro_model_time_step'],
            'input_dir' : self.params['input_dir'],
            'first_file': self.reader_build_info['sorted_file_info']['names'][0],
            'last_file' : self.reader_build_info['sorted_file_info']['names'][-1]

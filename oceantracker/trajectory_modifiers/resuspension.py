@@ -46,7 +46,7 @@ class BasicResuspension(_BaseTrajectoryModifier):
     # all particles checked to see if they need status changing
     def update(self, nb, time, active):
         # do resupension
-        #todo move 'resuspension_factor' calc to initialise when substeping removed
+        #todo move 'resuspension_factor' calc to initialize() when substeping removed
         self.start_update_timer()
         si= self.shared_info
         info = self.info

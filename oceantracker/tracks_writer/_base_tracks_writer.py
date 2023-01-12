@@ -35,7 +35,8 @@ class _BaseWriter(ParameterBaseClass):
         self.total_time_steps_written = 0
         self.n_files_written = 0
 
-        self.file_build_info={'dimensions' : {}, 'attributes': {}, 'variables': {}}
+        self.info['file_builder']={'dimensions' : {}, 'attributes': {}, 'variables': {}}
+        self.add_dimension('time_dim',None)
         self.add_dimension('vector2D', 2)
         self.add_dimension('vector3D', 3)
         self.nc = None
@@ -44,17 +45,16 @@ class _BaseWriter(ParameterBaseClass):
         si= self.shared_info
         grid = si.classes['reader'].grid
         if self.params['write_dry_cell_index']:
-            self.add_dimension('triangle', grid['triangles'].shape[0])
-            self.add_dimension('triplets', 3)
-            self.add_new_variable('dry_cell_index', ['time','triangle'], attributes_dict={'description': 'Time series of grid dry index 0-255'},
+            self.add_dimension('triangle_dim', grid['triangles'].shape[0])
+            self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes_dict={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])
 
 
     def add_dimension(self, name, size):
-        self.file_build_info['dimensions' ][name] ={'size': size}
+        self.info['file_builder']['dimensions' ][name] ={'size': size}
 
     def add_global_attribute(self, name, value):
-        self.file_build_info['attributes' ][name] = value
+        self.info['file_builder']['attributes' ][name] = value
 
     def add_new_variable(self,name, dim_list, attributes_dict=None, dtype=None, vector_dim=None, chunking=None):
 
@@ -72,7 +72,7 @@ class _BaseWriter(ParameterBaseClass):
             'dtype' : np.int8  if dtype is bool else dtype}
 
 
-        self.file_build_info['variables'][name] = var
+        self.info['file_builder']['variables'][name] = var
 
     def open_file_if_needed(self):
         si = self.shared_info
@@ -103,10 +103,10 @@ class _BaseWriter(ParameterBaseClass):
         self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file'][-1]), 'w')
         nc = self.nc
 
-        for name, item in self.file_build_info['dimensions'].items():
-            nc.add_a_Dimension(name,item['size'])
+        for name, item in self.info['file_builder']['dimensions'].items():
+            nc.add_dimension(name, item['size'])
 
-        for name, item in self.file_build_info['variables'].items():
+        for name, item in self.info['file_builder']['variables'].items():
 
             # check chunk size under 4GB
             if item['chunks'] is not None:
@@ -176,7 +176,7 @@ class _BaseWriter(ParameterBaseClass):
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
 
             # add all global attributes
-            for name, item in self.file_build_info['attributes'].items():
+            for name, item in self.info['file_builder']['attributes'].items():
                 nc.write_global_attribute(name,item)
 
             nc.close()
