@@ -1,0 +1,64 @@
+{
+    "shared_params": {
+        "output_file_base": "FVCOM_Lake_Superior_test",
+        "root_output_dir": "\\output"
+    },
+    "reader": {
+        "class_name": "oceantracker.reader.dev_FVCOM_reader.unstructured_FVCOM",
+        "input_dir": "F:\\Hindcasts\\colaborations\\LakeSuperior\\historical_sample",
+        "minimum_total_water_depth": 5,
+        "search_sub_dirs": true,
+        "file_mask": "nos.lsofs.fields.n000*.nc"
+    },
+    "base_case_params": {
+        "solver": {
+            "n_sub_steps": 3
+        },
+        "run_params": {
+            "user_note": "test of notes"
+        },
+        "particle_release_groups": [
+            {
+                "points": [
+                    [
+                        439094.44415005075,
+                        5265627.962025132,
+                        -10
+                    ]
+                ],
+                "pulse_size": 250,
+                "release_interval": 7200
+            }
+        ],
+        "trajectory_modifiers": [
+            {
+                "class_name": "oceantracker.trajectory_modifiers.resuspension.BasicResuspension",
+                "critical_friction_velocity": 0.0
+            }
+        ],
+        "fields": [
+            {
+                "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
+            }
+        ],
+        "particle_statistics": [
+            {
+                "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
+                "calculation_interval": 72000,
+                "grid_size": [
+                    320,
+                    321
+                ],
+                "grid_span": [
+                    250000,
+                    250000
+                ],
+                "grid_center": [
+                    439094.44415005075,
+                    5265627.962025132,
+                    -10
+                ]
+            }
+        ]
+    }
+}

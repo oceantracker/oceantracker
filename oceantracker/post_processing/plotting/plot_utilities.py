@@ -48,7 +48,7 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
         ax.triplot(grid['x'][:, 0], grid['x'][:, 1], grid['triangles'], color=(0.8, 0.8, 0.8), linewidth=.5, zorder=1)
 
     sel = grid['node_type'] == 3 # open_boundary_nodes
-    plt.plot(grid['x'][sel, 0], grid['x'][sel, 1], '--','darkgreen')
+    plt.scatter(grid['x'][sel, 0], grid['x'][sel, 1],s= 4,marker= '.',c='darkgreen')
 
     ax.set_xticklabels([])
     ax.set_yticklabels([])
@@ -65,7 +65,7 @@ def display_grid(grid, ginput=0, axis_lims=None):
 
     draw_base_map(grid, show_grid=True, axis_lims=axis_lims)
     if 1==0:
-        bt = np.flatnonzero(grid['boundary_triangles'])
+        bt = np.flatnonzero(grid['is_boundary_triangle'])
         plt.plot(grid['x'][grid['triangles'][bt,:],0].T, grid['x'][grid['triangles'][bt,:],1].T,'r', zorder=9)
 
     if ginput > 0:

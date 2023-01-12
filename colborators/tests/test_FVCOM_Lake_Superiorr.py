@@ -1,46 +1,78 @@
 from oceantracker.run_oceantracker import main
-from oceantracker.util.ncdf_util import NetCDFhandler
+from oceantracker.util import yaml_util, json_util
 from os import path
 import numpy as np
+import argparse
 
-points = [[ 650000, 7794453.5, -1. ], [ 649000, 7790000, -1. ]]
+parser = argparse.ArgumentParser()
+parser.add_argument('-norun', action='store_true')
+args = parser.parse_args()
 
-output_file_base='FVCOM_sample'
+# https://tidesandcurrents.noaa.gov/ofs/lsofs/lsofs.html
+# https://www.ncei.noaa.gov/thredds/catalog/model-lsofs-files/catalog.html
+output_file_base='FVCOM_Lake_Superior_test'
 root_output_dir ='\output'
 input_dir='F:\\Hindcasts\\colaborations\\LakeSuperior\\historical_sample'
 file_mask ='nos.lsofs.fields.n000*.nc'
 
-input_dir='F:\\Hindcasts\\colaborations\\LakeSuperior\\forecast'
-file_mask ='nos.lsofs.fields.f000*.nc'
+#input_dir='F:\\Hindcasts\\colaborations\\LakeSuperior\\forecast'
+#file_mask ='nos.lsofs.fields.f000*.nc'
 
+points = [[256203.6793068961, 5193002.88896844, -10],
+           [416692.1617094234, 5216000.828769726, -10],
+           [666422.5233426465, 5189371.635315605, -10],
+           [429178.67979108455, 5417656.448290474, -10],
+           [439094.44415005075, 5265627.962025132, -10]]
+
+# just use one point
+points= [[439094.44415005075, 5265627.962025132, -10]]
 
 params={'shared_params' :{'output_file_base' : output_file_base,'root_output_dir':root_output_dir },
      'reader': {"class_name": 'oceantracker.reader.dev_FVCOM_reader.unstructured_FVCOM',
-                'input_dir': input_dir, 'minimum_total_water_depth': 5,
-                'file_mask': file_mask,
-                'grid_variables':{'x':['lat','lon']}},
-    'base_case_params' : {'solver': {'n_sub_steps': 6},
+                'input_dir': input_dir, 'minimum_total_water_depth': 5, 'search_sub_dirs': True,
+                'file_mask': file_mask},
+    'base_case_params' : {'solver': {'n_sub_steps': 3},
     'run_params' : {'user_note':'test of notes'},
-    'particle_release_groups': [{'points': points, 'pulse_size': 10, 'release_interval': 600}],
-                        }
+    'particle_release_groups': [{'points': points, 'pulse_size': 250, 'release_interval': 7200}] ,
+    'trajectory_modifiers': [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
+                                                    'critical_friction_velocity': .000}],
+    'fields' :[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}],
+        'particle_statistics':[
+                  {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+                      'calculation_interval': 72000,   'grid_size': [320, 321],'grid_span':[ 250000,250000],'grid_center':points[0]}]
+                          }
 }
 
-#nc= NetCDFhandler(path.join(input_dir,file_mask))
+yaml_util.write_YAML(output_file_base+'.yml',params)
+json_util.write_JSON(output_file_base+'.json',params)
 
-runInfo_file_name,has_errors= main.run(params)
+if args.norun:
+    # infer run file name
+    runInfo_file_name = path.join(params['shared_params']['root_output_dir'], params['shared_params']['output_file_base'], params['shared_params']['output_file_base'] + '_runInfo.json')
+else:
+    # run oceantracker
+    runInfo_file_name,has_errors= main.run(params)
 
-from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars,  get_case_info_file_from_run_file
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 
-case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+from oceantracker.post_processing.read_output_files import load_output_files
+from oceantracker.post_processing.plotting import plot_utilities
+from oceantracker.post_processing.plotting.plot_tracks import animate_particles, plot_tracks
+from oceantracker.post_processing.plotting.plot_statistics import animate_heat_map, plot_heat_map
+case_info_file_name = load_output_files.get_case_info_file_from_run_file(runInfo_file_name)
+grid= load_output_files.load_grid(case_info_file_name)
 
-track_data = load_particle_track_vars(case_info_file_name)
+#plot_utilities.display_grid(grid, ginput=6)
 
-ax= np.asarray(points[0])
-dx=15000
-ax= [ax[0]-dx, ax[0]+dx,ax[1]-dx, ax[1]+dx]
+track_data = load_output_files.load_particle_track_vars(case_info_file_name,fraction_to_read=.1)
 
-animate_particles(track_data,  show_grid=True,axis_lims=ax,
-                  heading='FVCOM reader test',
+animate_particles(track_data,  show_grid=True,axis_lims=None,
+                  heading='FVCOM reader test',show_dry_cells=False,
                   release_group=None,
-                  back_ground_depth=True, show_dry_cells=True, interval=20)
+                  back_ground_depth=True, interval=20)
+plot_tracks(track_data)
+
+# heat maps from on the fly counts
+stats_data = load_output_files.load_stats_file(case_info_file_name)
+
+animate_heat_map(stats_data,  heading=output_file_base + ' particle count heat map log scale',  vmax=100.)
+plot_heat_map(stats_data,  heading=output_file_base + ' particle count heat map log scale', vmax=100.)

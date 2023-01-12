@@ -4,6 +4,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
 import numpy as np
 
+
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 
 from os import path
@@ -28,22 +29,21 @@ class  RectangularTrackWriter(_BaseWriter):
         super().initialize()
 
         si = self.shared_info
-        self.add_dimension('time',None)
-        self.add_dimension('particle', si.particle_buffer_size)
+        self.add_dimension('particle_dim', si.particle_buffer_size)
 
 
     def create_variable_to_write(self,name,is_time_varying=True,is_part_prop = True, vector_dim=None, attributes_dict=None, dtype=None):
         # creates a variable to write with given shape, normally shape[0]= None as unlimited
         dimList=[]
-        if is_time_varying:dimList.append('time')
-        if is_part_prop: dimList.append('particle')
+        if is_time_varying:dimList.append('time_dim')
+        if is_part_prop: dimList.append('particle_dim')
 
         # work out chunk dimensions from dimlist
         chunks =[]
         for n in dimList:
-            if n not in self.file_build_info['dimensions' ]:
+            if n not in self.info['file_builder']['dimensions' ]:
                 raise ValueError('Tracks file setup error: variable dimensions must be defined before variables are defined, variable  =' + name + ' , dim=', n)
-            dimsize = self.file_build_info['dimensions' ][n]['size']
+            dimsize = self.info['file_builder']['dimensions' ][n]['size']
             chunks.append( self.params['NCDF_time_chunk'] if dimsize is None else dimsize)
 
         self.add_new_variable(name, dimList, attributes_dict=attributes_dict, dtype=dtype, vector_dim=vector_dim, chunking=chunks)

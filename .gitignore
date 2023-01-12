@@ -6,3 +6,4 @@ venv
 /docs/_build/doctrees/
 /profiling/output/
 /oceantracker.egg-info/
+/colborators/tests/output/

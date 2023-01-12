@@ -3,7 +3,8 @@ from oceantracker.particle_properties.util import particle_operations_util, part
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
-from oceantracker.util.basic_util import atLeast_Nby1
+from oceantracker.util.basic_util import atLeast_Nby1, nopass
+
 
 class _BasePropertyInfo(ParameterBaseClass):
     # properties which are maintained in memory and may be written out, eg group and particle
@@ -25,6 +26,7 @@ class _BasePropertyInfo(ParameterBaseClass):
     def initialize(self, **kwargs): pass
 
     def initial_value_at_birth(self, released_IDs):  pass
+
 
     def update(self,t,active): pass
 
@@ -50,6 +52,7 @@ class TimeVaryingInfo(_BasePropertyInfo):
         if self.params['vector_dim'] > 1:
             s += (self.params['vector_dim'],)
         self.data = self.data = np.full(s, self.params['initial_value'], dtype=  self.params['dtype'])
+
 
     def update(self): pass # manual update by default
     def set_values(self, value): self.data[0]=value

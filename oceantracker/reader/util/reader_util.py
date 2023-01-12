@@ -1,3 +1,4 @@
+import numpy as np
 from numba import njit
 from numba.typed import List as NumbaList
 
@@ -38,13 +39,29 @@ def set_dry_cell_flag_from_tide(triangles, tide, depth, minimum_total_water_dept
                 if h < minimum_total_water_depth : n_dry+=1
             is_dry_cell[nb, ntri] = 1 if n_dry > 0 else 0
 
+@njit
+def find_open_boundary_faces(triangles, is_boundary_triangle, adjacency, is_open_boundary_node):
+    # amongst boundary triangles find those with 2 open face nodes
+    is_open_boundary_adjacent = np.full((triangles.shape[0],3),False)
+    is_open_node = np.full((3,),False)
+    # search only boundary triangles
+    op_nodes = np.flatnonzero(is_open_boundary_node)
+    for n in np.flatnonzero(is_boundary_triangle):
+        is_open_node[:] = False
+        for m in range(3):
+             for o in op_nodes:
+               if o == triangles[n,m]:
+                   # if next node is also open then tag face
+                    is_open_node[m]= True
+                    continue # stop looking
 
-@njit()
-def convert_numpy_node_to_tri_map_to_numba_list(node_to_tri_map_asarray):
-    # convert a rectangular map to a  list of lists, missing values are -99999
-    node_to_tri_map= NumbaList()
+        if np.sum(is_open_node) <= 1:continue # only one open node
 
-    for l in node_to_tri_map_asarray:
-        node_to_tri_map.append(list(l[l >= 0]))
+        # now know which of 3 nodes is open
+        # now flag the open face if current and next node is an opend one
+        for m in range(3):
+            if is_open_node[m] and is_open_node[(m+1) % 3]:
+                # open face number is node number opposite the two open face nodes
+                is_open_boundary_adjacent[n, (m + 2) % 3] = True
 
-    return node_to_tri_map
+    return is_open_boundary_adjacent

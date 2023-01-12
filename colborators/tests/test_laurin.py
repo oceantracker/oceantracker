@@ -452,7 +452,7 @@ if __name__ == '__main__':
 
 
     parser.add_argument('-mode_debug', action='store_true')
-    parser.add_argument('-noplots', action='store_true')
+    parser.add_argument('-doplots', action='store_true')
     parser.add_argument('-norun', action='store_true')
 
     args = parser.parse_args()
@@ -466,7 +466,7 @@ if __name__ == '__main__':
 
     release_interval = 3600
     case ={'run_params':{ 'particle_buffer_size': 120000,
-                          'open_boundary_type':1,
+                          'open_boundary_type': 1,
                           'block_dry_cells': True,
             'duration': 7. * 24 * 3600,
                 'write_tracks': True},
@@ -530,10 +530,10 @@ if __name__ == '__main__':
 
     if args.mode_debug: params['debug'] = True
 
-    test = json_util.read_JSON('test_param_files/21_10_09_depth_accuracy_test_v01.json')
+    test = json_util.read_JSON('../../tests/misc/test_param_files/21_10_09_depth_accuracy_test_v01.json')
    # case['particle_release_groups'] = test['base_case_params']['particle_release_groups']
-    json_util.write_JSON('test_param_files/LaurinTest.json',params)
-    yaml_util.write_YAML('test_param_files/LaurinTest.yaml', params)
+    json_util.write_JSON('../../tests/misc/test_param_files/LaurinTest.json', params)
+    yaml_util.write_YAML('../../tests/misc/test_param_files/LaurinTest.yaml', params)
 
     if not args.norun:
         run_info_file, has_errors = run(params)
@@ -541,7 +541,7 @@ if __name__ == '__main__':
         run_info_file = path.join(params['shared_params']['root_output_dir'],params['shared_params']['output_file_base'],params['shared_params']['output_file_base']+'_runInfo.json' )
 
 
-    if not args.noplots:
+    if not args.doplots:
         caseInfoFile = load_output_files.get_case_info_file_from_run_file(run_info_file)
 
         m = load_output_files.load_stats_file(caseInfoFile, nsequence=1)
@@ -549,7 +549,10 @@ if __name__ == '__main__':
         c = load_output_files.load_concentration_vars(caseInfoFile, var_list=['particle_concentration', 'C'])
         ax=[440000, 600000, 5910000,6010000]
 
-        plot_tracks.animate_particles(track_data, axis_lims=ax, title='Laurin 3D Schism test', polygon_list_to_plot=m['polygon_list'],show_grid=True, interval=0,show_dry_cells=True)
+        plot_tracks.animate_particles(track_data, axis_lims=ax,
+                                      title='Laurin 3D Schism test',
+                                      polygon_list_to_plot=m['polygon_list'],
+                                      show_grid=True, interval=0,show_dry_cells=False)
 
         if 1 == 0:
 

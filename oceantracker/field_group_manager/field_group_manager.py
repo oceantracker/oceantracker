@@ -35,7 +35,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         # when back tracking hindcast buffer is ordered  backwards in time, and time step is still positive
         # thus step fraction remains positive
-        self.step_dt_fraction = abs(time_sec - grid_time_buffers['time'][nb]) / si.hindcast_time_step
+        self.step_dt_fraction = abs(time_sec - grid_time_buffers['time'][nb]) / si.hydo_model_time_step
 
         # update 0-255 dry cell index
         field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, grid_time_buffers['is_dry_cell'],   grid_time_buffers['dry_cell_index'])

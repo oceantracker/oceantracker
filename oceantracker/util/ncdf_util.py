@@ -31,7 +31,7 @@ class NetCDFhandler(object):
                     self.variable_info[name] ={'dimensions':v[name].dimensions, 'shape': v[name].shape,'dtype': v[name].datatype}
 
 
-    def add_a_Dimension(self, name, dim_size=None):
+    def add_dimension(self, name, dim_size=None):
         # add a dimension for use in netcdf
         # print('AD',name,dim_size)
         if name not in self.file_handle.dimensions:
@@ -80,7 +80,7 @@ class NetCDFhandler(object):
 
         # cycle through dims list to add dimension, if needed
         for n in range(len(dimList)):
-            self.add_a_Dimension(dimList[n], X.shape[n])  # an unlimted dimension
+            self.add_dimension(dimList[n], X.shape[n])  # an unlimted dimension
 
         if dtype is None: dtype = X.dtype  # preserve type unless explicitly changed
 

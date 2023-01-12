@@ -52,11 +52,11 @@ class ROMS(GenericUnstructuredReader):
         grid['vertical_grid_type'] = 'sigma'
         return grid
 
-    def read_nodal_x_float32(self, nc):
+    def read_nodal_x_float64(self, nc):
         grid = self.grid
         # record useful grid info
-        grid['lat_psi'] = nc.read_a_variable('lat_psi').astype(np.float32)
-        grid['lon_psi'] = nc.read_a_variable('lon_psi').astype(np.float32)
+        grid['lat_psi'] = nc.read_a_variable('lat_psi').astype(np.float64)
+        grid['lon_psi'] = nc.read_a_variable('lon_psi').astype(np.float64)
         grid['lon_lat'] =  np.stack((grid['lon_psi'].flatten('F'),grid['lat_psi'].flatten('F')),  axis=1)
         return self.convert_lat_long_to_meters_grid(grid['lon_lat'])
 

@@ -217,7 +217,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # other checks and warnings
         if si.run_params['open_boundary_type'] > 0:
-            if not grid['has_open_boundary_data']:
+            if not np.any(grid['node_type'] == 3):
                 self.write_msg('Open boundary requested, but no open boundary node data available, boundaries will be closed,',
                                         hint='For Schism open boundaries requires hgrid file to named in reader params',warning=True)
         else:
@@ -328,6 +328,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         #todo make part of si info to ease write to json case_info??
         si.model_start_time = t_start
         si.model_duration = duration
+        si.hydo_model_time_step = si.reader_build_info['sorted_file_info']['hydro_model_time_step']
+        si.model_substep_timestep = si.hydo_model_time_step / si.classes['solver'].params['n_sub_steps']
 
         # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
         si.time_of_nominal_first_occurrence = si.model_direction * np.inf
@@ -390,7 +392,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 i, msg_list = make_class_instance_from_params(params)
                 si.add_class_instance_to_interator_lists(type, 'user', i)
                 i.initialize()  # some require instanceID from above add class to initialise
-
+        pass
     # ____________________________
     # internal methods below
     # ____________________________

@@ -255,7 +255,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             # get buffer time step and time fraction
             nt = reader.time_to_global_time_step(time)
             nb = reader.global_index_to_buffer_index(nt)
-            step_dt_fraction = abs(time - reader.get_particle_time(nb)) / si.hindcast_time_step
+            step_dt_fraction = abs(time - reader.get_particle_time(nb)) / si.hydo_model_time_step
 
             if fieldObj.is3D():
                 z_fraction_nodes = part_prop['z_fraction_nodes'].data

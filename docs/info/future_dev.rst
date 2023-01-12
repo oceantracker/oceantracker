@@ -7,13 +7,13 @@ Future additions
 ===================
 #. add status_modifier list of classes, to hold tidal stranding, kill old particles etc
 #. more post step bookkeeping to pre step bookkeeping to eliminate 2 costly update_cell
-#. Add velocity_modfier part prop used inside RK substeps which is updated by velocity_modfier classes every time step, eg terminal velocity
-#. find a number container suitable for passing all fields and part prop as a group by name, to allow assess to all and reduce arguments needed
+#. find a numba container suitable for passing all fields and part prop as a group by name, to allow assess to all and reduce arguments needed
+#. velocity interpolator which tweaks flows parallel to faces with adjacent dry cell or land bounday? after random walk velocity is added?
 #. Fuse looping for field interpolation for particle properties to reduce RAM-CPU memory traffic
     * kernal version of interpolate fields
     * fuse velocity interpolation and euler step
     * Update field derived particle properties as a group with kernel interpolator
-#. make error trapping reponse  more consistent
+#. make error trapping reponse  more consistent, eg some errors return no info
 #. Fuse Runge-kutta steps loops to reduce RAM-CPU memory traffic
     * kernal versions of BC walk and vertical walk
     * fuse BC walk and velocity interpolation using kernals

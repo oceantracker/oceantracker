@@ -10,7 +10,7 @@ from oceantracker.util import time_util
 
 def animate_heat_map(stats_data, var='count',  axis_lims=None, credit=None, interval=20,heading=None,
                      vmin=None, vmax=None,show_grid=False,title=None,logscale=False, caxis= None,nsequence=1,cmap='viridis',
-                     movie_file= None, fps=15, dpi=300, release_group=None, back_ground_depth=True,back_ground_color_map= None):
+                     movie_file= None, fps=15, dpi=300, release_group=None, back_ground_depth=True, back_ground_color_map= None):
 
     def draw_frame(nt):
 
@@ -37,6 +37,8 @@ def animate_heat_map(stats_data, var='count',  axis_lims=None, credit=None, inte
 
     print('animate_heat_map> colour axis limits',[zmin,zmax], caxis)
     pc = ax.pcolormesh(x,y, z, shading='gouraud', zorder= 2, cmap=cmap, edgecolor='none')
+
+    if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
 
     plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title,credit=credit,
                   back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
@@ -82,6 +84,8 @@ def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, cr
         pc = ax.tripcolor(grid['x'][:, 0], grid['x'][:, 1], facecolors=data[-1, :], triangles=grid['triangles'],
                           zorder=2, cmap=cmap, vmin=vmin, vmax=vmax, edgecolors='none')
 
+    if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
+
     plot_utilities.draw_base_map(grid, ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title,credit=credit,
                   back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
@@ -101,7 +105,7 @@ def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, cr
 
 def plot_heat_map(stats_data, nsequence=1, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
                   var='count',vmin=None, vmax=None, release_group=None,credit=None, cmap='viridis', heading = None,
-                  plot_file_name=None, back_ground_depth=False,back_ground_color_map= None):
+                  plot_file_name=None, back_ground_depth=True,back_ground_color_map= None):
     #todo repace var with data_to_plot=, as in other ploting code
     x,y, z = get_stats_data(nt, stats_data, var, logscale= logscale, release_group=release_group)
 
@@ -109,6 +113,8 @@ def plot_heat_map(stats_data, nsequence=1, nt=-1, axis_lims=None,show_grid=False
     ax  = plt.gca()
 
     pc = ax.pcolormesh(x, y, z, shading='gouraud', cmap=cmap, zorder=2)
+    if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
+
     plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid,title=title,credit=credit,
                   back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 

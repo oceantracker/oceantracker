@@ -25,10 +25,9 @@ class GenericUnstructuredReader(_BaseReader):
     def make_non_time_varying_grid(self,nc, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
-        grid['x'] = self.read_nodal_x_float32(nc)
+        grid['x'] = self.read_nodal_x_float64(nc)
         grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
         grid['quad_cell_to_split_index'] = np.flatnonzero(grid['quad_cells_to_split']).tolist() # make as list of indcies for calculations
-        grid['open_boundary_nodes'], grid['open_boundary_adjacency'] = self.read_open_boundary_data(grid)
 
         if self.is_hindcast3D(nc):
             grid['bottom_cell_index'] = self.read_bottom_cell_index_as_int32(nc)
@@ -36,22 +35,16 @@ class GenericUnstructuredReader(_BaseReader):
         # find model outline, make adjacency matrix etc
         grid = self._add_grid_attributes(grid)
 
-        # convert node to cell map to an numpy array
-        max_cells = 0
-        for l in grid['node_to_tri_map']:
-            if len(l) > max_cells: max_cells = len(l)
-        grid['node_to_tri_map_asarray']= np.full((len(grid['node_to_tri_map']),max_cells),-999999,dtype=np.int32)
-        for n,l in enumerate(grid['node_to_tri_map']):
-            grid['node_to_tri_map_asarray'][n, :len(l)]= np.asarray(l)
-
-        return grid
 
         # adjust node type and adjacent for open boundaries
-        # todo define node and adjacent types  in dict
-        sel = grid['open_boundary_nodes'] != 0
-        grid['node_type'][sel] = 3
-        grid['has_open_boundary_data'] = True if np.any(sel) else False
-        grid['adjacency'][grid['open_boundary_adjacency'] != 0] = -2
+        # todo define node and adjacent type values in dict, for single definition and case info output?
+        is_open_boundary_node = self.read_open_boundary_data(grid)
+        grid['node_type'][is_open_boundary_node] = 3
+
+        is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'],grid['adjacency'], is_open_boundary_node)
+        grid['adjacency'][is_open_boundary_adjacent] = -2
+
+        return grid
 
     def make_grid_time_buffers(self,nc, grid, grid_time_buffers):
         # now set up time buffers
@@ -85,9 +78,6 @@ class GenericUnstructuredReader(_BaseReader):
 
         grid['quad_cell_to_split_index'] = np.flatnonzero(grid['quad_cells_to_split']).tolist()
 
-        # convert node to cell list from an array back into a list of lists, needs to be a numba list for number interation
-        grid['node_to_tri_map']= reader_util.convert_numpy_node_to_tri_map_to_numba_list(grid['node_to_tri_map_asarray'])
-
         # time buffers , eg time
         grid_time_buffers = self.grid_time_buffers
         grid_time_buffers.update({'zlevel': None, 'dry_cell_index': None})
@@ -108,7 +98,7 @@ class GenericUnstructuredReader(_BaseReader):
         self.setup_reader_fields(reader_build_info)
 
         #useful info fro json output
-        self.info['hindcast_average_time_step'] = reader_build_info['sorted_file_info']['average_time_step']
+        self.info['hindcast_average_time_step'] = reader_build_info['sorted_file_info']['hydro_model_time_step']
         pass
 
     def check_grid(self,grid):
@@ -144,9 +134,9 @@ class GenericUnstructuredReader(_BaseReader):
             time += self.params['time_zone']*3600.
         return time
 
-    def read_nodal_x_float32(self, nc):
+    def read_nodal_x_float64(self, nc):
         gv= self.params['grid_variables']
-        x = np.stack((nc.read_a_variable(gv['x'][0]), nc.read_a_variable(gv['x'][1])), axis=1).astype(np.float32)
+        x = np.stack((nc.read_a_variable(gv['x'][0]), nc.read_a_variable(gv['x'][1])), axis=1).astype(np.float64)
         if self.params['cords_in_lat_long']:
             x = self.convert_lat_long_to_meters_grid(x)
         return x
@@ -180,9 +170,9 @@ class GenericUnstructuredReader(_BaseReader):
 
     def _add_grid_attributes(self, grid):
         # build adjacency etc from triangulation
-        grid['node_to_tri_map'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
-        grid['adjacency'] =  triangle_utilities_code.build_adjacency_from_node_cell_map(  grid['node_to_tri_map']  , grid['triangles'])
-        grid['boundary_triangles'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
+        grid['node_to_tri_map'],grid['tri_per_node'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
+        grid['adjacency'] =  triangle_utilities_code.build_adjacency_from_node_cell_map(grid['node_to_tri_map'],grid['tri_per_node'], grid['triangles'])
+        grid['is_boundary_triangle'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
 
         grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid)
 

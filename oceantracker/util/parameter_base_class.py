@@ -129,7 +129,7 @@ class ParameterBaseClass(object):
         for name in required_fields_list:
             if name not in si.classes['fields']:
                 append_message(msg_list,'     class ' + self.params['class_name'] + ', "' + self.params['name']
-                                + '" requires field  "' + name + '"' + ' to work, add to reader["field_variables"], or add to fields param list', exception = GracefulExitError)
+                                + '" requires field  "' + name + '"' + ' to work, add to reader["field_variables"], or add to fields param class list', exception = GracefulExitError)
 
         for name in required_props_list:
             if name not in si.classes['particle_properties']:

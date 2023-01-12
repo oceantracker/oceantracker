@@ -19,7 +19,7 @@ def read_particle_tracks_file(file_name, var_list=[], release_group= None, fract
             working_var_list.append(var)
 
 
-    if nc.is_dim( 'time_particle'):
+    if nc.is_dim( 'time_particle_dim'):
         d=  _read_compact_tracks(nc,working_var_list,release_group)
     else:
         d= _read_rectangular_tracks(nc, working_var_list,release_group)
@@ -82,7 +82,7 @@ def _read_compact_tracks(nc,var_list,release_group):
         if v in var_list: var_list.remove(v)
 
     for var in set(var_list): # only do unique vars
-        if nc.is_var_dim(var,'time_particle'):
+        if nc.is_var_dim(var,'time_particle_dim'):
             # compact time varying variablesF
             s = nc.get_var_shape(var)
             d[var] = np.full((time_steps_written, num_released) + tuple(s[1:]), nc.get_var_fillValue(var), dtype=nc.get_var_dtype(var))
@@ -94,7 +94,7 @@ def _read_compact_tracks(nc,var_list,release_group):
             if release_group is not None:
                  d[var] = d[var][:, rg == release_group-1, ...]
 
-        elif   nc.is_var_dim(var,'particle'):
+        elif   nc.is_var_dim(var,'particle_dim'):
             d[var] =nc.read_a_variable(var)[:num_released]
             if release_group is not None:
                 d[var] = d[var][rg == release_group-1, ...]

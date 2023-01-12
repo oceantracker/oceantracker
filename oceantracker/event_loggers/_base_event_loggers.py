@@ -66,19 +66,19 @@ class _BaseEventLogger(ParameterBaseClass):
         info['output_file'] = si.output_file_base + '_events_%03.0f' % (self.info['instanceID']  + 1) + '.nc'
         self.nc = NetCDFhandler(os.path.join(si.run_output_dir, info['output_file']), 'w')
 
-        self.nc.add_a_Dimension('event', dim_size=None) # open dim
+        self.nc.add_dimension('event_dim', dim_size=None) # open dim
 
         chunk = si.particle_buffer_size if params['chunk_size'] is None else params['chunk_size']
 
         vec_dims= ['oneD','twoD','threeD' ]
-        for n, d in enumerate(vec_dims): self.nc.add_a_Dimension(d, dim_size=n +1)
+        for n, d in enumerate(vec_dims): self.nc.add_dimension(d, dim_size=n + 1)
 
-        self.nc.create_a_variable('event_flag', ['event'], {'notes': 'event strated =1, ended = -1'}, np.int8, chunksizes=[chunk])
-        self.nc.create_a_variable('time', ['event'], {'notes': 'time in sec'}, np.float64,  chunksizes=[chunk])
+        self.nc.create_a_variable('event_flag', ['event_dim'], {'notes': 'event strated =1, ended = -1'}, np.int8, chunksizes=[chunk])
+        self.nc.create_a_variable('time', ['event_dim'], {'notes': 'time in sec'}, np.float64,  chunksizes=[chunk])
 
         for prop_name in  info['prop_to_write']:
             pp = part_prop[prop_name]
-            dims = ['event']
+            dims = ['event_dim']
             cs =  [chunk]
             # adjust for vectors
             if pp.num_vector_dimensions()  > 0:

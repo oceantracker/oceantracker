@@ -1,14 +1,12 @@
 import numpy as np
 from oceantracker.tracks_writer.track_writer_retangular import RectangularTrackWriter
-
 class FlatTrackWriter(RectangularTrackWriter):
 
     def initialize(self):
         super().initialize()
         si = self.shared_info
-        self.add_dimension('time', None)
-        self.add_dimension('particle', None)
-        self.add_dimension('time_particle', None)
+        self.add_dimension('particle_dim', None)
+        self.add_dimension('time_particle_dim', None)
 
         self.create_variable_to_write('particles_written_per_time_step',True, False, dtype=np.int32)
         self.create_variable_to_write('particle_ID', True, True, dtype=np.int32)
@@ -20,24 +18,24 @@ class FlatTrackWriter(RectangularTrackWriter):
         si=self.shared_info
 
         dimList=[]
-        if is_time_varying and not is_part_prop: dimList.append('time')
-        if is_time_varying and is_part_prop:dimList.append('time_particle')
-        if not is_time_varying and is_part_prop: dimList.append('particle')
+        if is_time_varying and not is_part_prop: dimList.append('time_dim')
+        if is_time_varying and is_part_prop:dimList.append('time_particle_dim')
+        if not is_time_varying and is_part_prop: dimList.append('particle_dim')
 
         # work out chunk dimensions from dimlist
         chunks = []
         for dim in dimList:
-            if dim not in self.file_build_info['dimensions']:
+            if dim not in self.info['file_builder']['dimensions']:
                 raise ValueError('Tracks file setup error: variable dimensions must be defined before variables are defined, variable  =' + name + ' , dim=', dim)
 
-            if dim == 'time':
+            if dim == 'time_dim':
                 chunks.append(self.params['NCDF_time_chunk'])
-            elif dim == 'time_particle':
+            elif dim == 'time_particle_dim':
                 chunks.append(self.params['NCDF_time_chunk']*si.particle_buffer_size)
-            elif dim == 'particle':
+            elif dim == 'particle_dim':
                 chunks.append(si.particle_buffer_size)
             else:
-                chunks.append(self.file_build_info['dimensions'][dim]['size'])
+                chunks.append(self.info['file_builder']['dimensions'][dim]['size'])
 
         self.add_new_variable(name, dimList, attributes_dict=attributes_dict, dtype=dtype, vector_dim=vector_dim, chunking=chunks)
 
