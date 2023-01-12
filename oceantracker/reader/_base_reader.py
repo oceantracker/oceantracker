@@ -11,9 +11,10 @@ from oceantracker.fields.util import fields_util
 from oceantracker.util.basic_util import nopass
 from oceantracker.util.triangle_utilities_code import append_split_cell_data
 from oceantracker.util import  cord_transforms
+from oceantracker.reader.util import shared_reader_memory_util
 from oceantracker.fields.util.fields_util import depth_aver_SlayerLSC_in4D
 from copy import copy ,deepcopy
-from oceantracker.util import  shared_memory
+
 from oceantracker.reader.util import reader_util
 
 class _BaseReader(ParameterBaseClass):
@@ -24,7 +25,6 @@ class _BaseReader(ParameterBaseClass):
                                  'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
                                  'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
                                  'coordinate_projection' : PVC(None, str, doc_str='string map project for meters grid for use by pyproj module, eg  "proj=utm +zone=16 +datum=NAD83" '),
-                                 'share_reader': PVC(False, bool),
                                  'minimum_total_water_depth': PVC(0.25, float, min=0.0,doc_str= 'Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
                                  'time_zone': PVC(None, int, min=-12, max=23),
                                  'cords_in_lat_long': PVC(False, bool),
@@ -132,20 +132,23 @@ class _BaseReader(ParameterBaseClass):
         return file_info
 
     def make_grid_builder(self, grid,grid_time_buffers,reader_build_info):
-
         # make share memory builder for the non time varying grid variables
+        #todo put reader_build_info['use_shared_memory'] test around all below
         reader_build_info['grid_constant_arrays_builder'] = {}
         for key, item in grid.items():
             if item is not None and type(item) == np.ndarray:
-                sm = shared_memory.SharedMemArray(values=item)
-                self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
-                reader_build_info['grid_constant_arrays_builder'][key] = sm.get_shared_mem_map()
+                if reader_build_info['use_shared_memory']:
+                    sm = shared_reader_memory_util.create_shared_arrayy(values=item)
+                    self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
+                    reader_build_info['grid_constant_arrays_builder'][key] = sm.get_shared_mem_map()
+                else:
+                    reader_build_info['grid_constant_arrays_builder'][key] = {'shape': item.shape, 'dtype': item.dtype}
 
         # now make info to build time buffers, eg time, zlevel
         reader_build_info['grid_time_buffers_builder'] = {}
         for key, item in grid_time_buffers.items():
-            if self.params['share_reader']:  # make shared moemory for shared_reader
-                sm = shared_memory.SharedMemArray(values=item)
+            if reader_build_info['use_shared_memory']:  # make shared moemory for shared_reader
+                sm = shared_reader_memory_util.create_shared_arrayy(values=item)
                 self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
                 reader_build_info['grid_time_buffers_builder'][key] = sm.get_shared_mem_map()
             else:
@@ -178,9 +181,9 @@ class _BaseReader(ParameterBaseClass):
             si.add_class_instance_to_interator_lists('fields', 'from_reader_field', i, crumbs='Adding Reader Field "' + name + '"')
             i.initialize()  # require variable_info to initialise
 
-            if self.params['share_reader']:
-                #todo make this part of reader field intialize
-                self.shared_memory['fields'][name] = shared_memory.SharedMemArray(values=i.data)
+            if reader_build_info['use_shared_memory']:
+                #todo make this part of reader field intialize???
+                self.shared_memory['fields'][name] = shared_reader_memory_util.create_shared_arrayy(values=i.data)
 
             if not i.params['is_time_varying']:
                 # if not time dependent field read in now,
@@ -496,7 +499,7 @@ class _BaseReader(ParameterBaseClass):
             for key, item in reader_build_info['shared_memory']['grid'].items():
                 self.shared_memory['grid'][key] = shared_memory.SharedMemArray(sm_map=item)
                 self.grid[key] = self.shared_memory['grid'][key].data  # grid variables is shared version
-
+        return reader_build_info
     def convert_lat_long_to_meters_grid(self,x):
 
         if self.params['coordinate_projection'] is None:

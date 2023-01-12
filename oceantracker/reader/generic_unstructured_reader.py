@@ -5,12 +5,12 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.message_and_error_logging import append_message, GracefulExitError, FatalError
 from oceantracker.util import time_util
-from oceantracker.util import shared_memory
+from oceantracker.util import shared_memory_util
 from oceantracker.fields.util import fields_util
 from oceantracker.util.cord_transforms import WGS84_to_UTM
 from numba import typed as numba_type
 from oceantracker.reader._base_reader import _BaseReader
-from oceantracker.reader.util import reader_util
+from oceantracker.reader.util import reader_util, shared_reader_memory_util
 
 class GenericUnstructuredReader(_BaseReader):
 
@@ -27,14 +27,13 @@ class GenericUnstructuredReader(_BaseReader):
         # add to reader build info
         grid['x'] = self.read_nodal_x_float64(nc)
         grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
-        grid['quad_cell_to_split_index'] = np.flatnonzero(grid['quad_cells_to_split']).tolist() # make as list of indcies for calculations
+        grid['quad_cell_to_split'] = np.flatnonzero(grid['quad_cells_to_split']) # make as list of indcies for calculations
 
         if self.is_hindcast3D(nc):
             grid['bottom_cell_index'] = self.read_bottom_cell_index_as_int32(nc)
 
         # find model outline, make adjacency matrix etc
         grid = self._add_grid_attributes(grid)
-
 
         # adjust node type and adjacent for open boundaries
         # todo define node and adjacent type values in dict, for single definition and case info output?
@@ -66,38 +65,37 @@ class GenericUnstructuredReader(_BaseReader):
         return grid_time_buffers
 
     def build_case_runner_reader(self, reader_build_info):
-        # todo move to base_reader or case runner??
+        # build the reader need for case runner to work, based on shared memory
+        # or build from crstch
         grid = self.grid
-        self.reader_build_info = reader_build_info
-        
-        # shared constant arrays of grid
-        for key, item in reader_build_info['grid_constant_arrays_builder'].items():
-            sm = shared_memory.SharedMemArray(sm_map=item)
-            self.shared_memory['grid'][key] = sm # need to retain a reference to shared or will be deleted
-            grid[key] = sm.data
-
-        grid['quad_cell_to_split_index'] = np.flatnonzero(grid['quad_cells_to_split']).tolist()
-
-        # time buffers , eg time
         grid_time_buffers = self.grid_time_buffers
+        # time buffers , eg time
         grid_time_buffers.update({'zlevel': None, 'dry_cell_index': None})
 
-        for key, item in reader_build_info['grid_time_buffers_builder'].items():
-            if 'mem_block_name' in item:
-                #
-                sm = shared_memory.SharedMemArray(sm_map=item)
-                self.shared_memory['grid'][key] = sm # need to retain a reference to shared or will be deleted
-                grid_time_buffers[key] = sm.data
-            else:
-                grid_time_buffers[key] = np.full(item['shape'],0, dtype=item['dtype'])
+        self.reader_build_info = reader_build_info
+
+        if not reader_build_info['use_shared_memory']:
+            # build from scatch
+            nc = self._open_grid_file(reader_build_info)
+            grid = self.make_non_time_varying_grid(nc, grid)
+            grid_time_buffers = self.make_grid_time_buffers(nc, grid, grid_time_buffers)
+            nc.close()
+        else:   # shared memory grid
+            for key, item in reader_build_info['grid_constant_arrays_builder'].items():
+                    sm = shared_reader_memory_util.create_shared_arrayy(sm_map=item)
+                    self.shared_memory['grid'][key] = sm # need to retain a reference to shared or will be deleted
+                    grid[key] = sm.data
+            for key, item in reader_build_info['grid_time_buffers_builder'].items():
+                    sm = shared_reader_memory_util.create_shared_array(sm_map=item)
+                    self.shared_memory['grid'][key] = sm  # need to retain a reference to shared or will be deleted
+                    grid_time_buffers[key] = sm.data
 
         # note if 3D
         grid['nz'] = 1 if grid_time_buffers['zlevel'] is None else grid_time_buffers['zlevel'].shape[2]
-
         # set up reader fields, using shared memory if requested
         self.setup_reader_fields(reader_build_info)
 
-        #useful info fro json output
+        #useful info for json output
         self.info['hindcast_average_time_step'] = reader_build_info['sorted_file_info']['hydro_model_time_step']
         pass
 

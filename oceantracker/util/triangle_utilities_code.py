@@ -179,7 +179,7 @@ def split_quad_cells(triangles_and_quads,quad_cells_to_split):
 
 def append_split_cell_data(grid,data,axis=0):
     # for cell based data add split cell data below given data
-    return  np.concatenate((data, data[:, grid['quad_cell_to_split_index']]), axis=axis)
+    return  np.concatenate((data, data[:, grid['quad_cells_to_split']]), axis=axis)
 
 
 def calcuate_triangle_areas(xy, tri):

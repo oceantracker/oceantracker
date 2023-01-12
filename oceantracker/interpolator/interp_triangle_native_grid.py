@@ -31,7 +31,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         grid = si.classes['reader'].grid
         grid_time_buffers = si.classes['reader'].grid_time_buffers
 
-
         # make barcentric transform matrix for the grid
         grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles'].data)
 

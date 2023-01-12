@@ -38,12 +38,12 @@ class SharedMemArray():
             self.data[:] = fill_value
 
         self.map={'var_name': var_name,
-                'mem_block_name': self.sm.name,
+                'shared_mem_name': self.sm.name,
                 'shape': self.data.shape,
                 'dtype': self.data.dtype.name}
 
     def _connect(self, sm_dict_map):
-        self.sm   = mp.shared_memory.SharedMemory(sm_dict_map['mem_block_name'], create=False)
+        self.sm   = mp.shared_memory.SharedMemory(sm_dict_map['shared_mem_name'], create=False)
         self.data = np.ndarray(sm_dict_map['shape'], dtype=sm_dict_map['dtype'], buffer=self.sm.buf)
 
         self.map = sm_dict_map
@@ -52,12 +52,12 @@ class SharedMemArray():
     def get_shared_mem_map(self): return self.map
 
     def disconnect(self):
-        #print('Diconnected from  shared memory variable', self.map['var_name'], self.map['mem_block_name'])
+        #print('Diconnected from  shared memory variable', self.map['var_name'], self.map['shared_mem_name'])
         self.sm.close()
         del self.data
 
     def delete(self):
-        print('Deleting shared memory variable-',self.map['var_name'], self.map['mem_block_name'])
+        print('Deleting shared memory variable-',self.map['var_name'], self.map['shared_mem_name'])
         del self.data
         self.sm.close()
         self.sm.unlink()

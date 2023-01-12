@@ -1,6 +1,6 @@
 # method to run ocean tracker from parameters
 # eg run(params)
-code_version = '0.3.03.003 2023-01-12'
+code_version = '0.3.03.004 2023-01-13'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -19,7 +19,7 @@ if multiprocessing.get_start_method() != 'spawn':
     try:
         multiprocessing.set_start_method('spawn',force=True)  # use spawn on linux platforms, default on windows
     except exec:
-        print('mutil_procesing Start method is currently', multiprocessing.get_start_method() )
+        print('mutil_processing Start method is currently', multiprocessing.get_start_method() )
 
 import time
 from copy import deepcopy
@@ -27,6 +27,7 @@ from datetime import datetime
 
 
 from os import path, makedirs
+from sys import version, version_info
 import traceback
 import shutil
 from time import perf_counter
@@ -37,7 +38,7 @@ from oceantracker.util.package_util import check_package
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import basic_util
 from oceantracker.util import json_util
-from oceantracker.util import shared_memory
+
 from oceantracker.util.message_and_error_logging import MessageLogging, append_message, GracefulExitError,FatalError
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import merge_params_with_defaults, check_top_level_param_keys_and_structure
@@ -45,20 +46,61 @@ from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
 from oceantracker.common_info_default_param_dict_templates import  default_case_param_template, run_params_defaults_template, default_class_names, package_fancy_name
 from oceantracker.util.parameter_base_class import make_class_instance_from_params
 
+
 import subprocess
 
 def run(user_params):
-    OT= _RunOceanTrackerClass()
+    OT= _RunOceanTrackerClass(user_params)
     full_runInfoJSON_file_name, has_errors = OT._run(deepcopy(user_params))
     return  full_runInfoJSON_file_name, has_errors
 
 class _RunOceanTrackerClass(object):
-    def __init__(self):
+    def __init__(self, params):
         self.run_log = MessageLogging('M:')
+        rl = self.run_log
+        rl.insert_screen_line()
+        rl.write_msg('Starting ' + package_fancy_name + '  Version ' + code_version)
+        rl.write_msg('Python version: ' + version, tabs=1)
+
+        if type(params) is not dict:
+            rl.write_msg('Parameter must be a dictionary or json/yaml file readable as a dictionary,given parameters are type=' + str(type(params)),
+                hint='check parameter file or parameter variable is in dictionary form', exception=GracefulExitError)
+
+            raise ValueError('Params must be a dictionary or json/yaml file readable as a dictioary,  got type=' + str(type(params)))
+
+        if 'shared_params' not in params:
+            rl.write_msg('Cannot find required top level parameter "shared_prams"',
+                         hint='check parameter file or dictionary for  "shared_prams" key', exception=GracefulExitError)
+
+        vi = version_info
+        install_hint = ' Install Python 3.10 or used environment.yml to build a Conda virtual environment named oceantracker',
+        if 'share_reader_memory' in params['shared_params'] and params['shared_params']['share_reader_memory']:
+            # for shared reader python version must be >=3.8
+            if not (vi.major == 3 and vi.major >= 8):
+                rl.write_msg('To use shared reader memory ' +
+                             package_fancy_name + ' requires Python 3 , version >= 3.8, disabling "share_reader_memory" parameter',
+                             hint=install_hint, warning=True, tabs=1)
+                params['shared_params']['share_reader_memory'] = False
+
+        if (vi.major == 3 and vi.major >= 11):
+            rl.write_msg(package_fancy_name + ' is not yet compatible with Python 3.11, as not al imported packages have been updated, eg Numba ',
+                         hint=install_hint, exception=FatalError, tabs=1)
+        if vi.major < 3:
+            rl.write_msg(package_fancy_name + ' requires Python version 3 ', hint=install_hint,  exception = FatalError, tabs = 1)
+
+        # todo check param structure here??
+        pass
 
     def _run(self, user_params):
 
+        # get shared params defaults
+        # todo check param struntured
+        msg_list=[]
+        user_params['shared_params'], msg_list = merge_params_with_defaults(user_params['shared_params'],
+                                        run_params_defaults_template['shared_params'], {},msg_list=msg_list, tag='shared_params')
+
         # make sure output dir is there, so to at least write errors
+        #todo convert error catching to use message logging
         try:
             output_files = self._A1_set_up_folders_and_file_names(user_params)
         except ValueError as e:
@@ -103,11 +145,7 @@ class _RunOceanTrackerClass(object):
         return full_runInfoJSON_file_name, has_errors
 
     def _A1_set_up_folders_and_file_names(self, user_params):
-        if type(user_params) is not dict:
-            raise ValueError('Params must be a dictionary, exiting,  got type=' + str(type(user_params)))
 
-        if 'shared_params' not in user_params:
-            raise ValueError('Cannot find key "shared_params" in parameters, exiting' )
 
         if 'root_output_dir' not in user_params['shared_params']:
             raise ValueError('Cannot find key "root_output_dir" in parameters, at least required for error logging,  exiting' )
@@ -153,8 +191,6 @@ class _RunOceanTrackerClass(object):
         rl= self.run_log
         t0 = time.perf_counter()
 
-        rl.insert_screen_line()
-        rl.write_msg('Starting ' + package_fancy_name+ '  Version ' + code_version )
 
         # clean up params
         working_params = deepcopy(params)
@@ -168,7 +204,6 @@ class _RunOceanTrackerClass(object):
         rl.insert_screen_line()
         rl.write_progress_marker('Running '+ package_fancy_name + ' started ' + str(datetime.now()))
         rl.write_progress_marker('Starting: ' + working_params['shared_params']['output_file_base'])
-
 
         # get info to build a reader
         reader_build_info, reader =self._C1_build_reader(params)
@@ -242,7 +277,6 @@ class _RunOceanTrackerClass(object):
         # make set of case params merged with defaults and checked
         msg_list =[]
         # build full shared params
-        shared_params, msg_list = merge_params_with_defaults(params['shared_params'], run_params_defaults_template['shared_params'], {},msg_list=msg_list, tag='shared_params')
         base_case_params = deepcopy(params['base_case_params'])
         base_case_params, msg_list = check_top_level_param_keys_and_structure(base_case_params, default_case_param_template,
                                                                               required_keys=[],
@@ -252,6 +286,7 @@ class _RunOceanTrackerClass(object):
         processor_number = 0
         case_list = params['case_list'] # will have a dummy one anned in strcture checks if empty
         runner_params=[]
+        shared_params= params['shared_params']
 
         for n_case, case in enumerate(case_list):
             # add replicate copies if required
@@ -326,11 +361,14 @@ class _RunOceanTrackerClass(object):
         params['reader']['input_dir'] = path.abspath(params['reader']['input_dir'])
 
         reader, msg_list = make_class_instance_from_params(params['reader'],class_type_name= 'reader')  # temporary  reader to get defaults
+        reader.info['share_reader_memory'] = params['shared_params']['share_reader_memory']
+
         reader.shared_info.case_log = self.run_log #todo make shared info messages more consistent???, ie this is not a case
         rl.add_messages(msg_list)
 
         # construct reader_build_info to be used by case_runners to build their reader
-        reader_build_info = {'reader_params': reader.params}
+        reader_build_info = {'reader_params': reader.params,
+                             'use_shared_memory': params['shared_params']['share_reader_memory']}
         reader_build_info = self._C2_get_hindcast_files_info(reader_build_info, reader) # get file lists
 
         # read and set up reader grid now as  required for writing grid file
@@ -339,6 +377,7 @@ class _RunOceanTrackerClass(object):
         grid = reader.grid
         grid_time_buffers = reader.grid_time_buffers
         nc = reader._open_grid_file(reader_build_info)
+
         grid = reader.make_non_time_varying_grid(nc, grid)
         grid_time_buffers = reader.make_grid_time_buffers(nc,grid,grid_time_buffers)
 
@@ -353,8 +392,9 @@ class _RunOceanTrackerClass(object):
 
         nc.close()
 
-        if reader.params['share_reader']:
-            reader.set_up_shared_grid_memory(reader_build_info)
+        if reader_build_info['use_shared_memory']:
+
+            reader_build_info = reader.set_up_shared_grid_memory(reader_build_info)
 
             # add to class to shared info, alows fileds to be built
             si = reader.shared_info
@@ -484,7 +524,7 @@ class _RunOceanTrackerClass(object):
         shared_params = case_param_list[0]['shared_params']
         case_results = []
 
-        if reader.params['share_reader']:
+        if reader.info['share_reader_memory']:
             case_results = self.run_with_shared_reader(case_param_list, reader)
 
         elif shared_params['processors'] == 1:
@@ -539,7 +579,6 @@ class _RunOceanTrackerClass(object):
 
         # shared grid is already to allow grid to be written  and case
 
-
         # shared reader control arrays
         time_steps_in_buffer = shared_memory.SharedMemArray(shape=(2,0),dtype=np.int2)
         c = {'time_steps_in_buffer':time_steps_in_buffer.get_shared_mem_map() }
@@ -592,4 +631,4 @@ class _RunOceanTrackerClass(object):
             git_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n','')
         except:
             git_revision = 'unknown'
-        return { 'version': code_version, 'git_revision': git_revision}
+        return { 'version': code_version, 'git_revision': git_revision, 'python_version':version}
