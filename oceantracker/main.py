@@ -73,7 +73,7 @@ class _RunOceanTrackerClass(object):
                          hint='check parameter file or dictionary for  "shared_prams" key', exception=GracefulExitError)
 
         vi = version_info
-        install_hint = ' Install Python 3.10 or used environment.yml to build a Conda virtual environment named oceantracker',
+        install_hint = 'Install Python 3.10 or used environment.yml to build a Conda virtual environment named oceantracker',
         if 'share_reader_memory' in params['shared_params'] and params['shared_params']['share_reader_memory']:
             # for shared reader python version must be >=3.8
             if not (vi.major == 3 and vi.major >= 8):
