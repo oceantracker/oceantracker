@@ -89,6 +89,7 @@ class GenericUnstructuredReader(_BaseReader):
                     sm = shared_reader_memory_util.create_shared_array(sm_map=item)
                     self.shared_memory['grid'][key] = sm  # need to retain a reference to shared or will be deleted
                     grid_time_buffers[key] = sm.data
+            #todo  shared fields
 
         # note if 3D
         grid['nz'] = 1 if grid_time_buffers['zlevel'] is None else grid_time_buffers['zlevel'].shape[2]
@@ -97,6 +98,8 @@ class GenericUnstructuredReader(_BaseReader):
 
         #useful info for json output
         self.info['hindcast_average_time_step'] = reader_build_info['sorted_file_info']['hydro_model_time_step']
+
+
         pass
 
     def check_grid(self,grid):
