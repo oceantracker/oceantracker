@@ -98,8 +98,6 @@ class GenericUnstructuredReader(_BaseReader):
 
         #useful info for json output
         self.info['hindcast_average_time_step'] = reader_build_info['sorted_file_info']['hydro_model_time_step']
-
-
         pass
 
     def check_grid(self,grid):

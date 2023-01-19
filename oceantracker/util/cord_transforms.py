@@ -18,13 +18,13 @@ transformerWGS84_to_NZTM = Transformer.from_crs(ID_WGS84, ID_NZTM , always_xy = 
 def WGS84_to_NZTM(lon_lat, out=None):
     # (lng,lat ) to NZTM for numpy arays
     if out is None: out = np.full_like(lon_lat,0.)
-    out[:,0],out[:,1] = transformerWGS84_to_NZTM.transform(lon_lat[:, 0], lon_lat[:, 1], always_xy = True)
+    out[:,0],out[:,1] = transformerWGS84_to_NZTM.transform(lon_lat[:, 0], lon_lat[:, 1])
     return out
 
 def NZTM_to_WGS84(xy, out=None):
     #  NZTM ( east, north)  to (lat, lng) for numpy arays
     if out is None: out = np.full_like(xy)
-    out[:,0],out[:,1] = transformerNZTM_to_WGS84.transform(xy[:,0], xy[:,1], always_xy = True) # not sure why xy are swapped here but it works
+    out[:,0],out[:,1] = transformerNZTM_to_WGS84.transform(xy[:,0], xy[:,1]) # not sure why xy are swapped here but it works
 
     # ensure longitude > 0
     sel= out[:,0] < 0
