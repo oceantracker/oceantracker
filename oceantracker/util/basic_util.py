@@ -100,7 +100,8 @@ def get_computer_info():
            'processor': platform.processor(),
             'CPUs_hardware':cpu_count(logical=False),
            'CPUs_logical': cpu_count(logical=True),
-           'Freq_Mhz':  (cpu_freq().max/1000.)
+           'Freq_Mhz':  (cpu_freq().max/1000.),
+           'python':[]
            }
     except Exception as e:
         s= ' Failed to get computer info, error=' + str(e)

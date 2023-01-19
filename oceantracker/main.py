@@ -14,12 +14,7 @@ code_version = '0.3.03.004 2023-01-13'
 
 # do first to ensure its right
 import multiprocessing
-print('mutil_processsing Start method is currently', multiprocessing.get_start_method() )
-if multiprocessing.get_start_method() != 'spawn':
-    try:
-        multiprocessing.set_start_method('spawn',force=True)  # use spawn on linux platforms, default on windows
-    except exec:
-        print('mutil_processing Start method is currently', multiprocessing.get_start_method() )
+
 
 import time
 from copy import deepcopy
@@ -304,22 +299,25 @@ class _RunOceanTrackerClass(object):
                     if key =='run_params':
                         cout['run_params'], msg_list = merge_params_with_defaults(c['run_params'],default_case_param_template['run_params'],
                                                                                    base_case_params['run_params'],   msg_list=msg_list, tag='case_run_params')
-
                         pass
                     elif type(item) == dict and key != 'reader':
                         # core classes
                         i, msg_list = make_class_instance_from_params(item,class_type_name=key,crumbs ='class param ' + key +' >> ',
                                                                       base_case_params= base_case_params[key], msg_list=msg_list)
-                        cout['core_classes'][key]= i.params
+                        if i is not None:
+                            cout['core_classes'][key]= i.params
                     elif type(item) == list:
                         if key not in cout['class_lists']: cout['class_lists'][key] =[]
                         for n, cli in enumerate( item + base_case_params[key]):
                             i, msg_list = make_class_instance_from_params(cli,class_type_name=key, msg_list=msg_list,
                                                                     nseq=n,crumbs ='class list param ' + key +' >> ')
-                            cout['class_lists'][key].append(i.params)
+
+                            if i is not None:
+                                cout['class_lists'][key].append(i.params)
 
                     else: pass # top level checks ensures items are dict or lists
-                    self.run_log.add_messages(msg_list)
+
+                self.run_log.add_messages(msg_list)
 
                 case_output_files= deepcopy(output_files) # need to make a copy
                 case_output_files['output_file_base']  = copy(shared_params['output_file_base'])

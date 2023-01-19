@@ -74,5 +74,5 @@ plot_tracks(track_data)
 # heat maps from on the fly counts
 stats_data = load_output_files.load_stats_file(case_info_file_name)
 
-animate_heat_map(stats_data,  heading=output_file_base + ' particle count heat map log scale',  vmax=100.)
-plot_heat_map(stats_data,  heading=output_file_base + ' particle count heat map log scale', vmax=100.)
+animate_heat_map(stats_data,  heading=output_file_base + ' particle count heat map',  vmax=100.)
+plot_heat_map(stats_data,  heading=output_file_base + ' particle count heat map', vmax=100.)
