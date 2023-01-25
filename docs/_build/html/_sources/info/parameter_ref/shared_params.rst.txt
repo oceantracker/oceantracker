@@ -66,6 +66,10 @@ Parameters:
 
 		- default: ``default_root_output_dir``
 
+	* ``share_reader_memory`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
 	* ``use_numpy_random_seed`` :   ``<class 'bool'>``   *<optional>*
 		Description: - Makes results reproducible, only use for testing developments give the same results!
 

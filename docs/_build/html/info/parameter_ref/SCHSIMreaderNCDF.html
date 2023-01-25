@@ -4,19 +4,19 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>SCHSIMreaderNCDF &#8212; OceanTracker Beta 0.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="run_params" href="run_params.html" />
-    <link rel="prev" title="GenericUnstructuredReader" href="GenericUnstructuredReader.html" />
+    <link rel="next" title="unstructured_FVCOM" href="unstructured_FVCOM.html" />
+    <link rel="prev" title="ROMS" href="ROMS.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -50,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -84,8 +84,8 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="reader_toc.html">reader</a><ul>
-      <li>Previous: <a href="GenericUnstructuredReader.html" title="previous chapter">GenericUnstructuredReader</a></li>
-      <li>Next: <a href="run_params.html" title="next chapter">run_params</a></li>
+      <li>Previous: <a href="ROMS.html" title="previous chapter">ROMS</a></li>
+      <li>Next: <a href="unstructured_FVCOM.html" title="next chapter">unstructured_FVCOM</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -96,7 +96,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -130,6 +130,14 @@
 </dl>
 </li>
 <li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">coordinate_projection</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - string map project for meters grid for use by pyproj module, eg  “proj=utm +zone=16 +datum=NAD83”</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">cords_in_lat_long</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
@@ -145,49 +153,16 @@
 </dd>
 </dl>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dimension_map</span></code>: nested parameter dictionary</p></li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">dimension_map</span></code>: nested parameter dictionary</dt><dd><ul>
+<dt><code class="docutils literal notranslate"><span class="pre">field_variables</span></code>: nested parameter dictionary</dt><dd><ul>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">node</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">nSCHISM_hgrid_node</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">vector2Ddim</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">two</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">vector3Ddim</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">bottom_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">z</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">nSCHISM_vgrid_layers</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">field_variables</span></code>: nested parameter dictionary</dt><dd><ul>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">salinity</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
@@ -226,6 +201,13 @@
 </dd>
 </dl>
 </li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">wind_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
 </ul>
 </dd>
 </dl>
@@ -248,57 +230,14 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">grid_variables</span></code>: nested parameter dictionary</dt><dd><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">bottom_cell_index</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">node_bottom_index</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">is_dry_cell</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Time variable flag of when cell is dry, 1= is dry cell</p>
+<dt><code class="docutils literal notranslate"><span class="pre">grid_file</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">wetdry_elem</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">triangles</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">SCHISM_hgrid_face_nodes</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">x</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['SCHISM_hgrid_node_x',</span> <span class="pre">'SCHISM_hgrid_node_y']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">zlevel</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">zcor</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grid_variables</span></code>: nested parameter dictionary</p></li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">hgrid_file_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
@@ -345,15 +284,7 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">one_based_indices</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - schism indcies are 1 based , not zero, eg. triangulation nodes start at 1 not zero as in python</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">one_based_indices</span></code>: nested parameter dictionary</p></li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">search_sub_dirs</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
@@ -386,6 +317,14 @@
 </dd>
 </dl>
 </li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">water_density</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">48</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
 </ul>
 </div></blockquote>
 </section>
@@ -399,10 +338,10 @@
     <ul>
         <li>
           &larr;
-          <a href="GenericUnstructuredReader.html" title="Previous document">GenericUnstructuredReader</a>
+          <a href="ROMS.html" title="Previous document">ROMS</a>
         </li>
         <li>
-          <a href="run_params.html" title="Next document">run_params</a>
+          <a href="unstructured_FVCOM.html" title="Next document">unstructured_FVCOM</a>
           &rarr;
         </li>
     </ul>
@@ -417,7 +356,7 @@
       &copy;2022, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

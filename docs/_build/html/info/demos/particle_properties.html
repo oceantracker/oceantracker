@@ -4,12 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Particle properties &#8212; OceanTracker Beta 0.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
@@ -50,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -84,7 +84,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -113,8 +113,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <li><p>demo60_SCHISM_3D_decaying_particle.py</p></li>
 </ul>
 <details>
-<summary> code </summary><div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo60_SCHISM_3D_decaying_particle.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<summary> code </summary><div class="literal-block-wrapper docutils container" id="container-1">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo60_SCHISM_3D_decaying_particle.py</span><a class="headerlink" href="#container-1" title="Permalink to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># demo60_SCHISM_3D_decaying_particle.py</span>
 <span class="c1">#---------------------------------------</span>
 <span class="kn">import</span> <span class="nn">oceantracker.main</span> <span class="k">as</span> <span class="nn">main</span>
@@ -147,8 +147,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 </div>
 </div>
 </details><details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo60_SCHISM_3D_decaying_particle.json</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="container-2">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo60_SCHISM_3D_decaying_particle.json</span><a class="headerlink" href="#container-2" title="Permalink to this code">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;shared_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo60_SCHISM_3D_decaying_particle&quot;</span><span class="p">,</span><span class="w"></span>
@@ -158,7 +158,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.reader.schism_reader.SCHSIMreaderNCDF&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoHindcastSchism3D.nc&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;depth_average&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;field_variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -211,8 +211,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 </div>
 </div>
 </details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo60_SCHISM_3D_decaying_particle.yaml</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-3">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo60_SCHISM_3D_decaying_particle.yaml</span><a class="headerlink" href="#container-3" title="Permalink to this code">¶</a></div>
 <div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base_case_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span><span class="w"></span>
@@ -244,7 +244,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">  </span><span class="nt">field_variables</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">water_temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">temp</span><span class="w"></span>
 <span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoHindcastSchism3D.nc</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast</span><span class="w"></span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span><span class="w"></span>
 <span class="nt">shared_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">compact_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
@@ -265,8 +265,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <li><p>class: <code class="docutils literal notranslate"><span class="pre">event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit</span></code></p></li>
 </ul>
 <details>
-<summary> code </summary><div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo07_inside_polygon_events.py</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
+<summary> code </summary><div class="literal-block-wrapper docutils container" id="container-4">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo07_inside_polygon_events.py</span><a class="headerlink" href="#container-4" title="Permalink to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># demo07_inside_polygon_events.py</span>
 <span class="c1">#---------------------------------------</span>
 <span class="kn">import</span> <span class="nn">oceantracker.main</span> <span class="k">as</span> <span class="nn">main</span>
@@ -303,8 +303,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 </div>
 </div>
 </details><details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo07_inside_polygon_events.json</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
+<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="container-5">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo07_inside_polygon_events.json</span><a class="headerlink" href="#container-5" title="Permalink to this code">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;shared_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo07_inside_polygon_events&quot;</span><span class="p">,</span><span class="w"></span>
@@ -314,7 +314,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoHindcast2D*.nc&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;search_sub_dirs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;dimension_map&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -454,8 +454,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 </div>
 </div>
 </details></details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo07_inside_polygon_events.yaml</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-6">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo07_inside_polygon_events.yaml</span><a class="headerlink" href="#container-6" title="Permalink to this code">¶</a></div>
 <div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base_case_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
@@ -532,7 +532,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="nt">x</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">east</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">north</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast</span><span class="w"></span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span><span class="w"></span>
 <span class="w">  </span><span class="nt">isodate_of_hindcast_time_zero</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2020-06-01&#39;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">search_sub_dirs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">time_buffer_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">24</span><span class="w"></span>
@@ -553,8 +553,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 </center><p>Particles coloured by their status property. Status can be one of following strings</p>
 <p><code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'frozen',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p>
 <details>
-<summary> code </summary><div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo56_SCHISM_3D_resupend_crtitical_friction_vel.py</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
+<summary> code </summary><div class="literal-block-wrapper docutils container" id="container-7">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo56_SCHISM_3D_resupend_crtitical_friction_vel.py</span><a class="headerlink" href="#container-7" title="Permalink to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># demo56_SCHISM_3D_resupend_crtitical_friction_vel.py</span>
 <span class="c1">#---------------------------------------</span>
 <span class="kn">import</span> <span class="nn">oceantracker.main</span> <span class="k">as</span> <span class="nn">main</span>
@@ -592,8 +592,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 </div>
 </div>
 </details><details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
+<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="container-8">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json</span><a class="headerlink" href="#container-8" title="Permalink to this code">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;shared_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo56_SCHISM_3D_resupend_crtitical_friction_vel&quot;</span><span class="p">,</span><span class="w"></span>
@@ -603,7 +603,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.reader.schism_reader.SCHSIMreaderNCDF&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoHindcastSchism3D.nc&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;depth_average&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;field_variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -611,7 +611,6 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">        </span><span class="p">},</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;field_variables_to_depth_average&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">            </span><span class="s2">&quot;water_velocity&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="s2">&quot;water_depth&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">            </span><span class="s2">&quot;salt&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">            </span><span class="s2">&quot;water_temperature&quot;</span><span class="w"></span>
 <span class="w">        </span><span class="p">]</span><span class="w"></span>
@@ -788,7 +787,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">        </span><span class="nt">&quot;trajectory_modifiers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">            </span><span class="p">{</span><span class="w"></span>
 <span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.trajectory_modifiers.resuspension.BasicResuspension&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;critical_friction_velocity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span><span class="w"></span>
+<span class="w">                </span><span class="nt">&quot;critical_friction_velocity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.005</span><span class="w"></span>
 <span class="w">            </span><span class="p">}</span><span class="w"></span>
 <span class="w">        </span><span class="p">]</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
@@ -797,8 +796,8 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 </div>
 </div>
 </details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo56_SCHISM_3D_resupend_crtitical_friction_vel.yaml</span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-9">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo56_SCHISM_3D_resupend_crtitical_friction_vel.yaml</span><a class="headerlink" href="#container-9" title="Permalink to this code">¶</a></div>
 <div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base_case_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span><span class="w"></span>
@@ -890,7 +889,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="nt">n_sub_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
 <span class="w">  </span><span class="nt">trajectory_modifiers</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.trajectory_modifiers.resuspension.BasicResuspension</span><span class="w"></span>
-<span class="w">    </span><span class="nt">critical_friction_velocity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+<span class="w">    </span><span class="nt">critical_friction_velocity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.005</span><span class="w"></span>
 <span class="w">  </span><span class="nt">velocity_modifiers</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity</span><span class="w"></span>
 <span class="w">    </span><span class="nt">mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.001</span><span class="w"></span>
@@ -901,11 +900,10 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <span class="w">    </span><span class="nt">water_temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">temp</span><span class="w"></span>
 <span class="w">  </span><span class="nt">field_variables_to_depth_average</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_velocity</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_depth</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">salt</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_temperature</span><span class="w"></span>
 <span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoHindcastSchism3D.nc</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast</span><span class="w"></span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span><span class="w"></span>
 <span class="nt">shared_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">compact_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
@@ -943,7 +941,7 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
       &copy;2022, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

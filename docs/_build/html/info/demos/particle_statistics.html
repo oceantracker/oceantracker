@@ -4,12 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Particle Statistics &#8212; OceanTracker Beta 0.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
@@ -50,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -82,7 +82,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -114,8 +114,8 @@
 <li><p>class: <code class="docutils literal notranslate"><span class="pre">particle_statistics.polygon_statistics.PolygonStats2D_ageBased</span></code></p></li>
 </ul>
 <details>
-<summary> code </summary><div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo03_heatmaps.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<summary> code </summary><div class="literal-block-wrapper docutils container" id="container-1">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo03_heatmaps.py</span><a class="headerlink" href="#container-1" title="Permalink to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># demo03_heatmaps.py</span>
 <span class="c1">#---------------------------------------</span>
 <span class="kn">import</span> <span class="nn">oceantracker.main</span> <span class="k">as</span> <span class="nn">main</span>
@@ -147,8 +147,8 @@
 </div>
 </div>
 </details><details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo03_heatmaps.json</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="container-2">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo03_heatmaps.json</span><a class="headerlink" href="#container-2" title="Permalink to this code">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;shared_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo03_heatmaps&quot;</span><span class="p">,</span><span class="w"></span>
@@ -157,7 +157,7 @@
 <span class="w">    </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker03\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoHindcast2D*.nc&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;search_sub_dirs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;dimension_map&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -196,7 +196,7 @@
 <span class="w">            </span><span class="nt">&quot;turn_on_write_particle_properties_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">                </span><span class="s2">&quot;n_cell&quot;</span><span class="w"></span>
 <span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;write_dry_cell_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;write_dry_cell_index&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
 <span class="w">        </span><span class="p">},</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;solver&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;n_sub_steps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
@@ -295,8 +295,8 @@
 </div>
 </div>
 </details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo03_heatmaps.yaml</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-3">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_yaml/demo03_heatmaps.yaml</span><a class="headerlink" href="#container-3" title="Permalink to this code">¶</a></div>
 <div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base_case_params</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
@@ -356,7 +356,7 @@
 <span class="w">  </span><span class="nt">tracks_writer</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">turn_on_write_particle_properties_list</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">n_cell</span><span class="w"></span>
-<span class="w">    </span><span class="nt">write_dry_cell_flag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">write_dry_cell_index</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="nt">reader</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dimension_map</span><span class="p">:</span><span class="w"></span>
@@ -375,7 +375,7 @@
 <span class="w">    </span><span class="nt">x</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">east</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">north</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker03\demos\demo_hindcast</span><span class="w"></span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span><span class="w"></span>
 <span class="w">  </span><span class="nt">isodate_of_hindcast_time_zero</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2020-06-01&#39;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">search_sub_dirs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">time_buffer_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">24</span><span class="w"></span>
@@ -415,7 +415,7 @@
       &copy;2022, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

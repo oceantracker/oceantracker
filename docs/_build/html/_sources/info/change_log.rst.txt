@@ -7,6 +7,22 @@ Known issues
 __________________
 
 
+Version 0.3.03.000 2023-01-03
+_____________________________________
+
+New features
+--------------------
+
+#.  FVCOM reader built and passed tests so far
+#. ROMS reade started but not workng
+#. time variable grid data, eg zlevel, dry_cell flag have moved from from  reader variables to reader.grid_time_buffers
+
+Changes
+--------------------
+
+#. non-varying grid data is shared memory amongst cases, no change to how grid variables are accessed
+#. caserunner grid variables and buffers are  built from reader_build_info, as step towards developing a shared reader
+
 Version 0.3.01.04-06, Oct 04 2022
 _____________________________________
 

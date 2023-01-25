@@ -45,14 +45,14 @@ Linux
 
     ``deactivate``
 
-.. literalinclude:: ../../../tests/oceantracker_linux_install.sh
+.. literalinclude:: ../../../installing/linux_install.sh
     :language: console
     :caption:
 
 Windows
 =======================
 
-To create a Vonda virtual environment
+To create a Conda virtual environment
 
 #. Install Anaconda, then
 
@@ -60,19 +60,18 @@ To create a Vonda virtual environment
 
     ``git clone https://github.com/oceantracker/oceantracker.git``
 
-#. Open adaconda command prompt as administrator
+#. Open Andconda command prompt as administrator
 
-#. Create a conda virtual environment
+#. change directorty to oceantracker folder with environment.yml
 
     ``conda create -n oceantracker``
 
-#. Activate virtual environment
+#. Create virtual environment
 
-    ``conda activate oceantracker``
+    ``conda env create -f environment.yml``
 
-#. From within   directory containing  oceantracker install dir
+#. Acivate virtual environment
 
-    ``conda install --yes --file oceantracker\requirements.txt``
+    ``conda acivate oceantracker``
 
-#. Use enviromnent within Pycharm etc  ( in Pycharm, need to add env. to those available from existing conda env., and add oceantracker as source root code)
-
+#. For Pycharm users, oceantracker should be one of the available Python interpreters so just select it.

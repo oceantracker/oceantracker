@@ -57,9 +57,9 @@ To loading a class OceanTracker does the following:
 	
 
 Readers Role/Construction
-#######################
+##########################
 
-A reader's role is to access  the hindcasts grid and field variables. It role is to: 
+A reader accesses  the hindcast grid and field variables. It role is to:
  
     * read the hydrodynamic model grid into core variables and add required variables, such as adjacent triangles map.
 		
@@ -70,7 +70,9 @@ Reader required methods
 ##########################
 
 	* read_nodal_x_float32() :  Read nodel (x,y)  as N by 2 vector of node cords as float64
+
     * read_triangles_as_int32(): read triangulation as M by 3,  and split any quad cells into new triangles
+
     * read_water_depths_as_float16(): read water depths at nodes as N array
 
 read_grid(): creates reader classes self.grid dictionary with keys

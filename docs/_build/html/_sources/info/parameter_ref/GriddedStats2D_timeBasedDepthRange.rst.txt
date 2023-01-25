@@ -51,7 +51,7 @@ Parameters:
 		- fixed_len: ``2``
 
 	* ``grid_span``:  *<optional>*
-		- a list containing type:  ``[<class 'float'>]``
+		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``

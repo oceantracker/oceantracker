@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>unstructured_FVCOM &#8212; OceanTracker Beta 0.3 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="run_params" href="run_params.html" />
+    <link rel="prev" title="SCHSIMreaderNCDF" href="SCHSIMreaderNCDF.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=oceantracker&repo=oceantracker&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/demos.html">Demos</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/installing.html">Installing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/parameters_overview.html">Parameters overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="parameter_ref_toc.html#top-level-parameters">Top level parameters</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="shared_params.html">shared_params</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="reader_toc.html">reader</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parameter_ref_toc.html#case-parameters">Case parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/output_files.html">Output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/post_processing.html">Post processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../users_guide/documentation.html">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../users_guide.html">Users guide</a><ul>
+  <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
+  <li><a href="reader_toc.html">reader</a><ul>
+      <li>Previous: <a href="SCHSIMreaderNCDF.html" title="previous chapter">SCHSIMreaderNCDF</a></li>
+      <li>Next: <a href="run_params.html" title="next chapter">run_params</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="unstructured-fvcom">
+<h1>unstructured_FVCOM<a class="headerlink" href="#unstructured-fvcom" title="Permalink to this headline">¶</a></h1>
+<p><strong>Description:</strong> Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names</p>
+<p><strong>Class:</strong> oceantracker.reader.dev_FVCOM_reader.unstructured_FVCOM</p>
+<p><strong>File:</strong> oceantracker/reader/dev_FVCOM_reader.py</p>
+<p><strong>Inheritance:</strong> _BaseReader&gt; GenericUnstructuredReader&gt; unstructured_FVCOM</p>
+<p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;not</span> <span class="pre">given</span> <span class="pre">in</span> <span class="pre">defaults&quot;</span></code></p>
+<section id="parameters">
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Class name as string A.B.C, used to import this class from python path</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">coordinate_projection</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - string map project for meters grid for use by pyproj module, eg  “proj=utm +zone=16 +datum=NAD83”</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">cords_in_lat_long</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">depth_average</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dimension_map</span></code>: nested parameter dictionary</p></li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">field_variables</span></code>: nested parameter dictionary</dt><dd><ul>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">bottom_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">salinity</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">tide</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">zeta</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">h</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">water_temperature</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">water_velocity</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['u',</span> <span class="pre">'v',</span> <span class="pre">'ww']</span></code></p></li>
+<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">wind_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">field_variables_to_depth_average</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">file_mask</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: - Mask for file names, eg “scout*.nc”, is joined with “input_dir” to give full file names</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">grid_file</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grid_variables</span></code>: nested parameter dictionary</p></li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">input_dir</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">isodate_of_hindcast_time_zero</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1970-01-01</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">max_numb_files_to_load</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">10000000</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">minimum_total_water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">0.25</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">random_walk_varyingAz</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name “water_velocity” would refers to a particle property or field used within the code</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">one_based_indices</span></code>: nested parameter dictionary</p></li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">search_sub_dirs</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">time_buffer_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">48</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">time_zone</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">-12</span></code></p></li>
+<li><p>max: <code class="docutils literal notranslate"><span class="pre">23</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">water_density</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">48</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="SCHSIMreaderNCDF.html" title="Previous document">SCHSIMreaderNCDF</a>
+        </li>
+        <li>
+          <a href="run_params.html" title="Next document">run_params</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2022, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/info/parameter_ref/unstructured_FVCOM.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
