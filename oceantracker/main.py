@@ -427,7 +427,9 @@ class _RunOceanTrackerClass(object):
         # checks on hindcast using first hindcast file 
         nc = NetCDFhandler(file_info['names'][0], 'r')
         msg_list = reader._basic_file_checks(nc, msg_list=[])
+        rl.add_messages(msg_list)
         msg_list = reader.additional_setup_and_hindcast_file_checks(nc, msg_list=msg_list)
+        rl.add_messages(msg_list)
         nc.close()
         self.run_log.add_messages(msg_list)
 
@@ -460,7 +462,7 @@ class _RunOceanTrackerClass(object):
 
         # checks on hindcast
         if  file_info['n_time_steps_in_hindcast']< 2:
-            rl.write_msg('Hincast must have at least two time steps, found ' + str(file_info['n_time_steps_in_hindcast']),exception=FatalError)
+            rl.write_msg('Hindcast must have at least two time steps, found ' + str(file_info['n_time_steps_in_hindcast']),exception=FatalError)
 
         # check for large time gaps between files
         file_info['hydro_model_time_step'] = (file_info['time_end'][-1]-file_info['time_start'][0])/(file_info['n_time_steps_in_hindcast']-1)
@@ -492,7 +494,7 @@ class _RunOceanTrackerClass(object):
             field_params,var_info = reader.get_field_variable_info(hindcast,'water_depth',reader.params['field_variables']['water_depth'])
             water_depth = reader.read_file_field_variable_as4D(hindcast,var_info['component_list'][0],var_info['is_time_varying'], file_index=None)
             water_depth = reader.preprocess_field_variable(hindcast,'water_depth',water_depth)
-            water_depth = np.squeeze(water_depth)
+            grid['water_depth'] = np.squeeze(water_depth)
 
         hindcast.close()
 
@@ -508,7 +510,7 @@ class _RunOceanTrackerClass(object):
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributesDict={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'].astype(np.int8), ('triangle_dim',))
-        nc.write_a_new_variable('water_depth', water_depth, ('node_dim',))
+        nc.write_a_new_variable('water_depth', grid['water_depth'], ('node_dim',))
         nc.close()
 
         grid_outline_file = output_files['output_file_base'] + '_grid_outline.json'

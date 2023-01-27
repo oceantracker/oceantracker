@@ -312,7 +312,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.classes['reader'].build_case_runner_reader(si.reader_build_info)
 
         # now know if 3D hindcast
-        si.hindcast_is3D = si.classes['fields']['water_velocity'].is3D()
+        si.hydro_model_is3D = si.classes['fields']['water_velocity'].is3D()
 
         # Timings, sort out start and run duration
         n_substeps = float(max(1, si.classes['solver'].params['n_sub_steps']))

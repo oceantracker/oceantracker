@@ -112,7 +112,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
     def read_nodal_x_float64(self, nc):
         x = np.stack((nc.read_a_variable('SCHISM_hgrid_node_x'), nc.read_a_variable('SCHISM_hgrid_node_y')), axis=1).astype(np.float64)
         if self.params['cords_in_lat_long']:
-            x  = self.convert_lat_long_to_meters_grid(x)
+            x  = self.convert_lon_lat_to_meters_grid(x)
         return x
 
     def read_triangles_as_int32(self, nc):

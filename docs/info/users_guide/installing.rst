@@ -74,4 +74,4 @@ To create a Conda virtual environment
 
     ``conda acivate oceantracker``
 
-#. For Pycharm users, oceantracker should be one of the available Python interpreters so just select it.
+#. For Pycharm users, oceantracker should be one of the available Python interpreters so just select it. If not added it via settings/project/interpreter

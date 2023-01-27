@@ -50,7 +50,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         info = self.info
         self.walk_stats = np.zeros((2,),dtype=triangle_interpolator_util.walk_stats)
 
-        if si.hindcast_is3D:
+        if si.hydro_model_is3D:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
             p.create_particle_property('manual_update',dict(name='nz_cell',  write=False, dtype=np.int32, initial_value=grid_time_buffers['zlevel'].shape[2]-2)) # todo  create  initial serach for vertical cell
@@ -69,7 +69,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.locate_BCwalk(xq, nb,step_dt_fraction, active)  # best method!
         self.code_timer.stop('find_cells_and_weights')
 
-        if si.hindcast_is3D:
+        if si.hydro_model_is3D:
             self.code_timer.start('find_depth_cell')
             # insert depth cells and fractions
             self.get_depth_cell(xq, nb, step_dt_fraction, active)
@@ -352,7 +352,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         info['bc_walk']['average_number_of_triangles_walked'] =  info['bc_walk']['total_steps'] /  max(info['bc_walk']['particles_located'], 1)
 
         # there are vertical walk stats
-        if si.hindcast_is3D:
+        if si.hydro_model_is3D:
             info['vertical_walk'] = {}
             for name in self.walk_stats[1].dtype.names:
                 info['vertical_walk'][name] = self.walk_stats[1][name]

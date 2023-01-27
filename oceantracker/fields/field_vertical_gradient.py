@@ -8,13 +8,13 @@ class VerticalGradient(UserFieldBase):
     def __init__(self):
         super().__init__()
         self.add_default_params({'name': PVC(None, str, is_required=True) ,
-                                 'name_of_field': PVC('', str, is_required=True),
+                                 'name_of_field': PVC(None, str, is_required=True),
                                  # below are not required as acquired from named field
                                  'is_time_varying': PVC(True, bool, is_required=False),
                                  'is3D': PVC(True, bool, is_required=False),
                                  'num_components': PVC(None, int, is_required=False)
                                  })
-        self.class_doc(description='Calculated vertical gradient of "name_of_field" param, as  "name_of_field_vertical_grad"')
+        self.class_doc(description='Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"')
 
     def initialize(self):
         si = self.shared_info

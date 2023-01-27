@@ -175,7 +175,7 @@ class PointRelease(ParameterBaseClass):
 
         info['number_released'] += n  # count number released in this group
 
-        if si.hindcast_is3D and (len(self.params['z_range']) > 0 or x0.shape[1] < 3):
+        if si.hydro_model_is3D and (len(self.params['z_range']) > 0 or x0.shape[1] < 3):
 
             if len(self.params['z_range']) == 0:  self.params['z_range']= [-1.0E30,1.0E30]
 
@@ -246,9 +246,9 @@ class PointRelease(ParameterBaseClass):
         x = x[sel, :]
         n_cell = n_cell[sel]
 
-        # add keep only those in wet cells, crudely this is those not in dry cell at this and the next time step
+        # add keep only those in wet cells at this time
         if not self.params['allow_release_in_dry_cells']:
-            sel =grid_time_buffers['dry_cell_index'][n_cell] < 128
+            sel =grid_time_buffers['dry_cell_index'][n_cell] < 128 # those wet
             x = x[sel, :]
             n_cell = n_cell[sel]
 

@@ -370,20 +370,17 @@ params.append(p90)
 # Sample data subset
 # https://www.seanoe.org/data/00751/86286/
 
-ROMS_params={'shared_params' :{'output_file_base' :'demo70_ROMS_reader_test', 'debug': True},
+ROMS_params={'shared_params' :{'output_file_base' :'demo70_ROMS_reader', 'debug': True},
  'reader': {'class_name': 'oceantracker.reader.dev_ROMS_reader.ROMS',
                     'input_dir': 'demo_hindcast',
-                     'file_mask': 'ROMS_DopAnV2R3-ini2007_da_his.nc',
+                     'file_mask': 'DopAnV2R3-ini2007_da_his.nc',
                      'field_variables':{'water_temperature':'temp'}
                           },
  'base_case_params' : { 'run_params' : {}, 'dispersion': {'A_H': .2, 'A_V': 0.001},
-                        'solver': {'n_sub_steps': 30},
-                'particle_release_groups': [{'points': [[1595000, 5482600, -1],[1599000, 5486200, -1] ],
-                                                     'pulse_size': 10, 'release_interval': 3600,
-                                                    'allow_release_in_dry_cells': True},
-                                                    {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
-                                    'points': poly_points,
-                                    'pulse_size': 10, 'release_interval':  3600}
+                        'solver': {'n_sub_steps': 6},
+                'particle_release_groups': [{'points': [[616042, 4219971,-1],[616042, 4729971,-1] ],
+                                                     'pulse_size': 10, 'release_interval': 1800,
+                                                 }
                                                     ],
                 'particle_properties': [{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
                                                       'decay_time_scale': 1. * 3600 * 24} ],
@@ -396,7 +393,7 @@ ROMS_params={'shared_params' :{'output_file_base' :'demo70_ROMS_reader_test', 'd
                 }
 }
 
-#params.append(ROMS_params)
+params.append(ROMS_params)
 
 def make_demo_python(demo_name):
     # write a simplified version of code to add to docs

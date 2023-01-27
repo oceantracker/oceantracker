@@ -137,7 +137,7 @@ class ParameterBaseClass(object):
                                 + '" requires particle property  "' + name + '"'
                                 + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', exception = GracefulExitError)
 
-        if requires3D and (requires3D and not si.hindcast_is3D):
+        if requires3D and (requires3D and not si.hydro_model_is3D):
                 append_message(msg_list,'     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', exception = GracefulExitError)
 
         return msg_list
