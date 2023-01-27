@@ -41,7 +41,10 @@ Features
 * Calculate the tracks of millions of particles
 * User configurable settings and computational pipeline driven entirely by json or yaml text files.
 * Add user defined particle properties and behaviours from parameter text files.
-* Native grid particle tracking for `SCHISM <http://ccrm.vims.edu/schismweb/>`_  like grids, which preserves the resolution of Slayer and LSC vertical grids
+* Native grid particle tracking which preserves the vertical resolution
+      * `SCHISM <http://ccrm.vims.edu/schismweb/>` for both  Slayer and LSC vertical grids
+      * FVCOM model output, which preserves the resolution of
+      * Support for ROMs regular grids is being developed
 * Builds heat maps on the fly, without recording particle tracks, also inside polygon counts computed on the fly
 * Backward and forward in time particle tracking
 * Shoreline stranding of particles by the tide and resuspension from the bottom

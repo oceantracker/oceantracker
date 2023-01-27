@@ -33,7 +33,7 @@ Parameters:
 		- default: ``None``
 
 	* ``name_of_field`` :   ``<class 'str'>`` **<isrequired>**
-		- default: ````
+		- default: ``None``
 
 	* ``num_components`` :   ``<class 'int'>``   *<optional>*
 		- default: ``None``

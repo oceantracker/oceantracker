@@ -17,7 +17,7 @@ class RandomWalk(_BaseTrajectoryModifer):
         dt = si.model_substep_timestep
 
         info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
-        if not si.hindcast_is3D:
+        if not si.hydro_model_is3D:
             info['random_walk_size'] =  info['random_walk_size'][:2]
 
         # set up shortcut to data required to modify velocity  below

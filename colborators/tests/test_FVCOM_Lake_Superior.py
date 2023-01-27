@@ -6,17 +6,23 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-norun', action='store_true')
+parser.add_argument('-hpc', action='store_true')
 args = parser.parse_args()
 
 # https://tidesandcurrents.noaa.gov/ofs/lsofs/lsofs.html
 # https://www.ncei.noaa.gov/thredds/catalog/model-lsofs-files/catalog.html
 output_file_base='FVCOM_Lake_Superior_test'
-root_output_dir ='\output'
-input_dir='F:\\Hindcasts\\colaborations\\LakeSuperior\\historical_sample'
-file_mask ='nos.lsofs.fields.n000*.nc'
 
-#input_dir='F:\\Hindcasts\\colaborations\\LakeSuperior\\forecast'
-#file_mask ='nos.lsofs.fields.f000*.nc'
+
+if args.hpc:
+    input_dir='/hpcfreenas/hindcast/LakeSuperior/'
+    root_output_dir = '/hpcfreenas/ross/oceanTrackerOutput/LakeSuperior/'
+else:
+    input_dir='F:\\Hindcasts\\colaborations\\LakeSuperior\\historical_sample'
+    root_output_dir = '\output'
+
+print(args,input_dir)
+file_mask ='nos.lsofs.fields.n000*.nc'
 
 points = [[256203.6793068961, 5193002.88896844, -10],
            [416692.1617094234, 5216000.828769726, -10],
@@ -67,12 +73,14 @@ track_data = load_output_files.load_particle_track_vars(case_info_file_name,frac
 
 animate_particles(track_data,  show_grid=True,axis_lims=None,
                   heading='FVCOM reader test',show_dry_cells=False,
-                  release_group=None,
+                  release_group=None, movie_file=output_file_base + '_animation01.mp4',
+                                fps=15,size=6,
                   back_ground_depth=True, interval=20)
 plot_tracks(track_data)
 
 # heat maps from on the fly counts
 stats_data = load_output_files.load_stats_file(case_info_file_name)
 
-animate_heat_map(stats_data,  heading=output_file_base + ' particle count heat map',  vmax=100.)
+animate_heat_map(stats_data,  heading=output_file_base + ' particle count heat map',  vmax=100.,
+                 movie_file=output_file_base + '_animation01.mp4',)
 plot_heat_map(stats_data,  heading=output_file_base + ' particle count heat map', vmax=100.)

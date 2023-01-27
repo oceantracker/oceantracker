@@ -28,7 +28,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # is data 3D
         self.particles_in_buffer = 0
         self.particles_released = 0
-        nDim = 3 if si.hindcast_is3D else  2
+        nDim = 3 if si.hydro_model_is3D else  2
 
         #  time dependent core  properties
         self.add_time_varying_info(name = 'time', description='time in seconds, since 1/1/1970') #time has only one value at each time step

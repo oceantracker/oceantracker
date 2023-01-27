@@ -137,7 +137,7 @@ class GenericUnstructuredReader(_BaseReader):
         gv= self.params['grid_variables']
         x = np.stack((nc.read_a_variable(gv['x'][0]), nc.read_a_variable(gv['x'][1])), axis=1).astype(np.float64)
         if self.params['cords_in_lat_long']:
-            x = self.convert_lat_long_to_meters_grid(x)
+            x = self.convert_lon_lat_to_meters_grid(x)
         return x
 
     def read_time_variable_grid_variables(self, nc, buffer_index, file_index):

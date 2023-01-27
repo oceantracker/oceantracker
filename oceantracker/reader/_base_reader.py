@@ -29,6 +29,8 @@ class _BaseReader(ParameterBaseClass):
                                  'time_zone': PVC(None, int, min=-12, max=23),
                                  'cords_in_lat_long': PVC(False, bool),
                                  'time_buffer_size': PVC(48, int, min=2),
+                                 'required_file_variables' :PLC([], [str]),
+                                 'required_file_dimensions': PLC([], [str]),
                                  'water_density': PVC(48, int, min=2),
                                  'depth_average': PVC(False, bool),  # turns 3D hindcast into a 2D one
                                  'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
@@ -229,7 +231,18 @@ class _BaseReader(ParameterBaseClass):
                 elif d is not None and not nc.is_var(d) :
                     append_message(msg_list,'For "' + vm + '" for param,  "' + name + ' ", cannot find variable in file "' + str(d) + '"', exception=GracefulExitError)
 
+
+        # check if all required dims and non-feilds variables present
+        for v in self.params[ 'required_file_variables']:
+            if not nc.is_var(v):
+                append_message(msg_list, 'Cannot find required variable in hydro model output file "' + v + '"', exception=GracefulExitError)
+
+        for v in self.params[ 'required_file_dimensions']:
+            if not nc.is_dim(v):
+                append_message(msg_list, 'Cannot find required dimension in hydro model outptut file "' + v + '"', exception=GracefulExitError)
         return msg_list
+
+
 
     def get_field_variable_info(self, nc, name,var_list):
         # get info from list of component eg ['temp'], ['u','v']
@@ -500,7 +513,8 @@ class _BaseReader(ParameterBaseClass):
                 self.shared_memory['grid'][key] = shared_memory.SharedMemArray(sm_map=item)
                 self.grid[key] = self.shared_memory['grid'][key].data  # grid variables is shared version
         return reader_build_info
-    def convert_lat_long_to_meters_grid(self,x):
+
+    def convert_lon_lat_to_meters_grid(self, x):
 
         if self.params['coordinate_projection'] is None:
             x_out, self.cord_transformer= cord_transforms.WGS84_to_UTM( x, out=None)

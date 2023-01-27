@@ -52,7 +52,17 @@ if __name__ == "__main__":
         demo_list.sort()
     else:
         demo_list=[args.demo]
-        
+
+    test_demo=70
+    if  args.testing:
+        demo_list=[test_demo] # ros ver
+    else:
+        # get rid of d deveopmenrt demos
+        demo_list2=[]
+        for d in demo_list:
+            if d != test_demo : demo_list2.append((d))
+        demo_list= demo_list2
+
     for n in demo_list:
 
         f=glob.glob(path.join(json_dir, 'demo' + '%02.0f' % n + '*.json'))
@@ -61,14 +71,19 @@ if __name__ == "__main__":
 
         params = json_util.read_JSON(f[0])
 
+        demo_name= params['shared_params']['output_file_base']
+        params['reader']['input_dir'] = path.join(path.dirname(__file__),'demo_hindcast')
+
         # tests or development choices of classes
         if args.testing:
-            params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
+            pass
+            params['reader'].update({'input_dir': 'F:\Hindcasts\Hindcast_samples_tests\ROMS_samples',
+                                   'file_mask': 'DopAnV2R3-ini2007_da_his.nc',})
+            #params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
             #params['base_case_params']['dispersion'].update({'A_V':0., 'A_H':0.})
             #params['base_case_params']['particle_release_groups'][0]['pulse_size']=1
 
-        demo_name= params['shared_params']['output_file_base']
-        params['reader']['input_dir'] = path.join(path.dirname(__file__),'demo_hindcast')
+
 
         # clean output folder
         params['shared_params']['root_output_dir'] = 'output'
@@ -94,6 +109,12 @@ if __name__ == "__main__":
             output_file_base = path.join('output', params['shared_params']['output_file_base'])
 
         if  args.noplot : continue
+
+        if args.testing:
+            #tracks=load_output_files.load_particle_track_vars(case_info_file_name)
+            #from oceantracker.post_processing.plotting.plot_utilities import display_grid
+            #display_grid(tracks['grid'],ginput=3)
+            pass
 
 
         # do plots

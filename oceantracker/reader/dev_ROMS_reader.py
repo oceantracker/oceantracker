@@ -5,6 +5,9 @@
 #better?
 #https://tds.marine.rutgers.edu/thredds/ncss/roms/doppio/DopAnV2R3-ini2007_da/his?var=h&var=mask_psi&var=mask_rho&var=mask_u&var=mask_v&var=ubar&var=vbar&var=zeta&var=temp&var=u&var=v&var=w&north=35.25&west=-77&east=-76&south=34.3&horizStride=1&time_start=2021-08-01T01%3A00%3A00Z&time_end=2021-08-02T00%3A00%3A00Z&timeStride=1&vertCoord=&accept=netcdf
 
+# full grid one day
+#https://tds.marine.rutgers.edu/thredds/ncss/roms/doppio/DopAnV2R3-ini2007_da/his?var=angle&var=f&var=h&var=mask_psi&var=mask_rho&var=mask_u&var=mask_v&var=pm&var=pn&var=ubar&var=vbar&var=zeta&var=temp&var=u&var=v&var=AKt&var=w&horizStride=1&time_start=2007-01-02T01%3A00%3A00Z&time_end=2007-01-03T00%3A00%3A00Z&timeStride=1&vertCoord=&addLatLon=true&accept=netcdf
+
 from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredReader
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
@@ -14,8 +17,14 @@ from numba import njit
 from oceantracker.util.cord_transforms import WGS84_to_UTM
 from matplotlib import pyplot as plt, tri
 
-from oceantracker.reader.util import reader_util
+from oceantracker.util.basic_util import  is_substring_in_list
 
+from oceantracker.reader.util import reader_util
+from oceantracker.reader.util.data_grid_transforms import convert_layer_field_to_levels_from_fixed_depth_fractions
+
+#todo triangulation is not aways right around smal islands, depending of which diag slits the cell in two
+#todo implement depth average mode using depth average variables in the file
+#todo friction velocity from bottom stress ???
 
 class ROMS(GenericUnstructuredReader):
     # reads  ROMS file, and tranforms all data to PSI grid
@@ -28,7 +37,9 @@ class ROMS(GenericUnstructuredReader):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({ 'field_variables': {'water_velocity': PLC(['u','v','w'], [str], fixed_len=2),
                                   'water_depth': PVC('h', str),
-                                  'tide': PVC('zeta', str)}
+                                  'tide': PVC('zeta', str)},
+                                  'required_file_variables': PLC(['ocean_time','mask_psi','lat_psi','lon_psi','h','zeta','u','v'], [str]),
+                                  'required_file_dimensions': PLC(['s_w','s_rho','eta_u','eta_v'], [str]),
                                 })
         # don't use name mappings for these variables
         self.clear_default_params(['dimension_map','grid_variables','one_based_indices'])
@@ -49,7 +60,10 @@ class ROMS(GenericUnstructuredReader):
         # show this be a method only
         # add time invariant vertical grid variables needed for transformations
 
-        grid['vertical_grid_type'] = 'sigma'
+        # first values in z axis is the top? so flip
+        grid['z_fractions_layer_center'] = nc.read_a_variable('s_rho', sel=None).astype(np.float32)  # layer center fractions
+        grid['z_fractions_layer_boundaries'] = nc.read_a_variable('s_w', sel=None).astype(np.float32)  # layer boundary fractions
+        grid['vertical_grid_type'] = 'S-sigma'
         return grid
 
     def read_nodal_x_float64(self, nc):
@@ -57,31 +71,40 @@ class ROMS(GenericUnstructuredReader):
         # record useful grid info
         grid['lat_psi'] = nc.read_a_variable('lat_psi').astype(np.float64)
         grid['lon_psi'] = nc.read_a_variable('lon_psi').astype(np.float64)
-        grid['lon_lat'] =  np.stack((grid['lon_psi'].flatten('F'),grid['lat_psi'].flatten('F')),  axis=1)
-        return self.convert_lat_long_to_meters_grid(grid['lon_lat'])
+
+        grid['lon_lat'] =  np.stack((grid['lon_psi'],grid['lat_psi']),  axis=2)
+        s=   grid['lon_lat'].shape
+        grid['lon_lat']=   grid['lon_lat'].reshape(s[0]*s[1],s[2])
+        x = self.convert_lon_lat_to_meters_grid(grid['lon_lat'])
+        return x
 
     def read_triangles_as_int32(self, nc):
+        # build triangles from regular grid
         grid = self.grid
 
         # get nodes for each corner of quad
         rows = np.arange(grid['psi_ocean_mask'].shape[0])
         cols = np.arange(grid['psi_ocean_mask'].shape[1])
-        grid['psi_grid_node_numbers'] = rows.reshape((-1, 1)) + grid['psi_ocean_mask'].shape[0]*cols.reshape((1,-1))
 
-        n1 = grid['psi_grid_node_numbers'][:-1,:-1]
-        n2 = grid['psi_grid_node_numbers'][:-1, 1:]
-        n3 = grid['psi_grid_node_numbers'][1: ,:-1]
-        n4 = grid['psi_grid_node_numbers'][1: , 1:]
+        # get global node numbers for flattened grid in C order, row 1 should be 0, 1, 3 ....
+        # note rows are x, and cols y in ROMS which are Fortran ordered arrays
+        grid['psi_grid_node_numbers'] = cols.size*rows.reshape((-1, 1)) + cols.reshape((1,-1))
+
+        # get global node numbers of triangle nodes
+        n1 = grid['psi_grid_node_numbers'][:-1, :-1]
+        n2 = grid['psi_grid_node_numbers'][:-1, 1: ]
+        n3 = grid['psi_grid_node_numbers'][1: , 1: ]
+        n4 = grid['psi_grid_node_numbers'][1: , :-1]
 
         # build triangles in anti-clockwise order
-        tri1 = np.stack((n1.flatten('F'), n2.flatten('F'), n4.flatten('F'))).T
-        tri2 = np.stack((n3.flatten('F'), n4.flatten('F'), n1.flatten('F'))).T
+        tri1 = np.stack((n1.flatten('C'), n2.flatten('C'), n3.flatten('C'))).T
+        tri2 = np.stack((n3.flatten('C'), n4.flatten('C'), n1.flatten('C'))).T
         tri = np.full((2*tri1.shape[0],3),0,dtype=np.int32)
         tri[:-1:2,:] = tri1 #put adjacent triangles together in memory, to speeds acces of nodal values??
         tri[1::2 ,:] = tri2
 
         # keep only ocean triangles, those with at least one ocean node
-        sel= np.any(grid['psi_ocean_mask'].flatten('F')[tri],axis=1)
+        sel= np.any(grid['psi_ocean_mask'].flatten('C')[tri],axis=1)
         tri = tri[sel,:]
         quad_cells_to_split = np.full((tri.shape[0],), False, dtype=bool) # none to slip as done manually
         return tri, quad_cells_to_split
@@ -97,11 +120,11 @@ class ROMS(GenericUnstructuredReader):
 
         # time varying zlevel from fixed water depth fractions and total water depth at nodes
 
-
         water_depth = fields['water_depth'].data[:, :, :, 0]
         tide = fields['tide'].data[:, :, :, 0]
 
         zlevel_buffer[buffer_index, ...] = grid['z_fractions_layer_boundaries'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
+        pass
 
     def read_dry_cell_data(self, nc, file_index,is_dry_cell_buffer,buffer_index):
         # get dry cells from water depth and tide
@@ -111,18 +134,20 @@ class ROMS(GenericUnstructuredReader):
 
         reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
                                                 si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
+        pass
 
     def read_time(self, nc, file_index=None):
-
+        # get times reatice to base date from netcdf encoded  strings
         if file_index is None:
             time = nc.read_a_variable('ocean_time', sel=None)
         else:
             time = nc.read_a_variable('ocean_time', sel=file_index)
+
         base_date = nc.get_var_attr('ocean_time','units').split('since ')[-1]
         t0 = time_util.iso8601str_to_seconds(base_date)
 
         time += t0
-        # get times from netcdf encoded  strings
+
         if self.params['time_zone'] is not None: time += self.params['time_zone'] * 3600.
 
         return time
@@ -146,15 +171,33 @@ class ROMS(GenericUnstructuredReader):
         # data is now shaped as (time, row, col, depth)
         # convert to psi grid
         if 'eta_rho' in data_dims:
-            a=1
+            data = 0.5 * (data[:, :-1, :, :] + data[:, 1:, :, :])
+            data = 0.5 * (data[:, :, :-1, :] + data[:, :, 1::, : ])
 
-        # now reshape in 4D
-        if not self.is_file_variable_time_varying(nc, var_name): data = data[np.newaxis, ...]
-        if not self.is_var_in_file_3D(nc, var_name):    data = data[:, :, np.newaxis, ...]
+        elif 'eta_u' in data_dims:
+            data = 0.5 * (data[:, :-1, :, :] + data[:, 1:, :, :])
+
+        elif 'eta_v' in data_dims:
+            data = 0.5 * (data[:, :, :-1, :] + data[:, :, 1::, :])
+
+        #todo test  data now matches dims if psi grid, if not exit, subseted ROMS
+
+        # now flatten (time,rows, col, depth)  to  (time,nodes, depth)
+        s= data.shape
+        data = data.reshape( (s[0],s[1]*s[2], s[3])) # this should match flatten in "C" order
+
+        grid = self.grid
+
+        if 's_rho' in data_dims:
+            # convert mid-layer values to values at layer boundaries, ie zlevels
+            data = convert_layer_field_to_levels_from_fixed_depth_fractions(
+                data, grid['z_fractions_layer_center'], grid['z_fractions_layer_boundaries'])
+
+        # add vector components axis
         if file_var_info['num_components'] == 1:             data = data[:, :, :, np.newaxis]
 
-        return data
 
+        return data
 
 
     def preprocess_field_variable(self, nc,name, data):
@@ -165,7 +208,7 @@ class ROMS(GenericUnstructuredReader):
 
         return data
 
-    def dev_show_grid(self):
+    def _dev_show_grid(self):
         # plots to help with development
         grid = self.grid
 
