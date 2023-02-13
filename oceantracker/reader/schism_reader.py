@@ -7,9 +7,11 @@ from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, P
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import time_util
 from oceantracker.fields.reader_field import ReaderField
-from oceantracker.util.triangle_utilities_code import split_quad_cells
-from oceantracker.util.triangle_utilities_code import append_split_cell_data
+from oceantracker.reader.util.reader_util import split_quad_cells, append_split_cell_data
 
+
+#todo add optional standard feilds by list of internal names, using a stanard feild maping maping
+#todo a way to map al stanard feilds but supress reading them unless requested?
 class SCHSIMreaderNCDF(GenericUnstructuredReader):
     # loads a standard SCHISM netcdf output file with nodal data
     # variable names can be tweaked via maps in shared_params, if non-standard names used
@@ -131,10 +133,8 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         return data.astype(np.int32), quad_cells_to_split
 
     def read_open_boundary_data(self, grid):
-        # todo rewrite to read boundary dat and create int matrix , for open boundary and land boundary nodes and cells. flaged ass 1/2
-        # and make this part of the read grid method
-
-        # read hgrid file for open boundary data
+        # make boolen of whether node is an open boundary node
+        # read schisim  hgrid file for open boundary data
         is_open_boundary_node = np.full((grid['x'].shape[0],),False)
 
         if self.params['hgrid_file_name'] is  None:

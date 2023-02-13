@@ -376,20 +376,17 @@ ROMS_params={'shared_params' :{'output_file_base' :'demo70_ROMS_reader', 'debug'
                      'file_mask': 'DopAnV2R3-ini2007_da_his.nc',
                      'field_variables':{'water_temperature':'temp'}
                           },
- 'base_case_params' : { 'run_params' : {}, 'dispersion': {'A_H': .2, 'A_V': 0.001},
+ 'base_case_params' : { 'run_params' : {'open_boundary_type': 1}, 'dispersion': {'A_H': .2, 'A_V': 0.001},
                         'solver': {'n_sub_steps': 6},
-                'particle_release_groups': [{'points': [[616042, 4219971,-1],[616042, 4729971,-1] ],
+                'particle_release_groups': [{'points': [[616042, 4219971,-1],[616042, 4729971,-1],[616042, 4910000,-1]  ],
                                                      'pulse_size': 10, 'release_interval': 1800,
                                                  }
                                                     ],
+                'fields' :[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}],
                 'particle_properties': [{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
                                                       'decay_time_scale': 1. * 3600 * 24} ],
-                'event_loggers':[{'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
-                                                    'particle_prop_to_write_list' : [ 'ID','x', 'IDrelease_group', 'status', 'age'],
-                                                        'polygon_list': [{'user_polygon_name' : 'A','points': (np.asarray(poly_points) + np.asarray([-5000,0])).tolist()},
-                                                                         {'user_polygon_name' : 'B', 'points': poly_points_large}
-                                                                         ]
-                                              }]
+                'trajectory_modifiers':[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
+                                   'critical_friction_velocity': .00}]
                 }
 }
 

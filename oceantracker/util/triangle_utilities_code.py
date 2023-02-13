@@ -169,17 +169,7 @@ def build_grid_outlines(grid):
             out['domain'].update({'nodes': nodes, 'points': points, 'face_nodes': face_nodes})
     return out
 
-def split_quad_cells(triangles_and_quads,quad_cells_to_split):
-    # find indices flagged for splitting
-    if quad_cells_to_split is not None:
-        qtri = triangles_and_quads[quad_cells_to_split, :]  # those to split
-        triangles = np.vstack((triangles_and_quads[:,:3], qtri[:, [0, 2, 3]]))
 
-    return triangles
-
-def append_split_cell_data(grid,data,axis=0):
-    # for cell based data add split cell data below given data
-    return  np.concatenate((data, data[:, grid['quad_cells_to_split']]), axis=axis)
 
 
 def calcuate_triangle_areas(xy, tri):
