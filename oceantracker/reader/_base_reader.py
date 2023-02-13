@@ -9,7 +9,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from oceantracker.fields.util import fields_util
 from oceantracker.util.basic_util import nopass
-from oceantracker.util.triangle_utilities_code import append_split_cell_data
+from oceantracker.reader.util.reader_util import append_split_cell_data
 from oceantracker.util import  cord_transforms
 from oceantracker.reader.util import shared_reader_memory_util
 from oceantracker.fields.util.fields_util import depth_aver_SlayerLSC_in4D
