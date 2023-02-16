@@ -3,7 +3,7 @@ from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from oceantracker.dispersion._base_dispersion import _BaseTrajectoryModifer
 from numba import njit, guvectorize, int32, int64, float64
 
-class RandomWalk(_BaseTrajectoryModifer):
+class RandomWalkV1(_BaseTrajectoryModifer):
     # add random walk using x displacement
     def __init__(self):
         # set up default params

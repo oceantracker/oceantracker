@@ -10,8 +10,9 @@ from oceantracker.common_info_default_param_dict_templates import default_class_
 
 # parameter dictionaries are nested dictionaries or lists of dictionaries
 
-def make_class_instance_from_params(params,class_type_name=None, base_case_params =None, msg_list=[], nseq=None, crumbs='', merge_params=True):
-    # make a class insance from dynamically  get instance of class from string eg oceantracker.solver.Solver
+def make_class_instance_from_params(params,class_type_name=None, base_case_params =None, msg_list=[],
+                                    nseq=None, crumbs='', merge_params=True):
+    # make a class instance  dynamically,  get instance of class from string eg oceantracker.solver.Solver
     if base_case_params is None : base_case_params={}
 
     # add class sequence number, used for in class list
@@ -26,6 +27,7 @@ def make_class_instance_from_params(params,class_type_name=None, base_case_param
     if 'class_name' not in params:  params['class_name'] = None
 
     if params['class_name'] is None and class_type_name is not None:
+        # get from base case or default classes
         if 'class_name' in base_case_params and base_case_params['class_name'] is not None:
             params['class_name'] = base_case_params['class_name']
         elif class_type_name in default_class_names:
@@ -34,10 +36,10 @@ def make_class_instance_from_params(params,class_type_name=None, base_case_param
             append_message(msg_list, 'params for ' + crumbs + ' must contain class_name ' + class_type_name,
                            exception=GracefulExitError, nseq=nseq)
             return None, None, msg_list
-    #else:
+    #elif package_info is not None:
     #    # try to convert to long name
-    #    if class_params['class_name'] in self.package_info['short_class_name_map']:
-    #        class_params['class_name'] = self.package_info['short_class_name_map'][class_params['class_name']]
+    #    if params['class_name'] in package_info['short_class_name_map']:
+    #        params['class_name'] = package_info['short_class_name_map'][params['class_name']]
 
     i, msg = import_module_from_string(params['class_name'])
     if msg is not None:

@@ -2,7 +2,8 @@
 import pkgutil
 import inspect
 import traceback
-from os import path, walk
+from os import path, walk, listdir
+import glob
 from importlib import import_module
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.message_and_error_logging import append_message, GracefulExitError
@@ -23,53 +24,40 @@ def get_root_package_dir():
 def package_relative_file_name(file_name):
     return file_name.split(get_root_package_dir() + '\\')[-1].replace('\\','/')
 # not working yet
-def build_short_class_name_map(d, calling_file):
-    msg_list= []
-    msg_base= package_fancy_name +'-package checks: '
-    append_message(msg_list, '____________________________________________________')
-    append_message(msg_list,msg_base +' Started for package in ' + d['package_dir'])
 
-    for root, dirs, files in walk(d['package_dir']):
-        for name in files:
-            if name[0] == '': continue
-            file_name = path.join(root, name)
-            if  ispkg: continue
-            try:
-                file_name = pkgutil.resolve_name(modname).__file__
-            except Exception as e:
-                append_message(msg_list, 'Could resolve module name ="' + modname + '"'
-                               + ', May be sytax error or import error in oceantracker',
-                               exception=e, traceback_str=traceback.format_exc())
-                return d, msg_list
+def build_short_class_name_map(package_dir,msg_list):
 
-            # dont work on those or the calling file to aviod circular imports
-            if file_name == calling_file : continue
-            if file_name== __file__ : continue
+    files = glob.glob(path.join(package_dir,'**','*.py'),recursive=True)
+    out={}
 
-            try:
-                module = import_module(modname)
-            except Exception as e:
-                append_message(msg_list,'Could not load oceantracker module ="' +  modname +'"'
-                            +', May be sytax error or import error in oceantracker',
-                               exception=e, traceback_str=traceback.format_exc())
-                return d, msg_list
+    for name in files:
 
-            for class_name, i in inspect.getmembers(module, inspect.isclass):
-                if not issubclass(i, ParameterBaseClass): continue
-                if len(inspect.signature(i.__init__).parameters) != 1: continue# only look at these with no __init__ argmuments and make an instance to get defaults created there
-                if not inspect.isclass(i): continue
-                if i.__module__ != module.__name__: continue  # only work on locally declared classes
-                instance = i()
-                full_name = modname + '.' + class_name
-                if class_name in d:
-                    append_message(msg_list,'Class names within the OceanTracker package must be unique, class name = ' +
-                                   class_name +' is in both :\n' + '    ' + d[class_name] +'\n    ' + full_name,
-                                   modname, exception=GracefulExitError)
-                    return d, msg_list
-                else:
-                    d['short_class_name_map'][class_name] = full_name
-    append_message(msg_list, msg_base + ' OK')
-    return d, msg_list
+        modname = 'oceantracker' + name.split(package_dir)[1].replace('\\','.').replace('.py','')
+
+        try:
+            module = import_module(modname)
+        except Exception as e:
+            append_message(msg_list,'Could not load oceantracker module ="' +  modname +'"'
+                        +', May be sytax error or import error in oceantracker',
+                           exception=e, traceback_str=traceback.format_exc())
+            return out, msg_list
+
+        for class_name, c in inspect.getmembers(module, inspect.isclass):
+            if not issubclass(c, ParameterBaseClass): continue
+            if len(inspect.signature(c.__init__).parameters) != 1: continue# only look at these with no __init__ argmuments and make an instance to get defaults created there
+            if not inspect.isclass(c): continue
+            if c.__module__ != module.__name__: continue  # only work on locally declared classes
+            instance = c()
+            full_name = modname + '.' + class_name
+            if class_name in out:
+                append_message(msg_list,'Class names within the OceanTracker package must be unique, class name = ' +
+                               class_name +' is in both :\n' + '    ' + out[class_name] +'\n    ' + full_name,
+                               modname, exception=GracefulExitError)
+                return out, msg_list
+            else:
+                out[class_name] = full_name
+
+    return out, msg_list
 
 def check_package(calling_file):
     # calling file must be in the root dir of package ie oceantracker_main
@@ -78,6 +66,12 @@ def check_package(calling_file):
         'package_name': package_dir.split('\\')[-1],
         'short_class_name_map':{}}
     msg_list=[]
-    #d, msg_list =  build_short_class_name_map(d,calling_file)
+    msg_base= package_fancy_name +'-package checks: '
+    append_message(msg_list, '____________________________________________________')
+    append_message(msg_list,msg_base +' Started for package in ' + d['package_dir'])
+
+    d['short_class_name_map'] =  build_short_class_name_map(package_dir, msg_list)
+    append_message(msg_list, msg_base + ' OK')
+
     return d, msg_list
 
