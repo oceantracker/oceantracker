@@ -62,16 +62,18 @@ To create a Conda virtual environment
 
 #. Open Andconda command prompt as administrator
 
-#. change directorty to oceantracker folder with environment.yml
-
-    ``conda create -n oceantracker``
 
 #. Create virtual environment
 
-    ``conda env create -f environment.yml``
+    ``conda env create -f environment.yml  -prefix= <dirname>``
 
-#. Acivate virtual environment
+where dir_name is dir where virtual environment resides eg "C:\ProgramData\Anaconda3\envs\oceantracker"
+
+#. Activate virtual environment
 
     ``conda acivate oceantracker``
 
-#. For Pycharm users, oceantracker should be one of the available Python interpreters so just select it. If not added it via settings/project/interpreter
+#. For Pycharm users,
+    # oceantracker should be one of the available Python interpreters so just select it, if it sits within Anaconda3\envs dir,
+    # otherwise  it virtual enviorment manually,  settings/project/interpreter
+    # if  working in folder outside of ocean tracker will ad access with   settings/project/project structure. add root source

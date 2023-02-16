@@ -28,7 +28,7 @@ from oceantracker.reader.util.data_grid_transforms import convert_layer_field_to
 #todo implement depth average mode using depth average variables in the file
 #todo friction velocity from bottom stress ???
 
-class ROMS(GenericUnstructuredReader):
+class ROMsNativeReader(GenericUnstructuredReader):
     # reads  ROMS file, and tranforms all data to PSI grid
     # then splits all triangles in two to  use in oceantracker as a triangular grid,
     # so works with curvilinear ROMS grids

@@ -115,11 +115,11 @@ class _RunOceanTrackerClass(object):
         # open log file
         rl = self.run_log
         rl.set_up_log_file(output_files['run_output_dir'], output_files['output_file_base'], 'runLog')
-        self.package_info, msg_list = check_package(__file__)
+        package_info, msg_list = check_package(__file__)
         rl.add_messages(msg_list)
 
         try:
-            full_runInfoJSON_file_name, has_errors = self._A2_do_run(user_params, output_files)
+            full_runInfoJSON_file_name, has_errors = self._A2_do_run(user_params, output_files,package_info)
 
         except GracefulExitError as e:
             rl.write_msg(' Graceful exit >>  Parameters/setup has errors, see above', exception = GracefulExitError)
@@ -175,7 +175,7 @@ class _RunOceanTrackerClass(object):
 
         return output_files
 
-    def _A2_do_run(self, params, output_files):
+    def _A2_do_run(self, params, output_files,package_info):
         run_info = {'user_note': {}, 'screen_log': [],
                     'run_started': datetime.now(),
                     'run_ended': None,
@@ -209,7 +209,7 @@ class _RunOceanTrackerClass(object):
         if working_params['shared_params']['write_output_files']:
             output_files['grid'], output_files['grid_outline'] = self._U3_write_run_grid_netCDF(output_files, reader_build_info, reader)
 
-        runner_params_test, shared_params, msg_list = self._E1_get_full_case_params(working_params, output_files, reader_build_info)
+        runner_params_test, shared_params, msg_list = self._E1_get_full_case_params(working_params, output_files, reader_build_info, package_info)
         # self.run_log.write_messages(msg_list)
         # run the cases, return list of case info json files which make up the run of all cases
         #----------------------------------------------------------------------------------------------
@@ -268,7 +268,7 @@ class _RunOceanTrackerClass(object):
         rl.check_messages_for_errors()
         return params
 
-    def _E1_get_full_case_params(self, params, output_files, reader_build_info):
+    def _E1_get_full_case_params(self, params, output_files, reader_build_info, package_info):
         # make set of case params merged with defaults and checked
         msg_list =[]
         # build full shared params
@@ -298,7 +298,8 @@ class _RunOceanTrackerClass(object):
                     if item is None: continue
                     if key =='run_params':
                         cout['run_params'], msg_list = merge_params_with_defaults(c['run_params'],default_case_param_template['run_params'],
-                                                                                   base_case_params['run_params'],   msg_list=msg_list, tag='case_run_params')
+                                                                                   base_case_params['run_params'],
+                                                                                 msg_list=msg_list, tag='case_run_params')
                         pass
                     elif type(item) == dict and key != 'reader':
                         # core classes
@@ -335,6 +336,7 @@ class _RunOceanTrackerClass(object):
                                     'reader_build_info' : reader_build_info,
                                     'case_params' : cout, # single case_params  merged with base_case_params
                                     'output_files' : case_output_files,
+                                    'package_info':package_info,
                                     })  # add case/ copy to list for the pool
 
 
@@ -367,8 +369,9 @@ class _RunOceanTrackerClass(object):
         # construct reader_build_info to be used by case_runners to build their reader
         reader_build_info = {'reader_params': reader.params,
                              'use_shared_memory': params['shared_params']['share_reader_memory']}
+        rl.write_progress_marker('Sorting hyrdo model files in time order')
         reader_build_info = self._C2_get_hindcast_files_info(reader_build_info, reader) # get file lists
-
+        rl.write_progress_marker('Finished sorting hyrdo model  files ', tabs=2)
         # read and set up reader grid now as  required for writing grid file
         # also if requested shared grid memory is set up
         # and shared memory info will be also added to reader_build_info for case runner to build reader
@@ -486,7 +489,7 @@ class _RunOceanTrackerClass(object):
 
         grid= reader.grid
 
-        # get depth frtom first hincast file
+        # get depth from first hincast file
         hindcast = NetCDFhandler(reader_build_info['sorted_file_info']['names'][0], 'r')
         depth_var = reader.params['field_variables']['water_depth']
         if depth_var is not None and hindcast.is_var(depth_var):
@@ -563,6 +566,8 @@ class _RunOceanTrackerClass(object):
         shared_params = case_param_list[0]['shared_params']
         shared_params['processors'] = min(shared_params['processors'], len(case_param_list))
         rl.write_progress_marker('oceantracker:multiProcessing: processors:' + str(shared_params['processors']))
+
+        case_results= None
 
         try:
             with multiprocessing.Pool(processes=shared_params['processors']) as pool:
