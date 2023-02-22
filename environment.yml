@@ -1,4 +1,4 @@
-dirname: oceantracker
+name: oceantracker
 channels:
   - numba
   - conda-forge
@@ -81,4 +81,4 @@ dependencies:
   - yaml=0.2.5=he774522_0
   - zlib=1.2.13=h8cc25b3_0
   - zstd=1.5.2=h19a0ad4_0
-prefix: C:\ProgramData\Anaconda3\envs\oceantracker
+

@@ -1,7 +1,5 @@
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
-from os import path
 package_fancy_name= 'OceanTracker'
-
 
 
 # template for oceanTracker params, with defaults to check against
