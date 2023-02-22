@@ -29,7 +29,6 @@ from time import perf_counter
 from copy import  copy
 import numpy as np
 
-from oceantracker.util.package_util import check_package
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import basic_util
 from oceantracker.util import json_util
@@ -115,11 +114,11 @@ class _RunOceanTrackerClass(object):
         # open log file
         rl = self.run_log
         rl.set_up_log_file(output_files['run_output_dir'], output_files['output_file_base'], 'runLog')
-        package_info, msg_list = check_package(__file__)
+        #package_info, msg_list = check_package(__file__)
         rl.add_messages(msg_list)
 
         try:
-            full_runInfoJSON_file_name, has_errors = self._A2_do_run(user_params, output_files,package_info)
+            full_runInfoJSON_file_name, has_errors = self._A2_do_run(user_params, output_files)
 
         except GracefulExitError as e:
             rl.write_msg(' Graceful exit >>  Parameters/setup has errors, see above', exception = GracefulExitError)
@@ -175,7 +174,7 @@ class _RunOceanTrackerClass(object):
 
         return output_files
 
-    def _A2_do_run(self, params, output_files,package_info):
+    def _A2_do_run(self, params, output_files):
         run_info = {'user_note': {}, 'screen_log': [],
                     'run_started': datetime.now(),
                     'run_ended': None,
@@ -209,7 +208,7 @@ class _RunOceanTrackerClass(object):
         if working_params['shared_params']['write_output_files']:
             output_files['grid'], output_files['grid_outline'] = self._U3_write_run_grid_netCDF(output_files, reader_build_info, reader)
 
-        runner_params_test, shared_params, msg_list = self._E1_get_full_case_params(working_params, output_files, reader_build_info, package_info)
+        runner_params_test, shared_params, msg_list = self._E1_get_full_case_params(working_params, output_files, reader_build_info)
         # self.run_log.write_messages(msg_list)
         # run the cases, return list of case info json files which make up the run of all cases
         #----------------------------------------------------------------------------------------------
@@ -268,7 +267,7 @@ class _RunOceanTrackerClass(object):
         rl.check_messages_for_errors()
         return params
 
-    def _E1_get_full_case_params(self, params, output_files, reader_build_info, package_info):
+    def _E1_get_full_case_params(self, params, output_files, reader_build_info):
         # make set of case params merged with defaults and checked
         msg_list =[]
         # build full shared params
@@ -336,7 +335,7 @@ class _RunOceanTrackerClass(object):
                                     'reader_build_info' : reader_build_info,
                                     'case_params' : cout, # single case_params  merged with base_case_params
                                     'output_files' : case_output_files,
-                                    'package_info':package_info,
+                                    #'package_info':package_info,
                                     })  # add case/ copy to list for the pool
 
 
