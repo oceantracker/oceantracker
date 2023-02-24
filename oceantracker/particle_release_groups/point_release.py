@@ -18,8 +18,7 @@ class PointRelease(ParameterBaseClass):
                                  'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles released in a single pulse, this number is released every release_interval.'),
                                  'release_interval':PVC(0., float, min =0., doc_str= 'Time interval between released pulses. To release at only one time use release_interval=0.'),
                                  'release_start_date': PVC(None, 'iso8601date'),
-                                 'max_cycles_to_find_release_points': PVC(50, int, min=50,doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
-                                 # to do add ability to release on set dates/times 'release_dates': PLC([], 'iso8601date'),
+                                   # to do add ability to release on set dates/times 'release_dates': PLC([], 'iso8601date'),
                                  'release_duration': PVC(1.0e32, float,min=0,
                                                     doc_str='Time in seconds particles are released for after they start being released, ie releases stop this time after first release.' ),
                                  'maximum_age': PVC(1.0e32,float,min=1.,
@@ -30,7 +29,9 @@ class PointRelease(ParameterBaseClass):
                                               doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.'),
                                  'z_range': PLC([],[float, int], min_length=2, doc_str='z range = [zmin, zmax] to randomly release in 3D, overrides any given release z value'),
                                   #Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}
-                                 'user_particle_property_parameters':{}, #  dictionary of items with keys of particle_properties,
+                                'max_cycles_to_find_release_points': PVC(50, int, min=50, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
+
+                                'user_particle_property_parameters':{}, #  dictionary of items with keys of particle_properties,
                                                                             # each a dictionary of parameters for that property
                                                                             # eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}}
                                  })
@@ -156,9 +157,9 @@ class PointRelease(ParameterBaseClass):
                 x0          = np.concatenate((x0, x), axis =0)
                 n_cell_guess= np.concatenate((n_cell_guess, n_cell))
 
-            # allow 50 cycles to find points
+            # allow max_cycles_to_find_release_points cycles to find points
             count += 1
-            if count > 200: break
+            if count > self.params["max_cycles_to_find_release_points"]: break
 
         if n_found < n_required:
             self.write_msg('Release, only found ' + str(n_found) + ' of ' + str(n_required) + ' required points inside domain after 50 cycles',warning=True,
