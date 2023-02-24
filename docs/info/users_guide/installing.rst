@@ -14,6 +14,15 @@ Requirements
 Linux
 =======================
 
+Notes: may need to install
+    * git
+    * python3 pip
+    * pip  eg  sudo apt install python3-pip
+    * python3-venv, eg sudo  apt install python3.10-venv
+
+before this, eg  sudo apt install python3-pip
+
+
 #.  Clone repository
 
     ``git clone https://github.com/oceantracker/oceantracker.git``
@@ -44,6 +53,8 @@ Linux
 #. Deactivate environment
 
     ``deactivate``
+
+or use command  ``bash linux_install.sh``  with script found in  install folder
 
 .. literalinclude:: ../../../installing/linux_install.sh
     :language: console
