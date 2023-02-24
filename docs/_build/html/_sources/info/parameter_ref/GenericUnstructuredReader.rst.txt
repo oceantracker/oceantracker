@@ -141,6 +141,16 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
+	* ``required_file_dimensions``:  *<optional>*
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``[]``
+		- can_be_empty_list: ``True``
+
+	* ``required_file_variables``:  *<optional>*
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``[]``
+		- can_be_empty_list: ``True``
+
 	* ``search_sub_dirs`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``

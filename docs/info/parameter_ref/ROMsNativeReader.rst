@@ -1,14 +1,14 @@
-#####
-ROMS
-#####
+#################
+ROMsNativeReader
+#################
 
 **Description:** Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names
 
-**Class:** oceantracker.reader.dev_ROMS_reader.ROMS
+**Class:** oceantracker.reader.dev_ROMS_reader.ROMsNativeReader
 
 **File:** oceantracker/reader/dev_ROMS_reader.py
 
-**Inheritance:** _BaseReader> GenericUnstructuredReader> ROMS
+**Inheritance:** _BaseReader> GenericUnstructuredReader> ROMsNativeReader
 
 **Default internal name:** ``"not given in defaults"``
 
@@ -98,6 +98,16 @@ Parameters:
 		- default: ``None``
 
 	* ``one_based_indices``: nested parameter dictionary
+	* ``required_file_dimensions``:  *<optional>*
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``['s_w', 's_rho', 'eta_u', 'eta_v']``
+		- can_be_empty_list: ``True``
+
+	* ``required_file_variables``:  *<optional>*
+		- a list containing type:  ``[<class 'str'>]``
+		- default list : ``['ocean_time', 'mask_psi', 'lat_psi', 'lon_psi', 'h', 'zeta', 'u', 'v']``
+		- can_be_empty_list: ``True``
+
 	* ``search_sub_dirs`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``

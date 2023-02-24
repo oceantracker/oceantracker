@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>GenericUnstructuredReader &#8212; OceanTracker Beta 0.3 documentation</title>
+    <title>ROMsNativeReader &#8212; OceanTracker Beta 0.3 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -15,8 +15,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ROMsNativeReader" href="ROMsNativeReader.html" />
-    <link rel="prev" title="reader" href="reader_toc.html" />
+    <link rel="next" title="SCHSIMreaderNCDF" href="SCHSIMreaderNCDF.html" />
+    <link rel="prev" title="GenericUnstructuredReader" href="GenericUnstructuredReader.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -84,8 +84,8 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="reader_toc.html">reader</a><ul>
-      <li>Previous: <a href="reader_toc.html" title="previous chapter">reader</a></li>
-      <li>Next: <a href="ROMsNativeReader.html" title="next chapter">ROMsNativeReader</a></li>
+      <li>Previous: <a href="GenericUnstructuredReader.html" title="previous chapter">GenericUnstructuredReader</a></li>
+      <li>Next: <a href="SCHSIMreaderNCDF.html" title="next chapter">SCHSIMreaderNCDF</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -110,12 +110,12 @@
 
           <div class="body" role="main">
             
-  <section id="genericunstructuredreader">
-<h1>GenericUnstructuredReader<a class="headerlink" href="#genericunstructuredreader" title="Permalink to this headline">¶</a></h1>
+  <section id="romsnativereader">
+<h1>ROMsNativeReader<a class="headerlink" href="#romsnativereader" title="Permalink to this headline">¶</a></h1>
 <p><strong>Description:</strong> Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names</p>
-<p><strong>Class:</strong> oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader</p>
-<p><strong>File:</strong> oceantracker/reader/generic_unstructured_reader.py</p>
-<p><strong>Inheritance:</strong> _BaseReader&gt; GenericUnstructuredReader</p>
+<p><strong>Class:</strong> oceantracker.reader.dev_ROMS_reader.ROMsNativeReader</p>
+<p><strong>File:</strong> oceantracker/reader/dev_ROMS_reader.py</p>
+<p><strong>Inheritance:</strong> _BaseReader&gt; GenericUnstructuredReader&gt; ROMsNativeReader</p>
 <p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;not</span> <span class="pre">given</span> <span class="pre">in</span> <span class="pre">defaults&quot;</span></code></p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
@@ -153,47 +153,7 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">dimension_map</span></code>: nested parameter dictionary</dt><dd><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">node</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">node</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">vector2Ddim</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">vector3Ddim</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">z</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dimension_map</span></code>: nested parameter dictionary</p></li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">field_variables</span></code>: nested parameter dictionary</dt><dd><ul>
 <li><dl>
@@ -212,14 +172,14 @@
 </li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">tide</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">zeta</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">h</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -232,11 +192,11 @@
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">water_velocity</span></code>:<strong>&lt;isrequired&gt;</strong></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">None]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['u',</span> <span class="pre">'v',</span> <span class="pre">None]</span></code></p></li>
+<dt><code class="docutils literal notranslate"><span class="pre">water_velocity</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['u',</span> <span class="pre">'v',</span> <span class="pre">'w']</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">3</span></code></p></li>
+<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -277,58 +237,7 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">grid_variables</span></code>: nested parameter dictionary</dt><dd><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">bottom_cell_index</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">is_dry_cell</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'numpy.int8'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Time variable flag of when cell is dry, 1= is dry cell</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">triangles</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">x</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['x',</span> <span class="pre">'y']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">zlevel</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grid_variables</span></code>: nested parameter dictionary</p></li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">input_dir</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
@@ -368,19 +277,11 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">one_based_indices</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - indcies in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">one_based_indices</span></code>: nested parameter dictionary</p></li>
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">required_file_dimensions</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['s_w',</span> <span class="pre">'s_rho',</span> <span class="pre">'eta_u',</span> <span class="pre">'eta_v']</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 </ul>
 </dd>
@@ -389,7 +290,7 @@
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">required_file_variables</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['ocean_time',</span> <span class="pre">'mask_psi',</span> <span class="pre">'lat_psi',</span> <span class="pre">'lon_psi',</span> <span class="pre">'h',</span> <span class="pre">'zeta',</span> <span class="pre">'u',</span> <span class="pre">'v']</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 </ul>
 </dd>
@@ -448,10 +349,10 @@
     <ul>
         <li>
           &larr;
-          <a href="reader_toc.html" title="Previous document">reader</a>
+          <a href="GenericUnstructuredReader.html" title="Previous document">GenericUnstructuredReader</a>
         </li>
         <li>
-          <a href="ROMsNativeReader.html" title="Next document">ROMsNativeReader</a>
+          <a href="SCHSIMreaderNCDF.html" title="Next document">SCHSIMreaderNCDF</a>
           &rarr;
         </li>
     </ul>
@@ -470,7 +371,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="../../_sources/info/parameter_ref/GenericUnstructuredReader.rst.txt"
+      <a href="../../_sources/info/parameter_ref/ROMsNativeReader.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

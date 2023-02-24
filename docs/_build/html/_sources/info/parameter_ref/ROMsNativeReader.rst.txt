@@ -1,14 +1,14 @@
-###################
-unstructured_FVCOM
-###################
+#################
+ROMsNativeReader
+#################
 
 **Description:** Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names
 
-**Class:** oceantracker.reader.dev_FVCOM_reader.unstructured_FVCOM
+**Class:** oceantracker.reader.dev_ROMS_reader.ROMsNativeReader
 
-**File:** oceantracker/reader/dev_FVCOM_reader.py
+**File:** oceantracker/reader/dev_ROMS_reader.py
 
-**Inheritance:** _BaseReader> GenericUnstructuredReader> unstructured_FVCOM
+**Inheritance:** _BaseReader> GenericUnstructuredReader> ROMsNativeReader
 
 **Default internal name:** ``"not given in defaults"``
 
@@ -53,7 +53,7 @@ Parameters:
 
 		* ``water_velocity``:  *<optional>*
 			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['u', 'v', 'ww']``
+			- default list : ``['u', 'v', 'w']``
 			- can_be_empty_list: ``True``
 			- fixed_len: ``2``
 
@@ -100,12 +100,12 @@ Parameters:
 	* ``one_based_indices``: nested parameter dictionary
 	* ``required_file_dimensions``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``['siglay', 'siglev']``
+		- default list : ``['s_w', 's_rho', 'eta_u', 'eta_v']``
 		- can_be_empty_list: ``True``
 
 	* ``required_file_variables``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``['Times', 'nv', 'u', 'v', 'h']``
+		- default list : ``['ocean_time', 'mask_psi', 'lat_psi', 'lon_psi', 'h', 'zeta', 'u', 'v']``
 		- can_be_empty_list: ``True``
 
 	* ``search_sub_dirs`` :   ``<class 'bool'>``   *<optional>*

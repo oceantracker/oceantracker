@@ -18,6 +18,7 @@ class PointRelease(ParameterBaseClass):
                                  'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles released in a single pulse, this number is released every release_interval.'),
                                  'release_interval':PVC(0., float, min =0., doc_str= 'Time interval between released pulses. To release at only one time use release_interval=0.'),
                                  'release_start_date': PVC(None, 'iso8601date'),
+                                 'max_cycles_to_find_release_points': PVC(50, int, min=50,doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
                                  # to do add ability to release on set dates/times 'release_dates': PLC([], 'iso8601date'),
                                  'release_duration': PVC(1.0e32, float,min=0,
                                                     doc_str='Time in seconds particles are released for after they start being released, ie releases stop this time after first release.' ),
@@ -157,10 +158,11 @@ class PointRelease(ParameterBaseClass):
 
             # allow 50 cycles to find points
             count += 1
-            if count > 50: break
+            if count > 200: break
 
         if n_found < n_required:
-            self.write_msg('Release, only found ' + str(n_found) + ' of ' + str(n_required) + ' required points inside domain after 50 cycles',warning=True)
+            self.write_msg('Release, only found ' + str(n_found) + ' of ' + str(n_required) + ' required points inside domain after 50 cycles',warning=True,
+                           hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  max_cycles_to_find_release_points, current value = {self.params["max_cycles_to_find_release_points"]:3}' )
             n_required = n_found #
 
         # trim initial location and cell  to required number

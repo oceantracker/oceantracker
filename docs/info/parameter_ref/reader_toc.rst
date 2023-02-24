@@ -9,7 +9,7 @@ reader
 	:maxdepth: 1
 
 	GenericUnstructuredReader.rst
-	ROMS.rst
+	ROMsNativeReader.rst
 	SCHSIMreaderNCDF.rst
 	unstructured_FVCOM.rst
 

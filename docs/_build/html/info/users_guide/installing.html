@@ -128,6 +128,16 @@
 </section>
 <section id="linux">
 <h2>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>Notes: may need to install</dt><dd><ul class="simple">
+<li><p>git</p></li>
+<li><p>python3 pip</p></li>
+<li><p>pip  eg  sudo apt install python3-pip</p></li>
+<li><p>python3-venv, eg sudo  apt install python3.10-venv</p></li>
+</ul>
+</dd>
+</dl>
+<p>before this, eg  sudo apt install python3-pip</p>
 <ol class="arabic">
 <li><p>Clone repository</p>
 <p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/oceantracker/oceantracker.git</span></code></p>
@@ -165,6 +175,7 @@
 </div></blockquote>
 </li>
 </ol>
+<p>or use command  <code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">linux_install.sh</span></code>  with script found in  install folder</p>
 <div class="literal-block-wrapper docutils container" id="container-2">
 <div class="code-block-caption"><span class="caption-text">../../../installing/linux_install.sh</span><a class="headerlink" href="#container-2" title="Permalink to this code">¶</a></div>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"># </span>install ocean tracker
@@ -173,20 +184,27 @@
 <span class="go">rm oceantracker -rf # replacing any existing package</span>
 
 <span class="go">git clone https://github.com/oceantracker/oceantracker.git</span>
+
 <span class="go">cd ./oceantracker</span>
+
 <span class="go">python3 -m venv venv</span>
 
 <span class="go">source ./venv/bin/activate</span>
 
 <span class="go">python setup.py develop   # add package to path</span>
+
 <span class="go">pip install -r ./requirements.txt</span>
 
 <span class="gp"># </span><span class="nb">test</span> by running demos
 <span class="go">echo &quot;Test run demo 60&quot;</span>
 <span class="go">cd ./demos</span>
+
 <span class="go">python run_demos.py -n --d 2</span>
+
 <span class="go">python run_demos.py -n --d 56</span>
+
 <span class="go">cd ..</span>
+
 <span class="go">cd ..</span>
 </pre></div>
 </div>
@@ -203,22 +221,23 @@
 </div></blockquote>
 </li>
 <li><p>Open Andconda command prompt as administrator</p></li>
-<li><p>change directorty to oceantracker folder with environment.yml</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">oceantracker</span></code></p>
-</div></blockquote>
-</li>
 <li><p>Create virtual environment</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">create</span> <span class="pre">-f</span> <span class="pre">environment.yml</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">create</span> <span class="pre">--file</span> <span class="pre">environment.yml</span></code></p>
 </div></blockquote>
 </li>
-<li><p>Acivate virtual environment</p>
+<li><p>Activate virtual environment</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">acivate</span> <span class="pre">oceantracker</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
 </div></blockquote>
 </li>
-<li><p>For Pycharm users, oceantracker should be one of the available Python interpreters so just select it. If not added it via settings/project/interpreter</p></li>
+<li><dl class="simple">
+<dt>For Pycharm users,</dt><dd><p># oceantracker should be one of the available Python interpreters so just select it (if it sits within Anaconda3envs dir),
+# otherwise  add virtual environment manually,  settings/project/interpreter add conda env by navigating to python.exe on dir
+# if  working in folder outside of ocean tracker will ad access with   settings/project/project structure. add root source</p>
+</dd>
+</dl>
+</li>
 </ol>
 </section>
 </section>
