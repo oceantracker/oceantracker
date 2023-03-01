@@ -45,8 +45,8 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
 
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['x'])
-        return msg_list
+        self.check_class_required_fields_prop_etc(required_props_list=['x'])
+
 
     def set_up_binned_variables(self,nc):
         si = self.shared_info
@@ -72,7 +72,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
                 self.sum_binned_part_prop[p_name] = np.full(dim_sizes[1:], 0.)  # zero for  summing
                 nc.create_a_variable( 'sum_' + p_name, dim_names, {'notes': 'sum of particle property inside polygon  ' + p_name}, np.float64)
             else:
-                si.case_log.write_msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
+                si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
 
     def update(self,**kwargs):
         si= self.shared_info
@@ -128,8 +128,8 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['age'])
-        return msg_list
+        self.check_class_required_fields_prop_etc(required_props_list=['age'])
+
 
     def set_up_binned_variables(self,nc):
         si = self.shared_info
@@ -144,7 +144,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
             if p_name in si.classes['particle_properties']:
                 self.sum_binned_part_prop[p_name] = np.full(dims, 0.)  # zero for  summing
             else:
-                self.write_msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
+                si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
     def update(self,**kwargs):
 

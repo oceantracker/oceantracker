@@ -1,5 +1,5 @@
 from oceantracker.common_info_default_param_dict_templates import default_case_param_template, default_class_names
-from oceantracker.util.message_and_error_logging import GracefulExitError, FatalError
+
 from oceantracker.util.module_importing_util import import_module_from_string
 
 class SharedInfoClass(object):
@@ -21,12 +21,12 @@ class SharedInfoClass(object):
 
 
     def add_core_class(self,class_type, instance,  check_if_core_class=True):
-        cl= self.case_log
+        ml= self.msg_logger
 
         if class_type not in default_case_param_template and check_if_core_class:
-            cl.write_msg('add_core_class, name is not a known core class, name=' + class_type,
+            ml.msg('add_core_class, name is not a known core class, name=' + class_type,
                          crumbs='Adding core class type=' + class_type,
-                         exception = GracefulExitError)
+                         exception = True)
 
         self.classes[class_type]= instance
         self.core_class_interator[class_type] = instance
@@ -42,7 +42,7 @@ class SharedInfoClass(object):
 
     def add_class_instance_to_interator_lists(self, class_type, iteration_group, i, crumbs=''):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
-        cl= self.case_log
+        ml= self.msg_logger
         crumbs += ' >>> Adding_class type >> ' + class_type + '(group= ' + iteration_group +')'
 
         known_list_classes= []
@@ -51,14 +51,14 @@ class SharedInfoClass(object):
                 known_list_classes.append(key)
 
         if class_type not in known_list_classes:
-            cl.write_msg('add_to_class_list: name is not a known class list,class_type=' + class_type , exception = GracefulExitError, crumbs = crumbs)
+            ml.msg('add_to_class_list: name is not a known class list,class_type=' + class_type , exception = True, crumbs = crumbs)
 
         # now add to class lists and interators
         # firts check it is known interation group
         if iteration_group not in self.class_interators_using_name[class_type]:
-            cl.write_msg('add_to_class_list: iteration_group  for class_type=' + class_type + ', group="'
+            ml.msg('add_to_class_list: iteration_group  for class_type=' + class_type + ', group="'
                          + iteration_group + '", is not one of known types=' + str(
-                self.class_interators_using_name[class_type].keys()), exception=GracefulExitError)
+                self.class_interators_using_name[class_type].keys()), fatal_error=True)
 
         i.info['instanceID'] = len(self.classes[class_type])  # needed for release group identification info etc, zero based
 
@@ -67,9 +67,9 @@ class SharedInfoClass(object):
 
         name = i.params['name']
         if name in self.classes[class_type]:
-            cl.write_msg('Class type"' + class_type + '" already has a class with name = "' + i.params['name']
+            ml.msg('Class type"' + class_type + '" already has a class with name = "' + i.params['name']
                          + '", "name" parameter must be unique',
-                         crumbs = ' Checking for unique class names >>> '+  crumbs, exception = FatalError)
+                         crumbs = ' Checking for unique class names >>> '+  crumbs, fatal_error=True)
 
 
         self.classes[class_type][name] = i

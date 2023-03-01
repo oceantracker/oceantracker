@@ -29,13 +29,10 @@ class VerticalGradient(UserFieldBase):
         a=1
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_prop_etc(requires3D=True,
+        self.check_class_required_fields_prop_etc(requires3D=True,
                                     required_grid_var_list=['bottom_cell_index'],
                                     required_grid_time_buffers_var_list=['zlevel'],
                                     required_fields_list=[self.params['name_of_field']])
-        return msg_list
-
-
     def update(self,active):
         si = self.shared_info
         fields= si.classes['fields']

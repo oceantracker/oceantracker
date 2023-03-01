@@ -1,6 +1,5 @@
 from oceantracker.particle_properties._base_properties import ParticleProperty
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
-from oceantracker.util.parameter_checking import append_message
 from numba import njit
 import numpy as np
 
@@ -14,8 +13,8 @@ class TotalWaterDepth(ParticleProperty):
 
     def check_requirements(self):
         si = self.shared_info
-        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['tide', 'water_depth'])
-        return msg_list
+        self.check_class_required_fields_prop_etc(required_props_list=['tide', 'water_depth'])
+
 
     def update(self,active):
         si = self.shared_info

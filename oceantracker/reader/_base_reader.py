@@ -1,7 +1,6 @@
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.util.message_and_error_logging import append_message, GracefulExitError
 from oceantracker.util import time_util
 from os import path, walk
 from glob import glob
@@ -71,7 +70,7 @@ class _BaseReader(ParameterBaseClass):
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index): nopass('reader method: read_zlevel_as_float32 is required for 3D hindcasts')
 
     # checks on first hindcast file
-    def additional_setup_and_hindcast_file_checks(self, nc, msg_list): pass
+    def additional_setup_and_hindcast_file_checks(self, nc,msg_logger): pass
 
     def make_non_time_varying_grid(self,nc, grid): nopass('setup_grid required')
 
@@ -178,7 +177,7 @@ class _BaseReader(ParameterBaseClass):
 
         # setup reader fields from their named components in field_variables param ( water depth ad tide done earlier from grid variables)
         for name, item in reader_build_info['field_builder'].items():
-            i, msg_list = make_class_instance_from_params(item['field_params'])
+            i = make_class_instance_from_params(item['field_params'], si.msg_logger)
             i.info['variable_info']= item['variable_info']
             si.add_class_instance_to_interator_lists('fields', 'from_reader_field', i, crumbs='Adding Reader Field "' + name + '"')
             i.initialize()  # require variable_info to initialise
@@ -200,7 +199,7 @@ class _BaseReader(ParameterBaseClass):
                      'name': name + '_depth_average','num_components': min(2, i.params['num_components']),
                      'is_time_varying': i.params['is_time_varying'],
                     'is3D': False}
-                i2, msg_list = make_class_instance_from_params(p,msg_list=msg_list)
+                i2 = make_class_instance_from_params(p,si.msg_logger)
                 si.add_class_instance_to_interator_lists('fields', 'depth_averaged_from_reader_field', i2,
                                                          crumbs='Adding Reader Depth Averaged Field "' + name + '"')
                 i2.initialize()
@@ -212,13 +211,12 @@ class _BaseReader(ParameterBaseClass):
 
         self.code_timer.stop('build_hindcast_reader')
 
-    def _basic_file_checks(self, nc, msg_list):
+    def _basic_file_checks(self, nc, msg_logger):
         # check named variables are in first file
-
         # check dim
         for name, d in self.params['dimension_map'].items():
             if d is not None and not nc.is_dim(d):
-                append_message(msg_list, 'Cannot find dimension_map dimension "' + name + ' ", file dimension given is "' + d + '"', exception=GracefulExitError)
+                msg_logger.msg('Cannot find dimension_map dimension "' + name + ' ", file dimension given is "' + d + '"', fatal_error=True)
 
         # check variables are there
         for vm in ['grid_variables', 'field_variables']:
@@ -226,21 +224,21 @@ class _BaseReader(ParameterBaseClass):
                 if type(d)== list:
                     for vf in d:
                         if vf is not None and not nc.is_var(vf):
-                            append_message(msg_list,' For  "' + vm + '" for param   "' + name + ' ",  cannot find variable in file  "' + vf + '"', exception=GracefulExitError)
+                            msg_logger.msg(' For  "' + vm + '" for param   "' + name + ' ",  cannot find variable in file  "' + vf + '"', fatal_error=True)
 
                 elif d is not None and not nc.is_var(d) :
-                    append_message(msg_list,'For "' + vm + '" for param,  "' + name + ' ", cannot find variable in file "' + str(d) + '"', exception=GracefulExitError)
+                    msg_logger.msg('For "' + vm + '" for param,  "' + name + ' ", cannot find variable in file "' + str(d) + '"', fatal_error=True)
 
 
         # check if all required dims and non-feilds variables present
         for v in self.params[ 'required_file_variables']:
             if not nc.is_var(v):
-                append_message(msg_list, 'Cannot find required variable in hydro model output file "' + v + '"', exception=GracefulExitError)
+                msg_logger.msg('Cannot find required variable in hydro model output file "' + v + '"', fatal_error=True)
 
         for v in self.params[ 'required_file_dimensions']:
             if not nc.is_dim(v):
-                append_message(msg_list, 'Cannot find required dimension in hydro model outptut file "' + v + '"', exception=GracefulExitError)
-        return msg_list
+                msg_logger.msg( 'Cannot find required dimension in hydro model outptut file "' + v + '"', fatal_error=True)
+
 
 
 
@@ -325,7 +323,7 @@ class _BaseReader(ParameterBaseClass):
             s += f' Steps in file {fi["n_time_steps"][-1]:4} nt available {nt_available[0]:03} :{nt_available[-1]:03},'
             s += f' file offsets {file_index[0]:4} : {file_index[-1]:4}  nt required {nt_required[0]:4}:{nt_required[-1]:4}, number required: {nt_required.shape[0]:4}'
 
-            si.case_log.write_progress_marker(s)
+            si.msg_logger.write_progress_marker(s)
 
             grid_time_buffers['nt_hindcast'][buffer_index] = nt_available  # add a grid variable with buffer time steps
 
@@ -359,7 +357,7 @@ class _BaseReader(ParameterBaseClass):
             s += f' buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03}'
             s += f' Read:{num_read:4}  time: {int(1000. * (perf_counter() - t0_file)):3} ms'
 
-            si.case_log.write_progress_marker(s)
+            si.msg_logger.write_progress_marker(s)
             b0 += num_read
             n_file += int(si.model_direction)
             nt_required = nt_required[num_read:]
@@ -370,7 +368,7 @@ class _BaseReader(ParameterBaseClass):
         buffer_info['first_nt_hindcast_in_buffer'] = grid_time_buffers['nt_hindcast'][0]  # global index of buffer zero
         buffer_info['last_nt_hindcast_in_buffer']  = grid_time_buffers['nt_hindcast'][total_read-1]
 
-        si.case_log.write_progress_marker(f'Total time to fill buffer  {(perf_counter() - t0):4.1f} sec',tabs=1)
+        si.msg_logger.write_progress_marker(f'Total time to fill buffer  {(perf_counter() - t0):4.1f} sec', tabs=1)
         self.code_timer.stop('reading_to_fill_time_buffer')
 
     def assemble_field_components(self,nc, field, buffer_index=None, file_index=None):

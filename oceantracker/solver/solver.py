@@ -34,12 +34,12 @@ class Solver(ParameterBaseClass):
 
     def check_requirements(self):
 
-        msg_list = self.check_class_required_fields_prop_etc(
+        self.check_class_required_fields_prop_etc(
             required_fields_list=['water_velocity'],
             required_props_list=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'],
             required_grid_var_list=[])
 
-        return msg_list
+
 
     def initialize_run(self):
         si = self.shared_info
@@ -259,7 +259,7 @@ class Solver(ParameterBaseClass):
         #s += ' Finishes: ' + (datetime.now() + timePerStep*n_steps/(1.-fraction_done)).strftime('%y-%m-%d %H:%M')
         s +=  ' Step-%4.0f ms' % (timePerStep * 1000.)
 
-        si.case_log.write_msg(s)
+        si.msg_logger.msg(s)
 
 
     def _update_stats(self,t):

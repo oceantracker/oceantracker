@@ -1,6 +1,6 @@
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.util.message_and_error_logging import GracefulExitError,FatalError
+
 
 from oceantracker.particle_release_groups.polygon_release import PolygonRelease
 from oceantracker.util.polygon_util import InsidePolygon, inside_ray_tracing_single_point
@@ -27,13 +27,13 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         # find associated release group
         if params['name_of_polygon_release_group']  not in si.classes['particle_release_groups']:
             #todo add crumb trail to error
-            si.case_log.write_msg( params['class_name'].split('.')[-1] + ' no polygon release group of name ' + params['name_of_polygon_release_group'] +
-                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.classes['particle_release_groups'].keys())), exception=GracefulExitError)
+            si.msg_logger.msg(params['class_name'].split('.')[-1] + ' no polygon release group of name ' + params['name_of_polygon_release_group'] +
+                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.classes['particle_release_groups'].keys())), fatal_error=True)
 
         rg = si.classes['particle_release_groups'][params['name_of_polygon_release_group']]
         if not isinstance(rg, PolygonRelease) :
-            si.case_log.write_msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params['name_of_polygon_release_group'] +
-                                  '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ' , exception=GracefulExitError)
+            si.msg_logger.msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params['name_of_polygon_release_group'] +
+                                  '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ', fatal_error=True)
 
         self.release_group_to_count = rg
         self.info['release_group_name'] = rg.params['name']
@@ -59,8 +59,8 @@ class ResidentInPolygon(_BaseParticleLocationStats):
     def check_requirements(self):
         si= self.shared_info
         params = self.params
-        msg_list = self.check_class_required_fields_prop_etc()
-        return msg_list
+        self.check_class_required_fields_prop_etc()
+
 
     def set_up_binned_variables(self, nc):
         si = self.shared_info
@@ -85,8 +85,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                 nc.create_a_variable('sum_' + p_name, dim_names,
                                      {'notes': 'sum of particle property inside polygon  ' + p_name}, np.float64)
             else:
-                si.case_log.write_msg(
-                    'Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
+                si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning= True)
 
     def set_up_spatial_bins(self,nc ): pass
 

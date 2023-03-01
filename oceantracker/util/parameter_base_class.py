@@ -4,13 +4,12 @@ import traceback
 from time import perf_counter
 from oceantracker.shared_info import SharedInfoClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, merge_params_with_defaults
-from oceantracker.util.message_and_error_logging import append_message, GracefulExitError, FatalError
 from oceantracker.util.module_importing_util import import_module_from_string
 from oceantracker.common_info_default_param_dict_templates import default_class_names, default_case_param_template
 
 # parameter dictionaries are nested dictionaries or lists of dictionaries
 
-def make_class_instance_from_params(params,class_type_name=None, base_case_params =None, msg_list=[],
+def make_class_instance_from_params(params,msg_logger, class_type_name=None, base_case_params =None,
                                     nseq=None, crumbs='', merge_params=True):
     # make a class instance  dynamically,  get instance of class from string eg oceantracker.solver.Solver
     if base_case_params is None : base_case_params={}
@@ -33,19 +32,15 @@ def make_class_instance_from_params(params,class_type_name=None, base_case_param
         elif class_type_name in default_class_names:
             params['class_name'] = default_class_names[class_type_name]
         else:
-            append_message(msg_list, 'params for ' + crumbs + ' must contain class_name ' + class_type_name,
-                           exception=GracefulExitError, nseq=nseq)
-            return None, None, msg_list
+            msg_logger.msg('params for ' + crumbs + ' must contain class_name ' + class_type_name,
+                           fatal_error=True, exit_now=True, hint= 'given params are = ' + str(params))
+
     #elif package_info is not None:
     #    # try to convert to long name
     #    if params['class_name'] in package_info['short_class_name_map']:
     #        params['class_name'] = package_info['short_class_name_map'][params['class_name']]
 
-    i, msg = import_module_from_string(params['class_name'])
-    if msg is not None:
-        msg_list.append(msg)
-        return i, msg_list
-
+    i = import_module_from_string(params['class_name'],msg_logger)
 
 
     i.info['nseq']= nseq
@@ -54,15 +49,14 @@ def make_class_instance_from_params(params,class_type_name=None, base_case_param
     if merge_params:
         # merge template with base case first
         if class_type_name in default_case_param_template and type(default_case_param_template[class_type_name]) != list:
-            base_case_params, msg_list = merge_params_with_defaults(base_case_params,
-                                                    default_case_param_template[class_type_name], {},
+            base_case_params = merge_params_with_defaults(base_case_params,
+                                                    default_case_param_template[class_type_name], {},msg_logger,
                                                     check_for_unknown_keys=False,
-                                                    crumbs=crumbs+'merging core clasess base case with case template',
-                                                    msg_list=msg_list)
+                                                    crumbs=crumbs+'merging core clasess base case with case template' )
 
-        i.params, msg_list = merge_params_with_defaults(params, i.default_params, base_case_params, msg_list=msg_list, crumbs=crumbs)
+        i.params  = merge_params_with_defaults(params, i.default_params, base_case_params, msg_logger, crumbs=crumbs)
 
-    return i, msg_list
+    return i
 
 class ParameterBaseClass(object):
     # object with default parameters as class dictionary, that are check against expections
@@ -91,7 +85,7 @@ class ParameterBaseClass(object):
                    }
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
-                                 'name':  PVC(None, 'random_walk_varyingAz', doc_str='The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code'),
+                                 'name':  PVC(None, str, doc_str='The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code'),
                                  'user_note': PVC(None, str),
                                  })
 
@@ -108,41 +102,41 @@ class ParameterBaseClass(object):
 
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_prop_etc()
-        return msg_list
+        self.check_class_required_fields_prop_etc()
+
 
     def check_class_required_fields_prop_etc(self, required_props_list=[], required_fields_list=[],
                                              required_grid_time_buffers_var_list=[],
-                                             required_grid_var_list=[], requires3D=None, msg_list=[]):
+                                             required_grid_var_list=[], requires3D=None):
         si = self.shared_info
         grid = si.classes['reader'].grid
         grid_time_buffers=  si.classes['reader'].grid_time_buffers
 
         for name in required_grid_var_list:
             if name not in grid:
-               append_message(msg_list, '     class ' + self.params['class_name'] + ', ' + self.params['name']
-                                + ' requires grid variable  "' + name + '"' + ' to work', exception = GracefulExitError)
+               si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name']
+                                + ' requires grid variable  "' + name + '"' + ' to work', fatal_error=True)
 
         for name in required_grid_time_buffers_var_list:
             if name not in grid_time_buffers:
-               append_message(msg_list, '     class ' + self.params['class_name'] + ', ' + self.params['name']
-                                + ' requires grid variable  "' + name + '"' + ' to work', exception = GracefulExitError)
+               si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name']
+                                + ' requires grid variable  "' + name + '"' + ' to work', fatal_error=True)
 
         for name in required_fields_list:
             if name not in si.classes['fields']:
-                append_message(msg_list,'     class ' + self.params['class_name'] + ', "' + self.params['name']
-                                + '" requires field  "' + name + '"' + ' to work, add to reader["field_variables"], or add to fields param class list', exception = GracefulExitError)
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', "' + self.params['name']
+                                + '" requires field  "' + name + '"' + ' to work, add to reader["field_variables"], or add to fields param class list', fatal_error=True)
 
         for name in required_props_list:
             if name not in si.classes['particle_properties']:
-                append_message(msg_list,'     class ' + self.params['class_name'] + ', particle property "' + self.params['name']
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.params['name']
                                 + '" requires particle property  "' + name + '"'
-                                + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', exception = GracefulExitError)
+                                + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', fatal_error=True)
 
         if requires3D and (requires3D and not si.hydro_model_is3D):
-                append_message(msg_list,'     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', exception = GracefulExitError)
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', fatal_error=True)
 
-        return msg_list
+
 
     def remove_default_params(self, name_list):
         # used to get rid if paramters of parent class which are not used by a child class
@@ -191,13 +185,3 @@ class ParameterBaseClass(object):
         if self.info['update_calls'] == 1: self.info['time_first_update_call'] = dt
 
 
-    def write_msg(self,text,warning=False,note=False,exception=None, hint=None,traceback_str=None):
-        si = self.shared_info
-        if exception is None:
-            crumbs= None
-        else:
-            n = str(self.params['name']) if 'name' in self.params else str(None)
-            crumbs='Class: ' + self.__module__ + '.' + self.__class__.__name__ +'(internal name=' + n +')'
-
-        si.case_log.write_msg(text, warning=warning,note=note, hint=hint,
-                exception=exception,traceback_str=traceback_str, crumbs=crumbs)

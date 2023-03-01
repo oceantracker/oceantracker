@@ -1,7 +1,7 @@
 import numpy as np
 from  oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamDictValueChecker as PVC
 from oceantracker.util.polygon_util import  InsidePolygon
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, GracefulExitError
 
 class SettleInPolygon(_BaseTrajectoryModifier):
     # fallows particles to freeze if inside a polygon
@@ -16,8 +16,8 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         self.polygons = []
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['is_frozen_in_polygon', 'time_of_settlement', 'status'])
-        return msg_list
+        self.check_class_required_fields_prop_etc(required_props_list=['is_frozen_in_polygon', 'time_of_settlement', 'status'])
+
 
 
     def initialize(self, **kwargs):
@@ -27,7 +27,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
 
         # set up polygons to test if particles inside
         if 'points' not in self.params['polygon']:
-            si.case_log.write_msg('initialize: Polygon settlement, each polygon must be a dictionary with at least a "points"  key a list of corrdinates', exception = GracefulExitError)
+            si.msg_logger.msg('initialize: Polygon settlement, each polygon must be a dictionary with at least a "points"  key a list of corrdinates', fatal_error=True)
 
         a = np.asarray(self.params['polygon']['points'])
         if a.shape[1] != 2:
