@@ -21,10 +21,9 @@ class BasicResuspension(_BaseTrajectoryModifier):
 
     # is 3D test of parent
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_prop_etc(
+        self.check_class_required_fields_prop_etc(
                         required_fields_list=['friction_velocity', 'water_velocity'],
                         required_props_list=['status','water_velocity'], requires3D=True)
-        return msg_list
 
     def initialize(self,**kwargs):
         si = self.shared_info

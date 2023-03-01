@@ -16,12 +16,12 @@ class FrictionVelocity(UserFieldBase):
     def check_requirements(self):
         si = self.shared_info
 
-        msg_list = self.check_class_required_fields_prop_etc(
+        self.check_class_required_fields_prop_etc(
             required_fields_list=['water_velocity'],
             required_grid_var_list=['bottom_cell_index'],
             required_grid_time_buffers_var_list=['zlevel'],
             requires3D=True)
-        return msg_list
+
 
     def update(self, buffer_index):
         si = self.shared_info

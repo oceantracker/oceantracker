@@ -1,10 +1,9 @@
 import numpy as np
 from numba import njit
 
+from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamDictValueChecker as PVC
 
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC, GracefulExitError
-
 
 class GriddedStats2D_timeBased(_BaseParticleLocationStats):
     # class to hold counts of particles inside grid squares
@@ -24,8 +23,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.grid = {}
 
     def check_requirements(self):
-        msg_list=self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'], required_grid_var_list=['x'])
-        return msg_list
+        self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'], required_grid_var_list=['x'])
 
     def initialize(self):
         # set up regular grid for  stats
@@ -142,7 +140,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
                 self.sum_binned_part_prop[p] = np.full(dim_sizes[1:], 0.)  # zero for  summing
                 nc.create_a_variable( 'sum_' + p, dim_names, {'notes': 'sum of particle property inside bin  ' + p}, np.float64)
             else:
-                self.write_msg('Part Prop "' + p + '" not a particle property, ignored and no stats calculated',warning=True)
+                si.msg_logger.msg('Part Prop "' + p + '" not a particle property, ignored and no stats calculated',warning=True)
 
     def update(self, **kwargs):
         # do counts for each release  location and grid cell
@@ -213,8 +211,8 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         super().initialize()
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['age'])
-        return msg_list
+        self.check_class_required_fields_prop_etc(required_props_list=['age'])
+
 
 
     def set_up_time_bins(self,nc):
@@ -222,7 +220,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         si= self.shared_info
         stats_grid = self.grid
 
-        self.write_msg('When use aged binned particle stats, to get un biases stats., need to stop releasing particles "max_age_to_bin" '
+        si.msg_logger.msg('When use aged binned particle stats, to get un biases stats., need to stop releasing particles "max_age_to_bin" '
                            + ' or max("user_age_bin_edges")  before end of run, by setting  particle param "release_duration"', note=True)
 
         # ages to bin particle ages into,  equal bins in given range
@@ -231,19 +229,19 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
         # check age order and length
         if age_min >  self.shared_info.model_duration:
-            si.case_log.write_msg(' parameter min_age_to_bin must be > duration of model run (min,max) = '
-                               + str([age_min, age_max]) + ', duration=' + str(self.shared_info.model_duration), exception = GracefulExitError)
+            si.msg_logger.msg(' parameter min_age_to_bin must be > duration of model run (min,max) = '
+                                    + str([age_min, age_max]) + ', duration=' + str(self.shared_info.model_duration), fatal_error=True)
 
         if age_max <= age_min:
-            si.case_log.write_msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
-                           + str([age_min,age_max ]) + ', duration=' + str(self.shared_info.model_duration),exception = GracefulExitError)
+            si.msg_logger.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
+                                    + str([age_min,age_max ]) + ', duration=' + str(self.shared_info.model_duration),fatal_error=True)
 
         # arange requites one mere step beyong required max_age
         dage= abs(int(self.params['age_bin_size']))
         stats_grid['age_bin_edges'] =  float(self.shared_info.model_direction) * np.arange(int(age_min), int(age_max+dage), dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
-            si.case_log.write_msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative', exception = GracefulExitError)
+            si.msg_logger.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative', fatal_error=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 
@@ -263,7 +261,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
             if p_name in self.shared_info.classes['particle_properties']:
                 self.sum_binned_part_prop[p_name] = np.full(dim_sizes, 0.)  # zero fro summing
             else:
-                self.write_msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
+                self.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
     def update(self, **kwargs):
         # do counts for each release  location and grid cell, over rides parent

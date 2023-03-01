@@ -58,7 +58,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         for key, prop in self.sum_binned_part_prop.items():
             if part_prop[key].is_vector():
-                self.write_msg('On the fly statistical Binning of vector particle property  "' + key + '" not yet implemented', warning=None)
+                si.msg_logger.msg('On the fly statistical Binning of vector particle property  "' + key + '" not yet implemented', warning=True)
             else:
                 self.prop_list.append(part_prop[key].data) # must used dataptr here
                 self.sum_prop_list.append(self.sum_binned_part_prop[key][:])

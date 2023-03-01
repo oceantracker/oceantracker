@@ -6,7 +6,7 @@ from os import path, walk, listdir
 import glob
 from importlib import import_module
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.message_and_error_logging import append_message, GracefulExitError
+
 from oceantracker.common_info_default_param_dict_templates import package_fancy_name
 
 # def get package name
@@ -37,9 +37,8 @@ def build_short_class_name_map(package_dir,msg_list):
         try:
             module = import_module(modname)
         except Exception as e:
-            append_message(msg_list,'Could not load oceantracker module ="' +  modname +'"'
-                        +', May be sytax error or import error in oceantracker',
-                           exception=e, traceback_str=traceback.format_exc())
+            print('Could not load oceantracker module ="' +  modname +'"'
+                        +', May be sytax error or import error in oceantracker'+ traceback.format_exc())
             return out, msg_list
 
         for class_name, c in inspect.getmembers(module, inspect.isclass):
@@ -50,9 +49,8 @@ def build_short_class_name_map(package_dir,msg_list):
             instance = c()
             full_name = modname + '.' + class_name
             if class_name in out:
-                append_message(msg_list,'Class names within the OceanTracker package must be unique, class name = ' +
-                               class_name +' is in both :\n' + '    ' + out[class_name] +'\n    ' + full_name,
-                               modname, exception=GracefulExitError)
+                print('Class names within the OceanTracker package must be unique, class name = ' +
+                               class_name +' is in both :\n' + '    ' + out[class_name] +'\n    ' + full_name+ traceback.format_exc())
                 return out, msg_list
             else:
                 out[class_name] = full_name
@@ -67,11 +65,11 @@ def check_package(calling_file):
         'short_class_name_map':{}}
     msg_list=[]
     msg_base= package_fancy_name +'-package checks: '
-    append_message(msg_list, '____________________________________________________')
-    append_message(msg_list,msg_base +' Started for package in ' + d['package_dir'])
+    print('____________________________________________________')
+    print(msg_base +' Started for package in ' + d['package_dir'])
 
     d['short_class_name_map'] =  build_short_class_name_map(package_dir, msg_list)
-    append_message(msg_list, msg_base + ' OK')
+    print( msg_base + ' OK')
 
     return d, msg_list
 

@@ -6,7 +6,6 @@ from oceantracker.util.basic_util import nopass
 from oceantracker.util.time_util import seconds_to_short_date
 from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
-from oceantracker.util.message_and_error_logging import GracefulExitError, FatalError
 
 
 # class to write with, outline methods needed
@@ -97,7 +96,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.info['output_file'].append(file_name + '.nc')
 
-        si.case_log.write_progress_marker('opening tracks output to : ' + self.info['output_file'][-1])
+        si.msg_logger.write_progress_marker('opening tracks output to : ' + self.info['output_file'][-1])
         self.add_global_attribute('file_created', datetime.now().isoformat())
 
         self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file'][-1]), 'w')
@@ -113,8 +112,8 @@ class _BaseWriter(ParameterBaseClass):
                 c = np.asarray(item['chunks'],dtype=np.int64) # avoids float 32 over flow
                 b = np.prod(c)*np.full((0,),0 ).astype(item['dtype']).itemsize # btypes in a chunk
                 if float(b) >= 4.0e9 :
-                    si.case_log.write_msg('Netcdf chunk size for variable "' + name+ '" exceeds 4GB, chunks=' + str(c), exception=GracefulExitError,
-                       hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time',)
+                    si.msg_logger.msg('Netcdf chunk size for variable "' + name + '" exceeds 4GB, chunks=' + str(c), fatal_error=True,
+                                            hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time', )
 
             try:
                 nc.create_a_variable(name,item['dim_list'], chunksizes=item['chunks'], dtype=item['dtype'], attributes=item['attributes'])

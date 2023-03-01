@@ -17,13 +17,12 @@ class RandomWalkVaryingAZ(RandomWalk):
         si=self.shared_info
         pgm = si.classes['particle_group_manager']
 
-        self.write_msg('RandomWalkVaryingAz: varying Az adds vertical velocity to dispersion to avoid particle accumulation at surface and bottom, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',warning=True)
+        si.msg_logger.msg('RandomWalkVaryingAz: varying Az adds vertical velocity to dispersion to avoid particle accumulation at surface and bottom, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',warning=True)
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_prop_etc(required_fields_list=['A_Z','A_Z_vertical_gradient'],
+       self.check_class_required_fields_prop_etc(required_fields_list=['A_Z','A_Z_vertical_gradient'],
                                                              requires3D=True,
                                                              required_props_list=['A_Z','A_Z_vertical_gradient','nz_cell', 'x', 'n_cell'])
-        return msg_list
 
     # apply random walk
     def update(self,nb,  time, active):

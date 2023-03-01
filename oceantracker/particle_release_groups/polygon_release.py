@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.particle_release_groups.point_release import PointRelease
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, GracefulExitError
+
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 
 
@@ -27,15 +27,15 @@ class PolygonRelease(PointRelease):
         info['points'] = np.asarray( self.params['points']).astype(np.float64)[:,:2] # make sure i is 2D
 
         if info['points'].shape[0] < 3:
-            si.case_log.write_msg('For polygon release group  "points" parameter have at least 3 points, given ' + str(info['points']), exception=GracefulExitError)
+            si.msg_logger.msg('For polygon release group  "points" parameter have at least 3 points, given ' + str(info['points']), fatal_error=True)
 
         self.polygon = InsidePolygon(verticies = info['points'])
 
         info['polygon_area'] = self.polygon.get_area()
 
         if info['polygon_area']  < 1:
-            si.case_log.write_msg('Release group = ' + str(self.info['instanceID'])
-                           + ', a Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), exception = GracefulExitError)
+            si.msg_logger.msg('Release group = ' + str(self.info['instanceID'])
+                                    + ', a Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
 
         info['number_released'] = 0
         info['pulse_count'] = 0

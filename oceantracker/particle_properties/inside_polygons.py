@@ -21,8 +21,7 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
                                  })
 
     def check_requirements(self):
-        msg_list = self.check_class_required_fields_prop_etc(required_props_list=['x'])
-        return msg_list
+        self.check_class_required_fields_prop_etc(required_props_list=['x'])
 
     def initialize(self,**kwargs):
         super().initialize()
@@ -30,13 +29,13 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
         # set up polygons instances
 
         self.polygons, msg = set_up_list_of_polygon_instances(self.params['polygon_list'])
-        si.case_log.add_messages(msg)
+
 
     def update(self, active):
         # find polygon each particle is inside
         part_prop = self.shared_info.classes['particle_properties']
 
-        # make all inside no polygon
+        # make all inside no polyg
         self.set_values(-1, active)
 
         # loop over polygons

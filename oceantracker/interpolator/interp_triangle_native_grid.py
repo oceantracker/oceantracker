@@ -121,10 +121,10 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
             sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_particle_subset_buffer())
             if sel.shape[0] > 0:
-                self.write_msg('Some BC walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles',warning=True)
+                si.msg_logger.msg('Some BC walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles',warning=True)
                 self.info['failed_searches'] += sel.shape[0]
                 # make notes for log file enabling follow up
-                self.write_msg('failed BCwalks_after_KDtree_retry, particles' + str(sel.tolist()) + ' xq =' + str(xq[sel, :].tolist()),warning=True)
+                si.msg_logger.msg('failed BCwalks_after_KDtree_retry, particles' + str(sel.tolist()) + ' xq =' + str(xq[sel, :].tolist()),warning=True)
                 # kill particles
                 part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
             self.code_timer.stop('kd-tree_retrys')

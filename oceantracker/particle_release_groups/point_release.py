@@ -77,9 +77,9 @@ class PointRelease(ParameterBaseClass):
 
         # now check if start in range
         if not hindcast_start <= release_info['first_release_time'] <= hindcast_end:
-            si.case_log.write_msg('Release group= ' + str(n+1) + ', name= ' + self.params['name'] + ',  parameter release_start_time is ' +
-                               time_util.seconds_to_iso8601str(release_info['first_release_time']) + '  is outside hindcast range ' + time_util.seconds_to_iso8601str(hindcast_start)
-                               + ' to ' + time_util.seconds_to_iso8601str(hindcast_end), warning=True)
+            si.msg_logger.msg('Release group= ' + str(n + 1) + ', name= ' + self.params['name'] + ',  parameter release_start_time is ' +
+                                    time_util.seconds_to_iso8601str(release_info['first_release_time']) + '  is outside hindcast range ' + time_util.seconds_to_iso8601str(hindcast_start)
+                                    + ' to ' + time_util.seconds_to_iso8601str(hindcast_end), warning=True)
 
         # todo allow a list of release dates for the group, eg elif params['release_dates']:
         if params['release_interval'] == 0.:
@@ -162,7 +162,7 @@ class PointRelease(ParameterBaseClass):
             if count > self.params["max_cycles_to_find_release_points"]: break
 
         if n_found < n_required:
-            self.write_msg('Release, only found ' + str(n_found) + ' of ' + str(n_required) + ' required points inside domain after 50 cycles',warning=True,
+            si.msg_logger.msg('Release, only found ' + str(n_found) + ' of ' + str(n_required) + ' required points inside domain after 50 cycles',warning=True,
                            hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  max_cycles_to_find_release_points, current value = {self.params["max_cycles_to_find_release_points"]:3}' )
             n_required = n_found #
 

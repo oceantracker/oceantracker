@@ -3,7 +3,6 @@ from copy import copy, deepcopy
 from oceantracker.util import triangle_utilities_code
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.util.message_and_error_logging import append_message, GracefulExitError, FatalError
 from oceantracker.util import time_util
 from oceantracker.util import shared_memory_util
 from oceantracker.fields.util import fields_util
@@ -103,21 +102,22 @@ class GenericUnstructuredReader(_BaseReader):
     def check_grid(self,grid):
         tt='Grid Check, '
         # check types of grid variables
+        si =self.shared_info
         type_checks={'x': np.float32,'triangles':np.int32}
         for name,t in type_checks.items():
             if grid[name] is not None and grid[name].dtype != t:
-                self.write_msg(tt + 'array dtype of grid variable"' + name + '" does not match required type "' +str(t)+ '"',
-                               exception=FatalError,
-                               hint='Check read method for this varaible converts to required type')
+                si.msg_logger.msg(tt + 'array dtype of grid variable"' + name + '" does not match required type "' +str(t)+ '"',
+                               fatal_error= True,
+                               hint='Check read method for this variable converts to required type')
 
         # check triangulation appears to be zero based index
         if np.max(grid['triangles'][:, :3]) >= self.grid['x'].shape[0] or np.min(grid['triangles'][:, :3]) < 0:
-            self.write_msg(tt+ 'out of bounds node number  node in triangulation, require zero based indices',
-                           exception=FatalError,
+            si.msg_logger.msg(tt+ 'out of bounds node number  node in triangulation, require zero based indices',
+                           fatal_error= True, exit_now=True,
                            hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
 
         elif np.min(grid['triangles']) == 1:
-            self.write_msg(tt+ 'smallest node index in triangulation ==1, require zero based indices',
+            si.msg_logger.msg(tt+ 'smallest node index in triangulation ==1, require zero based indices',
                            warning=True,
                            hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
 
@@ -134,9 +134,11 @@ class GenericUnstructuredReader(_BaseReader):
         return time
 
     def read_nodal_x_float64(self, nc):
+        si=self.shared_info
         gv= self.params['grid_variables']
         x = np.stack((nc.read_a_variable(gv['x'][0]), nc.read_a_variable(gv['x'][1])), axis=1).astype(np.float64)
         if self.params['cords_in_lat_long']:
+            #todo write warning of conversion to meters grid
             x = self.convert_lon_lat_to_meters_grid(x)
         return x
 

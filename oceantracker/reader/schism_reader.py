@@ -56,7 +56,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         data_added_to_buffer = nc.read_a_variable('wetdry_elem', file_index)
         is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
-    def additional_setup_and_hindcast_file_checks(self, nc, msg_list):
+    def additional_setup_and_hindcast_file_checks(self, nc, msg_logger):
         # sort out which velocity etc are there and adjust field variables
         params = self.params
         fv= params['field_variables']
@@ -74,8 +74,6 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         if  nc.is_var('minimum_depth'):
             # use schism min depth times 1.2 to allow for diff due to interp cell tide to nodes in schisms output
             params['minimum_total_water_depth']= 1.2*float(nc.read_a_variable('minimum_depth'))
-
-        return msg_list
 
     def make_non_time_varying_grid(self,nc, grid):
         grid =super().make_non_time_varying_grid(nc, grid)
