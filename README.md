@@ -1,10 +1,18 @@
 # OceanTracker
 
-# About/Install/User guide/Documentation 
+# About/Demos
 
-see [Github pages](https://oceantracker.github.io/oceantracker/)
+    [Github pages](https://oceantracker.github.io/oceantracker/)
 
+## User guide/Documentation 
 
+ [Oceantracker User Guide] (https://oceantracker.github.io/oceantracker/_build/html/info/users_guide.html)
+  
+    
+
+## Installing
+ 
+   [Oceantracker installing pages](https://oceantracker.github.io/oceantracker/)
 # Basic install
 ## Clone repository
 ```

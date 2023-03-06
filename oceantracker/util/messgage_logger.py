@@ -4,7 +4,7 @@ import traceback
 class GracefulError(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
-        msg= message + '\n hint= ' + hint if hint is not None else ' Look at messages above or in .err file'
+        msg= 'Error >> ' + message + '\n hint= ' + hint if hint is not None else ' Look at messages above or in .err file'
         super(GracefulError, self).__init__(msg)
 
 def msg_str(msg,tabs=0):

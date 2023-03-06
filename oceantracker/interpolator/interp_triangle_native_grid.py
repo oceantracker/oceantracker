@@ -31,9 +31,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         grid = si.classes['reader'].grid
         grid_time_buffers = si.classes['reader'].grid_time_buffers
 
-        # make barcentric transform matrix for the grid
-        grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles'].data)
-
+        # make barcentric transform matrix for the grid,  typee to match numba signature
+        grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles'].data).astype(np.float32)
         # build kd tree for initial triangle find of particle initial locations
         xy_centriod = np.mean(grid['x'][grid['triangles']], axis=1)
         self.KDtree = cKDTree(xy_centriod)
@@ -44,7 +43,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         p = si.classes['particle_group_manager']
         p.create_particle_property('manual_update',dict(name='n_cell',  write=False, dtype=np.int32,
                                    initial_value=0))  # start with cell number guess of zero
-        p.create_particle_property('manual_update',dict(name='bc_cords',  write=False, initial_value=0., vector_dim=3))
+        p.create_particle_property('manual_update',dict(name='bc_cords',  write=False, initial_value=0., vector_dim=3,dtype=np.float32))
 
         # BC walk stats
         info = self.info

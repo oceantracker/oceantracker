@@ -218,7 +218,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                         hint='For Schism open boundaries requires hgrid file to named in reader params',warning=True)
         else:
             si.msg_logger.msg('No open boundaries requested, as run_params["open_boundary_type"] = 0',note=True,
-                                      hint='Requires list of open boundary nodes not in hydro model, eg for Schism this can beread from hgrid file to named in reader params and run_params["open_boundary_type"] = 1')
+                                      hint='Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1')
 
         si.msg_logger.exit_if_prior_errors()
 

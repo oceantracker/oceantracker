@@ -54,7 +54,7 @@ class unstructured_FVCOM(GenericUnstructuredReader):
                                                     grid['x'], grid['x_center'],grid['node_to_tri_map'],grid['tri_per_node'])
         return grid
 
-    def read_nodal_x_float64(self, nc):
+    def read_nodal_x_as_float64(self, nc):
         # get node location in meters
         # also record cell center x as well to be used for get nodal field vals from values at center, eg velocity
         grid= self.grid

@@ -74,7 +74,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
         grid['vertical_grid_type'] = 'S-sigma'
         return grid
 
-    def read_nodal_x_float64(self, nc):
+    def read_nodal_x_as_float64(self, nc):
         grid = self.grid
         # record useful grid info
         grid['lat_psi'] = nc.read_a_variable('lat_psi').astype(np.float64)
@@ -224,7 +224,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
 
         return data
 
-    def read_open_boundary_data(self, grid):
+    def read_open_boundary_data_as_boolean(self, grid):
         # and make this part of the read grid method
 
         # read hgrid file for open boundary data

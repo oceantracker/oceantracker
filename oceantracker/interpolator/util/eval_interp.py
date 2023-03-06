@@ -46,7 +46,7 @@ def time_dependent_2Dfield(F_out, F_data, nb, step_dt_fraction, tri, n_cell, BCc
 @njit
 def time_independent_3Dfield(F_out, F_data, tri, n_cell, nz_node, z_fraction, BCcord, active):
     #  non-time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
-    # todo do not used yet?
+    # todo not working as not used yet
     n_comp = F_data.shape[2]  # time step of data is always [node,z,comp] even in 2D
     F=  F_data[0, :, :, :]
 
@@ -88,14 +88,13 @@ def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz
 
         nodes = tri[n_cell[n],:]
 
+        # for schisim LSC grid, node above and below may be the same foe triangles at transitions in number of depth cells
         nz_below = nz_nodes[n, 0, :]
         nz_above = nz_nodes[n, 1, :]
 
         # loop over each node in triangle
         for m in range(3):
             n_node = nodes[m]
-
-
             # loop over vector components
             for c in range(n_comp):
                 # add contributions from layer above and below particle, for each spatial component at two time steps
@@ -110,7 +109,7 @@ def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,
     n_comp = V_data.shape[3]  # time step of data is always [node,z,comp] even in 2D
 
     # create views to remove redundant dim at current and next time step, improves speed?
-    v1,     v2       = V_data[nb  , :, :, :], V_data[nb + 1, :, :, :]
+    v1,     v2  = V_data[nb  , :, :, :], V_data[nb + 1, :, :, :]
 
     dt1= 1.0-step_dt_fraction
 
@@ -141,7 +140,6 @@ def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,
 
 # below are development ideas
 #_______________________________________________
-
-# todo interpolate 3D feilds at free surface or bottom
+# todo interpolate 3D fields at free surface or bottom
 def interp_3Dfield_at_surfaces_time_indepenent(F_out, F_data, tri, n_cell, nz_bottom_cell, BCcord, active):
     basic_util.nopass('interp_3Dfield_at_surfaces_time_indepenent not yet implemented')

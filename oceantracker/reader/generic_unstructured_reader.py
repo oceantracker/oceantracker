@@ -24,8 +24,8 @@ class GenericUnstructuredReader(_BaseReader):
     def make_non_time_varying_grid(self,nc, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
-        grid['x'] = self.read_nodal_x_float64(nc)
-        grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
+        grid['x'] = self.read_nodal_x_as_float64(nc).astype(np.float64)
+        grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc).astype(np.int32)
         grid['quad_cell_to_split'] = np.flatnonzero(grid['quad_cells_to_split']) # make as list of indcies for calculations
 
         if self.is_hindcast3D(nc):
@@ -36,7 +36,7 @@ class GenericUnstructuredReader(_BaseReader):
 
         # adjust node type and adjacent for open boundaries
         # todo define node and adjacent type values in dict, for single definition and case info output?
-        is_open_boundary_node = self.read_open_boundary_data(grid)
+        is_open_boundary_node = self.read_open_boundary_data_as_boolean(grid)
         grid['node_type'][is_open_boundary_node] = 3
 
         is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'],grid['adjacency'], is_open_boundary_node)
@@ -133,7 +133,7 @@ class GenericUnstructuredReader(_BaseReader):
             time += self.params['time_zone']*3600.
         return time
 
-    def read_nodal_x_float64(self, nc):
+    def read_nodal_x_as_float64(self, nc):
         si=self.shared_info
         gv= self.params['grid_variables']
         x = np.stack((nc.read_a_variable(gv['x'][0]), nc.read_a_variable(gv['x'][1])), axis=1).astype(np.float64)

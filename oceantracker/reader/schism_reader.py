@@ -51,6 +51,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
     def read_dry_cell_data(self,nc,file_index, is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry
+        #todo enforce read as boolean
         grid = self.grid
         # get dry cells for each triangle allowing for splitting of quad cells
         data_added_to_buffer = nc.read_a_variable('wetdry_elem', file_index)
@@ -78,7 +79,6 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
     def make_non_time_varying_grid(self,nc, grid):
         grid =super().make_non_time_varying_grid(nc, grid)
         return grid
-
 
     def read_time(self, nc, file_index=None):
         if file_index is None:
@@ -109,7 +109,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
         return data.astype(np.int32)
 
-    def read_nodal_x_float64(self, nc):
+    def read_nodal_x_as_float64(self, nc):
         x = np.stack((nc.read_a_variable('SCHISM_hgrid_node_x'), nc.read_a_variable('SCHISM_hgrid_node_y')), axis=1).astype(np.float64)
         if self.params['cords_in_lat_long']:
             x  = self.convert_lon_lat_to_meters_grid(x)
@@ -130,7 +130,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         
         return data.astype(np.int32), quad_cells_to_split
 
-    def read_open_boundary_data(self, grid):
+    def read_open_boundary_data_as_boolean(self, grid):
         # make boolen of whether node is an open boundary node
         # read schisim  hgrid file for open boundary data
         is_open_boundary_node = np.full((grid['x'].shape[0],),False)
