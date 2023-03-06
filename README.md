@@ -1,114 +1,21 @@
 # OceanTracker
 
-# About/Demos
+OceanTracker is a fast extendable code for offline particle tracking in unstructured grids [1], which also works with structured grids.
 
-    [Github pages](https://oceantracker.github.io/oceantracker/)
+OceanTracker’s speed enables millions of particles to be simulated in unstructured grids. This significantly increases the range of particle behaviours that can be modeled and the quality of statistics derived from the particles. To eliminate the need to store and wade through the analysis of vast volumes of recorded particle tracks, the code has the ability to calculate statistics on the fly, such as heat maps and connectivity between regions.
 
-## User guide/Documentation 
+OceanTracker code is highly flexible and extendable by the user, whether run by a new user with a text file of parameters, or by an expert adding their specialised code for novel particle behaviours or statistics, to the computational pipe line
 
- [Oceantracker User Guide] (https://oceantracker.github.io/oceantracker/_build/html/info/users_guide.html)
+
+
+[More about Ocean tracker and demos](https://oceantracker.github.io/oceantracker/)
+
+
+ [Oceantracker User Guide](https://oceantracker.github.io/oceantracker/_build/html/info/users_guide.html)
   
-    
 
-## Installing
- 
-   [Oceantracker installing pages](https://oceantracker.github.io/oceantracker/)
-# Basic install
-## Clone repository
-```
-git clone https://gitlab.com/cinst/oceantracker02.git
-```
+  [Installing Oceantracker ](https://oceantracker.github.io/oceantracker/_build/html/info/users_guide/installing.html)
 
-## Working in a Virtual environment
-
-### Create virtual environment
-```
-python3 -m venv venv
-```
-
-### Activate venv
-```
-source ./venv/bin/activate
-```
-
-### Install packages in venv
-```
-python setup.py develop
-pip install -r ./requirements.txt
-```
-
-### Deactivate environment
-```
-deactivate
-```
-
-# Run OceanTracker 
-
-python3 runOT.py --param_file  ./demos/demo02_animation.json   ( + options below) 
-
-    --param_file (type=str,help='json file of input parameters ')
-    
-    --input_dir(type=str,  help='overrides dir for hindcast files given in param file')
-    
-    --root_output_dir (type=str, help='overrides root output dir given in param file')
-    
-    --processors' (type=int,  help='overrides number of processors to used given in param file')
-    
-    --replicates', (type=int,  help='overrides number of case replicates given in param file')
-    
-    --duration (type=float, help='overrides model duration in seconds of all of cases, useful in testing ')
-    
-    --cases (type=int, help='only runs  first "cases" of the case_list, useful in testing ')
-    
-    -debug (action='store_true', help=' gives better error information, but runs slower, eg checks Numba array bounds')
-
-# Misc Linux commands
-## Kill all python processes
-```
-killall -9 python3
-```
-
-
-## Make bash script executable(+x)
-```
-chmod +x ./script.sh
-```
-the 
-```
-./script.sh
-```
-## run non-executable scipt and log to file and screen
-
-```
-bash script.sh | tee log2021-12-18.txt
-```
-## Killall python3
-
-```
-sudo killall -9 python3
-```
-
-Perhaps run twice to verify the *kill*
-Expected output:
-```
-(venv) max@RVoceantracker02:~/gitlab/oceantracker02$ sudo killall -9 python3
-(venv) max@RVoceantracker02:~/gitlab/oceantracker02$ sudo killall -9 python3
-python3: no process found
-```
-#Use detachable screen 
-```
-screen 
-```
-Ctr+a+d will detach, screen -r will resume
-
-Make a  log file
-```
-screen -L -Logfile file_name.log
-```
-
-# ssh server 
-```
-sudo apt update
-sudo apt install openssh-server
-sudo systemctl status ssh
-```
+  [Running Oceantracker ](https://oceantracker.github.io/oceantracker/_build/html/info/users_guide/running_ocean_tracker.html)
+  
+[1] Vennell, R., Scheel, M., Weppe, S., Knight, B. and Smeaton, M., 2021. Fast lagrangian particle tracking in unstructured ocean model grids , Ocean Dynamics, 71(4), pp.423-437.
