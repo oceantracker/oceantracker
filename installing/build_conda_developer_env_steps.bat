@@ -12,3 +12,5 @@ conda config --add channels https://conda.anaconda.org/conda-forge
 conda config --add channels https://conda.anaconda.org/domdfcoding
 conda install sphinx-toolbox
 conda install -c conda-forge rst2pdf
+conda install -c conda-forge pyinstrument
+

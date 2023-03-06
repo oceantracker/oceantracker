@@ -22,6 +22,7 @@ Future additions
 #. option for particle tracking to work natively in lat/log cords
 #. RK45 solver to allow adaptive time stepping to improve accuracy for those particles where flows are rapidly varying in time or space.
 #. Read release points/polygons from file, eg shape files, csv
+#. system to check data types match those required when used in numba signatures
 
 #. Shared/asynchronous reader to speed solution and save total memory, changes required:
     * reader buffer as ring buffer on global hindcast time step

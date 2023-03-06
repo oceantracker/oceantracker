@@ -1,3 +1,5 @@
+.. _running-oceantracker:
+
 #####################
 Running OceanTracker
 #####################
@@ -16,7 +18,7 @@ OceanTracker can be run in two ways.
 
     Then write code to do post processing and/or plotting, using oceantracker.post_processing.* or with user's own tools.
 
-#. From python code by:
+#. From python code in IDE  ( eg PyCharm, Visual Studio) by:
 
     * creating a parameter dictionary by either:
         * building a parameter dictionary in code, or
@@ -26,14 +28,16 @@ OceanTracker can be run in two ways.
 
 .. note::
 
-    If OceanTracker was istalled with a virtual environment, activate it first. Eg. in linux, if in dir above OceanTracker package, then:
+    If OceanTracker was installed with a virtual environment, activate it first. Eg. in linux, if in dir above OceanTracker package, then:
 
     ``source ./oceantracker/venv/bin/activate``
 
+    or windows
 
-
+    ``conda activate oceantracker``
 
 .. include:: ../demos/minimal_example.rst
+
 
 Run from parameter file
 ============================
@@ -119,8 +123,24 @@ Run from code
 
 Below is example of building a dictionary of parameters, running particle tracking and plotting:
 
+
+
+Another exmaple
+
 .. literalinclude:: ../../../demos/run_from_code_demo.py
     :caption:
     :language: python
+
+
+
+
+Run from code in python IDE
+============================
+
+# Visual Studio
+
+# PyCharm
+
+
 
 

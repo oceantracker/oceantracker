@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Parameter details" href="../parameter_ref/parameter_ref_toc.html" />
-    <link rel="prev" title="Running OceanTracker" href="running_ocean_tracker.html" />
+    <link rel="prev" title="Code Structure" href="code_structure.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -58,6 +58,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_structure.html">Code Structure</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Parameters overview</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#top-level-params">Top level params</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#case-level-params">Case level params</a></li>
@@ -69,7 +70,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="post_processing.html">Post processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="documentation.html">Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
 </ul>
@@ -81,7 +81,7 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
-      <li>Previous: <a href="running_ocean_tracker.html" title="previous chapter">Running OceanTracker</a></li>
+      <li>Previous: <a href="code_structure.html" title="previous chapter">Code Structure</a></li>
       <li>Next: <a href="../parameter_ref/parameter_ref_toc.html" title="next chapter">Parameter details</a></li>
   </ul></li>
   </ul></li>
@@ -218,8 +218,8 @@ the computational pipeline by the ParticleGroupManager. Then it will automatical
         <span class="bp">self</span><span class="o">.</span><span class="n">class_doc</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Exponentially decaying particle property based on age.&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">check_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">msg_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_class_required_fields_prop_etc</span><span class="p">(</span><span class="n">required_props_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">msg_list</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">check_class_required_fields_prop_etc</span><span class="p">(</span><span class="n">required_props_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">])</span>
+
 
 
     <span class="k">def</span> <span class="nf">initial_value_at_birth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_part_IDs</span><span class="p">):</span>
@@ -244,7 +244,7 @@ the computational pipeline by the ParticleGroupManager. Then it will automatical
     <ul>
         <li>
           &larr;
-          <a href="running_ocean_tracker.html" title="Previous document">Running OceanTracker</a>
+          <a href="code_structure.html" title="Previous document">Code Structure</a>
         </li>
         <li>
           <a href="../parameter_ref/parameter_ref_toc.html" title="Next document">Parameter details</a>

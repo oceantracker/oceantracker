@@ -66,6 +66,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#run-from-code">Run from code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-from-code-in-python-ide">Run from code in python IDE</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="code_structure.html">Code Structure</a></li>
@@ -108,8 +109,8 @@
 
           <div class="body" role="main">
             
-  <section id="running-oceantracker">
-<h1>Running OceanTracker<a class="headerlink" href="#running-oceantracker" title="Permalink to this headline">¶</a></h1>
+  <section id="running-oceantracker-1">
+<span id="running-oceantracker"></span><h1>Running OceanTracker<a class="headerlink" href="#running-oceantracker-1" title="Permalink to this headline">¶</a></h1>
 <section id="ways-to-run">
 <h2>Ways to run<a class="headerlink" href="#ways-to-run" title="Permalink to this headline">¶</a></h2>
 <p>OceanTracker can be run in two ways.</p>
@@ -122,7 +123,7 @@
 <p>Then write code to do post processing and/or plotting, using oceantracker.post_processing.* or with user’s own tools.</p>
 </div></blockquote>
 </li>
-<li><p>From python code by:</p>
+<li><p>From python code in IDE  ( eg PyCharm, Visual Studio) by:</p>
 <blockquote>
 <div><ul class="simple">
 <li><dl class="simple">
@@ -141,8 +142,10 @@
 </ol>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If OceanTracker was istalled with a virtual environment, activate it first. Eg. in linux, if in dir above OceanTracker package, then:</p>
+<p>If OceanTracker was installed with a virtual environment, activate it first. Eg. in linux, if in dir above OceanTracker package, then:</p>
 <p><code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">./oceantracker/venv/bin/activate</span></code></p>
+<p>or windows</p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
 </aside>
 </section>
 <section id="minimal-example">
@@ -537,6 +540,7 @@ For this 3D hindcast, grey particles are stranded on the bottom, green ones are 
 <section id="run-from-code">
 <h2>Run from code<a class="headerlink" href="#run-from-code" title="Permalink to this headline">¶</a></h2>
 <p>Below is example of building a dictionary of parameters, running particle tracking and plotting:</p>
+<p>Another exmaple</p>
 <div class="literal-block-wrapper docutils container" id="container-6">
 <div class="code-block-caption"><span class="caption-text">../../../demos/run_from_code_demo.py</span><a class="headerlink" href="#container-6" title="Permalink to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># run oceantracker direct from code from dictionary built in code</span>
@@ -588,6 +592,11 @@ For this 3D hindcast, grey particles are stranded on the bottom, green ones are 
 </pre></div>
 </div>
 </div>
+</section>
+<section id="run-from-code-in-python-ide">
+<h2>Run from code in python IDE<a class="headerlink" href="#run-from-code-in-python-ide" title="Permalink to this headline">¶</a></h2>
+<p># Visual Studio</p>
+<p># PyCharm</p>
 </section>
 </section>
 

@@ -59,7 +59,10 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Installing</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#requirements">Requirements</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linux">Linux</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ways-to-run">Ways to Run</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
@@ -212,33 +215,46 @@
 </section>
 <section id="windows">
 <h2>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h2>
-<p>To create a Conda virtual environment</p>
+<p>Create a Conda virtual environment</p>
 <ol class="arabic">
-<li><p>Install Anaconda, then</p></li>
+<li><p>Install Anaconda for all users (may require admin rights), then change to dir where oceantracker files will reside eg</p>
+<p><code class="docutils literal notranslate"><span class="pre">cd</span>&#160; <span class="pre">code/mycodedir</span></code></p>
+</li>
+<li><p>Ensure git is installed, then clone repository</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/oceantracker/oceantracker.git</span></code></p>
+</div></blockquote>
+</li>
+<li><p>Change dir to that with oceantracker</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">./oceantracker</span></code></p>
+</div></blockquote>
+</li>
 <li><p>From within folder/dir where oceantracker is to be installed, clone repository</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/oceantracker/oceantracker.git</span></code></p>
 </div></blockquote>
 </li>
-<li><p>Open Andconda command prompt as administrator</p></li>
-<li><p>Create virtual environment</p>
+<li><p>Open Anaconda command prompt as administrator  (may require admin rights), then create virtual environment with file oceantracker/environment.yml</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">create</span> <span class="pre">--file</span> <span class="pre">environment.yml</span></code></p>
 </div></blockquote>
 </li>
-<li><p>Activate virtual environment</p>
+<li><p>Activate the conda virtual environment</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
 </div></blockquote>
 </li>
-<li><dl class="simple">
-<dt>For Pycharm users,</dt><dd><p># oceantracker should be one of the available Python interpreters so just select it (if it sits within Anaconda3envs dir),
-# otherwise  add virtual environment manually,  settings/project/interpreter add conda env by navigating to python.exe on dir
-# if  working in folder outside of ocean tracker will ad access with   settings/project/project structure. add root source</p>
-</dd>
-</dl>
+<li><p>install oceantracker to be accessible from other dir</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--no-deps</span> <span class="pre">-e</span> <span class="pre">.</span></code></p>
+</div></blockquote>
 </li>
 </ol>
+<section id="ways-to-run">
+<h3>Ways to Run<a class="headerlink" href="#ways-to-run" title="Permalink to this headline">¶</a></h3>
+<p>see Running ocean tracker at  <a class="reference internal" href="running_ocean_tracker.html#running-oceantracker"><span class="std std-ref">Running OceanTracker</span></a>.</p>
+</section>
 </section>
 </section>
 

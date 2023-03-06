@@ -2,7 +2,7 @@
 # eg run(params)
 import sys
 
-code_version = '0.3.04.000 2023-03-01'
+code_version = '0.3.04.001 2023-03-02'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -62,15 +62,13 @@ class _RunOceanTrackerClass(object):
 
         except GracefulError as e:
             # errors thrown by msg_logger
-            raise(GracefulError('preliminary setup had fatal errors'))
+            raise(Exception('preliminary setup had fatal errors, see hints above'))
 
         except Exception as e:
             # unexpected errors
-            print('Unexpected error  in  preliminary set up')
             print(str(e))
             traceback.print_exc()
-            sys.exit()
-            pass
+            raise(Exception('Unexpected error  in  preliminary set up'))
 
         # make message/error logger for main code  with log and error output files
         self.msg_logger = MessageLogger('M:')
@@ -81,31 +79,31 @@ class _RunOceanTrackerClass(object):
 
         # complete the setup with message logger
         try:
-
             run_builder, reader, case_builders_list = self.set_up(run_builder,msg_logger)
 
         except GracefulError as e:
             msg_logger.show_all_warnings_and_errors()
             msg_logger.write_error_log_file(e)
             msg_logger.msg(f' Graceful exit from main code', hint=' has parameters/setup has errors, see above', fatal_error=True)
-
+            return  None, True
         except Exception as e:
             # unexpected errors
             msg_logger.write_error_log_file(e)
             msg_logger.show_all_warnings_and_errors(e)
-            msg_logger.msg('unexpected error', hint='see trace back above, or .err file')
+            msg_logger.msg('unexpected error', hint='see trace back above, or .err file', fatal_error=True)
+            return None, True
+
 
         # now run cases
         full_runInfoJSON_file_name, has_errors = self._run(run_builder, case_builders_list,reader)
 
         return full_runInfoJSON_file_name, has_errors
 
-
     def setup_output_folders_and_run_builder(self, params):
         #setus up params, opens log files/ error handling, required befor mesage loger can be used
 
         if type(params) is not dict:
-            raise GracefulError('Parameter must be a dictionary or json/yaml file readable as a dictionary,given parameters are type=' + str(type(params)),
+            raise GracefulError('Parameter must be a dictionary or json/yaml file readable as a dictionary, given parameters are type=' + str(type(params)),
                                 hint='check parameter file or parameter variable is in dictionary form')
 
         run_builder={'params_from_user': deepcopy(params),
@@ -116,7 +114,7 @@ class _RunOceanTrackerClass(object):
         working_params = run_builder['working_params']
         # basic share params checks, not logged to file
         if 'shared_params' not in working_params:
-           raise GracefulError('Error >>>>>> Cannot find required top level parameter "shared_prams "',
+           raise GracefulError('Cannot find required top level parameter "shared_prams "',
                                hint = 'check parameter file or dictionary for  "shared_prams" key')
 
         shared_params = working_params['shared_params']
@@ -126,7 +124,7 @@ class _RunOceanTrackerClass(object):
             shared_params['root_output_dir']='default_root_output_dir'
 
         if type(shared_params['root_output_dir']) is not str:
-            raise GracefulError('Error >>>>>> shared_params params root_output_dir must be a stringhas type=' + str(type(params['shared_params']['output_file_base'])),
+            raise GracefulError('Shared_params params root_output_dir must be a stringhas type=' + str(type(params['shared_params']['output_file_base'])),
                                 hint='check parameter root_output_dir values type')
 
         # file base
@@ -134,7 +132,7 @@ class _RunOceanTrackerClass(object):
             shared_params['output_file_base'] = 'default_output_file_base'
 
         if type(shared_params['output_file_base']) is not str:
-            raise GracefulError('Error >>>>>> shared_params params output_file_base must be a string, has type=' + str(type(shared_params['output_file_base'])),
+            raise GracefulError('Shared_params params output_file_base must be a string, has type=' + str(type(shared_params['output_file_base'])),
                                 hint='check parameter output_file_base values type')
 
         # get output files location
@@ -146,7 +144,7 @@ class _RunOceanTrackerClass(object):
 
         # add date to run if requested
         if type(shared_params['add_date_to_run_output_dir']) is not bool:
-            raise GracefulError('Error >>>>>> shared_params params output_file_base must be a boolean, has type=' + str(type(shared_params['output_file_base'])),
+            raise GracefulError('Shared_params params output_file_base must be a boolean, has type=' + str(type(shared_params['output_file_base'])),
                                 hint='check parameter add_date_to_run_output_dir values type')
 
         if shared_params['add_date_to_run_output_dir']:

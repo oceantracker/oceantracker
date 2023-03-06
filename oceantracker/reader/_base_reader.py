@@ -63,7 +63,7 @@ class _BaseReader(ParameterBaseClass):
         self.shared_memory= {'grid' :{}, 'fields':{},'control':{}}
 
     #required read methods non time dependent variables
-    def read_nodal_x_float64(self, nc): nopass('reader method: read_x is required')
+    def read_nodal_x_as_float64(self, nc): nopass('reader method: read_x is required')
     def read_bottom_cell_index_as_int32(self, nc):nopass('reader method: read_bottom_cell_index_as_int32 is required for 3D hindcasts')
 
     # required methods time dependent variables, also require a set up method
@@ -446,7 +446,7 @@ class _BaseReader(ParameterBaseClass):
             is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
             #grid['is_dry_cell'][buffer_index, :] =  np.concatenate((data_added_to_buffer, data_added_to_buffer[:, grid['quad_cell_to_split_index']]), axis=1)
 
-    def read_open_boundary_data(self, grid):
+    def read_open_boundary_data_as_boolean(self, grid):
         is_open_boundary_node = np.full((grid['x'].shape[0],), False)
         return is_open_boundary_node
 

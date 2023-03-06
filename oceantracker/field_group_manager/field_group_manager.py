@@ -33,8 +33,6 @@ class FieldGroupManager(ParameterBaseClass):
         self.code_timer.start('setup_interp_time_step')
         self.n_buffer = nb  # buffer offset just before given time ,
 
-        # when back tracking hindcast buffer is ordered  backwards in time, and time step is still positive
-        # thus step fraction remains positive
         self.step_dt_fraction = abs(time_sec - grid_time_buffers['time'][nb]) / si.hydo_model_time_step
 
         # update 0-255 dry cell index
@@ -42,7 +40,6 @@ class FieldGroupManager(ParameterBaseClass):
 
         # find cell for xq, node list and weight for interp at calls
         si.classes['interpolator'].find_cell(xq, nb, self.step_dt_fraction, active)
-
 
         self.code_timer.stop('setup_interp_time_step')
 

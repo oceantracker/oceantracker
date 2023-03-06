@@ -108,7 +108,7 @@ class Solver(ParameterBaseClass):
                 t2 = t1 + si.model_substep_timestep * si.model_direction
 
 
-                # at this point interp is not set up for current positions this is done in pre_step_bookeeping, and after last step
+                # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
 
                 # print screen data
                 if (info['n_time_steps_completed']  + ns) % self.params['screen_output_step_count'] == 0:

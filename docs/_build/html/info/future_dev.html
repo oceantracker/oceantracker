@@ -57,11 +57,11 @@
 <li class="toctree-l1 current"><a class="reference internal" href="users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="users_guide/installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/code_structure.html">Code Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html">Parameters overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html">Post processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/documentation.html">Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html">Change log</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Future development</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#future-additions">Future additions</a></li>
@@ -133,6 +133,7 @@
 <li><p>option for particle tracking to work natively in lat/log cords</p></li>
 <li><p>RK45 solver to allow adaptive time stepping to improve accuracy for those particles where flows are rapidly varying in time or space.</p></li>
 <li><p>Read release points/polygons from file, eg shape files, csv</p></li>
+<li><p>system to check data types match those required when used in numba signatures</p></li>
 <li><dl class="simple">
 <dt>Shared/asynchronous reader to speed solution and save total memory, changes required:</dt><dd><ul class="simple">
 <li><p>reader buffer as ring buffer on global hindcast time step</p></li>
