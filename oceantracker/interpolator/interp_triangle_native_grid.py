@@ -87,7 +87,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                 xq,
                                                 part_prop['x_last_good'].data,
                                                 part_prop['status'].data,
-
                                                 part_prop['bc_cords'].data,
                                                 grid['bc_transform'],
                                                 grid['adjacency'],
@@ -101,7 +100,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         if sel.shape[0] > 0:
             self.code_timer.start('kd-tree_retrys')
-            new_cell, status, bc = self.initial_cell_guess(xq[sel,:2])
+            new_cell  = self.initial_cell_guess(xq[sel,:])
             part_prop['n_cell'].set_values(new_cell, sel)
             triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
                                         xq,
@@ -121,7 +120,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_particle_subset_buffer())
             if sel.shape[0] > 0:
                 si.msg_logger.msg('Some BC walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles',warning=True)
-                self.info['failed_searches'] += sel.shape[0]
                 # make notes for log file enabling follow up
                 si.msg_logger.msg('failed BCwalks_after_KDtree_retry, particles' + str(sel.tolist()) + ' xq =' + str(xq[sel, :].tolist()),warning=True)
                 # kill particles
@@ -137,7 +135,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         dist, n_cell = self.KDtree.query(xq[:, :2])
 
-        n_cell = n_cell.astype(np.int32)  # KD tre gives in64need for compartibilty of types
+        n_cell = n_cell.astype(np.int32)  # KD tre gives in64need for compatibility of types
 
         n_cell[np.any(~np.isfinite(xq), axis=1)] = -1 # stops walking for non-finite initial cords
 
@@ -191,7 +189,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                        step_dt_fraction,
                                                        grid['triangles'],
                                                        n_cell,
-                                                       nz_cell,nz_nodes, z_fraction,
+                                                       nz_cell,
+                                                       nz_nodes,
+                                                       z_fraction,
                                                     z_fraction_bottom_layer, is_in_bottom_layer,
                                                        bc_cords,  si.z0,   active)
                 else:

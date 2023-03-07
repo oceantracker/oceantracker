@@ -39,7 +39,6 @@ class _BaseReader(ParameterBaseClass):
                                                     'zlevel': PVC(None, str),
                                                     'bottom_cell_index': PVC(None, str),
                                                     'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-
                                  'field_variables': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3,is_required=True),
                                                      'water_depth': PVC(None, str),
                                                      'tide': PVC(None, str),

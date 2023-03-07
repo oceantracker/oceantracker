@@ -101,6 +101,7 @@ def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz
                 F_out[n, c] +=     BCcord[n, m] * (F1[n_node, nz_below[m], c] * zf1 + F1[n_node, nz_above[m], c] * zf)*dt1  \
                                 +  BCcord[n, m] * (F2[n_node, nz_below[m], c] * zf1 + F2[n_node, nz_above[m], c] * zf)*step_dt_fraction  # second time step
 
+
 @njit
 def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,
                            nz_cell,nz_nodes, z_fraction, z_fraction_bottom_layer, is_in_bottom_layer, BCcord, z0, active):
@@ -129,14 +130,16 @@ def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,
 
         zf1 = 1.0 - zf
 
-        # loop over each node in triangle
+        # loop over each node in triangle and add its contribution to interpolation
         for m in range(3):
             n_node = tri[n_cell[n], m]
             # loop over vector components
             for c in range(n_comp):
                 # add contributions from layer above and below particle, for each spatial component at two time steps
-                V_out[n, c] +=  BCcord[n, m] * (v1[n_node, nz_below[m], c] * zf1 + v1[n_node, nz_above[m], c] * zf) * dt1 \
-                             +  BCcord[n, m] * (v2[n_node, nz_below[m], c] * zf1 + v2[n_node, nz_above[m], c] * zf) * step_dt_fraction  # second time step
+                v  = (v1[n_node, nz_below[m], c] * zf1 + v1[n_node, nz_above[m], c] * zf) * dt1
+                v += (v2[n_node, nz_below[m], c] * zf1 + v2[n_node, nz_above[m], c] * zf) * step_dt_fraction
+                V_out[n, c] +=  BCcord[n, m] * v # add effect of node m
+
 
 # below are development ideas
 #_______________________________________________
