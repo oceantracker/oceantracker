@@ -221,7 +221,7 @@ class ParticleGroupManager(ParameterBaseClass):
         for key,item in si.class_interators_using_name['particle_properties']['from_fields'].items():
             si.classes['field_group_manager'].interp_named_field_at_particle_locations(key, active)
 
-        # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for update
+        # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for p in si.class_interators_using_name['particle_properties']['user'].values():
                 p.update(active)
 

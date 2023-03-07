@@ -155,7 +155,7 @@ class Solver(ParameterBaseClass):
         fgm.setup_interp_time_step(nb, t, part_prop['x'].data, alive)
 
         # update particle properties
-        pgm .update_PartProp(t, alive)
+        pgm.update_PartProp(t, alive)
 
         # update writable class lists and stats at current time step now props are up to date
         self._update_stats(t)
