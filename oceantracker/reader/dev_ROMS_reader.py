@@ -114,7 +114,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
         quad_cells_to_split = np.full((quad_cells.shape[0],), True, dtype=bool)
         tri = split_quad_cells(quad_cells, quad_cells_to_split)
 
-        return tri, quad_cells_to_split
+        return tri.astype(np.int32), quad_cells_to_split.astype(np.int32)
 
     def is_hindcast3D(self, nc):  return nc.is_var('u') # are always 3D
 
