@@ -538,6 +538,7 @@ class _RunOceanTrackerClass(object):
             field_params,var_info = reader.get_field_variable_info(hindcast,'water_depth',reader.params['field_variables']['water_depth'])
             water_depth = reader.read_file_field_variable_as4D(hindcast,var_info['component_list'][0],var_info['is_time_varying'], file_index=None)
             water_depth = reader.preprocess_field_variable(hindcast,'water_depth',water_depth)
+            water_depth= water_depth[0, :, 0, 0] # guard against  water depth being time dependent, so only write first time step of the 4D depth field
             grid['water_depth'] = np.squeeze(water_depth)
 
         hindcast.close()
