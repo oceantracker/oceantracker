@@ -197,15 +197,15 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
     # nz_with_bottom must be time independent
     # zlevel must be float32, z, float64
     # schisim LSC vertical grid means have to track node above and below separately,
-    # as cells at transions in number of depth cells are triangles in vertical, others are quadrilaterals in vertical plane
+    # as cells at transitions in number of depth cells are triangles in vertical, others are quadrilaterals in vertical plane
 
     tf2 = 1. - step_dt_fraction
 
+    # working space
     top_nz_cell = z_level_at_nodes.shape[2] - 2
     top_zlevel3= np.full((3,),top_nz_cell,dtype=np.int32)
 
     for n in active:  # loop over active particles
-
         n_vertical_steps = 0
         nodes = tri[n_cell[n], :]  # nodes for the particle's cell
         bottom_nz_nodes = nz_with_bottom[nodes]

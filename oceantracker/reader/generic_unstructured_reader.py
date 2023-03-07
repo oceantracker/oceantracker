@@ -25,7 +25,7 @@ class GenericUnstructuredReader(_BaseReader):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
         grid['x'] = self.read_nodal_x_as_float64(nc).astype(np.float64)
-        grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc).astype(np.int32)
+        grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
         grid['quad_cell_to_split'] = np.flatnonzero(grid['quad_cells_to_split']) # make as list of indcies for calculations
 
         if self.is_hindcast3D(nc):
@@ -157,7 +157,7 @@ class GenericUnstructuredReader(_BaseReader):
         data = nc.read_a_variable(self.params['grid_variables']['triangles'])
         if self.params['one_based_indices']:  data -= 1
         quad_cells_to_split = np.full((data.shape[0],),False,dtype=bool)
-        return data[:,:3].astype(np.int32), quad_cells_to_split
+        return data[:, :3].astype(np.int32), quad_cells_to_split
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         # read in place
@@ -166,6 +166,7 @@ class GenericUnstructuredReader(_BaseReader):
     def read_bottom_cell_index_as_int32(self, nc):
         # Slayer grid, bottom cell index = zero
         data = np.zeros((self.grid['x'].shape[0],), dtype=np.int32)
+        if self.params['one_based_indices']:  data -= 1
         return data
 
 

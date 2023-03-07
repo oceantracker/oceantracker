@@ -77,7 +77,7 @@ class unstructured_FVCOM(GenericUnstructuredReader):
         return x
 
     def read_triangles_as_int32(self, nc):
-        data = nc.read_a_variable('nv').T - 1
+        data = nc.read_a_variable('nv').T - 1 # convert to zero base index
         quad_cells_to_split = np.full((data.shape[0],),False,dtype=bool)
         return data[:,:3].astype(np.int32), quad_cells_to_split
 

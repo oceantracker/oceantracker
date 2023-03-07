@@ -62,15 +62,27 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         params = self.params
         fv= params['field_variables']
 
-        if not nc.is_var('hvel') or params['depth_average']:
-            # run in depth averaged mode if only a 2D schsim run
+        if not nc.is_var('hvel'):
+            # run in depth averaged mode if only a 2D Schisim run
             params['depth_average']= True
+            msg_logger.msg(' 3D Schism velocity variable "hvel" not in hydo-model trying to run in depth average mode using "dahv" variable', note=True)
             fv['water_velocity'] = ['dahv'] # one vector component
 
-        if 'water_velocity' in self.params['field_variables_to_depth_average'] and nc.is_var('dahv'):
-            # used depth average vel in fil instead of doing depth average
-            self.params['field_variables_to_depth_average'].remove('water_velocity')
-            fv['water_velocity_depth_average'] = ['dahv']
+        if params['depth_average']:
+            #sort out which velo to use
+            if  nc.is_var('dahv'):
+                fv['water_velocity'] = ['dahv']
+                if 'water_velocity' in self.params['field_variables_to_depth_average']:
+                    # make sure wre are not also depth averaging  3D velocity when running depth averaged
+                    self.params['field_variables_to_depth_average'].remove('water_velocity')
+        else:
+            # 3D run
+            fv['water_velocity'] = ['hvel']
+            # inclcude vertical velocity if in file
+            if nc.is_var('vertical_velocity'):
+                fv['water_velocity'].append('vertical_velocity')
+            else:
+                msg_logger.msg('No "vertical_velocity" variable in Schism hydo-model files, assuming vertical_velocity=0', note=True)
 
         if  nc.is_var('minimum_depth'):
             # use schism min depth times 1.2 to allow for diff due to interp cell tide to nodes in schisms output
@@ -100,7 +112,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         grid = self.grid
         if nc.is_var('node_bottom_index'):
             data = nc.read_a_variable('node_bottom_index')
-            data -= 1
+            data -= 1 # make zero based index
             grid['vertical_grid_type'] = 'LSC'
         else:
             # Slayer grid, bottom cell index = zero
