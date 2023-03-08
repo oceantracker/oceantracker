@@ -15,7 +15,7 @@ class GenericUnstructuredReader(_BaseReader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
-        self.add_default_params({ 'dimension_map': {'node': PVC('node', str)},
+        self.add_default_params({ 'dimension_map': {'node': PVC('node', str,is_required=True)},
                                 'grid_variables': {'triangles': PVC(None, str, is_required=True)}})
 
         self.buffer_info ={'n_filled' : None}
@@ -190,7 +190,9 @@ class GenericUnstructuredReader(_BaseReader):
         return grid
 
 
-
+    def is_hindcast3D(self, nc):
+        #is zlevel defined then it is 3D
+        return  self.params['grid_variables']['zlevel'] is not None
 
 
 

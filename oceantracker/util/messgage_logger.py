@@ -84,7 +84,7 @@ class MessageLogger(object):
 
     def exit_if_prior_errors(self,msg=None):
         if self.has_fatal_errors():
-            raise GracefulError('Fatal error cannot continue' +msg if msg is not None else '', hint='Check above or run.err file for errors')
+            raise GracefulError('Fatal error cannot continue >>> ' +msg if msg is not None else '', hint='Check above or run.err file for errors')
 
     def insert_screen_line(self):
         self.msg('--------------------------------------------------------------------------')

@@ -115,7 +115,7 @@ class NetCDFhandler(object):
     def are_all_vars(self, name_list):        return all(self.are_vars(name_list))
 
     # dimensions
-    def get_dims(self): return self.file_handle.dimensions
+    def get_dims(self): return list(self.file_handle.dimensions.keys())
     def get_dim_size(self,dim_name):  return self.file_handle.dimensions[dim_name].size
 
     def is_dim(self,dim_name):return dim_name in self.file_handle.dimensions

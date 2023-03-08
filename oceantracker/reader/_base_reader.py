@@ -48,7 +48,7 @@ class _BaseReader(ParameterBaseClass):
                                                      'bottom_stress': PVC(None, str),
                                                      },
 
-                                 'dimension_map': {'time': PVC('time', str), 'node': PVC('node', str), 'z': PVC(None, str),
+                                 'dimension_map': {'time': PVC('time', str, is_required=True), 'node': PVC('node', str), 'z': PVC(None, str),
                                                    'vector2Ddim': PVC(None, str), 'vector3Ddim': PVC(None, str)},
                                  'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
                                  'search_sub_dirs': PVC(False, bool),
@@ -91,9 +91,7 @@ class _BaseReader(ParameterBaseClass):
 
     def get_number_of_z_levels(self,nc): return nc.get_dim_size(self.params['dimension_map']['z'])
 
-    def is_hindcast3D(self, nc):
-        zdim=self.params['dimension_map']['z']
-        return  zdim is not None and zdim in nc.get_var_dims(self.params['water_velocity'][0])
+    def is_hindcast3D(self, nc): nopass('must define method to test if hindcast is 3D')
 
     # working methods
 
@@ -215,7 +213,9 @@ class _BaseReader(ParameterBaseClass):
         # check dim
         for name, d in self.params['dimension_map'].items():
             if d is not None and not nc.is_dim(d):
-                msg_logger.msg('Cannot find dimension_map dimension "' + name + ' ", file dimension given is "' + d + '"', fatal_error=True)
+                msg_logger.msg('Cannot find dimension_map dimension "' + name + ' ", file dimension given is "' + d + '"',
+                               hint='Dimensions in hydro-model file = ' + str(nc.get_dims()),
+                               fatal_error=True)
 
         # check variables are there
         for vm in ['grid_variables', 'field_variables']:
