@@ -20,7 +20,7 @@ class unstructured_FVCOM(GenericUnstructuredReader):
     def __init__(self):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({ 'field_variables': {'water_velocity': PLC(['u','v','ww'], [str], fixed_len=2),
+        self.add_default_params({ 'field_variables': {'water_velocity': PLC(['u','v'], [str], fixed_len=2),
                                   'water_depth': PVC('h', str),
                                   'tide': PVC('zeta', str)},
                                   'required_file_variables': PLC(['Times','nv', 'u', 'v', 'h'], [str]),
@@ -28,6 +28,13 @@ class unstructured_FVCOM(GenericUnstructuredReader):
                                 })
         # don't use name mappings for these variables
         self.clear_default_params(['dimension_map','grid_variables','one_based_indices'])
+
+    def additional_setup_and_hindcast_file_checks(self, nc, msg_logger):
+        # include vertical velocity if in file
+        if nc.is_var('ww'):
+            self.params['field_variables']['water_velocity'].append('ww')
+        else:
+            msg_logger.msg('No vertical velocity "ww" variable in FVCOM hydro-model files, assuming vertical_velocity=0', note=True)
 
     def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.get_var_dims(var_name_in_file) for x in ['siglay','siglev'])
 
