@@ -78,15 +78,17 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         else:
             # 3D run
             fv['water_velocity'] = ['hvel']
-            # inclcude vertical velocity if in file
+            # include vertical velocity if in file
             if nc.is_var('vertical_velocity'):
                 fv['water_velocity'].append('vertical_velocity')
             else:
-                msg_logger.msg('No "vertical_velocity" variable in Schism hydo-model files, assuming vertical_velocity=0', note=True)
+                msg_logger.msg('No "vertical_velocity" variable in Schism hydro-model files, assuming vertical_velocity=0', note=True)
 
         if  nc.is_var('minimum_depth'):
             # use schism min depth times 1.2 to allow for diff due to interp cell tide to nodes in schisms output
             params['minimum_total_water_depth']= 1.2*float(nc.read_a_variable('minimum_depth'))
+
+
 
     def make_non_time_varying_grid(self,nc, grid):
         grid =super().make_non_time_varying_grid(nc, grid)
