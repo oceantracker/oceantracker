@@ -166,7 +166,6 @@ class GenericUnstructuredReader(_BaseReader):
     def read_bottom_cell_index_as_int32(self, nc):
         # Slayer grid, bottom cell index = zero
         data = np.zeros((self.grid['x'].shape[0],), dtype=np.int32)
-        if self.params['one_based_indices']:  data -= 1
         return data
 
 
