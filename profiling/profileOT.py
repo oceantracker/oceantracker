@@ -7,15 +7,15 @@ import argparse
 from datetime import datetime
 import numpy as np
 
-from oceantracker.main import run
+import oceantracker.main
 
 
 from oceantracker.util.json_util import read_JSON , write_JSON
 
-def get_params(args):
+def get_params(params, datasource=2):
 
 
-    if args.datasource==1:
+    if datasource==1:
         output_file_base= 'demo_SCHISM_3D'
         input_dir =  '..\\demos\\demo_hindcast'
         file_mask  = 'demoHindcastSchism3D.nc'
@@ -26,7 +26,7 @@ def get_params(args):
         calculation_interval = 3*3600
 
 
-    elif args.datasource==2:
+    elif datasource==2:
         output_file_base= 'Sounds'
         input_dir =  'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2008'
         file_mask  = 'schism_marl200801*.nc'
@@ -95,56 +95,66 @@ def get_params(args):
 
     return params
 
+def run_code(profiler_name, params):
+
+    profile_dir = 'results'
+    test_version = 1
+
+    results_file = 'PItest_%03.0f' % test_version + params['shared_params']['output_file_base']
+    full_ouput_dir = path.join(params['shared_params']['root_output_dir'], params['shared_params']['output_file_base'])
+    run_info_file = path.join(full_ouput_dir, params['shared_params']['output_file_base'] + '_runInfo.json')
+    case_info_file = path.join(full_ouput_dir, params['shared_params']['output_file_base'] + '_caseInfo.json')
+
+    oceantracker.main.run(params)
+    ri = read_JSON(run_info_file)
+    d = path.join(profile_dir, profiler_name, params['shared_params']['output_file_base'], platform.processor().replace(' ', '_').replace(',', '_'))
+    makedirs(d, exist_ok=True)
+    fnn = path.join(d, results_file + '_CodeVer_' + ri['code_version_info']['version'].replace(' ', '_').replace(',', '_'))
+
+    # copy case file
+    ci = read_JSON(case_info_file)
+    write_JSON(fnn +'_caseInfo.json', ci)
+    return fnn
+
+def run(profiler_name,params):
+    # plane run by command line profiler
+    fnn= run_code(profiler_name,params)
+    return fnn
+
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasource', default=1, type=int)
-    parser.add_argument('--testtype', default=1, type=int)
+    parser.add_argument('--profile_type', default=1, type=int)
     parser.add_argument('-dev', action='store_true')
     args = parser.parse_args()
 
-    params= get_params(args)
 
     # dev choices of classes
     if args.dev:
-        params['base_case_params'].update( {'interpolator': {'class_name' :'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
+        params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
 
-    profile_dir= 'results'
-    test_version = 1
+    params = get_params(args.datasource)
 
+    #params['shared_params']['max_duration'] = 12 * 3600  # 12 hour test
 
-    results_file = 'PItest_%03.0f' % test_version + params['shared_params']['output_file_base']
-    full_ouput_dir=path.join(params['shared_params']['root_output_dir'], params['shared_params']['output_file_base'])
-    run_info_file= path.join(full_ouput_dir, params['shared_params']['output_file_base']+'_runInfo.json')
-    case_info_file = path.join(full_ouput_dir, params['shared_params']['output_file_base'] + '_caseInfo.json')
+    if args.profile_type == 0:
+        run('scalelene',params)
 
+    elif args.profile_type==1:
 
-    if args.testtype==1:
-        from pyinstrument import Profiler,renderers
+        from pyinstrument import Profiler, renderers
 
         profiler = Profiler(interval=0.0002)
         profiler.start()
-        run(params)
+        fnn = run_code('pyinstrument', params)
         profiler.stop()
 
-        ri = read_JSON(run_info_file)
+        with open(fnn + '.html', mode='w') as f:
+            f.write(profiler.output_html(timeline=False))
 
-        d =  path.join(profile_dir,'pyinstrument', params['shared_params']['output_file_base'],platform.processor().replace(' ', '_').replace(',', '_') )
-        makedirs(d,exist_ok=True)
-        fnn=  path.join(d, results_file + '_CodeVer_' + ri['code_version_info']['version'].replace(' ', '_').replace(',', '_') )
-
-        # copy case file
-        ci = read_JSON(case_info_file)
-        write_JSON(fnn +'_caseInfo.json', ci)
-
-        # write pri
-        with open(fnn  + '.html',mode='w') as f:  f.write(profiler.output_html(timeline=False))
-        #with open(fnn+ '.html',mode='w') as f:          f.write(profiler.output(renderer=renderers.HTMLRenderer(timeline=False, show_all=False)))
-
-
-
-    elif args.testtype == 2:
+    elif args.profile_type == 2:
         import cProfile, pstats
         profiler = cProfile.Profile()
         profiler.enable()

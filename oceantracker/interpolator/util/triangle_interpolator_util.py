@@ -19,7 +19,7 @@ status_bad_cord = int(particle_info['status_flags']['bad_cord'])
 status_cell_search_failed = int(particle_info['status_flags']['cell_search_failed'])
 
 
-@njit((float64[:], float32[:, :], float64[:]))
+@njit((float64[:], float64[:, :], float64[:]))
 def _get_single_BC_cord_numba(x, BCtransform, bc):
     # get BC cord of x for one triangle from DT transform matrix inverse, see scipy.spatial.Delaunay
     # also return index smallest BC for walk and largest
@@ -292,7 +292,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
         walk_stats['histogram'][min(n_vertical_steps, walk_stats['histogram'].shape[0] - 1)] += 1
 
 
-@njit([(int64, float32[:, :, :], float32[:], float64, float64, int32[:], int32[:])])
+@njit([(int64, float32[:, :, :], float64[:], float64, float64, int32[:], int32[:])])
 def _eval_z_at_nz_nodes(nb, z_level_at_nodes, BCcord, tf, tf2, nodes, nz_nodes):
     # eval a at given zlevel given nodes
     z = 0.
@@ -303,7 +303,7 @@ def _eval_z_at_nz_nodes(nb, z_level_at_nodes, BCcord, tf, tf2, nodes, nz_nodes):
     return z
 
 
-@njit([(int64, int32, float32[:, :, :], int32[:], float32[:], float64, float64, int32[:], int32[:])])
+@njit([(int64, int32, float32[:, :, :], int32[:], float64[:], float64, float64, int32[:], int32[:])])
 def _eval_z_at_nz_cell(nb, nz_cell, z_level_at_nodes, bottom_nodes, BCcord, tf, tf2, nodes, nz_nodes):
     # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
     z = 0.
@@ -312,3 +312,6 @@ def _eval_z_at_nz_cell(nb, nz_cell, z_level_at_nodes, bottom_nodes, BCcord, tf, 
         z += z_level_at_nodes[nb, nodes[m], nz_nodes[m]] * BCcord[m] * tf2 \
              + z_level_at_nodes[nb + 1, nodes[m], nz_nodes[m]] * BCcord[m] * tf
     return z
+
+
+#________ old versions
