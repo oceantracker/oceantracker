@@ -338,7 +338,7 @@ class _BaseReader(ParameterBaseClass):
                        si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = fields_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid_time_buffers['zlevel'], grid['bottom_cell_index'])
 
             # read grid time, zlevel
-            # do after reading fields as some hindcasts required tide filed to get zlevel, eg FVCOM
+            # do this after reading fields as some hindcasts required tide field to get zlevel, eg FVCOM
             self.read_time_variable_grid_variables(nc, buffer_index,file_index)
 
             nc.close()
