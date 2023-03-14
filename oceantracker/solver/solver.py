@@ -39,8 +39,6 @@ class Solver(ParameterBaseClass):
             required_props_list=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'],
             required_grid_var_list=[])
 
-
-
     def initialize_run(self):
         si = self.shared_info
         grid = si.classes['reader'].grid
@@ -65,6 +63,7 @@ class Solver(ParameterBaseClass):
         pgm, fgm   = si.classes['particle_group_manager'], si.classes['field_group_manager']
         part_prop = si.classes['particle_properties']
 
+
         for n, nt in enumerate(nt_hindcast[:-1]): # one less step as last step is initial condition for next block
             nt_remaining= nt_hindcast[n:] # remaining hindcast time steps to run
             if not reader.time_steps_in_buffer(nt_remaining):
@@ -74,7 +73,6 @@ class Solver(ParameterBaseClass):
             #nb = reader.time_to_global_time_step(t) #todo needed when substeping removed
             nb = (nt -grid_time_buffers['nt_hindcast'][0])*si.model_direction
             t_hindcast = grid_time_buffers['time'][nb]  # make time exactly that of hindcast
-
 
             # do sub steps with hind-cast model step
             for ns in range(self.params['n_sub_steps']):
@@ -107,18 +105,18 @@ class Solver(ParameterBaseClass):
 
                 t2 = t1 + si.model_substep_timestep * si.model_direction
 
-
                 # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
 
                 # print screen data
                 if (info['n_time_steps_completed']  + ns) % self.params['screen_output_step_count'] == 0:
                     self.screen_output(info['n_time_steps_completed'] , nt,  nb, ns, t1, t0_step)
 
-                info['n_time_steps_completed']  += 1
+                info['n_time_steps_completed'] += 1
 
                 if abs(t2 - si.model_start_time) > si.model_duration:  break
 
-        self.pre_step_bookkeeping(nb, t2, info['n_time_steps_completed']) # update interp and write out props at last step
+        if n > 0:# if more than on set completed
+            self.pre_step_bookkeeping(nb, t2, info['n_time_steps_completed']) # update interp and write out props at last step
 
         return info['n_time_steps_completed'], t2
 
@@ -128,10 +126,10 @@ class Solver(ParameterBaseClass):
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
         fgm = si.classes['field_group_manager']
+
         # release particles
         #todo remove setp interp from particle release as done just below??
         new_particleIDs = pgm.release_particles(nb, t)
-
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
         self.info['total_alive_particles'] += alive.shape[0]
         

@@ -147,11 +147,12 @@ class GenericUnstructuredReader(_BaseReader):
         grid_time_buffers = self.grid_time_buffers
 
         grid_time_buffers['time'][buffer_index] = self.read_time(nc, file_index=file_index)
-        self.read_dry_cell_data(nc, file_index, grid_time_buffers['is_dry_cell'],buffer_index)
 
         if grid_time_buffers['zlevel'] is not None:
             # read zlevel inplace to save memory?
             self.read_zlevel_as_float32(nc, file_index, grid_time_buffers['zlevel'], buffer_index)
+
+        self.read_dry_cell_data(nc, file_index, grid_time_buffers['is_dry_cell'],buffer_index)
 
     def read_triangles_as_int32(self, nc):
         data = nc.read_a_variable(self.params['grid_variables']['triangles'])
