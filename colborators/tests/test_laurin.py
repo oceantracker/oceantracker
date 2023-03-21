@@ -1,11 +1,12 @@
 from oceantracker.main import run
 from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.util  import json_util
-from oceantracker.util  import yaml_util
+from oceantracker.util import json_util
+from oceantracker.util import yaml_util
 from os import path
 
 import argparse
 from oceantracker.post_processing.plotting import plot_tracks, plot_vertical_tracks, plot_statistics, plot_utilities
+
 statistical_polygon_list = [
     {
         "user_polygon_name": "geesthacht",
@@ -450,120 +451,206 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-
     parser.add_argument('-mode_debug', action='store_true')
     parser.add_argument('-doplots', action='store_true')
+    parser.add_argument('-doconcentration', action='store_true')
+    parser.add_argument('-dovertical', action='store_true')
     parser.add_argument('-norun', action='store_true')
+    
 
     args = parser.parse_args()
-    input_dir= 'F:\\Hindcasts\\Hindcast_samples_tests\\LaurinGermany'
+    # input_dir = 'F:\\Hindcasts\\Hindcast_samples_tests\\LaurinGermany'
+    input_dir = '/scratch/local1/hzg2'
 
-    x0 =[[502096, 5968781, -2], [485000, 5982000, -2],[470376, 5980287, -2],[ 536935,5940317, -2] ,[560849,5932934, -2],[448288.024467616, 5983779.777737856, -2]]
-    #x0 = [[502096, 5968781, -2]]
-    pulse_size = int(1000000/8) # 7 releases points/groups
+    x0 = [
+        [502096, 5968781, -2],
+        [485000, 5982000, -2],
+        [470376, 5980287, -2],
+        [536935, 5940317, -2],
+        [560849, 5932934, -2],
+        [448288, 5983779, -2]
+    ]
+
+    pulse_size = int(1000000/8)  # 7 releases points/groups
     release_interval = 0
-    pulse_size= 10
-
+    pulse_size = 10
     release_interval = 3600
-    case ={'run_params':{ 'particle_buffer_size': 120000,
-                          'open_boundary_type': 1,
-                          'block_dry_cells': True,
-            'duration': 7. * 24 * 3600,
-                'write_tracks': True},
-        'tracks_writer' : {'output_step_count': 15},
-        'solver': { 'screen_output_step_count': 1,  'n_sub_steps': 30, 'RK_order': 2},
-        'particle_release_groups': [{'points': x0,'pulse_size': pulse_size, 'release_interval': release_interval},
-                                    {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
-                                     'points': statistical_polygon_list[1]['points'],'pulse_size': 10*pulse_size, 'release_interval': release_interval}],
-        # 'dispersion': {'A_H': 0.2 ,'A_V': 0.001},
-        'dispersion': {'A_H': 0.2 ,'A_V': 0.001,'class_name':'oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ'},
-        'trajectory_modifiers': [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
-                                       'critical_friction_velocity': .01},
-            #{    "class_name": "oceantracker.trajectory_modifiers.split_particles.SplitParticles",  "splitting_interval": 180,  "split_status_greater_than": 'dead',   "probability_of_splitting": 0.01},
-                                      ],
 
-         'particle_properties': [{ 'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'}],
-         'particle_concentrations': [{'class_name': 'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D'}],
-         'fields' : [{'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocity'},
-                     {'class_name': 'oceantracker.fields.field_vertical_gradient.VerticalGradient','name_of_field': 'A_Z','name':'A_Z_vertical_gradient'}],
+    params = {
+        'shared_params': {
+            'output_file_base': 'Laurin_3d',
+            'debug': True,
+            # 'root_output_dir': 'F:\\OceanTrackerOuput\\Laurin',
+            'root_output_dir': '/scratch/local1/output',
+            'compact_mode': True
+        },
+        'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+                   'file_mask': 'schout_*.nc', 'input_dir': input_dir,
+                   'hgrid_file_name': path.join(input_dir, 'hgrid.gr3'),
+                   # fields to track at particle locations
+                   'field_variables': {'ECO_no3': 'ECO_no3', 'A_Z': 'diffusivity'},
+                   'field_variables_to_depth_average': ['water_velocity']
+                   },
+        'case_list': [
+            {
+                'run_params': {
+                    'particle_buffer_size': 120000,
+                    'open_boundary_type': 1,
+                    'block_dry_cells': True,
+                    'duration': 7. * 24 * 3600,
+                    'write_tracks': True
+                },
+                'tracks_writer': {
+                    'output_step_count': 15
+                },
+                'solver': {
+                    'screen_output_step_count': 1,  'n_sub_steps': 30, 'RK_order': 2},
+                'particle_release_groups': [
+                    {
+                        'points': x0,
+                        'pulse_size': pulse_size,
+                        'release_interval': release_interval
+                    },
+                    {
+                        'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+                        'points': statistical_polygon_list[1]['points'],
+                        'pulse_size': 10*pulse_size,
+                        'release_interval': release_interval
+                    }
+                ],
+                'dispersion': {
+                    'class_name': 'oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ',
+                    'A_H': 0.2,
+                    'A_V': 0.001
+                },
+                'trajectory_modifiers': [
+                    {
+                        'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
+                        'critical_friction_velocity': .01
+                    },
+                    # {
+                    #     "class_name": "oceantracker.trajectory_modifiers.split_particles.SplitParticles",
+                    #  "splitting_interval": 180,
+                    #  "split_status_greater_than": 'dead',
+                    #   "probability_of_splitting": 0.01
+                    # },
+                ],
+                'particle_properties': [
+                    {
+                        'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'
+                    }
+                ],
+                'particle_concentrations': [
+                    {
+                        'class_name': 'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D'
+                    }
+                ],
+                'fields': [
+                    {
+                        'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocity'
+                    },
+                    {
+                        'class_name': 'oceantracker.fields.field_vertical_gradient.VerticalGradient',
+                        'name_of_field': 'A_Z',
+                        'name': 'A_Z_vertical_gradient'
+                    }
+                ],
 
-         'velocity_modifiers': [{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.00}],
-        "particle_statistics": [
-            {
-                "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
-                "calculation_interval": 100,
-                "count_status_equal_to": 'moving',
-                "particle_property_list": [],
-                "polygon_list": statistical_polygon_list
-            },
-            {
-                "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
-                "calculation_interval": 100,
-                "count_status_equal_to": 'stranded_by_tide',
-                "particle_property_list": [],
-                "polygon_list": statistical_polygon_list
-            },
-            {
-                "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
-                "calculation_interval": 100,
-                "count_status_equal_to": 'on_bottom',
-                "particle_property_list": [],
-                "polygon_list": statistical_polygon_list
+                'velocity_modifiers': [
+                    {
+                        'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
+                        'mean': -0.00
+                    }
+                ],
+                "particle_statistics": [
+                    {
+                        "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
+                        "calculation_interval": 100,
+                        "count_status_equal_to": 'moving',
+                        "particle_property_list": [],
+                        "polygon_list": statistical_polygon_list
+                    },
+                    {
+                        "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
+                        "calculation_interval": 100,
+                        "count_status_equal_to": 'stranded_by_tide',
+                        "particle_property_list": [],
+                        "polygon_list": statistical_polygon_list
+                    },
+                    {
+                        "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
+                        "calculation_interval": 100,
+                        "count_status_equal_to": 'on_bottom',
+                        "particle_property_list": [],
+                        "polygon_list": statistical_polygon_list
+                    }
+                ]
             }
         ]
     }
 
-    params={ 'shared_params': {'output_file_base': 'Laurin_3d',
-                                'debug': True,
+    if args.mode_debug:
+        params['debug'] = True
 
-                                'root_output_dir': 'F:\\OceanTrackerOuput\\Laurin',
-                               'compact_mode': True
-                               },
-            'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
-                          'file_mask': 'schout_*.nc', 'input_dir': input_dir,
-                      'hgrid_file_name': path.join(input_dir,'hgrid.gr3'),
-                          'field_variables': { 'ECO_no3': 'ECO_no3','A_Z':'diffusivity'},# fields to track at particle locations
-                       'field_variables_to_depth_average':['water_velocity']
-                       },
-               'case_list': [case]}
-
-
-    if args.mode_debug: params['debug'] = True
-
-    test = json_util.read_JSON('../../tests/misc/test_param_files/21_10_09_depth_accuracy_test_v01.json')
-   # case['particle_release_groups'] = test['base_case_params']['particle_release_groups']
-    json_util.write_JSON('../../tests/misc/test_param_files/LaurinTest.json', params)
-    yaml_util.write_YAML('../../tests/misc/test_param_files/LaurinTest.yaml', params)
+    json_util.write_JSON(
+        '../../tests/misc/test_param_files/LaurinTest.json', params)
+    yaml_util.write_YAML(
+        '../../tests/misc/test_param_files/LaurinTest.yaml', params)
 
     if not args.norun:
         run_info_file, has_errors = run(params)
     else:
-        run_info_file = path.join(params['shared_params']['root_output_dir'],params['shared_params']['output_file_base'],params['shared_params']['output_file_base']+'_runInfo.json' )
+        run_info_file = path.join(
+            params['shared_params']['root_output_dir'],
+            params['shared_params']['output_file_base'],
+            params['shared_params']['output_file_base']+'_runInfo.json'
+        )
 
+    ax = [440000, 600000, 5910000, 6010000]
 
     if not args.doplots:
-        caseInfoFile = load_output_files.get_case_info_file_from_run_file(run_info_file)
 
+        caseInfoFile = load_output_files.get_case_info_file_from_run_file(
+            run_info_file)
+
+        track_data = load_output_files.load_particle_track_vars(
+            caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.9
+        )
         m = load_output_files.load_stats_file(caseInfoFile, nsequence=1)
-        track_data = load_output_files.load_particle_track_vars(caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.9)
-        c = load_output_files.load_concentration_vars(caseInfoFile, var_list=['particle_concentration', 'C'])
-        ax=[440000, 600000, 5910000,6010000]
 
-        plot_tracks.animate_particles(track_data, axis_lims=ax,
-                                      title='Laurin 3D Schism test',
-                                      polygon_list_to_plot=m['polygon_list'],
-                                      show_grid=True, interval=0,show_dry_cells=False)
+        plot_tracks.animate_particles(
+            track_data, axis_lims=ax,
+            title='Laurin 3D Schism test',
+            polygon_list_to_plot=m['polygon_list'],
+            show_grid=True, interval=0, show_dry_cells=False
+        )
 
-        if 1 == 0:
+    if not args.doconcentration:
 
-            anim = plot_heat_maps.animate_concentrations(c, data_to_plot=c['particle_concentration'], logscale=True, shading=True,
-                                                        axis_lims=ax, cmap='hot_r', vmin = 1.0e-7, vmax=.01,
-                                                        title='SCHISIM-3D, 2D concentrations ')
+        c = load_output_files.load_concentration_vars(
+            caseInfoFile, var_list=['particle_concentration', 'C']
+        )
 
-            anim = plot_heat_maps.animate_concentrations(c, data_to_plot=c['particle_concentration'], logscale=True,shading=False,
-                                                         axis_lims=ax, cmap='hot_r', vmin=1.0e-7, vmax=.01, back_ground_depth=False, title='SCHISIM-3D, 2D concentrations ')
+        anim = plot_statistics.animate_concentrations(
+            c, data_to_plot=c['particle_concentration'], logscale=True, shading=True,
+            axis_lims=ax, cmap='hot_r', vmin=1.0e-7, vmax=.01,
+            title='SCHISIM-3D, 2D concentrations')
 
-            plot_vertical_tracks.plot_path_in_vertical_section(track_data, title='Laurin, sometimes resuspension_jump ', particleID=0)
+        anim = plot_statistics.animate_concentrations(
+            c, data_to_plot=c['particle_concentration'], logscale=True, shading=False,
+            axis_lims=ax, cmap='hot_r', vmin=1.0e-7, vmax=.01, back_ground_depth=False,
+            title='SCHISIM-3D, 2D concentrations')
 
-            plot_vertical_tracks.plot_relative_height(track_data, title='Laurin, sometimes resuspension_jump ')
-            plot_vertical_tracks.plot_relative_height(track_data, title='Laurin, sometimes resuspension_jump ', bottom=False)
+    if not args.dovertical:
+
+        track_data = load_output_files.load_particle_track_vars(
+            caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.9
+        )
+
+        plot_vertical_tracks.plot_path_in_vertical_section(
+            track_data, title='Laurin, sometimes resuspension_jump ', particleID=0)
+
+        plot_vertical_tracks.plot_relative_height(
+            track_data, title='Laurin, sometimes resuspension_jump ')
+        plot_vertical_tracks.plot_relative_height(
+            track_data, title='Laurin, sometimes resuspension_jump ', bottom=False)
