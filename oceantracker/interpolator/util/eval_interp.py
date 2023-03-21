@@ -2,8 +2,9 @@ import numpy as np
 from numba import njit
 from oceantracker.util import  basic_util
 
+use_fast_math=False # for testing
 
-@njit
+@njit(fastmath=use_fast_math)
 def time_independent_2Dfield(F_out, F_data, tri, n_cell, BCcord, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
     # time independent  2D fields, eg water_depth
@@ -22,7 +23,7 @@ def time_independent_2Dfield(F_out, F_data, tri, n_cell, BCcord, active):
             for c in range(n_comp):
                 F_out[n, c] += bc * F[n_node, c]
 
-@njit
+@njit(fastmath=use_fast_math)
 def time_dependent_2Dfield(F_out, F_data, nb, step_dt_fraction, tri, n_cell, BCcord, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
     # time dependent  fields from two time slices in hindcast
@@ -43,7 +44,7 @@ def time_dependent_2Dfield(F_out, F_data, nb, step_dt_fraction, tri, n_cell, BCc
                 F_out[n, c] += bc * (tf2 * F1[ n_node, c] + step_dt_fraction * F2[n_node, c])
 
 # do 3D interp evaluation
-@njit
+@njit(fastmath=use_fast_math)
 def time_independent_3Dfield(F_out, F_data, tri, n_cell, nz_node, z_fraction, BCcord, active):
     #  non-time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
     # todo do not used yet?
@@ -67,7 +68,7 @@ def time_independent_3Dfield(F_out, F_data, tri, n_cell, nz_node, z_fraction, BC
             for c in range(n_comp):
                 # add contributions from layer above and below particle, for each spatial component
                 F_out[n, c] += bc * (F[n_node, nz, c] * zf1 + F[n_node, nz + 1, c] * zf)
-@njit
+@njit(fastmath=use_fast_math)
 def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz_nodes, z_fraction, BCcord,  active):
     #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
 
@@ -102,7 +103,7 @@ def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz
                 F_out[n, c] +=     BCcord[n, m] * (F1[n_node, nz_below[m], c] * zf1 + F1[n_node, nz_above[m], c] * zf)*dt1  \
                                 +  BCcord[n, m] * (F2[n_node, nz_below[m], c] * zf1 + F2[n_node, nz_above[m], c] * zf)*step_dt_fraction  # second time step
 
-@njit
+@njit(fastmath=use_fast_math)
 def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,
                            nz_cell,nz_nodes, z_fraction, z_fraction_bottom_layer, is_in_bottom_layer, BCcord, z0, active):
     #  special case of interpolating water velocity with log layer in bottom cell, linear z interpolation at other depth cells
