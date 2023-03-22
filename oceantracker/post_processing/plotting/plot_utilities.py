@@ -161,8 +161,8 @@ def _sort_colour_limits(data, vmin, vmax, log_scale, masking = True):
         vmin = np.nanmin(data_out) if vmin <= 0  else np.log10(vmin)
         vmax = np.nanmax(data_out) if vmax <= 0  else np.log10(vmax)
 
-    if not masking:
-        data[np.isnan(data)] = vmin # gives same color to all <= vmin
+    if masking:
+        data_out[np.isnan(data_out)] = vmin # gives same color to all <= vmin
 
     return vmin, vmax, data_out
 

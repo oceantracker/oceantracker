@@ -182,16 +182,16 @@ def convert_face_to_nodal_values(x, tri, face_data):
     # convert face values to nodal using inverse distance weight to face values of triangles surrounding each node
     @njit
     def inverse_distance_weight_face_values(node_map,x,xtri, data):
-        out= np.full((len(node_map),), np.nan)
+        out = np.full((len(node_map[0]),), np.nan)
 
         for node in np.arange(out.shape[0]):
 
-            if len(node_map[node]) == 0:
+            if node_map[1][node] == 0:
                 out[node] = np.nan
             else:
-                c, sum_data, sum_s =0, 0., 0.
-                for m in np.arange(len(node_map[node])):
-                    t = node_map[node][m]
+                c, sum_data, sum_s = 0, 0., 0.
+                for m in np.arange(node_map[1][node]):
+                    t = node_map[0][node][m]
                     if ~np.isnan(data[t]):
                         s= 1./np.sqrt( (x[node,0]-xtri[t,0])**2 + (x[node,1]-xtri[t,1])**2)
                         sum_data +=  data[t]*s
