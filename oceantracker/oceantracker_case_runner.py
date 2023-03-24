@@ -44,6 +44,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.minimum_total_water_depth = si.case_runner_params['reader_build_info']['reader_params']['minimum_total_water_depth']
         si.processor_number = runner_params['processor_number']
 
+        si.model_current_time = None
+        si.n_time_steps_completed = 0
+
         # set up message logging
         output_files=runner_params['output_files']
         si.msg_logger = MessageLogger('P%03.0f:' % si.processor_number)
@@ -155,6 +158,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # also used for parallel  version
         self.code_timer.start('total_model_all')
         si = self.shared_info
+
+
+
         info= self.info
         info['model_run_started'] = datetime.now()
 
@@ -183,21 +189,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         solver.initialize_run()
         time_steps_completed, t = solver.solve(nt_hindcast)
         # ------------------------------------------
-        # post run stuff
-        info = self.info
-        info['start_time'] = si.model_start_time
-        info['end_time'] = t
-        info['start_date'] = time_util.seconds_to_date(si.model_start_time)
-        info['end_date'] = time_util.seconds_to_date(t)
 
-        info['time_steps_completed'] = 1 if solver.info['n_time_steps_completed'] == 0 else solver.info['n_time_steps_completed']
 
         # close all instances
         for i in si.all_class_instance_pointers_iterator():
             i.close()
-        info['model_run_ended'] = datetime.now()
-        #info['model_run_time_sec'] = info['model_run_started']-datetime.now()
-        info['model_run_duration'] = time_util.duration_str_from_dates(info['model_run_started'], datetime.now())
+
 
         self.code_timer.stop('total_model_all')
 
@@ -399,6 +396,21 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         info['model_start_date']  = time_util.seconds_to_iso8601str(si.model_start_time)
         info['model_duration_days'] = si.model_duration/24/3600.
         info['backtracking'] = si.backtracking
+
+        # post run stuff
+        info = self.info
+        info['start_time'] = si.model_start_time
+        info['end_time'] = si.model_current_time
+        info['start_date'] = time_util.seconds_to_date(si.model_start_time)
+        info['end_date'] = time_util.seconds_to_date(si.model_current_time)
+
+        info['time_steps_completed'] = max(1, si.n_time_steps_completed)
+
+        info['model_run_ended'] = datetime.now()
+        # info['model_run_time_sec'] = info['model_run_started']-datetime.now()
+        info['model_run_duration'] = time_util.duration_str_from_dates(info['model_run_started'], datetime.now())
+
+
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'run_user_note': si.shared_params['user_note'],
              'case_user_note': si.run_params['user_note'],

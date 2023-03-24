@@ -48,7 +48,6 @@ class Solver(ParameterBaseClass):
 
         info['computation_started'] = datetime.now()
         # set up particle velocity working space for solver
-        info['n_time_steps_completed'] = 0
         info['total_alive_particles'] = 0
 
 
@@ -62,7 +61,7 @@ class Solver(ParameterBaseClass):
         info = self.info
         pgm, fgm   = si.classes['particle_group_manager'], si.classes['field_group_manager']
         part_prop = si.classes['particle_properties']
-
+        si.n_time_steps_completed = 0
 
         for n, nt in enumerate(nt_hindcast[:-1]): # one less step as last step is initial condition for next block
             nt_remaining= nt_hindcast[n:] # remaining hindcast time steps to run
@@ -83,7 +82,8 @@ class Solver(ParameterBaseClass):
 
                 # release particles, update cell location/interp, update status, write tracks etc,
                 # todo refactor all to use nt_hindcast not nb
-                self.pre_step_bookkeeping(nb, t1, info['n_time_steps_completed'])
+                si.model_current_time = t1
+                self.pre_step_bookkeeping(nb, t1)
 
                 # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
                 is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out=self.get_particle_index_buffer())
@@ -108,19 +108,19 @@ class Solver(ParameterBaseClass):
                 # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
 
                 # print screen data
-                if (info['n_time_steps_completed']  + ns) % self.params['screen_output_step_count'] == 0:
-                    self.screen_output(info['n_time_steps_completed'] , nt,  nb, ns, t1, t0_step)
+                if (si.n_time_steps_completed  + ns) % self.params['screen_output_step_count'] == 0:
+                    self.screen_output(si.n_time_steps_completed , nt,  nb, ns, t1, t0_step)
 
-                info['n_time_steps_completed'] += 1
+                si.n_time_steps_completed += 1
 
                 if abs(t2 - si.model_start_time) > si.model_duration:  break
 
         if n > 0:# if more than on set completed
-            self.pre_step_bookkeeping(nb, t2, info['n_time_steps_completed']) # update interp and write out props at last step
+            self.pre_step_bookkeeping(nb, t2) # update interp and write out props at last step
 
-        return info['n_time_steps_completed'], t2
+        return si.n_time_steps_completed, t2
 
-    def pre_step_bookkeeping(self, nb, t, n_time_steps_completed):
+    def pre_step_bookkeeping(self, nb, t):
         self.code_timer.start('pre_step_bookkeeping')
         si = self.shared_info
         part_prop = si.classes['particle_properties']
@@ -167,8 +167,7 @@ class Solver(ParameterBaseClass):
             tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
             # write tracks file
-            if n_time_steps_completed % si.classes['tracks_writer'].params['output_step_count'] == 0:
-                tracks_writer.write_all_time_varying_prop_and_data()
+            tracks_writer.write_all_time_varying_prop_and_data()
 
         self.code_timer.stop('pre_step_bookkeeping')
 

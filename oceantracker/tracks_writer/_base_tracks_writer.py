@@ -144,6 +144,9 @@ class _BaseWriter(ParameterBaseClass):
 
         self.code_timer.start('write_output')
         si= self.shared_info
+
+        if si.n_time_steps_completed % self.params['output_step_count'] != 0: return
+
         grid_time_buffers = si.classes['reader'].grid_time_buffers
 
         # write time vary info , eg "time"

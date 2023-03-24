@@ -648,7 +648,7 @@ class _RunOceanTrackerClass(object):
             if case_file is not None :
                 c= json_util.read_JSON(path.join(run_output_dir, case_file))
                 sinfo = c['class_info']['solver']
-                n_time_steps += sinfo['n_time_steps_completed']
+                n_time_steps += c['run_info']['time_steps_completed']
                 total_alive_particles += sinfo['total_alive_particles']
 
         num_cases = len(case_info_files)
