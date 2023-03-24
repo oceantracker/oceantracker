@@ -1,5 +1,5 @@
-case_list:
-- dispersion:
+base_case_params:
+  dispersion:
     A_H: 0.2
     A_V: 0.001
     class_name: oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ
@@ -10,6 +10,7 @@ case_list:
     name_of_field: A_Z
   particle_concentrations:
   - class_name: oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D
+    output_step_count: 60
   particle_properties:
   - class_name: oceantracker.particle_properties.total_water_depth.TotalWaterDepth
   particle_release_groups:
@@ -29,8 +30,8 @@ case_list:
     - - 560849
       - 5932934
       - -2
-    - - 448288.024467616
-      - 5983779.777737856
+    - - 448288
+      - 5983779
       - -2
     pulse_size: 10
     release_interval: 3600
@@ -51,10 +52,11 @@ case_list:
     pulse_size: 100
     release_interval: 3600
   particle_statistics:
-  - calculation_interval: 100
+  - calculation_interval: 60
     class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
-    count_status_equal_to: moving
-    particle_property_list: []
+    count_status_in_range:
+    - moving
+    - moving
     polygon_list: &id002
     - points:
       - - 585700.0
@@ -256,15 +258,17 @@ case_list:
       - - 468803.0
         - 5943956.0
       user_polygon_name: north_sea
-  - calculation_interval: 100
+  - calculation_interval: 60
     class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
-    count_status_equal_to: stranded_by_tide
-    particle_property_list: []
+    count_status_in_range:
+    - stranded_by_tide
+    - stranded_by_tide
     polygon_list: *id002
-  - calculation_interval: 100
+  - calculation_interval: 60
     class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
-    count_status_equal_to: on_bottom
-    particle_property_list: []
+    count_status_in_range:
+    - on_bottom
+    - on_bottom
     polygon_list: *id002
   run_params:
     block_dry_cells: true
@@ -274,10 +278,10 @@ case_list:
     write_tracks: true
   solver:
     RK_order: 2
-    n_sub_steps: 30
+    n_sub_steps: 60
     screen_output_step_count: 1
   tracks_writer:
-    output_step_count: 15
+    output_step_count: 60
   trajectory_modifiers:
   - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
     critical_friction_velocity: 0.01
