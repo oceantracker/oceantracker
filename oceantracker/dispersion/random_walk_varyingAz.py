@@ -31,7 +31,7 @@ class RandomWalkVaryingAZ(RandomWalk):
         si= self.shared_info
         prop = si.classes['particle_properties']
         self._add_random_walk_velocity_modifier(prop['A_Z'].data, prop['A_Z_vertical_gradient'].data,
-                                                self.info['random_walk_velocity'], si.model_substep_timestep,
+                                                self.info['random_walk_velocity'], si.solver_info['model_timestep'],
                                                 active, prop['velocity_modifier'].data)
 
     @staticmethod

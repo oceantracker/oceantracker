@@ -25,11 +25,10 @@ def iso8601str_to_seconds(s):  return date_to_seconds(date_from_iso8601str(s))
 
 def date_to_seconds(date): return  (date-ot_time_zero()).total_seconds()
 
-def add_seconds(date,s) :  return  date + timedelta(seconds=s)
+
 
 def diff(date1,date2) :  return  (date1 - date2).total_seconds()
 
-def duration_str_from_dates(date1, date2) : return  str(date2 - date1)
 
 def date_from_iso8601str(s, err_msg='')  :
     try:

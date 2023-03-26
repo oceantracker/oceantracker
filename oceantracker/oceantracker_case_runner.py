@@ -21,7 +21,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def run(self, runner_params):
         si=self.shared_info
         si.reset()  # clear out classes from class instance of SharedInfo if running series of mains
-
+        t0 = datetime.now()
         # basic param shortcuts
         si.shared_params = runner_params['shared_params']
         si.run_params = runner_params['case_params']['run_params']
@@ -36,16 +36,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # other useful shared values
         si.backtracking = si.shared_params['backtracking']
         si.model_direction = -1 if si.backtracking else 1
+
         si.write_output_files = si.shared_params['write_output_files']
         si.write_tracks = si.run_params['write_tracks']
         si.retain_culled_part_locations = si.run_params['retain_culled_part_locations']
         si.compact_mode = si.shared_params['compact_mode']
+
         si.z0 = si.run_params['z0']
         si.minimum_total_water_depth = si.case_runner_params['reader_build_info']['reader_params']['minimum_total_water_depth']
         si.processor_number = runner_params['processor_number']
 
-        si.model_current_time = None
-        si.n_time_steps_completed = 0
 
         # set up message logging
         output_files=runner_params['output_files']
@@ -62,7 +62,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         try:
             self._set_up_run(runner_params)
             self._make_core_class_instances(runner_params)
+            si.solver_info = si.classes['solver'].info  # allows shortcut access from other classes
             self._initialize_solver_and_core_classes()
+
+
             self._make_and_initialize_user_classes()
             si.classes['dispersion'].initialize()  # is not done in _initialize_solver_and_core_classes as it may depend on user classes to work
 
@@ -86,13 +89,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # try running case
         try:
             self._do_a_run()
-            case_info = self._get_case_info()
+            case_info = self._get_case_info(t0)
 
             if si.shared_params['write_output_files']:
                 case_info_file = si.output_file_base + '_caseInfo.json'
                 json_util.write_JSON(path.join(si.run_output_dir, case_info_file), case_info)
 
-            si.msg_logger.write_progress_marker('Ended ' + si.output_file_base + ',  elapsed time =' + self.info['model_run_duration'])
+
 
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
@@ -108,10 +111,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # reshow warnings
         si.msg_logger.show_all_warnings_and_errors()
-
+        si.msg_logger.insert_screen_line()
         si.msg_logger.write_progress_marker('Finished case number %3.0f, ' % si.processor_number + ' '
                                             + si.output_files['output_file_base']
-                                           + ' at ' + time_util.iso8601_str(datetime.now()))
+                                            + ' started: ' + str(t0)
+                                            + ', ended: ' + str(datetime.now()))
+        si.msg_logger.msg('Elapsed time =' + str(datetime.now() - t0), tabs=3)
+        si.msg_logger.insert_screen_line()
         si.msg_logger.close()
         return case_info_file, False
 
@@ -168,12 +174,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         p, reader, f = si.classes['particle_group_manager'], si.classes['reader'], si.classes['field_group_manager']  # for later use
 
 
-        si.msg_logger.write_progress_marker('Starting ' + si.output_file_base + f',  duration: {(si.model_duration / 24 / 3600):4}')
+        si.msg_logger.write_progress_marker('Starting ' + si.output_file_base + f',  duration: {(si.solver_info["model_duration"] / 24 / 3600):4}')
 
 
         # get hindcast step range
-        nt0 = reader.time_to_global_time_step(si.model_start_time)
-        nt1 = reader.time_to_global_time_step(si.model_start_time +  int(si.model_direction)*si.model_duration)
+        nt0 = reader.time_to_global_time_step(si.solver_info['model_start_time'])
+        nt1 = reader.time_to_global_time_step(si.solver_info['model_start_time'] +  int(si.model_direction)*si.solver_info['model_duration'])
         nt_hindcast = nt0 + int(si.model_direction)*np.arange(0 , abs(nt1-nt0))
 
         # trim required global time steps to fit in hindcast range
@@ -183,11 +189,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # fill and process buffer until there is less than 2 steps
         si.msg_logger.insert_screen_line()
-        si.msg_logger.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.model_duration / 24 / 3600))
+        si.msg_logger.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.solver_info['model_duration'] / 24 / 3600))
 
         #------------------------------------------
         solver.initialize_run()
-        time_steps_completed, t = solver.solve(nt_hindcast)
+        solver.solve(nt_hindcast)
         # ------------------------------------------
 
 
@@ -315,10 +321,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         duration = min(abs(t_end - t_start), si.run_params['duration'], si.shared_params['max_duration'])
 
         #todo make part of si info to ease write to json case_info??
-        si.model_start_time = t_start
-        si.model_duration = duration
-        si.hydo_model_time_step = si.reader_build_info['sorted_file_info']['hydro_model_time_step']
-        si.model_substep_timestep = si.hydo_model_time_step / si.classes['solver'].params['n_sub_steps']
+        si.solver_info['model_start_time'] = t_start
+        si.solver_info['model_start_date'] = t_start.astype('datetime64[s]')
+        si.solver_info['model_duration'] = duration
+
+        #todo change when using more than one reader
+        si.solver_info['hydo_model_time_step'] = si.reader_build_info['sorted_file_info']['hydro_model_time_step']
+
+        si.solver_info['model_timestep'] =  si.solver_info['hydo_model_time_step'] / si.classes['solver'].params['n_sub_steps']
 
         # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
         si.time_of_nominal_first_occurrence = si.model_direction * np.inf
@@ -385,31 +395,18 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     # ____________________________
     # internal methods below
     # ____________________________
-    def _get_case_info(self):
+    def _get_case_info(self, t0):
         si = self.shared_info
         pgm= si.classes['particle_group_manager']
         info = self.info
         info['date_of_time_zero'] = time_util.ot_time_zero()
         r = si.classes['reader']
+
         info['time_zone'] = r.params['time_zone']
-        info['model_timestep'] = si.model_substep_timestep
-        info['model_start_date']  = time_util.seconds_to_iso8601str(si.model_start_time)
-        info['model_duration_days'] = si.model_duration/24/3600.
         info['backtracking'] = si.backtracking
 
-        # post run stuff
-        info = self.info
-        info['start_time'] = si.model_start_time
-        info['end_time'] = si.model_current_time
-        info['start_date'] = time_util.seconds_to_date(si.model_start_time)
-        info['end_date'] = time_util.seconds_to_date(si.model_current_time)
 
-        info['time_steps_completed'] = max(1, si.n_time_steps_completed)
-
-        info['model_run_ended'] = datetime.now()
-        # info['model_run_time_sec'] = info['model_run_started']-datetime.now()
-        info['model_run_duration'] = time_util.duration_str_from_dates(info['model_run_started'], datetime.now())
-
+        info.update(dict(started= str(t0),ended= str(datetime.now()), elapsed_time = str(datetime.now() - t0)))
 
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'run_user_note': si.shared_params['user_note'],
@@ -418,6 +415,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'file_written': datetime.now().isoformat(),
              'code_version_info': si.case_runner_params['code_version_info'],
              'run_info' : info,
+             'solver_info' : si.solver_info,
              'hindcast_info': r.get_hindcast_info(),
              'particle_release_group_info' : [],
              'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),

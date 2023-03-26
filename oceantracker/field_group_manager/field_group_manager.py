@@ -33,7 +33,7 @@ class FieldGroupManager(ParameterBaseClass):
         self.code_timer.start('setup_interp_time_step')
         self.n_buffer = nb  # buffer offset just before given time ,
 
-        self.step_dt_fraction = abs(time_sec - grid_time_buffers['time'][nb]) / si.hydo_model_time_step
+        self.step_dt_fraction = abs(time_sec - grid_time_buffers['time'][nb]) / si.solver_info['hydo_model_time_step']
 
         # update 0-255 dry cell index
         field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, grid_time_buffers['is_dry_cell'],   grid_time_buffers['dry_cell_index'])

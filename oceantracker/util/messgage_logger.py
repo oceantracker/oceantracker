@@ -50,6 +50,8 @@ class MessageLogger(object):
             m[0] += msg_str('>>> Warning: ' , tabs)
         elif note:
             m[0] += msg_str('>>> Note: ', tabs)
+        else:
+            m[0] += msg_str('', tabs)
 
         if tag is not None: m[0] += ', in ' + tag + '>'
 

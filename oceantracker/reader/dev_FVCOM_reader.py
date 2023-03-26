@@ -111,7 +111,7 @@ class unstructured_FVCOM(GenericUnstructuredReader):
         else:
             # get dry cells from water depth and tide
             grid = self.grid
-            fields = self.shared_info.classes['fields']
+            fields = si.classes['fields']
             reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
                                                     si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
 

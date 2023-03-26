@@ -2,7 +2,7 @@ from  copy import deepcopy, copy
 import numpy as np
 import json
 from os import path
-from datetime import datetime,date
+from datetime import datetime,date, timedelta
 
 
 def write_JSON(file_name,d, indent=4):
@@ -62,11 +62,18 @@ class MyEncoder(json.JSONEncoder):
                 val =float(obj)  if np.isfinite(obj) else None
                 return val
 
+            # date/time strings
             elif isinstance(obj, (datetime, date)):
                 return obj.isoformat()
 
             elif isinstance(obj,type):
                 return obj.__name__
+
+            elif type(obj) == np.datetime64:
+                return str(obj)
+
+            elif type(obj) == np.timedelta64:
+                return str(obj.astype(timedelta)) # timedelta has better formating
 
             elif isinstance(obj,np.dtype):
                 return str(obj)

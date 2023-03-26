@@ -228,17 +228,17 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         age_max = abs(self.params['max_age_to_bin'])
 
         # check age order and length
-        if age_min >  self.shared_info.model_duration:
+        if age_min >  si.solver_info['model_duration']:
             si.msg_logger.msg(' parameter min_age_to_bin must be > duration of model run (min,max) = '
-                                    + str([age_min, age_max]) + ', duration=' + str(self.shared_info.model_duration), fatal_error=True)
+                                    + str([age_min, age_max]) + ', duration=' + str(si.solver_info['model_duration']), fatal_error=True)
 
         if age_max <= age_min:
             si.msg_logger.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
-                                    + str([age_min,age_max ]) + ', duration=' + str(self.shared_info.model_duration),fatal_error=True)
+                                    + str([age_min,age_max ]) + ', duration=' + str(si.solver_info['model_duration']),fatal_error=True)
 
         # arange requites one mere step beyong required max_age
         dage= abs(int(self.params['age_bin_size']))
-        stats_grid['age_bin_edges'] =  float(self.shared_info.model_direction) * np.arange(int(age_min), int(age_max+dage), dage)
+        stats_grid['age_bin_edges'] =  float(si.model_direction) * np.arange(int(age_min), int(age_max+dage), dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
             si.msg_logger.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative', fatal_error=True)
@@ -258,7 +258,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         self.count_all_particles =  np.full((stats_grid['age_bins'].shape[0], len(si.classes['particle_release_groups'])) , 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
-            if p_name in self.shared_info.classes['particle_properties']:
+            if p_name in si.classes['particle_properties']:
                 self.sum_binned_part_prop[p_name] = np.full(dim_sizes, 0.)  # zero fro summing
             else:
                 self.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)

@@ -277,7 +277,6 @@ class _BaseReader(ParameterBaseClass):
 
         return params, var_info
     
-
     def time_steps_in_buffer(self, nt_hindcast_remaining):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
         nt_hindcast = self.grid_time_buffers['nt_hindcast']
@@ -460,6 +459,7 @@ class _BaseReader(ParameterBaseClass):
         return abs(self.get_last_time_in_hindcast() - self.get_first_time_in_hindcast())
 
     def time_to_global_time_step(self, t):
+        #todo remove when stepping model in time no time step, and when using buffer??
         si = self.shared_info
         fi = self.reader_build_info['sorted_file_info']
         nt = (fi['n_time_steps_in_hindcast'] - 1) * (t - self.get_first_time_in_hindcast()) / (self.get_last_time_in_hindcast() - self.get_first_time_in_hindcast())
@@ -468,6 +468,19 @@ class _BaseReader(ParameterBaseClass):
         else:
             nt = np.floor(nt)
         return int(nt)
+
+    def time_to_reader_time_step(self,t):
+        # global time step for buffer always ordered forward in time,
+        si = self.shared_info
+        fi = self.reader_build_info['sorted_file_info']
+        nt = (fi['n_time_steps_in_hindcast'] - 1) * (t - self.get_first_time_in_hindcast()) / (self.get_last_time_in_hindcast() - self.get_first_time_in_hindcast())
+
+        if si.backtracking:
+            nt = np.ceil(nt)
+        else:
+            nt = np.floor(nt)
+        return int(nt)
+
 
     def get_buffer_index(self,nt_global):
         fi = self.reader_build_info['sorted_file_info']

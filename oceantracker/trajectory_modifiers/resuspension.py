@@ -49,7 +49,7 @@ class BasicResuspension(_BaseTrajectoryModifier):
         self.start_update_timer()
         si= self.shared_info
         info = self.info
-        info['resuspension_factor']= 2.0*0.4*si.z0*si.model_substep_timestep/(1. - 2./np.pi)
+        info['resuspension_factor']= 2.0*0.4*si.z0*si.solver_info['model_timestep']/(1. - 2./np.pi)
         info['min_resuspension_jump']  = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
 
         # redsuspend those on bottom and friction velocity exceeds critical value
