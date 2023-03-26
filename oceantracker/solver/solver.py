@@ -1,7 +1,7 @@
 from time import perf_counter
 
 import numpy as np
-
+from datetime import datetime, timedelta
 from oceantracker.util import time_util
 from datetime import datetime
 
@@ -51,39 +51,47 @@ class Solver(ParameterBaseClass):
         info['total_alive_particles'] = 0
 
 
-    def solve(self, nt_hindcast):
+    def solve(self, nt_hindcast_all):
         # solve for data in buffer
         si = self.shared_info
         reader = si.classes['reader']
         grid = reader.grid
         grid_time_buffers = reader.grid_time_buffers
 
-        info = self.info
-        pgm, fgm   = si.classes['particle_group_manager'], si.classes['field_group_manager']
-        part_prop = si.classes['particle_properties']
-        si.n_time_steps_completed = 0
+        info = self.info # same as si.solver_info
 
-        for n, nt in enumerate(nt_hindcast[:-1]): # one less step as last step is initial condition for next block
-            nt_remaining= nt_hindcast[n:] # remaining hindcast time steps to run
+        pgm, fgm = si.classes['particle_group_manager'], si.classes['field_group_manager']
+        part_prop = si.classes['particle_properties']
+        info['time_steps_completed'] = 0
+
+        for n, nt_hindcast in enumerate(nt_hindcast_all[:-1]): # one less step as last step is initial condition for next block
+            nt_remaining= nt_hindcast_all[n:] # remaining hindcast time steps to run
             if not reader.time_steps_in_buffer(nt_remaining):
                 reader.fill_time_buffer(nt_remaining) # get next steps into buffer if not in buffer
 
             # set up run now data in buffer
             #nb = reader.time_to_global_time_step(t) #todo needed when substeping removed
-            nb = (nt -grid_time_buffers['nt_hindcast'][0])*si.model_direction
+            nb = (nt_hindcast -grid_time_buffers['nt_hindcast'][0])*si.model_direction
+
             t_hindcast = grid_time_buffers['time'][nb]  # make time exactly that of hindcast
+
+            info['current_hydro_model_time_step'] = nt_hindcast
+            info['current_reader_buffer_index'] = nb
+            info['current_hydro_model_time'] = t_hindcast
+            info['current_hydro_model_date'] =t_hindcast.astype('datetime64[s]')
+
 
             # do sub steps with hind-cast model step
             for ns in range(self.params['n_sub_steps']):
 
                 t0_step = perf_counter()
 
-                t1 = t_hindcast + ns*si.model_substep_timestep*si.model_direction
+                t1 = t_hindcast + ns*si.solver_info['model_timestep']*si.model_direction
 
                 # release particles, update cell location/interp, update status, write tracks etc,
                 # todo refactor all to use nt_hindcast not nb
-                si.model_current_time = t1
-                self.pre_step_bookkeeping(nb, t1)
+
+                self.pre_step_bookkeeping(nt_hindcast + ns, t1)
 
                 # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
                 is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out=self.get_particle_index_buffer())
@@ -103,29 +111,41 @@ class Solver(ParameterBaseClass):
                 #--------------------------------------
                 self.code_timer.stop('integration_step')
 
-                t2 = t1 + si.model_substep_timestep * si.model_direction
+                t2 = t1 + info['model_timestep'] * si.model_direction
 
                 # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
 
                 # print screen data
-                if (si.n_time_steps_completed  + ns) % self.params['screen_output_step_count'] == 0:
-                    self.screen_output(si.n_time_steps_completed , nt,  nb, ns, t1, t0_step)
+                if (si.solver_info['time_steps_completed']  + ns) % self.params['screen_output_step_count'] == 0:
+                    self.screen_output(si.solver_info['time_steps_completed'] , nt_hindcast,  nb, ns, t1, t0_step)
 
-                si.n_time_steps_completed += 1
+                info['time_steps_completed'] += 1
 
-                if abs(t2 - si.model_start_time) > si.model_duration:  break
+                if abs(t2 - info['model_start_time']) > info['model_duration']:  break
 
+        # write out props etc at last step
         if n > 0:# if more than on set completed
-            self.pre_step_bookkeeping(nb, t2) # update interp and write out props at last step
+            self.pre_step_bookkeeping(nb, t2)
 
-        return si.n_time_steps_completed, t2
+        info['model_end_time'] = t2
+        info['model_end_date'] = t2.astype('datetime64[s]')
+        info['model_run_duration'] =  info['model_end_time'] -info['model_start_time']
+        info['model_run_duration_actual'] = info['model_end_date']- info['model_start_date']
 
-    def pre_step_bookkeeping(self, nb, t):
+    def pre_step_bookkeeping(self, nt, t):
         self.code_timer.start('pre_step_bookkeeping')
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
         fgm = si.classes['field_group_manager']
+
+        info = self.info  # same as si.solver_info
+
+        info['current_model_time'] = t
+        info['current_model_time_step'] = nt
+        info['current_model_date'] = t.astype('datetime64[s]')
+
+        nb = info['current_reader_buffer_index']
 
         # release particles
         #todo remove setp interp from particle release as done just below??
@@ -182,7 +202,7 @@ class Solver(ParameterBaseClass):
         part_prop =  si.classes['particle_properties']
 
         # note here subStep_time_step has sign of forwards/backwards
-        dt = si.model_substep_timestep*si.model_direction
+        dt = si.solver_info['model_timestep']*si.model_direction
         dt2=dt/2.
         # set up views of  working variable space
         x1      = part_prop['x_last_good'].data
@@ -243,11 +263,11 @@ class Solver(ParameterBaseClass):
     def screen_output(self,n_steps, nt,  nb,  ns, t1, t0_step):
 
         si= self.shared_info
-        fraction_done= abs((t1 -si.model_start_time) / si.model_duration)
+        fraction_done= abs((t1 -si.solver_info['model_start_time']) / si.solver_info['model_duration'])
         s = '%02.0f%%:' % (100* fraction_done)
         s += '%06.0f:' % n_steps + 'h%06.0f:' % (nt) + 's%02.0f:' % ns + 'b%03.0f:' % nb
 
-        t = abs( t1-si.model_start_time)
+        t = abs( t1-si.solver_info['model_start_time'])
         s += 'Day ' +  ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(t1) + ':'

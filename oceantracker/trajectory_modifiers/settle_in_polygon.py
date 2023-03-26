@@ -36,7 +36,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         self.polygon = InsidePolygon(verticies=a)# do set up to speed inside using pre-calculation
 
         # add particle prop to track which are inside polygon, which will be automatically written to output
-        particle= self.shared_info.classes['particle_group_manager']
+        particle= si.classes['particle_group_manager']
         particle.create_particle_property( 'manual_update',dict(name='is_frozen_in_polygon', dtype=np.int8))
 
         # ad a parameter to record when last released

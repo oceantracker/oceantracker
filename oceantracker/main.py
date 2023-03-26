@@ -261,16 +261,17 @@ class _RunOceanTrackerClass(object):
 
     def _run(self,run_builder, case_builders_list, reader):
 
-
+        d0 = datetime.now()
+        t0 = perf_counter()
         run_info = {'user_note': {}, 'screen_log': [],
-                    'run_started': datetime.now(),
+                    'run_started': str(d0),
                     'run_ended': None,
                     'elasped_time': None,
                     'performance': {},
                     'output_files': {},
                     }
 
-        t0 = time.perf_counter()
+
         output_files= run_builder['output_files']
         working_params = run_builder['working_params']
 
@@ -284,10 +285,11 @@ class _RunOceanTrackerClass(object):
         # ----------------------------------------------------------------------------------------------
 
         # tidy up run
+        tnow= datetime.now()
         run_info.update({
             'user_note': working_params['shared_params']['user_note'],
-            'run_ended': datetime.now(),
-            'elasped_time': time_util.duration_str_from_dates(run_info['run_started'], datetime.now()),
+            'run_ended':tnow ,
+            'elasped_time': str(tnow-d0),
             'code_version_info': self._U2_code_version_info(),
             'computer': basic_util.get_computer_info(),
             'user_supplied_params':run_builder['params_from_user'],  # add params
@@ -301,9 +303,11 @@ class _RunOceanTrackerClass(object):
 
         # the end
         ml.show_all_warnings_and_errors()
-        ml.write_progress_marker('Finished ' + package_fancy_name + ' at ' + time_util.iso8601_str(datetime.now()))
-        ml.write_progress_marker('Output in ' + output_files['run_output_dir'])
-        ml.write_progress_marker('Run time  =  ' + str(run_info['elasped_time']))
+        ml.insert_screen_line()
+        ml.write_progress_marker('Finished ' + '---  started: ' + str(t0) + '---  ended: ' + str(datetime.now()))
+        ml.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
+        ml.msg('Output in ' + output_files['run_output_dir'], tabs=4)
+        ml.insert_screen_line()
         ml.close()
 
         has_errors= any(case_error)
@@ -648,7 +652,7 @@ class _RunOceanTrackerClass(object):
             if case_file is not None :
                 c= json_util.read_JSON(path.join(run_output_dir, case_file))
                 sinfo = c['class_info']['solver']
-                n_time_steps += c['run_info']['time_steps_completed']
+                n_time_steps += sinfo['time_steps_completed']
                 total_alive_particles += sinfo['total_alive_particles']
 
         num_cases = len(case_info_files)

@@ -80,7 +80,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def select_particles_to_count(self, out):
         # select  those> 0 or equal given value to count in stats
         si = self.shared_info
-        part_prop = self.shared_info.classes['particle_properties']
+        part_prop = si.classes['particle_properties']
 
         sel = part_prop['status'].find_those_in_range_of_values(
                 si.particle_status_flags[self.params['count_status_in_range'][0]],

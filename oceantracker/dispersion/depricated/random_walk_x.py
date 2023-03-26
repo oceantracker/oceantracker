@@ -14,7 +14,7 @@ class RandomWalkV1(_BaseTrajectoryModifer):
         si=self.shared_info
         info= self.info
         # get time step from solver
-        dt = si.model_substep_timestep
+        dt = si.solver_info['model_timestep']
 
         info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
         if not si.hydro_model_is3D:

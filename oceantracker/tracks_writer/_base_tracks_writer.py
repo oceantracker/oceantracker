@@ -3,7 +3,6 @@ from os import  path
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import  ParameterBaseClass
 from oceantracker.util.basic_util import nopass
-from oceantracker.util.time_util import seconds_to_short_date
 from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
 
@@ -13,7 +12,6 @@ from datetime import datetime
 
 class _BaseWriter(ParameterBaseClass):
     # particle property  write modes,   used to set when to write  properties to output, as well as if to calculate at all
-
 
 
     def __init__(self):
@@ -145,7 +143,7 @@ class _BaseWriter(ParameterBaseClass):
         self.code_timer.start('write_output')
         si= self.shared_info
 
-        if si.n_time_steps_completed % self.params['output_step_count'] != 0: return
+        if si.solver_info['time_steps_completed'] % self.params['output_step_count'] != 0: return
 
         grid_time_buffers = si.classes['reader'].grid_time_buffers
 

@@ -19,7 +19,7 @@ class SplitParticles(_BaseTrajectoryModifier):
 
         super().initialize()  # set up using regular grid for  stats
         si= self.shared_info
-        self.time_of_last_split = self.shared_info.model_start_time
+        self.time_of_last_split = si.solver_info['model_start_time']
 
     def select_particles_to_split(self, buffer_index, time, active):
         # get indices of particles to split
