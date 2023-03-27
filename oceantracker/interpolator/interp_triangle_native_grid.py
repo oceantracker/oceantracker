@@ -13,6 +13,7 @@ from oceantracker.interpolator.util import triangle_interpolator_util as triangl
 
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
 
+
 class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     # uses tweaked sci py which allows using start triangle location
@@ -59,6 +60,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             p.create_particle_property('manual_update', dict(name='is_in_bottom_layer', write=False, dtype=np.int8, initial_value=0.,
                                 description=' flag particle sin bottom layer fore log layer velocity interp'))
 
+    #@profile
     def find_cell(self, xq, nb,step_dt_fraction, active):
         # locate cell in place
         # nt give but not needed in 2D
@@ -76,6 +78,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             #print('vcell', self.info['n_total_vertical_search_steps'] / active.shape[0])
             self.code_timer.stop('find_depth_cell')
 
+    #@profile
     def locate_BCwalk(self,xq, nb,step_dt_fraction, active):
         # Bary Centric walk, flags land triangles in numba code
         si = self.shared_info
@@ -95,7 +98,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                 self.params['bc_walk_tol'],
                                                 self.params['max_search_steps'],
                                                 si.case_params['run_params']['open_boundary_type'] == 1,
-                                                active,self.walk_stats[0],  part_prop['n_cell'].data)
+                                                active,
+                                                self.walk_stats[0],
+                                                part_prop['n_cell'].data)
         sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_particle_subset_buffer())
 
         if sel.shape[0] > 0:
@@ -301,6 +306,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                      n_cell,
                                                      bc_cords, active)
                 return  output
+
 
     def get_depth_cell(self, xq, nb, step_dt_fraction,active):
         # find depth cell number starting with a guess of previous depth cell

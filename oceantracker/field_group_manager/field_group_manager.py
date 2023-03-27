@@ -2,6 +2,8 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass, make_clas
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from oceantracker.field_group_manager.util import  field_group_manager_util
 
+
+
 #TODO allow feilds to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
 
@@ -21,7 +23,6 @@ class FieldGroupManager(ParameterBaseClass):
     def initialize(self):
         si=self.shared_info
         si.create_class_interator('fields', known_iteration_groups=self.known_field_types)
-
 
     def setup_interp_time_step(self,nb, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation

@@ -2,6 +2,7 @@ from random import normalvariate
 from numba import njit
 from oceantracker.dispersion.random_walk import RandomWalk
 #from oceantracker.interpolator.util.dev.vertical_walk_at_particle_location_eval_interp import _evalBCinterp
+import numpy as np
 
 class RandomWalkVaryingAZ(RandomWalk):
     # dispersion for PDE of  the form d(A_z d(V)/dz)/dz if turbulent eddy viscosity A_z depends on z adds  vertical advection to random walk equal to d A_z/dz
@@ -31,7 +32,8 @@ class RandomWalkVaryingAZ(RandomWalk):
         si= self.shared_info
         prop = si.classes['particle_properties']
         self._add_random_walk_velocity_modifier(prop['A_Z'].data, prop['A_Z_vertical_gradient'].data,
-                                                self.info['random_walk_velocity'], si.solver_info['model_timestep'],
+                                                self.info['random_walk_velocity'],
+                                                np.abs(si.solver_info['model_timestep']),
                                                 active, prop['velocity_modifier'].data)
 
     @staticmethod
@@ -46,14 +48,13 @@ class RandomWalkVaryingAZ(RandomWalk):
             for m in range(2):
                 velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
 
-            # advection required by random walk to avoid accumulation
+            # pseudo-advection required by random walk to avoid accumulation
             velocity_modifier[n, 2] += A_Z_vertical_gradient[n]  # todo limit excursion by this velocity ?
 
             # random walk in vertical
-            dz_advection = A_Z_vertical_gradient[n]*timestep
-            a_z = A_Z[n] + A_Z_vertical_gradient[n]*dz_advection/2.0 # estimate of A_z at mid-point of the time step
+            random_walk_size= np.sqrt(2. * timestep * np.abs(A_Z[n]))
+            velocity_modifier[n, 2] += normalvariate(0.,  random_walk_size/timestep) # apply vertical walk as a velocity
 
-            velocity_modifier[n, 2] += normalvariate(0., a_z /timestep)  # todo limit A_Z?
 
 
 

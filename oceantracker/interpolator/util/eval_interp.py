@@ -102,7 +102,7 @@ def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz
                 # add contributions from layer above and below particle, for each spatial component at two time steps
                 F_out[n, c] +=     BCcord[n, m] * (F1[n_node, nz_below[m], c] * zf1 + F1[n_node, nz_above[m], c] * zf)*dt1  \
                                 +  BCcord[n, m] * (F2[n_node, nz_below[m], c] * zf1 + F2[n_node, nz_above[m], c] * zf)*step_dt_fraction  # second time step
-
+#@profile
 @njit(fastmath=use_fast_math)
 def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,
                            nz_cell,nz_nodes, z_fraction, z_fraction_bottom_layer, is_in_bottom_layer, BCcord, z0, active):
