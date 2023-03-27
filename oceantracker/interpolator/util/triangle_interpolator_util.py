@@ -1,5 +1,5 @@
 import numpy as np
-from numba import njit, float64, int32, float32, int8, int64, boolean, uint8
+from numba import njit,typeof, float64, int32, float32, int8, int64, boolean, uint8
 from oceantracker.util import basic_util
 from oceantracker.common_info_default_param_dict_templates import particle_info
 
@@ -19,7 +19,7 @@ status_bad_cord = int(particle_info['status_flags']['bad_cord'])
 status_cell_search_failed = int(particle_info['status_flags']['cell_search_failed'])
 
 
-@njit((float64[:], float64[:, :], float64[:]))
+@njit(typeof((1,1))(float64[:], float64[:, :], float64[:]))
 def _get_single_BC_cord_numba(x, BCtransform, bc):
     # get BC cord of x for one triangle from DT transform matrix inverse, see scipy.spatial.Delaunay
     # also return index smallest BC for walk and largest
@@ -49,33 +49,33 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
     if bc[2] > bc[n_max]: n_max = 2
     return n_min, n_max
 
-
 # ________ Barycentric triangle walk________
+#@profile
 @njit
 def BCwalk_with_move_backs_numba2D(xq, x_old, status, BC, BCtransform, triNeighbours, current_dry_cell_index, block_dry_cells,
                                    tol, max_BC_walk_steps, has_open_boundary, active, walk_stats, n_cell):
     # Barycentric walk across triangles to find cells
 
     bc = np.full((3,), 0.)
-
+    n_dim = xq.shape[1]
+    n_min_max= np.full((2,),-1,np.int8)
     # loop over active particles in place
     for n in active:
 
         n_tri = n_cell[n]  # starting triangle
         # do BC walk
         n_steps = 0
-        if np.any(~np.isfinite(xq[n, :])):
-            if np.all(np.isfinite(x_old[n, :])):
-                for i in range(xq.shape[1]): xq[n, i] = x_old[n, i]
-            else:
-                status[n] = status_bad_cord
-                continue
+        for nn in range(n_dim):
+            if xq[n, nn] == np.nan:
+                # if any is nan copy all and move on
+                for i in range(n_dim): xq[n, i] = x_old[n, i]
+                break
 
         move_back = False
 
         while n_steps < max_BC_walk_steps:
             # update barcentric cords of xq
-            n_min, n_max = _get_single_BC_cord_numba(xq[n, :2], BCtransform[n_tri, :, :], bc)
+            n_min, n_max =_get_single_BC_cord_numba(xq[n, :2], BCtransform[n_tri, :, :], bc)
 
             if bc[n_max] < 1. + tol and tol and bc[n_min] > -tol:
                 # are now inside triangle, leave particle status as is
@@ -121,14 +121,15 @@ def BCwalk_with_move_backs_numba2D(xq, x_old, status, BC, BCtransform, triNeighb
             for i in range(3): BC[n, i] = bc[i]
 
         # step count stats
-        walk_stats['particles_located'] += 1
-        walk_stats['total_steps'] += n_steps
+        if  False:
+            walk_stats['particles_located'] += 1
+            walk_stats['total_steps'] += n_steps
 
-        # record max number of steps
-        if n_steps > walk_stats['longest_walk']:
-            walk_stats['longest_walk'] = n_steps + 1
+            # record max number of steps
+            if n_steps > walk_stats['longest_walk']:
+                walk_stats['longest_walk'] = n_steps + 1
 
-        walk_stats['histogram'][min(n_steps, walk_stats['histogram'].shape[0] - 1)] += 1
+            walk_stats['histogram'][min(n_steps, walk_stats['histogram'].shape[0] - 1)] += 1
 
 
 @njit
@@ -190,6 +191,7 @@ def get_BC_transform_matrix(points, simplices):
     return Tinvs
 
 
+#@profile
 @njit
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_level_at_nodes, tri, n_cell,
                                                   nz_with_bottom, BCcord, status,

@@ -128,18 +128,23 @@ if __name__ == '__main__':
     parser.add_argument('--datasource', default=1, type=int)
     parser.add_argument('--profile_type', default=1, type=int)
     parser.add_argument('-dev', action='store_true')
+    parser.add_argument('-test', action='store_true')
     args = parser.parse_args()
 
+    params = get_params(args.datasource)
 
     # dev choices of classes
     if args.dev:
         params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
 
-    params = get_params(args.datasource)
 
-    #params['shared_params']['max_duration'] = 12 * 3600  # 12 hour test
+
+    if args.test:
+        params['shared_params']['max_duration']  =3*24.*3600  # 12 hour test
+        params['shared_params']['max_duration'] =2. * 3600  # 12 hour test
 
     if args.profile_type == 0:
+        # not working!
         run('scalelene',params)
 
     elif args.profile_type==1:

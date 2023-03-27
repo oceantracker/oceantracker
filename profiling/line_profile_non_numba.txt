@@ -1,0 +1,390 @@
+--OceanTracker preliminary set up
+M: --------------------------------------------------------------------------
+M: Starting OceanTracker  Version 0.3.04.001 2023-03-02
+M:   Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+M: --------------------------------------------------------------------------
+M: --------------------------------------------------------------------------
+M:   - Running OceanTracker started 2023-03-27 13:54:28.938035
+M:   - Starting: Sounds
+M:   - Sorting hyrdo model files in time order
+M:         - Finished sorting hyrdo model  files 
+M:   - Input directory: G:\Hindcasts_large\MalbroughSounds_10year_benPhD\2008
+M: --------------------------------------------------------------------------
+P001: --------------------------------------------------------------------------
+P001:   - Starting case number   1,  Sounds at 2023-03-27T13:54:42.277992
+P001: --------------------------------------------------------------------------
+P001: >>> Note: Running in debug mode
+P001:   - built case instances
+P001:   - set up particle_release_groups
+P001:   - initialized all classes
+P001: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
+P001: >>> Note: When use aged binned particle stats, to get un biases stats., need to stop releasing particles "max_age_to_bin"  or max("user_age_bin_edges")  before end of run, by setting  particle param "release_duration"
+P001: >>> Note: When use aged binned particle stats, to get un biases stats., need to stop releasing particles "max_age_to_bin"  or max("user_age_bin_edges")  before end of run, by setting  particle param "release_duration"
+P001: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
+P001:     Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
+P001:   - Starting Sounds,  duration: 0.041666666666666664
+P001: --------------------------------------------------------------------------
+P001:   - Starting Sounds,  duration:  0.0 days
+P001:   - Reading-file-01 schism_marl20080101_00z_3D.nc0000:0001 Steps in file   48 nt available 000 :001, file offsets    0 :    1  nt required    0:   1, number required:    2
+P001:   -     read file at time 2008-01-01 00:30:00 file offsets 0000:0001 buffer offsets 000:001 Read:   2  time: 2071 ms
+P001:     - Total time to fill buffer   2.1 sec
+P001: >>> Note: Running in debug mode
+P001: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
+P001: >>> Note: When use aged binned particle stats, to get un biases stats., need to stop releasing particles "max_age_to_bin"  or max("user_age_bin_edges")  before end of run, by setting  particle param "release_duration"
+P001: >>> Note: When use aged binned particle stats, to get un biases stats., need to stop releasing particles "max_age_to_bin"  or max("user_age_bin_edges")  before end of run, by setting  particle param "release_duration"
+P001: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
+P001:     Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
+P001: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+P001: Traceback (most recent call last):
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\oceantracker_case_runner.py", line 91, in run
+    self._do_a_run()
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\oceantracker_case_runner.py", line 196, in _do_a_run
+    solver.solve(nt_hindcast)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\solver\solver.py", line 94, in solve
+    self.pre_step_bookkeeping(nt_hindcast + ns, t1)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\solver\solver.py", line 152, in pre_step_bookkeeping
+    new_particleIDs = pgm.release_particles(nb, t)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\particle_group_manager\particle_group_manager.py", line 73, in release_particles
+    x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\particle_release_groups\point_release.py", line 151, in release_locations
+    x, n_cell = self.check_potential_release_locations_in_bounds(x)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\particle_release_groups\point_release.py", line 246, in check_potential_release_locations_in_bounds
+    sel, n_cell = si.classes['interpolator'].are_points_inside_domain(x[:,:2])
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\interp_triangle_native_grid.py", line 163, in are_points_inside_domain
+    n_cell  = self.initial_cell_guess(xq)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\interp_triangle_native_grid.py", line 146, in initial_cell_guess
+    triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
+  File "C:\ProgramData\Anaconda3\envs\developer-oceantracker\lib\site-packages\line_profiler.py", line 115, in wrapper
+    result = func(*args, **kwds)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\util\triangle_interpolator_util.py", line 69, in BCwalk_with_move_backs_numba2D
+    if xq[n, :] == np.nan:
+ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+
+P001: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+P001: Traceback (most recent call last):
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\oceantracker_case_runner.py", line 91, in run
+    self._do_a_run()
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\oceantracker_case_runner.py", line 196, in _do_a_run
+    solver.solve(nt_hindcast)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\solver\solver.py", line 94, in solve
+    self.pre_step_bookkeeping(nt_hindcast + ns, t1)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\solver\solver.py", line 152, in pre_step_bookkeeping
+    new_particleIDs = pgm.release_particles(nb, t)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\particle_group_manager\particle_group_manager.py", line 73, in release_particles
+    x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\particle_release_groups\point_release.py", line 151, in release_locations
+    x, n_cell = self.check_potential_release_locations_in_bounds(x)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\particle_release_groups\point_release.py", line 246, in check_potential_release_locations_in_bounds
+    sel, n_cell = si.classes['interpolator'].are_points_inside_domain(x[:,:2])
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\interp_triangle_native_grid.py", line 163, in are_points_inside_domain
+    n_cell  = self.initial_cell_guess(xq)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\interp_triangle_native_grid.py", line 146, in initial_cell_guess
+    triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
+  File "C:\ProgramData\Anaconda3\envs\developer-oceantracker\lib\site-packages\line_profiler.py", line 115, in wrapper
+    result = func(*args, **kwds)
+  File "e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\util\triangle_interpolator_util.py", line 69, in BCwalk_with_move_backs_numba2D
+    if xq[n, :] == np.nan:
+ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+
+P001: >>> Error:  Unexpected error in case number [ 1] 
+P001:     Hint: check above or .err file
+M: >>> Warning: CaseInfo files missing  for case 0, or other error, case may have not completed, check for .err file!!!!!!, error type= bool
+M: >>> Warning: CaseInfo files missing  for case 0, or other error, case may have not completed, check for .err file!!!!!!, error type= bool
+M: --------------------------------------------------------------------------
+M:   - Finished ---  started: 18528.0944757---  ended: 2023-03-27 13:54:49.864106
+M:       Elapsed time =0:00:07.589115
+M:         Output in F:\OceanTrackerOuput\OceanTrackerProfiling\Sounds
+M: --------------------------------------------------------------------------
+Wrote profile results to profileOT.py.lprof
+Timer unit: 1e-07 s
+
+Total time: 0 s
+File: e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\interp_triangle_native_grid.py
+Function: locate_BCwalk at line 80
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    80                                               @profile
+    81                                               def locate_BCwalk(self,xq, nb,step_dt_fraction, active):
+    82                                                   # Bary Centric walk, flags land triangles in numba code
+    83                                                   si = self.shared_info
+    84                                                   grid = si.classes['reader'].grid
+    85                                                   grid_time_buffers = si.classes['reader'].grid_time_buffers
+    86                                                   part_prop = si.classes['particle_properties']
+    87                                           
+    88                                                   triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
+    89                                                                                           xq,
+    90                                                                                           part_prop['x_last_good'].data,
+    91                                                                                           part_prop['status'].data,
+    92                                                                                           part_prop['bc_cords'].data,
+    93                                                                                           grid['bc_transform'],
+    94                                                                                           grid['adjacency'],
+    95                                                                                           grid_time_buffers['dry_cell_index'],
+    96                                                                                           si.run_params['block_dry_cells'],
+    97                                                                                           self.params['bc_walk_tol'],
+    98                                                                                           self.params['max_search_steps'],
+    99                                                                                           si.case_params['run_params']['open_boundary_type'] == 1,
+   100                                                                                           active,self.walk_stats[0],  part_prop['n_cell'].data)
+   101                                                   sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_particle_subset_buffer())
+   102                                           
+   103                                                   if sel.shape[0] > 0:
+   104                                                       self.code_timer.start('kd-tree_retrys')
+   105                                                       new_cell  = self.initial_cell_guess(xq[sel,:])
+   106                                                       part_prop['n_cell'].set_values(new_cell, sel)
+   107                                                       triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
+   108                                                                                   xq,
+   109                                                                                   part_prop['x_last_good'].data,
+   110                                                                                   part_prop['status'].data,
+   111                                                                                   part_prop['bc_cords'].data,
+   112                                                                                   grid['bc_transform'],
+   113                                                                                   grid['adjacency'],
+   114                                                                                   grid_time_buffers['dry_cell_index'],
+   115                                                                                   si.run_params['block_dry_cells'],
+   116                                                                                   self.params['bc_walk_tol'],
+   117                                                                                   self.params['max_search_steps'],
+   118                                                                                   si.case_params['run_params']['open_boundary_type'] == 1,
+   119                                                                                   sel,    self.walk_stats[0],part_prop['n_cell'].data)
+   120                                           
+   121                                                       sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_particle_subset_buffer())
+   122                                                       if sel.shape[0] > 0:
+   123                                                           si.msg_logger.msg('Some BC walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles',warning=True)
+   124                                                           # make notes for log file enabling follow up
+   125                                                           si.msg_logger.msg('failed BCwalks_after_KDtree_retry, particles' + str(sel.tolist()) + ' xq =' + str(xq[sel, :].tolist()),warning=True)
+   126                                                           # kill particles
+   127                                                           part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
+   128                                                       self.code_timer.stop('kd-tree_retrys')
+
+Total time: 0 s
+File: e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\util\eval_interp.py
+Function: eval_water_velocity_3D at line 107
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   107                                           @profile
+   108                                           def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,
+   109                                                                      nz_cell,nz_nodes, z_fraction, z_fraction_bottom_layer, is_in_bottom_layer, BCcord, z0, active):
+   110                                               #  special case of interpolating water velocity with log layer in bottom cell, linear z interpolation at other depth cells
+   111                                           
+   112                                               n_comp = V_data.shape[3]  # time step of data is always [node,z,comp] even in 2D
+   113                                           
+   114                                               # create views to remove redundant dim at current and next time step, improves speed?
+   115                                               v1,     v2       = V_data[nb  , :, :, :], V_data[nb + 1, :, :, :]
+   116                                           
+   117                                               dt1= 1.0-step_dt_fraction
+   118                                           
+   119                                               # loop over active particles and vector components
+   120                                               for n in active:
+   121                                                   for i in range(n_comp): V_out[n, i] = 0. # zero out for summing
+   122                                           
+   123                                                   nz_below = nz_nodes[n, 0, :]
+   124                                                   nz_above = nz_nodes[n, 1, :]
+   125                                           
+   126                                                   # if in bottom cell adjust fraction to larger value to give log layer interp
+   127                                                   # first time step z_fraction[n, 10, m]
+   128                                                   if is_in_bottom_layer[n] == 1:
+   129                                                       zf = z_fraction_bottom_layer[n]
+   130                                                   else:
+   131                                                       zf = z_fraction[n]
+   132                                           
+   133                                                   zf1 = 1.0 - zf
+   134                                           
+   135                                                   # loop over each node in triangle
+   136                                                   for m in range(3):
+   137                                                       n_node = tri[n_cell[n], m]
+   138                                                       # loop over vector components
+   139                                                       for c in range(n_comp):
+   140                                                           # add contributions from layer above and below particle, for each spatial component at two time steps
+   141                                                           V_out[n, c] +=  BCcord[n, m] * (v1[n_node, nz_below[m], c] * zf1 + v1[n_node, nz_above[m], c] * zf) * dt1 \
+   142                                                                        +  BCcord[n, m] * (v2[n_node, nz_below[m], c] * zf1 + v2[n_node, nz_above[m], c] * zf) * step_dt_fraction  # second time step
+
+Total time: 2.54e-05 s
+File: e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\util\triangle_interpolator_util.py
+Function: BCwalk_with_move_backs_numba2D at line 55
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    55                                           @profile
+    56                                           def BCwalk_with_move_backs_numba2D(xq, x_old, status, BC, BCtransform, triNeighbours, current_dry_cell_index, block_dry_cells,
+    57                                                                              tol, max_BC_walk_steps, has_open_boundary, active, walk_stats, n_cell):
+    58                                               # Barycentric walk across triangles to find cells
+    59                                           
+    60         1        116.0    116.0     45.7      bc = np.full((3,), 0.)
+    61                                           
+    62                                               # loop over active particles in place
+    63         1         14.0     14.0      5.5      for n in active:
+    64                                           
+    65         1         11.0     11.0      4.3          n_tri = n_cell[n]  # starting triangle
+    66                                                   # do BC walk
+    67         1          7.0      7.0      2.8          n_steps = 0
+    68         1         15.0     15.0      5.9          for nn in range(3):
+    69         1         91.0     91.0     35.8              if xq[n, :] == np.nan:
+    70                                                           # if any is nan copy all and move on
+    71                                                           for i in range(xq.shape[1]): xq[n, i] = x_old[n, i]
+    72                                                           break
+    73                                           
+    74                                                   move_back = False
+    75                                           
+    76                                                   while n_steps < max_BC_walk_steps:
+    77                                                       # update barcentric cords of xq
+    78                                                       n_min, n_max = _get_single_BC_cord_numba(xq[n, :2], BCtransform[n_tri, :, :], bc)
+    79                                           
+    80                                                       if bc[n_max] < 1. + tol and tol and bc[n_min] > -tol:
+    81                                                           # are now inside triangle, leave particle status as is
+    82                                                           break
+    83                                           
+    84                                                       n_steps += 1
+    85                                                       # move to neighbour triangle at face with smallest bc then test bc cord again
+    86                                                       next_tri = triNeighbours[n_tri, n_min]  # n_min is the face num in  tri to move across
+    87                                           
+    88                                                       if next_tri < 0:
+    89                                                           # if no new adjacent triangle, then are trying to exit domain at a boundary triangle,
+    90                                                           # keep n_cell, bc  unchanged
+    91                                                           if has_open_boundary and next_tri == -2:  # outside domain
+    92                                                               # leave x, bc, cell, location  unchanged as outside
+    93                                                               status[n] = status_outside_open_boundary
+    94                                                               break
+    95                                                           else:  # n_tri == -1 outside domain and any future
+    96                                                               # solid boundary, so just move back
+    97                                                               move_back = True
+    98                                                               break
+    99                                           
+   100                                                       # check for dry cell
+   101                                                       if block_dry_cells:  # is faster split into 2 ifs, not sure why
+   102                                                           if current_dry_cell_index[next_tri] > 128:
+   103                                                               # treats dry cell like a lateral boundary,  move back and keep triangle the same
+   104                                                               move_back = True
+   105                                                               break
+   106                                           
+   107                                                       n_tri = next_tri
+   108                                           
+   109                                                   # not found in given number of search steps
+   110                                                   if n_steps >= max_BC_walk_steps:  # dont update cell
+   111                                                       status[n] = status_cell_search_failed
+   112                                                       walk_stats['failed_walks'] += 1
+   113                                                       move_back = True
+   114                                           
+   115                                                   if move_back:
+   116                                                       # move back dont update
+   117                                                       for i in range(xq.shape[1]): xq[n, i] = x_old[n, i]
+   118                                                   else:
+   119                                                       # update cell anc BC for new triangle
+   120                                                       n_cell[n] = n_tri
+   121                                                       for i in range(3): BC[n, i] = bc[i]
+   122                                           
+   123                                                   # step count stats
+   124                                                   walk_stats['particles_located'] += 1
+   125                                                   walk_stats['total_steps'] += n_steps
+   126                                           
+   127                                                   # record max number of steps
+   128                                                   if n_steps > walk_stats['longest_walk']:
+   129                                                       walk_stats['longest_walk'] = n_steps + 1
+   130                                           
+   131                                                   walk_stats['histogram'][min(n_steps, walk_stats['histogram'].shape[0] - 1)] += 1
+
+Total time: 0 s
+File: e:\onedrive - cawthron\h_local_drive\particletracking\oceantracker\oceantracker\interpolator\util\triangle_interpolator_util.py
+Function: get_depth_cell_time_varying_Slayer_or_LSCgrid at line 194
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   194                                           @profile
+   195                                           def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_level_at_nodes, tri, n_cell,
+   196                                                                                             nz_with_bottom, BCcord, status,
+   197                                                                                             nz_cell, nz_nodes, z_fraction,
+   198                                                                                             z_fraction_bottom_layer, is_in_bottom_layer,
+   199                                                                                             z0, active, walk_stats):
+   200                                               # find the zlayer for each node of cell containing each particl eand at two time slices of hindcast  between nz_bottom and number of z levels
+   201                                               # LSC grid means must track vertical nodes for each particle
+   202                                               # nz_with_bottom is lowest cell in grid, is 0 for slayer vertical grids, but may be > 0 for LSC grids
+   203                                               # nz_with_bottom must be time independent
+   204                                           
+   205                                               tf2 = 1. - step_dt_fraction
+   206                                           
+   207                                               top_nz_cell = z_level_at_nodes.shape[2] - 2
+   208                                               top_zlevel3 = np.full((3,), top_nz_cell, dtype=np.int32)
+   209                                           
+   210                                               for n in active:  # loop over active particles
+   211                                                   nodes = tri[n_cell[n], :]  # nodes for the particle's cell
+   212                                                   bottom_nz_nodes = nz_with_bottom[nodes]
+   213                                                   nz_below = nz_nodes[n, 0, :]
+   214                                                   nz_above = nz_nodes[n, 1, :]
+   215                                           
+   216                                                   n_vertical_steps = 0
+   217                                           
+   218                                                   # current cell number
+   219                                                   bottom_nz_cell = np.min(bottom_nz_nodes)  # cell at bottom
+   220                                           
+   221                                                   # preserve status if stranded by tide
+   222                                                   if status[n] == status_stranded_by_tide:
+   223                                                       nz_cell[n] = bottom_nz_cell
+   224                                                       # update nodes above and below
+   225                                                       z_below = _eval_z_at_nz_cell(nb, bottom_nz_cell, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_below)
+   226                                                       z_above = _eval_z_at_nz_cell(nb, bottom_nz_cell + 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_above)
+   227                                                       zq[n] = z_below
+   228                                                       z_fraction[n] = 0.0
+   229                                                       continue
+   230                                           
+   231                                                   # make any already on bottom active, may be flagged on bottom if found on bottom, below
+   232                                                   if status[n] == status_on_bottom:   status[n] = status_moving
+   233                                           
+   234                                                   # find zlevel above and below  current vertical cell
+   235                                                   z_below = _eval_z_at_nz_cell(nb, nz_cell[n], z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_below)
+   236                                                   z_above = _eval_z_at_nz_cell(nb, nz_cell[n] + 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_above)
+   237                                           
+   238                                                   if zq[n] >= z_below:
+   239                                                       # search upwards, do nothing if z_above > zq[n] > z_below, ie current nodes are correct
+   240                                                       if zq[n] > z_above:
+   241                                                           while nz_cell[n] < top_nz_cell:
+   242                                                               n_vertical_steps += 1
+   243                                                               nz_cell[n] += 1
+   244                                                               z_below = z_above
+   245                                                               nz_below[:] = nz_above.copy()
+   246                                                               z_above = _eval_z_at_nz_cell(nb, nz_cell[n], z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_above)
+   247                                                               if zq[n] <= z_above: break
+   248                                                   else:
+   249                                                       # search downwards
+   250                                                       while nz_cell[n] > bottom_nz_cell:
+   251                                                           n_vertical_steps += 1
+   252                                                           nz_cell[n] -= 1
+   253                                                           z_above = z_below
+   254                                                           nz_above[:] = nz_below.copy()
+   255                                                           z_below = _eval_z_at_nz_cell(nb, nz_cell[n], z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_below)
+   256                                                           if zq[n] >= z_below: break  # found cell
+   257                                           
+   258                                                   # clip zq to be in bounds before calc. z_fraction
+   259                                                   z_bot = _eval_z_at_nz_nodes(nb, z_level_at_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, bottom_nz_nodes)
+   260                                                   if zq[n] < z_bot + z0:
+   261                                                       zq[n] = z_bot
+   262                                                       status[n] = status_on_bottom
+   263                                                   else:
+   264                                                       # clip to surface only if not below bottom
+   265                                                       z_surf = _eval_z_at_nz_nodes(nb, z_level_at_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, top_zlevel3)
+   266                                                       if zq[n] >= z_surf:
+   267                                                           zq[n] = z_surf
+   268                                           
+   269                                                   # get z fraction
+   270                                                   dz = z_above - z_below
+   271                                                   if dz < z0:
+   272                                                       z_fraction[n] = 0.0
+   273                                                   else:
+   274                                                       z_fraction[n] = (zq[n] - z_below) / dz
+   275                                           
+   276                                                   if nz_cell[n] == bottom_nz_cell:
+   277                                                       is_in_bottom_layer[n] = 1
+   278                                                       if dz < z0:
+   279                                                           z_fraction_bottom_layer[n] = 0.0
+   280                                                       else:
+   281                                                           # adjust z fraction so that linear interp acts like log layer
+   282                                                           z0p = z0 / dz
+   283                                                           z_fraction_bottom_layer[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
+   284                                           
+   285                                                   # record number of vertical search steps made for this particle
+   286                                                   # step count stats, tidal stranded particles are not counted
+   287                                                   walk_stats['particles_located'] += 1
+   288                                                   walk_stats['total_steps'] += n_vertical_steps
+   289                                                   # record max number of steps
+   290                                                   if n_vertical_steps > walk_stats['longest_walk']:
+   291                                                       walk_stats['longest_walk'] = n_vertical_steps + 1
+   292                                           
+   293                                                   walk_stats['histogram'][min(n_vertical_steps, walk_stats['histogram'].shape[0] - 1)] += 1
+
