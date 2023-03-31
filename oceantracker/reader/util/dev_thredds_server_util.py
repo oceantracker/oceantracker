@@ -72,7 +72,7 @@ def _strip_namespace_from_keys(d):
 
 if __name__ == "__main__":
 
-    # dev testing
+    # scatch_tests testing
     # /thredds/fileServer/NOAA/LSOFS/MODELS/2023/01/06/nos.lsofs.fields.n002.20230106.t00z.nc
    #'https://opendap.co-ops.nos.noaa.gov/'
     base_url = 'https://www.ncei.noaa.gov/'

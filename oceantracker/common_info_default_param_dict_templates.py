@@ -20,9 +20,9 @@ run_params_defaults_template = {'shared_params': {'user_note': PVC('No user note
                                                 'numba_function_cache_size' :  PVC(1024, int, min=128),
                                                 'multiprocessing_case_start_delay': PVC(0., float, min=0.), # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
                                                 'use_numpy_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!')
-                                                  # params needed for later dev work
+                                                  # params needed for later scatch_tests work
                                                   # 'list_paths_of_user_modules': PVC(None,list, contains = str), # todo not implemented yet
-                                                  # shared reader memory params for later dev.
+                                                  # shared reader memory params for later scatch_tests.
                                                   # 'shared_reader_memory' :PVC(False,  bool),
                                                   # 'multiprocessing_start_method_spawn': PVC(True,  bool), # overide default of linux as fork
                                                   #'loops_over_hindcast':  PVC(0, int, min=0),  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times

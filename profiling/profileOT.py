@@ -127,21 +127,22 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasource', default=1, type=int)
     parser.add_argument('--profile_type', default=1, type=int)
-    parser.add_argument('-dev', action='store_true')
+    parser.add_argument('-scatch_tests', action='store_true')
     parser.add_argument('-test', action='store_true')
+    parser.add_argument('-dev', action='store_true')
     args = parser.parse_args()
 
     params = get_params(args.datasource)
 
-    # dev choices of classes
+    # scatch_tests choices of classes
     if args.dev:
-        params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
+        params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.scatch_tests.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
 
 
 
     if args.test:
-        params['shared_params']['max_duration']  =3*24.*3600  # 12 hour test
-        params['shared_params']['max_duration'] =2. * 3600  # 12 hour test
+        params['shared_params']['max_duration']  =2*24.*3600  # 12 hour test
+        #params['shared_params']['max_duration'] =2. * 3600  # 12 hour test
 
     if args.profile_type == 0:
         # not working!
@@ -151,7 +152,7 @@ if __name__ == '__main__':
 
         from pyinstrument import Profiler, renderers
 
-        profiler = Profiler(interval=0.0002)
+        profiler = Profiler(interval=0.0001)
         profiler.start()
         fnn = run_code('pyinstrument', params)
         profiler.stop()

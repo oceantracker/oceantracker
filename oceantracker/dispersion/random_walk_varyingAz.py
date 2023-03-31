@@ -1,7 +1,7 @@
 from random import normalvariate
 from numba import njit
 from oceantracker.dispersion.random_walk import RandomWalk
-#from oceantracker.interpolator.util.dev.vertical_walk_at_particle_location_eval_interp import _evalBCinterp
+#from oceantracker.interpolator.util.scatch_tests.vertical_walk_at_particle_location_eval_interp import _evalBCinterp
 import numpy as np
 
 class RandomWalkVaryingAZ(RandomWalk):
@@ -37,7 +37,7 @@ class RandomWalkVaryingAZ(RandomWalk):
                                                 active, prop['velocity_modifier'].data)
 
     @staticmethod
-    @njit(fastmath=True)
+    @njit()
     def _add_random_walk_velocity_modifier(A_Z,A_Z_vertical_gradient,random_walk_velocity,timestep, active, velocity_modifier):
         # add vertical advection effect of dispersion to random walk, see Lynch Particles in the Coastal Ocean: Theory and Applications
         # this avoids particle accumulating in areas of high vertical gradient of A_Z, ie top and bottom

@@ -284,7 +284,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-test', nargs='?', const=0, type=int, default=1)
     parser.add_argument('--size', nargs='?', const=0, type=int, default=0)
-    parser.add_argument('-dev', action='store_true')
+    parser.add_argument('-scatch_tests', action='store_true')
     args = parser.parse_args()
     args.parallel= False
 
@@ -307,7 +307,7 @@ if __name__ == '__main__':
                     params['shared_params']['max_duration']= 14 * 24 * 3600.
                     params['base_case_params']['dispersion'].update( {'A_H': 0.,'A_V':0.0})
                     if args.dev:
-                        params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
+                        params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.scatch_tests.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
                         # params['base_case_params']['dispersion'].update({'A_V':0., 'A_H':0.})
                         # params['base_case_params']['particle_release_groups'][0]['pulse_size']=1
 
@@ -332,7 +332,7 @@ if __name__ == '__main__':
 
 
         elif ntest==3:
-            # plotting dev, test dry cell
+            # plotting scatch_tests, test dry cell
             dc = None if 1 == 0   else  'dry_cells'
 
             params={ 'duration': 6.*24*3600, 'dispersion': {'A_H': 10},
@@ -345,7 +345,7 @@ if __name__ == '__main__':
 
 
         elif ntest == 4:
-            # plotting dev
+            # plotting scatch_tests
             runInfoFile = run_test({'duration': 5. * 24 * 3600, 'dispersion': {'A_H': 0., 'A_V': 0.},
                                         'particle_group_manager': {'pulse_size': 10 ** 1, 'release_interval': 1 * 3600},
                                         'trajectory_modifiers':[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension'}],
@@ -358,7 +358,7 @@ if __name__ == '__main__':
 
 
         elif ntest== 9999:
-            # latest dev block
+            # latest scatch_tests block
             args.plot = 0
             args.size = 0
             args.file = 1

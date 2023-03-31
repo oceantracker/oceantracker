@@ -191,7 +191,7 @@ class Solver(ParameterBaseClass):
 
         self.code_timer.stop('pre_step_bookkeeping')
 
-
+    #@profile
     def integration_step(self, nb, t,is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties
