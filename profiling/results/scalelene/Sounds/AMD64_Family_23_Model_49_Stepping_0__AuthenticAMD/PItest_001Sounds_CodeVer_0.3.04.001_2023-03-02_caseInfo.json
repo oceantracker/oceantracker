@@ -2,49 +2,30 @@
     "run_user_note": "No user note",
     "case_user_note": "No user note",
     "processor_number": 1,
-    "file_written": "2023-03-27T15:57:29.768847",
+    "file_written": "2023-03-13T09:49:34.896824",
     "code_version_info": {
         "version": "0.3.04.001 2023-03-02",
-        "git_revision": "9c31670c536d847ef58fabf9eb8f00be9effb39d",
+        "git_revision": "474199228a2b8f36921c515a291f46b330184581",
         "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]"
     },
     "run_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2023-03-27T15:57:06.247481",
+        "model_run_started": "2023-03-13T09:49:08.638291",
+        "start_time": 1199147400.0,
+        "end_time": 1199188800.0,
+        "start_date": "2008-01-01T00:30:00",
+        "end_date": "2008-01-01T12:00:00",
+        "time_steps_completed": 23,
+        "model_run_ended": "2023-03-13T09:49:34.896824",
+        "model_run_duration": "0:00:26.258533",
         "date_of_time_zero": "1970-01-01T00:00:00",
         "time_zone": null,
-        "backtracking": false,
-        "started": "2023-03-27 15:57:01.055537",
-        "ended": "2023-03-27 15:57:29.768847",
-        "elapsed_time": "0:00:28.713310"
-    },
-    "solver_info": {
-        "time_spent_updating": 0.0,
-        "update_calls": 0,
-        "time_first_update_call": 0.0,
-        "nseq": 0,
-        "class_type": "solver",
-        "model_start_time": 1199147400.0,
-        "model_start_date": "2008-01-01T00:30:00",
-        "model_duration": 7200.0,
-        "hydo_model_time_step": 1800.0,
         "model_timestep": 1800.0,
-        "computation_started": "2023-03-27T15:57:06.248481",
-        "total_alive_particles": 8400,
-        "time_steps_completed": 3,
-        "current_hydro_model_time_step": 2,
-        "current_reader_buffer_index": 2,
-        "current_hydro_model_time": 1199151000.0,
-        "current_hydro_model_date": "2008-01-01T01:30:00",
-        "current_model_time": 1199152800.0,
-        "current_model_time_step": 2,
-        "current_model_date": "2008-01-01T02:00:00",
-        "model_end_time": 1199152800.0,
-        "model_end_date": "2008-01-01T02:00:00",
-        "model_run_duration": 5400.0,
-        "model_run_duration_actual": "1:30:00"
+        "model_start_date": "2008-01-01T00:30:00",
+        "model_duration_days": 0.5,
+        "backtracking": false
     },
     "hindcast_info": {
         "time_zone": null,
@@ -858,7 +839,7 @@
                 1201818600.0,
                 1201822200.0
             ],
-            "index_of_next_release": 2
+            "index_of_next_release": 12
         },
         {
             "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
@@ -1656,7 +1637,7 @@
                 1201818600.0,
                 1201822200.0
             ],
-            "index_of_next_release": 2
+            "index_of_next_release": 12
         }
     ],
     "particle_release_group_user_maps": {
@@ -1676,22 +1657,22 @@
         "    Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params[\"open_boundary_type\"] = 1"
     ],
     "timers": [
-        "   23.52s  57% calls 00001: total_model_all,  (first call/remainder = 23.52s/ 0.00s",
-        "   18.85s  45% calls 00004: pre_step_bookkeeping,  (first call/remainder = 18.06s/ 0.79s",
-        "   13.75s  33% calls 00004: release_particles,  (first call/remainder = 12.97s/ 0.78s",
-        "    3.76s   9% calls 00020: setup_interp_time_step,  (first call/remainder =  3.75s/ 0.01s",
-        "    2.93s   7% calls 00008: update_part_prop,  (first call/remainder =  2.93s/ 0.00s",
-        "    2.67s   6% calls 00052: interp_named_field_at_particle_locations,  (first call/remainder =  0.73s/ 1.94s",
-        "    2.65s   6% calls 00001: reading_to_fill_time_buffer,  (first call/remainder =  2.65s/ 0.00s",
-        "    2.53s   6% calls 00004: on_the_fly_statistics,  (first call/remainder =  2.53s/ 0.00s",
-        "    2.30s   6% calls 00020: find_depth_cell,  (first call/remainder =  2.29s/ 0.01s",
-        "    1.09s   3% calls 00001: intialize_interplolation_grid,  (first call/remainder =  1.09s/ 0.00s",
-        "    1.03s   2% calls 00020: find_cells_and_weights,  (first call/remainder =  1.03s/ 0.00s",
-        "    0.67s   2% calls 00003: integration_step,  (first call/remainder =  0.66s/ 0.01s",
-        "    0.63s   2% calls 00004: event_logging,  (first call/remainder =  0.63s/ 0.00s",
-        "    0.50s   1% calls 00001: build_hindcast_reader,  (first call/remainder =  0.50s/ 0.00s",
+        "   26.26s  69% calls 00001: total_model_all,  (first call/remainder = 26.26s/ 0.00s",
+        "   12.60s  33% calls 00024: pre_step_bookkeeping,  (first call/remainder = 12.16s/ 0.45s",
+        "   11.81s  31% calls 00001: reading_to_fill_time_buffer,  (first call/remainder = 11.81s/ 0.00s",
+        "    9.23s  24% calls 00024: release_particles,  (first call/remainder =  8.90s/ 0.34s",
+        "    2.72s   7% calls 00140: setup_interp_time_step,  (first call/remainder =  2.44s/ 0.28s",
+        "    1.93s   5% calls 00048: update_part_prop,  (first call/remainder =  1.88s/ 0.05s",
+        "    1.80s   5% calls 00332: interp_named_field_at_particle_locations,  (first call/remainder =  0.48s/ 1.32s",
+        "    1.63s   4% calls 00140: find_depth_cell,  (first call/remainder =  1.47s/ 0.16s",
+        "    1.49s   4% calls 00024: on_the_fly_statistics,  (first call/remainder =  1.48s/ 0.00s",
+        "    0.94s   2% calls 00140: find_cells_and_weights,  (first call/remainder =  0.86s/ 0.09s",
+        "    0.81s   2% calls 00023: integration_step,  (first call/remainder =  0.55s/ 0.27s",
+        "    0.68s   2% calls 00001: intialize_interplolation_grid,  (first call/remainder =  0.68s/ 0.00s",
+        "    0.49s   1% calls 00001: build_hindcast_reader,  (first call/remainder =  0.49s/ 0.00s",
+        "    0.43s   1% calls 00024: event_logging,  (first call/remainder =  0.43s/ 0.00s",
         "    0.01s   0% calls 00001: solver_initialization,  (first call/remainder =  0.01s/ 0.00s",
-        "    0.00s   0% calls 00004: particle_concentrations,  (first call/remainder =  0.00s/ 0.00s"
+        "    0.00s   0% calls 00024: particle_concentrations,  (first call/remainder =  0.00s/ 0.00s"
     ],
     "time_updating": {
         "particle_release_groups": [],
@@ -1789,7 +1770,7 @@
         ]
     },
     "particles": {
-        "num_released": 2800,
+        "num_released": 16800,
         "particle_status_flags": {
             "unknown": -127,
             "bad_cord": -20,
@@ -1807,7 +1788,7 @@
         "root_output_dir": "F:\\OceanTrackerOuput\\OceanTrackerProfiling",
         "output_file_base": "Sounds",
         "debug": true,
-        "max_duration": 7200.0,
+        "max_duration": 43200.0,
         "add_date_to_run_output_dir": false,
         "user_note": "No user note",
         "backtracking": false,
@@ -1852,7 +1833,7 @@
                 "class_name": "oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid",
                 "name": null,
                 "user_note": null,
-                "bc_walk_tol": 1e-05,
+                "bc_walk_tol": 1e-06,
                 "max_search_steps": 100
             },
             "particle_group_manager": {
@@ -2692,7 +2673,7 @@
                         1201818600.0,
                         1201822200.0
                     ],
-                    "index_of_next_release": 2
+                    "index_of_next_release": 12
                 },
                 {
                     "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
@@ -3490,7 +3471,7 @@
                         1201818600.0,
                         1201822200.0
                     ],
-                    "index_of_next_release": 2
+                    "index_of_next_release": 12
                 }
             ],
             "fields": [
@@ -3723,7 +3704,7 @@
             "class_name": "oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid",
             "name": null,
             "user_note": null,
-            "bc_walk_tol": 1e-05,
+            "bc_walk_tol": 1e-06,
             "max_search_steps": 100
         },
         "particle_group_manager": {
@@ -4598,7 +4579,7 @@
                     1201818600.0,
                     1201822200.0
                 ],
-                "index_of_next_release": 2
+                "index_of_next_release": 12
             },
             {
                 "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
@@ -5396,7 +5377,7 @@
                     1201818600.0,
                     1201822200.0
                 ],
-                "index_of_next_release": 2
+                "index_of_next_release": 12
             }
         ],
         "fields": [
@@ -5634,7 +5615,7 @@
                 "write": false,
                 "initial_value": 0.0,
                 "vector_dim": 3,
-                "dtype": "float64",
+                "dtype": "float32",
                 "class_name": "oceantracker.particle_properties._base_properties.ParticleProperty",
                 "user_note": null,
                 "description": null,
@@ -6150,25 +6131,9 @@
             "time_first_update_call": 0.0,
             "nseq": 0,
             "class_type": "solver",
-            "model_start_time": 1199147400.0,
-            "model_start_date": "2008-01-01T00:30:00",
-            "model_duration": 7200.0,
-            "hydo_model_time_step": 1800.0,
-            "model_timestep": 1800.0,
-            "computation_started": "2023-03-27T15:57:06.248481",
-            "total_alive_particles": 8400,
-            "time_steps_completed": 3,
-            "current_hydro_model_time_step": 2,
-            "current_reader_buffer_index": 2,
-            "current_hydro_model_time": 1199151000.0,
-            "current_hydro_model_date": "2008-01-01T01:30:00",
-            "current_model_time": 1199152800.0,
-            "current_model_time_step": 2,
-            "current_model_date": "2008-01-01T02:00:00",
-            "model_end_time": 1199152800.0,
-            "model_end_date": "2008-01-01T02:00:00",
-            "model_run_duration": 5400.0,
-            "model_run_duration_actual": "1:30:00"
+            "computation_started": "2023-03-13T09:49:08.638291",
+            "n_time_steps_completed": 23,
+            "total_alive_particles": 218400
         },
         "field_group_manager": {
             "time_spent_updating": 0.0,
@@ -6184,16 +6149,16 @@
             "nseq": 0,
             "class_type": "interpolator",
             "bc_walk": {
-                "particles_located": 0,
-                "total_steps": 0,
-                "longest_walk": 0,
+                "particles_located": 957957,
+                "total_steps": 141135,
+                "longest_walk": 4,
                 "failed_walks": 0,
                 "histogram": [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
+                    836122,
+                    106318,
+                    11824,
+                    3603,
+                    90,
                     0,
                     0,
                     0,
@@ -6220,28 +6185,28 @@
                     0,
                     0
                 ],
-                "average_number_of_triangles_walked": 0.0
+                "average_number_of_triangles_walked": 0.14732915986834483
             },
             "vertical_walk": {
-                "particles_located": 33020,
-                "total_steps": 25406,
+                "particles_located": 922681,
+                "total_steps": 280040,
                 "longest_walk": 14,
                 "failed_walks": 0,
                 "histogram": [
-                    25199,
-                    4718,
-                    1101,
-                    259,
-                    156,
-                    118,
-                    108,
-                    81,
-                    69,
-                    77,
-                    95,
-                    134,
-                    154,
-                    751,
+                    763699,
+                    115174,
+                    30417,
+                    2915,
+                    1470,
+                    1102,
+                    895,
+                    727,
+                    598,
+                    497,
+                    517,
+                    549,
+                    601,
+                    3520,
                     0,
                     0,
                     0,
@@ -6259,7 +6224,7 @@
                     0,
                     0
                 ],
-                "average_number_of_triangles_walked": 0.769412477286493
+                "average_number_of_triangles_walked": 0.30350684581128257
             }
         },
         "particle_group_manager": {
@@ -6314,9 +6279,9 @@
             "update_calls": 0,
             "time_first_update_call": 0.0,
             "buffer_info": {
-                "n_filled": 4,
+                "n_filled": 24,
                 "first_nt_hindcast_in_buffer": 0,
-                "last_nt_hindcast_in_buffer": 3
+                "last_nt_hindcast_in_buffer": 23
             },
             "nseq": 0,
             "class_type": "reader",
@@ -6362,8 +6327,8 @@
                         -1.0
                     ]
                 ],
-                "number_released": 2400,
-                "pulse_count": 2,
+                "number_released": 14400,
+                "pulse_count": 12,
                 "release_info": {
                     "first_release_date": "2008-01-01T00:30:00",
                     "last_release_date": "2008-01-31T23:30:00",
@@ -7118,7 +7083,7 @@
                         1201818600.0,
                         1201822200.0
                     ],
-                    "index_of_next_release": 2,
+                    "index_of_next_release": 12,
                     "points": [
                         [
                             1595000.0,
@@ -7202,8 +7167,8 @@
                     ]
                 ],
                 "polygon_area": 7152149906.614258,
-                "number_released": 400,
-                "pulse_count": 2,
+                "number_released": 2400,
+                "pulse_count": 12,
                 "release_info": {
                     "first_release_date": "2008-01-01T00:30:00",
                     "last_release_date": "2008-01-31T23:30:00",
@@ -7958,7 +7923,7 @@
                         1201818600.0,
                         1201822200.0
                     ],
-                    "index_of_next_release": 2,
+                    "index_of_next_release": 12,
                     "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
                     "points": [
                         [
@@ -8499,27 +8464,27 @@
         ],
         "trajectory_modifiers": [
             {
-                "time_spent_updating": 1.034579399994982,
-                "update_calls": 4,
-                "time_first_update_call": 1.034353299997747,
+                "time_spent_updating": 0.640315599999667,
+                "update_calls": 24,
+                "time_first_update_call": 0.6383960999992269,
                 "nseq": 0,
                 "class_type": null,
                 "instanceID": 0,
-                "number_resupended": 890,
+                "number_resupended": 21382,
                 "resuspension_factor": 19.813956435965586,
                 "min_resuspension_jump": 0.14076205609455122
             }
         ],
         "particle_statistics": [
             {
-                "time_spent_updating": 1.7918520999992325,
-                "update_calls": 1,
-                "time_first_update_call": 1.7918520999992325,
+                "time_spent_updating": 0.9192213999995147,
+                "update_calls": 4,
+                "time_first_update_call": 0.9177383999995072,
                 "output_file": "Sounds_stats_gridded_age_001.nc",
                 "nseq": 0,
                 "class_type": null,
                 "instanceID": 0,
-                "time_last_stats_recorded": 1199147400.0,
+                "time_last_stats_recorded": 1199179800.0,
                 "type": "gridded"
             },
             {
@@ -8530,26 +8495,26 @@
                 "nseq": 0,
                 "class_type": null,
                 "instanceID": 1,
-                "time_last_stats_recorded": 1199147400.0,
+                "time_last_stats_recorded": 1199179800.0,
                 "type": "polygon"
             }
         ],
         "event_loggers": [
             {
-                "time_spent_updating": 0.6307448000043223,
-                "update_calls": 4,
-                "time_first_update_call": 0.6306497000005038,
+                "time_spent_updating": 0.429829199998494,
+                "update_calls": 24,
+                "time_first_update_call": 0.42908950000037294,
                 "nseq": 0,
                 "class_type": null,
                 "instanceID": 0,
                 "prop_to_write": [
-                    "user_release_groupID",
-                    "x",
-                    "event_polygon",
                     "ID",
                     "age",
+                    "user_release_groupID",
+                    "x",
                     "status",
                     "IDpulse",
+                    "event_polygon",
                     "IDrelease_group"
                 ],
                 "output_file": "Sounds_events_001.nc"

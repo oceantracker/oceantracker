@@ -36,7 +36,7 @@ class RandomWalkV1(_BaseTrajectoryModifer):
         self._add_random_walk_velocity(self.random_velocity, active,si.classes['particle_properties']['velocity_modifier'].data)
 
     @staticmethod
-    @njit(fastmath=True)
+    @njit()
     #@guvectorize([(float64[:],int32[:],float64[:,:])],' (m), (l)->(n,m)') #, does not work needs n on LHS
     def _add_random_walk_velocity(random_velocity_size, active, velocity_modifier):
         for n in active:

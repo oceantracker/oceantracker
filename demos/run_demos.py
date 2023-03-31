@@ -79,7 +79,7 @@ if __name__ == "__main__":
             pass
             params['reader'].update({'input_dir': 'F:\Hindcasts\Hindcast_samples_tests\ROMS_samples',
                                    'file_mask': 'DopAnV2R3-ini2007_da_his.nc',})
-            #params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.dev.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
+            #params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.scatch_tests.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
             #params['base_case_params']['dispersion'].update({'A_V':0., 'A_H':0.})
             #params['base_case_params']['particle_release_groups'][0]['pulse_size']=1
 
