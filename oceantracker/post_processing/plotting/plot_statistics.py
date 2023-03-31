@@ -84,7 +84,7 @@ def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, cr
         pc = ax.tripcolor(grid['x'][:, 0], grid['x'][:, 1], facecolors=data[-1, :], triangles=grid['triangles'],
                           zorder=2, cmap=cmap, vmin=vmin, vmax=vmax, edgecolors='none')
 
-    if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
+    if axis_lims is None:    axis_lims=[np.min(grid['x'][:,0]),np.max(grid['x'][:,0]),np.min(grid['x'][:,1]),np.max(grid['x'][:,1])] # set axis limits to those of the grid
 
     plot_utilities.draw_base_map(grid, ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title,credit=credit,
                   back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
