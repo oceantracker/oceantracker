@@ -94,7 +94,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         grid =super().make_non_time_varying_grid(nc, grid)
         return grid
 
-    def read_time(self, nc, file_index=None):
+    def read_datetime(self, nc, file_index=None):
         if file_index is None:
             time = nc.read_a_variable('time', sel=None) # read all times
         else:
@@ -107,7 +107,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
         if self.params['time_zone'] is not None:
             time += self.params['time_zone']*3600.
-        return time
+        return time.astype('datetime64[s]')
 
     def read_bottom_cell_index_as_int32(self, nc):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid

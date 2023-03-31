@@ -17,11 +17,9 @@ code_version = '0.4.00.000 2023-03-29'
 # do first to ensure its right
 import multiprocessing
 
-
 import time
 from copy import deepcopy
 from datetime import datetime
-
 
 from os import path, makedirs
 from sys import version, version_info
@@ -467,7 +465,7 @@ class _RunOceanTrackerClass(object):
         # add defaults from template, ie get reader class_name default, no warnings, but get these below
         # check cals name
         file_info =reader.get_list_of_files_and_hindcast_times(reader.params['input_dir'])
-
+        info ={}
 
         # check some files found
         if len(file_info['names']) == 0:
@@ -483,22 +481,22 @@ class _RunOceanTrackerClass(object):
         nc.close()
 
         # convert file info to numpy arrays for sorting
-        keys = ['names','n_time_steps', 'time_start', 'time_end']
+        keys = ['names','n_time_steps', 'date_start', 'date_end']
         for key in keys:
             file_info[key] = np.asarray(file_info[key])
 
-
         # sort files in time order
-        file_order = np.argsort(file_info['time_start'], axis=0)
+        file_order = np.argsort(file_info['date_start'], axis=0)
         for key in keys:
             file_info[key] = file_info[key][file_order]
         file_info['names'] = file_info['names'].tolist()
 
         file_info['nt_global'] = np.cumsum(file_info['n_time_steps'])
         file_info['nt_global'] = np.column_stack((file_info['nt_global'] - file_info['n_time_steps'], file_info['nt_global'] - 1))
-        file_info['n_time_steps_in_hindcast'] = np.sum(file_info['n_time_steps'], axis=0)
+        info['n_time_steps_in_hindcast'] = np.sum(file_info['n_time_steps'], axis=0)
 
         # set up global time, step , file offset and file number for every time step in set of hindcast files
+        # todo delete in favour of testing times within hindcast
         file_info.update({'nt': [], 'file_number': [], 'file_offset': []})
 
         for n, n_steps in enumerate(file_info['n_time_steps']):
@@ -510,23 +508,27 @@ class _RunOceanTrackerClass(object):
         for key in ['nt','file_number','file_offset'] :  file_info[key] = np.asarray(file_info[key])
 
         # checks on hindcast
-        if  file_info['n_time_steps_in_hindcast']< 2:
+        if  info['n_time_steps_in_hindcast']< 2:
             msg_logger.msg('Hindcast must have at least two time steps, found ' + str(file_info['n_time_steps_in_hindcast']),fatal_error=True)
 
         # check for large time gaps between files
-        file_info['hydro_model_time_step'] = (file_info['time_end'][-1]-file_info['time_start'][0])/(file_info['n_time_steps_in_hindcast']-1)
+        info['first_date'] = file_info['date_start'][0]
+        info['last_date']  = file_info['date_end'][-1]
+        info['duration'] = info['last_date']-info['first_date']
+        info['hydro_model_time_step'] =  info['duration']/(info['n_time_steps_in_hindcast']-1)
 
         # check if time diff between starts of file and end of last are larger than average time step
-        if len(file_info['time_start']) > 1:
-            dt_gaps = file_info['time_start'][1:] -file_info['time_end'][:-1]
+        if len(file_info['date_start']) > 1:
+            dt_gaps = file_info['date_start'][1:] -file_info['date_end'][:-1]
             sel = np.abs(dt_gaps) > 1.8 * file_info['hydro_model_time_step']
             if np.any(sel):
                 msg_logger.msg('Some time gaps between hindcast files is are > 1.8 times average time step, check hindcast files are all present??', hint='check hindcast files are all present and times in files consistent', warning=True)
                 for n in np.flatnonzero(sel):
                     msg_logger.msg('file gaps between ' + file_info['names'][n] + ' and ' + file_info['names'][n+1],tabs=1)
 
+        reader_build_info['info'] = info
         reader_build_info['sorted_file_info'] = file_info
-        msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info')
+        msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
         return reader_build_info
 
     def _write_run_grid_netCDF(self, output_files, reader_build_info, reader):

@@ -191,12 +191,14 @@ class ParamDictValueChecker(object):
 
         elif info['type'] == 'iso8601date':
             try:
-                time_util.date_from_iso8601str(value)
+                value = np.datetime64(value)
             except Exception as e:
                 msg_logger.msg( 'Failed to convert to date as iso8601str "' + crumb_trail + '", value = ' + str(value),  fatal_error=True)
+        #todo add a time_ delta in seconds
 
-        # if not one of special types above then value unchanged
-        # check  value and type if not a None
+        #if not one of special types above then value unchanged
+        # check  value and type if not
+        # a None
         if value is not None:
 
             if type(info['type']) != str and not type(value) != info['type'] and not isinstance(value, info['type']):

@@ -95,9 +95,8 @@ class GenericUnstructuredReader(_BaseReader):
         # set up reader fields, using shared memory if requested
         self.setup_reader_fields(reader_build_info)
 
-        #useful info for json output
-        self.info['hindcast_average_time_step'] = reader_build_info['sorted_file_info']['hydro_model_time_step']
-        pass
+        #useful info for working and json output
+        self.info.update(reader_build_info['info'])
 
     def check_grid(self,grid):
         tt='Grid Check, '
@@ -121,7 +120,7 @@ class GenericUnstructuredReader(_BaseReader):
                            warning=True,
                            hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
 
-    def read_time(self, nc, file_index=None):
+    def read_datetime(self, nc, file_index=None):
         vname=self.params['grid_variables']['time']
         if file_index is None : file_index = np.arange(nc.get_var_shape(vname)[0])
 
@@ -131,7 +130,7 @@ class GenericUnstructuredReader(_BaseReader):
             time = time + time_util.date_to_seconds(time_util.date_from_iso8601str(self.params['isodate_of_hindcast_time_zero']))
         if self.params['time_zone'] is not None:
             time += self.params['time_zone']*3600.
-        return time
+        return time.astype('datetime64[s]')
 
     def read_nodal_x_as_float64(self, nc):
         si=self.shared_info
@@ -146,7 +145,7 @@ class GenericUnstructuredReader(_BaseReader):
         # read time and  grid variables, eg time, tide, zlevel
         grid_time_buffers = self.grid_time_buffers
 
-        grid_time_buffers['time'][buffer_index] = self.read_time(nc, file_index=file_index)
+        grid_time_buffers['time'][buffer_index] = self.read_datetime(nc, file_index=file_index)
 
         if grid_time_buffers['zlevel'] is not None:
             # read zlevel inplace to save memory?

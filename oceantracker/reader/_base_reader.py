@@ -116,14 +116,14 @@ class _BaseReader(ParameterBaseClass):
         else:
             file_names = glob(path.normpath(path.join(input_dir, self.params['file_mask'])))
 
-        file_info = {'names': file_names, 'n_time_steps': [], 'time_start': [], 'time_end': []}
+        file_info = {'names': file_names, 'n_time_steps': [], 'date_start': [], 'date_end': []}
         for n, fn in enumerate(file_names):
             # get first/second/last time from each file,
             nc = NetCDFhandler(fn, 'r')
-            time = self.read_time(nc)
+            time = self.read_datetime(nc)
             nc.close()
-            file_info['time_start'].append(time[0])
-            file_info['time_end'].append(time[-1]) # -1 guards against there being only one time step in the file
+            file_info['date_start'].append(time[0])
+            file_info['date_end'].append(time[-1]) # -1 guards against there being only one time step in the file
             file_info['n_time_steps'].append(time.shape[0])
             if n + 1 >= self.params['max_numb_files_to_load']: break
 
@@ -448,15 +448,6 @@ class _BaseReader(ParameterBaseClass):
         is_open_boundary_node = np.full((grid['x'].shape[0],), False)
         return is_open_boundary_node
 
-
-    def get_first_time_in_hindcast(self):
-        return self.reader_build_info['sorted_file_info']['time_start'][0]
-
-    def get_last_time_in_hindcast(self):
-        return self.reader_build_info['sorted_file_info']['time_end'][-1]
-
-    def get_hindcast_duration(self):
-        return abs(self.get_last_time_in_hindcast() - self.get_first_time_in_hindcast())
 
     def time_to_global_time_step(self, t):
         #todo remove when stepping model in time no time step, and when using buffer??

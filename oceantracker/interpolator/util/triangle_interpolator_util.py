@@ -5,7 +5,6 @@ from oceantracker.common_info_default_param_dict_templates import particle_info
 
 # flags for bc walk status
 
-walk_stats = np.dtype([('particles_located', np.int64), ('total_steps', np.int64), ('longest_walk', np.int32), ('failed_walks', np.int32), ('histogram', np.int64, (30,))])
 
 # globals
 status_moving = int(particle_info['status_flags']['moving'])
@@ -118,8 +117,7 @@ def BCwalk_with_move_backs_numba2D(xq, x_old, status,
 
         walk_counts[0] += 1  # particles walked
         walk_counts[1] += n_steps # steps taken
-        walk_counts[2] += max(n_steps+1, walk_counts[2]) # longest walk
-
+        walk_counts[2] = max(n_steps+1, walk_counts[2]) # longest walk
 
 @njit
 def get_BC_cords_numba(x, n_cells, BCtransform, bc):

@@ -25,17 +25,10 @@ def iso8601str_to_seconds(s):  return date_to_seconds(date_from_iso8601str(s))
 
 def date_to_seconds(date): return  (date-ot_time_zero()).total_seconds()
 
-
-
 def diff(date1,date2) :  return  (date1 - date2).total_seconds()
 
+def float_sec_to_time_delta(s): return np.asarray(s, dtype=np.float64).astype('timedelta64[s]')
 
-def date_from_iso8601str(s, err_msg='')  :
-    try:
-        d = dateutil.parser.isoparse(s)
-        return d
-    except AssertionError:
-        raise(err_msg  + ', dates must be iso8601 string eg 2019-09-17T21:21:00.123456,  minmal string example 2019-02-01')
 
 def iso8601_str(d)   :  return d.isoformat()
 
