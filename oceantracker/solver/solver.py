@@ -86,7 +86,7 @@ class Solver(ParameterBaseClass):
 
                 t0_step = perf_counter()
 
-                t1 = t_hindcast + ns*si.solver_info['model_timestep']*si.model_direction
+                t1 = t_hindcast + ns*si.solver_info['model_time_step']*si.model_direction
 
                 # release particles, update cell location/interp, update status, write tracks etc,
                 # todo refactor all to use nt_hindcast not nb
@@ -111,7 +111,7 @@ class Solver(ParameterBaseClass):
                 #--------------------------------------
                 self.code_timer.stop('integration_step')
 
-                t2 = t1 + info['model_timestep'] * si.model_direction
+                t2 = t1 + info['model_time_step'] * si.model_direction
 
                 # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
 
@@ -202,7 +202,7 @@ class Solver(ParameterBaseClass):
         part_prop =  si.classes['particle_properties']
 
         # note here subStep_time_step has sign of forwards/backwards
-        dt = si.solver_info['model_timestep']*si.model_direction
+        dt = si.solver_info['model_time_step']*si.model_direction
         dt2=dt/2.
         # set up views of  working variable space
         x1      = part_prop['x_last_good'].data

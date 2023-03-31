@@ -115,8 +115,8 @@ class unstructured_FVCOM(GenericUnstructuredReader):
             reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
                                                     si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
 
-    def read_time(self, nc, file_index=None):
-
+    def read_datetime(self, nc, file_index=None):
+        # read time as numpy datetime64[s]
         if file_index is None:
             time_str = nc.read_a_variable('Times', sel=None)
         else:
@@ -131,7 +131,7 @@ class unstructured_FVCOM(GenericUnstructuredReader):
 
         if self.params['time_zone'] is not None: time += self.params['time_zone'] * 3600.
 
-        return time
+        return time.astype('datetime64[s]')
 
     def read_file_field_variable_as4D(self, nc, file_var_info,is_time_varying, file_index=None):
         # reformat file variable into 4D time,node,depth, components  form

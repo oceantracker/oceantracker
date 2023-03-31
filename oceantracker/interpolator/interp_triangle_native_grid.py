@@ -48,9 +48,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         # BC walk stats
         info = self.info
-        self.walk_stats = np.zeros((2,),dtype=triangle_interpolator_util.walk_stats) #todo remove and fix walk counts stats calc. from below counts
         self.cell_walk_counts = np.zeros((4,), dtype=np.int64)
         self.vertical_walk_counts = np.zeros((4,), dtype=np.int64)
+
 
 
         if si.hydro_model_is3D:
@@ -343,21 +343,18 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         info = self.info
         # guard against no particle tracking done, eg all points outside domain so zero active
 
-        # note walk statistics
-
-        info['bc_walk'] ={}
-        for name in self.walk_stats[0].dtype.names:
-            info['bc_walk'][name]= self.walk_stats[0][name]
-        info['bc_walk']['average_number_of_triangles_walked'] =  info['bc_walk']['total_steps'] /  max(info['bc_walk']['particles_located'], 1)
-
-        # there are vertical walk stats
-        if si.hydro_model_is3D:
-            info['vertical_walk'] = {}
-            for name in self.walk_stats[1].dtype.names:
-                info['vertical_walk'][name] = self.walk_stats[1][name]
-
-            info['vertical_walk']['average_number_of_triangles_walked'] =  info['vertical_walk']['total_steps'] /  max(info['vertical_walk']['particles_located'], 1)
-
+        info['horizontal_walk'] ={'particles_located': self.cell_walk_counts[0],
+                          'total_steps': self.cell_walk_counts[1],
+                          'average_number_of_triangles_walked': self.cell_walk_counts[1]/max(1,self.cell_walk_counts[0]),
+                          'longest_walk' : self.cell_walk_counts[2],
+                          'failed_walks': self.cell_walk_counts[3]
+                          }
+        info['vertical_walk'] ={'particles_located': self.vertical_walk_counts[0],
+                          'total_steps': self.vertical_walk_counts[1],
+                          'average_number_of_triangles_walked': self.vertical_walk_counts[1]/max(1,self.vertical_walk_counts[0]),
+                          'longest_walk' : self.cell_walk_counts[2],
+                          'failed_walks': self.cell_walk_counts[3]
+                          }
 
 # Below is numpy version of numba BC cord code, now only used as check
 #________________________________________________

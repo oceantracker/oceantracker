@@ -17,11 +17,12 @@ class PointRelease(ParameterBaseClass):
                                  'release_radius':  PVC(0., float, min= 0., doc_str= 'Particles are released from random locations in circle of given radius around each point.'),
                                  'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles released in a single pulse, this number is released every release_interval.'),
                                  'release_interval':PVC(0., float, min =0., doc_str= 'Time interval between released pulses. To release at only one time use release_interval=0.'),
-                                 'release_start_date': PVC(None, 'iso8601date'),
+                                 'release_start_date': PVC(None, 'iso8601date', doc_str='Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
                                    # to do add ability to release on set dates/times 'release_dates': PLC([], 'iso8601date'),
-                                 'release_duration': PVC(1.0e32, float,min=0,
+                                 'release_duration': PVC(None, float,min=0,
                                                     doc_str='Time in seconds particles are released for after they start being released, ie releases stop this time after first release.' ),
-                                 'maximum_age': PVC(1.0e32,float,min=1.,
+                                'release_end_date': PVC(None, 'iso8601date', doc_str='Date to stop releasing partices, ignored if release_duration give, must be an ISO date as string eg. "2017-01-01T00:30:00" '),
+                                'maximum_age': PVC(None,float,min=1.,
                                                     doc_str='Particles older than this time in seconds are killed off and removed from computation.'),
                                  'user_release_groupID' : PVC(0,int, doc_str= 'User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.'),
                                  'user_release_group_name' : PVC(None,str,doc_str= 'User given name/label to attached to this release groups to make it easier to distinguish.'),
@@ -54,82 +55,72 @@ class PointRelease(ParameterBaseClass):
         info = self.info
         si = self.shared_info
 
-        hindcast_start = si.classes['reader'].get_first_time_in_hindcast()
-        hindcast_end = si.classes['reader'].get_last_time_in_hindcast()
-        hindcast_duration = abs(hindcast_end-hindcast_start)
+        hindcast_start = si.classes['reader'].info['first_date']
+        hindcast_end  = si.classes['reader'].info['last_date']
+        hindcast_duration =  si.classes['reader'].info['duration']
 
-        self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,'last_date_alive':None,
+        self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,
+                                    'last_date_alive':None,
                       'estimated_number_released' : 0,
-                      'first_release_time': None, 'last_release_time':None, 'last_time_alive':None,
-                      'release_schedule_times': None, 'index_of_next_release' : 0}
-
+                       'release_schedule_dates': None, 'index_of_next_release' : 0}
         # short cut
         release_info =self.info['release_info']
-
 
         if params['release_start_date'] is None:
         # no user start date so use  model runs' start date
             release_info['first_release_time'] = hindcast_start if not si.backtracking else hindcast_end
         else:
             # user given start date
-            d0 = time_util.date_from_iso8601str(params['release_start_date'], err_msg='Particle Group ,   Parameter release_start_date not valid iso date string')
-            release_info['first_release_time'] = time_util.date_to_seconds(d0)
+            release_info['first_release_time'] = params['release_start_date']
 
         # now check if start in range
         if not hindcast_start <= release_info['first_release_time'] <= hindcast_end:
             si.msg_logger.msg('Release group= ' + str(n + 1) + ', name= ' + self.params['name'] + ',  parameter release_start_time is ' +
-                                    time_util.seconds_to_iso8601str(release_info['first_release_time']) + '  is outside hindcast range ' + time_util.seconds_to_iso8601str(hindcast_start)
-                                    + ' to ' + time_util.seconds_to_iso8601str(hindcast_end), warning=True)
+                                    str(release_info['first_release_time'])
+                              + '  is outside hindcast range ' + str(hindcast_start)
+                                    + ' to ' + str(hindcast_end), warning=True)
+        # get max age of particles
+        if params['maximum_age'] is None:
+            max_age = time_util.float_sec_to_time_delta(1.0E20)
+        else:
+            max_age=  time_util.float_sec_to_time_delta(abs(params['maximum_age']))
 
-        # todo allow a list of release dates for the group, eg elif params['release_dates']:
+        # world out release times
         if params['release_interval'] == 0.:
             release_times = np.asarray([release_info['first_release_time']])
+        elif not si.backtracking:
+            if self.params['release_duration'] is not None:
+                t1 = release_info['first_release_time'] +  time_util.float_sec_to_time_delta(self.params['release_duration'])
+            elif self.params['release_end_date'] is not None:
+                t1 = self.params['release_end_date']
+            else:
+                t1 = hindcast_end
+            release_times = np.arange(release_info['first_release_time'],t1,
+                                      time_util.float_sec_to_time_delta(abs(params['release_interval'])))
+            release_info['last_time_alive'] = min(hindcast_end, release_times[-1] +  max_age)
+
         else:
-            release_times = release_info['first_release_time'] +  si.model_direction*np.arange(0,hindcast_duration, abs(params['release_interval']))
+            # backtracking
+            if self.params['release_duration'] is not None:
+                t1 = release_info['first_release_time'] - time_util.float_sec_to_time_delta(self.params['release_duration'])
+            elif self.params['release_end_date'] is not None:
+                t1 = self.params['release_end_date']
+            else:
+                t1 = hindcast_start
+            release_times = np.arange(release_info['first_release_time'], t1,
+                                      time_util.float_sec_to_time_delta(-abs(params['release_interval'])))
+            release_info['last_time_alive'] = max(hindcast_start, release_times[-1] - max_age)
 
-        # todo is there a less complex way to to this release times set up??
-        # clip release times to be within hindcast range
-        sel = np.logical_and(release_times >= hindcast_start, release_times <= hindcast_end)
-        release_times = release_times[sel]
-
-        if release_times.shape[0] == 0:
-            release_info['release_schedule_times'] = np.zeros((0,), dtype=np.float64) # empty list
-            return
-
-        # clip release times to be less than that of release duration
-        sel = (release_times - release_times[0])*si.model_direction <= self.params['release_duration']
-        release_info['release_schedule_times'] = release_times[sel]
-
-        release_info['first_release_time'] = release_times[0]
-        release_info['last_release_time'] = release_times[-1]
-        release_info['last_time_alive'] = release_times[-1] + self.params['maximum_age']*si.model_direction
-
-
-        # get life span of group in forward time order
-        if si.backtracking:
-            release_info['last_time_alive'] = max(release_info['last_time_alive'], hindcast_start)
-        else:
-            release_info['last_time_alive'] = min(release_info['last_time_alive'], hindcast_end)
-
-        # convert dates to time for easier debugging
-        release_info['first_release_date']= time_util.seconds_to_iso8601str(release_info['first_release_time'])
-        release_info['last_release_date'] = time_util.seconds_to_iso8601str(release_info['last_release_time'])
-        release_info['last_date_alive'] = time_util.seconds_to_iso8601str(release_info['last_time_alive'])
-
+        release_info['release_schedule_times'] = release_times
+        release_info['last_release_time'] = release_times[-1] # ensure it matches release times
         release_info['estimated_number_released'] =  self.estimated_total_number_released(release_info)
-
-        release_info.update(self.params)
-
-
 
     def estimated_total_number_released(self,release_info):
         info = self.info
-        if release_info['release_schedule_times'] is None:
-            return 0
-        else:
-            npart= self.params['pulse_size'] *  release_info['release_schedule_times'].shape[0] * info['points'].shape[0]
-            npart = int( npart+ max(10,.03*npart)) # add 3% more safety  margin
-            return npart
+
+        npart= self.params['pulse_size'] *  release_info['release_schedule_times'].size * info['points'].shape[0]
+        npart = int( npart+ max(10,.03*npart)) # add 3% more safety  margin
+        return npart
 
     def release_locations(self):
         # set up full set of release locations inside  polygons
