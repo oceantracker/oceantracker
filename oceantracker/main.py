@@ -2,7 +2,7 @@
 # eg run(params)
 import sys
 
-code_version = '0.3.04.004 2023-03-29'
+code_version = '0.4.00.000 2023-03-29'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
