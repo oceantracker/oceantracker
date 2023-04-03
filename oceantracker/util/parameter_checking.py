@@ -188,8 +188,9 @@ class ParamDictValueChecker(object):
                     msg_logger.msg(m, fatal_error=True)
 
         # deal with numpy versions of params, convert to python types
-        elif info['type'] == int and type(value) in [np.int8, np.int32, np.int16, np.int64]:
-            value = int(value)
+        elif info['type'] == int:
+            # ensure all at int32 as default int is int64 on  linux
+            value = np.int32(value)
 
         elif info['type'] == 'iso8601date':
             try:
