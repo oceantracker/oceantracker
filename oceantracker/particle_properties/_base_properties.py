@@ -3,7 +3,7 @@ from oceantracker.particle_properties.util import particle_operations_util, part
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
-from oceantracker.util.basic_util import atLeast_Nby1, nopass
+from oceantracker.util import time_util
 
 
 class _BasePropertyInfo(ParameterBaseClass):
@@ -16,10 +16,9 @@ class _BasePropertyInfo(ParameterBaseClass):
         self.add_default_params({ 'description': PVC(None,str), 'time_varying':PVC(True, bool),'name': PVC(None, str),
             'write': PVC(True, bool), 'vector_dim': PVC(1, int, min = 1 ), 'prop_dim3': PVC(1, int, min=1),
              'dtype':PVC(np.float64, np.dtype),
-             'initial_value':PVC(0., float),
+             'initial_value':PVC(0.,float),
              'update':PVC(True,bool)
               })
-
 
         self.class_doc(role='Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
 
@@ -34,7 +33,7 @@ class _BasePropertyInfo(ParameterBaseClass):
 
     def num_vector_dimensions(self):  return 0 if self.data.ndim == 1 else self.data.shape[1]
 
-    def get_dtype(self): return self.data.dtype
+    def get_dtype(self):  return self.params['dtype']
 
 
 class TimeVaryingInfo(_BasePropertyInfo):
@@ -51,7 +50,7 @@ class TimeVaryingInfo(_BasePropertyInfo):
         s=(1,)
         if self.params['vector_dim'] > 1:
             s += (self.params['vector_dim'],)
-        self.data = self.data = np.full(s, self.params['initial_value'], dtype=  self.params['dtype'])
+        self.data = self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype())
 
 
     def update(self): pass # manual update by default
@@ -80,12 +79,19 @@ class ParticleProperty(_BasePropertyInfo):
 
         self.info['array_size'] = s
         # set up data buffer
-        self.data = np.full(s, self.params['initial_value'], dtype=  self.params['dtype'])
+        self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype())
 
     def initial_value_at_birth(self, new_part_IDs):
         # need to set at birth, as in compact mode particle buffer changes,
         # so cant rely on value at matrix construction in initialize
-        self.set_values(self.params['initial_value'], new_part_IDs)  # sets this properties values
+        value =self.params['initial_value']
+
+        if self.get_dtype() == np.dtype('<M8[s]'): # datetime64 in seconds
+            value = time_util.seconds_to_datetime64(value)
+        if self.get_dtype() == np.timedelta64:
+            value = time_util.seconds_to_timedelta64(value)
+
+        self.set_values(value, new_part_IDs)  # sets this properties values
 
     def update(self, active): pass # manual update by default
 

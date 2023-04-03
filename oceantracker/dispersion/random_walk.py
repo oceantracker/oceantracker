@@ -14,7 +14,7 @@ class RandomWalk(_BaseTrajectoryModifer):
     def initialize(self):
         si = self.shared_info
         info = self.info
-        dt = si.solver_info['model_time_step']
+        dt = si.model_time_step
         info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
         if not si.hydro_model_is3D:
             info['random_walk_size'] = info['random_walk_size'][:2]
@@ -27,7 +27,7 @@ class RandomWalk(_BaseTrajectoryModifer):
         return np.sqrt(2. * np.abs(dt) * np.abs(A_turb))
 
     # apply random walk
-    def update(self,nb,  time, active):
+    def update(self,time_sec, active):
         # add up 2D/3D diffusion coeff as random walk done using velocity_modifier
         #todo remove nb param,  when changed to using arbitary time step, not substeping
 

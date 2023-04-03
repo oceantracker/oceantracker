@@ -8,13 +8,14 @@ from oceantracker.util import  basic_util
 
 # build node to cell map
 @njit
-def build_node_to_cell_map(tri,x):
+def build_node_to_cell_map_v1_using_lists(tri,x):
+    #todo deleted in favour of matrix version below?
     # build list  giving map from each node to list of cells which contain that node
 
     # make empty list for each node
     node_to_tri_map = NumbaList()
 
-
+    # make empty list
     for n in range(x.shape[0]):
         node_to_tri_map.append(NumbaList([np.int32(0)]))
         del node_to_tri_map[-1][-1]  # make it empty
@@ -41,9 +42,42 @@ def build_node_to_cell_map(tri,x):
             node_to_tri_map_array[n,tri_Per_node[n]] = c
             tri_Per_node[n] += 1
 
-            pass
-
     return node_to_tri_map_array, tri_Per_node
+
+
+@njit
+def build_node_to_cell_map(tri,x):
+    # build list  giving map from each node to list of cells which contain that node
+
+    # make empty array with guess of how many triangles per node
+    # using arrays faster than appending to lists
+    # need to exapnd array if needed to avios crash
+    n_block = 10
+    empty_block = np.full((x.shape[0],n_block), 0, dtype=np.int32)
+    node_to_tri_map =empty_block.copy()
+
+    tri_Per_node = np.full((x.shape[0],), 0, dtype=np.int32)
+    max_cells_per_node = 0
+
+    #  build a node to triangles map
+
+    for nTri  in range(tri.shape[0]):
+        for m  in range(tri.shape[1]):
+            node = tri[nTri, m]
+            tri_Per_node[node] += 1
+            max_cells_per_node = max(tri_Per_node[node], max_cells_per_node)
+
+            # if not enough space add colums to matrix
+            if tri_Per_node[node] >= node_to_tri_map.shape[1]:
+                # add another block
+                node_to_tri_map = np.concatenate((node_to_tri_map, empty_block.copy()),axis=1)
+            # log one more triangle for this node
+            node_to_tri_map[node, tri_Per_node[node]-1] = nTri
+
+
+
+    return node_to_tri_map, tri_Per_node
+
 
 # build adjacency matrix from node to triangles map
 @njit
@@ -88,7 +122,6 @@ def build_grid_outlines(grid):
     def build_edge_node_pairs(triangles, adjacency_matrix, boundary_tri):
 
         # find triangles with edges ( but not those with 3 edges, which are not connected to the domain)
-
         edge_node_pairs = np.full((2*boundary_tri.shape[0],2), -100, dtype=np.int32) # space for maximum number of edges at 1 or 2 per triangle
 
         nfound = 0  # number of pairs found
@@ -104,7 +137,7 @@ def build_grid_outlines(grid):
     @njit
     def join_segments(edge_node_pairs):
         # join segments into lines based on common nodes in edge pairs of nodes
-
+        # todo this is slow try with exapaning numy array
         npairs =edge_node_pairs.shape[0]
         active = np.full((npairs,),True)# those which still need to be paired
         # make empty segment_list
@@ -145,7 +178,7 @@ def build_grid_outlines(grid):
     edge_node_pairs = build_edge_node_pairs(grid['triangles'], grid['adjacency'], np.flatnonzero(grid['is_boundary_triangle']))
 
     # join segments into continuous lines
-    #todo this is slow
+
     segs = join_segments(edge_node_pairs)
 
     # use first segment to work out if an island

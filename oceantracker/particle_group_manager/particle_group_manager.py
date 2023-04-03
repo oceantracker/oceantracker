@@ -1,6 +1,5 @@
 import numpy as np
 from numba import njit
-from copy import copy
 from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util import time_util
@@ -31,7 +30,7 @@ class ParticleGroupManager(ParameterBaseClass):
         nDim = 3 if si.hydro_model_is3D else  2
 
         #  time dependent core  properties
-        self.add_time_varying_info(name = 'time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
+        self.add_time_varying_info(name = 'time', dtype=np.float64, description='time in seconds, since 1/1/1970') #time has only one value at each time step
 
         # core particle props. , write at each required time step
         self.create_particle_property('manual_update',dict(name='x',  vector_dim=nDim))  # particle location
@@ -52,7 +51,7 @@ class ParticleGroupManager(ParameterBaseClass):
         self.create_particle_property('manual_update',dict(name='IDpulse',  dtype=np.int32, initial_value=-1, time_varying= False,
                                       description='ID of pulse particle was released within its release group, zero based'))
 
-        self.create_particle_property('manual_update',dict(name='time_released',time_varying= False,
+        self.create_particle_property('manual_update',dict(name='time_released',dtype=np.float64,time_varying= False,
                                       description='time (sec) each particle was released'))
         self.create_particle_property('manual_update',dict(name='x_last_good', write=False, vector_dim=nDim))  # location when last moving
         self.create_particle_property('manual_update',dict(name='x0',  vector_dim=nDim, time_varying=False,
@@ -60,7 +59,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         self.screen_msg = ''
 
-    def release_particles(self, nb, t):
+    def release_particles(self, time_sec):
         # see if any group is ready to release
         self.code_timer.start('release_particles')
         si = self.shared_info
@@ -68,18 +67,21 @@ class ParticleGroupManager(ParameterBaseClass):
 
         for g in si.class_interators_using_name['particle_release_groups']['all'].values():
             ri = g.info['release_info']
-            if ri['release_schedule_times'] is not None and ri['index_of_next_release'] < ri['release_schedule_times'].shape[0] \
-                    and np.any(t * si.model_direction >= ri['release_schedule_times'][ri['index_of_next_release']] * si.model_direction):
-                x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
-                new_index = self.release_a_particle_group_pulse(nb, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
-                new_buffer_indices = np.concatenate((new_buffer_indices,new_index))
-                ri['index_of_next_release'] += 1
+            if ri['index_of_next_release'] < ri['release_schedule_times'].size:
+                # find any pulses not released at this time are release them,being safe there  could be more than one
+                sel = (ri['release_schedule_times'][ri['index_of_next_release']:]- time_sec) * si.model_direction <= 0.
+                sel = ri['index_of_next_release'] + np.flatnonzero(sel) # indexs of needed releases
+                for ng in range(sel.size):
+                    x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
+                    new_index = self.release_a_particle_group_pulse(time_sec, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
+                    new_buffer_indices = np.concatenate((new_buffer_indices,new_index))
+                ri['index_of_next_release'] += sel.size
 
         # for all new particles update cell and bc cords for new particles all at same time
         part_prop = si.classes['particle_properties']
 
         #todo does this setup_interp_time_step have to be here?
-        si.classes['field_group_manager'].setup_interp_time_step(nb, t, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
+        si.classes['field_group_manager'].setup_interp_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
 
         # initial values  part prop derived from fields
         for p in si.class_interators_using_name['particle_properties']['from_fields'].values():
@@ -91,7 +93,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # update new particles props
         # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
-        self.update_PartProp(t, new_buffer_indices)
+        self.update_PartProp(time_sec, new_buffer_indices)
 
         # flag if any bad initial locations
         if si.case_params['run_params']['open_boundary_type'] > 0:
@@ -103,13 +105,11 @@ class ParticleGroupManager(ParameterBaseClass):
             si.msg_logger.msg(str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain',warning=True)
             si.msg_logger.msgg(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)),warning=True)
 
-
-
         self.code_timer.stop('release_particles')
 
         return new_buffer_indices #indices of all new particles
 
-    def release_a_particle_group_pulse(self, nb, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess):
+    def release_a_particle_group_pulse(self, time_sec, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess):
         # release one pulse of particles from given group
         si = self.shared_info
 
@@ -120,7 +120,7 @@ class ParticleGroupManager(ParameterBaseClass):
         if smax >= si.particle_buffer_size:
             self.screen_msg += '; Out of particle buffer'
             si.msg_logger.msg('Ran out of particle buffer- no more releases, increase parameter "particle_buffer_size", size=' \
-                               + str(si.particle_buffer_size) +' at ' + time_util.seconds_to_iso8601str(t), warning=True)
+                              + str(si.particle_buffer_size) +' at ' + time_util.seconds_to_pretty_str(time_sec), warning=True)
             return  np.full((0,),0)# return if no more space
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index
@@ -130,10 +130,11 @@ class ParticleGroupManager(ParameterBaseClass):
         # before doing manual up dates, ensure initial values are set for
         # manually updated particle prop, so their initial value is correct,
         # as in compact mode cant rely on initial value set at array creation, due to re use of buffer
-        # important for prop, for which intial values is meaning full, eg polygon events writer, where initial -1 means in no polygon
+        # important for prop, for which initial values is meaning full, eg polygon events writer, where initial -1 means in no polygon
 
-        for p in si.class_interators_using_name['particle_properties']['manual_update'].values():  # catch any not manually updated with their initial value
-                p.initial_value_at_birth(new_buffer_indices)
+        for name, p in si.class_interators_using_name['particle_properties']['manual_update'].items():
+            # catch any not manually updated with their initial value
+            p.initial_value_at_birth(new_buffer_indices)
 
         #  set initial conditions/properties of new particles
         # do manual_update updates
@@ -147,7 +148,7 @@ class ParticleGroupManager(ParameterBaseClass):
         part_prop['status'].set_values(si.particle_status_flags['moving'], new_buffer_indices)  # set  status of released particles
 
         # below two needed for reruns of same solver to prevent contamination by last run
-        part_prop['time_released'].set_values(t, new_buffer_indices)  # time released for each particle, needed to calculate age
+        part_prop['time_released'].set_values(time_sec.astype(np.float64), new_buffer_indices)  # time released for each particle, needed to calculate age
 
         part_prop['ID'].set_values(self.particles_released + np.arange(num_released), new_buffer_indices)
 
@@ -214,7 +215,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         self.screen_msg= ''
         #  calculate age particle property = t-time_released
-        particle_operations_util.set_value_and_add(part_prop['age'].dataInBufferPtr(), t,
+        particle_operations_util.set_value_and_add(part_prop['age'].dataInBufferPtr(), t.astype(np.float64),
                                                    part_prop['time_released'].dataInBufferPtr(), active, scale= -1.)
 
         # first interpolate to give particle properties from reader derived  fields

@@ -2,6 +2,7 @@
     "shared_params": {
         "output_file_base": "demo10_polygon_residence_demo",
         "add_date_to_run_output_dir": false,
+        "time_step": 900,
         "compact_mode": true,
         "root_output_dir": "output"
     },
@@ -30,7 +31,7 @@
             "water_depth": "depth",
             "tide": "tide"
         },
-        "time_buffer_size": 24,
+        "time_buffer_size": 10,
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "base_case_params": {
@@ -43,9 +44,6 @@
         "tracks_writer": {
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
             "write_dry_cell_index": true
-        },
-        "solver": {
-            "n_sub_steps": 6
         },
         "particle_release_groups": [
             {
@@ -92,6 +90,9 @@
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
         ],
+        "solver": {
+            "n_sub_steps": 6
+        },
         "particle_statistics": [
             {
                 "class_name": "oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon",

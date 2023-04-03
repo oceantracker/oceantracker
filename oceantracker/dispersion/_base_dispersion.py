@@ -19,4 +19,4 @@ class _BaseTrajectoryModifer(ParameterBaseClass):
 
     # prototype for status modification,
     #  all particles tested to see if they need status changing, eg tidal stranding
-    def update(self, nb, time, active): pass
+    def update(self, time_sec, active): pass

@@ -76,8 +76,6 @@ base_case_params:
     release_interval: 3600
   run_params:
     write_tracks: false
-  solver:
-    n_sub_steps: 30
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: true
@@ -90,3 +88,4 @@ shared_params:
   max_duration: 1296000.0
   output_file_base: demo61_concentration_test
   root_output_dir: output
+  time_step: 120

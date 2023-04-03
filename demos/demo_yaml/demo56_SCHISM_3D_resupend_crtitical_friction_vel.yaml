@@ -85,8 +85,6 @@ base_case_params:
     particle_property_list:
     - water_depth
   run_params: {}
-  solver:
-    n_sub_steps: 30
   trajectory_modifiers:
   - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
     critical_friction_velocity: 0.005
@@ -109,3 +107,4 @@ shared_params:
   debug: true
   output_file_base: demo56_SCHISM_3D_resupend_crtitical_friction_vel
   root_output_dir: output
+  time_step: 120

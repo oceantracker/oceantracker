@@ -52,8 +52,6 @@ base_case_params:
     duration: 259200
     user_note: test of notes
     write_tracks: false
-  solver:
-    n_sub_steps: 2
   tracks_writer:
     turn_on_write_particle_properties_list:
     - n_cell
@@ -79,8 +77,9 @@ reader:
   input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
-  time_buffer_size: 24
+  time_buffer_size: 10
 shared_params:
   add_date_to_run_output_dir: false
   output_file_base: demo03_heatmaps
   root_output_dir: output
+  time_step: 900

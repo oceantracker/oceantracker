@@ -2,6 +2,7 @@
     "shared_params": {
         "output_file_base": "demo08_particle_splitting",
         "add_date_to_run_output_dir": false,
+        "time_step": 900,
         "compact_mode": false,
         "root_output_dir": "output"
     },
@@ -30,7 +31,7 @@
             "water_depth": "depth",
             "tide": "tide"
         },
-        "time_buffer_size": 24,
+        "time_buffer_size": 10,
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "base_case_params": {
@@ -45,9 +46,6 @@
         "tracks_writer": {
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
             "write_dry_cell_index": true
-        },
-        "solver": {
-            "n_sub_steps": 6
         },
         "particle_release_groups": [
             {
@@ -71,6 +69,9 @@
                 "decay_time_scale": 86400.0
             }
         ],
+        "solver": {
+            "n_sub_steps": 6
+        },
         "event_loggers": [
             {
                 "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",

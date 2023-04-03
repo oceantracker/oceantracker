@@ -21,7 +21,7 @@ class SplitParticles(_BaseTrajectoryModifier):
         si= self.shared_info
         self.time_of_last_split = si.solver_info['model_start_time']
 
-    def select_particles_to_split(self, buffer_index, time, active):
+    def select_particles_to_split(self, time_sec, active):
         # get indices of particles to split
         si = self.shared_info
         part_prop = si.classes['particle_properties']
@@ -35,16 +35,16 @@ class SplitParticles(_BaseTrajectoryModifier):
 
         return split
 
-    def update(self, buffer_index, time, active):
+    def update(self, time_sec, active):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
-        if  abs(time- self.time_of_last_split ) <= self.params['splitting_interval']:  return
+        if  abs(time_sec - self.time_of_last_split) <= self.params['splitting_interval']:  return
         si = self.shared_info
-        self.time_of_last_split  = time
+        self.time_of_last_split  = time_sec
 
         # split given fraction
-        split = self.select_particles_to_split(buffer_index, time, active)
+        split = self.select_particles_to_split(time_sec, active)
 
         x0           = part_prop['x'].get_values(split)
         user_release_groupID   = part_prop['user_release_groupID'].get_values(split)
@@ -52,4 +52,4 @@ class SplitParticles(_BaseTrajectoryModifier):
         n_cell_guess = part_prop['n_cell'].get_values(split)
         IDpulse      = part_prop['IDpulse'].get_values(split)
 
-        si.classes['particle_group_manager'].release_a_particle_group_pulse(buffer_index, time, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
+        si.classes['particle_group_manager'].release_a_particle_group_pulse(time_sec, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)

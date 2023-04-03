@@ -1,13 +1,7 @@
 import numpy as np
-from copy import copy, deepcopy
 from oceantracker.util import triangle_utilities_code
-from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
-from oceantracker.util import shared_memory_util
-from oceantracker.fields.util import fields_util
-from oceantracker.util.cord_transforms import WGS84_to_UTM
-from numba import typed as numba_type
 from oceantracker.reader._base_reader import _BaseReader
 from oceantracker.reader.util import reader_util, shared_reader_memory_util
 
@@ -18,9 +12,10 @@ class GenericUnstructuredReader(_BaseReader):
         self.add_default_params({ 'dimension_map': {'node': PVC('node', str,is_required=True)},
                                 'grid_variables': {'triangles': PVC(None, str, is_required=True)}})
 
-        self.buffer_info ={'n_filled' : None}
+        self.info['buffer_info'] ={'n_filled' : None}
         self.class_doc(description='Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names')
 
+    #@profile
     def make_non_time_varying_grid(self,nc, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
@@ -47,8 +42,9 @@ class GenericUnstructuredReader(_BaseReader):
     def make_grid_time_buffers(self,nc, grid, grid_time_buffers):
         # now set up time buffers
         time_buffer_size = self.params['time_buffer_size']
-        grid_time_buffers['time'] = np.full((self.params['time_buffer_size'],), 0.)  # time buffer
+        grid_time_buffers['time'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')  # time buffer
         grid_time_buffers['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
+
         # set up zlevel
         if self.is_hindcast3D(nc):
             s = [self.params['time_buffer_size'], grid['x'].shape[0], self.get_number_of_z_levels(nc)]
@@ -127,10 +123,11 @@ class GenericUnstructuredReader(_BaseReader):
         time = nc.read_a_variable(vname, sel=file_index)
 
         if self.params['isodate_of_hindcast_time_zero'] is not None:
-            time = time + time_util.date_to_seconds(time_util.date_from_iso8601str(self.params['isodate_of_hindcast_time_zero']))
+            time = time.astype('timedelta64[s]') + self.params['isodate_of_hindcast_time_zero']
+
         if self.params['time_zone'] is not None:
-            time += self.params['time_zone']*3600.
-        return time.astype('datetime64[s]')
+            time += time_util.seconds_to_timedelta64(self.params['time_zone'] * 3600.)
+        return time
 
     def read_nodal_x_as_float64(self, nc):
         si=self.shared_info
@@ -168,7 +165,7 @@ class GenericUnstructuredReader(_BaseReader):
         data = np.zeros((self.grid['x'].shape[0],), dtype=np.int32)
         return data
 
-
+    #@profile
     def _add_grid_attributes(self, grid):
         # build adjacency etc from triangulation
         grid['node_to_tri_map'],grid['tri_per_node'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])

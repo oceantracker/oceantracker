@@ -85,8 +85,6 @@ base_case_params:
     particle_property_list:
     - water_depth
   run_params: {}
-  solver:
-    n_sub_steps: 30
   velocity_modifiers:
   - class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
     mean: -0.001
@@ -105,3 +103,4 @@ shared_params:
   debug: true
   output_file_base: demo55_SCHISM_3D_fall_velocity
   root_output_dir: output
+  time_step: 120

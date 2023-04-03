@@ -105,7 +105,8 @@ def  CheckParameterValues(key,value_checker, user_param, base_param, crumbs, msg
             value = None
         else:
             value = value_checker.get_default()
-
+            # converts some variables to correct types, eg isodatetime, timedelta
+            value = value_checker.check_value(crumb_trail, value, msg_logger)
     elif user_param is None:
         # use value from base or default dict.
         value = base_param
@@ -150,6 +151,7 @@ class ParamDictValueChecker(object):
         info = self.info
 
         if info['obsolete'] is not None:
+            #todo make this work only if user suolies this param
             msg_logger.msg('Parameter  "' + crumb_trail + '" is obsolete  - ' + info['obsolete'],warning=True)
 
         if value is None:
@@ -194,7 +196,6 @@ class ParamDictValueChecker(object):
                 value = np.datetime64(value)
             except Exception as e:
                 msg_logger.msg( 'Failed to convert to date as iso8601str "' + crumb_trail + '", value = ' + str(value),  fatal_error=True)
-        #todo add a time_ delta in seconds
 
         #if not one of special types above then value unchanged
         # check  value and type if not

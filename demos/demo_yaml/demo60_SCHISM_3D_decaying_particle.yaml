@@ -35,3 +35,4 @@ shared_params:
   debug: true
   output_file_base: demo60_SCHISM_3D_decaying_particle
   root_output_dir: output
+  time_step: 120

@@ -31,7 +31,7 @@ class TerminalVelocity(VelocityModiferBase):
                                                           class_name='oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution',
                                              mean=self.params['mean'], variance=self.params['variance']))
 
-    def update(self, nb, t, active):
+    def update(self, time_sec, active):
         # modify vertical velocity, if backwards, make negative
         si = self.shared_info
         part_prop = si.classes['particle_properties']

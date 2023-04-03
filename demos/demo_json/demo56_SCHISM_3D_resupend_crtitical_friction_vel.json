@@ -2,6 +2,7 @@
     "shared_params": {
         "output_file_base": "demo56_SCHISM_3D_resupend_crtitical_friction_vel",
         "debug": true,
+        "time_step": 120,
         "compact_mode": true,
         "root_output_dir": "output"
     },
@@ -24,9 +25,6 @@
         "dispersion": {
             "A_H": 0.2,
             "A_V": 0.001
-        },
-        "solver": {
-            "n_sub_steps": 30
         },
         "particle_release_groups": [
             {

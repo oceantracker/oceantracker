@@ -142,11 +142,10 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             else:
                 si.msg_logger.msg('Part Prop "' + p + '" not a particle property, ignored and no stats calculated',warning=True)
 
-    def update(self, **kwargs):
+    def update(self, time_sec):
         # do counts for each release  location and grid cell
         self.start_update_timer()
-        time = kwargs['time']
-        self.record_time_stats_last_recorded(time)
+        self.record_time_stats_last_recorded(time_sec)
 
         part_prop = self.shared_info.classes['particle_properties']
         stats_grid = self.grid
@@ -160,7 +159,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                          self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
 
-        self.write_time_varying_stats(self.nWrites, time)
+        self.write_time_varying_stats(self.nWrites, time_sec)
         self.nWrites += 1
         self.stop_update_timer()
 

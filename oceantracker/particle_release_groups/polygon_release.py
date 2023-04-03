@@ -1,7 +1,6 @@
 import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.particle_release_groups.point_release import PointRelease
-
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 
 

@@ -50,8 +50,6 @@ base_case_params:
     pulse_size: 20
     release_interval: 3600
   run_params: {}
-  solver:
-    n_sub_steps: 30
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: true
@@ -63,3 +61,4 @@ shared_params:
   debug: true
   output_file_base: demo57_SCHISM_3D_lateralBoundaryTest
   root_output_dir: output
+  time_step: 120

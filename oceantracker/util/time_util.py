@@ -5,29 +5,31 @@ import math
 import numpy as np
 # deal with date time operations,
 
+def seconds_to_datetime64(s):
+    dt = datetime.utcfromtimestamp(s) # ignores time zone
+    return np.datetime64(dt).astype('datetime64[s]')
 
+def seconds_to_timedelta64(s): return np.asarray(s, dtype=np.float64).astype('timedelta64[s]')
 
-def ot_time_zero(): return datetime(1970,1,1)
+def pretty_duration_string(td):
+    #from timedelta64
+    # Calculate days, hours, and minutes
+    days = td.astype('timedelta64[D]').astype(int)
+    hours = (td.astype('timedelta64[h]') - days * 24).astype(int)
+    minutes = (td.astype('timedelta64[m]') - days * 24 * 60 - hours * 60).astype(int)
 
-def seconds_to_date(s): return ot_time_zero() + timedelta(seconds=s) # better than total seconds which allows for computers time zone
+    # Create the string representation
+    return  f"{days} days, {hours} hours, {minutes} minutes"
 
-def seconds_to_iso8601str(s): return seconds_to_date(s).isoformat() # better than total seconds which allows for computers time zone
 def seconds_to_pretty_str(s, seconds= True):
     fmt="%Y-%m-%d %H:%M"
     if seconds: fmt +=":%S"
-    s_str= seconds_to_date(s).strftime(fmt)
-    return s_str
-def seconds_to_short_date(s):
-    fmt="%Y_%m_%d"
-    s_str= seconds_to_date(s).strftime(fmt)
-    return s_str
-def iso8601str_to_seconds(s):  return date_to_seconds(date_from_iso8601str(s))
+    dt = datetime.utcfromtimestamp(s)
+    return  dt.strftime(fmt)
 
-def date_to_seconds(date): return  (date-ot_time_zero()).total_seconds()
+
 
 def diff(date1,date2) :  return  (date1 - date2).total_seconds()
-
-def float_sec_to_time_delta(s): return np.asarray(s, dtype=np.float64).astype('timedelta64[s]')
 
 
 def iso8601_str(d)   :  return d.isoformat()

@@ -19,7 +19,7 @@ class TidalStranding(_BaseStatusModifer):
         self.check_class_required_fields_prop_etc(required_grid_time_buffers_var_list=['dry_cell_index'])
 
 
-    def update(self, nb,t,sel):
+    def update(self, time_sec,sel):
         si=self.shared_info
         part_prop  =  si.classes['particle_properties']
 

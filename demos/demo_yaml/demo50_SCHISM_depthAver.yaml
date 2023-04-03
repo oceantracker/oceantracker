@@ -70,8 +70,6 @@ base_case_params:
     pulse_size: 10
     release_interval: 3600
   run_params: {}
-  solver:
-    n_sub_steps: 30
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: true
@@ -83,3 +81,4 @@ shared_params:
   debug: true
   output_file_base: demo50_SCHISM_depthAver
   root_output_dir: output
+  time_step: 120

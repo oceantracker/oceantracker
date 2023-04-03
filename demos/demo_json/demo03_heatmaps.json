@@ -2,6 +2,7 @@
     "shared_params": {
         "output_file_base": "demo03_heatmaps",
         "add_date_to_run_output_dir": false,
+        "time_step": 900,
         "root_output_dir": "output"
     },
     "reader": {
@@ -29,7 +30,7 @@
             "water_depth": "depth",
             "tide": "tide"
         },
-        "time_buffer_size": 24,
+        "time_buffer_size": 10,
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "base_case_params": {
@@ -46,9 +47,6 @@
                 "n_cell"
             ],
             "write_dry_cell_index": true
-        },
-        "solver": {
-            "n_sub_steps": 2
         },
         "particle_release_groups": [
             {

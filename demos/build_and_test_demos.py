@@ -23,6 +23,7 @@ demo_base_params=\
 {
  'shared_params' :{'output_file_base' : None,
                    'add_date_to_run_output_dir': False,
+                   'time_step' : 900,
                    },
      'reader': {"class_name": 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 'input_dir': 'demo_hindcast',
@@ -31,14 +32,13 @@ demo_base_params=\
                 'dimension_map': {'time': 'time', 'node': 'nodes'},
                 'grid_variables'  : {'time': 'time_sec', 'x':['east','north'],  'triangles': 'tri'},
                 'field_variables': {'water_velocity' : ['east_vel','north_vel'],'water_depth': 'depth','tide':'tide'},
-                'time_buffer_size': 24,
+                'time_buffer_size': 10,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
  'base_case_params' : {
     'run_params' : {'user_note':'test of notes'},
     'dispersion': {'A_H': .1},
     'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_index': True},
-    'solver': {'n_sub_steps': 2},
-        'particle_release_groups': [{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}],
+     'particle_release_groups': [{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}],
         'particle_properties': [
                         {'name': 'Oxygen', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24,'initial_value' : 20.},
                         {'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'},
@@ -232,7 +232,7 @@ params.append(p10)
 
 # case 50 schism basic
 schsim_base_params=\
-{'shared_params' :{'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True},
+{'shared_params' :{'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120},
  'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
                     'input_dir': 'demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',
@@ -241,7 +241,6 @@ schsim_base_params=\
                           },
  'base_case_params' : { 'run_params' : {},
                  'dispersion': {'A_H': .2, 'A_V': 0.001},
-                        'solver': {'n_sub_steps': 30},
                 'particle_release_groups': [{'points': [[1595000, 5482600, -1],[1599000, 5486200, -1] ],
                                                      'pulse_size': 10, 'release_interval': 3600,
                                                     'allow_release_in_dry_cells': True},
@@ -278,7 +277,6 @@ s55['base_case_params']['velocity_modifiers']= [
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
 ]
 s55['base_case_params']['fields']=[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}]
-s55['base_case_params']['solver'] = {'n_sub_steps': 30}
 s55['base_case_params']['particle_statistics']=[
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
