@@ -189,12 +189,12 @@ class ParamDictValueChecker(object):
 
         # deal with numpy versions of params, convert to python types
         elif info['type'] == int:
-            # ensure all at int32 as default int is int64 on  linux
+            # ensure all are int32 as default int is int64 on  linux
             value = np.int32(value)
 
         elif info['type'] == 'iso8601date':
             try:
-                value = np.datetime64(value)
+                value = np.datetime64(value).astype('datetime64[s]')
             except Exception as e:
                 msg_logger.msg( 'Failed to convert to date as iso8601str "' + crumb_trail + '", value = ' + str(value),  fatal_error=True)
 

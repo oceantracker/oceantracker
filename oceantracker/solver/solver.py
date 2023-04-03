@@ -81,6 +81,7 @@ class Solver(ParameterBaseClass):
 
         t0_model = perf_counter()
 
+        # runf forwars through datetime, which for backtracking are backwards in time
         for nt  in range(model_datetimes.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()
             time_sec = np.float64(model_datetimes[nt])

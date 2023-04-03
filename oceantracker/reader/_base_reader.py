@@ -346,7 +346,7 @@ class _BaseReader(ParameterBaseClass):
     
 
 
-    def fill_time_buffer(self, nt0_buffer):
+    def fill_time_buffer(self, nt0_hindcast):
         # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
         # fill buffer starting at hindcast time step nt0_buffer
         # todo change so does not read current step again after first fill of buffer
@@ -367,17 +367,22 @@ class _BaseReader(ParameterBaseClass):
         # ie if backtracking are still moving forward in buffer
         total_read = 0
         bi['buffer_available'] = buffer_size
-        bi['nt_buffer0'] = nt0_buffer
-        n_file = np.argmax(nt0_buffer  <  fi['nt_starts'] + fi['n_time_steps'])
-        if si.backtracking:
-            nt_total_available = min( nt0_buffer , bi['buffer_available']) # from start to current step available
-            nt_file_required = nt0_buffer - np.arange(nt_total_available)  # will load time steps in reverse order
-        else:
-            # forward tracking
-            nt_total_available = min(fi['n_time_steps_in_hindcast']- nt0_buffer, bi['buffer_available'] ) # from current step to end available
-            nt_file_required = nt0_buffer + np.arange(nt_total_available)
+        bi['nt_buffer0'] = nt0_hindcast
 
-        nt_buffer_required = nt0_buffer + np.arange(nt_total_available)  # buffer is always moving forwards
+        n_file = np.argmax(nt0_hindcast < fi['nt_starts'] + fi['n_time_steps']) # find first file with time step
+
+        # always move forward in buffer, by loading hindcast backwards if backtracking
+          # from current step to end of hindcast
+         # buffer is always moving forward
+        if si.backtracking:
+            # from start to current step available,by loading time steps in reverse order
+            nt_total_available = min(nt0_hindcast, bi['buffer_available'])
+            nt_hindcast_required = nt0_hindcast - np.arange(nt_total_available)
+            nt_file_required = fi['n_time_steps_in_hindcast']- 1 - nt_hindcast_required
+        else:
+            # forward tracking, time steps same as hindcast time steps
+            nt_total_available = min(fi['n_time_steps_in_hindcast'] - nt0_hindcast, bi['buffer_available'])
+            nt_file_required = nt_hindcast_required.copy()
 
         while len(nt_file_required) > 0 and 0 <= n_file < len(fi['names']):
 
@@ -386,20 +391,20 @@ class _BaseReader(ParameterBaseClass):
 
             if si.backtracking:
                     # from first remaining requested step to beginning of file is avaiable
-                    nt_available = nt_file_required[0] -  fi['nt_starts'][n_file] + 1
+                    nt_available = nt_file_required[0] -  fi['nt_starts'][n_file]
             else:
                 # from first requested file time step to end of file is available
                 nt_available = fi['nt_starts'][n_file]+ fi['n_time_steps'][n_file] - nt_file_required[0]
 
             num_read = min(nt_available, nt_file_required.size, bi['buffer_available'])
             file_offsets = nt_file_required[:num_read] - fi['nt_starts'][n_file] # steps in current file
-            buffer_index = nt_buffer_required[:num_read]  % bi['buffer_size']     # make ring buffer index in by modula maths
+            buffer_index = nt_hindcast_required[:num_read]  % bi['buffer_size']     # make ring buffer index in by modula maths
 
             s =  f'Reading-file-{(n_file+1):02d}  {path.basename(fi["names"][n_file])}, steps in file {fi["n_time_steps"][n_file]:3d},'
             s += f'reading  {num_read:2d} of {nt_total_available:2d} steps, '
-            s += f' for hindcast time steps {nt_buffer_required[0]:02d}:{nt_buffer_required[-1]:02d}, '
+            s += f' for hindcast time steps {nt_hindcast_required[0]:02d}:{nt_hindcast_required[-1]:02d}, '
             s += f' available {fi["nt_starts"][n_file]:03d}:{fi["nt_starts"][n_file]+fi["n_time_steps"][n_file]-1:03d}, '
-            s += f' read hindcast indices {nt_buffer_required[0]:03d}:{nt_buffer_required[num_read-1]:03d}'
+            s += f' read hindcast indices {nt_hindcast_required[0]:03d}:{nt_hindcast_required[num_read-1]:03d}'
             s += f' file  offsets  {file_offsets[0]:03d}:{file_offsets[num_read - 1]:03d} to ring buffer offsets {buffer_index[0]:03}:{buffer_index[num_read - 1]:03d} '
             si.msg_logger.write_progress_marker(s)
 
@@ -435,7 +440,7 @@ class _BaseReader(ParameterBaseClass):
             bi['buffer_available'] -= num_read
             n_file += int(si.model_direction)
             nt_file_required = nt_file_required[num_read:]
-            nt_buffer_required = nt_buffer_required[num_read:]
+            nt_hindcast_required = nt_hindcast_required[num_read:]
 
         si.msg_logger.write_progress_marker( f' read {total_read:3d} time steps in  {perf_counter()-t0:3.1f} sec',tabs=2)
 
@@ -522,14 +527,14 @@ class _BaseReader(ParameterBaseClass):
 
     def time_to_hydro_model_time_step(self, time_sec):
         #convert date time to global time step in hindcast just before/after when forward/backtracking
+        # always move forward through buffer, but file info is always forward in time
         si = self.shared_info
         info = self.info
 
-        # below works backwards as start time> end time
-        fraction_completed = (time_sec - info['first_time']) / (info['last_time'] - self.info['first_time'])
-        nt = (info['file_info']['n_time_steps_in_hindcast'] - 1) *  fraction_completed
+        hindcast_fraction= (time_sec - info['first_time']) / (info['last_time'] - self.info['first_time'])
+        nt = (info['file_info']['n_time_steps_in_hindcast'] - 1) *  hindcast_fraction
 
-        return int(nt)
+        return np.int32(np.floor(nt))
 
 
     def get_buffer_index_from_hindcast_global_time_step(self, nt):
