@@ -151,8 +151,6 @@ class ParameterBaseClass(object):
             self.default_params[key] ={}
 
 
-
-
     # below dynamical adds shared particle index buffers when first used within in a class instance
     # buffers are used to hold selections of particles, saving memory and time by reuse
     # use with care as returned view may refer to same buffer!!
@@ -161,7 +159,7 @@ class ParameterBaseClass(object):
         # return pointer to particle buffer of indcies
         # set up if not already attribute of class
         if not hasattr(self, 'particle_index_buffer_data'):
-            self.particle_index_buffer_data = np.full((self.shared_info.particle_buffer_size,), -127, np.int32)
+            self.particle_index_buffer_data = np.full((self.shared_info.particle_buffer_size,), -127,dtype= np.int32)
 
         return self.particle_index_buffer_data[:]
 
@@ -169,7 +167,7 @@ class ParameterBaseClass(object):
         # return pointer to particle buffer of indcies
         # set up if not already attribute of class
         if not hasattr(self, 'particle_subset_buffer_data'):
-            self.particle_subset_buffer_data = np.full((self.shared_info.particle_buffer_size,), -127, np.int32)
+            self.particle_subset_buffer_data = np.full((self.shared_info.particle_buffer_size,), -127, dtype= np.int32)
 
         return self.particle_subset_buffer_data[:]
 
