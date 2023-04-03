@@ -72,7 +72,7 @@ class ParticleGroupManager(ParameterBaseClass):
                     and np.any(t * si.model_direction >= ri['release_schedule_times'][ri['index_of_next_release']] * si.model_direction):
                 x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
                 new_index = self.release_a_particle_group_pulse(nb, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
-                new_buffer_indices = np.concatenate((new_buffer_indices,new_index))
+                new_buffer_indices = np.concatenate((new_buffer_indices,new_index),dtype=np.int32)
                 ri['index_of_next_release'] += 1
 
         # for all new particles update cell and bc cords for new particles all at same time
@@ -124,7 +124,7 @@ class ParticleGroupManager(ParameterBaseClass):
             return  np.full((0,),0)# return if no more space
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index
-        new_buffer_indices= np.arange(self.particles_in_buffer, smax)  # indices of particles IN BUFFER to add ( zero base)
+        new_buffer_indices= np.arange(self.particles_in_buffer, smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
         num_released = new_buffer_indices.shape[0]
 
         # before doing manual up dates, ensure initial values are set for
