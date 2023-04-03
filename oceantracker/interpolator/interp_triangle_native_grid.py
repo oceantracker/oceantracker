@@ -150,7 +150,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             self.params['bc_walk_tol'],
             self.params['max_search_steps'],
             False, # no open boundary, as must start inside
-            np.arange(xq.shape[0]), self.cell_walk_counts, n_cell)
+            np.arange(xq.shape[0], dtype=np.int32), self.cell_walk_counts, n_cell)
 
         return n_cell
 
@@ -158,7 +158,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         n_cell  = self.initial_cell_guess(xq)
         bc = self.get_bc_cords(xq,n_cell)
         is_inside=  np.all(np.logical_and(bc >= -self.params['bc_walk_tol'], bc  <= 1.+self.params['bc_walk_tol']),axis=1)
-        return is_inside, n_cell  # is inside if  magitude of all BC < 1
+        return is_inside, n_cell  # is inside if  magnitude of all BC < 1
 
 
     def eval_field_interpolation_at_particle_locations(self, fieldObj, nb  , output, active, step_dt_fraction=None):
