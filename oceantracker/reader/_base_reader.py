@@ -380,7 +380,7 @@ class _BaseReader(ParameterBaseClass):
             nt_hindcast_required = nt0_hindcast - np.arange(nt_total_available)
             nt_file_required = fi['n_time_steps_in_hindcast']- 1 - nt_hindcast_required
         else:
-            # forward tracking, time steps same as hindcast time steps
+            # forward tracking, time steps same as hindcast time steps, test
             nt_total_available = min(fi['n_time_steps_in_hindcast'] - nt0_hindcast, bi['buffer_available'])
             nt_file_required = nt_hindcast_required.copy()
 
