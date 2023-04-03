@@ -152,7 +152,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             self.params['bc_walk_tol'],
             self.params['max_search_steps'],
             False, # no open boundary, as must start inside
-            np.arange(xq.shape[0]), self.cell_walk_counts, n_cell)
+            np.arange(xq.shape[0], dtype=np.int32), self.cell_walk_counts, n_cell)
 
         return n_cell
 
