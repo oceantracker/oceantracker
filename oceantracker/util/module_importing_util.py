@@ -11,6 +11,7 @@ def import_module_from_string(s,msg_logger):
     try:
         ss = s.rsplit('.', 1)
         module_object = import_module(ss[0])
+        #module_object = __import__(ss[0]) # not working but faster option but less checks???
     except Exception as e:
         msg_logger.msg('Failed to find/load module given by string in or before __init__() "' + s + '"',
                           hint='Module names are case sensitive?, sytax error in module?, import error within module?',

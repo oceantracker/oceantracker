@@ -20,8 +20,8 @@ class _BaseWriter(ParameterBaseClass):
 
         self.add_default_params({
                                 'role_output_file_tag': PVC('tracks', str),
-                                 'output_step_count': PVC(1,int,min=1, doc_str='Write track data every output_step_count steps of the model'),
-                                 'turn_on_write_particle_properties_list': PLC([], [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
+                                'output_step_count': PVC(1,int,min=1, doc_str='Write track data every output_step_count steps of the model'),
+                                'turn_on_write_particle_properties_list': PLC([], [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                                  'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
                                                             doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),
                                  'time_steps_per_per_file': PVC(None, int,min=1, doc_str='Split track output into files with given number of time steps'),

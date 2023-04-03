@@ -39,11 +39,11 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 
 # ________ Barycentric triangle walk________
 #@njit()
-@njit(void(nbtypes.float64[:,:],nbtypes.float64[:,:],nbtypes.int8[:],
-        nbtypes.float64[:,:],nbtypes.float64[:,:,:],nbtypes.int32[:,:],
-        nbtypes.uint8[:], nbtypes.boolean,nbtypes.float64,
-        nbtypes.int32,nbtypes.boolean,
-        nbtypes.int32[:],nbtypes.int64[:],nbtypes.int32[:]
+@njit(void(float64[:,:],float64[:,:],int8[:],
+        float64[:,:],float64[:,:,:],int32[:,:],
+        uint8[:], boolean,float64,
+        int32,boolean,
+        int32[:],int64[:],int32[:]
         ) )
 def BCwalk_with_move_backs_numba2D(xq, x_old, status,
                                    BC, BCtransform, triNeighbours,
@@ -179,34 +179,35 @@ def get_BC_transform_matrix(points, simplices):
     return Tinvs
 
 
-@njit([float64(int64, float32[:, :, :], float64[:], float64, float64, int32[:], int32[:])])
+@njit([float64(int32[:], float32[:, :, :], float64[:], float64, float64, int32[:], int32[:])])
 def _eval_z_at_nz_nodes(nb, z_level_at_nodes, BCcord, tf, tf2, nodes, nz_nodes):
     # eval a at given zlevel given nodes
     z = 0.
     for m in range(3):
         node_nn = nodes[m]
-        z += z_level_at_nodes[nb, node_nn, nz_nodes[m]] * BCcord[m] * tf2 \
-             + z_level_at_nodes[nb + 1, node_nn, nz_nodes[m]] * BCcord[m] * tf
+        z += z_level_at_nodes[nb[0], node_nn, nz_nodes[m]] * BCcord[m] * tf2 \
+             + z_level_at_nodes[nb[1], node_nn, nz_nodes[m]] * BCcord[m] * tf
     return z
 
 
-@njit([float64(int64, int32, float32[:, :, :], int32[:], float64[:], float64, float64, int32[:], int32[:])])
+#@njit([float64(int64, int32[:], float32[:, :, :], int32[:], float64[:], float64, float64, int32[:], int32[:])])
+@njit
 def _eval_z_at_nz_cell(nb, nz_cell, z_level_at_nodes, bottom_nodes, BCcord, tf, tf2, nodes, nz_nodes):
     # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
     z = 0.
     for m in range(3):
         nz_nodes[m] = max(nz_cell, bottom_nodes[m])
-        z += z_level_at_nodes[nb, nodes[m], nz_nodes[m]] * BCcord[m] * tf2 \
-             + z_level_at_nodes[nb + 1, nodes[m], nz_nodes[m]] * BCcord[m] * tf
+        z += z_level_at_nodes[nb[0], nodes[m], nz_nodes[m]] * BCcord[m] * tf2 \
+             + z_level_at_nodes[nb[1], nodes[m], nz_nodes[m]] * BCcord[m] * tf
     return z
 
 
-@njit((void(nbtypes.float64[:], nbtypes.int32, nbtypes.float64,nbtypes.float32[:,:,:],
-           nbtypes.int32[:,:],nbtypes.int32[:],
-           nbtypes.int32[:],nbtypes.float64[:,:], nbtypes.int8[:],
-            nbtypes.int32[:], nbtypes.int32[:,:,:],nbtypes.float32[:],
-           nbtypes.float32[:],nbtypes.int8[:],
-           nbtypes.float64,nbtypes.int32[:],nbtypes.int64[:])
+@njit((void(float64[:], int32[:], float64,float32[:,:,:],
+           int32[:,:],int32[:],
+           int32[:],float64[:,:], int8[:],
+            int32[:], int32[:,:,:],float32[:],
+           float32[:],int8[:],
+           float64,int32[:],int64[:])
       ))
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_level_at_nodes,
                                                   tri, n_cell,
@@ -243,7 +244,6 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
             nz_cell[n] = bottom_nz_cell
             # update nodes above and below
             z_below = _eval_z_at_nz_cell(nb, bottom_nz_cell, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_below)
-            #z_above = _eval_z_at_nz_cell(nb, bottom_nz_cell + 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_above)
             zq[n] = z_below
             z_fraction[n] = 0.0
             continue

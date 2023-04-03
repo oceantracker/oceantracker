@@ -1,8 +1,6 @@
 # linear interploation for triangles in both space and time
-
 #todo  are BC cords as np.float32, faster as lower memory transfer demand and good enough?
 import numpy as np
-
 from scipy.spatial import cKDTree
 
 from oceantracker.interpolator._base_interp import _BaseInterp
@@ -70,7 +68,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         si= self.shared_info
         self.code_timer.start('find_cells_and_weights')
 
-        self.locate_BCwalk(xq, nb,step_dt_fraction, active)  # best method!
+        self.locate_BCwalk(xq, step_dt_fraction, active)  # best method!
         self.code_timer.stop('find_cells_and_weights')
 
         if si.hydro_model_is3D:
@@ -82,7 +80,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             self.code_timer.stop('find_depth_cell')
 
 
-    def locate_BCwalk(self,xq, nb,step_dt_fraction, active):
+    def locate_BCwalk(self,xq, step_dt_fraction, active):
         # Bary Centric walk, flags land triangles in numba code
         si = self.shared_info
         grid = si.classes['reader'].grid
@@ -249,8 +247,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         if fieldObj.is_time_varying():
             # get buffer time step and time fraction
-            nt = reader.time_to_global_time_step(time)
-            nb = reader.global_index_to_buffer_index(nt)
+            nt = reader.time_to_hydro_model_time_step(time)
+            nb = reader.get_buffer_index_from_hindcast_global_time_step(nt)
             step_dt_fraction = abs(time - reader.get_particle_time(nb)) / si.hydo_model_time_step
 
             if fieldObj.is3D():

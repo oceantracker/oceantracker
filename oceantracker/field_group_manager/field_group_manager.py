@@ -1,6 +1,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from oceantracker.field_group_manager.util import  field_group_manager_util
+import numpy as np
 
 
 
@@ -18,23 +19,29 @@ class FieldGroupManager(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'name': PVC('field_group_manager', str)})
 
-        self.n_buffer = 0
+        self.n_buffer = np.zeros((2, ), dtype=np.int32)
 
     def initialize(self):
         si=self.shared_info
         si.create_class_interator('fields', known_iteration_groups=self.known_field_types)
 
-    def setup_interp_time_step(self,nb, time_sec, xq, active):
+    def setup_interp_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
-        si=self.shared_info
-        grid = si.classes['reader'].grid
-        grid_time_buffers = si.classes['reader'].grid_time_buffers
+        si =self.shared_info
+        reader = si.classes['reader']
+
+        # ger buffer index from this time and next
+        nb = np.zeros((2, ), dtype=np.int32)
+        nb[0] = reader.time_to_buffer_index(time_sec)
+        nb[1] = reader.time_to_buffer_index(time_sec+si.model_direction*reader.info['hydro_model_time_step'])
+
+        grid_time_buffers = reader.grid_time_buffers
 
         self.code_timer.start('setup_interp_time_step')
         self.n_buffer = nb  # buffer offset just before given time ,
 
-        self.step_dt_fraction = abs(time_sec - grid_time_buffers['time'][nb]) / si.solver_info['hydo_model_time_step']
+        self.step_dt_fraction = abs(time_sec - np.float64(grid_time_buffers['time'][nb[0]])) / reader.info['hydro_model_time_step']
 
         # update 0-255 dry cell index
         field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, grid_time_buffers['is_dry_cell'],   grid_time_buffers['dry_cell_index'])
@@ -74,5 +81,4 @@ class FieldGroupManager(ParameterBaseClass):
         return output
 
 
-    def get_current_reader_time_buffer_index(self): return self.n_buffer
 

@@ -2,6 +2,7 @@
     "shared_params": {
         "output_file_base": "demo59_crit_shear_resupension",
         "debug": true,
+        "time_step": 120,
         "compact_mode": true,
         "backtracking": false,
         "root_output_dir": "output"
@@ -25,9 +26,6 @@
         "dispersion": {
             "A_H": 0.1,
             "A_V": 0.005
-        },
-        "solver": {
-            "n_sub_steps": 30
         },
         "particle_release_groups": [
             {

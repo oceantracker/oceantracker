@@ -9,6 +9,7 @@ from oceantracker.common_info_default_param_dict_templates import default_class_
 
 # parameter dictionaries are nested dictionaries or lists of dictionaries
 
+#@profile
 def make_class_instance_from_params(params,msg_logger, class_type_name=None, base_case_params =None,
                                     nseq=None, crumbs='', merge_params=True):
     # make a class instance  dynamically,  get instance of class from string eg oceantracker.solver.Solver
@@ -56,6 +57,8 @@ def make_class_instance_from_params(params,msg_logger, class_type_name=None, bas
 
         i.params  = merge_params_with_defaults(params, i.default_params, base_case_params, msg_logger, crumbs=crumbs)
 
+    # attach the current message loger
+    i.msg_logger = msg_logger
     return i
 
 class ParameterBaseClass(object):

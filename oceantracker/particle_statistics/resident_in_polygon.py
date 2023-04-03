@@ -89,15 +89,14 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
     def set_up_spatial_bins(self,nc ): pass
 
-    def update(self,**kwargs):
+    def update(self,time_sec):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
         rg  = self.release_group_to_count
         poly= self.polygon
 
         # update time stats  recorded
-        time = kwargs['time']
-        self.record_time_stats_last_recorded(time)
+        self.record_time_stats_last_recorded(time_sec)
 
         # any overloaded selection of particles given in child classes
         sel = self.select_particles_to_count(self.get_particle_index_buffer())
@@ -112,7 +111,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                     self.count_time_slice, self.count_all_particles_time_slice,
                                     self.prop_list, self.sum_prop_list, sel)
 
-        self.write_time_varying_stats(self.nWrites,time)
+        self.write_time_varying_stats(self.nWrites,time_sec)
         self.nWrites += 1
 
     def info_to_write_at_end(self):

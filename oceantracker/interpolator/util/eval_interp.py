@@ -30,8 +30,8 @@ def time_dependent_2Dfield(F_out, F_data, nb, step_dt_fraction, tri, n_cell, BCc
 
     n_comp = F_data.shape[3]  # time step of data is always [node,z,comp] even in 2D
     tf2 = 1. - step_dt_fraction
-    F1 = F_data[nb  , :, 0, :]
-    F2 = F_data[nb+1, :, 0, :]
+    F1 = F_data[nb[0]  , :, 0, :]
+    F2 = F_data[nb[1], :, 0, :]
     # loop over isActive particles and vector components
     for n in active:
         for i in range(n_comp): F_out[n, i] = 0. # zero out for summing
@@ -75,8 +75,8 @@ def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz
     n_comp = F_data.shape[3]  # time step of data is always [nb, node,z,comp] even in 2D
 
     # create views to remove redundant dim at current and next time step, improves speed?
-    F1 = F_data[nb  , :, :, :]
-    F2 = F_data[nb+1, :, :, :]
+    F1 = F_data[nb[0]  , :, :, :]
+    F2 = F_data[nb[1], :, :, :]
 
     dt1 = 1.0 - step_dt_fraction
 
@@ -104,7 +104,7 @@ def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz
                                 +  BCcord[n, m] * (F2[n_node, nz_below[m], c] * zf1 + F2[n_node, nz_above[m], c] * zf)*step_dt_fraction  # second time step
 
 #@njit
-@njit( ( (float64[:,:], float32[:, :, :, :],int32,float64,int32[:,:],int32[:], int32[:,:,:],   float32[:], float32[:], int8[:],float64[:,:], int32[:] )))
+@njit( ( (float64[:,:], float32[:, :, :, :],int32[:],float64,int32[:,:],int32[:], int32[:,:,:],   float32[:], float32[:], int8[:],float64[:,:], int32[:] )))
 def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,nz_nodes,
                            z_fraction,z_fraction_bottom_layer, is_in_bottom_layer, BCcord,  active):
     #  special case of interpolating water velocity with log layer in bottom cell, linear z interpolation at other depth cells
@@ -112,7 +112,7 @@ def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,nz_n
     n_comp = V_data.shape[3]  # time step of data is always [node,z,comp] even in 2D
 
     # create views to remove redundant dim at current and next time step, improves speed?
-    v1,     v2 = V_data[nb  , :, :, :], V_data[nb + 1, :, :, :]
+    v1,     v2 = V_data[nb[0] , :, :, :], V_data[nb[1], :, :, :]
 
     dt1= 1.0-step_dt_fraction
 

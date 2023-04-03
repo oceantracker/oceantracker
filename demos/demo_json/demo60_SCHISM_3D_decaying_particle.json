@@ -2,6 +2,7 @@
     "shared_params": {
         "output_file_base": "demo60_SCHISM_3D_decaying_particle",
         "debug": true,
+        "time_step": 120,
         "compact_mode": true,
         "root_output_dir": "output"
     },
@@ -19,9 +20,6 @@
         "dispersion": {
             "A_H": 0.2,
             "A_V": 0.001
-        },
-        "solver": {
-            "n_sub_steps": 48
         },
         "particle_release_groups": [
             {
@@ -53,6 +51,9 @@
                 "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                 "decay_time_scale": 25714.28571428571
             }
-        ]
+        ],
+        "solver": {
+            "n_sub_steps": 48
+        }
     }
 }

@@ -30,7 +30,7 @@ class RandomWalkV1(_BaseTrajectoryModifer):
         return np.sqrt(2. * np.abs(dt) * np.abs(A_turb))
 
     # apply random walk
-    def update(self,nb,  time, active):
+    def update(self,time_sec, active):
         # add up 2D/3D diffusion coeff as random walk vector
         si= self.shared_info
         self._add_random_walk_velocity(self.random_velocity, active,si.classes['particle_properties']['velocity_modifier'].data)

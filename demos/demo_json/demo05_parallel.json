@@ -2,6 +2,7 @@
     "shared_params": {
         "output_file_base": "demo05_parallel",
         "add_date_to_run_output_dir": false,
+        "time_step": 900,
         "compact_mode": true,
         "processors": 2,
         "replicates": 1,
@@ -33,7 +34,7 @@
             "water_depth": "depth",
             "tide": "tide"
         },
-        "time_buffer_size": 24,
+        "time_buffer_size": 10,
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "base_case_params": {
@@ -47,9 +48,6 @@
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
             "write_dry_cell_index": true
         },
-        "solver": {
-            "n_sub_steps": 6
-        },
         "particle_release_groups": [],
         "particle_properties": [
             {
@@ -61,7 +59,10 @@
             {
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
-        ]
+        ],
+        "solver": {
+            "n_sub_steps": 6
+        }
     },
     "case_list": [
         {

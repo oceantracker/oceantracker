@@ -63,11 +63,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             self._set_up_run(runner_params)
             self._make_core_class_instances(runner_params)
             si.solver_info = si.classes['solver'].info  # allows shortcut access from other classes
-            self._initialize_solver_and_core_classes()
+            self._initialize_solver_core_classes_and_release_groups()
 
 
             self._make_and_initialize_user_classes()
-            si.classes['dispersion'].initialize()  # is not done in _initialize_solver_and_core_classes as it may depend on user classes to work
+            si.classes['dispersion'].initialize()  # is not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
 
             # todo set up memory for all defined particle properties
             # todo memory packing is being developed and evaluated for speed
@@ -94,8 +94,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if si.shared_params['write_output_files']:
                 case_info_file = si.output_file_base + '_caseInfo.json'
                 json_util.write_JSON(path.join(si.run_output_dir, case_info_file), case_info)
-
-
 
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
@@ -165,33 +163,21 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         self.code_timer.start('total_model_all')
         si = self.shared_info
 
-
-
         info= self.info
         info['model_run_started'] = datetime.now()
 
         solver = si.classes['solver']
         p, reader, f = si.classes['particle_group_manager'], si.classes['reader'], si.classes['field_group_manager']  # for later use
 
-        si.msg_logger.write_progress_marker('Starting ' + si.output_file_base + f',  duration: {(si.solver_info["model_duration"] / 24 / 3600):4}')
-
-        # get hindcast step range
-        nt0 = reader.time_to_global_time_step(si.solver_info['model_start_time'])
-        nt1 = reader.time_to_global_time_step(si.solver_info['model_start_time'] +  int(si.model_direction)*si.solver_info['model_duration'])
-        nt_hindcast = nt0 + int(si.model_direction)*np.arange(0 , abs(nt1-nt0))
-
-        # trim required global time steps to fit in hindcast range
-        fi = reader.reader_build_info['sorted_file_info']
-        nt_hindcast = nt_hindcast[np.logical_and(nt_hindcast >= fi['nt'][0], nt_hindcast <= fi['nt'][-1])]
-
 
         # fill and process buffer until there is less than 2 steps
         si.msg_logger.insert_screen_line()
-        si.msg_logger.write_progress_marker('Starting ' + si.output_file_base + ',  duration: %4.1f days' % (si.solver_info['model_duration'] / 24 / 3600))
+        si.msg_logger.write_progress_marker('Starting ' + si.output_file_base + ',  duration: '
+                                            + time_util.pretty_duration_string(si.solver_info['model_duration_timedelta']) )
 
         #------------------------------------------
         solver.initialize_run()
-        solver.solve(nt_hindcast)
+        solver.solve()
         # ------------------------------------------
 
 
@@ -274,14 +260,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             i.set_up_release_times(n)
             release_info = i.info['release_info']
 
-            if release_info['release_schedule_times'].size ==0:
+            if release_info['release_schedule_times'].size == 0:
                 si.msg_logger.msg('Release group= ' + str(n + 1) + ', name= ' + i.params['name'] + ',  no release times in range of hindcast and given release duration', warning=True)
                 continue
             else:
                 estimated_total_particles += release_info['estimated_number_released'] # used to give buffer size if needed
                 first_release_time.append(release_info['first_release_time'])
-                last_time_alive.append(release_info['last_time_alive'])
-
+                last_time_alive.append(release_info['last_date_alive'])
 
         if len(si.classes['particle_release_groups']) == 0:
             # guard against there being no release groups
@@ -295,11 +280,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             t_last  = np.max(np.asarray(last_time_alive))
 
         # time range in forwards order
-        si.msg_logger.write_progress_marker('built case instances')
+        si.msg_logger.write_progress_marker('set up particle release groups')
 
         return t_first, t_last, estimated_total_particles
 
-    def _initialize_solver_and_core_classes(self):
+    def _initialize_solver_core_classes_and_release_groups(self):
         # initialise all classes, order is important!
         # short cuts
         si = self.shared_info
@@ -312,19 +297,26 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.hydro_model_is3D = si.classes['fields']['water_velocity'].is3D()
 
         # Timings, sort out start and run duration
-        n_substeps = float(max(1, si.classes['solver'].params['n_sub_steps']))
 
         # set up start time and duration based on particle releases
-        t_start, t_end, estimated_total_particles = self._setup_particle_release_groups(si.case_params['class_lists']['particle_release_groups'])
+        date_start, date_end, estimated_total_particles = self._setup_particle_release_groups(si.case_params['class_lists']['particle_release_groups'])
         si.msg_logger.write_progress_marker('set up particle_release_groups')
 
-        si.solver_info['model_start_date'] = t_start
-        si.solver_info['model_end_date'] = t_end
-        si.solver_info['model_duration'] =  t_end - t_start
+        #clip time to maximum duration in shared params
+        max_dur =time_util.seconds_to_timedelta64(si.shared_params['max_duration'])
+        if  date_end - date_start  > max_dur:
+            date_end = date_start + max_dur * si.model_direction
 
-        #todo change when using more than one reader, delete when doing time steps in seconds
-        si.solver_info['hydo_model_time_step'] = si.reader_build_info['info']['hydro_model_time_step']
-        si.solver_info['model_time_step'] =  si.solver_info['hydo_model_time_step'].astype(np.float64) / si.classes['solver'].params['n_sub_steps']
+        si.solver_info['model_start_date'] = date_start
+        si.solver_info['model_end_date'] = date_end
+        si.solver_info['model_duration_timedelta'] = abs( date_end - date_start)
+        si.solver_info['model_duration'] = time_util.pretty_duration_string(date_end - date_start),
+        si.solver_info['model_duration_sec']  = np.float64(si.solver_info['model_duration_timedelta'])
+        si.solver_info['model_time_step'] = si.shared_params['time_step']
+        si.solver_info['model_timedelta'] =time_util.seconds_to_timedelta64(si.shared_params['time_step'])
+
+        si.solver_info['model_start_time_sec'] = np.float64(date_start)
+        si.model_time_step = si.solver_info['model_time_step']
 
         # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
         si.time_of_nominal_first_occurrence = si.model_direction * np.inf
@@ -332,7 +324,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # find particle buffer size required by several classes
         if si.run_params['particle_buffer_size'] is None:
-            si.run_params['particle_buffer_size'] = max(100,estimated_total_particles)
+            si.run_params['particle_buffer_size'] = max(100, estimated_total_particles)
 
         si.particle_buffer_size = si.run_params['particle_buffer_size']
 
@@ -394,7 +386,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si = self.shared_info
         pgm= si.classes['particle_group_manager']
         info = self.info
-        info['date_of_time_zero'] = time_util.ot_time_zero()
+        info['date_of_time_zero'] = time_util.seconds_to_datetime64(0.)
         r = si.classes['reader']
 
         info['time_zone'] = r.params['time_zone']
@@ -411,7 +403,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'code_version_info': si.case_runner_params['code_version_info'],
              'run_info' : info,
              'solver_info' : si.solver_info,
-             'hindcast_info': r.get_hindcast_info(),
+             'hindcast_info': r.info,
              'particle_release_group_info' : [],
              'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),
              'warnings_errors': si.msg_logger.warnings_and_errors,

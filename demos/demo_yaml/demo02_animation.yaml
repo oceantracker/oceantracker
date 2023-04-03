@@ -61,9 +61,10 @@ reader:
   input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
-  time_buffer_size: 24
+  time_buffer_size: 10
 shared_params:
   add_date_to_run_output_dir: false
   compact_mode: true
   output_file_base: demo02_animation
   root_output_dir: output
+  time_step: 900

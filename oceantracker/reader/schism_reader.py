@@ -4,11 +4,8 @@ from datetime import  datetime, timedelta
 from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredReader
 from copy import  copy
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import time_util
-from oceantracker.fields.reader_field import ReaderField
 from oceantracker.reader.util.reader_util import split_quad_cells, append_split_cell_data
-
 
 #todo add optional standard feilds by list of internal names, using a stanard feild maping maping
 #todo a way to map al stanard feilds but supress reading them unless requested?
@@ -95,19 +92,17 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         return grid
 
     def read_datetime(self, nc, file_index=None):
-        if file_index is None:
-            time = nc.read_a_variable('time', sel=None) # read all times
-        else:
-            time = nc.read_a_variable('time', sel=file_index)
+        time = nc.read_a_variable('time', sel=file_index)
 
         base_date=  [ int(float(x)) for x in nc.get_var_attr('time','base_date').split()]
 
         d0= datetime(base_date[0], base_date[1], base_date[2], base_date[3], base_date[4])
-        time = time + time_util.date_to_seconds(d0)
+        time = time_util.seconds_to_timedelta64(time) + np.datetime64(d0).astype('datetime64[s]')
 
         if self.params['time_zone'] is not None:
-            time += self.params['time_zone']*3600.
-        return time.astype('datetime64[s]')
+            time += time_util.seconds_to_timedelta64(self.params['time_zone'] * 3600.)
+
+        return time
 
     def read_bottom_cell_index_as_int32(self, nc):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid

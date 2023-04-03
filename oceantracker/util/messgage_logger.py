@@ -35,7 +35,7 @@ class MessageLogger(object):
             remove(self.error_file_name)
 
         return  log_file_name, error_file_name
-
+    #todo add abilty to return excecption/traceback?
     def msg(self, msg_text, warning=False, note=False, hint=None, tag=None, tabs=0, crumbs=None, fatal_error=False,exit_now=False, traceback_str=None):
 
         if fatal_error: self.fatal_error_count +=1

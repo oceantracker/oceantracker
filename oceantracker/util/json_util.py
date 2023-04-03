@@ -77,6 +77,8 @@ class MyEncoder(json.JSONEncoder):
 
             elif isinstance(obj,np.dtype):
                 return str(obj)
+            elif type(obj) == timedelta:
+                return str(obj)
 
             return json.JSONEncoder.default(self, obj)
 

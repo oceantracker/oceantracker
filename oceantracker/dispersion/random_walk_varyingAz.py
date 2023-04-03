@@ -25,7 +25,7 @@ class RandomWalkVaryingAZ(RandomWalk):
                                                              requires3D=True,
                                                              required_props_list=['A_Z','A_Z_vertical_gradient','nz_cell', 'x', 'n_cell'])
     # apply random walk
-    def update(self,nb,  time, active):
+    def update(self, time_sec, active):
         # add up 2D/3D diffusion coeff as random walk vector, plus vertical advection given by
         si= self.shared_info
         prop = si.classes['particle_properties']
