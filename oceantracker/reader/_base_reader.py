@@ -23,8 +23,7 @@ class _BaseReader(ParameterBaseClass):
                                  'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
                                  'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
                                  'coordinate_projection' : PVC(None, str, doc_str='string map project for meters grid for use by pyproj module, eg  "proj=utm +zone=16 +datum=NAD83" '),
-                                 'minimum_total_water_depth': PVC(0.25, float, min=0.0,doc_str= 'Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
-                                 'time_zone': PVC(None, int, min=-12, max=23),
+                                 'time_zone': PVC(None, int, min=-12, max=12,doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
                                  'cords_in_lat_long': PVC(False, bool),
                                  'time_buffer_size': PVC(48, int, min=2),
                                  'required_file_variables' :PLC([], [str]),
@@ -60,6 +59,15 @@ class _BaseReader(ParameterBaseClass):
         self.shared_memory= {'grid' :{}, 'fields':{},'control':{}}
 
     #required read methods non time dependent variables
+    def build_case_runner_reader(self, reader_build_info):
+        # build a reader for a case runner
+
+        # make short cuts
+        self.reader_build_info = reader_build_info
+        self.info.update(reader_build_info)  # useful for json file
+        self.info['backtracking'] = reader_build_info['backtracking']
+        self.info['model_direction'] = -1 if reader_build_info['backtracking'] else 1
+
     def read_nodal_x_as_float64(self, nc): nopass('reader method: read_x is required')
     def read_bottom_cell_index_as_int32(self, nc):nopass('reader method: read_bottom_cell_index_as_int32 is required for 3D hindcasts')
 
@@ -102,8 +110,11 @@ class _BaseReader(ParameterBaseClass):
         # set update default value and vector variables map  based on given list
         si = self.shared_info
 
-    def get_list_of_files_and_hindcast_times(self, input_dir):
+    def get_list_of_files_and_hindcast_times(self):
         # get list of files matching mask
+
+        input_dir= self.params['input_dir']
+
         if self.params['search_sub_dirs']:
             # search hindcast sub dirs
             file_names = []
@@ -114,33 +125,34 @@ class _BaseReader(ParameterBaseClass):
         else:
             file_names = glob(path.normpath(path.join(input_dir, self.params['file_mask'])))
 
-        file_info = {'names': file_names, 'n_time_steps': [], 'date_start': [], 'date_end': []}
+        fi = {'names': file_names, 'n_time_steps': [], 'time_start': [], 'time_end': []}
         for n, fn in enumerate(file_names):
             # get first/second/last time from each file,
             nc = NetCDFhandler(fn, 'r')
-            time = self.read_datetime(nc)
+            time = self.read_time_sec_since_1970(nc)
             nc.close()
-            file_info['date_start'].append(time[0])
-            file_info['date_end'].append(time[-1]) # -1 guards against there being only one time step in the file
-            file_info['n_time_steps'].append(time.shape[0])
+            fi['time_start'].append(time[0])
+            fi['time_end'].append(time[-1]) # -1 guards against there being only one time step in the file
+            fi['n_time_steps'].append(time.shape[0])
             if n + 1 >= self.params['max_numb_files_to_load']: break
 
         # check some files found
-        if len(file_info['names']) == 0:
+        if len(fi['names']) == 0:
             self.msg_logger.msg('reader: cannot find any files matching mask "' + self.params['file_mask']
                            + '"  in input_dir : "' + self.params['input_dir'] + '"', fatal_error=True)
-            # convert file info to numpy arrays for sorting
-        keys = ['names', 'n_time_steps', 'date_start', 'date_end']
-        for key in keys:
-            file_info[key] = np.asarray(file_info[key])
 
-        # sort files in time order
-        file_order = np.argsort(file_info['date_start'], axis=0)
+        # convert file info to numpy arrays for sorting
+        keys = ['names', 'n_time_steps', 'time_start', 'time_end']
         for key in keys:
-            file_info[key] = file_info[key][file_order]
-        file_info['names'] = file_info['names'].tolist()
+            fi[key] = np.asarray(fi[key])
 
-        return file_info
+        # get time step index at start and end on files
+        cs = np.cumsum(fi['n_time_steps'])
+        fi['nt_starts'] = cs - fi['n_time_steps']
+        fi['n_time_steps_in_hindcast'] = np.sum(fi['n_time_steps'], axis=0)
+        fi['nt_ends'] = fi['nt_starts'] + fi['n_time_steps'] - 1
+
+        return fi
 
     def get_hindcast_files_info(self):
         # read through files to get start and finish times of each file
@@ -152,46 +164,67 @@ class _BaseReader(ParameterBaseClass):
         # build a dummy non-initialise reader to get some methods and full params
         # add defaults from template, ie get reader class_name default, no warnings, but get these below
         # check cals name
-        file_info = self.get_list_of_files_and_hindcast_times(self.params['input_dir'])
-        info = {}
+        fi = self.get_list_of_files_and_hindcast_times()
+
         # checks on hindcast using first hindcast file
-        nc = NetCDFhandler(file_info['names'][0], 'r')
+        nc = NetCDFhandler(fi['names'][0], 'r')
         self._basic_file_checks(nc, msg_logger)
-
         self.additional_setup_and_hindcast_file_checks(nc, msg_logger)
-
         nc.close()
 
-        # get index at start and end on files
-        cs = np.cumsum(file_info['n_time_steps'])
-        file_info['nt_starts'] = cs - file_info['n_time_steps']
-        file_info['n_time_steps_in_hindcast'] = np.sum(file_info['n_time_steps'], axis=0)
+        # tidy up file info
+
+
+        # order files backwards in time for backtracking
+
+
+        backtracking = self.shared_info.shared_params['backtracking']
+        if backtracking:
+            # flip order of arrays with file info
+            for key in fi.keys():
+                if type(fi[key]) == np.ndarray:
+                    fi[key] = np.flipud(fi[key])
+            fi['time_end'],   fi['time_start'] = fi['time_start'], fi['time_end'] #  swap start and end dates
+
+            # swap time stesp ar sta and end
+            fi['nt_starts'] ,fi['nt_ends']=  fi['nt_ends'],fi['nt_starts']
+
+        fi['names'] =    fi['names'].tolist()
+        fi['n_time_steps_in_hindcast'] = np.sum(fi['n_time_steps'])
+
+        
+        t =  np.concatenate((fi['time_start'],   fi['time_end']))
+        fi['first_time'] = np.min(t)
+        fi['last_time'] = np.max(t)
+        fi['duration'] = fi['last_time'] - fi['first_time']
+        fi['hydro_model_time_step'] = fi['duration'] / (fi['n_time_steps_in_hindcast'] - 1)
+
+        # datetime versions for reference
+        fi['date_start'] = time_util.seconds_to_datetime64(fi['time_start'])
+        fi['date_end'] = time_util.seconds_to_datetime64(fi['time_end'])
+        fi['first_date'] = time_util.seconds_to_datetime64(fi['first_time'])
+        fi['last_date'] = time_util.seconds_to_datetime64(fi['last_time'])
+        fi['hydro_model_timedelta'] = time_util.seconds_to_pretty_duration_string(fi['hydro_model_time_step'] )
+
+
+
 
         # checks on hindcast
-        if file_info['n_time_steps_in_hindcast'] < 2:
-            msg_logger.msg('Hindcast must have at least two time steps, found ' + str(file_info['n_time_steps_in_hindcast']), fatal_error=True)
+        if fi['n_time_steps_in_hindcast'] < 2:
+            msg_logger.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']), fatal_error=True)
 
         # check for large time gaps between files
-        info['first_date'] = file_info['date_start'][0]
-        info['last_date'] = file_info['date_end'][-1]
-        info['duration'] = info['last_date'] - info['first_date']
-        info['hydro_model_timedelta'] = info['duration'] / (file_info['n_time_steps_in_hindcast'] - 1)
-        info['first_time']  = np.float64(info['first_date'])
-        info['last_time'] = np.float64(info['last_date'])
-        info['hydro_model_time_step'] = np.float64(info['hydro_model_timedelta'])
-
         # check if time diff between starts of file and end of last are larger than average time step
-        if len(file_info['date_start']) > 1:
-            dt_gaps = file_info['date_start'][1:] - file_info['date_end'][:-1]
-            sel = np.abs(dt_gaps.astype(np.float64)) > 1.8 * info['hydro_model_time_step']
+        if len(fi['time_start']) > 1:
+            dt_gaps = fi['time_start'][1:] - fi['time_end'][:-1]
+            sel = np.abs(dt_gaps) > 1.8 * fi['hydro_model_time_step']
             if np.any(sel):
                 msg_logger.msg('Some time gaps between hindcast files is are > 1.8 times average time step, check hindcast files are all present??', hint='check hindcast files are all present and times in files consistent', warning=True)
                 for n in np.flatnonzero(sel):
-                    msg_logger.msg('file gaps between ' + file_info['names'][n] + ' and ' + file_info['names'][n + 1], tabs=1)
+                    msg_logger.msg('file gaps between ' + fi['names'][n] + ' and ' + fi['names'][n + 1], tabs=1)
 
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
-        info['file_info'] = file_info
-        return info
+        return fi
 
     def make_grid_builder(self, grid,grid_time_buffers,reader_build_info):
         # make share memory builder for the non time varying grid variables
@@ -199,7 +232,7 @@ class _BaseReader(ParameterBaseClass):
         reader_build_info['grid_constant_arrays_builder'] = {}
         for key, item in grid.items():
             if item is not None and type(item) == np.ndarray:
-                if reader_build_info['use_shared_memory']:
+                if reader_build_info['shared_reader_memory']:
                     sm = shared_reader_memory_util.create_shared_arrayy(values=item)
                     self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
                     reader_build_info['grid_constant_arrays_builder'][key] = sm.get_shared_mem_map()
@@ -209,7 +242,7 @@ class _BaseReader(ParameterBaseClass):
         # now make info to build time buffers, eg time, zlevel
         reader_build_info['grid_time_buffers_builder'] = {}
         for key, item in grid_time_buffers.items():
-            if reader_build_info['use_shared_memory']:  # make shared moemory for shared_reader
+            if reader_build_info['shared_reader_memory']:  # make shared moemory for shared_reader
                 sm = shared_reader_memory_util.create_shared_arrayy(values=item)
                 self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
                 reader_build_info['grid_time_buffers_builder'][key] = sm.get_shared_mem_map()
@@ -234,7 +267,7 @@ class _BaseReader(ParameterBaseClass):
         si = self.shared_info
         fm = si.classes['field_group_manager']
         self.code_timer.start('build_hindcast_reader')
-        nc = NetCDFhandler(reader_build_info['info']['file_info']['names'][0], 'r')
+        nc = NetCDFhandler(reader_build_info['file_info']['names'][0], 'r')
 
         # setup reader fields from their named components in field_variables param ( water depth ad tide done earlier from grid variables)
         for name, item in reader_build_info['field_builder'].items():
@@ -243,7 +276,7 @@ class _BaseReader(ParameterBaseClass):
             si.add_class_instance_to_interator_lists('fields', 'from_reader_field', i, crumbs='Adding Reader Field "' + name + '"')
             i.initialize()  # require variable_info to initialise
 
-            if reader_build_info['use_shared_memory']:
+            if reader_build_info['shared_reader_memory']:
                 #todo make this part of reader field intialize???
                 self.shared_memory['fields'][name] = shared_reader_memory_util.create_shared_arrayy(values=i.data)
 
@@ -269,7 +302,9 @@ class _BaseReader(ParameterBaseClass):
         # rinf buffer ono, needed to force read at first time step read to make
         bi = self.info['buffer_info']
         bi['n_filled'] = 0
+
         bi['buffer_size'] = self.params['time_buffer_size']
+        bi['time_steps_in_buffer'] = []
         bi['buffer_available'] = bi['buffer_size']
         bi['nt_buffer0'] = 0
 
@@ -310,7 +345,6 @@ class _BaseReader(ParameterBaseClass):
 
     def get_field_variable_info(self, nc, name,var_list):
         # get info from list of component eg ['temp'], ['u','v']
-        si= self.shared_info
 
         if type(var_list) is not list: var_list=[var_list] # if a string make a list of 1
         var_list = [v for v in var_list if v != None]
@@ -346,74 +380,68 @@ class _BaseReader(ParameterBaseClass):
     
 
 
-    def fill_time_buffer(self, nt0_hindcast):
+    def fill_time_buffer(self, time_sec):
         # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
         # fill buffer starting at hindcast time step nt0_buffer
         # todo change so does not read current step again after first fill of buffer
 
+        si = self.shared_info
         self.code_timer.start('reading_to_fill_time_buffer')
         t0 = perf_counter()
 
-        si = self.shared_info
         grid = self.grid
         grid_time_buffers = self.grid_time_buffers
-
-        fi = self.info['file_info']
-        bi = self.info['buffer_info']
+        info= self.info
+        fi = info['file_info']
+        bi = info['buffer_info']
         buffer_size = bi['buffer_size']
+        md = si.model_direction
 
+        nt0_hindcast = self.time_to_hydro_model_index(time_sec)
+        bi['nt_buffer0'] = nt0_hindcast  # nw start of buffer
 
         # get hindcast global time indices of first block, loads in model order
         # ie if backtracking are still moving forward in buffer
         total_read = 0
         bi['buffer_available'] = buffer_size
-        bi['nt_buffer0'] = nt0_hindcast
 
-        n_file = np.argmax(nt0_hindcast < fi['nt_starts'] + fi['n_time_steps']) # find first file with time step
+        # find first file with time step in it, if backwars files are in reverse time order
+        n_file = np.argmax(np.logical_and( nt0_hindcast * md  >=  fi['nt_starts']* md, nt0_hindcast* md  <= fi['nt_ends']* md))
 
-        # always move forward in buffer, by loading hindcast backwards if backtracking
-          # from current step to end of hindcast
-         # buffer is always moving forward
-        if si.backtracking:
-            # from start to current step available,by loading time steps in reverse order
-            nt_total_available = min(nt0_hindcast, bi['buffer_available'])
-            nt_hindcast_required = nt0_hindcast - np.arange(nt_total_available)
-            nt_file_required = fi['n_time_steps_in_hindcast']- 1 - nt_hindcast_required
-        else:
-            # forward tracking, time steps same as hindcast time steps, test
-            nt_total_available = min(fi['n_time_steps_in_hindcast'] - nt0_hindcast, bi['buffer_available'])
-            nt_file_required = nt_hindcast_required.copy()
+        # get required time step and trim to size of hindcast
+        nt_hindcast_required = nt0_hindcast + info['model_direction'] * np.arange(min(fi['n_time_steps_in_hindcast'],buffer_size))
+        sel = np.logical_and( 0 <= nt_hindcast_required,  nt_hindcast_required < fi['n_time_steps_in_hindcast'])
+        nt_hindcast_required = nt_hindcast_required[sel]
 
-        while len(nt_file_required) > 0 and 0 <= n_file < len(fi['names']):
+        bi['time_steps_in_buffer'] = []
 
-            t0_file = perf_counter()
+        while len(nt_hindcast_required) > 0 and 0 <= n_file < len(fi['names']):
+
             nc = NetCDFhandler(fi['names'][n_file], 'r')
 
-            if si.backtracking:
-                    # from first remaining requested step to beginning of file is avaiable
-                    nt_available = nt_file_required[0] -  fi['nt_starts'][n_file]
-            else:
-                # from first requested file time step to end of file is available
-                nt_available = fi['nt_starts'][n_file]+ fi['n_time_steps'][n_file] - nt_file_required[0]
+            # find time steps in current file,accounting for direction
+            sel =  np.logical_and( nt_hindcast_required* md >= fi['nt_starts'][n_file]* md,
+                                   nt_hindcast_required* md <= fi['nt_ends'  ][n_file]* md)
+            num_read = np.count_nonzero(sel)
+            nt_file = nt_hindcast_required[sel]  # hindcast steps in this file
 
-            num_read = min(nt_available, nt_file_required.size, bi['buffer_available'])
-            file_offsets = nt_file_required[:num_read] - fi['nt_starts'][n_file] # steps in current file
-            buffer_index = nt_hindcast_required[:num_read]  % bi['buffer_size']     # make ring buffer index in by modula maths
+            file_index = nt_file - fi['nt_starts'][n_file]
+            buffer_index = self.hydro_model_index_to_buffer_offset(nt_file)
 
             s =  f'Reading-file-{(n_file+1):02d}  {path.basename(fi["names"][n_file])}, steps in file {fi["n_time_steps"][n_file]:3d},'
-            s += f'reading  {num_read:2d} of {nt_total_available:2d} steps, '
-            s += f' for hindcast time steps {nt_hindcast_required[0]:02d}:{nt_hindcast_required[-1]:02d}, '
-            s += f' available {fi["nt_starts"][n_file]:03d}:{fi["nt_starts"][n_file]+fi["n_time_steps"][n_file]-1:03d}, '
-            s += f' read hindcast indices {nt_hindcast_required[0]:03d}:{nt_hindcast_required[num_read-1]:03d}'
-            s += f' file  offsets  {file_offsets[0]:03d}:{file_offsets[num_read - 1]:03d} to ring buffer offsets {buffer_index[0]:03}:{buffer_index[num_read - 1]:03d} '
+            s += f' steps  available {fi["nt_starts"][n_file]:03d}:{fi["nt_starts"][n_file]+fi["n_time_steps"][n_file]-1:03d}, '
+            s += f'reading  {num_read:2d} of {bi["buffer_available"]:2d} steps, '
+            s += f' for hydo-model time steps {nt_file[0]:02d}:{nt_file[-1]:02d}, '
+            s += f' from file offsets {file_index[0]:02d}:{file_index[-1]:02d}, '
+            s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[- 1]:03d} '
             si.msg_logger.write_progress_marker(s)
 
-            grid_time_buffers['nt_hindcast'][buffer_index] = nt_file_required[:num_read]  # add a grid variable with global hindcast time steps
+            grid_time_buffers['nt_hindcast'][buffer_index] = nt_hindcast_required[:num_read]  # add a grid variable with global hindcast time steps
 
             # read time varying vector and scalar reader fields
             for name, field in si.class_interators_using_name['fields']['from_reader_field'].items():
                 if field.is_time_varying():
-                    data_added_to_buffer = self.assemble_field_components(nc, field, buffer_index=buffer_index, file_index=file_offsets)
+                    data_added_to_buffer = self.assemble_field_components(nc, field, buffer_index=buffer_index, file_index=file_index)
                     data_added_to_buffer = self.preprocess_field_variable(nc, name, data_added_to_buffer) # do any customised tweaks
 
                     field.data[buffer_index, ...] = data_added_to_buffer
@@ -423,7 +451,7 @@ class _BaseReader(ParameterBaseClass):
 
             # read grid time, zlevel
             # do this after reading fields as some hindcasts required tide field to get zlevel, eg FVCOM
-            self.read_time_variable_grid_variables(nc, buffer_index,file_offsets)
+            self.read_time_variable_grid_variables(nc, buffer_index,file_index)
 
             nc.close()
 
@@ -437,10 +465,12 @@ class _BaseReader(ParameterBaseClass):
             total_read += num_read
 
             # set up for next step
+
             bi['buffer_available'] -= num_read
-            n_file += int(si.model_direction)
-            nt_file_required = nt_file_required[num_read:]
+            n_file += 1
             nt_hindcast_required = nt_hindcast_required[num_read:]
+            bi['time_steps_in_buffer'] += nt_file.tolist()
+
 
         si.msg_logger.write_progress_marker( f' read {total_read:3d} time steps in  {perf_counter()-t0:3.1f} sec',tabs=2)
 
@@ -500,9 +530,9 @@ class _BaseReader(ParameterBaseClass):
 
     def read_dry_cell_data(self,nc,file_index,is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry
-        si = self.shared_info
         grid = self.grid
         grid_time_buffers = self.grid_time_buffers
+        si = self.shared_info
         fields = si.classes['fields']
 
         if self.params['grid_variables']['is_dry_cell'] is None:
@@ -524,45 +554,51 @@ class _BaseReader(ParameterBaseClass):
         is_open_boundary_node = np.full((grid['x'].shape[0],), False)
         return is_open_boundary_node
 
-
-    def time_to_hydro_model_time_step(self, time_sec):
+    # convert, time etc to hindcast/ buffer index
+    def time_to_hydro_model_index(self, time_sec):
         #convert date time to global time step in hindcast just before/after when forward/backtracking
         # always move forward through buffer, but file info is always forward in time
-        si = self.shared_info
         info = self.info
-
-        hindcast_fraction= (time_sec - info['first_time']) / (info['last_time'] - self.info['first_time'])
-        nt = (info['file_info']['n_time_steps_in_hindcast'] - 1) *  hindcast_fraction
-
-        return np.int32(np.floor(nt))
+        fi = self.reader_build_info['file_info']
+        model_dir = info['model_direction']
 
 
-    def get_buffer_index_from_hindcast_global_time_step(self, nt):
+        hindcast_fraction= (time_sec - fi['first_time']) / (fi['last_time'] - fi['first_time'])
+
+
+        nt = (fi['n_time_steps_in_hindcast'] - 1) *  hindcast_fraction
+
+
+
+        return np.int32(np.floor(nt)) # buffer is always forward in time
+
+
+    def hydro_model_index_to_buffer_offset(self, nt_hindcast):
         # ring buffer mapping
-        return nt % self.info['buffer_info']['buffer_size']
+        return nt_hindcast % self.info['buffer_info']['buffer_size']
 
-    def time_to_buffer_index(self, time_sec):
-        nt = self.time_to_hydro_model_time_step(time_sec)
-        return self.get_buffer_index_from_hindcast_global_time_step(nt)
+
 
     def are_time_steps_in_buffer(self, time_sec):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
         si = self.shared_info
         bi = self.info['buffer_info']
+        model_dir = self.info['model_direction']
 
+        # get hindcast time step at current time
+        nt_hindcast = self.time_to_hydro_model_index(time_sec)
 
-        # find first and last times in ring buffer
-        nt_buffer = self.time_to_hydro_model_time_step(time_sec)
-        out = bi['nt_buffer0'] <= nt_buffer <  (bi['nt_buffer0'] + bi['n_filled'] - 1) # ensure this and the next are in the buffer
-        print('xx', bi['nt_buffer0'] , nt_buffer ,  (bi['nt_buffer0'] + bi['buffer_size'] - 1),out)
-
-        return out
+        if len(bi['time_steps_in_buffer']) < 2:
+            return False
+        else:
+            # check if next two steps are in buffer
+            return  nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
     def _open_grid_file(self,reader_build_info):
         if self.params['grid_file']:
             file_name = path.join(self.params['input_dir'],self.params['grid_file'])
         else:
-            file_name= reader_build_info['info']['file_info']['names'][0]
+            file_name= reader_build_info['file_info']['names'][0]
 
         nc =NetCDFhandler(file_name, 'r')
         return nc

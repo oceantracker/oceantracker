@@ -42,10 +42,10 @@ class PolygonRelease(PointRelease):
 
     def estimated_total_number_released(self, release_info):
         info = self.info
-        if release_info['release_schedule_times'] is None:
+        if release_info['release_times'] is None:
             return 0
         else:
-            npart = self.params['pulse_size'] * release_info['release_schedule_times'].shape[0]
+            npart = self.params['pulse_size'] * release_info['release_times'].shape[0]
             npart = int(npart + max(10, .03 * npart))  # add 3% more
             return npart
 

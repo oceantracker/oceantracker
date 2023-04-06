@@ -105,8 +105,7 @@ def  CheckParameterValues(key,value_checker, user_param, base_param, crumbs, msg
             value = None
         else:
             value = value_checker.get_default()
-            # converts some variables to correct types, eg isodatetime, timedelta
-            value = value_checker.check_value(crumb_trail, value, msg_logger)
+
     elif user_param is None:
         # use value from base or default dict.
         value = base_param
@@ -151,7 +150,6 @@ class ParamDictValueChecker(object):
         info = self.info
 
         if info['obsolete'] is not None:
-            #todo make this work only if user suolies this param
             msg_logger.msg('Parameter  "' + crumb_trail + '" is obsolete  - ' + info['obsolete'],warning=True)
 
         if value is None:
@@ -189,18 +187,17 @@ class ParamDictValueChecker(object):
 
         # deal with numpy versions of params, convert to python types
         elif info['type'] == int:
-            # ensure all are int32 as default int is int64 on  linux
+            # ensure all at int32 as default int is int64 on  linux
             value = np.int32(value)
 
         elif info['type'] == 'iso8601date':
             try:
-                value = np.datetime64(value).astype('datetime64[s]')
+                time_util.date_from_iso8601str(value)
             except Exception as e:
                 msg_logger.msg( 'Failed to convert to date as iso8601str "' + crumb_trail + '", value = ' + str(value),  fatal_error=True)
 
-        #if not one of special types above then value unchanged
-        # check  value and type if not
-        # a None
+        # if not one of special types above then value unchanged
+        # check  value and type if not a None
         if value is not None:
 
             if type(info['type']) != str and not type(value) != info['type'] and not isinstance(value, info['type']):

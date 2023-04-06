@@ -5,21 +5,25 @@ import math
 import numpy as np
 # deal with date time operations,
 
-def seconds_to_datetime64(s):
-    dt = datetime.utcfromtimestamp(s) # ignores time zone
-    return np.datetime64(dt).astype('datetime64[s]')
+def seconds_to_datetime64(s):  return np.asarray(s, dtype='datetime64[s]')
 
-def seconds_to_timedelta64(s): return np.asarray(s, dtype=np.float64).astype('timedelta64[s]')
 
-def pretty_duration_string(td):
-    #from timedelta64
-    # Calculate days, hours, and minutes
+def seconds_to_isostr(s): return str(seconds_to_datetime64(s))
+
+def datetime64_to_seconds(dt64):   return float(dt64)
+
+def isostr_to_datetime64(s):   return np.datetime64(s).astype('datetime64[s]')
+
+def isostr_to_seconds(s):    return isostr_to_datetime64(s).astype(np.float64)
+
+def seconds_to_pretty_duration_string(s):
+    td = np.timedelta64(int(np.round(s)),'s')
     days = td.astype('timedelta64[D]').astype(int)
     hours = (td.astype('timedelta64[h]') - days * 24).astype(int)
     minutes = (td.astype('timedelta64[m]') - days * 24 * 60 - hours * 60).astype(int)
-
+    seconds = (td.astype('timedelta64[s]') - days * 24 * 60 - hours * 60 - minutes*60*60).astype(int)
     # Create the string representation
-    return  f"{days} days, {hours} hours, {minutes} minutes"
+    return  f"{days} days, {hours} hours, {minutes} minutes, {seconds} seconds"
 
 def seconds_to_pretty_str(s, seconds= True):
     fmt="%Y-%m-%d %H:%M"

@@ -2,6 +2,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass, make_clas
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
+from oceantracker.util import time_util
 
 
 
@@ -33,16 +34,22 @@ class FieldGroupManager(ParameterBaseClass):
 
         # ger buffer index from this time and next
         nb = np.zeros((2, ), dtype=np.int32)
-        nb[0] = reader.time_to_buffer_index(time_sec)
-        nb[1] = reader.time_to_buffer_index(time_sec+si.model_direction*reader.info['hydro_model_time_step'])
+
+        nt_hindcast_step = reader.time_to_hydro_model_index(time_sec)
+        nb[0] = reader.hydro_model_index_to_buffer_offset(nt_hindcast_step)
+        nb[1] = reader.hydro_model_index_to_buffer_offset(nt_hindcast_step + si.model_direction) # buffer is forward in timenext index could be wrapped in ring buffer
+        self.info['current_hydro_model_step'] = nt_hindcast_step
+        self.info['current_buffer_index'] = nb
 
         grid_time_buffers = reader.grid_time_buffers
 
         self.code_timer.start('setup_interp_time_step')
         self.n_buffer = nb  # buffer offset just before given time ,
 
-        self.step_dt_fraction = abs(time_sec - np.float64(grid_time_buffers['time'][nb[0]])) / reader.info['hydro_model_time_step']
+        time_hindcast =   grid_time_buffers['time'][nb[1] if si.backtracking else  nb[0]] #
 
+        self.step_dt_fraction = abs(time_sec -time_hindcast) / reader.info['hydro_model_time_step']
+        #print('feilds',nt_hindcast_step, nb[0], time_hindcast, time_sec, time_sec -time_hindcast,self.step_dt_fraction)
         # update 0-255 dry cell index
         field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, grid_time_buffers['is_dry_cell'],   grid_time_buffers['dry_cell_index'])
 

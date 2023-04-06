@@ -143,7 +143,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
                                                 si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
         pass
 
-    def read_datetime(self, nc, file_index=None):
+    def read_time_sec_since_1970(self, nc, file_index=None):
         # get times relative to base date from netcdf encoded  strings
         if file_index is None:
             time = nc.read_a_variable('ocean_time', sel=None)

@@ -71,7 +71,7 @@ p2['base_case_params'].update({'solver': {'n_sub_steps': 6}, 'run_params': {'blo
                                'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
                                                 'write_dry_cell_index': True,
                                                }})
-p2['shared_params'].update({'output_file_base' :'demo02_animation' ,'compact_mode': True})
+p2['shared_params'].update({'output_file_base' :'demo02_animation' ,'compact_mode': True,'time_step': 10*60})
 params.append(p2)
 
 # demo 3

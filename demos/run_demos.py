@@ -10,6 +10,8 @@ from oceantracker import main
 from oceantracker.post_processing.plotting import plot_statistics,plot_tracks, plot_vertical_tracks, plot_utilities
 import make_demo_plots
 import build_and_test_demos
+import numpy as np
+
 
 def mfn(movie_file, n=None):
     if movie_file is not None:
@@ -135,7 +137,7 @@ if __name__ == "__main__":
             ax.scatter(d90['x'][0, :, 0], d90['x'][0, :, 1], color='g', marker='o', s=20, zorder=9)
 
             # rerun backwards from end point of forwards run
-            start_date = time_util.seconds_to_iso8601str(d90['time'][-1])
+            start_date = str(time_util.seconds_to_datetime64(d90['time'][-1]))
 
             params['shared_params']['output_file_base'] = 'Demo90backward'
             params['shared_params']['backtracking'] = True

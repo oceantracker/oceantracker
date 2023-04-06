@@ -210,13 +210,13 @@ class _RunOceanTrackerClass(object):
         install_hint = 'Install Python 3.10 or used environment.yml to build a Conda virtual environment named oceantracker'
 
         # todo check share mem version
-        if False and run_builder['working_params']['shared_params']['share_reader_memory']:
+        if False and run_builder['working_params']['shared_params']['shared_reader_memory']:
             # for shared reader python version must be >=3.8
             if not (vi.major == 3 and vi.major >= 8):
                 msg_logger.msg('To use shared reader memory ' +
                              package_fancy_name + ' requires Python 3 , version >= 3.8, disabling "share_reader_memory" parameter',
                              hint=install_hint, warning=True, tabs=1)
-                run_builder['working_params']['shared_params']['share_reader_memory'] = False
+                run_builder['working_params']['shared_params']['shared_reader_memory'] = False
 
         if (vi.major == 3 and vi.major >= 11):
             msg_logger.msg(package_fancy_name + ' is not yet compatible with Python 3.11, as not al imported packages have been updated, eg Numba ',
@@ -395,14 +395,13 @@ class _RunOceanTrackerClass(object):
         working_params['reader']['input_dir'] = path.abspath(path.normpath((working_params['reader']['input_dir'])))
 
         reader = make_class_instance_from_params(working_params['reader'],msg_logger, class_type_name='reader')  # temporary  reader to get defaults
-        reader.info['share_reader_memory'] = working_params['shared_params']['share_reader_memory']
+        reader.shared_info.shared_params = working_params['shared_params'] # reader needs access to share parms for set up
 
         # construct reader_build_info to be used by case_runners to build their reader
-        reader_build_info = {'reader_params': reader.params,
-                             'use_shared_memory': working_params['shared_params']['share_reader_memory']}
-        msg_logger.write_progress_marker('Sorting hydo model files in time order')
-
-        reader_build_info['info']=reader.get_hindcast_files_info() # get file lists
+        reader_build_info= {'shared_reader_memory': working_params['shared_params']['shared_reader_memory'],
+                            'backtracking' : working_params['shared_params']['backtracking'],
+                            'reader_params': reader.params}
+        reader_build_info['file_info'] = reader.get_hindcast_files_info() # get file lists
 
         msg_logger.write_progress_marker('Finished sorting hyrdo model  files ', tabs=3)
 
@@ -427,7 +426,7 @@ class _RunOceanTrackerClass(object):
 
         nc.close()
 
-        if reader_build_info['use_shared_memory']:
+        if reader_build_info['shared_reader_memory']:
 
             reader_build_info = reader.set_up_shared_grid_memory(reader_build_info)
 
@@ -457,7 +456,7 @@ class _RunOceanTrackerClass(object):
         grid= reader.grid
 
         # get depth from first hincast file
-        hindcast = NetCDFhandler(reader_build_info['info']['file_info']['names'][0], 'r')
+        hindcast = NetCDFhandler(reader_build_info['file_info']['names'][0], 'r')
         depth_var = reader.params['field_variables']['water_depth']
         if depth_var is not None and hindcast.is_var(depth_var):
             # world around to ensure depth read in right format
@@ -495,7 +494,7 @@ class _RunOceanTrackerClass(object):
         shared_params = case_param_list[0]['shared_params']
         case_results = []
 
-        if reader.info['share_reader_memory']:
+        if shared_params['shared_reader_memory']:
             case_results = self.run_with_shared_reader(case_param_list, reader)
 
         elif shared_params['processors'] == 1:

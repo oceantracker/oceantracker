@@ -142,7 +142,6 @@ class _BaseWriter(ParameterBaseClass):
 
         self.code_timer.start('write_output')
         si= self.shared_info
-
         if si.solver_info['time_steps_completed'] % self.params['output_step_count'] != 0: return
 
         grid_time_buffers = si.classes['reader'].grid_time_buffers

@@ -68,9 +68,8 @@ class Solver(ParameterBaseClass):
         info['time_steps_completed'] = 0
 
         # get hindcast step range
-        model_datetimes = np.arange(si.solver_info['model_start_date'],
-                                si.solver_info['model_end_date'],
-                                si.solver_info['model_timedelta'] * si.model_direction)
+        model_times = np.arange(info['model_start_time'], info['model_end_time'],
+                                info['model_time_step'] * si.model_direction)
 
         # work out time steps between writing tracks to to screen
         write_tracks_time_step = si.shared_params['screen_output_time_interval']
@@ -82,13 +81,12 @@ class Solver(ParameterBaseClass):
         t0_model = perf_counter()
 
         # runf forwars through datetime, which for backtracking are backwards in time
-        for nt  in range(model_datetimes.size-1): # one less step as last step is initial condition for next block
+        for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()
-            time_sec = np.float64(model_datetimes[nt])
+            time_sec = model_times[nt]
 
             if not reader.are_time_steps_in_buffer(time_sec):
-                nt_buffer = reader.time_to_hydro_model_time_step(time_sec)
-                reader.fill_time_buffer(nt_buffer) # get next steps into buffer if not in buffer
+                reader.fill_time_buffer(time_sec) # get next steps into buffer if not in buffer
 
             self.pre_step_bookkeeping(nt, time_sec)
 
@@ -120,7 +118,7 @@ class Solver(ParameterBaseClass):
 
             info['time_steps_completed'] += 1
 
-            if abs(t2 - info['model_start_time_sec']) > info['model_duration_sec']:  break
+            if abs(t2 - info['model_start_time']) > info['model_duration']:  break
 
         # write out props etc at last step
         if nt > 0:# if more than on set completed
@@ -128,8 +126,7 @@ class Solver(ParameterBaseClass):
 
         info['model_end_time'] = t2
         info['model_end_date'] = t2.astype('datetime64[s]')
-        info['model_run_duration'] =  info['model_end_time'] -info['model_start_time_sec']
-        info['model_run_duration_actual'] = info['model_end_date']- info['model_start_date']
+        info['model_run_duration'] =  info['model_end_time'] -info['model_start_time']
         info['computation_started'] =computation_started
         info['computation_ended'] = datetime.now()
         info['computation_duration'] = datetime.now() -computation_started
@@ -262,10 +259,10 @@ class Solver(ParameterBaseClass):
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
         si= self.shared_info
-        fraction_done= abs((time_sec - si.solver_info['model_start_time_sec']) / si.solver_info['model_duration_sec'])
+        fraction_done= abs((time_sec - si.solver_info['model_start_time']) / si.solver_info['model_duration'])
         s = f'{100* fraction_done:02.0f}%'
-        s += f' step {nt:06}:H{si.classes["field_group_manager"].n_buffer[0]:03}--{si.classes["field_group_manager"].n_buffer[1]:03} '
-        t = abs(time_sec - si.solver_info['model_start_time_sec'])
+        s += f' step {nt:06}:H{si.classes["field_group_manager"].n_buffer[0]:03d}--{si.classes["field_group_manager"].n_buffer[1]:03d} '
+        t = abs(time_sec - si.solver_info['model_start_time'])
         s += 'Day ' +  ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(time_sec) + ':'
@@ -274,7 +271,7 @@ class Solver(ParameterBaseClass):
         elapsed_time= perf_counter() - t0_model
         remaining_time= (1 - fraction_done) * elapsed_time / max(.01, fraction_done)
         if elapsed_time > 60.:
-            s += ' remaining:' + time_util.pretty_duration_string(abs(remaining_time))
+            s += ' remaining:' + time_util.seconds_to_pretty_duration_string(abs(remaining_time))
 
         s +=  f' step time = { (perf_counter() - t0_step) * 1000:4.1f} ms'
         si.msg_logger.msg(s)
