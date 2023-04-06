@@ -32,7 +32,7 @@ demo_base_params=\
                 'dimension_map': {'time': 'time', 'node': 'nodes'},
                 'grid_variables'  : {'time': 'time_sec', 'x':['east','north'],  'triangles': 'tri'},
                 'field_variables': {'water_velocity' : ['east_vel','north_vel'],'water_depth': 'depth','tide':'tide'},
-                'time_buffer_size': 10,
+                'time_buffer_size': 5,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
  'base_case_params' : {
     'run_params' : {'user_note':'test of notes'},

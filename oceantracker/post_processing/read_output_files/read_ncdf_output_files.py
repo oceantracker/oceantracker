@@ -70,7 +70,7 @@ def _read_compact_tracks(nc,var_list,release_group):
 
     n_time_step =  nc.read_a_variable('write_step_index')
 
-    # todo status is special as last value for each particle when it is alive is needed to continu after death???
+    # todo status is special as last value for each particle when it is alive is needed to continue after death???
     d['status'] =  np.full((time_steps_written, num_released) , -127, dtype=nc.get_var_dtype('status'))
     _insertMatrixValues(d['status'], n_time_step, particle_IDs, nc.read_a_variable('status'))
 

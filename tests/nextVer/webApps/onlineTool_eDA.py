@@ -184,7 +184,7 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
             t0 += pg['release_duration']/2  # center particle rleases on given time
             p1= WGS84_to_NZTM(np.asarray(p)).tolist()
             pg.update({'points': p1,
-                       'release_start_date': time_util.seconds_to_iso8601str(t0)
+                       'release_start_date': time_util.seconds_to_isostr(t0)
                         })
 
             pg_param.append(pg)

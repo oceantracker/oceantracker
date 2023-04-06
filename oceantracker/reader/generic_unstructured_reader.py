@@ -43,7 +43,8 @@ class GenericUnstructuredReader(_BaseReader):
     def make_grid_time_buffers(self,nc, grid, grid_time_buffers):
         # now set up time buffers
         time_buffer_size = self.params['time_buffer_size']
-        grid_time_buffers['time'] = np.zeros((time_buffer_size,), dtype=np.float64)  # time buffer
+        grid_time_buffers['time'] = np.zeros((time_buffer_size,), dtype=np.float64)
+        grid_time_buffers['date'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')# time buffer
         grid_time_buffers['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
 
         # set up zlevel
@@ -144,6 +145,9 @@ class GenericUnstructuredReader(_BaseReader):
         grid_time_buffers = self.grid_time_buffers
 
         grid_time_buffers['time'][buffer_index] = self.read_time_sec_since_1970(nc, file_index=file_index)
+
+        # add date for convenience
+        grid_time_buffers['date'][buffer_index] = time_util.seconds_to_datetime64(grid_time_buffers['time'][buffer_index])
 
         if grid_time_buffers['zlevel'] is not None:
             # read zlevel inplace to save memory?

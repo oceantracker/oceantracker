@@ -271,12 +271,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # guard against there being no release groups
             si.msg_logger.msg('No valid release groups, exiting' , fatal_error=True, exit_now=True)
 
-        if si.backtracking:
-            t_first = np.max(np.asarray(first_release_time))
-            t_last  = np.min(np.asarray(last_time_alive))
-        else:
-            t_first = np.min(np.asarray(first_release_time))
-            t_last  = np.max(np.asarray(last_time_alive))
+        t_first = np.min(np.asarray(first_release_time))
+        t_last  = np.max(np.asarray(last_time_alive))
 
         # time range in forwards order
         si.msg_logger.write_progress_marker('set up particle release groups')
