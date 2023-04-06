@@ -86,4 +86,4 @@ shared_params:
   compact_mode: true
   output_file_base: demo06_reefstranding
   root_output_dir: output
-  time_step: 900
+  time_step: 600

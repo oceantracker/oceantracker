@@ -8,18 +8,19 @@ run_params_defaults_template = {'shared_params': {'user_note': PVC('No user note
                                                  'root_output_dir':     PVC('default_root_output_dir', str, doc_str='base dir for all output files'),
                                                  'add_date_to_run_output_dir':  PVC(False, bool),
                                                  'output_file_base':    PVC('default_output_file_base', str,doc_str= 'The start/base of all output files and name of sub-dir where output will be written'),
-                                                 'time_step': PVC(3600., float,doc_str='Time step in seconds for all cases'),
+                                                 'time_step': PVC(3600., float, min=0.001,doc_str='Time step in seconds for all cases'),
                                                   'screen_output_time_interval': PVC(None, float, doc_str='Time in seconds between writing progress to the screen/log file'),
                                                  'backtracking':        PVC(False, bool),
                                                  'debug':               PVC(False, bool),
-                                                 'compact_mode':        PVC(False, bool,doc_str='Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format'), # discard dead/inactive particles from memory
+                                                  'minimum_total_water_depth': PVC(0.25, float, min=0.0, doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
+                                                  'compact_mode':        PVC(False, bool,doc_str='Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format'), # discard dead/inactive particles from memory
                                                  'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
                                                  'write_grid':          PVC(True,  bool),
                                                  'max_warnings':        PVC(50,    int, min=0),  # dont record more that this number of warnings, to keep caseInfo.json finite
                                                  'max_duration':        PVC(max_timedelta_in_seconds, 'timedelta',doc_str='Maximun duation in seconds to run all cases. Each case can have its own duration, this sets the maximum, useful in tsstingUseful'),  # limit all cases to this duration
                                                  'processors':          PVC(1, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
                                                  'replicates':          PVC(1, int, min=1,doc_str='number of replicates of each case to run, allows running larger particle numbers for each case in less time if running in parallel'),
-                                                'share_reader_memory' : PVC(False,  bool),
+                                                'shared_reader_memory' : PVC(False,  bool),
                                                 'numba_function_cache_size' :  PVC(1024, int, min=128),
                                                 'multiprocessing_case_start_delay': PVC(0., float, min=0.), # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
                                                 'use_numpy_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!')

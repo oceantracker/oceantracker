@@ -2,7 +2,7 @@
     "shared_params": {
         "output_file_base": "demo05_parallel",
         "add_date_to_run_output_dir": false,
-        "time_step": 900,
+        "time_step": 600,
         "compact_mode": true,
         "processors": 2,
         "replicates": 1,

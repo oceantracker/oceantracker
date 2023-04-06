@@ -54,67 +54,74 @@ class PointRelease(ParameterBaseClass):
         info = self.info
         si = self.shared_info
 
-        hindcast_start = si.classes['reader'].info['first_date']
-        hindcast_end  = si.classes['reader'].info['last_date']
-        hindcast_duration =  si.classes['reader'].info['duration']
+        reader =  si.classes['reader']
+        hindcast_start =reader.info['first_time']
+        hindcast_end  = reader.info['last_time']
+        model_time_step = si.shared_params['time_step']
 
         self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,
-                                    'last_date_alive':None,
+                                    'last_time_alive':None,
                       'estimated_number_released' : 0}
         # short cut
         release_info =self.info['release_info']
 
         if params['release_start_date'] is None:
-        # no user start date so use  model runs' start date
-            release_info['first_release_time'] = hindcast_start if not si.backtracking else hindcast_end
+            # no user start date so use  model runs' start date
+            time_start= hindcast_start if not si.backtracking else hindcast_end
         else:
             # user given start date
-            release_info['first_release_time'] = params['release_start_date']
+            time_start = params['release_start_date']
 
         # now check if start in range
-        if not hindcast_start <= release_info['first_release_time'] <= hindcast_end:
+        if not hindcast_start <= time_start <= hindcast_end:
             si.msg_logger.msg('Release group= ' + str(n + 1) + ', name= ' + self.params['name'] + ',  parameter release_start_time is ' +
-                                    str(release_info['first_release_time'])
-                              + '  is outside hindcast range ' + str(hindcast_start)
-                                    + ' to ' + str(hindcast_end), warning=True)
-        # get max age of particles
-        if params['maximum_age'] is None:
-            max_age = time_util.seconds_to_timedelta64(1.0E20)
-        else:
-            max_age=  time_util.seconds_to_timedelta64(abs(params['maximum_age']))
+                                    time_util.seconds_to_isostr(time_start)
+                              + '  is outside hindcast range ' + time_util.seconds_to_isostr(hindcast_start)
+                                    + ' to ' + time_util.seconds_to_isostr(hindcast_end), warning=True)
+
+        # set max age of particles
+        release_interval = model_time_step if params['release_interval'] is None else params['release_interval']
 
         # world out release times
-        if params['release_interval'] == 0.:
+        if release_interval == 0.:
             # single pulse
-            release_dates = np.asarray([release_info['first_release_time']])
-            release_info['last_date_alive'] = min(hindcast_end, release_dates[-1] +  max_age)
+            time_end =  time_start
 
-        elif not si.backtracking:
-            if self.params['release_duration'] is not None:
-                t1 = release_info['first_release_time'] +  time_util.seconds_to_timedelta64(self.params['release_duration'])
-            elif self.params['release_end_date'] is not None:
-                t1 = self.params['release_end_date']
-            else:
-                t1 = hindcast_end
-            release_dates = np.arange(release_info['first_release_time'], t1,
-                                      time_util.seconds_to_timedelta64(abs(params['release_interval'])))
-            release_info['last_date_alive'] = min(hindcast_end, release_dates[-1] +  max_age)
+        elif self.params['release_duration'] is not None:
+            time_end = time_start + info['model_direction']*self.params['release_duration']
 
+        elif self.params['release_end_date'] is not None:
+            time_end = time_util.isostr_to_seconds(self.params['release_end_date'])
         else:
-            # backtracking
-            if self.params['release_duration'] is not None:
-                t1 = release_info['first_release_time'] - time_util.seconds_to_timedelta64(self.params['release_duration'])
-            elif self.params['release_end_date'] is not None:
-                t1 = self.params['release_end_date']
-            else:
-                t1 = hindcast_start
-            release_dates = np.arange(release_info['first_release_time'], t1,
-                                      -time_util.seconds_to_timedelta64(abs(params['release_interval'])))
-            release_info['last_date_alive'] = max(hindcast_start, release_dates[-1] - max_age)
+            time_end = hindcast_start if si.backtracking else hindcast_end
 
-        release_info['release_schedule_dates'] = release_dates
-        release_info['release_schedule_times' ] = release_dates.astype(np.float64)
-        release_info['last_release_date'] = release_dates[-1] # ensure it matches release times
+        # get time steps for release in a dow safe way
+        model_time_step = si.shared_params['time_step']
+
+
+        # get release times within the hindcast
+        release_info['release_times'] = time_start + np.arange(abs(time_end-time_start),model_time_step )*si.model_direction
+        if release_info['release_times'].size ==0:  release_info['release_times']= np.asarray(time_start) # have at least one release
+        sel = np.logical_and( release_info['release_times'] >= hindcast_start,  release_info['release_times']  <= hindcast_end)
+        release_info['release_times'] = release_info['release_times'][sel]
+
+
+        # get time steps when released, used to determine when to release
+        release_info['release_time_steps'] =  np.round(( release_info['release_times']- hindcast_start)/model_time_step).astype(np.int32)
+
+        # find last time partiles alive
+        max_age = 1.0E30 if params['maximum_age'] is None else params['maximum_age']
+        release_info['last_time_alive'] =  release_info['release_times'][-1] + si.model_direction*max_age
+        release_info['last_time_alive'] =  min(max(hindcast_start,release_info['last_time_alive']),hindcast_end) # trim to limits of hind cast
+
+        # useful info
+        release_info['first_release_time'] = release_info['release_times'][0]
+        release_info['last_release_time'] = release_info['release_times'][-1]
+
+        release_info['release_dates'] = time_util.seconds_to_datetime64(release_info['release_times'])
+        release_info['first_release_date'] = time_util.seconds_to_datetime64(release_info['first_release_time'])
+        release_info['last_release_date'] = time_util.seconds_to_datetime64(release_info['last_release_time'])
+
         release_info['estimated_number_released'] =  self.estimated_total_number_released(release_info)
 
         # index of release the  times to be released next
@@ -123,7 +130,7 @@ class PointRelease(ParameterBaseClass):
     def estimated_total_number_released(self,release_info):
         info = self.info
 
-        npart= self.params['pulse_size'] *  release_info['release_schedule_times'].size * info['points'].shape[0]
+        npart= self.params['pulse_size'] *  release_info['release_times'].size * info['points'].shape[0]
         npart = int( npart+ max(10,.03*npart)) # add 3% more safety  margin
         return npart
 

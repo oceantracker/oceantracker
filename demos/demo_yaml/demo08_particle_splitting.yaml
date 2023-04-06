@@ -93,4 +93,4 @@ shared_params:
   compact_mode: false
   output_file_base: demo08_particle_splitting
   root_output_dir: output
-  time_step: 900
+  time_step: 600

@@ -81,26 +81,21 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
             else:
                 msg_logger.msg('No "vertical_velocity" variable in Schism hydro-model files, assuming vertical_velocity=0', note=True)
 
-        if  nc.is_var('minimum_depth'):
-            # use schism min depth times 1.2 to allow for diff due to interp cell tide to nodes in schisms output
-            params['minimum_total_water_depth']= 1.2*float(nc.read_a_variable('minimum_depth'))
-
-
 
     def make_non_time_varying_grid(self,nc, grid):
         grid =super().make_non_time_varying_grid(nc, grid)
         return grid
 
-    def read_datetime(self, nc, file_index=None):
+    def read_time_sec_since_1970(self, nc, file_index=None):
         time = nc.read_a_variable('time', sel=file_index)
 
         base_date=  [ int(float(x)) for x in nc.get_var_attr('time','base_date').split()]
 
         d0= datetime(base_date[0], base_date[1], base_date[2], base_date[3], base_date[4])
-        time = time_util.seconds_to_timedelta64(time) + np.datetime64(d0).astype('datetime64[s]')
+        time = time +datetime.
 
         if self.params['time_zone'] is not None:
-            time += time_util.seconds_to_timedelta64(self.params['time_zone'] * 3600.)
+            time += self.params['time_zone'] * 3600.
 
         return time
 

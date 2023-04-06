@@ -88,8 +88,6 @@ class ParticleProperty(_BasePropertyInfo):
 
         if self.get_dtype() == np.dtype('<M8[s]'): # datetime64 in seconds
             value = time_util.seconds_to_datetime64(value)
-        if self.get_dtype() == np.timedelta64:
-            value = time_util.seconds_to_timedelta64(value)
 
         self.set_values(value, new_part_IDs)  # sets this properties values
 

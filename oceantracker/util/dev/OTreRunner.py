@@ -117,8 +117,8 @@ class OceanTrackerReRunner(object):
              'time_base_seconds_since': reader.params['hindcast_date_of_time_zero'],
              'hindcast': {'start_time': t1,
                           'end_time': t2,
-                          'start_date': time_util.seconds_to_iso8601str(t1),
-                          'end_date': time_util.seconds_to_iso8601str(t2),
+                          'time_start': time_util.seconds_to_iso8601str(t1),
+                          'time_end': time_util.seconds_to_iso8601str(t2),
                           'nodes': grid['x'].shape[0],
                           },
              }

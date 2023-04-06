@@ -247,8 +247,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         if fieldObj.is_time_varying():
             # get buffer time step and time fraction
-            nt = reader.time_to_hydro_model_time_step(time)
-            nb = reader.get_buffer_index_from_hindcast_global_time_step(nt)
+            nt = reader.time_to_hydro_model_index(time)
+            nb = reader.buffer_index_to_buffer_offset(nt)
             step_dt_fraction = abs(time - reader.get_particle_time(nb)) / si.hydo_model_time_step
 
             if fieldObj.is3D():

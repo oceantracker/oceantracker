@@ -4,6 +4,7 @@ from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, P
 from oceantracker.util import time_util
 from oceantracker.reader._base_reader import _BaseReader
 from oceantracker.reader.util import reader_util, shared_reader_memory_util
+from datetime import datetime
 
 class GenericUnstructuredReader(_BaseReader):
 
@@ -42,7 +43,7 @@ class GenericUnstructuredReader(_BaseReader):
     def make_grid_time_buffers(self,nc, grid, grid_time_buffers):
         # now set up time buffers
         time_buffer_size = self.params['time_buffer_size']
-        grid_time_buffers['time'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')  # time buffer
+        grid_time_buffers['time'] = np.zeros((time_buffer_size,), dtype=np.float64)  # time buffer
         grid_time_buffers['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
 
         # set up zlevel
@@ -67,9 +68,9 @@ class GenericUnstructuredReader(_BaseReader):
         # time buffers , eg time
         grid_time_buffers.update({'zlevel': None, 'dry_cell_index': None})
 
-        self.reader_build_info = reader_build_info
+        super().build_case_runner_reader(reader_build_info)
 
-        if not reader_build_info['use_shared_memory']:
+        if not reader_build_info['shared_reader_memory']:
             # build from scatch
             nc = self._open_grid_file(reader_build_info)
             grid = self.make_non_time_varying_grid(nc, grid)
@@ -92,7 +93,7 @@ class GenericUnstructuredReader(_BaseReader):
         self.setup_reader_fields(reader_build_info)
 
         #useful info for working and json output
-        self.info.update(reader_build_info['info'])
+        self.info.update(reader_build_info['file_info'])
 
     def check_grid(self,grid):
         tt='Grid Check, '
@@ -116,17 +117,17 @@ class GenericUnstructuredReader(_BaseReader):
                            warning=True,
                            hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
 
-    def read_datetime(self, nc, file_index=None):
+    def read_time_sec_since_1970(self, nc, file_index=None):
         vname=self.params['grid_variables']['time']
         if file_index is None : file_index = np.arange(nc.get_var_shape(vname)[0])
 
         time = nc.read_a_variable(vname, sel=file_index)
 
         if self.params['isodate_of_hindcast_time_zero'] is not None:
-            time = time.astype('timedelta64[s]') + self.params['isodate_of_hindcast_time_zero']
+            time +=  time_util.isostr_to_seconds(self.params['isodate_of_hindcast_time_zero'])
 
         if self.params['time_zone'] is not None:
-            time += time_util.seconds_to_timedelta64(self.params['time_zone'] * 3600.)
+            time += self.params['time_zone'] * 3600.
         return time
 
     def read_nodal_x_as_float64(self, nc):
@@ -142,7 +143,7 @@ class GenericUnstructuredReader(_BaseReader):
         # read time and  grid variables, eg time, tide, zlevel
         grid_time_buffers = self.grid_time_buffers
 
-        grid_time_buffers['time'][buffer_index] = self.read_datetime(nc, file_index=file_index)
+        grid_time_buffers['time'][buffer_index] = self.read_time_sec_since_1970(nc, file_index=file_index)
 
         if grid_time_buffers['zlevel'] is not None:
             # read zlevel inplace to save memory?
