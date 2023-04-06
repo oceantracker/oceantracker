@@ -153,6 +153,7 @@ if __name__ == "__main__":
             d2 = load_output_files.load_particle_track_vars(caseInfoFile2)
 
             ax.plot(d2['x'][:, :, 0], d2['x'][:, :, 1], color='r', linewidth=1.5)
+            ax.scatter(d2['x'][0, :, 0], d2['x'][0, :, 1], color='r', marker='o', s=20, zorder=9)
             ax.set_title('Test particle tracking forwards then backwards')
             plt.gcf().tight_layout()
             plot_utilities.show_output(plot_file_name= 'output\\'+ demo_name +'_and_backward_tracks.jpeg')

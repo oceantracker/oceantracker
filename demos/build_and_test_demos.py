@@ -354,7 +354,7 @@ params.append(s61)
 p90= deepcopy(p2)
 
 p90['shared_params'].update({'max_duration': 1*24*3600.,'output_file_base': 'demo90forward',
-                                'backtracking': False,'debug': True })
+                                'backtracking': False,'debug': True,'time_step' :60 })
 
 p90['base_case_params']['particle_release_groups']= [{'pulse_size': 1, 'release_interval': 0,
                                                         'points': [[1594500, 5486500], [1596500, 5489000], [1595000, 5483000] ]}]

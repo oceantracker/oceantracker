@@ -548,13 +548,10 @@ class _BaseReader(ParameterBaseClass):
 
 
         hindcast_fraction= (time_sec - fi['first_time']) / (fi['last_time'] - fi['first_time'])
-
-
         nt = (fi['n_time_steps_in_hindcast'] - 1) *  hindcast_fraction
 
-
-
-        return np.int32(np.floor(nt)) # buffer is always forward in time
+        # if back tracking ronud up as moving backwards through buffer, forward round down
+        return np.int32(np.floor(nt*model_dir)*model_dir)
 
 
     def hydro_model_index_to_buffer_offset(self, nt_hindcast):
@@ -572,11 +569,7 @@ class _BaseReader(ParameterBaseClass):
         # get hindcast time step at current time
         nt_hindcast = self.time_to_hydro_model_index(time_sec)
 
-        if len(bi['time_steps_in_buffer']) < 2:
-            return False
-        else:
-            # check if next two steps are in buffer
-            return  nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
+        return  nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
     def _open_grid_file(self,reader_build_info):
         if self.params['grid_file']:

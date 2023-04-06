@@ -80,7 +80,7 @@ class Solver(ParameterBaseClass):
 
         t0_model = perf_counter()
 
-        # runf forwars through datetime, which for backtracking are backwards in time
+        # run forwards through model time variable, which for backtracking are backwards in time
         for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()
             time_sec = model_times[nt]
@@ -260,11 +260,13 @@ class Solver(ParameterBaseClass):
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
         si= self.shared_info
+        fm= si.classes["field_group_manager"]
+
         fraction_done= abs((time_sec - si.solver_info['model_start_time']) / si.solver_info['model_duration'])
         s = f'{100* fraction_done:02.0f}%'
-        s += f' step {nt:06}:H{si.classes["field_group_manager"].n_buffer[0]:03d}--{si.classes["field_group_manager"].n_buffer[1]:03d} '
+        s += f' step {nt:04d} :H{fm.info["current_hydro_model_step"]:04d}-{fm.n_buffer[0]:03d}-{fm.n_buffer[1]:03d}'
         t = abs(time_sec - si.solver_info['model_start_time'])
-        s += 'Day ' +  ('-' if si.backtracking else '+')
+        s += ' Day ' +  ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(time_sec) + ':'
         s +=   si.classes['particle_group_manager'].screen_info()

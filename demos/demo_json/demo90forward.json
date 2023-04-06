@@ -2,7 +2,7 @@
     "shared_params": {
         "output_file_base": "demo90forward",
         "add_date_to_run_output_dir": false,
-        "time_step": 600,
+        "time_step": 60,
         "compact_mode": true,
         "max_duration": 86400.0,
         "backtracking": false,
