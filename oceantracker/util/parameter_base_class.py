@@ -21,7 +21,7 @@ def make_class_instance_from_params(params,msg_logger, class_type_name=None, bas
         sequ_tag = ''
     else:
         sequ_tag = '[#' + str(nseq) + '] '
-    crumbs += sequ_tag
+    crumbs +=  sequ_tag
 
     # work out class name
     if 'class_name' not in params:  params['class_name'] = None

@@ -43,6 +43,8 @@ base_case_params:
     release_interval: 10800
   run_params:
     user_note: test of notes
+  solver:
+    n_sub_steps: 48
   tracks_writer:
     class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
     time_steps_per_per_file: 200
