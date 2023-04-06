@@ -60,7 +60,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         self.screen_msg = ''
 
-    def release_particles(self, nb, t):
+    def release_particles(self, time_sec):
         # see if any group is ready to release
         self.code_timer.start('release_particles')
         si = self.shared_info
@@ -68,10 +68,11 @@ class ParticleGroupManager(ParameterBaseClass):
 
         for g in si.class_interators_using_name['particle_release_groups']['all'].values():
             ri = g.info['release_info']
-            if ri['release_schedule_times'] is not None and ri['index_of_next_release'] < ri['release_schedule_times'].shape[0] \
-                    and np.any(t * si.model_direction >= ri['release_schedule_times'][ri['index_of_next_release']] * si.model_direction):
+            sel =  time_sec* si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
+            num_pulses= np.count_nonzero(sel)
+            for n in range(num_pulses):
                 x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
-                new_index = self.release_a_particle_group_pulse(nb, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
+                new_index = self.release_a_particle_group_pulse(time_sec, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index),dtype=np.int32)
                 ri['index_of_next_release'] += 1
 
@@ -79,7 +80,7 @@ class ParticleGroupManager(ParameterBaseClass):
         part_prop = si.classes['particle_properties']
 
         #todo does this setup_interp_time_step have to be here?
-        si.classes['field_group_manager'].setup_interp_time_step(nb, t, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
+        si.classes['field_group_manager'].setup_interp_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
 
         # initial values  part prop derived from fields
         for p in si.class_interators_using_name['particle_properties']['from_fields'].values():
@@ -91,7 +92,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # update new particles props
         # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
-        self.update_PartProp(t, new_buffer_indices)
+        self.update_PartProp(time_sec, new_buffer_indices)
 
         # flag if any bad initial locations
         if si.case_params['run_params']['open_boundary_type'] > 0:
@@ -109,7 +110,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         return new_buffer_indices #indices of all new particles
 
-    def release_a_particle_group_pulse(self, nb, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess):
+    def release_a_particle_group_pulse(self, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess):
         # release one pulse of particles from given group
         si = self.shared_info
 
@@ -120,7 +121,7 @@ class ParticleGroupManager(ParameterBaseClass):
         if smax >= si.particle_buffer_size:
             self.screen_msg += '; Out of particle buffer'
             si.msg_logger.msg('Ran out of particle buffer- no more releases, increase parameter "particle_buffer_size", size=' \
-                               + str(si.particle_buffer_size) +' at ' + time_util.seconds_to_iso8601str(t), warning=True)
+                               + str(si.particle_buffer_size) +' at ' + time_util.seconds_to_isostr(t), warning=True)
             return  np.full((0,),0)# return if no more space
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index

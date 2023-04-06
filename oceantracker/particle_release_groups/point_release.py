@@ -55,8 +55,8 @@ class PointRelease(ParameterBaseClass):
         si = self.shared_info
 
         reader =  si.classes['reader']
-        hindcast_start =reader.info['first_time']
-        hindcast_end  = reader.info['last_time']
+        hindcast_start = reader.info['first_time']
+        hindcast_end   = reader.info['last_time']
         model_time_step = si.shared_params['time_step']
 
         self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,
@@ -70,7 +70,7 @@ class PointRelease(ParameterBaseClass):
             time_start= hindcast_start if not si.backtracking else hindcast_end
         else:
             # user given start date
-            time_start = params['release_start_date']
+            time_start = time_util.isostr_to_seconds(params['release_start_date'])
 
         # now check if start in range
         if not hindcast_start <= time_start <= hindcast_end:
@@ -84,15 +84,14 @@ class PointRelease(ParameterBaseClass):
 
         # world out release times
         if release_interval == 0.:
-            # single pulse
-            time_end =  time_start
-
+            time_end = time_start
         elif self.params['release_duration'] is not None:
             time_end = time_start + info['model_direction']*self.params['release_duration']
 
         elif self.params['release_end_date'] is not None:
             time_end = time_util.isostr_to_seconds(self.params['release_end_date'])
         else:
+            # defaulr is limit of hindcast
             time_end = hindcast_start if si.backtracking else hindcast_end
 
         # get time steps for release in a dow safe way
@@ -100,8 +99,13 @@ class PointRelease(ParameterBaseClass):
 
 
         # get release times within the hindcast
-        release_info['release_times'] = time_start + np.arange(abs(time_end-time_start),model_time_step )*si.model_direction
-        if release_info['release_times'].size ==0:  release_info['release_times']= np.asarray(time_start) # have at least one release
+        if abs(time_end-time_start) < model_time_step:
+            # have only one release
+            release_info['release_times'] = np.asarray(time_start)
+        else:
+            release_info['release_times'] = time_start + np.arange(0., abs(time_end-time_start),release_interval )*si.model_direction
+
+        # trim releases to be within hindcast
         sel = np.logical_and( release_info['release_times'] >= hindcast_start,  release_info['release_times']  <= hindcast_end)
         release_info['release_times'] = release_info['release_times'][sel]
 

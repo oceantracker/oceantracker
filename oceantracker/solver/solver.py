@@ -123,6 +123,7 @@ class Solver(ParameterBaseClass):
         # write out props etc at last step
         if nt > 0:# if more than on set completed
             self.pre_step_bookkeeping(nt, t2)
+            self.screen_output(si.solver_info['time_steps_completed'], t2, t0_model, t0_step)
 
         info['model_end_time'] = t2
         info['model_end_date'] = t2.astype('datetime64[s]')

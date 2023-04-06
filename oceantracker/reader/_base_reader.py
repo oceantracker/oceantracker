@@ -173,22 +173,6 @@ class _BaseReader(ParameterBaseClass):
         nc.close()
 
         # tidy up file info
-
-
-        # order files backwards in time for backtracking
-
-
-        backtracking = self.shared_info.shared_params['backtracking']
-        if backtracking:
-            # flip order of arrays with file info
-            for key in fi.keys():
-                if type(fi[key]) == np.ndarray:
-                    fi[key] = np.flipud(fi[key])
-            fi['time_end'],   fi['time_start'] = fi['time_start'], fi['time_end'] #  swap start and end dates
-
-            # swap time stesp ar sta and end
-            fi['nt_starts'] ,fi['nt_ends']=  fi['nt_ends'],fi['nt_starts']
-
         fi['names'] =    fi['names'].tolist()
         fi['n_time_steps_in_hindcast'] = np.sum(fi['n_time_steps'])
 
@@ -395,7 +379,7 @@ class _BaseReader(ParameterBaseClass):
         fi = info['file_info']
         bi = info['buffer_info']
         buffer_size = bi['buffer_size']
-        md = si.model_direction
+
 
         nt0_hindcast = self.time_to_hydro_model_index(time_sec)
         bi['nt_buffer0'] = nt0_hindcast  # nw start of buffer
@@ -406,7 +390,7 @@ class _BaseReader(ParameterBaseClass):
         bi['buffer_available'] = buffer_size
 
         # find first file with time step in it, if backwars files are in reverse time order
-        n_file = np.argmax(np.logical_and( nt0_hindcast * md  >=  fi['nt_starts']* md, nt0_hindcast* md  <= fi['nt_ends']* md))
+        n_file = np.argmax(np.logical_and( nt0_hindcast   >=  fi['nt_starts']* si.model_direction, nt0_hindcast  <= fi['nt_ends']))
 
         # get required time step and trim to size of hindcast
         nt_hindcast_required = nt0_hindcast + info['model_direction'] * np.arange(min(fi['n_time_steps_in_hindcast'],buffer_size))
@@ -420,8 +404,8 @@ class _BaseReader(ParameterBaseClass):
             nc = NetCDFhandler(fi['names'][n_file], 'r')
 
             # find time steps in current file,accounting for direction
-            sel =  np.logical_and( nt_hindcast_required* md >= fi['nt_starts'][n_file]* md,
-                                   nt_hindcast_required* md <= fi['nt_ends'  ][n_file]* md)
+            sel =  np.logical_and( nt_hindcast_required >= fi['nt_starts'][n_file],
+                                   nt_hindcast_required <= fi['nt_ends'  ][n_file])
             num_read = np.count_nonzero(sel)
             nt_file = nt_hindcast_required[sel]  # hindcast steps in this file
 
@@ -433,7 +417,7 @@ class _BaseReader(ParameterBaseClass):
             s += f'reading  {num_read:2d} of {bi["buffer_available"]:2d} steps, '
             s += f' for hydo-model time steps {nt_file[0]:02d}:{nt_file[-1]:02d}, '
             s += f' from file offsets {file_index[0]:02d}:{file_index[-1]:02d}, '
-            s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[- 1]:03d} '
+            s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03d} '
             si.msg_logger.write_progress_marker(s)
 
             grid_time_buffers['nt_hindcast'][buffer_index] = nt_hindcast_required[:num_read]  # add a grid variable with global hindcast time steps
@@ -467,7 +451,7 @@ class _BaseReader(ParameterBaseClass):
             # set up for next step
 
             bi['buffer_available'] -= num_read
-            n_file += 1
+            n_file += si.model_direction
             nt_hindcast_required = nt_hindcast_required[num_read:]
             bi['time_steps_in_buffer'] += nt_file.tolist()
 

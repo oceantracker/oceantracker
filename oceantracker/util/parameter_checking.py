@@ -192,7 +192,8 @@ class ParamDictValueChecker(object):
 
         elif info['type'] == 'iso8601date':
             try:
-                time_util.date_from_iso8601str(value)
+                #test if convertable
+                time_util.isostr_to_datetime64(value) # leave as a string
             except Exception as e:
                 msg_logger.msg( 'Failed to convert to date as iso8601str "' + crumb_trail + '", value = ' + str(value),  fatal_error=True)
 
