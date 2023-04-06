@@ -29,7 +29,7 @@ import numpy as np
 
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import basic_util
-from oceantracker.util import json_util
+from oceantracker.util import json_util ,yaml_util
 
 from oceantracker.util.parameter_checking import merge_params_with_defaults, check_top_level_param_keys_and_structure
 from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
@@ -158,12 +158,21 @@ class _RunOceanTrackerClass(object):
             # path may already exist, but if not through other error, exit
             raise IOError('Failed to make run output dir:' + run_output_dir + ', exiting')
 
+            # write a copy of user given parameters, to help with code support
+        fb = path.join(root_output_dir,run_output_dir, shared_params['output_file_base'] +'_users_params')
+        json_util.write_JSON(fb,params)
+        yaml_util.write_YAML(fb, params)
+
         run_builder['output_files'] = {'root_output_dir': root_output_dir,
                         'run_output_dir' :  run_output_dir,
                         'output_file_base': shared_params['output_file_base'],
                         'runInfo_file'  : shared_params['output_file_base'] + '_runInfo.json',
                         'runLog_file':  shared_params['output_file_base']+ '_runScreen.log',
-                        'run_error_file':  shared_params['output_file_base']+ '_run.err'}
+                        'run_error_file':  shared_params['output_file_base']+ '_run.err',
+                        'users_params_json' : fb + '.json',
+                        'users_params_yaml' : fb + '.yaml'}
+
+
 
         return run_builder
 

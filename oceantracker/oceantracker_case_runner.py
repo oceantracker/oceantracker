@@ -220,13 +220,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # make core classes, eg. field group
         for key, params in case_params['core_classes'].items():
             # merge params
-            i = make_class_instance_from_params(params,si.msg_logger, class_type_name=key)
+            i = make_class_instance_from_params(params,si.msg_logger, class_type_name=key, crumbs= key)
             si.add_core_class(key, i)
 
 
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags
 
-        i = make_class_instance_from_params( si.reader_build_info['reader_params'],si.msg_logger, class_type_name='reader')
+        i = make_class_instance_from_params( si.reader_build_info['reader_params'],si.msg_logger, class_type_name='reader', crumbs='reader')
         si.add_core_class('reader', i,check_if_core_class=False)  # use cor ecars as name
 
         # some core classes required the presence of others to initialize so do all here in given order, with solver last
@@ -251,7 +251,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if 'class_name' not in pg_params: pg_params['class_name'] = 'oceantracker.particle_release_groups.point_release.PointRelease'
 
             # make instance and initialise
-            i = make_class_instance_from_params(pg_params,si.msg_logger)
+            i = make_class_instance_from_params(pg_params,si.msg_logger,crumbs='particle release group')
             si.add_class_instance_to_interator_lists('particle_release_groups', 'user', i, crumbs='Adding release groups')
             i.initialize()
 
@@ -349,7 +349,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for n, params in enumerate(si.case_params['class_lists']['fields']):
-            i = make_class_instance_from_params(params, si.msg_logger)
+            i = make_class_instance_from_params(params, si.msg_logger, crumbs='user fields')
             si.add_class_instance_to_interator_lists('fields','user', i, crumbs='Adding "fields" from user params')
             i.initialize()
             # now add custom prop based on  this field
@@ -370,12 +370,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.case_params['class_lists']['status_modifiers'].append({'name':'tidal_stranding','class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'})
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
-        for type in ['velocity_modifiers', 'trajectory_modifiers',
+        for user_type in ['velocity_modifiers', 'trajectory_modifiers',
                      'particle_statistics',
                      'particle_concentrations', 'event_loggers','status_modifiers']:
-            for n, params in enumerate(si.case_params['class_lists'][type]):
-                i = make_class_instance_from_params(params, msg_logger=si.msg_logger)
-                si.add_class_instance_to_interator_lists(type, 'user', i)
+            for n, params in enumerate(si.case_params['class_lists'][user_type]):
+                i = make_class_instance_from_params(params, msg_logger=si.msg_logger, crumbs= 'user type ' + user_type)
+                si.add_class_instance_to_interator_lists(user_type, 'user', i)
                 i.initialize()  # some require instanceID from above add class to initialise
         pass
     # ____________________________

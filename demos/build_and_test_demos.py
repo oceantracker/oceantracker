@@ -53,8 +53,8 @@ p1.update({'case_list': [{ 'particle_release_groups': [{
             } )
 p1['base_case_params'].update({
                                'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
-                                                'time_steps_per_per_file':200}})
-
+                                                'time_steps_per_per_file':200},
+                                'solver':{'n_sub_steps': 48}})
 p1['shared_params'].update({'output_file_base' :'demo01_plot_tracks' ,'backtracking': True})
 params.append(p1)
 
