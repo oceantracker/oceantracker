@@ -55,4 +55,4 @@ shared_params:
   max_duration: 86400.0
   output_file_base: demo90forward
   root_output_dir: output
-  time_step: 600
+  time_step: 60
