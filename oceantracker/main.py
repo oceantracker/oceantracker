@@ -158,8 +158,8 @@ class _RunOceanTrackerClass(object):
             # path may already exist, but if not through other error, exit
             raise IOError('Failed to make run output dir:' + run_output_dir + ', exiting')
 
-            # write a copy of user given parameters, to help with code support
-        fb = path.join(root_output_dir,run_output_dir, shared_params['output_file_base'] +'_users_params')
+        # write a copy of user given parameters, to help with debugging and code support
+        fb = path.join(root_output_dir,run_output_dir, 'users_params_'+shared_params['output_file_base'] )
         json_util.write_JSON(fb,params)
         yaml_util.write_YAML(fb, params)
 
@@ -195,12 +195,12 @@ class _RunOceanTrackerClass(object):
         ml.set_max_warnings(working_params['shared_params']['max_warnings'])
 
         ml.insert_screen_line()
-        ml.write_progress_marker('Running ' + package_fancy_name + ' started ' + str(datetime.now()))
-        ml.write_progress_marker('Starting: ' + working_params['shared_params']['output_file_base'])
+        ml.progress_marker('Running ' + package_fancy_name + ' started ' + str(datetime.now()))
+        ml.progress_marker('Starting: ' + working_params['shared_params']['output_file_base'])
 
         # get info to build a reader, and create a dummy reader instance
         run_builder['reader_build_info'], reader = self._setup_reader_builder(run_builder, ml)
-        ml.write_progress_marker('Input directory: ' + reader.params['input_dir'])
+        ml.progress_marker('Input directory: ' + reader.params['input_dir'])
 
         # make full list of cases to run with fully merged params
         case_builders  = self.setup_build_full_case_params(run_builder,ml)
@@ -308,7 +308,7 @@ class _RunOceanTrackerClass(object):
         # the end
         ml.show_all_warnings_and_errors()
         ml.insert_screen_line()
-        ml.write_progress_marker('Finished ' + '---  started: ' + str(t0) + '---  ended: ' + str(datetime.now()))
+        ml.progress_marker('Finished ' + '---  started: ' + str(t0) + '---  ended: ' + str(datetime.now()))
         ml.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
         ml.msg('Output in ' + output_files['run_output_dir'], tabs=4)
         ml.insert_screen_line()
@@ -412,7 +412,7 @@ class _RunOceanTrackerClass(object):
                             'reader_params': reader.params}
         reader_build_info['file_info'] = reader.get_hindcast_files_info() # get file lists
 
-        msg_logger.write_progress_marker('Finished sorting hyrdo model  files ', tabs=3)
+        msg_logger.progress_marker('Finished sorting hyrdo model  files ', tabs=3)
 
         # read and set up reader grid now as  required for writing grid file
         # also if requested shared grid memory is set up
@@ -539,12 +539,12 @@ class _RunOceanTrackerClass(object):
         msg_list = []
         shared_params = case_param_list[0]['shared_params']
         shared_params['processors'] = min(shared_params['processors'], len(case_param_list))
-        ml.write_progress_marker('oceantracker:multiProcessing: processors:' + str(shared_params['processors']))
+        ml.progress_marker('oceantracker:multiProcessing: processors:' + str(shared_params['processors']))
 
         with multiprocessing.Pool(processes=shared_params['processors']) as pool:
             case_results = pool.map(self._run1_case, case_param_list)
 
-        ml.write_progress_marker('parallel pool complete')
+        ml.progress_marker('parallel pool complete')
 
         return case_results
 

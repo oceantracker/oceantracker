@@ -1,6 +1,6 @@
 import numpy as np
 from numba import  njit
-from datetime import  datetime, timedelta
+from datetime import  datetime
 from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredReader
 from copy import  copy
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
@@ -92,7 +92,9 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         base_date=  [ int(float(x)) for x in nc.get_var_attr('time','base_date').split()]
 
         d0= datetime(base_date[0], base_date[1], base_date[2], base_date[3], base_date[4])
-        time = time +datetime.
+        d0 = np.datetime64(d0).astype('datetime64[s]')
+        sec = time_util.datetime64_to_seconds(d0)
+        time += sec
 
         if self.params['time_zone'] is not None:
             time += self.params['time_zone'] * 3600.

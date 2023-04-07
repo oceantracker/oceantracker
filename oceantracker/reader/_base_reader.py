@@ -418,7 +418,7 @@ class _BaseReader(ParameterBaseClass):
             s += f' for hydo-model time steps {nt_file[0]:02d}:{nt_file[-1]:02d}, '
             s += f' from file offsets {file_index[0]:02d}:{file_index[-1]:02d}, '
             s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03d} '
-            si.msg_logger.write_progress_marker(s)
+            si.msg_logger.progress_marker(s)
 
             grid_time_buffers['nt_hindcast'][buffer_index] = nt_hindcast_required[:num_read]  # add a grid variable with global hindcast time steps
 
@@ -455,8 +455,7 @@ class _BaseReader(ParameterBaseClass):
             nt_hindcast_required = nt_hindcast_required[num_read:]
             bi['time_steps_in_buffer'] += nt_file.tolist()
 
-
-        si.msg_logger.write_progress_marker( f' read {total_read:3d} time steps in  {perf_counter()-t0:3.1f} sec',tabs=2)
+        si.msg_logger.progress_marker(f' read {total_read:3d} time steps in  {perf_counter() - t0:3.1f} sec', tabs=2)
 
 
         # record useful info/diagnostics

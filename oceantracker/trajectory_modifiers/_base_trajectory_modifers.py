@@ -13,4 +13,4 @@ class _BaseTrajectoryModifier(ParameterBaseClass):
                                  'requires_3D': PVC(False, bool)})
 
     # all particles checked to see if they need status changing
-    def update(self,buffer_index, time, active): pass
+    def update(self, time_sec, active): pass

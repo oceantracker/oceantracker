@@ -130,7 +130,8 @@ class NetCDFhandler(object):
 
     def is_var_attr(self, name, attr_name):  return hasattr(self.file_handle.variables[name], attr_name)
 
-    def get_var_attr(self, name, attr_name):  return getattr(self.file_handle.variables[name], attr_name)
+    def get_var_attr(self, name, attr_name):
+        return getattr(self.file_handle.variables[name], attr_name)
     def get_var_dtype(self,name):
         # to allow for netcd scaland fit of integers
         # get dtype by reading one  vaule

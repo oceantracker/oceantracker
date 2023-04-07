@@ -22,6 +22,8 @@ base_case_params:
     release_interval: 1800
   run_params:
     open_boundary_type: 1
+  solver:
+    n_sub_steps: 6
   trajectory_modifiers:
   - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
     critical_friction_velocity: 0.0

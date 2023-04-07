@@ -2,7 +2,7 @@
     "shared_params": {
         "output_file_base": "demo09_polygon_release_overlapping_land",
         "add_date_to_run_output_dir": false,
-        "time_step": 900,
+        "time_step": 120,
         "backtracking": true,
         "root_output_dir": "output"
     },
@@ -31,7 +31,7 @@
             "water_depth": "depth",
             "tide": "tide"
         },
-        "time_buffer_size": 5,
+        "time_buffer_size": 15,
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "base_case_params": {
@@ -120,10 +120,7 @@
             {
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
-        ],
-        "solver": {
-            "n_sub_steps": 48
-        }
+        ]
     },
     "case_list": [
         {

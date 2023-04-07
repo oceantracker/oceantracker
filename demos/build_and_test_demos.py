@@ -32,7 +32,7 @@ demo_base_params=\
                 'dimension_map': {'time': 'time', 'node': 'nodes'},
                 'grid_variables'  : {'time': 'time_sec', 'x':['east','north'],  'triangles': 'tri'},
                 'field_variables': {'water_velocity' : ['east_vel','north_vel'],'water_depth': 'depth','tide':'tide'},
-                'time_buffer_size': 5,
+                'time_buffer_size': 15,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
  'base_case_params' : {
     'run_params' : {'user_note':'test of notes'},
@@ -53,9 +53,10 @@ p1.update({'case_list': [{ 'particle_release_groups': [{
             } )
 p1['base_case_params'].update({
                                'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
-                                                'time_steps_per_per_file':200},
-                                'solver':{'n_sub_steps': 48}})
-p1['shared_params'].update({'output_file_base' :'demo01_plot_tracks' ,'backtracking': True})
+                                                'time_steps_per_per_file':200}}
+                                )
+p1['shared_params'].update({'output_file_base' :'demo01_plot_tracks' ,'backtracking': True,
+                            'time_step': 120})
 params.append(p1)
 
 # demo 2 track animation
@@ -368,15 +369,15 @@ params.append(p90)
 # Sample data subset
 # https://www.seanoe.org/data/00751/86286/
 
-ROMS_params={'shared_params' :{'output_file_base' :'demo70_ROMS_reader', 'debug': True},
- 'reader': {'class_name': 'oceantracker.reader.dev_ROMS_reader.ROMS',
+ROMS_params={'shared_params' :{'output_file_base' :'demo70_ROMS_reader', 'debug': True,
+                               'time_step': 1800},
+ 'reader': {'class_name': 'oceantracker.reader.ROMS_reader.ROMsNativeReader',
                     'input_dir': 'demo_hindcast',
                      'file_mask': 'DopAnV2R3-ini2007_da_his.nc',
                      'field_variables':{'water_temperature':'temp'}
                           },
  'base_case_params' : { 'run_params' : {'open_boundary_type': 1}, 'dispersion': {'A_H': .2, 'A_V': 0.001},
-                        'solver': {'n_sub_steps': 6},
-                'particle_release_groups': [{'points': [[616042, 4219971,-1],[616042, 4729971,-1],[616042, 4910000,-1]  ],
+                        'particle_release_groups': [{'points': [[616042, 4219971,-1],[616042, 4729971,-1],[616042, 4910000,-1]  ],
                                                      'pulse_size': 10, 'release_interval': 1800,
                                                  }
                                                     ],

@@ -32,7 +32,7 @@
             "water_depth": "depth",
             "tide": "tide"
         },
-        "time_buffer_size": 5,
+        "time_buffer_size": 15,
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "base_case_params": {

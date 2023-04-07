@@ -17,7 +17,7 @@ run_params_defaults_template = {'shared_params': {'user_note': PVC('No user note
                                                  'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
                                                  'write_grid':          PVC(True,  bool),
                                                  'max_warnings':        PVC(50,    int, min=0),  # dont record more that this number of warnings, to keep caseInfo.json finite
-                                                 'max_duration':        PVC(max_timedelta_in_seconds, 'timedelta',doc_str='Maximun duation in seconds to run all cases. Each case can have its own duration, this sets the maximum, useful in tsstingUseful'),  # limit all cases to this duration
+                                                 'max_duration':        PVC(max_timedelta_in_seconds, float,doc_str='Maximun duation in seconds to run all cases. Each case can have its own duration, this sets the maximum, useful in testing'),  # limit all cases to this duration
                                                  'processors':          PVC(1, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
                                                  'replicates':          PVC(1, int, min=1,doc_str='number of replicates of each case to run, allows running larger particle numbers for each case in less time if running in parallel'),
                                                 'shared_reader_memory' : PVC(False,  bool),

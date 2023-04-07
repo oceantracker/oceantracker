@@ -278,7 +278,6 @@ base_case_params:
     write_tracks: true
   solver:
     RK_order: 2
-    n_sub_steps: 60
     screen_output_step_count: 1
   tracks_writer:
     output_step_count: 60
@@ -303,3 +302,4 @@ shared_params:
   debug: true
   output_file_base: Laurin_3d
   root_output_dir: F:\OceanTrackerOuput\Laurin
+  time_step: 60

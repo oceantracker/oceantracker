@@ -37,7 +37,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         tag = '' if self.params['role_output_file_tag'] is None else '_' + self.params['role_output_file_tag']
         self.info['output_file'] = si.output_file_base + '_concentrations_%03.0f' % (self.info['instanceID']  + 1) + tag + '.nc'
 
-        si.msg_logger.write_progress_marker('opening concentrations output to : ' + self.info['output_file'])
+        si.msg_logger.progress_marker('opening concentrations output to : ' + self.info['output_file'])
 
         self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
         nc = self.nc
@@ -55,17 +55,17 @@ class _BaseTriangleProperties(ParameterBaseClass):
         part_prop =  si.classes['particle_properties']
         return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
 
-    def write(self, n_buffer, time):
+    def write(self, time_sec):
         si = self.shared_info
-        if self.params['only_update_concentrations_on_write']: self.update(n_buffer, time)
+        if self.params['only_update_concentrations_on_write']: self.update(time_sec)
 
         if si.write_output_files and self.params['write'] and si.solver_info['time_steps_completed'] % self.params['output_step_count'] == 0:
-            self.nc.file_handle['time'][self.time_steps_written] = time
+            self.nc.file_handle['time'][self.time_steps_written] = time_sec
             self.nc.file_handle['particle_count'][self.time_steps_written,...] = self.particle_count[:]
             self.nc.file_handle['particle_concentration'][self.time_steps_written, ...] = self.particle_concentration[:]
             self.time_steps_written += 1
 
-    def update(self,n_buffer=None, time=None):nopass
+    def update(self, time_sec):nopass
     def check_requirements(self): pass
 
     def record_time_stats_last_recorded(self, t): self.info['time_last_stats_recorded'] = t

@@ -173,10 +173,13 @@ class GenericUnstructuredReader(_BaseReader):
     #@profile
     def _add_grid_attributes(self, grid):
         # build adjacency etc from triangulation
+        msg_logger = self.msg_logger
+        msg_logger.progress_marker('building triangle adjacency matrix')
         grid['node_to_tri_map'],grid['tri_per_node'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
         grid['adjacency'] =  triangle_utilities_code.build_adjacency_from_node_cell_map(grid['node_to_tri_map'],grid['tri_per_node'], grid['triangles'])
-        grid['is_boundary_triangle'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
 
+        msg_logger.progress_marker('building domain and island outlines')
+        grid['is_boundary_triangle'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
         grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid)
 
         # make island and domain nodes
@@ -187,7 +190,6 @@ class GenericUnstructuredReader(_BaseReader):
         grid['node_type'][grid['grid_outline']['domain']['nodes']] = 2
 
         grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
-
         return grid
 
 
