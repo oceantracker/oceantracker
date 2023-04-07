@@ -4,12 +4,6 @@ run_params
 
 
 
-.. warning::
-
-	Lots more to add here and work on layout!!
-
-
-
 Parameters:
 ************
 

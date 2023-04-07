@@ -34,9 +34,9 @@ Parameters:
 		- min: ``50``
 
 	* ``maximum_age`` :   ``<class 'float'>``   *<optional>*
-		Description: - Particles older than this time in seconds are killed off and removed from computation.
+		Description: - Particles older than this age in seconds are killed off and removed from computation.
 
-		- default: ``1e+32``
+		- default: ``None``
 		- min: ``1.0``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
@@ -57,8 +57,13 @@ Parameters:
 	* ``release_duration`` :   ``<class 'float'>``   *<optional>*
 		Description: - Time in seconds particles are released for after they start being released, ie releases stop this time after first release.
 
-		- default: ``1e+32``
-		- min: ``0``
+		- default: ``None``
+		- min: ``0.0``
+
+	* ``release_end_date`` :   ``iso8601date``   *<optional>*
+		Description: - Date to stop releasing partices, ignored if release_duration give, must be an ISO date as string eg. "2017-01-01T00:30:00"
+
+		- default: ``None``
 
 	* ``release_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: - Time interval between released pulses. To release at only one time use release_interval=0.
@@ -67,6 +72,8 @@ Parameters:
 		- min: ``0.0``
 
 	* ``release_start_date`` :   ``iso8601date``   *<optional>*
+		Description: - Must be an ISO date as string eg. "2017-01-01T00:30:00"
+
 		- default: ``None``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*

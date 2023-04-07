@@ -113,8 +113,8 @@
   <section id="romsnativereader">
 <h1>ROMsNativeReader<a class="headerlink" href="#romsnativereader" title="Permalink to this headline">¶</a></h1>
 <p><strong>Description:</strong> Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names</p>
-<p><strong>Class:</strong> oceantracker.reader.dev_ROMS_reader.ROMsNativeReader</p>
-<p><strong>File:</strong> oceantracker/reader/dev_ROMS_reader.py</p>
+<p><strong>Class:</strong> oceantracker.reader.ROMS_reader.ROMsNativeReader</p>
+<p><strong>File:</strong> oceantracker/reader/ROMS_reader.py</p>
 <p><strong>Inheritance:</strong> _BaseReader&gt; GenericUnstructuredReader&gt; ROMsNativeReader</p>
 <p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;not</span> <span class="pre">given</span> <span class="pre">in</span> <span class="pre">defaults&quot;</span></code></p>
 <section id="parameters">
@@ -261,15 +261,6 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">minimum_total_water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">0.25</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name “water_velocity” would refers to a particle property or field used within the code</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
@@ -313,10 +304,11 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time_zone</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">time_zone</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12</p>
+<ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">-12</span></code></p></li>
-<li><p>max: <code class="docutils literal notranslate"><span class="pre">23</span></code></p></li>
+<li><p>max: <code class="docutils literal notranslate"><span class="pre">12</span></code></p></li>
 </ul>
 </dd>
 </dl>

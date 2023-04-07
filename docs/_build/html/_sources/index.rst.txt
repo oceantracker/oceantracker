@@ -21,7 +21,7 @@ Fast particle tracking in unstructured grids
    </video>
   </center>
 
-OceanTracker is a fast extendable code for offline particle tracking in unstructured grids [1]_.
+OceanTracker is a fast extendable code for offline particle tracking in unstructured grids [1]_, which also works with regular grid hydrodynamic models.
 
 OceanTracker's speed enables millions of particles to be simulated in unstructured grids. This
 significantly increases the range of particle behaviours that can be modeled and the quality of statistics
@@ -44,7 +44,7 @@ Features
 * Native grid particle tracking which preserves the vertical resolution
       * `SCHISM <http://ccrm.vims.edu/schismweb/>` for both  Slayer and LSC vertical grids
       * FVCOM model output, which preserves the resolution of
-      * Support for ROMs regular grids is being developed
+      * regular native grid ROMs
 * Builds heat maps on the fly, without recording particle tracks, also inside polygon counts computed on the fly
 * Backward and forward in time particle tracking
 * Shoreline stranding of particles by the tide and resuspension from the bottom

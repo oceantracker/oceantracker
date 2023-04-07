@@ -4,9 +4,9 @@ ROMsNativeReader
 
 **Description:** Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names
 
-**Class:** oceantracker.reader.dev_ROMS_reader.ROMsNativeReader
+**Class:** oceantracker.reader.ROMS_reader.ROMsNativeReader
 
-**File:** oceantracker/reader/dev_ROMS_reader.py
+**File:** oceantracker/reader/ROMS_reader.py
 
 **Inheritance:** _BaseReader> GenericUnstructuredReader> ROMsNativeReader
 
@@ -86,12 +86,6 @@ Parameters:
 		- default: ``10000000``
 		- min: ``1``
 
-	* ``minimum_total_water_depth`` :   ``<class 'float'>``   *<optional>*
-		Description: - Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering
-
-		- default: ``0.25``
-		- min: ``0.0``
-
 	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
@@ -117,9 +111,11 @@ Parameters:
 		- min: ``2``
 
 	* ``time_zone`` :   ``<class 'int'>``   *<optional>*
+		Description: - time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12
+
 		- default: ``None``
 		- min: ``-12``
-		- max: ``23``
+		- max: ``12``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

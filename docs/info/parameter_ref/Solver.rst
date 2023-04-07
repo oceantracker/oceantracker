@@ -25,15 +25,8 @@ Parameters:
 
 		- default: ``None``
 
-	* ``n_sub_steps`` :   ``<class 'int'>``   *<optional>*
-		- default: ``1``
-		- min: ``1``
-
 	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``solver``
-
-	* ``screen_output_step_count`` :   ``<class 'int'>``   *<optional>*
-		- default: ``1``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

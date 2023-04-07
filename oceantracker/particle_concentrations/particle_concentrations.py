@@ -30,7 +30,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
         nc.create_a_variable('particle_count', ['time_dim','triangle_dim'], dtype=self.particle_count.dtype)
         nc.create_a_variable('particle_concentration', ['time_dim', 'triangle_dim'], dtype=self.particle_concentration.dtype)
 
-    def update(self,n_buffer, time):
+    def update(self, time_sec):
         si=self.shared_info
         grid = si.classes['reader'].grid
 
@@ -40,8 +40,8 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
                                       grid['triangle_area'],
                                        self.particle_count,
                                         self.particle_concentration,  sel)
-        self.write(n_buffer, time)
-        self.record_time_stats_last_recorded(time)
+        self.write(time_sec)
+        self.record_time_stats_last_recorded(time_sec)
 
     @staticmethod
     @njit()

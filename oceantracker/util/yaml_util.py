@@ -1,7 +1,7 @@
 import yaml
 
 def write_YAML(file_name,d):
-    if '.json' in file_name.lower():
+    if '.yaml' in file_name.lower():
         fn = file_name
     else:
         fn = file_name + '.yaml'

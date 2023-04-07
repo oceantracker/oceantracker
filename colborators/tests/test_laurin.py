@@ -481,7 +481,8 @@ if __name__ == '__main__':
             'output_file_base': 'Laurin_3d',
             'debug': True,
             'root_output_dir': output_dir,
-            'compact_mode': True
+            'compact_mode': True,
+            'time_step' : 60,
         },
         'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
                    'file_mask': 'schout_*.nc', 'input_dir': input_dir,
@@ -502,7 +503,7 @@ if __name__ == '__main__':
                 'output_step_count': 60
             },
             'solver': {
-                'n_sub_steps': 60,
+
                 'RK_order': 2,
                 'screen_output_step_count': 1,
                 },

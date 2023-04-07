@@ -4,12 +4,6 @@ shared_params
 
 
 
-.. warning::
-
-	Lots more to add here and work on layout!!
-
-
-
 Parameters:
 ************
 
@@ -31,12 +25,20 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``max_duration`` :   ``<class 'float'>``   *<optional>*
-		- default: ``1e+20``
+	* ``max_duration`` :   ``timedelta``   *<optional>*
+		Description: - Maximun duation in seconds to run all cases. Each case can have its own duration, this sets the maximum, useful in tsstingUseful
+
+		- default: ``31536000000``
 
 	* ``max_warnings`` :   ``<class 'int'>``   *<optional>*
 		- default: ``50``
 		- min: ``0``
+
+	* ``minimum_total_water_depth`` :   ``<class 'float'>``   *<optional>*
+		Description: - Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering
+
+		- default: ``0.25``
+		- min: ``0.0``
 
 	* ``multiprocessing_case_start_delay`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
@@ -47,6 +49,8 @@ Parameters:
 		- min: ``128``
 
 	* ``output_file_base`` :   ``<class 'str'>``   *<optional>*
+		Description: - The start/base of all output files and name of sub-dir where output will be written
+
 		- default: ``default_output_file_base``
 
 	* ``processors`` :   ``<class 'int'>``   *<optional>*
@@ -66,9 +70,20 @@ Parameters:
 
 		- default: ``default_root_output_dir``
 
-	* ``share_reader_memory`` :   ``<class 'bool'>``   *<optional>*
+	* ``screen_output_time_interval`` :   ``<class 'float'>``   *<optional>*
+		Description: - Time in seconds between writing progress to the screen/log file
+
+		- default: ``None``
+
+	* ``shared_reader_memory`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
+
+	* ``time_step`` :   ``<class 'float'>``   *<optional>*
+		Description: - Time step in seconds for all cases
+
+		- default: ``3600.0``
+		- min: ``0.001``
 
 	* ``use_numpy_random_seed`` :   ``<class 'bool'>``   *<optional>*
 		Description: - Makes results reproducible, only use for testing developments give the same results!
@@ -84,6 +99,8 @@ Parameters:
 		- possible_values: ``[True, False]``
 
 	* ``write_output_files`` :   ``<class 'bool'>``   *<optional>*
+		Description: - Set to False if no output files are to be written, eg. for output sent to web
+
 		- default: ``True``
 		- possible_values: ``[True, False]``
 

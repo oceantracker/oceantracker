@@ -1,0 +1,40 @@
+base_case_params:
+  dispersion:
+    A_H: 0.2
+    A_V: 0.001
+  fields:
+  - class_name: oceantracker.fields.friction_velocity.FrictionVelocity
+  particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+  particle_release_groups:
+  - points:
+    - - 616042
+      - 4219971
+      - -1
+    - - 616042
+      - 4729971
+      - -1
+    - - 616042
+      - 4910000
+      - -1
+    pulse_size: 10
+    release_interval: 1800
+  run_params:
+    open_boundary_type: 1
+  solver:
+    n_sub_steps: 6
+  trajectory_modifiers:
+  - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
+    critical_friction_velocity: 0.0
+reader:
+  class_name: oceantracker.reader.ROMS_reader.ROMsNativeReader
+  field_variables:
+    water_temperature: temp
+  file_mask: DopAnV2R3-ini2007_da_his.nc
+  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+shared_params:
+  debug: true
+  output_file_base: demo70_ROMS_reader
+  root_output_dir: output
+  time_step: 1800

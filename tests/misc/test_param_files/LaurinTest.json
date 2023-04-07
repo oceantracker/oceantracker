@@ -3,7 +3,8 @@
         "output_file_base": "Laurin_3d",
         "debug": true,
         "root_output_dir": "F:\\OceanTrackerOuput\\Laurin",
-        "compact_mode": true
+        "compact_mode": true,
+        "time_step": 60
     },
     "reader": {
         "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
@@ -30,7 +31,6 @@
             "output_step_count": 60
         },
         "solver": {
-            "n_sub_steps": 60,
             "RK_order": 2,
             "screen_output_step_count": 1
         },

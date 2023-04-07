@@ -36,7 +36,8 @@ class MessageLogger(object):
 
         return  log_file_name, error_file_name
     #todo add abilty to return excecption/traceback?
-    def msg(self, msg_text, warning=False, note=False, hint=None, tag=None, tabs=0, crumbs=None, fatal_error=False,exit_now=False, traceback_str=None):
+    def msg(self, msg_text, warning=False, note=False,
+            hint=None, tag=None, tabs=0, crumbs=None, fatal_error=False,exit_now=False, traceback_str=None):
 
         if fatal_error: self.fatal_error_count +=1
 
@@ -91,7 +92,7 @@ class MessageLogger(object):
     def insert_screen_line(self):
         self.msg('--------------------------------------------------------------------------')
 
-    def write_progress_marker(self, msg, tabs=0):
+    def progress_marker(self, msg, tabs=0):
         self.msg('- ' + msg, tabs=tabs + 1)
 
     def show_all_warnings_and_errors(self,error=None):

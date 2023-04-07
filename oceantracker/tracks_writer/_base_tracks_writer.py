@@ -94,7 +94,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.info['output_file'].append(file_name + '.nc')
 
-        si.msg_logger.write_progress_marker('opening tracks output to : ' + self.info['output_file'][-1])
+        si.msg_logger.progress_marker('opening tracks output to : ' + self.info['output_file'][-1])
         self.add_global_attribute('file_created', datetime.now().isoformat())
 
         self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file'][-1]), 'w')

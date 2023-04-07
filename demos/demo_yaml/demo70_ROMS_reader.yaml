@@ -22,13 +22,11 @@ base_case_params:
     release_interval: 1800
   run_params:
     open_boundary_type: 1
-  solver:
-    n_sub_steps: 6
   trajectory_modifiers:
   - class_name: oceantracker.trajectory_modifiers.resuspension.BasicResuspension
     critical_friction_velocity: 0.0
 reader:
-  class_name: oceantracker.reader.dev_ROMS_reader.ROMS
+  class_name: oceantracker.reader.ROMS_reader.ROMsNativeReader
   field_variables:
     water_temperature: temp
   file_mask: DopAnV2R3-ini2007_da_his.nc
@@ -37,3 +35,4 @@ shared_params:
   debug: true
   output_file_base: demo70_ROMS_reader
   root_output_dir: output
+  time_step: 1800

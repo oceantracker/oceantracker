@@ -43,7 +43,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         particle.create_particle_property('manual_update',dict(name='time_of_settlement',  initial_value=0.))
 
     # all particles checked to see if they need status changing
-    def update(self, buffer_index, time, active):
+    def update(self, time_sec, active):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
@@ -56,11 +56,11 @@ class SettleInPolygon(_BaseTrajectoryModifier):
             settling = not_frozen[rand < self.params['probability_of_settlement']]
             part_prop['status'].set_values(si.particle_status_flags['frozen'], settling)
             part_prop['is_frozen_in_polygon'].set_values(1, settling)
-            part_prop['time_of_settlement'].set_values(time, settling)
+            part_prop['time_of_settlement'].set_values(time_sec, settling)
 
         # now look at all those frozen
         frozen = part_prop['status'].compare_all_to_a_value( 'eq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
-        time_settled = np.abs(time - part_prop['time_of_settlement'].get_values(frozen)) # abs works even if backtracking
+        time_settled = np.abs(time_sec - part_prop['time_of_settlement'].get_values(frozen)) # abs works even if backtracking
         release =  frozen[ time_settled > self.params['settlement_duration'] ]
         part_prop['status'].set_values(si.particle_status_flags['moving'], release)
         part_prop['is_frozen_in_polygon'].set_values(0, release)

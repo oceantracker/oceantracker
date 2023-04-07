@@ -15,7 +15,7 @@ def import_module_from_string(s,msg_logger):
     except Exception as e:
         msg_logger.msg('Failed to find/load module given by string in or before __init__() "' + s + '"',
                           hint='Module names are case sensitive?, sytax error in module?, import error within module?',
-                          fatal_error=True, extit_now=True, traceback_str = traceback.print_exc())
+                          fatal_error=True, exit_now=True, traceback_str = traceback.print_exc())
 
     # make instance
     try:

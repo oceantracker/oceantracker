@@ -262,11 +262,9 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
             else:
                 self.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
-    def update(self, **kwargs):
+    def update(self, time_sec):
         # do counts for each release  location and grid cell, over rides parent
         self.start_update_timer()
-        time = kwargs['time']
-        self.record_time_stats_last_recorded(time)
         stats_grid = self.grid
 
         # set up pointers to particle properties

@@ -2,10 +2,11 @@
     "shared_params": {
         "output_file_base": "demo70_ROMS_reader",
         "debug": true,
+        "time_step": 1800,
         "root_output_dir": "output"
     },
     "reader": {
-        "class_name": "oceantracker.reader.dev_ROMS_reader.ROMS",
+        "class_name": "oceantracker.reader.ROMS_reader.ROMsNativeReader",
         "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "DopAnV2R3-ini2007_da_his.nc",
         "field_variables": {
@@ -19,9 +20,6 @@
         "dispersion": {
             "A_H": 0.2,
             "A_V": 0.001
-        },
-        "solver": {
-            "n_sub_steps": 6
         },
         "particle_release_groups": [
             {

@@ -117,22 +117,19 @@ class unstructured_FVCOM(GenericUnstructuredReader):
                                                     si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
 
     def read_time_sec_since_1970(self, nc, file_index=None):
-        # read time as numpy datetime64[s]
-        if file_index is None:
-            time_str = nc.read_a_variable('Times', sel=None)
-        else:
-            time_str = nc.read_a_variable('Times', sel=file_index)
+        # read time as seconds
+        time_str = nc.read_a_variable('Times', sel=file_index)
 
         # get times from netcdf encoded  strings
-        time=[]
+        time_sec=[]
         for s in time_str:
-            time.append(time_util.iso8601str_to_seconds(s.tostring()))
+            time_sec.append(time_util.isostr_to_seconds(s.tostring()))
 
-        time = np.asarray(time, dtype= np.float64)
+        time_sec = np.asarray(time_sec, dtype= np.float64)
 
-        if self.params['time_zone'] is not None: time += self.params['time_zone'] * 3600.
+        if self.params['time_zone'] is not None: time_sec += self.params['time_zone'] * 3600.
 
-        return time.astype('datetime64[s]')
+        return time_sec
 
     def read_file_field_variable_as4D(self, nc, file_var_info,is_time_varying, file_index=None):
         # reformat file variable into 4D time,node,depth, components  form

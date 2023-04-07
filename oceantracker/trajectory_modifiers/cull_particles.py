@@ -26,7 +26,7 @@ class CullParticles(_BaseTrajectoryModifier):
 
         self.time_of_last_cull = self.shared_info.time_of_nominal_first_occurrence
 
-    def select_particles_to_cull(self, buffer_index, time, active):
+    def select_particles_to_cull(self, time_sec, active):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
@@ -40,15 +40,15 @@ class CullParticles(_BaseTrajectoryModifier):
 
         return culled
 
-    def update(self, buffer_index, time, active):
+    def update(self, time_sec, active):
 
-        if  abs(time- self.time_of_last_cull ) <= self.params['cull_interval']: return
-        self.time_of_last_cull = time
+        if  abs(time_sec- self.time_of_last_cull ) <= self.params['cull_interval']: return
+        self.time_of_last_cull = time_sec
 
         si = self.shared_info
         part_prop =  si.classes['particle_properties']
 
-        culled = self.select_particles_to_cull(buffer_index, time, active)
+        culled = self.select_particles_to_cull(time_sec, active)
         part_prop['status'].set_values(si.particle_status_flags['dead'], culled)
 
         if not si.retain_culled_part_locations:

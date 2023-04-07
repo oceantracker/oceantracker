@@ -67,7 +67,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         if not self.params['write']: return
 
         dim_names = ('time_dim', 'pulse_dim')
-        num_pulses= len(self.release_group_to_count.info['release_info']['release_schedule_times'])
+        num_pulses= len(self.release_group_to_count.info['release_info']['release_times'])
         nc.add_dimension('pulse_dim', dim_size=num_pulses)
         nc.create_a_variable('count', dim_names,
                              {'notes': 'counts of particles in each pulse of release group inside release polygon at given times'},
@@ -116,7 +116,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
     def info_to_write_at_end(self):
         nc = self.nc
-        nc.write_a_new_variable('release_schedule_times', self.release_group_to_count.info['release_info']['release_schedule_times'],['pulse_dim'], dtype=np.float64,attributesDict={'times_pulses_released': ' times in seconds since 1970'})
+        nc.write_a_new_variable('release_times', self.release_group_to_count.info['release_info']['release_times'],['pulse_dim'], dtype=np.float64,attributesDict={'times_pulses_released': ' times in seconds since 1970'})
 
 
     @staticmethod

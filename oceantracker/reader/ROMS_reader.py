@@ -146,18 +146,18 @@ class ROMsNativeReader(GenericUnstructuredReader):
     def read_time_sec_since_1970(self, nc, file_index=None):
         # get times relative to base date from netcdf encoded  strings
         if file_index is None:
-            time = nc.read_a_variable('ocean_time', sel=None)
+            time_sec = nc.read_a_variable('ocean_time', sel=None)
         else:
-            time = nc.read_a_variable('ocean_time', sel=file_index)
+            time_sec = nc.read_a_variable('ocean_time', sel=file_index)
 
         base_date = nc.get_var_attr('ocean_time','units').split('since ')[-1]
-        t0 = time_util.iso8601str_to_seconds(base_date)
+        t0 = time_util.isostr_to_seconds(base_date)
 
-        time += t0
+        time_sec += t0
 
-        if self.params['time_zone'] is not None: time += self.params['time_zone'] * 3600.
+        if self.params['time_zone'] is not None: time_sec += self.params['time_zone'] * 3600.
 
-        return time.astype('datetime64[s]')
+        return time_sec
 
     def read_file_field_variable_as4D(self, nc, file_var_info, is_time_varying, file_index=None):
         # reformat file variable into 4D time,node,depth, components  form

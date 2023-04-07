@@ -110,10 +110,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # reshow warnings
         si.msg_logger.show_all_warnings_and_errors()
         si.msg_logger.insert_screen_line()
-        si.msg_logger.write_progress_marker('Finished case number %3.0f, ' % si.processor_number + ' '
-                                            + si.output_files['output_file_base']
-                                            + ' started: ' + str(t0)
-                                            + ', ended: ' + str(datetime.now()))
+        si.msg_logger.progress_marker('Finished case number %3.0f, ' % si.processor_number + ' '
+                                      + si.output_files['output_file_base']
+                                      + ' started: ' + str(t0)
+                                      + ', ended: ' + str(datetime.now()))
         si.msg_logger.msg('Elapsed time =' + str(datetime.now() - t0), tabs=3)
         si.msg_logger.insert_screen_line()
         si.msg_logger.close()
@@ -129,9 +129,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si = self.shared_info
 
         si.msg_logger.insert_screen_line()
-        si.msg_logger.write_progress_marker('Starting case number %3.0f, ' % si.processor_number + ' '
-                                            + si.output_files['output_file_base']
-                                            +' at ' + time_util.iso8601_str(datetime.now()))
+        si.msg_logger.progress_marker('Starting case number %3.0f, ' % si.processor_number + ' '
+                                      + si.output_files['output_file_base']
+                                      + ' at ' + time_util.iso8601_str(datetime.now()))
         si.msg_logger.insert_screen_line()
 
         if si.shared_params['use_numpy_random_seed']:
@@ -142,9 +142,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
         if si.shared_params['multiprocessing_case_start_delay'] > 0:
             delay = si.shared_params['multiprocessing_case_start_delay'] * (si.processor_number % si.shared_params['processors'])
-            si.msg_logger.write_progress_marker('Delaying start by  ' + str(delay) + ' sec')
+            si.msg_logger.progress_marker('Delaying start by  ' + str(delay) + ' sec')
             sleep(delay)
-            si.msg_logger.write_progress_marker('Starting after delay  of ' + str(delay) + ' sec')
+            si.msg_logger.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
 
         # not sure if buffer is to small, but make bigger to 512 as default,  Numba default is  128, may slow code due to recompilations from too small buffer??
         environ['numba_function_cache_size'] = str(si.shared_params['numba_function_cache_size'])
@@ -172,7 +172,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # fill and process buffer until there is less than 2 steps
         si.msg_logger.insert_screen_line()
-        si.msg_logger.write_progress_marker('Starting ' + si.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.solver_info['model_duration']))
+        si.msg_logger.progress_marker('Starting ' + si.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.solver_info['model_duration']))
 
         #------------------------------------------
         solver.initialize_run()
@@ -275,7 +275,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         t_last  = np.max(np.asarray(last_time_alive))
 
         # time range in forwards order
-        si.msg_logger.write_progress_marker('set up particle release groups')
+        si.msg_logger.progress_marker('set up particle release groups')
 
         return t_first, t_last, estimated_total_particles
 
@@ -296,7 +296,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up start time and duration based on particle releases
 
         time_start, time_end, estimated_total_particles = self._setup_particle_release_groups(si.case_params['class_lists']['particle_release_groups'])
-        si.msg_logger.write_progress_marker('set up particle_release_groups')
+        si.msg_logger.progress_marker('set up particle_release_groups')
 
         #clip time to maximum duration in shared params
         if  time_end - time_start  > si.shared_params['max_duration']:
@@ -334,7 +334,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for name in ['particle_group_manager', 'interpolator', 'solver'] : # order may matter?
             si.classes[name].initialize()
 
-        si.msg_logger.write_progress_marker('initialized all core classes')
+        si.msg_logger.progress_marker('initialized all core classes')
 
     def _make_and_initialize_user_classes(self):
         # complete build of particle by adding reade, custom properties and modifiers

@@ -3,12 +3,11 @@ from os import path, mkdir
 from glob import  glob
 import inspect
 import importlib
-from copy import copy
+
 from oceantracker.common_info_default_param_dict_templates import run_params_defaults_template, default_case_param_template, default_class_names
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
-from oceantracker.util.yaml_util import write_YAML
 
 root_param_ref_dir = path.join(package_util.get_root_package_dir(),'docs', 'info', 'parameter_ref')
 
@@ -43,6 +42,8 @@ class RSTfileBuilder(object):
         if type(body) != list: body=[body]
         self.lines.append({'type': 'directive', 'direct_type': direct_type, 'body' : body, 'indent' :indent, 'params':{}})
         self.add_lines()
+        self.add_lines()
+
 
     def collapsable_code(self,file_name):
         a=1
@@ -89,7 +90,7 @@ class RSTfileBuilder(object):
 
     def write_param_dict_defaults(self, params):
         self.add_lines()
-        self.add_directive('warning', body='Lots more to add here and work on layout!!')
+        #self.add_directive('warning', body='Lots more to add here and work on layout!!')
 
         self.add_heading('Parameters:', level=0)
 
@@ -111,6 +112,8 @@ class RSTfileBuilder(object):
 
 
             if type(item) == PVC:
+
+                if item.info['obsolete'] is not None: continue
                 self.add_lines('* ``' + key + '`` :   ``' + str(item.info['type']) + '`` '
                                + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
 
@@ -119,12 +122,13 @@ class RSTfileBuilder(object):
                     self.add_lines()
 
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
-
+                  # dont write obsolete params
                 for k, v in item.info.items():
                     if k not in ['type', 'default_value', 'is_required', 'doc_str'] and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 
                 self.add_lines()
+
             elif type(item) == PLC:
 
                 self.add_lines('* ``' + key + '``:' + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**'), indent=indent + 1)

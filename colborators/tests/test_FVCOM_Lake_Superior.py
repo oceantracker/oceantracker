@@ -33,23 +33,24 @@ points = [[256203.6793068961, 5193002.88896844, -10],
 # just use one point
 points= [[439094.44415005075, 5265627.962025132, -10]]
 
-params={'shared_params' :{'output_file_base' : output_file_base,'root_output_dir':root_output_dir },
-     'reader': {"class_name": 'oceantracker.reader.dev_FVCOM_reader.unstructured_FVCOM',
-                'input_dir': input_dir, 'minimum_total_water_depth': 5, 'search_sub_dirs': True,
+params={'shared_params' :{'output_file_base' : output_file_base,'root_output_dir':root_output_dir,
+                          'time_step' : 20*60},
+     'reader': {"class_name": 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
+                'input_dir': input_dir, 'search_sub_dirs': True,
                 'file_mask': file_mask},
-    'base_case_params' : {'solver': {'n_sub_steps': 3},
-    'run_params' : {'user_note':'test of notes'},
-    'particle_release_groups': [{'points': points, 'pulse_size': 250, 'release_interval': 7200}] ,
-    'trajectory_modifiers': [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
-                                                    'critical_friction_velocity': .000}],
-    'fields' :[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}],
+    'base_case_params' : {
+        'run_params' : {'user_note':'test of notes'},
+        'particle_release_groups': [{'points': points, 'pulse_size': 250, 'release_interval': 7200}] ,
+        'trajectory_modifiers': [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
+                                                        'critical_friction_velocity': .000}],
+        'fields' :[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}],
         'particle_statistics':[
                   {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 72000,   'grid_size': [320, 321],'grid_span':[ 250000,250000],'grid_center':points[0]}]
                           }
 }
 
-yaml_util.write_YAML(output_file_base+'.yml',params)
+yaml_util.write_YAML(output_file_base+'.yaml',params)
 json_util.write_JSON(output_file_base+'.json',params)
 
 if args.norun:

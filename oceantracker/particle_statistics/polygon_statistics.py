@@ -74,14 +74,12 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
 
-    def update(self,**kwargs):
+    def update(self,time_sec):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
         g = self.grid
 
         # update time stats  recorded
-        time = kwargs['time']
-        self.record_time_stats_last_recorded(time)
 
         # set up pointers to particle properties
         p_groupID = part_prop['IDrelease_group'].dataInBufferPtr()
@@ -93,7 +91,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         # do counts
         self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
 
-        self.write_time_varying_stats(self.nWrites,time)
+        self.write_time_varying_stats(self.nWrites,time_sec)
         self.nWrites += 1
 
     def info_to_write_at_end(self):pass  # nothing extra to write
