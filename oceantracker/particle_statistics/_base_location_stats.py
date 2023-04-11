@@ -12,7 +12,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()
-
+        #todo add depth range for count
         self.add_default_params({ 'calculation_interval':       PVC(24*60*60.,float),
                                   'role_output_file_tag' :           PVC('stats_base',str),
                                   'file_tag': PVC(None, str),

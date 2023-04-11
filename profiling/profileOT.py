@@ -20,7 +20,7 @@ def get_params(params, datasource=2):
         input_dir =  '..\\demos\\demo_hindcast'
         file_mask  = 'demoHindcastSchism3D.nc'
         root_output_dir = 'output'
-        n_sub_steps = 60  # 1min
+        time_step = 60  # 1min
         release_interval = 600
         pulse_size = 200
         calculation_interval = 3*3600
@@ -31,7 +31,7 @@ def get_params(params, datasource=2):
         input_dir =  'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2008'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = 'F:\\OceanTrackerOuput\\OceanTrackerProfiling'
-        n_sub_steps = 1  #30min
+        time_step = 1800  #30min
         release_interval = 3600
         pulse_size = 200
         calculation_interval = 3 * 3600
@@ -53,7 +53,7 @@ def get_params(params, datasource=2):
 
 
     params = \
-        {'shared_params': {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': True},
+        {'shared_params': {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': True, 'time_step': time_step},
          'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
                     'input_dir': input_dir,
                     'file_mask': file_mask,
@@ -61,7 +61,7 @@ def get_params(params, datasource=2):
                     },
          'base_case_params': {'run_params': {'write_tracks': False},
                               'dispersion': {'A_H': .2, 'A_V': 0.001},
-                              'solver': {'n_sub_steps': n_sub_steps},
+                              'solver': {'n_sub_steps': 1},
                               'particle_release_groups': [{'points': points,
                                                            'pulse_size': pulse_size, 'release_interval': release_interval,
                                                            'allow_release_in_dry_cells': True},

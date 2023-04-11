@@ -111,7 +111,7 @@ class _BaseReader(ParameterBaseClass):
         si = self.shared_info
 
     def get_list_of_files_and_hindcast_times(self):
-        # get list of files matching mask
+        # get time sorted list of files matching mask
 
         input_dir= self.params['input_dir']
 
@@ -146,6 +146,15 @@ class _BaseReader(ParameterBaseClass):
         for key in keys:
             fi[key] = np.asarray(fi[key])
 
+        # sort files into order based on start time
+        s = np.argsort(fi['time_start'])
+        for key in fi.keys():
+            if isinstance(fi[key],np.ndarray):
+                fi[key] = fi[key][s]
+
+        # tidy up file info
+        fi['names'] =    fi['names'].tolist()
+
         # get time step index at start and end on files
         cs = np.cumsum(fi['n_time_steps'])
         fi['nt_starts'] = cs - fi['n_time_steps']
@@ -157,7 +166,6 @@ class _BaseReader(ParameterBaseClass):
     def get_hindcast_files_info(self):
         # read through files to get start and finish times of each file
         # create a time sorted list of files given by file mask in file_info dictionary
-        # sorts based on time from read time,  assumes a global time across all files
         # note this is only called once by OceantrackRunner to form file info list,
         # which is then passed to  OceanTrackerCaseRunner
         msg_logger = self.msg_logger
@@ -172,11 +180,7 @@ class _BaseReader(ParameterBaseClass):
         self.additional_setup_and_hindcast_file_checks(nc, msg_logger)
         nc.close()
 
-        # tidy up file info
-        fi['names'] =    fi['names'].tolist()
-        fi['n_time_steps_in_hindcast'] = np.sum(fi['n_time_steps'])
 
-        
         t =  np.concatenate((fi['time_start'],   fi['time_end']))
         fi['first_time'] = np.min(t)
         fi['last_time'] = np.max(t)
@@ -189,9 +193,6 @@ class _BaseReader(ParameterBaseClass):
         fi['first_date'] = time_util.seconds_to_datetime64(fi['first_time'])
         fi['last_date'] = time_util.seconds_to_datetime64(fi['last_time'])
         fi['hydro_model_timedelta'] = time_util.seconds_to_pretty_duration_string(fi['hydro_model_time_step'] )
-
-
-
 
         # checks on hindcast
         if fi['n_time_steps_in_hindcast'] < 2:
@@ -411,7 +412,6 @@ class _BaseReader(ParameterBaseClass):
 
             file_index = nt_file - fi['nt_starts'][n_file]
             buffer_index = self.hydro_model_index_to_buffer_offset(nt_file)
-
             s =  f'Reading-file-{(n_file+1):02d}  {path.basename(fi["names"][n_file])}, steps in file {fi["n_time_steps"][n_file]:3d},'
             s += f' steps  available {fi["nt_starts"][n_file]:03d}:{fi["nt_starts"][n_file]+fi["n_time_steps"][n_file]-1:03d}, '
             s += f'reading  {num_read:2d} of {bi["buffer_available"]:2d} steps, '

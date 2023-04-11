@@ -26,6 +26,8 @@ class GenericUnstructuredReader(_BaseReader):
 
         if self.is_hindcast3D(nc):
             grid['bottom_cell_index'] = self.read_bottom_cell_index_as_int32(nc)
+            # below are used in cell find and 3D interp evaluation
+            grid['bottom_cell_index_at_triangle_nodes'] = grid['bottom_cell_index'][grid['triangles']]
 
         # find model outline, make adjacency matrix etc
         grid = self._add_grid_attributes(grid)
@@ -37,6 +39,7 @@ class GenericUnstructuredReader(_BaseReader):
 
         is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'],grid['adjacency'], is_open_boundary_node)
         grid['adjacency'][is_open_boundary_adjacent] = -2
+        grid['limits'] = np.asarray([np.min(grid['x'][:,0]),np.max(grid['x'][:,0]),np.min(grid['x'][:,1]),np.max(grid['x'][:,1])])
 
         return grid
 
@@ -174,6 +177,7 @@ class GenericUnstructuredReader(_BaseReader):
     def _add_grid_attributes(self, grid):
         # build adjacency etc from triangulation
         msg_logger = self.msg_logger
+
         msg_logger.progress_marker('building triangle adjacency matrix')
         grid['node_to_tri_map'],grid['tri_per_node'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
         grid['adjacency'] =  triangle_utilities_code.build_adjacency_from_node_cell_map(grid['node_to_tri_map'],grid['tri_per_node'], grid['triangles'])
@@ -188,7 +192,7 @@ class GenericUnstructuredReader(_BaseReader):
             grid['node_type'][c['nodes']] = 1
 
         grid['node_type'][grid['grid_outline']['domain']['nodes']] = 2
-
+        msg_logger.progress_marker('calculating triangle areas')
         grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
         return grid
 

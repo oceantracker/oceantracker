@@ -11,7 +11,6 @@ from oceantracker.interpolator.util import triangle_interpolator_util as triangl
 
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
 
-
 class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     # uses tweaked sci py which allows using start triangle location
@@ -19,7 +18,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        self.add_default_params({'bc_walk_tol': PVC(1.0e-5, float,min = 0.), 'max_search_steps': PVC(100,int, min =1)})
+        self.add_default_params({'bc_walk_tol': PVC(1.0e-5, float,min = 0.),
+                                 'max_search_steps': PVC(100,int, min =1)})
         self.grid = {}
 
     def initialize(self):
@@ -46,10 +46,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         # BC walk stats
         info = self.info
-        self.cell_walk_counts = np.zeros((4,), dtype=np.int64)
-        self.vertical_walk_counts = np.zeros((4,), dtype=np.int64)
-
-
+        self.cell_walk_counts = np.zeros((6,), dtype=np.int64)
+        self.vertical_walk_counts = np.zeros((6,), dtype=np.int64)
 
         if si.hydro_model_is3D:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
@@ -97,6 +95,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         if sel.shape[0] > 0:
             self.code_timer.start('kd-tree_retrys')
+
             new_cell  = self.initial_cell_guess(xq[sel,:])
             part_prop['n_cell'].set_values(new_cell, sel)
             triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
@@ -114,13 +113,19 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                         sel,   self.cell_walk_counts,part_prop['n_cell'].data)
 
             sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_particle_subset_buffer())
-            if sel.shape[0] > 0:
-                si.msg_logger.msg('Some BC walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles',warning=True)
+            if sel.size > 0:
+                self.cell_walk_counts[5] += sel.size # total failed walks
+                si.msg_logger.msg('walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles',warning=True,tabs=0,
+                                  hint='Try decreasing time step or increasing interpolator parameter "max_search_steps", current vale =' + str(self.params['max_search_steps']))
                 # make notes for log file enabling follow up
-                si.msg_logger.msg('failed BCwalks_after_KDtree_retry, particles' + str(sel.tolist()) + ' xq =' + str(xq[sel, :].tolist()),warning=True)
+                si.msg_logger.msg('particle locations of failed walks, first 3 or less ', warning=True,tabs=2)
+                si.msg_logger.msg(' location xq =' + str(xq[sel[:3], :].tolist()), warning=True,tabs=2)
+                si.msg_logger.msg(' x_old =' + str(part_prop['x_last_good'].data[sel[:3], :].tolist()),warning=True,tabs=2)
                 # kill particles
                 part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
             self.code_timer.stop('kd-tree_retrys')
+
+
 
 
     def initial_cell_guess(self, xq):
@@ -172,7 +177,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if fieldObj.is_time_varying():
             if fieldObj.is3D():
                 nz_cell = part_prop['nz_cell'].data
-                nz_nodes = part_prop['nz_nodes'].data
+                nz_bottom = grid['bottom_cell_index']
                 z_fraction = part_prop['z_fraction'].data
 
                 if fieldObj.params['name']=='water_velocity':
@@ -186,7 +191,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                        step_dt_fraction,
                                                        grid['triangles'],
                                                        n_cell,
-                                                       nz_nodes,
+                                                       nz_cell,
+                                                       nz_bottom,
                                                        z_fraction,
                                                     z_fraction_bottom_layer, is_in_bottom_layer,
                                                        bc_cords,     active)
@@ -196,7 +202,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                        nb,
                                                        step_dt_fraction,
                                                        grid['triangles'],
-                                                       n_cell,nz_nodes,
+                                                       n_cell, nz_cell,nz_bottom,
                                                        z_fraction, bc_cords, active)
                     #F_out, F_data, nb, step_dt_fraction, tri, nz_bottom, n_cell, nz_cell, z_fraction, BCcord, active
             else:
@@ -316,17 +322,18 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         BCcords     = part_prop['bc_cords'].data
         z_fraction = part_prop['z_fraction'].data
         z_fraction_bottom_layer =  part_prop['z_fraction_bottom_layer'].data
-        is_in_bottom_layer = part_prop['is_in_bottom_layer'].data
-        nz_nodes = part_prop['nz_nodes'].data
+        is_in_bottom_layer = part_prop['is_in_bottom_layer'].data # todo remove prop
+        nz_nodes = part_prop['nz_nodes'].data  # todo remove prop
 
         triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(
                                             xq[:, 2], nb, step_dt_fraction, zlevel_nodes,
                                             grid['triangles'], n_cell,
                                             nz_bottom, BCcords, status,
-                                            nz_cell,nz_nodes, z_fraction,
-                                            z_fraction_bottom_layer,is_in_bottom_layer,
+                                            nz_cell,z_fraction,
+                                            z_fraction_bottom_layer,
                                             si.z0, active,  self.vertical_walk_counts)
         info = self.info
+
 
 
     def get_bc_cords(self,x,n_cells):
@@ -345,8 +352,15 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                           'total_steps': self.cell_walk_counts[1],
                           'average_number_of_triangles_walked': self.cell_walk_counts[1]/max(1,self.cell_walk_counts[0]),
                           'longest_walk' : self.cell_walk_counts[2],
-                          'failed_walks': self.cell_walk_counts[3]
+                          'walks_retried': self.cell_walk_counts[3],
+                          'particles_killed_after_walk_retry_failed': self.cell_walk_counts[5],
+                          'nans_in_position_encountered': self.cell_walk_counts[4]
                           }
+        if info['horizontal_walk']['particles_killed_after_walk_retry_failed'] > 0:
+            si.msg_logger.msg(f"{info['horizontal_walk']['particles_located']:3d},  {info['horizontal_walk']['particles_killed_after_walk_retry_failed']:3d}, failed to find cell",
+                              crumbs='Interpolator cals, InterpTriangularNativeGrid_Slayer_and_LSCgrid',
+                              hint= f"Try increasing interpolator parameter 'max_search_steps', current value ={self.params['max_search_steps']:3d}")
+
         info['vertical_walk'] ={'particles_located': self.vertical_walk_counts[0],
                           'total_steps': self.vertical_walk_counts[1],
                           'average_number_of_triangles_walked': self.vertical_walk_counts[1]/max(1,self.vertical_walk_counts[0]),
