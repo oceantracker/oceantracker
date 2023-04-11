@@ -53,11 +53,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
             p.create_particle_property('manual_update',dict(name='nz_cell',  write=False, dtype=np.int32, initial_value=grid_time_buffers['zlevel'].shape[2]-2)) # todo  create  initial serach for vertical cell
-            p.create_particle_property('manual_update', dict(name='nz_nodes', write=False, dtype=np.int32, initial_value=0, vector_dim=2,prop_dim3=3,description='z nodes for levels above and below particle, used to get reference used in field interpolation'))
             p.create_particle_property('manual_update',dict(name='z_fraction',   write=False, dtype=np.float32, initial_value=0.))
             p.create_particle_property('manual_update', dict(name='z_fraction_bottom_layer', write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
-            p.create_particle_property('manual_update', dict(name='is_in_bottom_layer', write=False, dtype=np.int8, initial_value=0.,
-                                description=' flag particles in bottom layer for log layer velocity interp'))
 
     #@profile
     def find_cell(self, xq, nb,step_dt_fraction, active):
@@ -183,7 +180,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 if fieldObj.params['name']=='water_velocity':
                     # 3D vel needs log layer interp in bottom cell
                     z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
-                    is_in_bottom_layer = part_prop['is_in_bottom_layer'].data
 
                     eval_interp.eval_water_velocity_3D(basic_util.atLeast_Nby1(output),
                                                        fieldObj.data,
@@ -194,7 +190,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                        nz_cell,
                                                        nz_bottom,
                                                        z_fraction,
-                                                    z_fraction_bottom_layer, is_in_bottom_layer,
+                                                    z_fraction_bottom_layer,
                                                        bc_cords,     active)
                 else:
                     eval_interp.time_dependent_3Dfield(basic_util.atLeast_Nby1(output),
@@ -322,8 +318,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         BCcords     = part_prop['bc_cords'].data
         z_fraction = part_prop['z_fraction'].data
         z_fraction_bottom_layer =  part_prop['z_fraction_bottom_layer'].data
-        is_in_bottom_layer = part_prop['is_in_bottom_layer'].data # todo remove prop
-        nz_nodes = part_prop['nz_nodes'].data  # todo remove prop
 
         triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(
                                             xq[:, 2], nb, step_dt_fraction, zlevel_nodes,
