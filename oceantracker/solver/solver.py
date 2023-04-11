@@ -257,6 +257,7 @@ class Solver(ParameterBaseClass):
         #  x2 = x1 + v*dt
         solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)  # set final location directly to particle x property
 
+        #print('xxx', x2[:10, :] - x1[:10, :],v[:10,:])
 
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
