@@ -8,7 +8,7 @@ run_params_defaults_template = {'shared_params': {'user_note': PVC('No user note
                                                  'root_output_dir':     PVC('default_root_output_dir', str, doc_str='base dir for all output files'),
                                                  'add_date_to_run_output_dir':  PVC(False, bool),
                                                  'output_file_base':    PVC('default_output_file_base', str,doc_str= 'The start/base of all output files and name of sub-dir where output will be written'),
-                                                 'time_step': PVC(3600., float, min=0.001,doc_str='Time step in seconds for all cases'),
+                                                 'time_step': PVC(None, float, min=0.01,doc_str='Time step in seconds for all cases'),
                                                   'screen_output_time_interval': PVC(None, float, doc_str='Time in seconds between writing progress to the screen/log file'),
                                                  'backtracking':        PVC(False, bool),
                                                  'debug':               PVC(False, bool),

@@ -20,6 +20,7 @@ class MessageLogger(object):
         self.fatal_error_count = 0
         self.warnings_and_errors=[]
         self.log_file = None
+        self.error_warning_count = 0
 
     def set_up_files(self,run_output_dir,output_file_base):
 
@@ -46,9 +47,10 @@ class MessageLogger(object):
         # first line of message
         if fatal_error:
             m[0] += msg_str( '>>> Error: ', tabs)
-
+            self.error_warning_count += 1
         elif warning:
             m[0] += msg_str('>>> Warning: ' , tabs)
+            self.error_warning_count += 1
         elif note:
             m[0] += msg_str('>>> Note: ', tabs)
         else:
@@ -73,7 +75,8 @@ class MessageLogger(object):
 
             # keeplist ond warnings errors etc to print at end
             if fatal_error or warning or note:
-                self.warnings_and_errors.append(l)
+                if self.error_warning_count <= self.max_warnings:
+                    self.warnings_and_errors.append(l)
 
         # mange whether to exit now or not:
         if fatal_error: self.fatal_error_count += 1

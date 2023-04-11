@@ -354,12 +354,12 @@ params.append(s61)
 # back tracking test
 p90= deepcopy(p2)
 
-p90['shared_params'].update({'max_duration': 1*24*3600.,'output_file_base': 'demo90forward',
+p90['shared_params'].update({'max_duration': 2*24*3600.,'output_file_base': 'demo90forward',
                                 'backtracking': False,'debug': True,'time_step' :60 })
-
+p90['reader']['time_buffer_size']=2  # test with  tiny buffer
 p90['base_case_params']['particle_release_groups']= [{'pulse_size': 1, 'release_interval': 0,
                                                         'points': [[1594500, 5486500], [1596500, 5489000], [1595000, 5483000] ]}]
-p90['base_case_params']['solver']['n_sub_steps'] =  60
+
 p90['base_case_params']['dispersion'].update({'A_H' : 0., 'A_V': 0.})
 
 params.append(p90)

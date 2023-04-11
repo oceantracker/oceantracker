@@ -482,7 +482,7 @@ if __name__ == '__main__':
             'debug': True,
             'root_output_dir': output_dir,
             'compact_mode': True,
-            'time_step' : 60,
+            'time_step' : 10*60,
         },
         'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
                    'file_mask': 'schout_*.nc', 'input_dir': input_dir,
@@ -521,7 +521,8 @@ if __name__ == '__main__':
                 }
             ],
             'dispersion': {
-                'class_name': 'oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ',
+                'class_name': 'oceantracker.dispersion.random_walk.RandomWalk',
+                #'class_name': 'oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ',
                 'A_H': 0.2,
                 'A_V': 0.001
             },

@@ -4,7 +4,7 @@
         "add_date_to_run_output_dir": false,
         "time_step": 60,
         "compact_mode": true,
-        "max_duration": 86400.0,
+        "max_duration": 172800.0,
         "backtracking": false,
         "debug": true,
         "root_output_dir": "output"
@@ -34,7 +34,7 @@
             "water_depth": "depth",
             "tide": "tide"
         },
-        "time_buffer_size": 15,
+        "time_buffer_size": 2,
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "base_case_params": {
@@ -81,7 +81,7 @@
             }
         ],
         "solver": {
-            "n_sub_steps": 60
+            "n_sub_steps": 6
         }
     }
 }

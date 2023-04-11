@@ -4,7 +4,7 @@
         "debug": true,
         "root_output_dir": "F:\\OceanTrackerOuput\\Laurin",
         "compact_mode": true,
-        "time_step": 60
+        "time_step": 600
     },
     "reader": {
         "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
@@ -104,7 +104,7 @@
             }
         ],
         "dispersion": {
-            "class_name": "oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ",
+            "class_name": "oceantracker.dispersion.random_walk.RandomWalk",
             "A_H": 0.2,
             "A_V": 0.001
         },

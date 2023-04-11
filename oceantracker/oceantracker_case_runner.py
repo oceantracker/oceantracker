@@ -283,18 +283,28 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # initialise all classes, order is important!
         # short cuts
         si = self.shared_info
+        reader= si.classes['reader']
         # start with setting up reader as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
         si.classes['field_group_manager'].initialize() # needed here to add reader fields inside reader build
-        si.classes['reader'].build_case_runner_reader(si.reader_build_info)
+        reader.build_case_runner_reader(si.reader_build_info)
 
         # now know if 3D hindcast
         si.hydro_model_is3D = si.classes['fields']['water_velocity'].is3D()
 
-        # Timings, sort out start and run duration
+        if si.shared_params['time_step'] is None:
+            time_step = reader.info['hydro_model_time_step']
+            si.msg_logger.msg("No time step given, using hydro-model's time step =" + str(time_step) + 'sec', note=True)
+        else:
+            time_step =  si.shared_params['time_step']
+            if time_step > reader.info['hydro_model_time_step']:
+                time_step = reader.info['hydro_model_time_step']
+                si.msg_logger.msg("Time step is greater than hydro-model's, this capability not yet available, using hydro-model's time step =" + str(time_step) + 'sec', warning=True)
+
+        si.solver_info['model_time_step'] = time_step
+        si.model_time_step = time_step
 
         # set up start time and duration based on particle releases
-
         time_start, time_end, estimated_total_particles = self._setup_particle_release_groups(si.case_params['class_lists']['particle_release_groups'])
         si.msg_logger.progress_marker('set up particle_release_groups')
 
@@ -305,8 +315,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.solver_info['model_start_time'] = time_start
         si.solver_info['model_end_time'] = time_end
         si.solver_info['model_duration'] = abs( time_end - time_start)
-        si.solver_info['model_time_step'] = si.shared_params['time_step']
-        si.model_time_step = si.solver_info['model_time_step']
+
+
 
         # useful info
 
@@ -318,7 +328,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
         # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
-        si.time_of_nominal_first_occurrence = si.model_direction * np.inf
+        si.time_of_nominal_first_occurrence = si.model_direction * 1.0E36
         # todo get rid of time_of_nominal_first_occurrence
 
         # find particle buffer size required by several classes

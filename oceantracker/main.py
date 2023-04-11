@@ -2,7 +2,7 @@
 # eg run(params)
 import sys
 
-code_version = '0.4.00.000 2023-03-29'
+code_version = '0.4.00.001 2023-04-11'
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -161,7 +161,6 @@ class _RunOceanTrackerClass(object):
         # write a copy of user given parameters, to help with debugging and code support
         fb = path.join(root_output_dir,run_output_dir, 'users_params_'+shared_params['output_file_base'] )
         json_util.write_JSON(fb,params)
-        yaml_util.write_YAML(fb, params)
 
         run_builder['output_files'] = {'root_output_dir': root_output_dir,
                         'run_output_dir' :  run_output_dir,

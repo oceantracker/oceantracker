@@ -21,7 +21,7 @@ base_case_params:
   run_params:
     block_dry_cells: true
   solver:
-    n_sub_steps: 60
+    n_sub_steps: 6
   tracks_writer:
     class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
     write_dry_cell_index: true
@@ -46,13 +46,13 @@ reader:
   input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
-  time_buffer_size: 15
+  time_buffer_size: 2
 shared_params:
   add_date_to_run_output_dir: false
   backtracking: false
   compact_mode: true
   debug: true
-  max_duration: 86400.0
+  max_duration: 172800.0
   output_file_base: demo90forward
   root_output_dir: output
   time_step: 60

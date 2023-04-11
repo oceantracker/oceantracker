@@ -20,7 +20,8 @@ class _BaseWriter(ParameterBaseClass):
 
         self.add_default_params({
                                 'role_output_file_tag': PVC('tracks', str),
-                                'output_step_count': PVC(1,int,min=1, doc_str='Write track data every output_step_count steps of the model'),
+                                'write_time_interval': PVC(None, int, min=1, doc_str='the time in seconds between writes (will be rounded to model time step)'),
+                                'output_step_count': PVC(1,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", the time in seconds bewteen writes'),
                                 'turn_on_write_particle_properties_list': PLC([], [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                                  'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
                                                             doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),
@@ -41,7 +42,16 @@ class _BaseWriter(ParameterBaseClass):
     def initialize(self):
         si= self.shared_info
         grid = si.classes['reader'].grid
-        if self.params['write_dry_cell_index']:
+        params = self.params
+
+        # find steps between wrtites, rounded to nearest model time step
+        if params['write_time_interval'] is None :
+            nt_step = 1
+        else:
+            nt_step = int(np.round(params['write_time_interval']/si.model_time_step)*si.model_time_step)
+        self.info['output_step_count'] = min(nt_step,1)
+
+        if params['write_dry_cell_index']:
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])
             self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes_dict={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])
@@ -142,7 +152,8 @@ class _BaseWriter(ParameterBaseClass):
 
         self.code_timer.start('write_output')
         si= self.shared_info
-        if si.solver_info['time_steps_completed'] % self.params['output_step_count'] != 0: return
+
+        if si.solver_info['time_steps_completed'] % self.info['output_step_count'] != 0: return
 
         grid_time_buffers = si.classes['reader'].grid_time_buffers
 

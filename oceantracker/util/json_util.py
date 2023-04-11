@@ -38,6 +38,21 @@ def read_JSON(file_name):
 
 #Store as JSON a numpy.ndarray or any nested-list composition.
 class MyEncoder(json.JSONEncoder):
+    def _custom_preprocess_dict(self, val):
+
+        if isinstance(val,(float,np.float64,np.float32)) and not np.isfinite(val):
+            return 'not finite'
+        if isinstance(val, datetime):
+            return  val.isoformat()
+        else:
+           return val
+
+    def encode_notused(self, d):
+        if isinstance(d,dict):
+            for key in d.keys():
+                d[key]= self._custom_preprocess_dict(d[key])
+
+        return super().encode(d)
 
     def default(self, obj):
 
@@ -57,10 +72,6 @@ class MyEncoder(json.JSONEncoder):
                 # make single numpy int values
                 return int(obj)
 
-            elif isinstance(obj,(float, np.float32, np.float64)) :
-                # make single numpy float values
-                val =float(obj)  if np.isfinite(obj) else None
-                return val
 
             # date/time strings
             elif isinstance(obj, (datetime, date)):
@@ -79,6 +90,9 @@ class MyEncoder(json.JSONEncoder):
                 return str(obj)
             elif type(obj) == timedelta:
                 return str(obj)
+
+            elif np.isnan(obj) or not np.isfinite(obj) :
+                return None
 
             return json.JSONEncoder.default(self, obj)
 

@@ -22,9 +22,9 @@ def seconds_to_pretty_duration_string(s):
     days = td.astype('timedelta64[D]').astype(int)
     hours = (td.astype('timedelta64[h]') - days * 24).astype(int)
     minutes = (td.astype('timedelta64[m]') - days * 24 * 60 - hours * 60).astype(int)
-    seconds = (td.astype('timedelta64[s]') - days * 24 * 60 - hours * 60 - minutes*60*60).astype(int)
+    seconds = (td.astype('timedelta64[s]') - days * 24 * 60 * 60 - hours * 60 * 60 - minutes*60).astype(int)
     # Create the string representation
-    return  f"{days} days, {hours} hours, {minutes} minutes, {seconds} seconds"
+    return  f"{days} days, {hours} hrs, {minutes} min, {seconds} sec"
 
 def seconds_to_pretty_str(s, seconds= True):
     fmt="%Y-%m-%d %H:%M"

@@ -49,7 +49,8 @@ class FieldGroupManager(ParameterBaseClass):
         time_hindcast =   grid_time_buffers['time'][nb[0]]
 
         self.step_dt_fraction = abs(time_sec -time_hindcast) / reader.info['hydro_model_time_step']
-        #print('feilds',nt_hindcast_step, nb, 'timesec',time_util.seconds_to_datetime64(time_sec),    'hindcast time',time_util.seconds_to_datetime64(time_hindcast),'buffer times',              grid_time_buffers['date'][nb],time_sec -time_hindcast,self.step_dt_fraction)
+        #if self.step_dt_fraction  < 0  or self.step_dt_fraction > 1.1:
+        #    print('feilds',self.step_dt_fraction,nt_hindcast_step, nb, 'timesec',time_util.seconds_to_datetime64(time_sec),    'hindcast time',time_util.seconds_to_datetime64(time_hindcast),'buffer times',              grid_time_buffers['date'][nb],time_sec -time_hindcast,self.step_dt_fraction)
         # update 0-255 dry cell index
         field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, grid_time_buffers['is_dry_cell'],   grid_time_buffers['dry_cell_index'])
 

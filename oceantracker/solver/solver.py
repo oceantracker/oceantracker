@@ -21,7 +21,7 @@ class Solver(ParameterBaseClass):
                         'RK_order':                   PVC(4, int, possible_values=[1, 2, 4]),
                         'name':                       PVC('solver',str),
                         'n_sub_steps': PVC(1, int, obsolete='use shared_parameter "time_step", run may not have required time step'),
-                        'screen_output_step_count': PVC(1, int, obsolete='use shared_parameter "screen_output_time_interval"')
+                        'screen_output_step_count': PVC(1, int, obsolete='use shared_parameter "screen_output_time_interval" in seconds')
                             })
 
     def initialize(self):
@@ -265,7 +265,7 @@ class Solver(ParameterBaseClass):
 
         fraction_done= abs((time_sec - si.solver_info['model_start_time']) / si.solver_info['model_duration'])
         s = f'{100* fraction_done:02.0f}%'
-        s += f' step {nt:04d}:H{fm.info["current_hydro_model_step"]:04d}-{fm.n_buffer[0]:02d}-{fm.n_buffer[1]:02d}'
+        s += f' step {nt:04d}:H{fm.info["current_hydro_model_step"]:04d}b{fm.n_buffer[0]:02d}-{fm.n_buffer[1]:02d}'
         t = abs(time_sec - si.solver_info['model_start_time'])
         s += ' Day ' +  ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)

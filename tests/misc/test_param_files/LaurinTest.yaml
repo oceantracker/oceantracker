@@ -2,7 +2,7 @@ base_case_params:
   dispersion:
     A_H: 0.2
     A_V: 0.001
-    class_name: oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ
+    class_name: oceantracker.dispersion.random_walk.RandomWalk
   fields:
   - class_name: oceantracker.fields.friction_velocity.FrictionVelocity
   - class_name: oceantracker.fields.field_vertical_gradient.VerticalGradient
@@ -302,4 +302,4 @@ shared_params:
   debug: true
   output_file_base: Laurin_3d
   root_output_dir: F:\OceanTrackerOuput\Laurin
-  time_step: 60
+  time_step: 600
