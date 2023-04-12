@@ -144,9 +144,13 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
     def update(self, **kwargs):
         # do counts for each release  location and grid cell
+
+        if not self.is_time_to_count(): return
+
         self.start_update_timer()
         time = kwargs['time']
         self.record_time_stats_last_recorded(time)
+
 
         part_prop = self.shared_info.classes['particle_properties']
         stats_grid = self.grid
@@ -265,10 +269,16 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
     def update(self, **kwargs):
         # do counts for each release  location and grid cell, over rides parent
+        if not self.is_time_to_count(): return
+
         self.start_update_timer()
+
+
         time = kwargs['time']
         self.record_time_stats_last_recorded(time)
         stats_grid = self.grid
+
+
 
         # set up pointers to particle properties
         part_prop = self.shared_info.classes['particle_properties']

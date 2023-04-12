@@ -6,7 +6,7 @@ from os import  path
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from numba.typed import List as NumbaList
-
+from oceantracker.util import  time_util
 class _BaseParticleLocationStats(ParameterBaseClass):
 
     def __init__(self):
@@ -14,6 +14,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         super().__init__()
 
         self.add_default_params({ 'calculation_interval':       PVC(24*60*60.,float),
+                                  'count_start_date': PVC(None, 'iso8601date', doc_str='Start particle counting from this date'),
+                                  'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this date'),
                                   'role_output_file_tag' :           PVC('stats_base',str),
                                   'file_tag': PVC(None, str),
                                   'write':                      PVC(True,bool),
@@ -82,6 +84,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
+
         sel = part_prop['status'].find_those_in_range_of_values(
                 si.particle_status_flags[self.params['count_status_in_range'][0]],
                 si.particle_status_flags[self.params['count_status_in_range'][1]],
@@ -89,12 +92,33 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         return sel
 
+    def is_time_to_count(self):
+        si = self.shared_info
+        params= self.params
+        info=self.info
+        md = si.model_direction
+
+        if params['count_start_date'] is None:
+            info['start_time'] = si.solver_info['model_start_time']
+        else:
+            info['start_time'] = time_util.iso8601str_to_seconds(params['count_start_date'])
+
+        if params['count_end_date'] is None:
+            info['end_time'] = si.solver_info['model_start_time'] + md * si.solver_info['model_duration']
+        else:
+            info['end_time'] = time_util.iso8601str_to_seconds(params['count_end_date'])
+
+
+        out =   info['start_time'] * md <=  si.solver_info['current_hydro_model_time'] * md  <= info['end_time'] * md
+        return out
+
     def record_time_stats_last_recorded(self, t):   self .info['time_last_stats_recorded'] = t
 
     def update(self): basic_util.nopass()
 
     def write_time_varying_stats(self, n, time):
         # write nth step in file
+
         fh = self.nc.file_handle
         fh['time'][n] = time
         fh['count'][n, ...] = self.count_time_slice[:, ...]

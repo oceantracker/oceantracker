@@ -85,6 +85,8 @@ p3['base_case_params']['particle_release_groups']=[
 p3['base_case_params']['particle_statistics']=[
                   {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
+                   'count_start_date': '2020-06-01 21:16:07',
+                   'count_end_date': '2020-06-30 21:16:07',
                       'grid_size': [220, 221]},
                   {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                         'count_status_in_range' : ['moving','moving'],

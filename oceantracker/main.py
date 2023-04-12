@@ -610,7 +610,7 @@ class _RunOceanTrackerClass(object):
 
         pool=  multiprocessing.Pool(processes=shared_params['processors'])
 
-        case_results = pool.map(_run1_case, case_param_list)
+        case_results = pool.map(self._run1_case, case_param_list)
         pool.close()
         #case_results = pool.map(self.junk,ll)
 
@@ -634,7 +634,12 @@ class _RunOceanTrackerClass(object):
         #todo make shared fields and grid arrays read only in children sm.data.setflags(write=False)
         pass
 
-
+    def _run1_case(self, run_params):
+        # run one process on a particle based on given family class parameters
+        # by creating an independent instances of  model classes, with given parameters
+        ot = OceanTrackerCaseRunner()
+        caseInfo_file, case_error = ot.run(deepcopy(run_params))
+        return caseInfo_file, case_error
 
     def _U1_get_all_cases_performance_info(self, case_info_files, case_error_list, sparams, run_output_dir, t0):
         # finally get run totals of steps and particles
@@ -672,9 +677,3 @@ class _RunOceanTrackerClass(object):
         return { 'version': code_version, 'git_revision': git_revision, 'python_version':version}
 
 
-def _run1_case(run_params):
-    # run one process on a particle based on given family class parameters
-    # by creating an independent instances of  model classes, with given parameters
-    ot = OceanTrackerCaseRunner()
-    caseInfo_file, case_error = ot.run(deepcopy(run_params))
-    return caseInfo_file, case_error

@@ -75,9 +75,14 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
 
     def update(self,**kwargs):
+
+        if not self.is_time_to_count(): return
         si= self.shared_info
         part_prop = si.classes['particle_properties']
         g = self.grid
+
+
+
 
         # update time stats  recorded
         time = kwargs['time']
@@ -148,8 +153,11 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
     def update(self,**kwargs):
 
+        if not self.is_time_to_count(): return
+
         part_prop = self.shared_info.classes['particle_properties']
         stats_grid = self.grid
+
 
         # update time stats  recorded
         time = kwargs['time']

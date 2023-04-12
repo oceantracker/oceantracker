@@ -22,6 +22,8 @@ base_case_params:
   particle_statistics:
   - calculation_interval: 1800
     class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
+    count_end_date: '2020-06-30 21:16:07'
+    count_start_date: '2020-06-01 21:16:07'
     grid_size:
     - 220
     - 221
