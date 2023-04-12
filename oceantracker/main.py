@@ -54,8 +54,6 @@ class _RunOceanTrackerClass(object):
     def run(self,params):
 
         # prelim set up to get output dir, to make message logger
-
-
         try:
             print('--' + package_fancy_name + ' preliminary set up')
             run_builder= self.setup_output_folders_and_run_builder(params)
@@ -76,7 +74,6 @@ class _RunOceanTrackerClass(object):
         run_builder['output_files']['runLog_file'], run_builder['output_files']['run_error_file'] = \
             msg_logger.set_up_files(run_builder['output_files']['run_output_dir'], run_builder['output_files']['output_file_base'])
 
-
         # complete the setup with message logger
         try:
             run_builder, reader, case_builders_list = self.set_up(run_builder,msg_logger)
@@ -93,8 +90,8 @@ class _RunOceanTrackerClass(object):
             msg_logger.msg('unexpected error', hint='see trace back above, or .err file', fatal_error=True)
             return None, True
 
-
         # now run cases
+        #---------------------
         full_runInfoJSON_file_name, has_errors = self._run(run_builder, case_builders_list,reader)
 
         return full_runInfoJSON_file_name, has_errors
@@ -407,11 +404,11 @@ class _RunOceanTrackerClass(object):
         # construct reader_build_info to be used by case_runners to build their reader
         reader_build_info = {'reader_params': reader.params,
                              'use_shared_memory': working_params['shared_params']['share_reader_memory']}
-        msg_logger.write_progress_marker('Sorting hyrdo model files in time order')
+        msg_logger.write_progress_marker('Sorting hydro-model files in time order')
 
         reader_build_info = self._get_hindcast_files_info(reader_build_info, reader) # get file lists
 
-        msg_logger.write_progress_marker('Finished sorting hyrdo model  files ', tabs=3)
+        msg_logger.write_progress_marker(f'Finished sorting {len(reader_build_info["sorted_file_info"]["names"]):2} hydro-model  files ', tabs=3)
 
         # read and set up reader grid now as  required for writing grid file
         # also if requested shared grid memory is set up
@@ -611,8 +608,11 @@ class _RunOceanTrackerClass(object):
         shared_params['processors'] = min(shared_params['processors'], len(case_param_list))
         ml.write_progress_marker('oceantracker:multiProcessing: processors:' + str(shared_params['processors']))
 
-        with multiprocessing.Pool(processes=shared_params['processors']) as pool:
-            case_results = pool.map(self._run1_case, case_param_list)
+        pool=  multiprocessing.Pool(processes=shared_params['processors'])
+
+        case_results = pool.map(_run1_case, case_param_list)
+        pool.close()
+        #case_results = pool.map(self.junk,ll)
 
         ml.write_progress_marker('parallel pool complete')
 
@@ -634,13 +634,7 @@ class _RunOceanTrackerClass(object):
         #todo make shared fields and grid arrays read only in children sm.data.setflags(write=False)
         pass
 
-    @staticmethod
-    def _run1_case(run_params):
-        # run one process on a particle based on given family class parameters
-        # by creating an independent instances of  model classes, with given parameters
-        ot = OceanTrackerCaseRunner()
-        caseInfo_file, case_error = ot.run(deepcopy(run_params))
-        return caseInfo_file, case_error
+
 
     def _U1_get_all_cases_performance_info(self, case_info_files, case_error_list, sparams, run_output_dir, t0):
         # finally get run totals of steps and particles
@@ -676,3 +670,11 @@ class _RunOceanTrackerClass(object):
         except:
             git_revision = 'unknown'
         return { 'version': code_version, 'git_revision': git_revision, 'python_version':version}
+
+
+def _run1_case(run_params):
+    # run one process on a particle based on given family class parameters
+    # by creating an independent instances of  model classes, with given parameters
+    ot = OceanTrackerCaseRunner()
+    caseInfo_file, case_error = ot.run(deepcopy(run_params))
+    return caseInfo_file, case_error
