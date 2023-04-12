@@ -86,7 +86,7 @@ class PointRelease(ParameterBaseClass):
         if release_interval == 0.:
             time_end = time_start
         elif self.params['release_duration'] is not None:
-            time_end = time_start + info['model_direction']*self.params['release_duration']
+            time_end = time_start + si.model_direction*self.params['release_duration']
 
         elif self.params['release_end_date'] is not None:
             time_end = time_util.isostr_to_seconds(self.params['release_end_date'])
