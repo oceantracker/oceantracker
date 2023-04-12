@@ -53,7 +53,8 @@ def get_params(params, datasource=2):
 
 
     params = \
-        {'shared_params': {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': True, 'time_step': time_step},
+        {'shared_params': {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': True, 'time_step': time_step,
+                           'screen_output_time_interval':time_step},
          'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
                     'input_dir': input_dir,
                     'file_mask': file_mask,
@@ -61,7 +62,6 @@ def get_params(params, datasource=2):
                     },
          'base_case_params': {'run_params': {'write_tracks': False},
                               'dispersion': {'A_H': .2, 'A_V': 0.001},
-                              'solver': {'n_sub_steps': 1},
                               'particle_release_groups': [{'points': points,
                                                            'pulse_size': pulse_size, 'release_interval': release_interval,
                                                            'allow_release_in_dry_cells': True},
@@ -145,8 +145,7 @@ if __name__ == '__main__':
         #params['shared_params']['max_duration'] =2. * 3600  # 12 hour test
 
     if args.profile_type == 0:
-        # not working!
-        run('scalelene',params)
+        run_code('pyinstrument', params)
 
     elif args.profile_type==1:
 
@@ -159,8 +158,11 @@ if __name__ == '__main__':
 
         with open(fnn + '.html', mode='w') as f:
             f.write(profiler.output_html(timeline=False))
-
     elif args.profile_type == 2:
+        # not working!
+        run('scalelene', params)
+
+    elif args.profile_type == 3:
         import cProfile, pstats
         profiler = cProfile.Profile()
         profiler.enable()
@@ -168,19 +170,4 @@ if __name__ == '__main__':
         profiler.disable()
         stats = pstats.Stats(profiler).sort_stats('cumtime')
         stats.print_stats()
-    else:
-        with cProfile.Profile() as pr:
-            main()
-
-            pr.print_stats()
-
-            with profiler:
-                main()
-
-
-            # You can also write the result to the console:
-            profiler.print_stats()
-
-            # Or to a file:
-            profiler.dump_stats("profiler_stats.txt")
 

@@ -191,7 +191,7 @@ class _RunOceanTrackerClass(object):
         ml.insert_screen_line()
         ml.exit_if_prior_errors('errors merging share params with defaults')
 
-        ml.set_max_warnings(working_params['shared_params']['max_warnings'])
+        ml.max_warnings= working_params['shared_params']['max_warnings']
 
         ml.insert_screen_line()
         ml.progress_marker('Running ' + package_fancy_name + ' started ' + str(datetime.now()))
@@ -307,7 +307,7 @@ class _RunOceanTrackerClass(object):
         # the end
         ml.show_all_warnings_and_errors()
         ml.insert_screen_line()
-        ml.progress_marker('Finished ' + '---  started: ' + str(t0) + '---  ended: ' + str(datetime.now()))
+        ml.progress_marker('Finished ' + '-  started: ' + str(d0) + '- ended: ' + str(datetime.now()))
         ml.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
         ml.msg('Output in ' + output_files['run_output_dir'], tabs=4)
         ml.insert_screen_line()

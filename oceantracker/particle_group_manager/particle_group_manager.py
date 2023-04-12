@@ -1,5 +1,5 @@
 import numpy as np
-from numba import njit
+from numba import njit, types as nbtypes
 from copy import copy
 from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
 from oceantracker.particle_properties.util import particle_operations_util
@@ -32,7 +32,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         #  time dependent core  properties
         self.add_time_varying_info(name = 'time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
-
+        #todo put core properteis in a numpy dtype block
         # core particle props. , write at each required time step
         self.create_particle_property('manual_update',dict(name='x',  vector_dim=nDim))  # particle location
         self.create_particle_property('manual_update',dict(name='particle_velocity',  vector_dim=nDim))
@@ -58,6 +58,7 @@ class ParticleGroupManager(ParameterBaseClass):
         self.create_particle_property('manual_update',dict(name='x0',  vector_dim=nDim, time_varying=False,
                                       description='initial location of each particle'))  # exact location released including any randomization
 
+        self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
 
     def release_particles(self, time_sec):
@@ -295,25 +296,27 @@ class ParticleGroupManager(ParameterBaseClass):
     def status_counts(self):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
-        c = self._do_status_counts(part_prop['status'].dataInBufferPtr(), np.asarray(list(si.particle_status_flags.values())))
+        count_array = self.status_count_array
+        self._do_status_counts(part_prop['status'].dataInBufferPtr(),count_array)
+
 
         # put numba counts back in dict with proper names
-        counts={'active': sum(c)}
-        for n, key in enumerate(si.particle_status_flags.keys()):
-            counts[key] = c[n]
+        counts={'active': 0}
+        for name, val in si.particle_status_flags.items():
+            c= count_array[val + 128]
+            counts[name] = c
+            counts['active'] += c
         return counts
 
     @staticmethod
     @njit
-    def _do_status_counts(status, prop_types):
-        # do fast counts of particles with each status
-        counts = np.full((len(prop_types),1), 0 ,np.int32)
+    ##@njit(nbtypes.int32[:](nbtypes.int8[:],nbtypes.int32[:]))
+    def _do_status_counts(status, status_counts):
+        # do count into array of all possible status values -128 <= val <= 127
+        for m in range(status_counts.size): status_counts[m] = 0
         for n in range(status.shape[0]):
-            for m in range(prop_types.shape[0]):
-                if status[n] == prop_types[m]:
-                    counts[m] += 1
-                    break
-        return counts
+            status_counts[status[n]-128] += 1
+
 
     def screen_info(self):
         si = self.shared_info
