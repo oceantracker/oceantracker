@@ -49,11 +49,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # set up message logging
         output_files=runner_params['output_files']
-        si.msg_logger = MessageLogger('P%03.0f:' % si.processor_number)
+        si.msg_logger = MessageLogger('P%03.0f:' % si.processor_number,si.shared_params['max_warnings'])
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'],output_files['output_file_base'] + '_caseLog')
 
-        si.msg_logger.set_max_warnings(si.shared_params['max_warnings'])
 
 
         case_info_file = None

@@ -105,9 +105,12 @@ def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz
                 F_out[n, c] +=     BCcord[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*dt1  \
                                 +  BCcord[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*step_dt_fraction  # second time step
 
-@njit
-#@njit( ( (float64[:,:], float32[:, :, :, :],int32[:],float64,int32[:,:],int32[:], int32[:],   float32[:], float32[:], int8[:],float64[:,:], int32[:] )))
-def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction, tri, n_cell,nz_cell, nz_bottom,
+#@njit
+@njit( ( (float64[:,:], float32[:, :, :, :],int32[:],float64,
+                    int32[:,:],int32[:], int32[:], int32[:],
+                    float32[:], float32[:], float64[:,:], int32[:] )))
+def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction,
+                           tri, n_cell,nz_cell, nz_bottom,
                            z_fraction,z_fraction_bottom_layer,  BCcord,  active):
     #  special case of interpolating water velocity with log layer in bottom cell, linear z interpolation at other depth cells
 

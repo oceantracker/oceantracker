@@ -9,7 +9,7 @@ run_params_defaults_template = {'shared_params': {'user_note': PVC('No user note
                                                  'add_date_to_run_output_dir':  PVC(False, bool),
                                                  'output_file_base':    PVC('default_output_file_base', str,doc_str= 'The start/base of all output files and name of sub-dir where output will be written'),
                                                  'time_step': PVC(None, float, min=0.01,doc_str='Time step in seconds for all cases'),
-                                                  'screen_output_time_interval': PVC(None, float, doc_str='Time in seconds between writing progress to the screen/log file'),
+                                                  'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
                                                  'backtracking':        PVC(False, bool),
                                                  'debug':               PVC(False, bool),
                                                   'minimum_total_water_depth': PVC(0.25, float, min=0.0, doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
@@ -86,7 +86,7 @@ default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0), 'user_polyg
                         'points': PVC([], 'vector', list_contains_type=float, is_required=True),
                                }
 
-particle_info = {'status_flags': {'unknown': -127, 'bad_cord': -20, 'cell_search_failed': -19, 'notReleased': -10,  'dead': -2,'outside_open_boundary': -1, 'frozen': 0,
+particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search_failed': -19, 'notReleased': -10,  'dead': -2,'outside_open_boundary': -1, 'frozen': 0,
                                   'stranded_by_tide': 3,  'on_bottom': 6,  'moving': 10},
                  'known_prop_types': ['manual_update', 'from_fields','user']
                  }

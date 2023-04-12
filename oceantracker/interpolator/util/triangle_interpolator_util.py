@@ -179,21 +179,11 @@ def get_BC_transform_matrix(points, simplices):
 
     return Tinvs
 
-
-@njit([float64(int32[:], float32[:, :, :], float64[:], float64, float64, int32[:], int32[:])])
-def _eval_z_at_nz_nodes(nb, z_level_at_nodes, BCcord, tf, tf2, nodes, nz_nodes):
-    # eval a at given zlevel given nodes
-    z = 0.
-    for m in range(3):
-        node_nn = nodes[m]
-        z += z_level_at_nodes[nb[0], node_nn, nz_nodes[m]] * BCcord[m] * tf2 \
-             + z_level_at_nodes[nb[1], node_nn, nz_nodes[m]] * BCcord[m] * tf
-    return z
-
-
-#@njit([float64(int64, int32[:], float32[:, :, :], int32[:], float64[:], float64, float64, int32[:], int32[:])])
-@njit
-def _eval_z_at_nz_cell(nb, nz_cell, z_level_at_nodes, nz_bottom_nodes, BCcord, tf, tf2, nodes):
+#@njit
+@njit([float64(int32[:], int64, float32[:, :, :],
+              int32[:], float64[:], float64, float64,  int32[:])])
+def _eval_z_at_nz_cell(nb, nz_cell, z_level_at_nodes,
+                       nz_bottom_nodes, BCcord, tf, tf2, nodes):
     # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
     z = 0.
     for m in range(3):
@@ -202,20 +192,17 @@ def _eval_z_at_nz_cell(nb, nz_cell, z_level_at_nodes, nz_bottom_nodes, BCcord, t
              + z_level_at_nodes[nb[1], nodes[m], nz] * BCcord[m] * tf
     return z
 
-'''
+#@njit
 @njit((void(float64[:], int32[:], float64,float32[:,:,:],
                int32[:,:],int32[:],
                int32[:],float64[:,:], int8[:],
-                int32[:], int32[:,:,:],float32[:],
-               float32[:],int8[:],
-               float64,int32[:],int64[:])  ))
-'''
-@njit
+                int32[:], float32[:],
+               float32[:],
+               float64,int32[:], int64[:])))
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_level_at_nodes,
                                                   tri, n_cell,
                                                   nz_with_bottom, BCcord, status,
-                                                  nz_cell, z_fraction,
-                                                  z_fraction_bottom_layer,
+                                                  nz_cell, z_fraction, z_fraction_bottom_layer,
                                                   z0, active, walk_counts):
     # find the zlayer for each node of cell containing each particle and at two time slices of hindcast  between nz_bottom and number of z levels
     # LSC grid means must track vertical nodes for each particle
@@ -229,7 +216,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
     for n in active:  # loop over active particles
         nodes = tri[n_cell[n], :]  # nodes for the particle's cell
         bottom_nz_nodes = nz_with_bottom[nodes]
-        bottom_nz_cell = np.min(bottom_nz_nodes)  # cell at bottom is smalest of those in triangle
+        bottom_nz_cell = np.min(bottom_nz_nodes)  # cell at bottom is smallest of those in triangle
 
         n_vertical_steps = 0
 
@@ -246,13 +233,12 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
         if status[n] == status_on_bottom:   status[n] = status_moving
 
         # find zlevel above and below  current vertical cell
-        z_below = _eval_z_at_nz_cell(nb, nz_cell[n], z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes)
-        #z_above = _eval_z_at_nz_cell(nb, nz_cell[n] + 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes, nz_above)
-
         nz = nz_cell[n]
+        z_below = _eval_z_at_nz_cell(nb, nz, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes)
+
         if zq[n] >= z_below:
             # search upwards, do nothing if z_above > zq[n] > z_below, ie current nodes are correct
-            z_above = _eval_z_at_nz_cell(nb, nz_cell[n] + 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes)
+            z_above = _eval_z_at_nz_cell(nb, nz + 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes)
             while zq[n] > z_above:
                 if nz >= top_nz_cell:
                     if zq[n] > z_above:
@@ -265,14 +251,14 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
 
         elif nz <= bottom_nz_cell :
             # already in bottom cell so cant move down, leave nz unchanged, just get zlevel above
-            z_above = _eval_z_at_nz_cell(nb, nz_cell[n] + 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes)
+            z_above = _eval_z_at_nz_cell(nb, nz + 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes)
             if zq[n] < z_below:
                 zq[n] = z_below  # clip to bottom depth
 
         else:
             # search downwards
             z_above  = z_below
-            z_below = _eval_z_at_nz_cell(nb, nz_cell[n] - 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes)
+            z_below = _eval_z_at_nz_cell(nb, nz - 1, z_level_at_nodes, bottom_nz_nodes, BCcord[n, :], step_dt_fraction, tf2, nodes)
             while zq[n] < z_below:
                 if nz <= bottom_nz_cell:
                     if zq[n] < z_below:

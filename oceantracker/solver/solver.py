@@ -51,7 +51,7 @@ class Solver(ParameterBaseClass):
         # set up particle velocity working space for solver
         info['total_alive_particles'] = 0
 
-
+    #@profile
     def solve(self):
         # solve for data in buffer
         si = self.shared_info
@@ -75,9 +75,9 @@ class Solver(ParameterBaseClass):
         # work out time steps between writing tracks to to screen
         write_tracks_time_step = si.shared_params['screen_output_time_interval']
         if write_tracks_time_step is None:
-            nt_write_tracks = 1
+            nt_write_time_step_to_screen = 1
         else:
-            nt_write_tracks = max(1,int(write_tracks_time_step/si.solver_info['model_time_step']))
+            nt_write_time_step_to_screen = max(1,int(write_tracks_time_step/si.solver_info['model_time_step']))
 
         t0_model = perf_counter()
 
@@ -114,7 +114,7 @@ class Solver(ParameterBaseClass):
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
 
             # print progress to screen
-            if nt % nt_write_tracks == 0:
+            if nt % nt_write_time_step_to_screen == 0:
                 self.screen_output(si.solver_info['time_steps_completed'] ,  time_sec, t0_model, t0_step)
 
             info['time_steps_completed'] += 1
@@ -275,10 +275,10 @@ class Solver(ParameterBaseClass):
 
         elapsed_time= perf_counter() - t0_model
         remaining_time= (1 - fraction_done) * elapsed_time / max(.01, fraction_done)
-        if elapsed_time > 60.:
-            s += ' remaining:' + time_util.seconds_to_pretty_duration_string(abs(remaining_time))
+        if elapsed_time > 300.:
+            s += ' remaining: ' + time_util.seconds_to_pretty_duration_string(abs(remaining_time), seconds=False) +','
 
-        s +=  f' step time = { (perf_counter() - t0_step) * 1000:4.1f} ms'
+        s += f' step time = { (perf_counter() - t0_step) * 1000:4.1f} ms'
         si.msg_logger.msg(s)
 
 
