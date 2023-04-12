@@ -6,7 +6,7 @@ from os import  path
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from numba.typed import List as NumbaList
-
+from oceantracker.util import time_util
 class _BaseParticleLocationStats(ParameterBaseClass):
 
     def __init__(self):
@@ -14,6 +14,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         super().__init__()
         #todo add depth range for count
         self.add_default_params({ 'calculation_interval':       PVC(24*60*60.,float),
+                                  'count_start_date': PVC(None, 'iso8601date',doc_str= 'Start particle counting from this date'),
+                                  'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this date'),
                                   'role_output_file_tag' :           PVC('stats_base',str),
                                   'file_tag': PVC(None, str),
                                   'write':                      PVC(True,bool),
@@ -79,6 +81,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def select_particles_to_count(self, out):
         # select  those> 0 or equal given value to count in stats
+
+        if not self.is_time_to_count():return np.full((0,),-1,dtype=np.int32)
+
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
@@ -86,8 +91,27 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 si.particle_status_flags[self.params['count_status_in_range'][0]],
                 si.particle_status_flags[self.params['count_status_in_range'][1]],
                 out=out)
-
         return sel
+
+
+    def is_time_to_count(self):
+        si = self.shared_info
+        params= self.params
+        info=self.info
+
+        if params['count_start_date'] is None:
+            info['start_time'] = si.solver_info['model_start_time']
+        else:
+            info['start_time'] = time_util.isostr_to_seconds(params['count_start_date'])
+
+        if params['count_end_date'] is None:
+            info['end_time'] = si.solver_info['model_end_time']
+        else:
+            info['end_time'] = time_util.isostr_to_seconds(params['count_end_date'])
+
+        md= si.model_direction
+        out =   info['start_time'] * md <=  si.solver_info['current_model_time'] * md  <= info['end_time'] * md
+        return out
 
     def record_time_stats_last_recorded(self, t):   self .info['time_last_stats_recorded'] = t
 

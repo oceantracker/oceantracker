@@ -53,6 +53,7 @@ class PointRelease(ParameterBaseClass):
         params = self.params
         info = self.info
         si = self.shared_info
+        ml = self.msg_logger
 
         reader =  si.classes['reader']
         hindcast_start = reader.info['first_time']
@@ -91,11 +92,11 @@ class PointRelease(ParameterBaseClass):
         elif self.params['release_end_date'] is not None:
             time_end = time_util.isostr_to_seconds(self.params['release_end_date'])
         else:
-            # defaulr is limit of hindcast
+            # default is limit of hindcast
             time_end = hindcast_start if si.backtracking else hindcast_end
 
         # get time steps for release in a dow safe way
-        model_time_step = si.shared_params['time_step']
+        model_time_step = si.model_time_step
 
 
         # get release times within the hindcast
@@ -109,6 +110,10 @@ class PointRelease(ParameterBaseClass):
         sel = np.logical_and( release_info['release_times'] >= hindcast_start,  release_info['release_times']  <= hindcast_end)
         release_info['release_times'] = release_info['release_times'][sel]
 
+        if release_info['release_times'].size ==0:
+            ml.msg(f'No release times in range of hydro-model for release_group {info["nseq"]+1:2d}, ',
+                   fatal_error=True,
+                   hint=' Check hydro-model date range and release dates  ' , exit_now = True)
 
         # get time steps when released, used to determine when to release
         release_info['release_time_steps'] =  np.round(( release_info['release_times']- hindcast_start)/model_time_step).astype(np.int32)

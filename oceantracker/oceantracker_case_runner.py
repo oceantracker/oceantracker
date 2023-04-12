@@ -77,7 +77,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         except GracefulError as e:
             si.msg_logger.msg(' Graceful exit >>  Parameters/setup has errors, see above', fatal_error= True)
-            si.msg_logger.write_error_log_file(e)
             return None, True
 
         except Exception as e:
