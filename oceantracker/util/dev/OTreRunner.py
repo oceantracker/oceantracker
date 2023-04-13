@@ -26,7 +26,7 @@ def build_reader(input_dir, params):
     otsim = OceanTrackerCaseRunner()
     otsim.shared_info.case_runner_params= {'sorted_hindcast_file_info' : file_info}  # nack to give reader acess to hindcastr file info
 
-    params['reader'].update({'time_buffer_size' : file_info['n_time_steps_in_hindcast']}) # set buffer size to hindcast size
+    params['reader'].update({'time_buffer_size': file_info['n_time_steps_in_hindcast']})  # set buffer size to hindcast size
 
     reader = otsim._build_class_instance('reader', params['reader'], show_warnings=False)
     reader.initialize()
@@ -46,8 +46,8 @@ class OceanTrackerReRunner(object):
 
     def first_run(self, params, test_root_output_dir = None):
 
-        params['shared_params'].update({'processors': 1, 'replicates': 1, # enforce single core
-                                        'input_dir' : 'Missing'})
+        params['shared_params'].update({'processors': 1, 'replicates': 1,  # enforce single core
+                                           'input_dir': 'Missing'})
 
         ot1 = OceanTrackerRunMain()
 
@@ -233,8 +233,8 @@ if __name__ == '__main__':
          'pulse_size': 10, 'release_interval': 3 * 3600}
 
     ]
-    # loop over tests
-    print('rerunner tests')
+    # loop over tests_of_hindcasts
+    print('rerunner tests_of_hindcasts')
     for pg in prg:
         print(pg)
         ot_rerunner.rerun(pg)

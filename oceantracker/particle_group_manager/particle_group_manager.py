@@ -225,7 +225,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for p in si.class_interators_using_name['particle_properties']['user'].values():
-                p.update(active)
+            p.update(active)
 
         self.code_timer.stop('update_part_prop')
 

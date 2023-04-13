@@ -27,7 +27,6 @@ if __name__ == '__main__':
 
                 'write_tracks': True},
         'tracks_writer' : {'turn_on_write_particle_properties_list':['n_cell'],'output_step_count': 3},
-        'solver': { 'screen_output_step_count': 1,  'n_sub_steps': 2},
         'particle_release_groups': [ {'points': x0 ,'pulse_size':70, 'release_interval': 600}],
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
         'velocity_modifiers' : [{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0.001}],

@@ -74,7 +74,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
 
-    def update(self,time_sec):
+    def do_counts(self, time_sec, sel):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
         g = self.grid
@@ -86,13 +86,9 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         p_x       = part_prop['x'].dataInBufferPtr()
         p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instanceID'])].dataInBufferPtr()
 
-        sel = self.select_particles_to_count(self.get_particle_index_buffer())
-
         # do counts
         self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
 
-        self.write_time_varying_stats(self.nWrites,time_sec)
-        self.nWrites += 1
 
     def info_to_write_at_end(self):pass  # nothing extra to write
 
@@ -144,7 +140,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
-    def update(self,time_sec):
+    def do_counts(self, time_sec, sel):
 
         part_prop = self.shared_info.classes['particle_properties']
         stats_grid = self.grid
@@ -158,8 +154,6 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
         p_age       = part_prop['age'].dataInBufferPtr()
         p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instanceID'] )].dataInBufferPtr()
 
-        # find those which user wants to count eg all alive by default
-        sel = self.select_particles_to_count(self.get_particle_index_buffer())
 
         # loop over statistics polygons
         self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, sel, stats_grid['age_bin_edges'], p_age)

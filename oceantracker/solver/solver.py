@@ -100,7 +100,7 @@ class Solver(ParameterBaseClass):
                 i.update(time_sec, is_moving)
 
             # dispersion is done by random walk velocity modification prior to integration step
-            si.classes['dispersion'].update(time_sec,  is_moving)
+            si.classes['dispersion'].update(time_sec, is_moving)
 
             #  Main integration step
             self.code_timer.start('integration_step')

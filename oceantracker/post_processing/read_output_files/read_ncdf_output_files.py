@@ -223,7 +223,7 @@ def read_residence_file(file_name, var_list=[]):
                 d[var] = d['sum_' + var]/d['count'] # calc mean
 
         else:
-            print('Warning reading residence file ' + file_name + ', cannot load variable' + var + ', is not in file ')
+            print('Warning reading residence file ' + file_name + ', cannot load variable ' + var + ', is not in file ')
         d['limits'][var] = {'min': np.nanmin(d[var]), 'max': np.nanmax(d[var])}
     nc.close()
     return d

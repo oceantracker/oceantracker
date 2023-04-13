@@ -264,7 +264,6 @@ def base_param(is3D=False, isBackwards = False):
         r['grid_variables'].update({'zlevel': 'zlevel'})
         r['dimension_map'].update({'z': 'zlevel'})
         r['file_mask'] = params['reader']['file_mask'].replace('2D', '3D')
-        base_case['solver']['screen_output_step_count'] = 1
         base_case['dispersion'].update({'A_H': 0.,'A_V': 0.})
         #base_case['velocity_modifiers'].append({'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0*0.001})
 
@@ -297,7 +296,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     for ntest in testList:
-        # tests or development choices of classes
+        # tests_of_hindcasts or development choices of classes
 
         if ntest==1:
             # zero dispersion test 2d/3D

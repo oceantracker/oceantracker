@@ -142,11 +142,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             else:
                 si.msg_logger.msg('Part Prop "' + p + '" not a particle property, ignored and no stats calculated',warning=True)
 
-    def update(self, time_sec):
+    def do_counts(self, time_sec, sel):
         # do counts for each release  location and grid cell
-        self.start_update_timer()
-        self.record_time_stats_last_recorded(time_sec)
-
         part_prop = self.shared_info.classes['particle_properties']
         stats_grid = self.grid
 
@@ -154,14 +151,11 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         p_groupID = part_prop['IDrelease_group'].dataInBufferPtr()
         p_x= part_prop['x'].dataInBufferPtr()
 
-        sel = self.select_particles_to_count(self.get_particle_index_buffer())
-
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                          self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
 
-        self.write_time_varying_stats(self.nWrites, time_sec)
-        self.nWrites += 1
-        self.stop_update_timer()
+
+
 
     @staticmethod
     @njit
@@ -213,7 +207,6 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         self.check_class_required_fields_prop_etc(required_props_list=['age'])
 
 
-
     def set_up_time_bins(self,nc):
         # this set up age bins, not time
         si= self.shared_info
@@ -262,9 +255,9 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
             else:
                 self.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
-    def update(self, time_sec):
+    def do_counts(self, time_sec, sel):
         # do counts for each release  location and grid cell, over rides parent
-        self.start_update_timer()
+
         stats_grid = self.grid
 
         # set up pointers to particle properties
@@ -273,11 +266,8 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         p_x = part_prop['x'].dataInBufferPtr()
         p_age = part_prop['age'].dataInBufferPtr()
 
-        sel = self.select_particles_to_count(self.get_particle_index_buffer())
-
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'], self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, stats_grid['age_bin_edges'], p_age, sel)
 
-        self.stop_update_timer()
 
     @staticmethod
     @njit
@@ -304,9 +294,11 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
                     for m in range(len(prop_list)):
                         sum_prop_list[m][na, ng, r, c] += prop_list[m][n]
 
+    def write_time_varying_stats(self, n, time_sec): pass # no writing in the fly in agged based states
+
     def info_to_write_at_end(self):
 
-        # write variables whole
+        # only write variables as whole at end
         super().info_to_write_at_end()
         nc = self.nc
         stats_grid = self.grid

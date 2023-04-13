@@ -38,7 +38,6 @@ def get_base_params():
                                                     'duration' : 3*24*3600.,
 
                                                     },
-                                       'solver': {'screen_output_step_count': 6, 'RK_order': 4, 'n_sub_steps':2},
                                        'particle_group_manager': {},
                                        'tracks_writer': {'output_step_count': 3},
                                        'dispersion': {'A_H': 1.0},
@@ -184,8 +183,8 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
             t0 += pg['release_duration']/2  # center particle rleases on given time
             p1= WGS84_to_NZTM(np.asarray(p)).tolist()
             pg.update({'points': p1,
-                       'release_start_date': time_util.seconds_to_isostr(t0)
-                        })
+                          'release_start_date': time_util.seconds_to_isostr(t0)
+                          })
 
             pg_param.append(pg)
 
@@ -201,7 +200,7 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
         # change stats max age to bin based on duration, grid center etc
         # first adjust center of grid to mean of points
         si.user_classes['particle_statistics'][0].p.update({
-                'grid_center': np.mean(np.asarray(pNZTM),axis=0).tolist()})
+            'grid_center': np.mean(np.asarray(pNZTM), axis=0).tolist()})
 
         self._do_a_rerun(case_params, emit_method)
 
