@@ -10,7 +10,7 @@ from oceantracker.util import time_util
 
 def animate_heat_map(stats_data, var='count',  axis_lims=None, credit=None, interval=20,heading=None,
                      vmin=None, vmax=None,show_grid=False,title=None,logscale=False, caxis= None,nsequence=1,cmap='viridis',
-                     movie_file= None, fps=15, dpi=300, release_group=None, back_ground_depth=True, back_ground_color_map= None):
+                     movie_file= None, fps=15, dpi=300, release_group=1, back_ground_depth=True, back_ground_color_map= None):
 
     def draw_frame(nt):
 
@@ -59,7 +59,7 @@ def animate_heat_map(stats_data, var='count',  axis_lims=None, credit=None, inte
 
 def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, credit=None, interval=100, colourbar=True,heading=None,
                      vmin=None, vmax=None,show_grid=False,title=None,logscale=False, cmap='viridis', shading=True,
-                     movie_file= None, fps=15, dpi=300, release_group=None, back_ground_depth=True, back_ground_color_map= None):
+                     movie_file= None, fps=15, dpi=300, release_group=1, back_ground_depth=True, back_ground_color_map= None):
 
     def draw_frame(nt):
 
@@ -104,7 +104,7 @@ def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, cr
     return anim
 
 def plot_heat_map(stats_data, nsequence=1, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
-                  var='count',vmin=None, vmax=None, release_group=None,credit=None, cmap='viridis', heading = None,
+                  var='count',vmin=None, vmax=None, release_group=1,credit=None, cmap='viridis', heading = None,
                   plot_file_name=None, back_ground_depth=True,back_ground_color_map= None):
     #todo repace var with data_to_plot=, as in other ploting code
     x,y, z = get_stats_data(nt, stats_data, var, logscale= logscale, release_group=release_group)
@@ -134,35 +134,22 @@ def plot_heat_map(stats_data, nsequence=1, nt=-1, axis_lims=None,show_grid=False
     return plot_file_name
 
 
-def get_stats_data(nt, d, var, logscale=False, release_group=None, zmin=None):
+def get_stats_data(nt, d, var, logscale=False, release_group=1, zmin=None):
     # get count or variable patch Nan in zero counts
     # sum/average over all or 1 release group dim
     # nt is time step or age bin
     z= d[var][nt, :, :, :].astype(np.float64)
     count = d['count'][nt, :, :, :]
 
-    if release_group is None:
-        # sum.average over all releaseGroypus
-        if d['release_group_centered_grids'] :
-            raise  Exception(' can not yet merge all grid stats data for plotting if release_group_centered_grids is True, as grids not all in same location ')
+    # get single requested release group
+    release_group -=1  # make release group zero based
+    z = z[release_group, :, :]
 
-        if var == 'count':
-            z = np.nansum(z,axis=0)
-        else:
-            with np.errstate(all='ignore'):
-                z = np.nanmean(z, axis=0)
-        x = d['x'][0, :]
-        y = d['y'][0, :]
-        count = np.nansum(count, axis=0)
-    else:
-        # get single requested release group
-        z = z[release_group, :, :]
+    count = count[release_group, :, :]
+    x = d['x'][release_group, :]
+    y = d['y'][release_group, :]
 
-        count = count[release_group, :, :]
-        x = d['x'][release_group, :]
-        y = d['y'][release_group, :]
-
-    # make zero counts nan or zero and tose les than min value, so they won't plot
+    # make zero counts nan or zero and tose less than min value, so they won't plot
     if zmin is None:  zmin = np.nanmin(z)
 
     z[z < zmin] = np.nan

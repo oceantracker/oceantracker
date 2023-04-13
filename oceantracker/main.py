@@ -393,7 +393,7 @@ class _RunOceanTrackerClass(object):
             msg_logger('Reader param must have class_name parameter', fatal_error=True, exit_now=True)
 
         if not path.isdir(working_params['reader']['input_dir']):
-            msg_logger('Cannot find  input_dir (hindcast) directory = ' + working_params['reader']['input_dir'], fatal_error=True, exit_now=True)
+            msg_logger.msg('Cannot find  input_dir (hindcast) directory = ' + working_params['reader']['input_dir'], fatal_error=True, exit_now=True)
 
         working_params['reader']['input_dir'] = path.abspath(path.normpath((working_params['reader']['input_dir'])))
 

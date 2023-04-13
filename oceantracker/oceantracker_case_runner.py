@@ -313,7 +313,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         n_substeps = float(max(1, si.classes['solver'].params['n_sub_steps']))
 
 
-
         # set up start time and duration based on particle releases
         t_start, t_end, estimated_total_particles = self._setup_particle_release_groups(si.case_params['class_lists']['particle_release_groups'])
         si.msg_logger.write_progress_marker('set up particle_release_groups')
@@ -334,7 +333,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.time_of_nominal_first_occurrence = si.model_direction * np.inf
 
         # find particle buffer size required by several classes
-        pb_estimate= estimated_total_particles + max(100,estimated_total_particles)
+        pb_estimate= max(100,estimated_total_particles)
 
         if si.run_params['particle_buffer_size'] is None:
             si.run_params['particle_buffer_size'] =pb_estimate

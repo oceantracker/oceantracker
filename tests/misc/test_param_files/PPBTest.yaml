@@ -19,15 +19,7 @@ case_list:
       - 5721500
     pulse_size: 50
     release_interval: 1800
-  run_params:
-    duration: 691200.0
-    write_tracks: true
-  solver:
-    n_sub_steps: 2
-    screen_output_step_count: 1
-  tracks_writer:
-    output_step_count: 3
-  user_particle_statistics:
+  particle_statistics:
   - calculation_interval: 10800
     class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
     grid_center: *id001
@@ -39,12 +31,20 @@ case_list:
     - 35000.0
     particle_property_list:
     - water_depth
+  run_params:
+    duration: 345600.0
+    write_tracks: true
+  solver:
+    n_sub_steps: 6
+    screen_output_step_count: 1
+  tracks_writer:
+    output_step_count: 6
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   cords_in_lat_long: true
   depth_average: true
   file_mask: schout_*.nc
+  input_dir: F:\Hindcasts\Hindcast_samples_tests\Deakin_EricT\PPB_Hydro_netCDF
 shared_params:
-  input_dir: F:\Hindcasts\Deakin_EricT\PPB_Hydro_netCDF
   output_file_base: PPBtest
   root_output_dir: F:\OceanTrackerOuput\Deakin\portPhillipBay
