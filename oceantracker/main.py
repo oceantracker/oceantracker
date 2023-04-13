@@ -594,7 +594,7 @@ class _RunOceanTrackerClass(object):
         return case_info_file_list,  case_errors_list
 
     def run_serial(self,case_param_list):
-        # serial or non-parallel mode,   run a single case non parallel to makes debuging easier and allows reruns of single case
+        # serial or non-parallel mode,   run a single case non-parallel to makes debugging easier and allows reruns of single case
         case_results = []
         for c in case_param_list:
             a = self._run1_case(c)
@@ -609,7 +609,6 @@ class _RunOceanTrackerClass(object):
         ml.write_progress_marker('oceantracker:multiProcessing: processors:' + str(shared_params['processors']))
 
         pool=  multiprocessing.Pool(processes=shared_params['processors'])
-
         case_results = pool.map(self._run1_case, case_param_list)
         pool.close()
         #case_results = pool.map(self.junk,ll)
@@ -634,7 +633,8 @@ class _RunOceanTrackerClass(object):
         #todo make shared fields and grid arrays read only in children sm.data.setflags(write=False)
         pass
 
-    def _run1_case(self, run_params):
+    @staticmethod
+    def _run1_case(run_params):
         # run one process on a particle based on given family class parameters
         # by creating an independent instances of  model classes, with given parameters
         ot = OceanTrackerCaseRunner()
