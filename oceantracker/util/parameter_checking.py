@@ -149,7 +149,7 @@ class ParamDictValueChecker(object):
         # check given value against defaults  in class instance info
         info = self.info
 
-        if info['obsolete'] is not None:
+        if value is not None and info['obsolete'] is not None:
             msg_logger.msg('Parameter  "' + crumb_trail + '" is obsolete- ' + info['obsolete'], warning=True)
 
         if value is None:
