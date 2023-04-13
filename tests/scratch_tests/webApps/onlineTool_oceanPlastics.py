@@ -121,8 +121,8 @@ if __name__ == '__main__':
          'pulse_size': 10, 'release_interval': 3 * 3600}
 
     ]
-    # loop over tests
-    print('rerunner tests')
+    # loop over tests_of_hindcasts
+    print('rerunner tests_of_hindcasts')
     for pg in prg:
         print(pg)
         ot_rerunner.rerun(pg)

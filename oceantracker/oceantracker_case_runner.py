@@ -399,8 +399,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         info['time_zone'] = r.params['time_zone']
         info['backtracking'] = si.backtracking
 
-
-        info.update(dict(started= str(t0),ended= str(datetime.now()), elapsed_time = str(datetime.now() - t0)))
+        info.update(dict(started=str(t0), ended=str(datetime.now()), elapsed_time=str(datetime.now() - t0)))
 
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'run_user_note': si.shared_params['user_note'],

@@ -89,7 +89,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
     def set_up_spatial_bins(self,nc ): pass
 
-    def update(self,time_sec):
+    def do_counts(self, time_sec, sel):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
         rg  = self.release_group_to_count
@@ -97,9 +97,6 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
         # update time stats  recorded
         self.record_time_stats_last_recorded(time_sec)
-
-        # any overloaded selection of particles given in child classes
-        sel = self.select_particles_to_count(self.get_particle_index_buffer())
 
         # do counts
         self.do_counts_and_summing_numba(poly.line_bounds, poly.slope_inv, poly.polygon_bounds,
@@ -111,13 +108,11 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                     self.count_time_slice, self.count_all_particles_time_slice,
                                     self.prop_list, self.sum_prop_list, sel)
 
-        self.write_time_varying_stats(self.nWrites,time_sec)
-        self.nWrites += 1
+
 
     def info_to_write_at_end(self):
         nc = self.nc
         nc.write_a_new_variable('release_times', self.release_group_to_count.info['release_info']['release_times'],['pulse_dim'], dtype=np.float64,attributesDict={'times_pulses_released': ' times in seconds since 1970'})
-
 
     @staticmethod
     @njit

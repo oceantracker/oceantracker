@@ -505,7 +505,6 @@ if __name__ == '__main__':
             'solver': {
 
                 'RK_order': 2,
-                'screen_output_step_count': 1,
                 },
             'particle_release_groups': [
                 {
@@ -593,9 +592,9 @@ if __name__ == '__main__':
         params['shared_params']['debug'] = True
 
     json_util.write_JSON(
-        '../../tests/misc/test_param_files/LaurinTest.json', params)
+        '../misc/test_param_files/LaurinTest.json', params)
     yaml_util.write_YAML(
-        '../../tests/misc/test_param_files/LaurinTest.yaml', params)
+        '../misc/test_param_files/LaurinTest.yaml', params)
 
     if not args.norun:
         run_info_file, has_errors = run(params)

@@ -34,7 +34,6 @@ if __name__ == '__main__':
                 'duration': 5. * 24 * 3600,
                 'write_tracks': True},
         'tracks_writer' : {'output_step_count': 3},
-        'solver': { 'screen_output_step_count': 1,  'n_sub_steps': 2},
         'particle_release_groups': [ {'points': x0 ,'pulse_size':5, 'release_interval': 1800}],
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
 

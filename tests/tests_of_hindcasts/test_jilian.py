@@ -25,7 +25,6 @@ if __name__ == '__main__':
                 'write_tracks': True,
                 'block_dry_cells': False},
         'tracks_writer' : {'output_step_count': 3},
-        'solver': { 'screen_output_step_count': 1,  'n_sub_steps': 2},
         'particle_release_groups': [ {'points': x0 ,'pulse_size':10, 'release_interval': 600}],
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
         'velocity_modifiers' : [{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.000}],
@@ -66,8 +65,8 @@ if __name__ == '__main__':
         m = load_output_files.load_stats_file(caseInfoFile, nsequence=0)
         caseInfo = load_output_files.read_case_info_file(caseInfoFile)
         param_base = path.join(caseInfo['output_files']['root_output_dir'], 'jilian_rawparams')
-        json_util.write_JSON('test_param_files/jilianTest.json', params)
-        yaml_util.write_YAML('test_param_files/jilianTest.yaml', params)
+        json_util.write_JSON('../misc/test_param_files/jilianTest.json', params)
+        yaml_util.write_YAML('../misc/test_param_files/jilianTest.yaml', params)
 
         ax=[365000,    400000,     4080000,    4120000]
 

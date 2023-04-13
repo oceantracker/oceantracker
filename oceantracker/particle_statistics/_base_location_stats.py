@@ -28,9 +28,21 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def initialize(self):
         si =self.shared_info
+        info = self.info
+        params = self.params
        # used to create boolean of those to count
-        self.info['time_last_stats_recorded'] = si.time_of_nominal_first_occurrence
+        info['time_last_stats_recorded'] = si.time_of_nominal_first_occurrence
 
+
+        if params['count_start_date'] is None:
+            info['start_time'] = si.solver_info['model_start_time']
+        else:
+            info['start_time'] = time_util.isostr_to_seconds(params['count_start_date'])
+
+        if params['count_end_date'] is None:
+            info['end_time'] = si.solver_info['model_end_time']
+        else:
+            info['end_time'] = time_util.isostr_to_seconds(params['count_end_date'])
 
     def set_up_spatial_bins(self): basic_util.nopass()
 
@@ -82,7 +94,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def select_particles_to_count(self, out):
         # select  those> 0 or equal given value to count in stats
 
-        if not self.is_time_to_count():return np.full((0,),-1,dtype=np.int32)
+
 
         si = self.shared_info
         part_prop = si.classes['particle_properties']
@@ -92,7 +104,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 si.particle_status_flags[self.params['count_status_in_range'][1]],
                 out=out)
         return sel
-
 
     def is_time_to_count(self):
         si = self.shared_info
@@ -115,7 +126,22 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def record_time_stats_last_recorded(self, t):   self .info['time_last_stats_recorded'] = t
 
-    def update(self): basic_util.nopass()
+    def update(self, time_sec):
+        if not self.is_time_to_count(): return
+
+        self.start_update_timer()
+
+        self.record_time_stats_last_recorded(time_sec)
+
+        # any overloaded selection of particles given in child classes
+        sel = self.select_particles_to_count(self.get_particle_index_buffer())
+
+        self.do_counts(time_sec,sel)
+
+        self.write_time_varying_stats(self.nWrites, time_sec)
+        self.nWrites += 1
+
+        self.stop_update_timer()
 
     def write_time_varying_stats(self, n, time):
         # write nth step in file

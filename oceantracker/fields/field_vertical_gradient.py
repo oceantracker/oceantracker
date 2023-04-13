@@ -22,8 +22,8 @@ class VerticalGradient(UserFieldBase):
 
         named_field= si.classes['fields'][self.params['name_of_field']]
         self.params.update({'is_time_varying': named_field.params['is_time_varying'],
-                            'is_time_varying': named_field.params['is_time_varying'],
-                            'is3D':True})
+                               'is_time_varying': named_field.params['is_time_varying'],
+                               'is3D': True})
 
         super().initialize()  # set up self.data with above params
         a=1

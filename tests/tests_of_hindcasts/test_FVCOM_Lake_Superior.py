@@ -19,7 +19,7 @@ if args.hpc:
     root_output_dir = '/hpcfreenas/ross/oceanTrackerOutput/LakeSuperior/'
 else:
     input_dir='F:\\Hindcasts\\colaborations\\LakeSuperior\\historical_sample'
-    root_output_dir = '\output'
+    root_output_dir = 'output'
 
 print(args,input_dir)
 file_mask ='nos.lsofs.fields.n000*.nc'

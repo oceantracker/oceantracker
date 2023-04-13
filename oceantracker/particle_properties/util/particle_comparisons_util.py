@@ -1,4 +1,4 @@
-# in place comparisons/tests of particle properties
+# in place comparisons/tests_of_hindcasts of particle properties
 # returns indies for which test is true in a view of int32 array
 
 import numpy as np
