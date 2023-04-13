@@ -20,8 +20,8 @@ class Solver(ParameterBaseClass):
         self.add_default_params({
                         'RK_order':                   PVC(4, int, possible_values=[1, 2, 4]),
                         'name':                       PVC('solver',str),
-                        'n_sub_steps': PVC(1, int, obsolete='use shared_parameter "time_step", run may not have required time step'),
-                        'screen_output_step_count': PVC(1, int, obsolete='use shared_parameter "screen_output_time_interval" in seconds')
+                        'n_sub_steps': PVC(None, int, obsolete='use shared_parameter "time_step", run may not have required time step'),
+                        'screen_output_step_count': PVC(None, int, obsolete='use shared_parameter "screen_output_time_interval" in seconds')
                             })
 
     def initialize(self):
