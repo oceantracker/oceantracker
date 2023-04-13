@@ -2,7 +2,7 @@
     "shared_params": {
         "output_file_base": "demo09_polygon_release_overlapping_land",
         "add_date_to_run_output_dir": false,
-        "time_step": 120,
+        "time_step": 600,
         "backtracking": true,
         "root_output_dir": "output"
     },
@@ -43,7 +43,7 @@
         },
         "tracks_writer": {
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
-            "time_steps_per_per_file": 200
+            "time_steps_per_per_file": 700
         },
         "particle_release_groups": [
             {

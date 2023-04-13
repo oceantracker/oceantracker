@@ -23,7 +23,7 @@ def plot_tracks(track_data, fraction_to_plot=None, show_grid=False,credit=None, 
 
     ax.plot(track_data['x'][:,:, 0], track_data['x'][:, :, 1], linewidth=.5)
     if show_start:
-        # show al starts, eg random within polygon
+        # show all starts, eg random within polygon
         ax.scatter( track_data['x0'][ :, 0],  track_data['x0'][ :, 1], edgecolors=None, c='green', s=4, zorder =8)
 
     plot_utilities.plot_release_points_and_polygons(track_data, ax=ax) # these are nominal starts

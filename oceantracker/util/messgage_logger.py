@@ -66,7 +66,7 @@ class MessageLogger(object):
         if crumbs is not None:
             m.append(msg_str('In: ' + crumbs, tabs + 1))
         if hint is not None:
-            m.append(msg_str('Hint: ' + hint, tabs + 2))
+            m.append(msg_str('Hint: ' + hint, tabs + 3))
 
         # write message lines
         for l in m:

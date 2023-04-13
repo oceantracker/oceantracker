@@ -121,7 +121,7 @@
         "velocity_modifiers": [
             {
                 "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
-                "mean": -0.0005
+                "mean": -0.002
             }
         ],
         "fields": [

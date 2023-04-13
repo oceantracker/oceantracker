@@ -31,8 +31,6 @@ base_case_params:
     name_of_polygon_release_group: near_shore
   run_params:
     block_dry_cells: true
-  solver:
-    n_sub_steps: 6
   tracks_writer:
     class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
     write_dry_cell_index: true

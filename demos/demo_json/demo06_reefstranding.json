@@ -108,9 +108,6 @@
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
         ],
-        "solver": {
-            "n_sub_steps": 6
-        },
         "trajectory_modifiers": [
             {
                 "class_name": "oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon",

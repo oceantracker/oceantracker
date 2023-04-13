@@ -21,7 +21,7 @@ class _BaseWriter(ParameterBaseClass):
         self.add_default_params({
                                 'role_output_file_tag': PVC('tracks', str),
                                 'write_time_interval': PVC(None, int, min=1, doc_str='the time in seconds between writes (will be rounded to model time step)'),
-                                'output_step_count': PVC(1,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", the time in seconds bewteen writes'),
+                                'output_step_count': PVC(1,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
                                 'turn_on_write_particle_properties_list': PLC([], [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                                  'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
                                                             doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),

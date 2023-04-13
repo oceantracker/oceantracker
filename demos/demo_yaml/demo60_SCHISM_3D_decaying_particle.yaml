@@ -21,8 +21,6 @@ base_case_params:
     pulse_size: 1
     release_interval: 150.0
   run_params: {}
-  solver:
-    n_sub_steps: 48
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   depth_average: true
