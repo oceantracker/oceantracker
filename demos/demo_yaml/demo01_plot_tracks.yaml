@@ -17,7 +17,7 @@ base_case_params:
     user_note: test of notes
   tracks_writer:
     class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
-    time_steps_per_per_file: 200
+    time_steps_per_per_file: 700
 case_list:
 - particle_release_groups:
   - points:
@@ -52,4 +52,4 @@ shared_params:
   backtracking: true
   output_file_base: demo01_plot_tracks
   root_output_dir: output
-  time_step: 120
+  time_step: 600

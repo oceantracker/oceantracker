@@ -69,9 +69,6 @@
                 "decay_time_scale": 86400.0
             }
         ],
-        "solver": {
-            "n_sub_steps": 6
-        },
         "event_loggers": [
             {
                 "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",

@@ -51,9 +51,6 @@
                 "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                 "decay_time_scale": 25714.28571428571
             }
-        ],
-        "solver": {
-            "n_sub_steps": 48
-        }
+        ]
     }
 }

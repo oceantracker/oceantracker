@@ -90,9 +90,6 @@
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
         ],
-        "solver": {
-            "n_sub_steps": 6
-        },
         "particle_statistics": [
             {
                 "class_name": "oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon",

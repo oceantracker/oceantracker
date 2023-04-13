@@ -79,9 +79,6 @@
             {
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
-        ],
-        "solver": {
-            "n_sub_steps": 6
-        }
+        ]
     }
 }

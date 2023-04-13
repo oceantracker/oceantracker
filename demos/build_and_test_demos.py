@@ -53,10 +53,10 @@ p1.update({'case_list': [{ 'particle_release_groups': [{
             } )
 p1['base_case_params'].update({
                                'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
-                                                'time_steps_per_per_file':200}}
+                                                'time_steps_per_per_file':700}}
                                 )
 p1['shared_params'].update({'output_file_base' :'demo01_plot_tracks' ,'backtracking': True,
-                            'time_step': 120})
+                            'time_step': 600})
 params.append(p1)
 
 # demo 2 track animation
@@ -68,7 +68,7 @@ p2['base_case_params']['particle_release_groups']=[{'allow_release_in_dry_cells'
      'pulse_size': 10, 'release_interval': 3 * 3600}
 ]
 
-p2['base_case_params'].update({'solver': {'n_sub_steps': 6}, 'run_params': {'block_dry_cells': True},
+p2['base_case_params'].update({'run_params': {'block_dry_cells': True},
                                'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
                                                 'write_dry_cell_index': True,
                                                }})
@@ -145,7 +145,6 @@ params.append (p5)
 # track animation with settlement on reef polygon
 # demo 6
 p6 = deepcopy(p2)
-p6['base_case_params'].update({'solver': {'n_sub_steps': 6}})
 
 p6['base_case_params']['particle_release_groups']= [
             {'points': [[1594500, 5482700], [1598000, 5486100], [1595500, 5489700]], 'pulse_size': 10, 'release_interval': 3 * 3600},
@@ -246,7 +245,7 @@ schsim_base_params=\
                 'particle_release_groups': [{'points': [[1595000, 5482600, -1],[1599000, 5486200, -1] ],
                                                      'pulse_size': 10, 'release_interval': 3600,
                                                     'allow_release_in_dry_cells': True},
-                                                    {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+                                    {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
                                     'points': poly_points,
                                     'pulse_size': 10, 'release_interval':  3600}
                                                     ],
@@ -325,13 +324,12 @@ s59['shared_params'].update({'output_file_base' : 'demo59_crit_shear_resupension
 bc = s59['base_case_params']
 bc['trajectory_modifiers'] =[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
                                    'critical_friction_velocity': .01}]
-bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.0005}]
+bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002}]
 params.append(s59)
 
 # decaying particles sized on c
 s60 = deepcopy(schsim_base_params)
-s60['shared_params'].update({'output_file_base' : 'demo60_SCHISM_3D_decaying_particle','compact_mode':True})
-s60['base_case_params']['solver'] = {'n_sub_steps': 48}
+s60['shared_params'].update({'output_file_base' : 'demo60_SCHISM_3D_decaying_particle','compact_mode':True, 'time_step': 120})
 s60['base_case_params']['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
                                                      'pulse_size': 1, 'release_interval': 2.5*60, 'maximum_age': .2*24*3600}
                                                     ]

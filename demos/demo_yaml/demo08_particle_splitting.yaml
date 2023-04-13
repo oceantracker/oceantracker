@@ -53,8 +53,6 @@ base_case_params:
     block_dry_cells: true
     particle_buffer_size: 5000
     retain_culled_part_locations: true
-  solver:
-    n_sub_steps: 6
   tracks_writer:
     class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
     write_dry_cell_index: true

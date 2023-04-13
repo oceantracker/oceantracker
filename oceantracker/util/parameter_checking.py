@@ -150,7 +150,7 @@ class ParamDictValueChecker(object):
         info = self.info
 
         if info['obsolete'] is not None:
-            msg_logger.msg('Parameter  "' + crumb_trail + '" is obsolete- ' + info['obsolete'],hint=info['obsolete'],warning=True)
+            msg_logger.msg('Parameter  "' + crumb_trail + '" is obsolete- ' + info['obsolete'], warning=True)
 
         if value is None:
             # check default exits
