@@ -19,7 +19,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # set up info/attributes
         super().__init__()
         self.add_default_params({'bc_walk_tol': PVC(1.0e-5, float,min = 0.),
-                                 'max_search_steps': PVC(100,int, min =1)})
+                                 'max_search_steps': PVC(200,int, min =1)})
         self.grid = {}
 
     def initialize(self):
@@ -113,7 +113,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             if sel.size > 0:
                 self.cell_walk_counts[5] += sel.size # total failed walks
                 si.msg_logger.msg('walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles',warning=True,tabs=0,
-                                  hint='Try decreasing time step or increasing interpolator parameter "max_search_steps", current vale =' + str(self.params['max_search_steps']))
+                                  hint='Try decreasing time step or increasing interpolator parameter "max_search_steps", current value =' + str(self.params['max_search_steps']))
                 # make notes for log file enabling follow up
                 si.msg_logger.msg('particle locations of failed walks, first 3 or less ', warning=True,tabs=2)
                 si.msg_logger.msg(' location xq =' + str(xq[sel[:3], :].tolist()), warning=True,tabs=2)

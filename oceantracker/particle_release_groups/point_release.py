@@ -131,17 +131,14 @@ class PointRelease(ParameterBaseClass):
         release_info['first_release_date'] = time_util.seconds_to_datetime64(release_info['first_release_time'])
         release_info['last_release_date'] = time_util.seconds_to_datetime64(release_info['last_release_time'])
 
-        release_info['estimated_number_released'] =  self.estimated_total_number_released(release_info)
-
         # index of release the  times to be released next
         release_info['index_of_next_release'] =  0
 
-    def estimated_total_number_released(self,release_info):
+    def estimated_total_number_released(self):
         info = self.info
-
+        release_info = info['release_info']
         npart= self.params['pulse_size'] *  release_info['release_times'].size * info['points'].shape[0]
-        npart = int( npart+ max(10,.03*npart)) # add 3% more safety  margin
-        return npart
+        return int(npart)
 
     def release_locations(self):
         # set up full set of release locations inside  polygons
