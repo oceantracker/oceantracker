@@ -75,7 +75,7 @@ if __name__ == '__main__':
             params['shared_params']['output_file_base'] + '_runInfo.json'
         )
 
-    # do plot
+    # do plots
     if not args.noplots:
         from oceantracker.post_processing.read_output_files import load_output_files
         from oceantracker.post_processing.plotting import plot_tracks, plot_statistics
@@ -88,7 +88,7 @@ if __name__ == '__main__':
         track_data = load_output_files.load_particle_track_vars(
             caseInfoFile, var_list=['tide', 'water_depth','eDNA'], fraction_to_read=.02)
 
-        #plot_tracks.animate_particles(track_data, axis_lims=ax, title='Port Phillip Bay Schism test',show_dry_cells = False)
+        plot_tracks.animate_particles(track_data, axis_lims=ax, title='Port Phillip Bay Schism test',show_dry_cells = False)
 
         dx=25000
         #ax = [217641+dx, 404133-dx, 5702747+dx, 5815571-dx]
