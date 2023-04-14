@@ -18,7 +18,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({  # if be used alongside 3D vel
                         'hgrid_file_name': PVC(None, str),
-                        'field_variables': {'water_velocity': PLC(['hvel'], [str], fixed_len=2),
+                        'field_variables': {'water_velocity': PLC([], [str], fixed_len=2),
                                             'water_depth': PVC('depth', str),
                                             'tide': PVC('elev', str)},
                                 })
@@ -64,6 +64,9 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
             params['depth_average']= True
             msg_logger.msg(' 3D Schism velocity variable "hvel" not in hydo-model trying to run in depth average mode using "dahv" variable', note=True)
             fv['water_velocity'] = ['dahv'] # one vector component
+        else:
+            fv['water_velocity'] = ['hvel']
+
 
         if params['depth_average']:
             #sort out which velo to use
