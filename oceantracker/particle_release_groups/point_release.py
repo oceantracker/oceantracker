@@ -55,6 +55,7 @@ class PointRelease(ParameterBaseClass):
         si = self.shared_info
         ml = self.msg_logger
 
+        #todo for multiple readers, get  field group ot hold overlaping range
         reader =  si.classes['reader']
         hindcast_start = reader.info['first_time']
         hindcast_end   = reader.info['last_time']

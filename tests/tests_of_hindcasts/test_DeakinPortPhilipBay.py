@@ -10,9 +10,8 @@ import argparse
 def set_params(args, x0, duration_sec= 5. * 24 * 3600):
 
 
-    case = {'run_params': {
-        'duration': duration_sec,
-        'write_tracks': True},
+    case = {'run_params': {'duration': duration_sec,
+                            'write_tracks': True},
         'tracks_writer': {'write_time_interval':3600},
         'dispersion': {'A_H': 1.0, 'A_V': 0.001},
         'particle_properties':[{'name' :'eDNA', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24}],
