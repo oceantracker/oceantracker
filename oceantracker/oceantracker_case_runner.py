@@ -301,7 +301,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         time_start, time_end = self._setup_particle_release_groups(si.case_params['class_lists']['particle_release_groups'])
         si.msg_logger.progress_marker('set up particle_release_groups')
 
-        #clip time to maximum duration in shared and case params
+        #clip times to maximum duration in shared and case params
         duration = abs(time_end - time_start)
         duration = min(duration,si.case_params['run_params']['duration'], si.shared_params['max_duration'] )
         time_end = time_start + duration* si.model_direction

@@ -2,7 +2,7 @@ import numpy as np
 from numba import njit,typeof, float64, int32, float32, int8, int64, boolean, uint8, void, types as nbtypes
 from oceantracker.util import basic_util
 from oceantracker.common_info_default_param_dict_templates import particle_info
-
+from oceantracker.util import shared_numpy_dtypes
 # flags for bc walk status
 
 
@@ -41,16 +41,16 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 #@njit()
 @njit(void(float64[:,:],float64[:,:],int8[:],
         float64[:,:],float64[:,:,:],int32[:,:],
-        uint8[:], boolean,float64,
-        int32,boolean,
-        int32[:],int64[:],int32[:]
-        ) )
+        uint8[:],
+        int32[:],int32[:],
+        typeof(shared_numpy_dtypes.dtypes['walk_info'])[:])
+        )
 def BCwalk_with_move_backs_numba2D(xq, x_old, status,
                                    BC, BCtransform, triNeighbours,
-                                   current_dry_cell_index, block_dry_cells, tol,
-                                   max_BC_walk_steps, has_open_boundary,
-                                   active, walk_counts, n_cell):
+                                   current_dry_cell_index,
+                                   active, n_cell, walk_info):
     # Barycentric walk across triangles to find cells
+    wi = walk_info[0] # for some reason record dtypes must be an  array, work with element zero
 
     bc = np.zeros((3,), dtype=np.float64) # working space
     n_dim = xq.shape[1]
@@ -61,19 +61,21 @@ def BCwalk_with_move_backs_numba2D(xq, x_old, status,
         n_tri = n_cell[n]  # starting triangle
         # do BC walk
         n_steps = 0
+        move_back = False
 
         if xq[n, 0] == np.nan or xq[n, 1] == np.nan:
             # if any is nan copy all and move on
             for i in range(n_dim): xq[n, i] = x_old[n, i]
-            walk_counts[4] += 1 # count nans
+            wi['nans_encountered_triangle_walk'] += 1 # count nans
+            move_back = True
             continue
-        move_back = False
 
-        while n_steps < max_BC_walk_steps:
+
+        while n_steps < wi['max_triangle_walk_steps']:
             # update barcentric cords of xq
             n_min, n_max= _get_single_BC_cord_numba(xq[n, :2], BCtransform[n_tri, :, :], bc)
 
-            if tol and bc[n_min] > -tol and bc[n_max] < 1. + tol:
+            if bc[n_min] > -wi['bc_walk_tol']  and bc[n_max] < 1. + wi['bc_walk_tol']:
                 # are now inside triangle, leave particle status as is
                 break # with current n_tri as found cell
 
@@ -84,7 +86,7 @@ def BCwalk_with_move_backs_numba2D(xq, x_old, status,
             if next_tri < 0:
                 # if no new adjacent triangle, then are trying to exit domain at a boundary triangle,
                 # keep n_cell, bc  unchanged
-                if has_open_boundary and next_tri == -2:  # outside domain
+                if wi['has_open_boundary'] and next_tri == -2:  # outside domain
                     # leave x, bc, cell, location  unchanged as outside
                     status[n] = status_outside_open_boundary
                     break
@@ -94,7 +96,7 @@ def BCwalk_with_move_backs_numba2D(xq, x_old, status,
                     break
 
             # check for dry cell
-            if block_dry_cells:  # is faster split into 2 ifs, not sure why
+            if wi['block_dry_cells']:  # is faster split into 2 ifs, not sure why
                 if current_dry_cell_index[next_tri] > 128:
                     # treats dry cell like a lateral boundary,  move back and keep triangle the same
                     move_back = True
@@ -103,10 +105,9 @@ def BCwalk_with_move_backs_numba2D(xq, x_old, status,
             n_tri = next_tri
 
         # not found in given number of search steps
-        if n_steps >= max_BC_walk_steps:  # dont update cell
+        if n_steps >= wi['max_triangle_walk_steps']:  # dont update cell
             status[n] = status_cell_search_failed
-            walk_counts[3] += 1
-            #move_back = True# do move back externally
+            #move_back = True# todo shoul it just move back, not retyr?do move back externally
 
         if move_back:
             # move back dont update
@@ -116,9 +117,9 @@ def BCwalk_with_move_backs_numba2D(xq, x_old, status,
             n_cell[n] = n_tri
             for i in range(3): BC[n, i] = bc[i]
 
-        walk_counts[0] += 1  # particles walked
-        walk_counts[1] += n_steps # steps taken
-        walk_counts[2] = max(n_steps + 1, walk_counts[2]) # longest walk
+        wi['particles_located_by_walking'] += 1  # particles walked
+        wi['number_of_triangles_walked'] += n_steps # steps taken
+        wi['longest_triangle_walk'] = max(n_steps, wi['longest_triangle_walk'] ) # longest walk
 
 @njit
 def get_BC_cords_numba(x, n_cells, BCtransform, bc):
@@ -198,17 +199,17 @@ def _eval_z_at_nz_cell(nb, nz_cell, z_level_at_nodes,
                int32[:],float64[:,:], int8[:],
                 int32[:], float32[:],
                float32[:],
-               float64,int32[:], int64[:])))
+               float64,int32[:], typeof(shared_numpy_dtypes.dtypes['walk_info'])[:])))
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_level_at_nodes,
                                                   tri, n_cell,
                                                   nz_with_bottom, BCcord, status,
                                                   nz_cell, z_fraction, z_fraction_bottom_layer,
-                                                  z0, active, walk_counts):
+                                                  z0, active, walk_info):
     # find the zlayer for each node of cell containing each particle and at two time slices of hindcast  between nz_bottom and number of z levels
     # LSC grid means must track vertical nodes for each particle
     # nz_with_bottom is lowest cell in grid, is 0 for slayer vertical grids, but may be > 0 for LSC grids
     # nz_with_bottom must be time independent
-
+    wi = walk_info[0]
     tf2 = 1. - step_dt_fraction
 
     top_nz_cell = z_level_at_nodes.shape[2] - 2
@@ -300,9 +301,8 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(zq, nb, step_dt_fraction, z_le
 
         # record number of vertical search steps made for this particle
         # step count stats, tidal stranded particles are not counted
-        walk_counts[0] += 1
-        walk_counts[1] += n_vertical_steps
-        walk_counts[2] = max(walk_counts[2], n_vertical_steps + 1) # record max number of steps
+        wi['total_vertical_steps'] += n_vertical_steps
+        wi[ 'longest_vertical_walk'] = max(wi['longest_vertical_walk'] , n_vertical_steps) # record max number of steps
 
 
 

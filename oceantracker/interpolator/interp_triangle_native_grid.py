@@ -6,10 +6,32 @@ from scipy.spatial import cKDTree
 from oceantracker.interpolator._base_interp import _BaseInterp
 from oceantracker.util import basic_util
 
-# import scatch_tests versions of eval and walk
-from oceantracker.interpolator.util import triangle_interpolator_util as triangle_interpolator_util, eval_interp
+#  use record dtype to reduce numer of params which must be passed to cell walk
+#  requires set up walk_info dtype before importing triangle_interpolator_util,
+# as dtype  is used  in a numba signature in triangle_interpolator_util at time of import
+from oceantracker.util import shared_numpy_dtypes
+shared_numpy_dtypes.create_shared_dtype('walk_info', [('bc_walk_tol', np.float64),
+                                                     ('max_triangle_walk_steps', np.float64),
+                                                      ('block_dry_cells', bool),
+                                                      ('has_open_boundary', bool),
+                                                      ('particles_located_by_walking', np.int64),
+                                                      ('number_of_triangles_walked', np.int64),
+                                                      ('longest_triangle_walk' , np.int64),
+                                                      ('triangle_walks_retried', np.int64),
+                                                      ('particles_killed_after_triangle_walk_retry_failed', np.int64),
+                                                      ('nans_encountered_triangle_walk', np.int64),
+                                                    ('total_vertical_steps', np.int64),
+                                                    ('longest_vertical_walk', np.int64),
+                                                      ] )
+
+
+from oceantracker.interpolator.util import triangle_interpolator_util ,  eval_interp
 
 from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
+
+# interp info numpy dtype to reduce args passed to numba
+#dtype([('f0', '<i4'), ('f1', '<f8', (2, 3))])
+
 
 class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
@@ -24,7 +46,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def initialize(self):
         super().initialize()  # children must call this parent class to default shared_params etc
-
+        params = self.params
         self.code_timer.start('intialize_interplolation_grid')
         si= self.shared_info
         grid = si.classes['reader'].grid
@@ -44,9 +66,17 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                    initial_value=0))  # start with cell number guess of zero
         p.create_particle_property('manual_update',dict(name='bc_cords',  write=False, initial_value=0., vector_dim=3,dtype=np.float64))
 
-        # BC walk stats
+        # BC walk info
+
+        # build cell walk info dtype
+        self.walk_info = np.zeros((1,),dtype=shared_numpy_dtypes.dtypes['walk_info']) # hs to be an array for numba signature?
+        wi = self.walk_info
+        wi['bc_walk_tol'] = params['bc_walk_tol']
+        wi['block_dry_cells'] =   si.run_params['block_dry_cells']
+        wi['max_triangle_walk_steps'] = params['max_search_steps']
+        wi['has_open_boundary'] = si.case_params['run_params']['open_boundary_type'] == 1,
+
         info = self.info
-        self.cell_walk_counts = np.zeros((6,), dtype=np.int64)
         self.vertical_walk_counts = np.zeros((6,), dtype=np.int64)
 
         if si.hydro_model_is3D:
@@ -85,9 +115,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
                                     xq,     part_prop['x_last_good'].data, part_prop['status'].data,
                                     part_prop['bc_cords'].data, grid['bc_transform'],  grid['adjacency'],
-                                    grid_time_buffers['dry_cell_index'],  si.run_params['block_dry_cells'],  self.params['bc_walk_tol'],
-                                    self.params['max_search_steps'],  si.case_params['run_params']['open_boundary_type'] == 1,
-                                    active,  self.cell_walk_counts, part_prop['n_cell'].data)
+                                    grid_time_buffers['dry_cell_index'],
+                                    active,  part_prop['n_cell'].data,
+                                    self.walk_info)
         sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_particle_subset_buffer())
 
         if sel.shape[0] > 0:
@@ -103,11 +133,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                         grid['bc_transform'],
                                         grid['adjacency'],
                                         grid_time_buffers['dry_cell_index'],
-                                        si.run_params['block_dry_cells'],
-                                        self.params['bc_walk_tol'],
-                                        self.params['max_search_steps'],
-                                        si.case_params['run_params']['open_boundary_type'] == 1,
-                                        sel,   self.cell_walk_counts,part_prop['n_cell'].data)
+                                        sel,   part_prop['n_cell'].data, self.walk_info)
 
             sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_particle_subset_buffer())
             if sel.size > 0:
@@ -136,7 +162,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         n_cell = n_cell.astype(np.int32)  # KD tre gives in64need for compatibility of types
 
         n_cell[np.any(~np.isfinite(xq), axis=1)] = -1 # stops walking for non-finite initial cords
-
+        wi = self.walk_info
+        blocking_dry_cells= bool(wi['block_dry_cells']) # note 'block_dry_cells' so it can be restored, wi are arrays so copy
+        wi['block_dry_cells'] =  False # todo allow dry cells as initial guess?? needs to be more consitent for initial releases??
         # KD tree is not perfect as finds nearest centriod, so do a walk to correct
         status  = np.full((xq.shape[0],),10, dtype=np.int8)
         bc      = np.full((xq.shape[0],3),  0., dtype=np.float64)
@@ -148,12 +176,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             grid['bc_transform'],
             grid['adjacency'],
             grid_time_buffers['dry_cell_index'],
-            False, # dont block dry cells, just block at domain boundary  #todo this should only be for particle releases as could return a dry cell?
-            self.params['bc_walk_tol'],
-            self.params['max_search_steps'],
-            False, # no open boundary, as must start inside
-            np.arange(xq.shape[0], dtype=np.int32), self.cell_walk_counts, n_cell)
-
+            np.arange(xq.shape[0], dtype=np.int32),  n_cell,
+            wi)
+        wi['block_dry_cells'] = blocking_dry_cells  # restore block_dry_cells setting
         return n_cell
 
     def are_points_inside_domain(self, xq):
@@ -325,7 +350,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                             nz_bottom, BCcords, status,
                                             nz_cell,z_fraction,
                                             z_fraction_bottom_layer,
-                                            si.z0, active,  self.vertical_walk_counts)
+                                            si.z0, active,  self.walk_info)
         info = self.info
 
 
@@ -340,27 +365,19 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def close(self):
         si=self.shared_info
         info = self.info
-        # guard against no particle tracking done, eg all points outside domain so zero active
 
-        info['horizontal_walk'] ={'particles_located': self.cell_walk_counts[0],
-                          'total_steps': self.cell_walk_counts[1],
-                          'average_number_of_triangles_walked': self.cell_walk_counts[1]/max(1,self.cell_walk_counts[0]),
-                          'longest_walk' : self.cell_walk_counts[2],
-                          'walks_retried': self.cell_walk_counts[3],
-                          'particles_killed_after_walk_retry_failed': self.cell_walk_counts[5],
-                          'nans_in_position_encountered': self.cell_walk_counts[4]
-                          }
-        if info['horizontal_walk']['particles_killed_after_walk_retry_failed'] > 0:
-            si.msg_logger.msg(f"{info['horizontal_walk']['particles_located']:3d},  {info['horizontal_walk']['particles_killed_after_walk_retry_failed']:3d}, failed to find cell",
+        # transfer walk stats to class info to write  in case_info file
+        info['walk_info'] ={}
+        wi = info['walk_info']
+        for key in self.walk_info.dtype.names:
+            wi[key] = self.walk_info[0][key]
+        wi['average_number_of_triangles_walked']= wi['number_of_triangles_walked']/max(1,wi['particles_located_by_walking'])
+        wi['average_vertical_walk_steps'] = wi['total_vertical_steps'] / max(1, wi['particles_located_by_walking'])
+
+        if wi['particles_killed_after_triangle_walk_retry_failed'] > 0:
+            si.msg_logger.msg(f" Of {wi['particles_located_by_walking']:3d} particles located {wi['particles_killed_after_triangle_walk_retry_failed']:3d}, failed to find cell",
                               crumbs='Interpolator cals, InterpTriangularNativeGrid_Slayer_and_LSCgrid',
                               hint= f"Try increasing interpolator parameter 'max_search_steps', current value ={self.params['max_search_steps']:3d}")
-
-        info['vertical_walk'] ={'particles_located': self.vertical_walk_counts[0],
-                          'total_steps': self.vertical_walk_counts[1],
-                          'average_number_of_triangles_walked': self.vertical_walk_counts[1]/max(1,self.vertical_walk_counts[0]),
-                          'longest_walk' : self.cell_walk_counts[2],
-                          'failed_walks': self.cell_walk_counts[3]
-                          }
 
 # Below is numpy version of numba BC cord code, now only used as check
 #________________________________________________
