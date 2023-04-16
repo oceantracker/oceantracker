@@ -1,0 +1,47 @@
+case_list:
+- dispersion:
+    A_H: 1.0
+    A_V: 0.001
+  particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+    name: eDNA
+  particle_release_groups:
+  - points:
+    - - 312197
+      - 5795541
+    pulse_size: 250
+    release_interval: 1800
+  - points:
+    - - 294455
+      - 5758887
+    pulse_size: 250
+    release_interval: 1800
+  particle_statistics:
+  - calculation_interval: 1800
+    class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
+    grid_size:
+    - 150
+    - 151
+    grid_span:
+    - 25000.0
+    - 25000.0
+    particle_property_list:
+    - eDNA
+    release_group_centered_grids: true
+  run_params:
+    duration: 604800.0
+    write_tracks: true
+  solver:
+    n_sub_steps: 6
+    screen_output_step_count: 1
+  tracks_writer:
+    output_step_count: 6
+reader:
+  class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
+  cords_in_lat_long: true
+  file_mask: schout_*.nc
+  input_dir: F:\Hindcasts\Hindcast_samples_tests\Deakin_EricT\PPB_Hydro_netCDF
+shared_params:
+  output_file_base: PPBtest
+  root_output_dir: F:\OceanTrackerOuput\Deakin\portPhillipBay

@@ -66,6 +66,9 @@ if __name__ == '__main__':
     params['reader']['file_mask']= 'schout_*.nc'
     params['shared_params']['root_output_dir'] = 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay'
 
+    # for info write josn params
+    json_util.write_JSON('PPB.json', params)
+    yaml_util.write_YAML('PPB.yaml',params)
     if not args.norun:
         run_info_file, has_errors = run(params)
     else:
