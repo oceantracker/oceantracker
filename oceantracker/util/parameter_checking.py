@@ -6,7 +6,6 @@ from oceantracker.util import time_util
 
 crumb_seperator= ' >> '
 
-
 def check_top_level_param_keys_and_structure(params, template, msg_logger, required_keys=[], required_alternatives=[], crumbs=None):
     # ensure top level parameter dict has all keys, and any required ones
 
@@ -117,17 +116,17 @@ def  CheckParameterValues(key,value_checker, user_param, base_param, crumbs, msg
     return value
 
 class ParamDictValueChecker(object):
-    def __init__(self, value, dtype, is_required=False, list_contains_type=None,
+    def __init__(self, default_value, dtype, is_required=False, list_contains_type=None,
                  min=None, max=None,
                  possible_values=None,
                  doc_str=None,
                  class_doc_feature=None,
-                obsolete = None):
+                 obsolete = None):
 
-        if value is not None and type(value) == dict:
+        if default_value is not None and type(default_value) == dict:
             raise ValueError('"value" of default set by ParamValueChecker (PVC) can not be a dictionary, as all dict in default_params are assumed to also be parameter dict in their own right')
 
-        i = dict(default_value=value,
+        i = dict(default_value=default_value,
                  doc_str=doc_str,
                  class_doc_feature=class_doc_feature,
                  type=dtype,
@@ -216,6 +215,22 @@ class ParamDictValueChecker(object):
                 msg_logger.msg('Parameter "' + crumb_trail + '" must be one of ' + str(info['possible_values']) + ', value given =  ' + str(value),fatal_error=True)
 
         return value  # value may be None if default or given value is None
+
+class ClassParamDictChecker(ParamDictValueChecker):
+    # checks normal values plus extra checks of class name etc
+
+    def __init__(self,default_class=None, is_required=False,
+                 doc_str=None,
+                 class_doc_feature=None,
+                obsolete = None):
+
+        # must be a dict
+        super().__init__(None, dict, is_required=is_required, doc_str=doc_str,  class_doc_feature=class_doc_feature, obsolete = obsolete)
+        self.info['default_class'] = default_class
+
+    def check_value(self, crumb_trail, value, msg_logger):
+
+        super().check_value(self, crumb_trail, value, msg_logger)
 
 class ParameterListChecker(object):
     # checks parameter list values

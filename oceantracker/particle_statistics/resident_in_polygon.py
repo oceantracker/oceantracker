@@ -37,7 +37,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
         self.release_group_to_count = rg
         self.info['release_group_name'] = rg.params['name']
-        self.info['release_group_ID_to_count'] = rg.info['instanceID']
+        self.info['release_group_ID_to_count'] = rg.info['instance_index']
 
 
         self.polygon = InsidePolygon(self.release_group_to_count.params['points'])

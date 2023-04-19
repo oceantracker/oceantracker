@@ -39,8 +39,6 @@ base_case_params:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-  fields:
-  - class_name: oceantracker.fields.friction_velocity.FrictionVelocity
   particle_properties:
   - class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
@@ -103,4 +101,5 @@ shared_params:
   debug: true
   output_file_base: demo55_SCHISM_3D_fall_velocity
   root_output_dir: output
+  run_as_depth_averaged: true
   time_step: 120

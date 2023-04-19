@@ -3,6 +3,7 @@
         "output_file_base": "demo56_SCHISM_3D_resupend_crtitical_friction_vel",
         "debug": true,
         "time_step": 120,
+        "run_as_depth_averaged": true,
         "compact_mode": true,
         "root_output_dir": "output"
     },
@@ -10,10 +11,10 @@
         "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
         "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",
-        "depth_average": false,
         "field_variables": {
             "water_temperature": "temp"
         },
+        "depth_average": false,
         "field_variables_to_depth_average": [
             "water_velocity",
             "salt",
@@ -168,11 +169,6 @@
                 "mean": -0.001
             }
         ],
-        "fields": [
-            {
-                "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
-            }
-        ],
         "particle_statistics": [
             {
                 "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
@@ -186,11 +182,8 @@
                 ]
             }
         ],
-        "trajectory_modifiers": [
-            {
-                "class_name": "oceantracker.trajectory_modifiers.resuspension.BasicResuspension",
-                "critical_friction_velocity": 0.005
-            }
-        ]
+        "resuspension": {
+            "critical_friction_velocity": 0.005
+        }
     }
 }

@@ -1,4 +1,4 @@
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ClassParamDictChecker as CPC
 package_fancy_name= 'OceanTracker'
 import numpy as np
 
@@ -11,6 +11,7 @@ run_params_defaults_template = {'shared_params': {'user_note': PVC('No user note
                                                  'time_step': PVC(None, float, min=0.01,doc_str='Time step in seconds for all cases'),
                                                   'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
                                                  'backtracking':        PVC(False, bool),
+                                                  'run_as_depth_averaged': PVC(False, bool),  # turns 3D hindcast into a 2D one
                                                  'debug':               PVC(False, bool),
                                                   'minimum_total_water_depth': PVC(0.25, float, min=0.0, doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
                                                   'compact_mode':        PVC(False, bool,doc_str='Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format'), # discard dead/inactive particles from memory
@@ -47,14 +48,15 @@ default_case_param_template={
                                     'open_boundary_type' :  PVC(0, int, min=0, max=1),
                                     'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
               },
-             'solver': {},
+             'solver':{},#  CPC(default_class='oceantracker.solver.solver.Solver'),
              'field_group_manager':{} ,
              'interpolator': {} ,
              'particle_group_manager': {},
              'tracks_writer':   {},
              'dispersion':      {},
+             'resuspension': {},
      # class lists
-             'particle_release_groups':  [],  #bbbbbbbbbbbbbbbbbbbbbbbbb
+             'particle_release_groups':  [],
 
     # above classes are required classes/family members/ parameters, below are user classes held in named lists
     # below are optional user classes held in named lists
@@ -78,12 +80,14 @@ default_class_names={ 'solver': 'oceantracker.solver.solver.Solver',
              'particle_group_manager': 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager',
               'tracks_writer':   'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
              'dispersion':      'oceantracker.dispersion.random_walk.RandomWalk',
+             'resuspension':     'oceantracker.resuspension.resuspension.BasicResuspension',
              'particle_release_groups': 'oceantracker.particle_release_groups.point_release.PointRelease',
               'fields' :  'oceantracker.fields._base_field.BaseField',
               'reader': 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader'}
 
 default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0), 'user_polygon_name': PVC(None, str),
-                        'points': PVC([], 'vector', list_contains_type=float, is_required=True),
+                'points': PVC([], 'vector', list_contains_type=float, is_required=True,
+                 doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
                                }
 
 particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search_failed': -19, 'notReleased': -10,  'dead': -2,'outside_open_boundary': -1, 'frozen': 0,

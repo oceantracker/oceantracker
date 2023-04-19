@@ -3,6 +3,7 @@
         "output_file_base": "demo60_SCHISM_3D_decaying_particle",
         "debug": true,
         "time_step": 120,
+        "run_as_depth_averaged": true,
         "compact_mode": true,
         "root_output_dir": "output"
     },
@@ -10,7 +11,6 @@
         "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
         "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",
-        "depth_average": true,
         "field_variables": {
             "water_temperature": "temp"
         }

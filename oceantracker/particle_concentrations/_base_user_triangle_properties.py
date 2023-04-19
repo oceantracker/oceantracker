@@ -35,7 +35,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         grid = si.classes['reader'].grid
 
         tag = '' if self.params['role_output_file_tag'] is None else '_' + self.params['role_output_file_tag']
-        self.info['output_file'] = si.output_file_base + '_concentrations_%03.0f' % (self.info['instanceID']  + 1) + tag + '.nc'
+        self.info['output_file'] = si.output_file_base + '_concentrations_%03.0f' % self.info['instance_number'] + tag + '.nc'
 
         si.msg_logger.progress_marker('opening concentrations output to : ' + self.info['output_file'])
 

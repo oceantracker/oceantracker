@@ -29,7 +29,7 @@ class _CorePolygonMethods(ParameterBaseClass):
         particles = si.classes['particle_group_manager']
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-        particles.create_particle_property('user',dict(name= 'inside_polygonID_'+ str(self.info['instanceID'] ),
+        particles.create_particle_property('user',dict(name= 'inside_polygonID_'+ str(self.info['instance_number'] ),
                                                class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=self.params['polygon_list'],
                                                 write=False))
@@ -84,7 +84,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         # set up pointers to particle properties
         p_groupID = part_prop['IDrelease_group'].dataInBufferPtr()
         p_x       = part_prop['x'].dataInBufferPtr()
-        p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instanceID'])].dataInBufferPtr()
+        p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instance_number'])].dataInBufferPtr()
 
         # do counts
         self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
@@ -152,7 +152,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
         p_groupID   = part_prop['IDrelease_group'].dataInBufferPtr()
         p_x         = part_prop['x'].dataInBufferPtr()
         p_age       = part_prop['age'].dataInBufferPtr()
-        p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instanceID'] )].dataInBufferPtr()
+        p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instance_number'] )].dataInBufferPtr()
 
 
         # loop over statistics polygons

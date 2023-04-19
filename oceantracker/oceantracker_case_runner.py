@@ -1,6 +1,8 @@
 from copy import deepcopy
 from os import path, environ, remove
-from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
+from oceantracker.util.parameter_base_class import ParameterBaseClass
+from oceantracker.util.parameter_util import  make_class_instance_from_params
+
 from oceantracker.util.messgage_logger import MessageLogger, GracefulError
 
 import numpy as np
@@ -64,7 +66,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
             self._make_and_initialize_user_classes()
-            si.classes['dispersion'].initialize()  # is not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
+
+            # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
+            si.classes['dispersion'].initialize()
+            if si.hydro_model_is3D:
+                si.classes['resuspension'].initialize()
 
             # todo set up memory for all defined particle properties
             # todo memory packing is being developed and evaluated for speed
@@ -74,7 +80,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             self._do_run_integrity_checks()
 
         except GracefulError as e:
-            si.msg_logger.msg(' Graceful exit >>  Parameters/setup has errors, see above', fatal_error= True)
+            si.msg_logger.msg('Case runner graceful exit >>  Parameters/setup has errors, see above', fatal_error= True)
             return None, True
 
         except Exception as e:
@@ -94,7 +100,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
-            si.msg_logger.msg(f' Graceful exit from case number [{si.processor_number:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+            si.msg_logger.msg(f' Cae Funner graceful exit from case number [{si.processor_number:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
             return None, True
 
         except Exception as e:
@@ -214,15 +220,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # make core classes, eg. field group
         for key, params in case_params['core_classes'].items():
-            # merge params
-            i = make_class_instance_from_params(params,si.msg_logger, class_type_name=key, crumbs= key)
-            si.add_core_class(key, i)
+            si.add_core_class(key, params, crumbs= ' Making all core class ' + key )
 
 
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags
-
-        i = make_class_instance_from_params( si.reader_build_info['reader_params'],si.msg_logger, class_type_name='reader', crumbs='reader')
-        si.add_core_class('reader', i,check_if_core_class=False)  # use cor ecars as name
+        si.add_core_class('reader', si.reader_build_info['reader_params'],check_if_core_class=False, crumbs='Making reader core class')  # use cor ecars as name
 
         # some core classes required the presence of others to initialize so do all here in given order, with solver last
         #for name in ['reader','field_group_manager','particle_group_manager','interpolator','tracks_writer','dispersion','solver']:
@@ -245,8 +247,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if 'class_name' not in pg_params: pg_params['class_name'] = 'oceantracker.particle_release_groups.point_release.PointRelease'
 
             # make instance and initialise
-            i = make_class_instance_from_params(pg_params,si.msg_logger,crumbs='particle release group')
-            si.add_class_instance_to_interator_lists('particle_release_groups', 'user', i, crumbs='Adding release groups')
+            i = si.create_class_instance_as_interator('particle_release_groups', 'user', pg_params, crumbs='Adding release groups')
             i.initialize()
 
             # set up release times so duration of run known
@@ -356,14 +357,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # create prop particle properties derived from fields loaded from reader on the fly
         for prop_type in ['from_reader_field','derived_from_reader_field','depth_averaged_from_reader_field']:
-            for name, i in si.class_interators_using_name['fields'][prop_type].items():
-                pgm.create_particle_property('from_fields', dict(name=name,  vector_dim=i.get_number_components(), time_varying=True,
+            for name, i in si.classes['fields'].items():
+                if i.info['field_type'] == prop_type:
+                    pgm.create_particle_property('from_fields', dict(name=name,  vector_dim=i.get_number_components(), time_varying=True,
                                                                  write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
 
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for n, params in enumerate(si.case_params['class_lists']['fields']):
-            i = make_class_instance_from_params(params, si.msg_logger, crumbs='user fields')
-            si.add_class_instance_to_interator_lists('fields','user', i, crumbs='Adding "fields" from user params')
+            i = si.create_class_instance_as_interator('fields', 'user', params, crumbs='Adding "fields" from user params')
             i.initialize()
             # now add custom prop based on  this field
             pgm.create_particle_property('from_fields', dict(name=i.params['name'], vector_dim=i.get_number_components(),
@@ -386,9 +387,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for user_type in ['velocity_modifiers', 'trajectory_modifiers',
                      'particle_statistics',
                      'particle_concentrations', 'event_loggers','status_modifiers']:
-            for n, params in enumerate(si.case_params['class_lists'][user_type]):
-                i = make_class_instance_from_params(params, msg_logger=si.msg_logger, crumbs= 'user type ' + user_type)
-                si.add_class_instance_to_interator_lists(user_type, 'user', i)
+            for params in si.case_params['class_lists'][user_type]:
+                i = si.create_class_instance_as_interator(user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
                 i.initialize()  # some require instanceID from above add class to initialise
         pass
     # ____________________________
@@ -419,7 +419,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),
              'warnings_errors': si.msg_logger.warnings_and_errors,
              'timers': self.code_timer.time_sorted_timings(),
-             'time_updating': {},
              'output_files': si.output_files,
              'particles': { 'num_released': pgm.particles_released,
                             'particle_status_flags': si.particle_status_flags},
@@ -427,33 +426,27 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'case_params': si.case_runner_params['case_params'],
              'full_params': {},
              'class_info': {},
-
               }
 
-        for key, i in si.core_class_interator.items():
-            if i is None: continue
-            d['full_params'][key] = i.params
-            d['class_info'][key] = i.info
-            if 'output_file' in i.info:
-                d['output_files'][key] = i.info['output_file']
+
+        for key, i in si.classes.items():
+
+            if type(i) == dict:
+                d['full_params'][key] = []
+                d['class_info'][key] = []
+                d['output_files'][key] = []
+                # interate over dict
+                for key2, i2 in i.items():
+                    d['full_params'][key].append(i2.params)
+                    d['class_info'][key].append(i2.info)
+                    d['output_files'][key].append(i2.info['output_file'] if 'output_file' in i2.info else None)
+
             else:
-                d['output_files'][key] = None
+                d['full_params'][key] = i.params
+                d['class_info'][key] = i.info
+                d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
 
 
-        for key, item in si.class_interators_using_name.items():
-            # a class list type
-            d['full_params'][key]=[]
-            d['class_info'][key] = []
-            d['output_files'][key] =[]
-            d['time_updating'][key] =[]
-
-            for i in item['all'].values():
-                d['full_params'][key].append(i.params)
-                d['class_info'][key].append(i.info)
-                if 'output_file' in i.info:
-                    d['output_files'][key].append(i.info['output_file'])
-                else:
-                    d['output_files'][key].append(None)
 
         for key, item in si.classes['particle_release_groups'].items():
             rginfo=item.params

@@ -1,12 +1,12 @@
 # modfiy aspects pof all isActive particles, ie moving and stranded
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 import numpy as np
-from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+from oceantracker.resuspension._base_resuspension import _BaseResuspension
 
 
 from numba import  njit
 
-class BasicResuspension(_BaseTrajectoryModifier):
+class BasicResuspension(_BaseResuspension):
     # based on
     # Lynch, Daniel R., David A. Greenberg, Ata Bilgili, Dennis J. McGillicuddy Jr, James P. Manning, and Alfredo L. Aretxabaleta.
     # Particles in the coastal ocean: Theory and applications. Cambridge University Press, 2014.
@@ -16,20 +16,30 @@ class BasicResuspension(_BaseTrajectoryModifier):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'name': PVC('BasicResuspension',str),
-                                 'critical_friction_velocity': PVC(0., float, min=0.),
+                'critical_friction_velocity': PVC(0., float, min=0.),
+                'friction_velocity_field_class_name': PVC(
+                        'oceantracker.fields.friction_velocity.FrictionVelocity', str)
                                  })
 
     # is 3D test of parent
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(
-                        required_fields_list=['friction_velocity', 'water_velocity'],
+                        required_fields_list=['water_velocity'],
                         required_props_list=['status','water_velocity'], requires3D=True)
 
     def initialize(self,**kwargs):
         si = self.shared_info
         info = self.info
         info['number_resupended'] = 0
+        # add required field and particle property for resuspension
+        si.classes['field_group_manager'].create_field('derived_from_reader_field',
+                    {'class_name':self.params['friction_velocity_field_class_name'],
+                     }, crumbs='initializing respuspension class ')
+        si.classes['particle_group_manager'].create_particle_property('from_fields',
+                    {'name':'friction_velocity'},
+                    crumbs='initializing respuspension class ')
 
+    from oceantracker.fields.friction_velocity import FrictionVelocity
     def select_particles_to_resupend(self, active):
         # compare to single critical value
         # todo add comparison to  particles critical value from distribution, add new particle property to hold  individual critical values

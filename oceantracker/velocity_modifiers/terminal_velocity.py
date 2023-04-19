@@ -10,7 +10,11 @@ class TerminalVelocity(VelocityModiferBase):
     def __init__(self,):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'name': PVC('terminal_velocity',str),'mean': PVC(0.,float),'variance': PVC(None, float, min=0.)})
+        self.add_default_params({'name': PVC('terminal_velocity',str),
+                                 'mean': PVC(0.,float, doc_str='Terminal velocity positive upwards, ie fall velocities ate negative'),
+                                 'variance': PVC(None, float, min=0., doc_str='variance of normal distribution of terminal velocity, used to give each particles its own terminal velocity from random normal distribution'),
+                                 'requires_3D': PVC(True, bool)
+                                 })
 
         # only possible in in 3D so tweak flag
 

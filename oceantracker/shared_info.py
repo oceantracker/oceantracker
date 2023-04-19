@@ -1,5 +1,5 @@
 from oceantracker.common_info_default_param_dict_templates import default_case_param_template, default_class_names
-
+from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.module_importing_util import import_module_from_string
 
 class SharedInfoClass(object):
@@ -9,41 +9,43 @@ class SharedInfoClass(object):
 
     def reset(self):
         self.classes = {}
-        self.class_interators_using_name = {}
         self.core_class_interator = {}
-        self.classes_as_lists ={}
         # fill in known user class and iterator names
         for key, item in default_case_param_template.items():
             if type(item) == list:
                 self.classes[key] = {}
-                self.classes_as_lists[key] = []
-                self.class_interators_using_name[key] = {'all': {}, 'user': {} , 'manual_update':{}}
 
+    def add_core_class(self,class_type, params,  check_if_core_class=True, crumbs =''):
 
-    def add_core_class(self,class_type, instance,  check_if_core_class=True):
         ml= self.msg_logger
 
+        #todo make check if in common.shared_info_default_params
         if class_type not in default_case_param_template and check_if_core_class:
             ml.msg('add_core_class, name is not a known core class, name=' + class_type,
                          crumbs='Adding core class type=' + class_type,
                          exception = True)
-
-        self.classes[class_type]= instance
-        self.core_class_interator[class_type] = instance
+        i = make_class_instance_from_params(params, self.msg_logger, crumbs=crumbs + ' adding core class, type =  ' + class_type)
 
 
-    def create_class_interator(self,class_type, known_iteration_groups=None):
-        if class_type not in self.classes: self.classes[class_type] = {}
-        if class_type not in self.class_interators_using_name: self.class_interators_using_name[class_type] = {'all': {}}
+        if i.params['requires_3D'] and not self.case_runner_params['is_3D_run'] :
+                # dont add a 3D class if i not a 3D run
+                self.msg_logger.msg(' Not using add core class,' + i.params['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
+        else:
+            self.classes[class_type]= i
+            self.core_class_interator[class_type] = i
 
-        if known_iteration_groups is not None:
-            for g in known_iteration_groups:
-                self.class_interators_using_name[class_type].update({g :{}})
+        return i
 
-    def add_class_instance_to_interator_lists(self, class_type, iteration_group, i, crumbs=''):
+
+    def create_class_instance_as_interator(self, class_type, iteration_group, params, crumbs=''):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         ml= self.msg_logger
-        crumbs += ' >>> Adding_class type >> ' + class_type + '(group= ' + iteration_group +')'
+
+        instance_index = len(self.classes[class_type])
+
+        crumbs += f' >>> adding_class type >> {class_type}  (group=  {iteration_group} #{instance_index+1: 1d})'
+
+        i = make_class_instance_from_params(params, self.msg_logger, crumbs='user fields')
 
         known_list_classes= []
         for key, item in default_case_param_template.items():
@@ -54,40 +56,30 @@ class SharedInfoClass(object):
             ml.msg('add_to_class_list: name is not a known class list,class_type=' + class_type , exception = True, crumbs = crumbs)
 
         # now add to class lists and interators
-        # firts check it is known interation group
-        if iteration_group not in self.class_interators_using_name[class_type]:
-            ml.msg('add_to_class_list: iteration_group  for class_type=' + class_type + ', group="'
-                         + iteration_group + '", is not one of known types=' + str(
-                self.class_interators_using_name[class_type].keys()), fatal_error=True)
+        # todo  check it is known interation group
 
-        i.info['instanceID'] = len(self.classes[class_type])  # needed for release group identification info etc, zero based
+        i.info['instance_index'] = instance_index  # needed for release group identification info etc, zero based
+        i.info['instance_number'] =  instance_index + 1 # external facing number starting at 1
 
         if 'name' not in i.params or i.params['name'] is None:
-            i.params['name'] = f"{ i.info['instanceID']:04}"
+            i.params['name'] = f"instance_number{ i.info['instance_number']:04d}"
 
         name = i.params['name']
         if name in self.classes[class_type]:
             ml.msg('Class type"' + class_type + '" already has a class with name = "' + i.params['name']
                          + '", "name" parameter must be unique',
-                         crumbs = ' Checking for unique class names >>> '+  crumbs, fatal_error=True)
+                         crumbs =   crumbs,  fatal_error=True)
 
-
-        self.classes[class_type][name] = i
-        self.classes_as_lists[class_type].append(i)
-
-        self.class_interators_using_name[class_type]['all'][name] = i
-        self.class_interators_using_name[class_type][iteration_group][name] = i
+        if i.params['requires_3D'] and not self.case_runner_params['is_3D_run']:
+                # dont add a 3D class if i not a 3D run
+                self.msg_logger.msg(' Not using user  class,' + i.params['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
+        else:
+            self.classes[class_type][name] = i
+        return i
 
     def delete_add_class_instance_to_interators(self, name, class_type, iteration_group, i):
-        i.info['instanceID'] = len(self.classes[class_type]) # needed for release group identification info etc
+        i.info['instance_index'] = len(self.classes[class_type]) # needed for release group identification info etc
         self.classes[class_type][name] = i
-        self.classes_as_lists[class_type].append(i)
-
-        self.class_interators_using_name[class_type]['all'][name] = i
-        self.class_interators_using_name[class_type][iteration_group][name] = i
-
-
-
 
     def all_class_instance_pointers_iterator(self, asdict=False):
         # build list of all points for iteration, eg in calling all close methods

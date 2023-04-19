@@ -49,7 +49,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def open_output_file(self):
         si=self.shared_info
         if self.params['write']:
-            self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_%03.0f' % (self.info['instanceID']  + 1)
+            self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_%03.0f' % self.info['instance_number']
             self.info['output_file'] += '.nc' if self.params['file_tag'] is None else '_'+ self.params['file_tag'] + '.nc'
             self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
         else:
@@ -160,8 +160,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         nc = self.nc
         # write total released in each release group
         num_released=[]
-        for pg in si.class_interators_using_name['particle_release_groups']['all'].values():
-            num_released.append(pg.info['number_released'])
+        for name, i in si.classes['particle_release_groups'].items():
+            num_released.append(i.info['number_released'])
 
         if self.params['write']:
             self.info_to_write_at_end()

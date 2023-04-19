@@ -24,7 +24,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
 
         super().initialize()  # set up using regular grid for  stats
         si = self.shared_info
-        if self.info['instanceID']  > 0 :
+        if self.info['instance_index']  > 0 :
             raise FatalError('LogPolygonEntryAndExit: can only have one instance')
 
         # add particle property to show which polygon particle is in, -1 = in no polygon
