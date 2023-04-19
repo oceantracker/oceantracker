@@ -38,6 +38,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # other useful shared values
         si.backtracking = si.shared_params['backtracking']
         si.model_direction = -1 if si.backtracking else 1
+        si.is_3D_run = si.case_runner_params['is_3D_run']
 
         si.write_output_files = si.shared_params['write_output_files']
         si.write_tracks = si.run_params['write_tracks']
