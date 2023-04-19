@@ -9,8 +9,7 @@ class _BaseStatusModifer(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'name': PVC(None, str),
-                                 'requires_3D': PVC(False, bool)})
+        self.add_default_params({'name': PVC(None, str)})
 
     # all particles checked to see if they need status changing
     def update(self,buffer_index, time, active): pass

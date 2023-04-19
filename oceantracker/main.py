@@ -34,7 +34,7 @@ from oceantracker.util import json_util ,yaml_util
 from oceantracker.util.parameter_checking import merge_params_with_defaults, check_top_level_param_keys_and_structure
 from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
 from oceantracker.common_info_default_param_dict_templates import  default_case_param_template, run_params_defaults_template, default_class_names, package_fancy_name
-from oceantracker.util.parameter_base_class import make_class_instance_from_params
+from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
 
 import subprocess
@@ -51,8 +51,6 @@ class _RunOceanTrackerClass(object):
     def run(self,params):
 
         # prelim set up to get output dir, to make message logger
-
-
         try:
             print('--' + package_fancy_name + ' preliminary set up')
             run_builder= self.setup_output_folders_and_run_builder(params)
@@ -200,6 +198,8 @@ class _RunOceanTrackerClass(object):
         # get info to build a reader, and create a dummy reader instance
         run_builder['reader_build_info'], reader = self._setup_reader_builder(run_builder, ml)
         ml.progress_marker('Input directory: ' + reader.params['input_dir'])
+
+        run_builder['is_3D_run'] = run_builder['reader_build_info']['hindcast_is3D'] and not run_builder['working_params']['shared_params']['run_as_depth_averaged']
 
         # make full list of cases to run with fully merged params
         case_builders  = self.setup_build_full_case_params(run_builder,ml)
@@ -382,6 +382,7 @@ class _RunOceanTrackerClass(object):
                                     'reader_build_info' : run_builder['reader_build_info'],
                                     'case_params' : cout, # single case_params  merged with base_case_params
                                     'output_files' : case_output_files,
+                                    'is_3D_run' :   run_builder['is_3D_run']
                                     #'package_info':package_info,
                                     })  # add case/ copy to list for the pool
 
@@ -409,7 +410,7 @@ class _RunOceanTrackerClass(object):
         reader_build_info= {'shared_reader_memory': working_params['shared_params']['shared_reader_memory'],
                             'backtracking' : working_params['shared_params']['backtracking'],
                             'reader_params': reader.params}
-        reader_build_info['file_info'] = reader.get_hindcast_files_info() # get file lists
+        reader_build_info['file_info'] , reader_build_info['hindcast_is3D'] = reader.get_hindcast_files_info() # get file lists
 
         msg_logger.progress_marker('Finished sorting hyrdo model  files ', tabs=3)
 

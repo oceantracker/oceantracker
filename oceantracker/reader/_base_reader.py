@@ -1,5 +1,5 @@
 import numpy as np
-from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
+from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 from os import path, walk
@@ -29,7 +29,6 @@ class _BaseReader(ParameterBaseClass):
                                  'required_file_variables' :PLC([], [str]),
                                  'required_file_dimensions': PLC([], [str]),
                                  'water_density': PVC(48, int, min=2),
-                                 'depth_average': PVC(False, bool),  # turns 3D hindcast into a 2D one
                                  'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
                                  'one_based_indices' :  PVC(False, bool,doc_str='indcies in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
                                  'grid_variables': {'time': PVC('time', str, is_required=True),
@@ -178,6 +177,7 @@ class _BaseReader(ParameterBaseClass):
         nc = NetCDFhandler(fi['names'][0], 'r')
         self._basic_file_checks(nc, msg_logger)
         self.additional_setup_and_hindcast_file_checks(nc, msg_logger)
+        hindcast_is3D = self.is_hindcast3D(nc)
         nc.close()
 
 
@@ -209,7 +209,7 @@ class _BaseReader(ParameterBaseClass):
                     msg_logger.msg('file gaps between ' + fi['names'][n] + ' and ' + fi['names'][n + 1], tabs=1)
 
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
-        return fi
+        return fi, hindcast_is3D
 
     def make_grid_builder(self, grid,grid_time_buffers,reader_build_info):
         # make share memory builder for the non time varying grid variables
@@ -250,16 +250,14 @@ class _BaseReader(ParameterBaseClass):
 
     def setup_reader_fields(self, reader_build_info):
         si = self.shared_info
-        fm = si.classes['field_group_manager']
+        fgm = si.classes['field_group_manager']
         self.code_timer.start('build_hindcast_reader')
         nc = NetCDFhandler(reader_build_info['file_info']['names'][0], 'r')
 
         # setup reader fields from their named components in field_variables param ( water depth ad tide done earlier from grid variables)
         for name, item in reader_build_info['field_builder'].items():
-            i = make_class_instance_from_params(item['field_params'], si.msg_logger)
-            i.info['variable_info']= item['variable_info']
-            si.add_class_instance_to_interator_lists('fields', 'from_reader_field', i, crumbs='Adding Reader Field "' + name + '"')
-            i.initialize()  # require variable_info to initialise
+            i = fgm.create_field('from_reader_field', item['field_params'], crumbs='Reader - making reader field ')
+            i.info['variable_info'] = item['variable_info'] #needed to unpack reader variables
 
             if reader_build_info['shared_reader_memory']:
                 #todo make this part of reader field intialize???
@@ -274,14 +272,12 @@ class _BaseReader(ParameterBaseClass):
             # set up depth averaged version if requested
             if name in self.params['field_variables_to_depth_average']:
                 # tweak shape to fit depth average of scalar or 3D vector
-                p = {'class_name':'oceantracker.fields.reader_field.DepthAveragedReaderField',
+                p = {'class_name':'oceantracker.fields._base_field._BaseField',
                      'name': name + '_depth_average','num_components': min(2, i.params['num_components']),
                      'is_time_varying': i.params['is_time_varying'],
                     'is3D': False}
-                i2 = make_class_instance_from_params(p,si.msg_logger)
-                si.add_class_instance_to_interator_lists('fields', 'depth_averaged_from_reader_field', i2,
-                                                         crumbs='Adding Reader Depth Averaged Field "' + name + '"')
-                i2.initialize()
+                fgm.create_field('depth_averaged_from_reader_field', p, crumbs='Reader - making depth averged version of reader field')
+
         nc.close()
 
         # rinf buffer ono, needed to force read at first time step read to make
@@ -326,11 +322,9 @@ class _BaseReader(ParameterBaseClass):
                 msg_logger.msg( 'Cannot find required dimension in hydro model outptut file "' + v + '"', fatal_error=True)
 
 
-
-
     def get_field_variable_info(self, nc, name,var_list):
         # get info from list of component eg ['temp'], ['u','v']
-
+        depth_averaging = self.shared_info.shared_params['run_as_depth_averaged']
         if type(var_list) is not list: var_list=[var_list] # if a string make a list of 1
         var_list = [v for v in var_list if v != None]
         var_file_name0=var_list[0]
@@ -341,7 +335,7 @@ class _BaseReader(ParameterBaseClass):
         var_info= { 'component_list':[],
                     'is3D_in_file': is3D_in_file,
                     'is_time_varying': is_time_varying,
-                    'requires_depth_averaging': self.params['depth_average'] and is3D_in_file}
+                    'requires_depth_averaging': depth_averaging and is3D_in_file}
 
         # work out number of components in list of variables
         n_total_comp=0
@@ -352,10 +346,13 @@ class _BaseReader(ParameterBaseClass):
 
         # if a 3D var and vector then it must have  3D components
         # eg this allows for missing vertical velocity, to have zeros in water_velocity
-        if is3D_in_file and n_total_comp> 1: n_total_comp =3
+        if is3D_in_file and n_total_comp > 1: n_total_comp = 3  #todo not sure this is always safe
+
+        # if depth averaging reduce to at most a 2D buffer
+        if depth_averaging :  n_total_comp = min(2, n_total_comp)
 
         params = {'name': name,
-                  'class_name':'oceantracker.fields.reader_field.ReaderField',
+                  'class_name': 'oceantracker.fields._base_field._BaseField' ,#'oceantracker.fields.reader_field.ReaderField',
              'is_time_varying':  is_time_varying,
              'num_components' : n_total_comp,
              'is3D' :  False if var_info['requires_depth_averaging'] else is3D_in_file
@@ -423,8 +420,8 @@ class _BaseReader(ParameterBaseClass):
             grid_time_buffers['nt_hindcast'][buffer_index] = nt_hindcast_required[:num_read]  # add a grid variable with global hindcast time steps
 
             # read time varying vector and scalar reader fields
-            for name, field in si.class_interators_using_name['fields']['from_reader_field'].items():
-                if field.is_time_varying():
+            for name, field in si.classes['fields'].items():
+                if field.is_time_varying() and field.info['field_type'] == 'from_reader_field':
                     data_added_to_buffer = self.assemble_field_components(nc, field, buffer_index=buffer_index, file_index=file_index)
                     data_added_to_buffer = self.preprocess_field_variable(nc, name, data_added_to_buffer) # do any customised tweaks
 
@@ -441,10 +438,9 @@ class _BaseReader(ParameterBaseClass):
 
             # now all  data has been read from file, now
             # update user fields from newly read fields and data
-            for field_types in ['derived_from_reader_field','user']:
-                for field in si.class_interators_using_name['fields'][field_types].values():
-                    if field.is_time_varying():
-                        field.update(buffer_index)
+            for name, i in si.classes['fields'].items():
+                if i.is_time_varying() and i.info['field_type'] in ['derived_from_reader_field','user']:
+                    i.update(buffer_index)
 
             total_read += num_read
 

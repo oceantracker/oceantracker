@@ -11,6 +11,8 @@ class PolygonRelease(PointRelease):
         # set up info/attributes
         super().__init__()
         self.add_default_params(default_polygon_dict_params)
+
+
         self.class_doc(description='Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.')
 
         # below are not needed for polygons
@@ -33,7 +35,7 @@ class PolygonRelease(PointRelease):
         info['polygon_area'] = self.polygon.get_area()
 
         if info['polygon_area']  < 1:
-            si.msg_logger.msg('Release group = ' + str(self.info['instanceID'])
+            si.msg_logger.msg('Release group = ' + str(self.info['instance_number'])
                                     + ', a Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
 
         info['number_released'] = 0

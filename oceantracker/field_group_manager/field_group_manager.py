@@ -1,4 +1,4 @@
-from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
+from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
@@ -24,7 +24,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def initialize(self):
         si=self.shared_info
-        si.create_class_interator('fields', known_iteration_groups=self.known_field_types)
+
 
     def setup_interp_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
@@ -87,6 +87,13 @@ class FieldGroupManager(ParameterBaseClass):
         self.code_timer.stop('interp_at_given_locations_and_time')
 
         return output
+
+    def create_field(self, field_type, field_params, crumbs=''):
+        si = self.shared_info
+        i = si.create_class_instance_as_interator('fields', field_type, field_params, crumbs=crumbs + ' adding  a field ')
+        i.info['field_type'] = field_type
+        i.initialize()
+        return i
 
 
 

@@ -78,7 +78,6 @@ base_case_params:
     write_tracks: false
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
-  depth_average: true
   field_variables:
     water_temperature: temp
   file_mask: demoHindcastSchism3D.nc
@@ -88,4 +87,5 @@ shared_params:
   max_duration: 1296000.0
   output_file_base: demo61_concentration_test
   root_output_dir: output
+  run_as_depth_averaged: true
   time_step: 120

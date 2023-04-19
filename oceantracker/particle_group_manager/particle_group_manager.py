@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit, types as nbtypes
 from copy import copy
-from oceantracker.util.parameter_base_class import ParameterBaseClass, make_class_instance_from_params
+from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
@@ -22,8 +22,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def initialize(self):
         si= self.shared_info
-        si.create_class_interator('particle_properties', known_iteration_groups=self.known_prop_types)
-        si.create_class_interator('time_varying_info')
+
         info=self.info
         # is data 3D
         self.particles_in_buffer = 0
@@ -67,7 +66,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         new_buffer_indices = np.full((0,), 0, np.int32)
 
-        for g in si.class_interators_using_name['particle_release_groups']['all'].values():
+        for g in si.classes['particle_release_groups'].values():
             ri = g.info['release_info']
             sel =  time_sec* si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
             num_pulses= np.count_nonzero(sel)
@@ -84,12 +83,14 @@ class ParticleGroupManager(ParameterBaseClass):
         si.classes['field_group_manager'].setup_interp_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
 
         # initial values  part prop derived from fields
-        for p in si.class_interators_using_name['particle_properties']['from_fields'].values():
-            p.initial_value_at_birth(new_buffer_indices)
+        for name, i  in si.classes['particle_properties'].items():
+            if i.info['prop_type'] =='from_fields':
+                i.initial_value_at_birth(new_buffer_indices)
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
-        for p in si.class_interators_using_name['particle_properties']['user'].values():
-            p.initial_value_at_birth(new_buffer_indices)
+        for name, i  in si.classes['particle_properties'].items():
+            if i.info['prop_type'] == 'user':
+                i.initial_value_at_birth(new_buffer_indices)
 
         # update new particles props
         # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
@@ -132,10 +133,11 @@ class ParticleGroupManager(ParameterBaseClass):
         # before doing manual up dates, ensure initial values are set for
         # manually updated particle prop, so their initial value is correct,
         # as in compact mode cant rely on initial value set at array creation, due to re use of buffer
-        # important for prop, for which intial values is meaning full, eg polygon events writer, where initial -1 means in no polygon
+        # important for prop, for which initial values is meaning full, eg polygon events writer, where initial -1 means in no polygon
 
-        for p in si.class_interators_using_name['particle_properties']['manual_update'].values():  # catch any not manually updated with their initial value
-                p.initial_value_at_birth(new_buffer_indices)
+        for name, i in si.classes['particle_properties'].items():  # catch any not manually updated with their initial value
+            if i.info['prop_type'] == 'manual_update':
+                i.initial_value_at_birth(new_buffer_indices)
 
         #  set initial conditions/properties of new particles
         # do manual_update updates
@@ -160,8 +162,6 @@ class ParticleGroupManager(ParameterBaseClass):
         # set interp memory properties if present
         self.particles_released  += num_released # total released
         self.particles_in_buffer += num_released # number in particle buffer
-
-
         return new_buffer_indices
 
     def add_time_varying_info(self,**kwargs):
@@ -170,28 +170,28 @@ class ParticleGroupManager(ParameterBaseClass):
         params = kwargs
         params['class_name'] = 'oceantracker.particle_properties._base_properties.TimeVaryingInfo'
         si = self.shared_info
-        i = make_class_instance_from_params(params,si.msg_logger)
-        si.add_class_instance_to_interator_lists('time_varying_info', 'manual_update', i)
+        i = si.create_class_instance_as_interator('time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
         i.initialize()
 
         if si.write_tracks and i.params['write']:
             w = si.classes['tracks_writer']
             w.create_variable_to_write(i.params['name'], 'time', None,i.params['vector_dim'], attributes_dict=None, dtype=i.params['dtype'] )
 
-    def create_particle_property(self,prop_type, prop_params):
+    def create_particle_property(self,prop_type, prop_params, crumbs=''):
         si = self.shared_info
 
         if type(prop_type) != str or type(prop_params) !=dict:
+            #todo move all raise exception to msglogger
             raise Exception('ParticleGroupManager.create_particle_property, must be create_particle_property(prop_type(str), prop_params(dict))' )
         if prop_type not in self.known_prop_types:
             Exception('Create_particle_property: type is "' + prop_type + '", must be one of ' + str(self.known_prop_types))
 
         # set default class
         if 'class_name' not in prop_params: prop_params['class_name'] = 'oceantracker.particle_properties._base_properties.ParticleProperty'
-        i = make_class_instance_from_params(prop_params,si.msg_logger)
-        si.add_class_instance_to_interator_lists('particle_properties', prop_type, i,
-                                                 crumbs='Adding "particle_properties" name= "' + str(prop_params['name']) + '" of type=' +   prop_type)
+        i = si.create_class_instance_as_interator('particle_properties', prop_type, prop_params,
+                                                  crumbs=crumbs +' adding "particle_properties" name= "' + str(prop_params['name']) + '" of type=' +   prop_type)
         i.initialize()
+        i.info['prop_type'] = prop_type
         name = i.params['name']
         if si.write_tracks:
             # tweak write flag if in param lists
@@ -220,12 +220,14 @@ class ParticleGroupManager(ParameterBaseClass):
                                                    part_prop['time_released'].dataInBufferPtr(), active, scale= -1.)
 
         # first interpolate to give particle properties from reader derived  fields
-        for key,item in si.class_interators_using_name['particle_properties']['from_fields'].items():
-            si.classes['field_group_manager'].interp_named_field_at_particle_locations(key, active)
+        for key,i in si.classes['particle_properties'].items():
+            if i.info['prop_type'] == 'from_fields':
+                si.classes['field_group_manager'].interp_named_field_at_particle_locations(key, active)
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
-        for p in si.class_interators_using_name['particle_properties']['user'].values():
-            p.update(active)
+        for key, i in si.classes['particle_properties'].items():
+            if i.info['prop_type'] == 'user':
+                i.update(active)
 
         self.code_timer.stop('update_part_prop')
 
@@ -234,7 +236,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
-        for n,p in enumerate(si.class_interators_using_name['particle_release_groups']['all'].values()):
+        for n,p in enumerate(si.classes['particle_release_groups'].values()):
 
             if p.params['maximum_age'] is not None:
 
@@ -284,9 +286,10 @@ class ParticleGroupManager(ParameterBaseClass):
         # make dict masp from userId and user_release_group_name to sequence number
         releaseGroups_user_maps = {'particle_release_userRelease_groupID_map': {} , 'particle_release_user_release_group_name_map': {}}
 
-        for n, x0 in enumerate(self.shared_info.class_interators_using_name['particle_release_groups']['all'].values()):
-            releaseGroups_user_maps['particle_release_userRelease_groupID_map'][str(x0.params['user_release_groupID'])] = n
-            releaseGroups_user_maps['particle_release_user_release_group_name_map'][str(x0.params['user_release_group_name'])] = n
+        #todo use i.info['nsequence'] for rg id
+        for n, i in enumerate(self.shared_info.classes['particle_release_groups'].values()):
+            releaseGroups_user_maps['particle_release_userRelease_groupID_map'][str(i.params['user_release_groupID'])] = n
+            releaseGroups_user_maps['particle_release_user_release_group_name_map'][str(i.params['user_release_group_name'])] = n
 
         return releaseGroups_user_maps
 

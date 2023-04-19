@@ -56,19 +56,20 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
     def additional_setup_and_hindcast_file_checks(self, nc, msg_logger):
         # sort out which velocity etc are there and adjust field variables
+        si= self.shared_info
         params = self.params
         fv= params['field_variables']
 
         if not nc.is_var('hvel'):
             # run in depth averaged mode if only a 2D Schisim run
-            params['depth_average']= True
+            si.shared_params['run_as_depth_averaged']= True
             msg_logger.msg(' 3D Schism velocity variable "hvel" not in hydo-model trying to run in depth average mode using "dahv" variable', note=True)
             fv['water_velocity'] = ['dahv'] # one vector component
         else:
             fv['water_velocity'] = ['hvel']
 
 
-        if params['depth_average']:
+        if si.shared_params['run_as_depth_averaged']:
             #sort out which velo to use
             if  nc.is_var('dahv'):
                 fv['water_velocity'] = ['dahv']

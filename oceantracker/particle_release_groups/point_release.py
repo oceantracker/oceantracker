@@ -112,7 +112,7 @@ class PointRelease(ParameterBaseClass):
         release_info['release_times'] = release_info['release_times'][sel]
 
         if release_info['release_times'].size ==0:
-            ml.msg(f'No release times in range of hydro-model for release_group {info["nseq"]+1:2d}, ',
+            ml.msg(f'No release times in range of hydro-model for release_group {info["instance_number"]:2d}, ',
                    fatal_error=True,
                    hint=' Check hydro-model date range and release dates  ' , exit_now = True)
 
@@ -181,7 +181,7 @@ class PointRelease(ParameterBaseClass):
         n_cell_guess = n_cell_guess [:n_required]
 
         n = x0.shape[0]
-        IDrelease_group = self.info['instanceID']
+        IDrelease_group = self.info['instance_index']
         IDpulse = info['pulse_count']
         info['pulse_count'] += 1
         user_release_groupID = self.params['user_release_groupID']

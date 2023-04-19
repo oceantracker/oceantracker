@@ -23,7 +23,6 @@ base_case_params:
   run_params: {}
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
-  depth_average: true
   field_variables:
     water_temperature: temp
   file_mask: demoHindcastSchism3D.nc
@@ -33,4 +32,5 @@ shared_params:
   debug: true
   output_file_base: demo60_SCHISM_3D_decaying_particle
   root_output_dir: output
+  run_as_depth_averaged: true
   time_step: 120

@@ -233,11 +233,11 @@ params.append(p10)
 
 # case 50 schism basic
 schsim_base_params=\
-{'shared_params' :{'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120},
+{'shared_params' :{'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,'run_as_depth_averaged': True},
  'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
                     'input_dir': 'demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',
-                            'depth_average': True,
+
                      'field_variables':{'water_temperature':'temp'}
                           },
  'base_case_params' : { 'run_params' : {},
@@ -277,7 +277,6 @@ s55['base_case_params']['particle_release_groups']=[{'points': [[1594500, 548700
 s55['base_case_params']['velocity_modifiers']= [
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
 ]
-s55['base_case_params']['fields']=[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}]
 s55['base_case_params']['particle_statistics']=[
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
@@ -287,8 +286,7 @@ params.append(s55)
 
 # schsim 3D, sometimes resupend
 s56 = deepcopy(s55)
-s56['base_case_params']['trajectory_modifiers'] = [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
-                                                    'critical_friction_velocity': .005}]
+s56['base_case_params']['resuspension'] = {'critical_friction_velocity': .005}
 s56['shared_params'].update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
 s56['base_case_params']['velocity_modifiers']= [
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}]
