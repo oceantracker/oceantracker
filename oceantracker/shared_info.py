@@ -27,7 +27,7 @@ class SharedInfoClass(object):
         i = make_class_instance_from_params(params, self.msg_logger, crumbs=crumbs + ' adding core class, type =  ' + class_type)
 
 
-        if i.params['requires_3D'] and not self.case_runner_params['is_3D_run'] :
+        if i.params['requires_3D'] and not self.is_3D_run :
                 # dont add a 3D class if i not a 3D run
                 self.msg_logger.msg(' Not using add core class,' + i.params['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
         else:
@@ -70,7 +70,7 @@ class SharedInfoClass(object):
                          + '", "name" parameter must be unique',
                          crumbs =   crumbs,  fatal_error=True)
 
-        if i.params['requires_3D'] and not self.case_runner_params['is_3D_run']:
+        if i.params['requires_3D'] and not self.is_3D_run:
                 # dont add a 3D class if i not a 3D run
                 self.msg_logger.msg(' Not using user  class,' + i.params['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
         else:
