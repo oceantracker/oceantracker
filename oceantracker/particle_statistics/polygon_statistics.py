@@ -29,7 +29,8 @@ class _CorePolygonMethods(ParameterBaseClass):
         particles = si.classes['particle_group_manager']
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-        particles.create_particle_property('user',dict(name= 'inside_polygonID_'+ str(self.info['instanceID'] ),
+        self.info['inside_polygon_particle_prop'] = f'inside_polygon_on_fly_stats_ {self.info["instanceID"]}'
+        particles.create_particle_property('manual_update',dict(name=  self.info['inside_polygon_particle_prop'],
                                                class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=self.params['polygon_list'],
                                                 write=False))
@@ -91,12 +92,15 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         # set up pointers to particle properties
         p_groupID = part_prop['IDrelease_group'].dataInBufferPtr()
         p_x       = part_prop['x'].dataInBufferPtr()
-        p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instanceID'])].dataInBufferPtr()
 
         sel = self.select_particles_to_count(self.get_particle_index_buffer())
 
+        # manual update which polygon particles are inside
+        inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
+        inside_poly_prop.update(sel)
+
         # do counts
-        self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
+        self.do_counts_and_summing_numba(inside_poly_prop.dataInBufferPtr(), p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
 
         self.write_time_varying_stats(self.nWrites,time)
         self.nWrites += 1
@@ -167,13 +171,18 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
         p_groupID   = part_prop['IDrelease_group'].dataInBufferPtr()
         p_x         = part_prop['x'].dataInBufferPtr()
         p_age       = part_prop['age'].dataInBufferPtr()
-        p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instanceID'] )].dataInBufferPtr()
+
+
 
         # find those which user wants to count eg all alive by default
         sel = self.select_particles_to_count(self.get_particle_index_buffer())
 
+        # manual update which polygon particles are inside
+        inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
+        inside_poly_prop.update(sel)
+
         # loop over statistics polygons
-        self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, sel, stats_grid['age_bin_edges'], p_age)
+        self.do_counts_and_summing_numba(inside_poly_prop.dataInBufferPtr(), p_groupID, p_x, self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, sel, stats_grid['age_bin_edges'], p_age)
 
     def info_to_write_at_end(self):
         # write variables whole

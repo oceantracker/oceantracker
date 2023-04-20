@@ -132,6 +132,7 @@ class Solver(ParameterBaseClass):
         info['model_run_duration'] =  info['model_end_time'] -info['model_start_time']
         info['model_run_duration_actual'] = info['model_end_date']- info['model_start_date']
 
+    #@profile
     def pre_step_bookkeeping(self, nt, t):
         self.code_timer.start('pre_step_bookkeeping')
         si = self.shared_info

@@ -205,6 +205,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def get_particle_time(self): return self.time_varying_group_info['time'].get_values()
 
+    #@profile
     def update_PartProp(self, t, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
         self.code_timer.start('update_part_prop')

@@ -42,5 +42,6 @@ cd ./oceantracker
 
 
 
-Make  dir to that with oceantracker
-pip install --no-deps -e 
+# Make  oceantracker module able to be found
+
+    ''pip install --no-deps -e .```
