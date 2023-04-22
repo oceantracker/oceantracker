@@ -1,5 +1,5 @@
 from oceantracker.particle_release_groups.polygon_release import PolygonRelease
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 import numpy as np
 
 class PolygonReleaseWaterDepthRange(PolygonRelease):

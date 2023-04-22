@@ -1,14 +1,7 @@
 {
-    "shared_params": {
-        "output_file_base": "demo05_parallel",
-        "add_date_to_run_output_dir": false,
-        "time_step": 600,
-        "compact_mode": true,
-        "processors": 2,
-        "replicates": 1,
-        "multiprocessing_case_start_delay": 1.0,
-        "root_output_dir": "output"
-    },
+    "output_file_base": "demo05_parallel",
+    "add_date_to_run_output_dir": false,
+    "time_step": 600,
     "reader": {
         "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
         "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
@@ -37,35 +30,32 @@
         "time_buffer_size": 15,
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
-    "base_case_params": {
-        "run_params": {
-            "block_dry_cells": true
-        },
-        "dispersion": {
-            "A_H": 0.1
-        },
-        "tracks_writer": {
-            "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
-            "write_dry_cell_index": true
-        },
-        "particle_release_groups": [],
-        "particle_properties": [
-            {
-                "name": "Oxygen",
-                "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-                "decay_time_scale": 86400.0,
-                "initial_value": 20.0
-            },
-            {
-                "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
-            }
-        ]
+    "user_note": "test of notes",
+    "dispersion": {
+        "A_H": 0.1
     },
+    "tracks_writer": {
+        "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
+        "write_dry_cell_index": true
+    },
+    "particle_release_groups": [],
+    "particle_properties": [
+        {
+            "name": "Oxygen",
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 86400.0,
+            "initial_value": 20.0
+        },
+        {
+            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
+        }
+    ],
+    "block_dry_cells": true,
+    "compact_mode": true,
+    "processors": 2,
+    "multiprocessing_case_start_delay": 1.0,
     "case_list": [
         {
-            "run_params": {
-                "case_output_file_tag": "test_case_tag_0"
-            },
             "particle_release_groups": [
                 {
                     "allow_release_in_dry_cells": true,
@@ -82,12 +72,10 @@
                     "pulse_size": 2,
                     "release_interval": 10800
                 }
-            ]
+            ],
+            "case_output_file_tag": "test_case_tag_0"
         },
         {
-            "run_params": {
-                "case_output_file_tag": "test_case_tag_1"
-            },
             "particle_release_groups": [
                 {
                     "allow_release_in_dry_cells": true,
@@ -104,12 +92,10 @@
                     "pulse_size": 2,
                     "release_interval": 10800
                 }
-            ]
+            ],
+            "case_output_file_tag": "test_case_tag_1"
         },
         {
-            "run_params": {
-                "case_output_file_tag": "test_case_tag_2"
-            },
             "particle_release_groups": [
                 {
                     "allow_release_in_dry_cells": true,
@@ -126,12 +112,10 @@
                     "pulse_size": 2,
                     "release_interval": 10800
                 }
-            ]
+            ],
+            "case_output_file_tag": "test_case_tag_2"
         },
         {
-            "run_params": {
-                "case_output_file_tag": "test_case_tag_3"
-            },
             "particle_release_groups": [
                 {
                     "allow_release_in_dry_cells": true,
@@ -148,12 +132,10 @@
                     "pulse_size": 2,
                     "release_interval": 10800
                 }
-            ]
+            ],
+            "case_output_file_tag": "test_case_tag_3"
         },
         {
-            "run_params": {
-                "case_output_file_tag": "test_case_tag_4"
-            },
             "particle_release_groups": [
                 {
                     "allow_release_in_dry_cells": true,
@@ -170,7 +152,9 @@
                     "pulse_size": 2,
                     "release_interval": 10800
                 }
-            ]
+            ],
+            "case_output_file_tag": "test_case_tag_4"
         }
-    ]
+    ],
+    "root_output_dir": "output"
 }

@@ -25,34 +25,31 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.reset()  # clear out classes from class instance of SharedInfo if running series of mains
         t0 = datetime.now()
         # basic param shortcuts
-        si.shared_params = runner_params['shared_params']
-        si.run_params = runner_params['case_params']['run_params']
-        si.case_params = runner_params['case_params']
-        si.output_files = runner_params['output_files']
-        si.reader_build_info = runner_params['reader_build_info']
         si.case_runner_params = runner_params
+        si.settings = si.case_runner_params['settings']
+        si.output_files = si.case_runner_params['output_files']
+        si.reader_build_info = si.case_runner_params['reader_build_info']
 
         si.run_output_dir = si.output_files['run_output_dir']
         si.output_file_base = si.output_files['output_file_base']
 
         # other useful shared values
-        si.backtracking = si.shared_params['backtracking']
+        si.backtracking = si.settings['backtracking']
         si.model_direction = -1 if si.backtracking else 1
         si.is_3D_run = si.case_runner_params['is_3D_run']
 
-        si.write_output_files = si.shared_params['write_output_files']
-        si.write_tracks = si.run_params['write_tracks']
-        si.retain_culled_part_locations = si.run_params['retain_culled_part_locations']
-        si.compact_mode = si.shared_params['compact_mode']
+        si.write_output_files = si.settings['write_output_files']
+        si.write_tracks = si.settings['write_tracks']
+        si.retain_culled_part_locations = si.settings['retain_culled_part_locations']
+        si.compact_mode = si.settings['compact_mode']
 
-        si.z0 = si.run_params['z0']
-        si.minimum_total_water_depth = si.case_runner_params['shared_params']['minimum_total_water_depth']
+        si.z0 = si.settings['z0']
+        si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
         si.processor_number = runner_params['processor_number']
-
 
         # set up message logging
         output_files=runner_params['output_files']
-        si.msg_logger = MessageLogger('P%03.0f:' % si.processor_number,si.shared_params['max_warnings'])
+        si.msg_logger = MessageLogger('P%03.0f:' % si.processor_number, si.settings['advanced_settings']['max_warnings'])
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'],output_files['output_file_base'] + '_caseLog')
 
@@ -60,8 +57,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         case_exception = None
         # case set up
         try:
-            self._set_up_run(runner_params)
-            self._make_core_class_instances(runner_params)
+            self._set_up_run()
+            self._make_core_class_instances()
             si.solver_info = si.classes['solver'].info  # allows shortcut access from other classes
             self._initialize_solver_core_classes_and_release_groups()
 
@@ -94,7 +91,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             self._do_a_run()
             case_info = self._get_case_info(t0)
 
-            if si.shared_params['write_output_files']:
+            if si.settings['write_output_files']:
                 case_info_file = si.output_file_base + '_caseInfo.json'
                 json_util.write_JSON(path.join(si.run_output_dir, case_info_file), case_info)
 
@@ -122,13 +119,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.close()
         return case_info_file, False
 
-    def _set_up_run(self,runner_params):
+    def _set_up_run(self):
         # builds shared_info class variable with data and classes initialized  ready for run
         # from single run case_runner_params
-
-        # put needed variables in shared info
-        self.user_set_params = deepcopy(runner_params)  # used for log file
-        si = self.shared_info
+        si =self.shared_info
 
         si.msg_logger.insert_screen_line()
         si.msg_logger.progress_marker('Starting case number %3.0f, ' % si.processor_number + ' '
@@ -136,22 +130,22 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
         si.msg_logger.insert_screen_line()
 
-        if si.shared_params['use_numpy_random_seed']:
+        if si.settings['advanced_settings']['use_numpy_random_seed']:
             np.random.seed(0)
             si.msg_logger.msg('Using numpy.random.seed(0), makes results reproducible (only use for testing developments give the same results!)',warning=True)
 
         # get short class names map
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
-        if si.shared_params['multiprocessing_case_start_delay'] > 0:
-            delay = si.shared_params['multiprocessing_case_start_delay'] * (si.processor_number % si.shared_params['processors'])
+        if si.settings['advanced_settings']['multiprocessing_case_start_delay'] > 0:
+            delay = si.settings['advanced_settings']['multiprocessing_case_start_delay'] * (si.processor_number % si.settings['processors'])
             si.msg_logger.progress_marker('Delaying start by  ' + str(delay) + ' sec')
             sleep(delay)
             si.msg_logger.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
 
         # not sure if buffer is to small, but make bigger to 512 as default,  Numba default is  128, may slow code due to recompilations from too small buffer??
-        environ['numba_function_cache_size'] = str(si.shared_params['numba_function_cache_size'])
+        environ['numba_function_cache_size'] = str(si.settings['advanced_settings']['numba_function_cache_size'])
 
-        if si.shared_params['debug']:
+        if si.settings['debug']:
             # makes it easier to debug, particularly  in pycharm
             environ['NUMBA_BOUNDSCHECK'] = '1'
             environ['NUMBA_FULL_TRACEBACKS'] = '1'
@@ -200,7 +194,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             i.check_requirements()
 
         # other checks and warnings
-        if si.run_params['open_boundary_type'] > 0:
+        if si.settings['open_boundary_type'] > 0:
             if not np.any(grid['node_type'] == 3):
                 si.msg_logger.msg('Open boundary requested, but no open boundary node data available, boundaries will be closed,',
                                         hint='For Schism open boundaries requires hgrid file to named in reader params',warning=True)
@@ -210,13 +204,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.msg_logger.exit_if_prior_errors()
 
-    def _make_core_class_instances(self, run_params):
+    def _make_core_class_instances(self):
         # params are full merged by oceantracker main and instance making tested, so m=no parm merge needed
         si=self.shared_info
-        case_params= run_params['case_params']
+        case_params= si.case_runner_params
 
         # change writer for compact mode
-        if si.shared_params['compact_mode']:
+        if si.settings['compact_mode']:
             case_params['core_classes']['tracks_writer']['class_name']='oceantracker.tracks_writer.track_writer_compact.FlatTrackWriter'
 
         # make core classes, eg. field group
@@ -227,9 +221,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags
         si.add_core_class('reader', si.reader_build_info['reader_params'],check_if_core_class=False, crumbs='Making reader core class')  # use cor ecars as name
 
-        # some core classes required the presence of others to initialize so do all here in given order, with solver last
-        #for name in ['reader','field_group_manager','particle_group_manager','interpolator','tracks_writer','dispersion','solver']:
-        #    si.classes[name].initialize()
 
     def _setup_particle_release_groups(self, particle_release_groups_params_list):
         # particle_release groups setup and instances,
@@ -282,16 +273,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # start with setting up reader as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
         si.classes['field_group_manager'].initialize() # needed here to add reader fields inside reader build
-        reader.build_case_runner_reader(si.reader_build_info)
+        reader.build_case_runner_reader()
 
         # now know if 3D hindcast
         si.hydro_model_is3D = si.classes['fields']['water_velocity'].is3D()
 
-        if si.shared_params['time_step'] is None:
+        if si.settings['time_step'] is None:
             time_step = reader.info['hydro_model_time_step']
             si.msg_logger.msg("No time step given, using hydro-model's time step =" + str(time_step) + 'sec', note=True)
         else:
-            time_step =  si.shared_params['time_step']
+            time_step =  si.settings['time_step']
             if time_step > reader.info['hydro_model_time_step']:
                 time_step = reader.info['hydro_model_time_step']
                 si.msg_logger.msg("Time step is greater than hydro-model's, this capability not yet available, using hydro-model's time step =" + str(time_step) + 'sec', warning=True)
@@ -300,12 +291,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.model_time_step = time_step
 
         # set up start time and duration based on particle releases
-        time_start, time_end = self._setup_particle_release_groups(si.case_params['class_lists']['particle_release_groups'])
+        time_start, time_end = self._setup_particle_release_groups(si.case_runner_params['class_lists']['particle_release_groups'])
         si.msg_logger.progress_marker('set up particle_release_groups')
 
         #clip times to maximum duration in shared and case params
         duration = abs(time_end - time_start)
-        duration = min(duration,si.case_params['run_params']['duration'], si.shared_params['max_duration'] )
+        duration = min(duration, si.settings['duration'], si.settings['max_duration'])
         time_end = time_start + duration* si.model_direction
 
         # note results
@@ -337,10 +328,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
         # find particle buffer size required by all releases, with 3% safety margin
-        if si.run_params['particle_buffer_size'] is None:
-            si.run_params['particle_buffer_size'] =int(max(100, estimated_total_particles*1.03))
+        if si.settings['particle_buffer_size'] is None:
+            si.settings['particle_buffer_size'] =int(max(100, estimated_total_particles*1.03))
 
-        si.particle_buffer_size = si.run_params['particle_buffer_size']
+        si.particle_buffer_size = si.settings['particle_buffer_size']
 
         if si.write_tracks:
             si.classes['tracks_writer'].initialize()
@@ -364,7 +355,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                                                  write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
 
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
-        for n, params in enumerate(si.case_params['class_lists']['fields']):
+        for n, params in enumerate(si.case_runner_params['class_lists']['fields']):
             i = si.create_class_instance_as_interator('fields', 'user', params, crumbs='Adding "fields" from user params')
             i.initialize()
             # now add custom prop based on  this field
@@ -376,19 +367,19 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if not i.is_time_varying(): i.update()
 
         # any custom particle properties added by user
-        for p in si.case_params['class_lists']['particle_properties']:
+        for p in si.case_runner_params['class_lists']['particle_properties']:
             pgm.create_particle_property('user',p)
 
         # add default classes, eg tidal stranding
         #todo this may be better else where
-        if 'dry_cell_index' in si.classes['reader'].grid_time_buffers and 'tidal_stranding' not in  si.case_params['class_lists']['status_modifiers']:
-            si.case_params['class_lists']['status_modifiers'].append({'name':'tidal_stranding','class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'})
+        if 'dry_cell_index' in si.classes['reader'].grid_time_buffers and 'tidal_stranding' not in  si.case_runner_params['class_lists']['status_modifiers']:
+            si.case_runner_params['class_lists']['status_modifiers'].append({'name':'tidal_stranding','class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'})
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for user_type in ['velocity_modifiers', 'trajectory_modifiers',
                      'particle_statistics',
                      'particle_concentrations', 'event_loggers','status_modifiers']:
-            for params in si.case_params['class_lists'][user_type]:
+            for params in si.case_runner_params['class_lists'][user_type]:
                 i = si.create_class_instance_as_interator(user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
                 i.initialize()  # some require instanceID from above add class to initialise
         pass
@@ -405,56 +396,44 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         info['time_zone'] = r.params['time_zone']
         info['backtracking'] = si.backtracking
 
-        info.update(dict(started=str(t0), ended=str(datetime.now()), elapsed_time=str(datetime.now() - t0)))
+        info.update(dict(started=str(t0), ended=str(datetime.now()),
+                         elapsed_time=str(datetime.now() - t0),
+                         number_particles_released= pgm.particles_released))
 
         # base class variable warnings is common with all descendents of parameter_base_class
-        d = {'run_user_note': si.shared_params['user_note'],
-             'case_user_note': si.run_params['user_note'],
+        d = {'user_note': si.settings['user_note'],
              'processor_number' : si.processor_number,
              'file_written': datetime.now().isoformat(),
              'code_version_info': si.case_runner_params['code_version_info'],
              'run_info' : info,
              'solver_info' : si.solver_info,
              'hindcast_info': r.info,
+             'full_case_params': si.case_runner_params,
+             'particle_status_flags': si.particle_status_flags,
              'particle_release_group_info' : [],
              'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),
              'warnings_errors': si.msg_logger.warnings_and_errors,
              'timers': self.code_timer.time_sorted_timings(),
              'output_files': si.output_files,
-             'particles': { 'num_released': pgm.particles_released,
-                            'particle_status_flags': si.particle_status_flags},
-             'shared_params': si.shared_params,
-             'case_params': si.case_runner_params['case_params'],
-             'full_params': {},
-             'class_info': {},
-              }
-
+             'class_info': {}, }
 
         for key, i in si.classes.items():
 
             if type(i) == dict:
-                d['full_params'][key] = []
                 d['class_info'][key] = []
                 d['output_files'][key] = []
                 # interate over dict
                 for key2, i2 in i.items():
-                    d['full_params'][key].append(i2.params)
                     d['class_info'][key].append(i2.info)
                     d['output_files'][key].append(i2.info['output_file'] if 'output_file' in i2.info else None)
 
             else:
-                d['full_params'][key] = i.params
                 d['class_info'][key] = i.info
                 d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
-
-
 
         for key, item in si.classes['particle_release_groups'].items():
             rginfo=item.params
             rginfo.update(item.info['release_info'])
             d['particle_release_group_info'].append(rginfo)
-
-
-          # adds maps
 
         return d

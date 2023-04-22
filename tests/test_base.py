@@ -347,7 +347,7 @@ if __name__ == '__main__':
             # plotting scatch_tests
             runInfoFile = run_test({'duration': 5. * 24 * 3600, 'dispersion': {'A_H': 0., 'A_V': 0.},
                                         'particle_group_manager': {'pulse_size': 10 ** 1, 'release_interval': 1 * 3600},
-                                        'trajectory_modifiers':[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension'}],
+                                        'trajectory_modifiers':[{'class_name': 'oceantracker.resuspension.BasicResuspension'}],
                                     }, is3D=True)
 
             plot_sample(runInfoFile)

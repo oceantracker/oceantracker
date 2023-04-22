@@ -76,7 +76,7 @@ def get_params(params, datasource=2):
                                                  'polygon_list': [{'user_polygon_name': 'A', 'points': (np.asarray(poly_points) + np.asarray([-5000, 0])).tolist()},
                                                                                                                 ]
                                                  }],
-                              'trajectory_modifiers': [{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
+                              'trajectory_modifiers': [{'class_name': 'oceantracker.resuspension.BasicResuspension',
                                                            'critical_friction_velocity': .001}],
                               'velocity_modifiers': [{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'variance': 0.001}],
                               'fields':  [{'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocity'}],

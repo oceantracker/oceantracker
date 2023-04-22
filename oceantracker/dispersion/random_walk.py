@@ -1,5 +1,5 @@
 import numpy as np
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.dispersion._base_dispersion import _BaseTrajectoryModifer
 from numba import njit, types as nbtypes
 from random import normalvariate

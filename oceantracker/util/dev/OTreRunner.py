@@ -46,7 +46,7 @@ class OceanTrackerReRunner(object):
 
     def first_run(self, params, test_root_output_dir = None):
 
-        params['shared_params'].update({'processors': 1, 'replicates': 1,  # enforce single core
+        params['shared_params'].update({'processors': 1,  # enforce single core
                                            'input_dir': 'Missing'})
 
         ot1 = OceanTrackerRunMain()

@@ -4,7 +4,7 @@ import numpy as np
 import oceantracker.particle_statistics.gridded_statistics as gridded_statistics
 import oceantracker.particle_statistics.polygon_statistics as polygon_statistics
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 
 class WaterDepthRangeStats(ParameterBaseClass):
@@ -24,8 +24,8 @@ class WaterDepthRangeStats(ParameterBaseClass):
         part_prop= self.shared_info.classes['particle_properties']
 
 
-        sel= self.select_depth_rangeGT(part_prop['status'].dataInBufferPtr(), self.params['count_status_in_range'],
-                                     part_prop['water_depth'].dataInBufferPtr(), self.params['min_depth'], self.params['max_water_depth'], out)
+        sel= self.select_depth_rangeGT(part_prop['status'].used_buffer(), self.params['count_status_in_range'],
+                                       part_prop['water_depth'].used_buffer(), self.params['min_depth'], self.params['max_water_depth'], out)
         return sel
 
     @staticmethod

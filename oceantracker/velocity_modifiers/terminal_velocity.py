@@ -1,7 +1,7 @@
 from  oceantracker.velocity_modifiers._base_velocity_modifer import VelocityModiferBase
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.particle_properties.particle_parameter_from_normal_distribution import  ParticleParameterFromNormalDistribution
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 
 class TerminalVelocity(VelocityModiferBase):

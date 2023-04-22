@@ -3,7 +3,7 @@
 # 2) the terajectory of the particle eg, resuspension
 
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 class _BaseTrajectoryModifer(ParameterBaseClass):
 

@@ -1,6 +1,6 @@
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 from os import path, walk
 from glob import glob
@@ -48,7 +48,7 @@ class _BaseReader(ParameterBaseClass):
                                  'dimension_map': {'time': PVC('time', str, is_required=True), 'node': PVC('node', str), 'z': PVC(None, str),
                                                    'vector2Ddim': PVC(None, str), 'vector3Ddim': PVC(None, str)},
                                  'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
-                                 'search_sub_dirs': PVC(False, bool),
+                                 'search_sub_dirs': PVC(True, bool),
                                  'max_numb_files_to_load': PVC(10 ** 7, int, min=1)
                                  })  # list of normal required dimensions
         self.grid = {}
@@ -58,14 +58,12 @@ class _BaseReader(ParameterBaseClass):
         self.shared_memory= {'grid' :{}, 'fields':{},'control':{}}
 
     #required read methods non time dependent variables
-    def build_case_runner_reader(self, reader_build_info):
+    def build_case_runner_reader(self):
         # build a reader for a case runner
-
+        si = self.shared_info
         # make short cuts
-        self.reader_build_info = reader_build_info
-        self.info.update(reader_build_info)  # useful for json file
-        self.info['backtracking'] = reader_build_info['backtracking']
-        self.info['model_direction'] = -1 if reader_build_info['backtracking'] else 1
+        self.reader_build_info = si.reader_build_info
+        self.info.update(si.reader_build_info)  # useful for json file
 
     def read_nodal_x_as_float64(self, nc): nopass('reader method: read_x is required')
     def read_bottom_cell_index_as_int32(self, nc):nopass('reader method: read_bottom_cell_index_as_int32 is required for 3D hindcasts')
@@ -211,13 +209,14 @@ class _BaseReader(ParameterBaseClass):
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
         return fi, hindcast_is3D
 
-    def make_grid_builder(self, grid,grid_time_buffers,reader_build_info):
+    def make_grid_builder(self, grid,grid_time_buffers,run_builder):
         # make share memory builder for the non time varying grid variables
         #todo put reader_build_info['use_shared_memory'] test around all below
+        reader_build_info = run_builder['reader_build_info']
         reader_build_info['grid_constant_arrays_builder'] = {}
         for key, item in grid.items():
             if item is not None and type(item) == np.ndarray:
-                if reader_build_info['shared_reader_memory']:
+                if run_builder['settings']['shared_reader_memory']:
                     sm = shared_reader_memory_util.create_shared_arrayy(values=item)
                     self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
                     reader_build_info['grid_constant_arrays_builder'][key] = sm.get_shared_mem_map()
@@ -227,17 +226,18 @@ class _BaseReader(ParameterBaseClass):
         # now make info to build time buffers, eg time, zlevel
         reader_build_info['grid_time_buffers_builder'] = {}
         for key, item in grid_time_buffers.items():
-            if reader_build_info['shared_reader_memory']:  # make shared moemory for shared_reader
+            if  run_builder['settings']['shared_reader_memory']:  # make shared moemory for shared_reader
                 sm = shared_reader_memory_util.create_shared_arrayy(values=item)
                 self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
                 reader_build_info['grid_time_buffers_builder'][key] = sm.get_shared_mem_map()
             else:
                 reader_build_info['grid_time_buffers_builder'][key] = {'shape': item.shape, 'dtype': item.dtype}
 
-        return reader_build_info
+        return run_builder
 
-    def maker_field_builder(self,nc, reader_build_info):
+    def maker_field_builder(self,nc, run_builder):
         # loop over reader field params
+        reader_build_info = run_builder['reader_build_info']
         reader_build_info['field_builder'] ={}
         for name, field_variable_comps in self.params['field_variables'].items():
             if field_variable_comps is not None:
@@ -245,21 +245,21 @@ class _BaseReader(ParameterBaseClass):
                 reader_build_info['field_builder'][name] = {'field_params': field_params,'variable_info': comp_info}
                 pass
 
-        return reader_build_info
+        return run_builder
 
 
-    def setup_reader_fields(self, reader_build_info):
+    def setup_reader_fields(self):
         si = self.shared_info
         fgm = si.classes['field_group_manager']
         self.code_timer.start('build_hindcast_reader')
-        nc = NetCDFhandler(reader_build_info['file_info']['names'][0], 'r')
+        nc = NetCDFhandler(si.reader_build_info['file_info']['names'][0], 'r')
 
         # setup reader fields from their named components in field_variables param ( water depth ad tide done earlier from grid variables)
-        for name, item in reader_build_info['field_builder'].items():
+        for name, item in si.reader_build_info['field_builder'].items():
             i = fgm.create_field('from_reader_field', item['field_params'], crumbs='Reader - making reader field ')
             i.info['variable_info'] = item['variable_info'] #needed to unpack reader variables
 
-            if reader_build_info['shared_reader_memory']:
+            if si.settings['shared_reader_memory']:
                 #todo make this part of reader field intialize???
                 self.shared_memory['fields'][name] = shared_reader_memory_util.create_shared_arrayy(values=i.data)
 
@@ -324,7 +324,7 @@ class _BaseReader(ParameterBaseClass):
 
     def get_field_variable_info(self, nc, name,var_list):
         # get info from list of component eg ['temp'], ['u','v']
-        depth_averaging = self.shared_info.shared_params['run_as_depth_averaged']
+        depth_averaging = self.shared_info.settings['run_as_depth_averaged']
         if type(var_list) is not list: var_list=[var_list] # if a string make a list of 1
         var_list = [v for v in var_list if v != None]
         var_file_name0=var_list[0]
@@ -391,7 +391,7 @@ class _BaseReader(ParameterBaseClass):
         n_file = np.argmax(np.logical_and( nt0_hindcast   >=  fi['nt_starts']* si.model_direction, nt0_hindcast  <= fi['nt_ends']))
 
         # get required time step and trim to size of hindcast
-        nt_hindcast_required = nt0_hindcast + info['model_direction'] * np.arange(min(fi['n_time_steps_in_hindcast'],buffer_size))
+        nt_hindcast_required = nt0_hindcast + si.model_direction * np.arange(min(fi['n_time_steps_in_hindcast'],buffer_size))
         sel = np.logical_and( 0 <= nt_hindcast_required,  nt_hindcast_required < fi['n_time_steps_in_hindcast'])
         nt_hindcast_required = nt_hindcast_required[sel]
 
@@ -537,9 +537,9 @@ class _BaseReader(ParameterBaseClass):
     def time_to_hydro_model_index(self, time_sec):
         #convert date time to global time step in hindcast just before/after when forward/backtracking
         # always move forward through buffer, but file info is always forward in time
-        info = self.info
+        si = self.shared_info
         fi = self.reader_build_info['file_info']
-        model_dir = info['model_direction']
+        model_dir = si.model_direction
 
 
         hindcast_fraction= (time_sec - fi['first_time']) / (fi['last_time'] - fi['first_time'])
@@ -559,7 +559,7 @@ class _BaseReader(ParameterBaseClass):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
         si = self.shared_info
         bi = self.info['buffer_info']
-        model_dir = self.info['model_direction']
+        model_dir = si.model_direction
 
         # get hindcast time step at current time
         nt_hindcast = self.time_to_hydro_model_index(time_sec)

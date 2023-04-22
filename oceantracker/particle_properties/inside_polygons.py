@@ -1,6 +1,6 @@
 from oceantracker.particle_properties._base_properties import ParticleProperty
 import numpy as np
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.polygon_util import set_up_list_of_polygon_instances, InsidePolygon
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 
@@ -30,7 +30,6 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
 
         self.polygons, msg = set_up_list_of_polygon_instances(self.params['polygon_list'])
 
-
     def update(self, active):
         # find polygon each particle is inside
         part_prop = self.shared_info.classes['particle_properties']
@@ -44,8 +43,8 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
 
         for n, poly in enumerate(self.polygons):
             # assumes non-overlapping polygons, ie so only inside one at a time, the first polygon it is inside
-            inside, out_side = poly.inside_indices(part_prop['x'].dataInBufferPtr(), active=to_search, out=self.get_particle_index_buffer(),
-                                         also_return_indices_outside=True, out_outside=self.get_particle_subset_buffer())
+            inside, out_side = poly.inside_indices(part_prop['x'].used_buffer(), active=to_search, out=self.get_particle_index_buffer(),
+                                                   also_return_indices_outside=True, out_outside=self.get_particle_subset_buffer())
             self.set_values(n, inside)
-            to_search = out_side # on next polygon only search those not in this polygon
+            to_search = out_side # on next polygon only search those not in precceding polygons
 

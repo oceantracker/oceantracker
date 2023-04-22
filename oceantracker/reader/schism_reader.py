@@ -3,7 +3,7 @@ from numba import  njit
 from datetime import  datetime
 from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredReader
 from copy import  copy
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 from oceantracker.reader.util.reader_util import split_quad_cells, append_split_cell_data
 
@@ -62,14 +62,14 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
         if not nc.is_var('hvel'):
             # run in depth averaged mode if only a 2D Schisim run
-            si.shared_params['run_as_depth_averaged']= True
+            si.settings['run_as_depth_averaged']= True
             msg_logger.msg(' 3D Schism velocity variable "hvel" not in hydo-model trying to run in depth average mode using "dahv" variable', note=True)
             fv['water_velocity'] = ['dahv'] # one vector component
         else:
             fv['water_velocity'] = ['hvel']
 
 
-        if si.shared_params['run_as_depth_averaged']:
+        if si.settings['run_as_depth_averaged']:
             #sort out which velo to use
             if  nc.is_var('dahv'):
                 fv['water_velocity'] = ['dahv']

@@ -1,6 +1,6 @@
 import numpy as np
 from  oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
-from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC
 from oceantracker.util.polygon_util import  InsidePolygon
 
 class SettleInPolygon(_BaseTrajectoryModifier):
@@ -48,7 +48,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         part_prop = si.classes['particle_properties']
 
         # find those inside and freeze, only if they haven't been recently frozen
-        those_inside = self.polygon.inside_indices(part_prop['x'].dataInBufferPtr(), out= self.get_particle_index_buffer(), active=active)
+        those_inside = self.polygon.inside_indices(part_prop['x'].used_buffer(), out= self.get_particle_index_buffer(), active=active)
         if those_inside.shape[0] > 0:
 
             not_frozen = part_prop['status'].find_subset_where(those_inside, 'eq', si.particle_status_flags['moving'])

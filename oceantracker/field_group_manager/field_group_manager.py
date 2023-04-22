@@ -1,5 +1,5 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
 from oceantracker.util import time_util
@@ -69,7 +69,7 @@ class FieldGroupManager(ParameterBaseClass):
         self.code_timer.start('interp_named_field_at_particle_locations')
         si = self.shared_info
         if output is None:
-            output = si.classes['particle_properties'][fieldName].dataInBufferPtr()
+            output = si.classes['particle_properties'][fieldName].used_buffer()
 
         si.classes['interpolator'].eval_field_interpolation_at_particle_locations(si.classes['fields'][fieldName], self.n_buffer, output, active, step_dt_fraction=self.step_dt_fraction)
 

@@ -6,7 +6,7 @@ from datetime import datetime
 
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
 
 
@@ -73,7 +73,7 @@ class Solver(ParameterBaseClass):
                                 info['model_time_step'] * si.model_direction)
 
         # work out time steps between writing tracks to to screen
-        write_tracks_time_step = si.shared_params['screen_output_time_interval']
+        write_tracks_time_step = si.settings['screen_output_time_interval']
         if write_tracks_time_step is None:
             nt_write_time_step_to_screen = 1
         else:

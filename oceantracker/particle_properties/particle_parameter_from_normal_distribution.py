@@ -1,6 +1,6 @@
 from oceantracker.particle_properties._base_properties import ParticleProperty
 import numpy as np
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 class ParticleParameterFromNormalDistribution(ParticleProperty):
     # particle property drawn from normal distribution at birth

@@ -1,4 +1,4 @@
-from oceantracker.common_info_default_param_dict_templates import default_case_param_template, default_class_names
+from oceantracker.common_info_default_param_dict_templates import default_param_template, default_class_names
 from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.module_importing_util import import_module_from_string
 
@@ -9,9 +9,8 @@ class SharedInfoClass(object):
 
     def reset(self):
         self.classes = {}
-        self.core_class_interator = {}
         # fill in known user class and iterator names
-        for key, item in default_case_param_template.items():
+        for key, item in default_param_template.items():
             if type(item) == list:
                 self.classes[key] = {}
 
@@ -20,11 +19,13 @@ class SharedInfoClass(object):
         ml= self.msg_logger
 
         #todo make check if in common.shared_info_default_params
-        if class_type not in default_case_param_template and check_if_core_class:
+        if class_type not in default_param_template and check_if_core_class:
             ml.msg('add_core_class, name is not a known core class, name=' + class_type,
                          crumbs='Adding core class type=' + class_type,
                          exception = True)
-        i = make_class_instance_from_params(params, self.msg_logger, crumbs=crumbs + ' adding core class, type =  ' + class_type)
+        i = make_class_instance_from_params(params, self.msg_logger,
+                                            class_type_name=class_type,
+                                            crumbs=crumbs + ' adding core class, type =  ' + class_type)
 
 
         if i.params['requires_3D'] and not self.is_3D_run :
@@ -32,8 +33,6 @@ class SharedInfoClass(object):
                 self.msg_logger.msg(' Not using add core class,' + i.params['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
         else:
             self.classes[class_type]= i
-            self.core_class_interator[class_type] = i
-
         return i
 
 
@@ -48,7 +47,7 @@ class SharedInfoClass(object):
         i = make_class_instance_from_params(params, self.msg_logger, crumbs='user fields')
 
         known_list_classes= []
-        for key, item in default_case_param_template.items():
+        for key, item in default_param_template.items():
             if type(item) == list:
                 known_list_classes.append(key)
 

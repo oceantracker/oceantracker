@@ -1,10 +1,7 @@
 {
-    "shared_params": {
-        "output_file_base": "demo70_ROMS_reader",
-        "debug": true,
-        "time_step": 1800,
-        "root_output_dir": "output"
-    },
+    "output_file_base": "demo70_ROMS_reader",
+    "debug": true,
+    "time_step": 1800,
     "reader": {
         "class_name": "oceantracker.reader.ROMS_reader.ROMsNativeReader",
         "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
@@ -13,53 +10,47 @@
             "water_temperature": "temp"
         }
     },
-    "base_case_params": {
-        "run_params": {
-            "open_boundary_type": 1
-        },
-        "dispersion": {
-            "A_H": 0.2,
-            "A_V": 0.001
-        },
-        "particle_release_groups": [
-            {
-                "points": [
-                    [
-                        616042,
-                        4219971,
-                        -1
-                    ],
-                    [
-                        616042,
-                        4729971,
-                        -1
-                    ],
-                    [
-                        616042,
-                        4910000,
-                        -1
-                    ]
+    "open_boundary_type": 1,
+    "dispersion": {
+        "A_H": 0.2,
+        "A_V": 0.001
+    },
+    "particle_release_groups": [
+        {
+            "points": [
+                [
+                    616042,
+                    4219971,
+                    -1
                 ],
-                "pulse_size": 10,
-                "release_interval": 1800
-            }
-        ],
-        "fields": [
-            {
-                "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
-            }
-        ],
-        "particle_properties": [
-            {
-                "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-                "decay_time_scale": 86400.0
-            }
-        ],
-        "trajectory_modifiers": [
-            {
-                "class_name": "oceantracker.trajectory_modifiers.resuspension.BasicResuspension",
-                "critical_friction_velocity": 0.0
-            }
-        ]
-    }
+                [
+                    616042,
+                    4729971,
+                    -1
+                ],
+                [
+                    616042,
+                    4910000,
+                    -1
+                ]
+            ],
+            "pulse_size": 10,
+            "release_interval": 1800
+        }
+    ],
+    "fields": [
+        {
+            "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
+        }
+    ],
+    "particle_properties": [
+        {
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 86400.0
+        }
+    ],
+    "resupension": {
+        "critical_friction_velocity": 0.0
+    },
+    "root_output_dir": "output"
 }

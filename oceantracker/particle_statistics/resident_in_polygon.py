@@ -1,5 +1,5 @@
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 
 
 from oceantracker.particle_release_groups.polygon_release import PolygonRelease

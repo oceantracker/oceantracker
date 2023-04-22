@@ -5,7 +5,7 @@ from numba  import njit
 from copy import copy,deepcopy
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.ncdf_util import  NetCDFhandler
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 
 class _BaseEventLogger(ParameterBaseClass):
 

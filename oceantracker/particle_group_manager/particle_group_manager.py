@@ -4,7 +4,7 @@ from copy import copy
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util import time_util
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 # holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
 
@@ -97,7 +97,7 @@ class ParticleGroupManager(ParameterBaseClass):
         self.update_PartProp(time_sec, new_buffer_indices)
 
         # flag if any bad initial locations
-        if si.case_params['run_params']['open_boundary_type'] > 0:
+        if si.settings['open_boundary_type'] > 0:
             bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['outside_open_boundary'], out=self.get_particle_index_buffer())
         else:
             bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
@@ -216,8 +216,8 @@ class ParticleGroupManager(ParameterBaseClass):
 
         self.screen_msg= ''
         #  calculate age particle property = t-time_released
-        particle_operations_util.set_value_and_add(part_prop['age'].dataInBufferPtr(), t,
-                                                   part_prop['time_released'].dataInBufferPtr(), active, scale= -1.)
+        particle_operations_util.set_value_and_add(part_prop['age'].used_buffer(), t,
+                                                   part_prop['time_released'].used_buffer(), active, scale= -1.)
 
         # first interpolate to give particle properties from reader derived  fields
         for key,i in si.classes['particle_properties'].items():
@@ -300,7 +300,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         count_array = self.status_count_array
-        self._do_status_counts(part_prop['status'].dataInBufferPtr(),count_array)
+        self._do_status_counts(part_prop['status'].used_buffer(), count_array)
 
 
         # put numba counts back in dict with proper names

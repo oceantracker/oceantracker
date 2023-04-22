@@ -1,64 +1,60 @@
-base_case_params:
-  dispersion:
-    A_H: 10
-    A_V: 0.001
-  event_loggers:
-  - class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
-    particle_prop_to_write_list:
-    - ID
-    - x
-    - IDrelease_group
-    - status
-    - age
-    polygon_list:
-    - points:
-      - - 1592682.1237
-        - 5489972.7479
-      - - 1593604.1667
-        - 5490275.5488
-      - - 1593886.4247
-        - 5489464.0424
-      - - 1592917.3387
-        - 5489000.0
-      - - 1592300.0
-        - 5489000.0
-      - - 1592682.1237
-        - 5489972.7479
-      user_polygon_name: A
-    - points:
-      - - 1597682.1237
-        - 5489972.7479
-      - - 1598604.1667
-        - 5490275.5488
-      - - 1598886.4247
-        - 5489464.0424
-      - - 1597917.3387
-        - 5487000
-      - - 1597300
-        - 5487000
-      - - 1597682.1237
-        - 5489972.7479
-      user_polygon_name: B
-  particle_properties:
-  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
-    decay_time_scale: 86400.0
-  particle_release_groups:
+debug: true
+dispersion:
+  A_H: 10
+  A_V: 0.001
+event_loggers:
+- class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
+  particle_prop_to_write_list:
+  - ID
+  - x
+  - IDrelease_group
+  - status
+  - age
+  polygon_list:
   - points:
-    - - 1599750
-      - 5485600
-      - -1
-    pulse_size: 20
-    release_interval: 3600
-  run_params: {}
+    - - 1592682.1237
+      - 5489972.7479
+    - - 1593604.1667
+      - 5490275.5488
+    - - 1593886.4247
+      - 5489464.0424
+    - - 1592917.3387
+      - 5489000.0
+    - - 1592300.0
+      - 5489000.0
+    - - 1592682.1237
+      - 5489972.7479
+    user_polygon_name: A
+  - points:
+    - - 1597682.1237
+      - 5489972.7479
+    - - 1598604.1667
+      - 5490275.5488
+    - - 1598886.4247
+      - 5489464.0424
+    - - 1597917.3387
+      - 5487000
+    - - 1597300
+      - 5487000
+    - - 1597682.1237
+      - 5489972.7479
+    user_polygon_name: B
+output_file_base: demo57_SCHISM_3D_lateralBoundaryTest
+particle_properties:
+- class_name: oceantracker.particle_properties.age_decay.AgeDecay
+  decay_time_scale: 86400.0
+particle_release_groups:
+- points:
+  - - 1599750
+    - 5485600
+    - -1
+  pulse_size: 20
+  release_interval: 3600
 reader:
   class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   field_variables:
     water_temperature: temp
   file_mask: demoHindcastSchism3D.nc
   input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
-shared_params:
-  debug: true
-  output_file_base: demo57_SCHISM_3D_lateralBoundaryTest
-  root_output_dir: output
-  run_as_depth_averaged: true
-  time_step: 120
+root_output_dir: output
+time_step: 120

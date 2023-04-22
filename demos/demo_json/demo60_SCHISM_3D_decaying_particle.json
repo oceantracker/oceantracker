@@ -1,12 +1,7 @@
 {
-    "shared_params": {
-        "output_file_base": "demo60_SCHISM_3D_decaying_particle",
-        "debug": true,
-        "time_step": 120,
-        "run_as_depth_averaged": true,
-        "compact_mode": true,
-        "root_output_dir": "output"
-    },
+    "output_file_base": "demo60_SCHISM_3D_decaying_particle",
+    "debug": true,
+    "time_step": 120,
     "reader": {
         "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
         "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
@@ -15,42 +10,41 @@
             "water_temperature": "temp"
         }
     },
-    "base_case_params": {
-        "run_params": {},
-        "dispersion": {
-            "A_H": 0.2,
-            "A_V": 0.001
-        },
-        "particle_release_groups": [
-            {
-                "points": [
-                    [
-                        1594500,
-                        5487000,
-                        -1
-                    ],
-                    [
-                        1594500,
-                        5483000,
-                        -1
-                    ],
-                    [
-                        1598000,
-                        5486100,
-                        -1
-                    ]
+    "dispersion": {
+        "A_H": 0.2,
+        "A_V": 0.001
+    },
+    "particle_release_groups": [
+        {
+            "points": [
+                [
+                    1594500,
+                    5487000,
+                    -1
                 ],
-                "pulse_size": 1,
-                "release_interval": 150.0,
-                "maximum_age": 17280.000000000004
-            }
-        ],
-        "particle_properties": [
-            {
-                "name": "C",
-                "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-                "decay_time_scale": 25714.28571428571
-            }
-        ]
-    }
+                [
+                    1594500,
+                    5483000,
+                    -1
+                ],
+                [
+                    1598000,
+                    5486100,
+                    -1
+                ]
+            ],
+            "pulse_size": 1,
+            "release_interval": 150.0,
+            "maximum_age": 17280.000000000004
+        }
+    ],
+    "particle_properties": [
+        {
+            "name": "C",
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 25714.28571428571
+        }
+    ],
+    "compact_mode": true,
+    "root_output_dir": "output"
 }

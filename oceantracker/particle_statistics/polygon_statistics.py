@@ -2,7 +2,7 @@ import numpy as np
 
 import oceantracker.particle_statistics.gridded_statistics as gridded_statistics
 from numba import njit
-from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 class _CorePolygonMethods(ParameterBaseClass):
@@ -29,7 +29,8 @@ class _CorePolygonMethods(ParameterBaseClass):
         particles = si.classes['particle_group_manager']
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-        particles.create_particle_property('user',dict(name= 'inside_polygonID_'+ str(self.info['instance_number'] ),
+        self.info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_ {self.info["instance_number"]}'
+        particles.create_particle_property('manual_update',dict(name=  self.info['inside_polygon_particle_prop'],
                                                class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=self.params['polygon_list'],
                                                 write=False))
@@ -82,12 +83,16 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         # update time stats  recorded
 
         # set up pointers to particle properties
-        p_groupID = part_prop['IDrelease_group'].dataInBufferPtr()
-        p_x       = part_prop['x'].dataInBufferPtr()
-        p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instance_number'])].dataInBufferPtr()
+        p_groupID = part_prop['IDrelease_group'].used_buffer()
+        p_x       = part_prop['x'].used_buffer()
+
+        # manual update which polygon particles are inside
+        inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
+        inside_poly_prop.update(sel)
 
         # do counts
-        self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
+        self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
+                                         p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
 
 
     def info_to_write_at_end(self):pass  # nothing extra to write
@@ -149,14 +154,18 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
         self.record_time_stats_last_recorded(time_sec)
 
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
-        p_groupID   = part_prop['IDrelease_group'].dataInBufferPtr()
-        p_x         = part_prop['x'].dataInBufferPtr()
-        p_age       = part_prop['age'].dataInBufferPtr()
-        p_inside_polygons = part_prop['inside_polygonID_'+ str(self.info['instance_number'] )].dataInBufferPtr()
+        p_groupID   = part_prop['IDrelease_group'].used_buffer()
+        p_x         = part_prop['x'].used_buffer()
+        p_age       = part_prop['age'].used_buffer()
+
+        # manual update which polygon particles are inside
+        inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
+        inside_poly_prop.update(sel)
 
 
         # loop over statistics polygons
-        self.do_counts_and_summing_numba(p_inside_polygons, p_groupID, p_x, self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, sel, stats_grid['age_bin_edges'], p_age)
+        self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(), p_groupID, p_x, self.count_age_bins,
+                                         self.count_all_particles, self.prop_list, self.sum_prop_list, sel, stats_grid['age_bin_edges'], p_age)
 
     def info_to_write_at_end(self):
         # write variables whole

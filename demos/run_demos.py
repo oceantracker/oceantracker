@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
         params = json_util.read_JSON(f[0])
 
-        demo_name= params['shared_params']['output_file_base']
+        demo_name= params['output_file_base']
         params['reader']['input_dir'] = path.join(path.dirname(__file__),'demo_hindcast')
 
         # tests_of_hindcasts or development choices of classes
@@ -88,8 +88,8 @@ if __name__ == "__main__":
 
 
         # clean output folder
-        params['shared_params']['root_output_dir'] = 'output'
-        output_folder = path.join(params['shared_params']['root_output_dir'], params['shared_params']['output_file_base'])
+        params['root_output_dir'] = 'output'
+        output_folder = path.join(params['root_output_dir'], params['output_file_base'])
 
         if not args.skiprun:
             runInfo_file_name, has_errors = main.run(params)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
                 print('Error during demo')
                 exit()
 
-        runInfo_file_name = path.join( params['shared_params']['root_output_dir'],params['shared_params']['output_file_base'],params['shared_params']['output_file_base']+'_runInfo.json')
+        runInfo_file_name = path.join( params['root_output_dir'],params['output_file_base'],params['output_file_base']+'_runInfo.json')
         case_info_file_name = load_output_files.get_case_info_file_from_run_file(runInfo_file_name)
         caseInfo = load_output_files.read_case_info_file(case_info_file_name)
 
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         if args.noplot:
             output_file_base= None
         else:
-            output_file_base = path.join('output', params['shared_params']['output_file_base'])
+            output_file_base = path.join('output', params['output_file_base'])
 
         if  args.noplot : continue
 
@@ -139,9 +139,9 @@ if __name__ == "__main__":
             # rerun backwards from end point of forwards run
             start_date = str(time_util.seconds_to_datetime64(d90['time'][-1]))
 
-            params['shared_params']['output_file_base'] = 'Demo90backward'
-            params['shared_params']['backtracking'] = True
-            params['base_case_params']['particle_release_groups'][0].update({
+            params['output_file_base'] = 'Demo90backward'
+            params['backtracking'] = True
+            params['particle_release_groups'][0].update({
                 'points': d90['x'][-1, :, :],
                 'release_start_date': start_date})
 

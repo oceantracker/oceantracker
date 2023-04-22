@@ -4,8 +4,8 @@ from glob import  glob
 import inspect
 import importlib
 
-from oceantracker.common_info_default_param_dict_templates import run_params_defaults_template, default_case_param_template, default_class_names
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.common_info_default_param_dict_templates import run_params_defaults_template, default_param_template, default_class_names
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
 
@@ -261,21 +261,21 @@ def build_param_ref():
     page.add_new_toc_to_page('case', maxdepth=1, sort_body=True)
 
     rp = RSTfileBuilder('run_params', 'run_params')
-    rp.write_param_dict_defaults(default_case_param_template['run_params'])
+    rp.write_param_dict_defaults(default_param_template['run_params'])
     page.add_toc_link('case',rp)
 
     page.add_heading('Core classes',level=2)
     page.add_new_toc_to_page('core', maxdepth=1)
-    for key in sorted(default_case_param_template.keys()):
-        if key in ['run_params'] or  type(default_case_param_template[key])==list: continue
+    for key in sorted(default_param_template.keys()):
+        if key in ['run_params'] or  type(default_param_template[key])==list: continue
 
         toc = make_sub_pages(key)
         page.add_toc_link('core', toc)
 
     page.add_heading('User added classes',level=2)
     page.add_new_toc_to_page('user', maxdepth=1)
-    for key in sorted(default_case_param_template.keys()):
-        if type(default_case_param_template[key]) != list: continue
+    for key in sorted(default_param_template.keys()):
+        if type(default_param_template[key]) != list: continue
         toc = make_sub_pages(key)
         page.add_toc_link('user', toc)
 

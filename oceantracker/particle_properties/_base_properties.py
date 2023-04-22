@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.util import time_util
 
@@ -101,25 +101,18 @@ class ParticleProperty(_BasePropertyInfo):
         else:
             particle_operations_util.set_value(self.data, values, active)
 
-    def add_values_to(self, values, active):
-        # set property using using indicies sel
-        if type(values) == np.ndarray:
-            if values.shape[0]  != active.shape[0] : raise Exception('add_values_to: shape of values must match number of indices to set in active')
-            particle_operations_util.add_values_to(self.data, values, active)
-        else:
-            particle_operations_util.add_value_to(self.data, values, active)
+    def fill_buffer(self,value):
+        n_in_buffer = self.shared_info.classes['particle_group_manager'].particles_in_buffer
+        self.data[:n_in_buffer,...] = value
 
-    def add_prop_to(self, prop_name, sel, scale = 1.0):
-        particle_operations_util.add_to(self.dataInBufferPtr(), self.shared_info.classes['particle_properties'][prop_name].dataInBufferPtr(), sel, scale= scale)
 
     def get_values(self, sel):
         # get property values using indices sel
         return np.take(self.data,sel, axis=0)  # for integer index sel, take is faster than numpy fancy indexing and numba
 
-    def copy_prop(self,prop_name, sel):
-        particle_operations_util.copy(self.dataInBufferPtr(), self.shared_info.classes['particle_properties'][prop_name].dataInBufferPtr(), sel)
+    def used_buffer(self): return self.data[:self.shared_info.classes['particle_group_manager'].particles_in_buffer, ...]
 
-    def dataInBufferPtr(self): return self.data[:self.shared_info.classes['particle_group_manager'].particles_in_buffer, ...]
+    def full_buffer(self):  return self.data
 
     # particle selection methods
     # if out given, uses index buffers to speed, by reducing memory creation, and making it more likely index values are in chip cache
@@ -132,7 +125,7 @@ class ParticleProperty(_BasePropertyInfo):
             raise Exception('compare_all_to_a_value: particle property ' + self.params['name'] +'>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
 
         # to search only those in buffer use dataInBufferPtr()
-        data = self.dataInBufferPtr()
+        data = self.used_buffer()
         if out is None: out = np.full((data.shape[0],), -127, np.int32)
         found = particle_comparisons_util.prop_compared_to_value(data, test, value, out)
         return found
@@ -145,10 +138,10 @@ class ParticleProperty(_BasePropertyInfo):
         if self.is_vector():
             raise Exception('find_subset_where: particle property ' + self.params['name'] + '>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
 
-        return particle_comparisons_util.prop_subset_compared_to_value(active, self.dataInBufferPtr(), test, value, out)
+        return particle_comparisons_util.prop_subset_compared_to_value(active, self.used_buffer(), test, value, out)
 
     def find_those_in_range_of_values(self,value1,value2, out):
-        data = self.dataInBufferPtr()
+        data = self.used_buffer()
         if out is None: out = np.full((data.shape[0],), -127, np.int32)
 
         found= particle_comparisons_util._find_all_in_range(data, value1,value2, out)

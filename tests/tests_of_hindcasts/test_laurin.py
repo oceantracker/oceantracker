@@ -527,7 +527,7 @@ if __name__ == '__main__':
             },
             'trajectory_modifiers': [
                 {
-                    'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
+                    'class_name': 'oceantracker.resuspension.BasicResuspension',
                     'critical_friction_velocity': .01
                 },
                 # {

@@ -1,23 +1,5 @@
-base_case_params:
-  dispersion:
-    A_H: 0.1
-  particle_properties:
-  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
-    decay_time_scale: 86400.0
-    initial_value: 20.0
-    name: Oxygen
-  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-  particle_release_groups:
-  - points:
-    - - 1594500
-      - 5483000
-    pulse_size: 200
-    release_interval: 0
-  run_params:
-    user_note: test of notes
-  tracks_writer:
-    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
-    time_steps_per_per_file: 700
+add_date_to_run_output_dir: false
+backtracking: true
 case_list:
 - particle_release_groups:
   - points:
@@ -25,6 +7,21 @@ case_list:
       - 5489100
     pulse_size: 1
     release_interval: 10800
+dispersion:
+  A_H: 0.1
+output_file_base: demo01_plot_tracks
+particle_properties:
+- class_name: oceantracker.particle_properties.age_decay.AgeDecay
+  decay_time_scale: 86400.0
+  initial_value: 20.0
+  name: Oxygen
+- class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+particle_release_groups:
+- points:
+  - - 1594500
+    - 5483000
+  pulse_size: 200
+  release_interval: 0
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -47,9 +44,9 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
-shared_params:
-  add_date_to_run_output_dir: false
-  backtracking: true
-  output_file_base: demo01_plot_tracks
-  root_output_dir: output
-  time_step: 600
+root_output_dir: output
+time_step: 600
+tracks_writer:
+  class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
+  time_steps_per_per_file: 700
+user_note: test of notes

@@ -27,7 +27,7 @@ shared_numpy_dtypes.create_shared_dtype('walk_info', [('bc_walk_tol', np.float64
 
 from oceantracker.interpolator.util import triangle_interpolator_util ,  eval_interp
 
-from oceantracker.util.parameter_checking import  ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
 
 # interp info numpy dtype to reduce args passed to numba
 #dtype([('f0', '<i4'), ('f1', '<f8', (2, 3))])
@@ -72,9 +72,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.walk_info = np.zeros((1,),dtype=shared_numpy_dtypes.dtypes['walk_info']) # hs to be an array for numba signature?
         wi = self.walk_info
         wi['bc_walk_tol'] = params['bc_walk_tol']
-        wi['block_dry_cells'] =   si.run_params['block_dry_cells']
+        wi['block_dry_cells'] =   si.settings['block_dry_cells']
         wi['max_triangle_walk_steps'] = params['max_search_steps']
-        wi['has_open_boundary'] = si.case_params['run_params']['open_boundary_type'] == 1,
+        wi['has_open_boundary'] = si.settings['open_boundary_type'] == 1,
 
         info = self.info
         self.vertical_walk_counts = np.zeros((6,), dtype=np.int64)

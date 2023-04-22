@@ -1,7 +1,7 @@
 from oceantracker.fields._base_field import UserFieldBase
 import numpy as np
 from numba import njit
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 class VerticalGradient(UserFieldBase):
 
