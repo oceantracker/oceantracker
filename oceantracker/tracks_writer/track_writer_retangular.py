@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 
 
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 from os import path
 

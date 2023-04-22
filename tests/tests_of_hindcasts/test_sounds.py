@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     if not args.depthaverage:
         case['velocity_modifiers']= [{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0.000}]
-        case['trajectory_modifiers']=[{'class_name': 'oceantracker.trajectory_modifiers.resuspension.BasicResuspension',
+        case['trajectory_modifiers']=[{'class_name': 'oceantracker.resuspension.BasicResuspension',
                                    'critical_friction_velocity': 0.0}]
 
     params={ 'shared_params': {'output_file_base': 'soundstest',

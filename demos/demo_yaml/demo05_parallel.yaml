@@ -1,20 +1,8 @@
-base_case_params:
-  dispersion:
-    A_H: 0.1
-  particle_properties:
-  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
-    decay_time_scale: 86400.0
-    initial_value: 20.0
-    name: Oxygen
-  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-  particle_release_groups: []
-  run_params:
-    block_dry_cells: true
-  tracks_writer:
-    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
-    write_dry_cell_index: true
+add_date_to_run_output_dir: false
+block_dry_cells: true
 case_list:
-- particle_release_groups:
+- case_output_file_tag: test_case_tag_0
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -23,9 +11,8 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
-  run_params:
-    case_output_file_tag: test_case_tag_0
-- particle_release_groups:
+- case_output_file_tag: test_case_tag_1
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -34,9 +21,8 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
-  run_params:
-    case_output_file_tag: test_case_tag_1
-- particle_release_groups:
+- case_output_file_tag: test_case_tag_2
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -45,9 +31,8 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
-  run_params:
-    case_output_file_tag: test_case_tag_2
-- particle_release_groups:
+- case_output_file_tag: test_case_tag_3
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -56,9 +41,8 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
-  run_params:
-    case_output_file_tag: test_case_tag_3
-- particle_release_groups:
+- case_output_file_tag: test_case_tag_4
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -67,8 +51,19 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
-  run_params:
-    case_output_file_tag: test_case_tag_4
+compact_mode: true
+dispersion:
+  A_H: 0.1
+multiprocessing_case_start_delay: 1.0
+output_file_base: demo05_parallel
+particle_properties:
+- class_name: oceantracker.particle_properties.age_decay.AgeDecay
+  decay_time_scale: 86400.0
+  initial_value: 20.0
+  name: Oxygen
+- class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+particle_release_groups: []
+processors: 2
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -91,12 +86,9 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
-shared_params:
-  add_date_to_run_output_dir: false
-  compact_mode: true
-  multiprocessing_case_start_delay: 1.0
-  output_file_base: demo05_parallel
-  processors: 2
-  replicates: 1
-  root_output_dir: output
-  time_step: 600
+root_output_dir: output
+time_step: 600
+tracks_writer:
+  class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
+  write_dry_cell_index: true
+user_note: test of notes

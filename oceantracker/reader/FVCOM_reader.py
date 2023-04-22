@@ -1,5 +1,5 @@
 from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredReader
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 
 import numpy as np

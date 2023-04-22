@@ -39,7 +39,12 @@ class MessageLogger(object):
         return  log_file_name, error_file_name
     #todo add abilty to return excecption/traceback?
     def msg(self, msg_text, warning=False, note=False,
-            hint=None, tag=None, tabs=0, crumbs=None, fatal_error=False,exit_now=False, traceback_str=None):
+            hint=None, tag=None, tabs=0, crumbs=None,
+            fatal_error=False,exit_now=False, exception = None, traceback_str=None):
+
+        if exception is not None:
+            fatal_error = True
+            exit_now = True
 
         if fatal_error: self.fatal_error_count +=1
 
@@ -49,6 +54,7 @@ class MessageLogger(object):
         if fatal_error:
             m[0] += msg_str( '>>> Error: ', tabs)
             self.error_warning_count += 1
+
         elif warning:
             m[0] += msg_str('>>> Warning: ' , tabs)
             self.error_warning_count += 1
@@ -57,14 +63,18 @@ class MessageLogger(object):
         else:
             m[0] += msg_str('', tabs)
 
-        if tag is not None: m[0] += ', in ' + tag + '>'
+        if exception is not None:
+            m[0] += msg_str('exception >>: ' + str(exception), tabs+2)
+
+        if traceback_str is not None:
+            m[0] += msg_str('traceback >>: ' + str(traceback_str), tabs + 2)
 
         m[0] +=  msg_text
 
         # first line complete
 
         if crumbs is not None:
-            m.append(msg_str('In: ' + crumbs, tabs + 1))
+            m.append(msg_str('in: ' + crumbs, tabs + 3))
         if hint is not None:
             m.append(msg_str('Hint: ' + hint, tabs + 3))
 

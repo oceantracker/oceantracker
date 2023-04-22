@@ -1,5 +1,5 @@
 from oceantracker.fields._base_field import UserFieldBase
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 from numba import njit
 import numpy as np

@@ -1,6 +1,6 @@
 import numpy as np
 from oceantracker.util import triangle_utilities_code
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 from oceantracker.reader._base_reader import _BaseReader
 from oceantracker.reader.util import reader_util, shared_reader_memory_util
@@ -64,28 +64,29 @@ class GenericUnstructuredReader(_BaseReader):
         # note which are time buffers
         return grid_time_buffers
 
-    def build_case_runner_reader(self, reader_build_info):
+    def build_case_runner_reader(self):
         # build the reader need for case runner to work, based on shared memory
         # or build from crstch
+        si=self.shared_info
         grid = self.grid
         grid_time_buffers = self.grid_time_buffers
         # time buffers , eg time
         grid_time_buffers.update({'zlevel': None, 'dry_cell_index': None})
 
-        super().build_case_runner_reader(reader_build_info)
+        super().build_case_runner_reader()
 
-        if not reader_build_info['shared_reader_memory']:
+        if not si.settings['shared_reader_memory']:
             # build from scatch
-            nc = self._open_grid_file(reader_build_info)
+            nc = self._open_grid_file(si.reader_build_info)
             grid = self.make_non_time_varying_grid(nc, grid)
             grid_time_buffers = self.make_grid_time_buffers(nc, grid, grid_time_buffers)
             nc.close()
         else:   # shared memory grid
-            for key, item in reader_build_info['grid_constant_arrays_builder'].items():
+            for key, item in si.reader_build_info['grid_constant_arrays_builder'].items():
                     sm = shared_reader_memory_util.create_shared_arrayy(sm_map=item)
                     self.shared_memory['grid'][key] = sm # need to retain a reference to shared or will be deleted
                     grid[key] = sm.data
-            for key, item in reader_build_info['grid_time_buffers_builder'].items():
+            for key, item in si.reader_build_info['grid_time_buffers_builder'].items():
                     sm = shared_reader_memory_util.create_shared_array(sm_map=item)
                     self.shared_memory['grid'][key] = sm  # need to retain a reference to shared or will be deleted
                     grid_time_buffers[key] = sm.data
@@ -94,10 +95,10 @@ class GenericUnstructuredReader(_BaseReader):
         # note if 3D
         grid['nz'] = 1 if grid_time_buffers['zlevel'] is None else grid_time_buffers['zlevel'].shape[2]
         # set up reader fields, using shared memory if requested
-        self.setup_reader_fields(reader_build_info)
+        self.setup_reader_fields()
 
         #useful info for working and json output
-        self.info.update(reader_build_info['file_info'])
+        self.info.update(si.reader_build_info['file_info'])
 
     def check_grid(self,grid):
         tt='Grid Check, '

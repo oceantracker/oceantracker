@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import time_util
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from numba import njit
 class PointRelease(ParameterBaseClass):
     # releases particles at fixed points, inside optional radius
@@ -59,7 +59,7 @@ class PointRelease(ParameterBaseClass):
         reader =  si.classes['reader']
         hindcast_start = reader.info['first_time']
         hindcast_end   = reader.info['last_time']
-        model_time_step = si.shared_params['time_step']
+        model_time_step = si.settings['time_step']
 
         self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,
                                     'last_time_alive':None,

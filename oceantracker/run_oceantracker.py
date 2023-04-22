@@ -38,7 +38,6 @@ if __name__ == '__main__':
     if args.root_output_dir : params['shared_params']['root_output_dir'] = args.root_output_dir
     if args.input_dir       : params['reader']['input_dir']      = args.input_dir
     if args.processors      : params['shared_params']['processors']     = args.processors
-    if args.replicates      : params['shared_params']['replicates']     = args.replicates
     if args.duration        : params['shared_params']['max_duration']   = args.duration
     if args.debug           : params['shared_params']['debug']          = args.debug
 

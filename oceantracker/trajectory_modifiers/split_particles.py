@@ -1,5 +1,5 @@
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.particle_properties.util import particle_comparisons_util
 

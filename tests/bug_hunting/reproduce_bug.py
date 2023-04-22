@@ -138,7 +138,7 @@ def create_case_dict_for_pen(pen_position,depth_range,
             ],
             "trajectory_modifiers": [
                 {
-                    "class_name": "oceantracker.trajectory_modifiers.resuspension.BasicResuspension",
+                    "class_name": "oceantracker.resuspension.BasicResuspension",
                     "critical_friction_velocity": feed_critical_friction_velocity
                 }
             ],
@@ -185,7 +185,7 @@ def create_case_dict_for_pen(pen_position,depth_range,
             ],
             "trajectory_modifiers": [
                 {
-                    "class_name": "oceantracker.trajectory_modifiers.resuspension.BasicResuspension",
+                    "class_name": "oceantracker.resuspension.BasicResuspension",
                     "critical_friction_velocity": shit_critical_friction_velocity
                 }
             ],

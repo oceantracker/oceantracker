@@ -1,6 +1,7 @@
 import numpy as np
 from oceantracker.particle_properties._base_properties import ParticleProperty
-from oceantracker.util.parameter_checking import ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
+from oceantracker.particle_properties.util import particle_operations_util
 
 class DistanceTravelled(ParticleProperty):
 
@@ -26,5 +27,6 @@ class DistanceTravelled(ParticleProperty):
         # faster in numba?
         dx = part_prop['x'].get_values(active) - part_prop['x_last_good'].get_values(active)
         ds = np.sqrt(np.power(dx[:, 0], 2), np.power(dx[:, 1], 2)).reshape((-1,))
-        self.add_values_to(ds, active)
+
+        particle_operations_util.add_values_to(self.data, ds, active)
 

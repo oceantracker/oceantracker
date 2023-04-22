@@ -6,38 +6,6 @@ from oceantracker.util import time_util
 
 crumb_seperator= ' >> '
 
-def check_top_level_param_keys_and_structure(params, template, msg_logger, required_keys=[], required_alternatives=[], crumbs=None):
-    # ensure top level parameter dict has all keys, and any required ones
-
-    # check for required keys
-    for key in required_keys:
-        if key not in params:
-            msg_logger.msg('Required param key  "' + key + '" is missing', crumbs=crumbs, fatal_error=True)
-
-    # check for required alternatives eg. required_alternatives=[['base_case_params','case_list' ]]
-    for l in required_alternatives:
-        has_alternative=False
-        for key in l:
-            if key in params:has_alternative=True
-        if not has_alternative:
-            msg_logger.msg( 'Params  must contain at least one of keys ' + str(l) + ' ',crumbs=crumbs, exception = True)
-
-    # make sure all template keys are present
-    for key, item in template.items():
-        if key not in params:
-            if type(item) == dict: params[key] = {}
-            if type(item) == list: params[key] = []
-        elif  type(params[key]) != type(item):
-            msg_logger.msg('Param key = "' + key + '" must be type ' + str(type(item)) + ' not type' + str(type(params[key])),crumbs=crumbs, fatal_error=True)
-
-    # key for unexpected keys
-    for key in params.keys():
-        if key not in template.keys():
-            msg_logger.msg( 'Unexpected key = "' + key + '" in parameters', warning=True, crumbs=crumbs,
-                  hint= 'must be one of keys = ' + str(list(template.keys())), tabs=1)
-
-    return params
-
 def  merge_params_with_defaults(params, default_params, base_case, msg_logger, crumbs= '',  check_for_unknown_keys=True):
     # merge nested paramteres with defaults, returns a copy of params updated
     # if param key is in base case then use base case rather than value from ParamDictValueChecker.get_default()
@@ -53,15 +21,13 @@ def  merge_params_with_defaults(params, default_params, base_case, msg_logger, c
         msg_logger.msg('merge_with_defaults, parameter ' + crumbs + 'params must be a dictionary', fatal_error= True,exit_now=True)
 
     if type(default_params) != dict:
-        msg_logger.msg('merge_with_defaults, parameter ' + crumbs + 'default_params must be a dictionary', fatal_error= True,exit_now=True)
-    
+        msg_logger.msg('merge_with_defaults, parameter ' + crumbs + 'default_params must be a dictionary,  got type' + str(type(dp)), fatal_error= True,exit_now=True)
 
     # first check if any keys in base or case params are not in defaults
     if check_for_unknown_keys:
         for key in list(base_case.keys())+list(params.keys()):
-           if key not in default_params:
+           if  key not in default_params :
                msg_logger.msg('non-standard parameter:' + crumbs + crumb_seperator + key, warning=True)
-
 
     for key, item in default_params.items():
         parent_crumb = crumbs + crumb_seperator + key
@@ -69,7 +35,7 @@ def  merge_params_with_defaults(params, default_params, base_case, msg_logger, c
         if key not in params: params[key] = None  # add default key to params if not present
         if key not in base_case: base_case[key] = None  # add default key to params if not present
 
-        if type(item) == ParamDictValueChecker:
+        if type(item) == ParamValueChecker:
             params[key] = CheckParameterValues(key, item, params[key], base_case[key], crumbs, msg_logger)
 
         elif type(item) == ParameterListChecker:
@@ -83,13 +49,15 @@ def  merge_params_with_defaults(params, default_params, base_case, msg_logger, c
 
         elif type(item) == dict:
             # nested param dict
-            # for some reason ommiting base case keyword does not mean recursive call gets default, gets other unknown value??
+            #todo remove thsi option in fafoour of ParamValueDict of ParamClassDict
+
+            # for some reason omiting base case keyword does not mean recursive call gets default, gets other unknown value??
             bc = base_case[key] if key in base_case and base_case[key] is not None else {}
             params[key] = merge_params_with_defaults(params[key], item, bc,  msg_logger, crumbs=parent_crumb + crumb_seperator + key)
-            a=1
+
         else:
-            msg_logger.msg('merge_params_with_defaults items in default dictionary can be ParamDictValueChecker, ParameterListChecker, or a nested param dict, '
-                           + parent_crumb,fatal_error = True)
+            msg_logger.msg('merge_params_with_defaults items in default dictionary can be ParamDictValueChecker, ParameterListChecker, or a nested param dict, ',
+                           crumbs= parent_crumb,fatal_error = True)
 
     return params
 
@@ -115,13 +83,15 @@ def  CheckParameterValues(key,value_checker, user_param, base_param, crumbs, msg
 
     return value
 
-class ParamDictValueChecker(object):
+class ParamValueChecker(object):
     def __init__(self, default_value, dtype, is_required=False, list_contains_type=None,
                  min=None, max=None,
                  possible_values=None,
                  doc_str=None,
                  class_doc_feature=None,
                  obsolete = None):
+
+        # todo add crumb trail param
 
         if default_value is not None and type(default_value) == dict:
             raise ValueError('"value" of default set by ParamValueChecker (PVC) can not be a dictionary, as all dict in default_params are assumed to also be parameter dict in their own right')
@@ -216,21 +186,7 @@ class ParamDictValueChecker(object):
 
         return value  # value may be None if default or given value is None
 
-class ClassParamDictChecker(ParamDictValueChecker):
-    # checks normal values plus extra checks of class name etc
 
-    def __init__(self,default_class=None, is_required=False,
-                 doc_str=None,
-                 class_doc_feature=None,
-                obsolete = None):
-
-        # must be a dict
-        super().__init__(None, dict, is_required=is_required, doc_str=doc_str,  class_doc_feature=class_doc_feature, obsolete = obsolete)
-        self.info['default_class'] = default_class
-
-    def check_value(self, crumb_trail, value, msg_logger):
-
-        super().check_value(self, crumb_trail, value, msg_logger)
 
 class ParameterListChecker(object):
     # checks parameter list values
@@ -308,6 +264,3 @@ class ParameterListChecker(object):
                     #todo add possible values checks
 
         return complete_list
-
-
-

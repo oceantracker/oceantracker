@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
 
-from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamDictValueChecker as PVC
+from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC
 
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 
@@ -148,8 +148,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         stats_grid = self.grid
 
         # set up pointers to particle properties
-        p_groupID = part_prop['IDrelease_group'].dataInBufferPtr()
-        p_x= part_prop['x'].dataInBufferPtr()
+        p_groupID = part_prop['IDrelease_group'].used_buffer()
+        p_x= part_prop['x'].used_buffer()
 
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                          self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
@@ -262,9 +262,9 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
         # set up pointers to particle properties
         part_prop = self.shared_info.classes['particle_properties']
-        p_groupID = part_prop['IDrelease_group'].dataInBufferPtr()
-        p_x = part_prop['x'].dataInBufferPtr()
-        p_age = part_prop['age'].dataInBufferPtr()
+        p_groupID = part_prop['IDrelease_group'].used_buffer()
+        p_x = part_prop['x'].used_buffer()
+        p_age = part_prop['age'].used_buffer()
 
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'], self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, stats_grid['age_bin_edges'], p_age, sel)
 

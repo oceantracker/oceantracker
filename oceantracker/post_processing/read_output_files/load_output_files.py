@@ -109,9 +109,9 @@ def _get_user_class_filename(user_class_type, case_info,nsequence):
     return file_name
 
 def _extract_useful_params(case_info, d):
-    d.update({'particle_status_flags': case_info['particles']['particle_status_flags'],
+    d.update({'particle_status_flags': case_info['particle_status_flags'],
                  'particle_release_group_info': case_info['particle_release_group_info']})
-    d['full_params'] = case_info['full_params']
+    d['full_case_params'] = case_info['full_case_params']
 
     return d
 

@@ -1,62 +1,56 @@
-base_case_params:
-  dispersion:
-    A_H: 0.1
-  particle_properties:
-  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
-    decay_time_scale: 86400.0
-    initial_value: 20.0
-    name: Oxygen
-  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-  particle_release_groups:
+add_date_to_run_output_dir: false
+dispersion:
+  A_H: 0.1
+duration: 259200
+output_file_base: demo03_heatmaps
+particle_properties:
+- class_name: oceantracker.particle_properties.age_decay.AgeDecay
+  decay_time_scale: 86400.0
+  initial_value: 20.0
+  name: Oxygen
+- class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+particle_release_groups:
+- points:
+  - - 1596000
+    - 5486000
+  pulse_size: 2000
+  release_interval: 7200
+  release_radius: 100.0
+- points:
+  - - 1596000
+    - 5490000
+  pulse_size: 2000
+  release_interval: 7200
+particle_statistics:
+- calculation_interval: 1800
+  class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
+  count_start_date: '2020-06-01 21:16:07'
+  grid_size:
+  - 220
+  - 221
+  particle_property_list:
+  - water_depth
+- calculation_interval: 1800
+  class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
+  count_status_in_range:
+  - moving
+  - moving
+  particle_property_list:
+  - water_depth
+  polygon_list:
   - points:
-    - - 1596000
-      - 5486000
-    pulse_size: 2000
-    release_interval: 7200
-    release_radius: 100.0
-  - points:
-    - - 1596000
-      - 5490000
-    pulse_size: 2000
-    release_interval: 7200
-  particle_statistics:
-  - calculation_interval: 1800
-    class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
-    count_start_date: '2020-06-01 21:16:07'
-    grid_size:
-    - 220
-    - 221
-    particle_property_list:
-    - water_depth
-  - calculation_interval: 1800
-    class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
-    count_status_in_range:
-    - moving
-    - moving
-    particle_property_list:
-    - water_depth
-    polygon_list:
-    - points:
-      - - 1597682.1237
-        - 5489972.7479
-      - - 1598604.1667
-        - 5490275.5488
-      - - 1598886.4247
-        - 5489464.0424
-      - - 1597917.3387
-        - 5489000
-      - - 1597300
-        - 5489000
-      - - 1597682.1237
-        - 5489972.7479
-  run_params:
-    duration: 259200
-    user_note: test of notes
-    write_tracks: false
-  tracks_writer:
-    turn_on_write_particle_properties_list:
-    - n_cell
-    write_dry_cell_index: true
+    - - 1597682.1237
+      - 5489972.7479
+    - - 1598604.1667
+      - 5490275.5488
+    - - 1598886.4247
+      - 5489464.0424
+    - - 1597917.3387
+      - 5489000
+    - - 1597300
+      - 5489000
+    - - 1597682.1237
+      - 5489972.7479
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -79,8 +73,11 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
-shared_params:
-  add_date_to_run_output_dir: false
-  output_file_base: demo03_heatmaps
-  root_output_dir: output
-  time_step: 900
+root_output_dir: output
+time_step: 900
+tracks_writer:
+  turn_on_write_particle_properties_list:
+  - n_cell
+  write_dry_cell_index: true
+user_note: test of notes
+write_tracks: false

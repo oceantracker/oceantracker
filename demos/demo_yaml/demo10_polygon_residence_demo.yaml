@@ -1,39 +1,37 @@
-base_case_params:
-  dispersion:
-    A_H: 0.1
-  particle_properties:
-  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
-    decay_time_scale: 86400.0
-    initial_value: 20.0
-    name: Oxygen
-  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-  particle_release_groups:
-  - class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
-    name: near_shore
-    points:
-    - - 1594682.1237
-      - 5483472.7479
-    - - 1595604.1667
-      - 5483775.5488
-    - - 1595886.4247
-      - 5482964.0424
-    - - 1594917.3387
-      - 5482500.0
-    - - 1594300.0
-      - 5482500.0
-    - - 1594682.1237
-      - 5483472.7479
-    pulse_size: 100
-    release_interval: 43200
-  particle_statistics:
-  - calculation_interval: 1800
-    class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
-    name_of_polygon_release_group: near_shore
-  run_params:
-    block_dry_cells: true
-  tracks_writer:
-    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
-    write_dry_cell_index: true
+add_date_to_run_output_dir: false
+block_dry_cells: true
+compact_mode: true
+dispersion:
+  A_H: 0.1
+output_file_base: demo10_polygon_residence_demo
+particle_properties:
+- class_name: oceantracker.particle_properties.age_decay.AgeDecay
+  decay_time_scale: 86400.0
+  initial_value: 20.0
+  name: Oxygen
+- class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+particle_release_groups:
+- class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
+  name: near_shore
+  points:
+  - - 1594682.1237
+    - 5483472.7479
+  - - 1595604.1667
+    - 5483775.5488
+  - - 1595886.4247
+    - 5482964.0424
+  - - 1594917.3387
+    - 5482500.0
+  - - 1594300.0
+    - 5482500.0
+  - - 1594682.1237
+    - 5483472.7479
+  pulse_size: 100
+  release_interval: 43200
+particle_statistics:
+- calculation_interval: 1800
+  class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
+  name_of_polygon_release_group: near_shore
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -56,9 +54,9 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
-shared_params:
-  add_date_to_run_output_dir: false
-  compact_mode: true
-  output_file_base: demo10_polygon_residence_demo
-  root_output_dir: output
-  time_step: 600
+root_output_dir: output
+time_step: 600
+tracks_writer:
+  class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
+  write_dry_cell_index: true
+user_note: test of notes
