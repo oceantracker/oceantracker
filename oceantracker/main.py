@@ -121,7 +121,7 @@ class _RunOceanTrackerClass(object):
 
         # complete the setup with message logger
         ml.insert_screen_line()
-        ml.progress_marker('Running ' + common_info.package_fancy_name + ' started ' + str(datetime.now()))
+        ml.msg('Running ' + common_info.package_fancy_name + ' started ' + str(datetime.now()))
         ml.progress_marker('Starting: ' + run_builder['settings']['output_file_base'])
         run_builder = self.setup_check_python_version(run_builder, ml)
 
@@ -146,6 +146,7 @@ class _RunOceanTrackerClass(object):
         # now run cases
         full_runInfoJSON_file_name, has_errors = self._run(run_builder, case_params_list,reader)
 
+        ml.close()
         return full_runInfoJSON_file_name, has_errors
 
     def setup_output_folders_and_msg_loger_file(self, run_builder, raw_params):
@@ -311,8 +312,8 @@ class _RunOceanTrackerClass(object):
             # check if trying to change param which are shared by all runs
             for key in common_info.shared_params:
                 if key in case['settings']:
-                    msg_logger.msg(f'Cannot set parameter {key} within a case, as must be the same for all cases',
-                                   warning=True, crumbs= ', ignoring this value and using top level value for' + tag)
+                    msg_logger.msg(f'Cannot set parameter {key} within a case, it must be the same for all cases, ignoring this value' ,
+                                   warning=True, hint ='move this param to top level or delete  from ' + tag)
                     case['settings'].pop(key)
 
             # merge params
@@ -371,7 +372,7 @@ class _RunOceanTrackerClass(object):
         reader_build_info = run_builder['reader_build_info']
         reader_build_info['file_info'] , reader_build_info['hindcast_is3D'] = reader.get_hindcast_files_info() # get file lists
 
-        msg_logger.progress_marker('Finished sorting hyrdo model  files ', tabs=3)
+        msg_logger.progress_marker('Finished sorting hyrdo-model  files ', tabs=3)
 
         # read and set up reader grid now as  required for writing grid file
         # also if requested shared grid memory is set up

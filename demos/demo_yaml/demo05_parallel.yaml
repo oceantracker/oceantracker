@@ -2,7 +2,7 @@ add_date_to_run_output_dir: false
 block_dry_cells: true
 case_list:
 - case_output_file_tag: test_case_tag_0
-  particle_release_groups:
+  particle_release_groups_list:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -11,8 +11,9 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
+  root_output_dir: bad
 - case_output_file_tag: test_case_tag_1
-  particle_release_groups:
+  particle_release_groups_list:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -21,8 +22,9 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
+  root_output_dir: bad
 - case_output_file_tag: test_case_tag_2
-  particle_release_groups:
+  particle_release_groups_list:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -31,8 +33,9 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
+  root_output_dir: bad
 - case_output_file_tag: test_case_tag_3
-  particle_release_groups:
+  particle_release_groups_list:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -41,8 +44,9 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
+  root_output_dir: bad
 - case_output_file_tag: test_case_tag_4
-  particle_release_groups:
+  particle_release_groups_list:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
@@ -51,6 +55,7 @@ case_list:
       - 5486100
     pulse_size: 2
     release_interval: 10800
+  root_output_dir: bad
 compact_mode: true
 dispersion:
   A_H: 0.1

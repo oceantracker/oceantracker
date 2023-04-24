@@ -39,10 +39,10 @@ ________________________________________
     
         ~~~        
         conda create -n oceantracker python=3.10 
-        conda activate oceantracker   
+        conda activate oceantracker
         conda install -c conda-forge numba
-        conda install -c anaconda numpy
         conda install -c conda-forge netcdf4
+        conda install -c anaconda numpy
         conda install -c anaconda scipy
         conda install -c conda-forge pyproj
         conda install -c anaconda pyyaml    
@@ -55,4 +55,8 @@ ________________________________________
 
 5.  Make oceantracker module findable
 
-``pip install --no-deps -e`` 
+``pip install --no-deps -e .`` 
+
+6. To add ability to make animation movies 
+
+   ``conda install -c conda-forge ffmpeg``

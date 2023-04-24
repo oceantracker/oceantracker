@@ -133,6 +133,7 @@ class Solver(ParameterBaseClass):
         info['computation_ended'] = datetime.now()
         info['computation_duration'] = datetime.now() -computation_started
 
+    #@profile
     def pre_step_bookkeeping(self, nt,time_sec):
         self.code_timer.start('pre_step_bookkeeping')
         si = self.shared_info
@@ -193,6 +194,7 @@ class Solver(ParameterBaseClass):
 
         self.code_timer.stop('pre_step_bookkeeping')
 
+    #@profile
     def integration_step(self, time_sec, is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties

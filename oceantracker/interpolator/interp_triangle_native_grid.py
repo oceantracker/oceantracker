@@ -104,7 +104,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             #print('vcell', self.info['n_total_vertical_search_steps'] / active.shape[0])
             self.code_timer.stop('find_depth_cell')
 
-
+    #@profile
     def locate_BCwalk(self,xq, step_dt_fraction, active):
         # Bary Centric walk, flags land triangles in numba code
         si = self.shared_info
@@ -326,7 +326,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                      bc_cords, active)
                 return  output
 
-
+    #@profile
     def get_depth_cell(self, xq, nb, step_dt_fraction,active):
         # find depth cell number starting with a guess of previous depth cell
         # for fixed fractional depth grid

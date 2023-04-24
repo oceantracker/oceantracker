@@ -125,7 +125,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si =self.shared_info
 
         si.msg_logger.insert_screen_line()
-        si.msg_logger.progress_marker('Starting case number %3.0f, ' % si.processor_number + ' '
+        si.msg_logger.msg('Starting case number %3.0f, ' % si.processor_number + ' '
                                       + si.output_files['output_file_base']
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
         si.msg_logger.insert_screen_line()
