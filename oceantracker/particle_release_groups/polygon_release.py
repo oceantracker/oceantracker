@@ -32,7 +32,7 @@ class PolygonRelease(PointRelease):
 
         self.polygon = InsidePolygon(verticies = info['points'])
 
-        info['polygon_area'] = self.polygon.get_area()
+        info['polygon_area'] = self.polygon._get_area()
 
         if info['polygon_area']  < 1:
             si.msg_logger.msg('Release group = ' + str(self.info['instance_number'])

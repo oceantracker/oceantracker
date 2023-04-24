@@ -127,7 +127,7 @@ pg= deepcopy(p5['particle_release_groups'][0])
 p5['particle_release_groups'] =[]
 
 pg.update({'pulse_size': 2})
-c= {'particle_release_groups' : [pg]}
+c= {'particle_release_groups_list' : [pg],'root_output_dir': 'bad'}
 p5['case_list'] = []
 for n in range(5):
     p= deepcopy(c)
