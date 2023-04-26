@@ -22,7 +22,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
                                  'output_step_count': PVC(1, int, min=1),
                                  'calculation_interval' : PVC(1, float, min=1) # not 1 to keep file size small
                                  })
-    def initialize(self):
+    def initial_setup(self):
         # set up data buffer and output variables
         self.set_up_data_buffers()
         self.set_up_output_file()

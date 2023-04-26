@@ -66,9 +66,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             self._make_and_initialize_user_classes()
 
             # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
-            si.classes['dispersion'].initialize()
+            si.classes['dispersion'].initial_setup()
             if si.hydro_model_is3D:
-                si.classes['resuspension'].initialize()
+                si.classes['resuspension'].initial_setup()
 
             # todo set up memory for all defined particle properties
             # todo memory packing is being developed and evaluated for speed
@@ -240,7 +240,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             # make instance and initialise
             i = si.create_class_instance_as_interator('particle_release_groups', 'user', pg_params, crumbs='Adding release groups')
-            i.initialize()
+            i.initial_setup()
 
             # set up release times so duration of run known
             i.set_up_release_times(n)
@@ -261,8 +261,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         t_last  = np.max(np.asarray(last_time_alive))
 
         # time range in forwards order
-        si.msg_logger.progress_marker('set up particle release groups')
-
         return t_first, t_last
 
     def _initialize_solver_core_classes_and_release_groups(self):
@@ -272,7 +270,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         reader= si.classes['reader']
         # start with setting up reader as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
-        si.classes['field_group_manager'].initialize() # needed here to add reader fields inside reader build
+        si.classes['field_group_manager'].initial_setup()  # needed here to add reader fields inside reader build
         reader.build_case_runner_reader()
 
         # now know if 3D hindcast
@@ -334,11 +332,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.particle_buffer_size = si.settings['particle_buffer_size']
 
         if si.write_tracks:
-            si.classes['tracks_writer'].initialize()
+            si.classes['tracks_writer'].initial_setup()
 
         # initialize the rest of the core classes
-        for name in ['particle_group_manager', 'interpolator', 'solver'] : # order may matter?
-            si.classes[name].initialize()
+        #todo below apply to all core classes, reader
+        for name in ['field_group_manager','particle_group_manager', 'interpolator', 'solver'] : # order may matter?
+            si.classes[name].initial_setup()
+
+        # do final setp which may depend on settingd from intitial st up
+        for name in ['field_group_manager','particle_group_manager', 'interpolator', 'solver'] : # order may matter?
+            si.classes[name].final_setup()
 
         si.msg_logger.progress_marker('initialized all core classes')
 
@@ -357,7 +360,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for n, params in enumerate(si.case_runner_params['class_lists']['fields']):
             i = si.create_class_instance_as_interator('fields', 'user', params, crumbs='Adding "fields" from user params')
-            i.initialize()
+            i.initial_setup()
             # now add custom prop based on  this field
             pgm.create_particle_property('from_fields', dict(name=i.params['name'], vector_dim=i.get_number_components(),
                                                              time_varying=i.is_time_varying(),
@@ -381,7 +384,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                      'particle_concentrations', 'event_loggers','status_modifiers']:
             for params in si.case_runner_params['class_lists'][user_type]:
                 i = si.create_class_instance_as_interator(user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
-                i.initialize()  # some require instanceID from above add class to initialise
+                i.initial_setup()  # some require instanceID from above add class to initialise
         pass
     # ____________________________
     # internal methods below

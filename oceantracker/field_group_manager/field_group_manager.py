@@ -22,7 +22,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         self.n_buffer = np.zeros((2, ), dtype=np.int32)
 
-    def initialize(self):
+    def initial_setup(self):
         si=self.shared_info
 
 
@@ -61,6 +61,8 @@ class FieldGroupManager(ParameterBaseClass):
 
         return active
 
+
+
     def interp_named_field_at_particle_locations(self, fieldName, active, output=None):
         # interp reader fieldName inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's fieldName
@@ -92,7 +94,7 @@ class FieldGroupManager(ParameterBaseClass):
         si = self.shared_info
         i = si.create_class_instance_as_interator('fields', field_type, field_params, crumbs=crumbs + ' adding  a field ')
         i.info['field_type'] = field_type
-        i.initialize()
+        i.initial_setup()
         return i
 
 

@@ -4,7 +4,7 @@ import numpy as np
 from oceantracker.util import time_util
 from datetime import datetime
 
-from oceantracker.particle_properties.util import particle_operations_util
+from oceantracker.particle_properties import particle_operations_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
@@ -24,7 +24,7 @@ class Solver(ParameterBaseClass):
                         'screen_output_step_count': PVC(None, int, obsolete='use shared_parameter "screen_output_time_interval" in seconds')
                             })
 
-    def initialize(self):
+    def initial_setup(self):
 
         self.code_timer.start('solver_initialization')
         si = self.shared_info

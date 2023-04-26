@@ -1,7 +1,8 @@
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
-from oceantracker.particle_properties.util import particle_comparisons_util
+from oceantracker.particle_properties import particle_comparisons_util
+
 
 # proptype for how to  split particles
 class SplitParticles(_BaseTrajectoryModifier):
@@ -15,9 +16,9 @@ class SplitParticles(_BaseTrajectoryModifier):
                                  'split_status_equal_to': PVC(None,  str, possible_values=particle_info['status_flags'].keys()),
                                  'probability_of_splitting': PVC(1.0, float, min=0., max=1.)
                                  })
-    def initialize(self):
+    def initial_setup(self):
 
-        super().initialize()  # set up using regular grid for  stats
+        super().initial_setup()  # set up using regular grid for  stats
         si= self.shared_info
         self.time_of_last_split = si.solver_info['model_start_time']
 

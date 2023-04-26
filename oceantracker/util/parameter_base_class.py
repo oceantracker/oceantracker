@@ -23,7 +23,7 @@ class ParameterBaseClass(object):
     code_timer = basic_util.BlockTimer()
     shared_info = SharedInfoClass()  # for all to access
 
-    def initialize(self): pass
+    def initial_setup(self): pass
 
     def close(self):  pass
 
@@ -40,6 +40,15 @@ class ParameterBaseClass(object):
                                  'requires_3D': PVC(False, bool)
                                  })
 
+
+    def intitial_setup(self):
+        # setup done before other classes set
+        pass
+
+    def final_setup(self):
+        # setup done after all other classes have intitial_setup, ie things that depend on settingas of othe classes
+        # eg particle buffer size
+        pass
 
     def add_default_params(self,d=None):
         # add default as key word or dictionary

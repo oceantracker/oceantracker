@@ -13,8 +13,8 @@ class RandomWalkVaryingAZ(RandomWalk):
         self.add_default_params({ } )
 
 
-    def initialize(self):
-        super().initialize()
+    def initial_setup(self):
+        super().initial_setup()
         si=self.shared_info
         pgm = si.classes['particle_group_manager']
 

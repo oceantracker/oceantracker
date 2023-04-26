@@ -49,7 +49,7 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_yaml/demo06_reefstranding.yaml
+.. literalinclude:: ../../../demos/demo_param_files/demo06_reefstranding.yaml
     :language: Yaml
     :caption:
 
@@ -108,7 +108,7 @@ Vertical slice showing one example of a falling particle and resuspension, with 
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_yaml/demo58_bottomBounce.yaml
+.. literalinclude:: ../../../demos/demo_param_files/demo58_bottomBounce.yaml
     :language: Yaml
     :caption:
 
@@ -164,7 +164,7 @@ Particles with splitting in two every 6 hours and a 5% chance of dying every 6 h
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_yaml/demo08_particle_splitting.yaml
+.. literalinclude:: ../../../demos/demo_param_files/demo08_particle_splitting.yaml
     :language: Yaml
     :caption:
 

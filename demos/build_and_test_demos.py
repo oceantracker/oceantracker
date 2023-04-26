@@ -256,28 +256,24 @@ s50 = deepcopy(schsim_base_params)
 params.append (s50)
 
 # schsim 3D
-s55 = deepcopy(schsim_base_params)
-s55.update({'output_file_base' : 'demo55_SCHISM_3D_fall_velocity'})
-s55['reader'].update({'depth_average': False,'field_variables_to_depth_average' :[ 'water_velocity', 'salt', 'water_temperature']})
+s56 = deepcopy(schsim_base_params)
+s56['reader'].update({'depth_average': False,'field_variables_to_depth_average' :[ 'water_velocity', 'salt', 'water_temperature']})
 
-s55['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
+s56['particle_release_groups']=[{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
                                                      'pulse_size': 10, 'release_interval': 3600},
-                                                    {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+                                {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
                                     'points': poly_points, 'z_range' :[-2, -4.],
                                     'pulse_size': 10, 'release_interval':  3600}
                                                     ]
-s55['velocity_modifiers']= [
+s56['velocity_modifiers']= [
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
 ]
-s55['particle_statistics']=[
+s56['particle_statistics']=[
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
                       'grid_size': [120, 121]}]
-#s55['base_case_params']['dispersion'] = {'A_V': 0,'A_H': 0} # testing
-params.append(s55)
 
-# schsim 3D, sometimes resupend
-s56 = deepcopy(s55)
+
 s56['resuspension'] = {'critical_friction_velocity': .005}
 s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
 s56['velocity_modifiers']= [
@@ -385,7 +381,7 @@ def make_demo_python(demo_name):
     lines = text_file.read().splitlines()
 
 
-    out += ['params = json_util.read_JSON("..\\demo_json\\'+ demo_name +'.json")','']
+    out += ['params = json_util.read_JSON("..\\demo_param_files\\'+ demo_name +'.json")','']
     out += ["runInfo_file_name, has_errors = main.run(params)", '']
     out +=['# output is now in output/' +demo_name,'']
 
@@ -422,10 +418,9 @@ def make_demo_python(demo_name):
 def build_demos(testrun=False):
     # make json/ymal
 
-    JSONdir ='demo_json'
-    if not path.isdir(JSONdir): mkdir(JSONdir)
-    YAMLdir = 'demo_yaml'
-    if not path.isdir(YAMLdir): mkdir(YAMLdir)
+    paramdir ='demo_param_files'
+    if not path.isdir(paramdir): mkdir(paramdir)
+
     demo_dir = path.dirname(__file__)
     input_dir = path.join(demo_dir, 'demo_hindcast') # hindcast location
 
@@ -437,11 +432,8 @@ def build_demos(testrun=False):
         demo['reader']['input_dir'] = input_dir
         demo['root_output_dir'] = 'output' # wil put in cwd
 
-        json_file=path.join(JSONdir, demo_name + '.json')
-        json_util.write_JSON(json_file, demo)
-
-        yaml_file= path.join(YAMLdir, demo_name + '.yaml')
-        yaml_util.write_YAML(yaml_file, demo)
+        json_util.write_JSON(path.join(paramdir, demo_name + '.json'), demo)
+        yaml_util.write_YAML(path.join(paramdir, demo_name + '.yaml'), demo)
 
         make_demo_python(demo_name)
         if testrun:
@@ -457,7 +449,7 @@ def build_demos(testrun=False):
     if testrun:
         from minimal_example import params as min_params
 
-        json_util.write_JSON(path.join(JSONdir, 'minimal_example.json'), min_params)
+        json_util.write_JSON(path.join(paramdir, 'minimal_example.json'), min_params)
         yaml_util.write_YAML(path.join(YAMLdir, 'minimal_example.yaml'), min_params)
 
 

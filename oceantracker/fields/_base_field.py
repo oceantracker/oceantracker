@@ -15,7 +15,7 @@ class _BaseField(ParameterBaseClass):
                                   'num_components': PVC(None, int,is_required=True),
                                   })
 
-    def initialize(self):
+    def initial_setup(self):
 
         si = self.shared_info
         grid = si.classes['reader'].grid

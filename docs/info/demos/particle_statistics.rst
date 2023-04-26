@@ -60,7 +60,7 @@ along with counts of particles inside polygons
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_yaml/demo03_heatmaps.yaml
+.. literalinclude:: ../../../demos/demo_param_files/demo03_heatmaps.yaml
     :language: Yaml
     :caption:
 

@@ -179,8 +179,10 @@ class GenericUnstructuredReader(_BaseReader):
         # build adjacency etc from triangulation
         msg_logger = self.msg_logger
 
-        msg_logger.progress_marker('building triangle adjacency matrix')
+        msg_logger.progress_marker('building node to triangles map')
         grid['node_to_tri_map'],grid['tri_per_node'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
+
+        msg_logger.progress_marker('building triangle adjacency matrix')
         grid['adjacency'] =  triangle_utilities_code.build_adjacency_from_node_cell_map(grid['node_to_tri_map'],grid['tri_per_node'], grid['triangles'])
 
         msg_logger.progress_marker('building domain and island outlines')

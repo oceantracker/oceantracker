@@ -56,7 +56,7 @@ For this 3D hindcast, grey particles are stranded on the bottom, green ones are 
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_yaml/minimal_example.yaml
+.. literalinclude:: ../../../demos/demo_param_files/minimal_example.yaml
     :language: Yaml
     :caption:
 

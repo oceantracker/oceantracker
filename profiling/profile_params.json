@@ -1,21 +1,19 @@
 {
-    "output_file_base": "demo55_SCHISM_3D_fall_velocity",
+    "root_output_dir": "F:\\OceanTrackerOuput\\OceanTrackerProfiling",
+    "output_file_base": "Sounds",
+    "max_duration": 86400,
     "debug": true,
-    "time_step": 120,
+    "time_step": 600,
+    "screen_output_time_interval": 600,
     "reader": {
         "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
-        "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "demoHindcastSchism3D.nc",
+        "input_dir": "G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2008",
+        "file_mask": "schism_marl200801*.nc",
         "field_variables": {
             "water_temperature": "temp"
-        },
-        "depth_average": false,
-        "field_variables_to_depth_average": [
-            "water_velocity",
-            "salt",
-            "water_temperature"
-        ]
+        }
     },
+    "write_tracks": false,
     "dispersion": {
         "A_H": 0.2,
         "A_V": 0.001
@@ -24,23 +22,39 @@
         {
             "points": [
                 [
-                    1594500,
-                    5487000,
+                    1595000,
+                    5482600.0,
                     -1
                 ],
                 [
-                    1594500,
-                    5483000,
+                    1599000,
+                    5486200,
                     -1
                 ],
                 [
-                    1598000,
-                    5486100,
+                    1597682.1237,
+                    5489972.7479,
+                    -1
+                ],
+                [
+                    1598604.1667,
+                    5490275.5488,
+                    -1
+                ],
+                [
+                    1598886.4247,
+                    5489464.0424,
+                    -1
+                ],
+                [
+                    1597917.3387,
+                    5489000,
                     -1
                 ]
             ],
-            "pulse_size": 10,
-            "release_interval": 3600
+            "pulse_size": 200,
+            "release_interval": 3600,
+            "allow_release_in_dry_cells": true
         },
         {
             "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
@@ -70,11 +84,7 @@
                     5489972.7479
                 ]
             ],
-            "z_range": [
-                -2,
-                -4.0
-            ],
-            "pulse_size": 10,
+            "pulse_size": 200,
             "release_interval": 3600
         }
     ],
@@ -123,9 +133,42 @@
                             5489972.7479
                         ]
                     ]
-                },
+                }
+            ]
+        }
+    ],
+    "velocity_modifiers": [
+        {
+            "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
+            "variance": 0.001
+        }
+    ],
+    "particle_statistics": [
+        {
+            "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased",
+            "calculation_interval": 10800,
+            "particle_property_list": [
+                "water_depth"
+            ],
+            "grid_size": [
+                220,
+                221
+            ],
+            "min_age_to_bin": 0.0,
+            "max_age_to_bin": 259200.0,
+            "age_bin_size": 3600.0
+        },
+        {
+            "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased",
+            "calculation_interval": 10800,
+            "particle_property_list": [
+                "water_depth"
+            ],
+            "min_age_to_bin": 0.0,
+            "max_age_to_bin": 259200.0,
+            "age_bin_size": 3600.0,
+            "polygon_list": [
                 {
-                    "user_polygon_name": "B",
                     "points": [
                         [
                             1597682.1237,
@@ -141,11 +184,11 @@
                         ],
                         [
                             1597917.3387,
-                            5487000
+                            5489000
                         ],
                         [
                             1597300,
-                            5487000
+                            5489000
                         ],
                         [
                             1597682.1237,
@@ -155,25 +198,5 @@
                 }
             ]
         }
-    ],
-    "velocity_modifiers": [
-        {
-            "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
-            "mean": -0.001
-        }
-    ],
-    "particle_statistics": [
-        {
-            "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
-            "calculation_interval": 3600,
-            "particle_property_list": [
-                "water_depth"
-            ],
-            "grid_size": [
-                120,
-                121
-            ]
-        }
-    ],
-    "root_output_dir": "output"
+    ]
 }

@@ -12,7 +12,7 @@ class _BaseTrajectoryModifer(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'name': PVC(None,str),'is3D': PVC(False,bool)})
 
-    def initialize(self,**kwargs): pass
+    def initial_setup(self, **kwargs): pass
 
         # set up shortcut to dat requied to modify velocity  below      eg.
         #self.x_data= self.aunt('particle_group_manager').property_data_ptr('x')

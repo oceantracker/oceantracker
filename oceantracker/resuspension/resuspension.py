@@ -27,7 +27,7 @@ class BasicResuspension(_BaseResuspension):
                         required_fields_list=['water_velocity'],
                         required_props_list=['status','water_velocity'], requires3D=True)
 
-    def initialize(self,**kwargs):
+    def initial_setup(self, **kwargs):
         si = self.shared_info
         info = self.info
         info['number_resupended'] = 0

@@ -1,7 +1,8 @@
 import numpy as np
 from oceantracker.particle_properties._base_properties import ParticleProperty
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.particle_properties.util import particle_operations_util
+from oceantracker.particle_properties import particle_operations_util
+
 
 class DistanceTravelled(ParticleProperty):
 
@@ -13,8 +14,8 @@ class DistanceTravelled(ParticleProperty):
         self.check_class_required_fields_prop_etc(required_props_list=['x', 'x_last_good'])
 
 
-    def initialize(self,**kwargs):
-        super().initialize()
+    def initial_setup(self, **kwargs):
+        super().initial_setup()
         # shortcuts
 
     def initial_value_at_birth(self, active):

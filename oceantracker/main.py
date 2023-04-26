@@ -2,7 +2,7 @@
 # eg run(params)
 import sys
 
-code_version = '0.4.00.001 2023-04-11'
+
 
 # todo kernal/numba based RK4 step
 # todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
@@ -198,7 +198,7 @@ class _RunOceanTrackerClass(object):
         # set up log files for run
 
         msg_logger.insert_screen_line()
-        msg_logger.msg('Starting ' + common_info.package_fancy_name + '  Version ' + code_version)
+        msg_logger.msg('Starting ' + common_info.package_fancy_name + '  Version ' + common_info.code_version)
         msg_logger.msg('Python version: ' + version, tabs=1)
 
         vi = version_info
@@ -564,7 +564,7 @@ class _RunOceanTrackerClass(object):
             git_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n','')
         except:
             git_revision = 'unknown'
-        return { 'version': code_version, 'git_revision': git_revision, 'python_version':version}
+        return { 'version':common_info.code_version, 'git_revision': git_revision, 'python_version':version}
 
     def check_top_level_class_keys(self, params, template, msg_logger, required_keys=[], crumbs=None):
         # ensure top level parameter dict has all keys, and any required ones

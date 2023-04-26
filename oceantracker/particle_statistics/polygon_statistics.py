@@ -18,10 +18,10 @@ class _CorePolygonMethods(ParameterBaseClass):
 
         self.file_tag = 'polygon_stats'
 
-    def initialize(self, **kwargs):
+    def initial_setup(self, **kwargs):
 
         # do standard stats initialize
-        super().initialize()# set up using regular grid for  stats
+        super().initial_setup()  # set up using regular grid for  stats
         self.info['type'] = 'polygon'
 
     def set_up_spatial_bins(self,nc ):

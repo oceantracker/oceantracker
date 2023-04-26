@@ -2,7 +2,7 @@
 #---------------------------------------
 import oceantracker.main as main
 from oceantracker.util import json_util
-params = json_util.read_JSON("..\demo_json\demo04_ageBasedHeatmaps.json")
+params = json_util.read_JSON("..\demo_param_files\demo04_ageBasedHeatmaps.json")
 
 runInfo_file_name, has_errors = main.run(params)
 

@@ -39,7 +39,7 @@ class _BaseWriter(ParameterBaseClass):
         self.add_dimension('vector3D', 3)
         self.nc = None
 
-    def initialize(self):
+    def initial_setup(self):
         si= self.shared_info
         grid = si.classes['reader'].grid
         params = self.params

@@ -25,10 +25,10 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'], required_grid_var_list=['x'])
 
-    def initialize(self):
+    def initial_setup(self):
         # set up regular grid for  stats
         si =self.shared_info
-        super().initialize()
+        super().initial_setup()
         self.open_output_file()
         nc = self.nc
         if self.params['write']:
@@ -199,9 +199,9 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
                                  'age_bin_size':    PVC(1.*24*3600.,float),
                                 })
 
-    def initialize(self):
+    def initial_setup(self):
         # set up info/attributes
-        super().initialize()
+        super().initial_setup()
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['age'])

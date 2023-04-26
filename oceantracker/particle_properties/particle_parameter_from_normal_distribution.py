@@ -12,8 +12,8 @@ class ParticleParameterFromNormalDistribution(ParticleProperty):
                                  'variance' : PVC(0., float, min= 0.,is_required=True),
                                  'time_varying': PVC(False,bool)})
 
-    def initialize(self):
-        super().initialize()
+    def initial_setup(self):
+        super().initial_setup()
 
     def initial_value_at_birth(self, new_part_IDs):
         s= (new_part_IDs.shape[0],)

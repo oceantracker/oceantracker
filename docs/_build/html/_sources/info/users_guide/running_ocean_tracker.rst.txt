@@ -90,7 +90,7 @@ Example of parameters as yaml file , where indenting with spaces (not tabs) crea
    <details>
    <summary> yaml parameter file </summary>
 
-.. literalinclude:: ../../../demos/demo_yaml/demo55_SCHISM_3D_fall_velocity.yaml
+.. literalinclude:: ../../../demos/demo_param_files/demo55_SCHISM_3D_fall_velocity.yaml
     :caption:
     :language: Yaml
 
