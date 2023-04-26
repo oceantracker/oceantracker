@@ -29,7 +29,7 @@ def build_reader(input_dir, params):
     params['reader'].update({'time_buffer_size': file_info['n_time_steps_in_hindcast']})  # set buffer size to hindcast size
 
     reader = otsim._build_class_instance('reader', params['reader'], show_warnings=False)
-    reader.initialize()
+    reader.initial_setup()
 
     # fill buffer
     bt = params['shared_params']['backtracking']
@@ -98,7 +98,7 @@ class OceanTrackerReRunner(object):
 
         # reset any stats, reallocate count arrays, based on new release groups
         for s in si.classes['particle_statistics']:
-            s.initialize()
+            s.initial_setup()
 
         particle.info['num_released'] = 0
 

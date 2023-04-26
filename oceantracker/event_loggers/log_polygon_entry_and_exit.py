@@ -2,8 +2,9 @@ from oceantracker.event_loggers._base_event_loggers import _BaseEventLogger
 import numpy as np
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
-from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
-from time import perf_counter
+from oceantracker.particle_properties import particle_operations_util
+
+
 class LogPolygonEntryAndExit(_BaseEventLogger):
     # assumes non over lapping polygons
 
@@ -20,9 +21,9 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
 
 
 
-    def initialize(self):
+    def initial_setup(self):
 
-        super().initialize()  # set up using regular grid for  stats
+        super().initial_setup()  # set up using regular grid for  stats
         si = self.shared_info
         if self.info['instance_index']  > 0 :
             raise FatalError('LogPolygonEntryAndExit: can only have one instance')

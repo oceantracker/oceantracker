@@ -1,6 +1,4 @@
 from  oceantracker.velocity_modifiers._base_velocity_modifer import VelocityModiferBase
-from oceantracker.particle_properties.util import particle_operations_util
-from oceantracker.particle_properties.particle_parameter_from_normal_distribution import  ParticleParameterFromNormalDistribution
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 
@@ -22,8 +20,8 @@ class TerminalVelocity(VelocityModiferBase):
         self.check_class_required_fields_prop_etc(requires3D=True, required_props_list=['velocity_modifier'])
 
 
-    def initialize(self):
-        super().initialize()
+    def initial_setup(self):
+        super().initial_setup()
         si = self.shared_info
         particle= si.classes['particle_group_manager']
 

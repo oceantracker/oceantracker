@@ -33,7 +33,7 @@ def _get_comparison(test):
         raise Exception('_get_comparison: invalid particle property comparison test  "' + test + '", must one of ' + str(comparison_function_map.keys()))
     return comparison_function_map[test]
 
-def prop_compared_to_value(part_prop, test, value, out=None):
+def compared_prop_to_value(part_prop, test, value, out=None):
     # return a view of indices where  part_prop (test) value, is true
 
     if out is None: out = np.full((part_prop.shape[0],), -127, np.int32)

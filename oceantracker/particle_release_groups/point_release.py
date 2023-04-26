@@ -38,7 +38,7 @@ class PointRelease(ParameterBaseClass):
         self.class_doc(description= 'Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.')
 
 
-    def initialize(self):
+    def initial_setup(self):
         # must be called after unpack_x0
         # tidy up parameters to make them numpy arrays with first dimension equal to number of locations
 

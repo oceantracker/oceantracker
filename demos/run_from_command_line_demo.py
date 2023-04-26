@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     s='_________________________________________________________________________________________________________________________'
     # run ets with json and ymal file input params
-    for file_type, file_dir in zip(['yaml', 'json'],['demo_yaml', 'demo_json']):
+    for file_type, file_dir in zip(['yaml', 'json'],['demo_param_files', 'demo_param_files']):
         cl=clmaster.copy()
         print( s)
         print( file_type +' parameter file')

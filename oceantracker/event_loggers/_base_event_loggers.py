@@ -20,7 +20,7 @@ class _BaseEventLogger(ParameterBaseClass):
         self.check_class_required_fields_prop_etc(required_props_list=['event_has_started_boolean'])
 
 
-    def initialize(self):
+    def initial_setup(self):
         si = self.shared_info
         buffer_size= si.particle_buffer_size
 

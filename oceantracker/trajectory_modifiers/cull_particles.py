@@ -2,7 +2,9 @@ import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 from oceantracker.common_info_default_param_dict_templates import particle_info
-from oceantracker.particle_properties.util import particle_comparisons_util
+from oceantracker.particle_properties import particle_comparisons_util
+
+
 # proptype for how to  cull particles, this version just culls random sltions
 class CullParticles(_BaseTrajectoryModifier):
     # splits all particles at given time interval
@@ -20,9 +22,9 @@ class CullParticles(_BaseTrajectoryModifier):
         self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'])
 
 
-    def initialize(self):
+    def initial_setup(self):
 
-        super().initialize()  # set up using regular grid for  stats
+        super().initial_setup()  # set up using regular grid for  stats
 
         self.time_of_last_cull = self.shared_info.time_of_nominal_first_occurrence
 

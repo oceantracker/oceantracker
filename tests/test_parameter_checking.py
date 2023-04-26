@@ -10,9 +10,9 @@ if __name__ == "__main__":
     parser.add_argument('--test', default=None, type=int)
     args = parser.parse_args()
 
-    #params_that_work= json_util.read_JSON('../demos/demo_json/demo05_parallel.json')
-    #params_that_work = json_util.read_JSON('../demos/demo_json/demo02_animation.json')
-    params_that_work = json_util.read_JSON('../demos/demo_json/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json')
+    #params_that_work= json_util.read_JSON('../demos/demo_param_files/demo05_parallel.json')
+    #params_that_work = json_util.read_JSON('../demos/demo_param_files/demo02_animation.json')
+    params_that_work = json_util.read_JSON('../demos/demo_param_files/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json')
 
     params_that_work['shared_params']['max_duration']=3600
     params_that_work['case_list']=[]

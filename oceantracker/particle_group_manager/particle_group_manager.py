@@ -1,8 +1,7 @@
 import numpy as np
-from numba import njit, types as nbtypes
-from copy import copy
+from numba import njit
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.particle_properties.util import particle_operations_util
+from oceantracker.particle_properties import particle_operations_util
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
@@ -20,7 +19,7 @@ class ParticleGroupManager(ParameterBaseClass):
         self.status_flags= particle_info['status_flags']
         self.known_prop_types = particle_info['known_prop_types']
 
-    def initialize(self):
+    def initial_setup(self):
         si= self.shared_info
 
         info=self.info
@@ -171,7 +170,7 @@ class ParticleGroupManager(ParameterBaseClass):
         params['class_name'] = 'oceantracker.particle_properties._base_properties.TimeVaryingInfo'
         si = self.shared_info
         i = si.create_class_instance_as_interator('time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
-        i.initialize()
+        i.initial_setup()
 
         if si.write_tracks and i.params['write']:
             w = si.classes['tracks_writer']
@@ -190,7 +189,7 @@ class ParticleGroupManager(ParameterBaseClass):
         if 'class_name' not in prop_params: prop_params['class_name'] = 'oceantracker.particle_properties._base_properties.ParticleProperty'
         i = si.create_class_instance_as_interator('particle_properties', prop_type, prop_params,
                                                   crumbs=crumbs +' adding "particle_properties" name= "' + str(prop_params['name']) + '" of type=' +   prop_type)
-        i.initialize()
+        i.initial_setup()
         i.info['prop_type'] = prop_type
         name = i.params['name']
         if si.write_tracks:

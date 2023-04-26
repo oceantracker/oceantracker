@@ -11,7 +11,7 @@ class RandomWalk(_BaseTrajectoryModifer):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'name': PVC('random_walk',str),'A_H': PVC(1.0,float,min=0.), 'A_V': PVC(0.001,float,min=0.), } )
 
-    def initialize(self):
+    def initial_setup(self):
         si = self.shared_info
         info = self.info
         dt = si.model_time_step

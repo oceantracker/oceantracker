@@ -20,9 +20,9 @@ class SettleInPolygon(_BaseTrajectoryModifier):
 
 
 
-    def initialize(self, **kwargs):
+    def initial_setup(self, **kwargs):
 
-        super().initialize()
+        super().initial_setup()
         si=self.shared_info
 
         # set up polygons to test if particles inside

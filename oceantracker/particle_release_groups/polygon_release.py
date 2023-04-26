@@ -19,7 +19,7 @@ class PolygonRelease(PointRelease):
         self.remove_default_params(['release_radius'])
 
 
-    def initialize(self):
+    def initial_setup(self):
         # sort out list  polygon from points
         info = self.info
         si= self.shared_info

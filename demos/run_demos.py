@@ -43,12 +43,12 @@ if __name__ == "__main__":
     if not path.isdir(args.root_output_dir):  mkdir(args.root_output_dir)
 
     demo_dir = path.dirname(__file__)
-    json_dir = path.join(demo_dir, 'demo_json')
+    param_dir = path.join(demo_dir, 'demo_param_files')
 
     if args.demo is None:
         # build full list of   demos
         demo_list=[]
-        demofiles = glob.glob(path.join(json_dir, 'demo*.json'))
+        demofiles = glob.glob(path.join(param_dir, 'demo*.json'))
         for f in demofiles:
             demo_list.append(int(path.split(f)[1][4:6]))
         demo_list.sort()
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     if  args.testing:
         demo_list=[test_demo] # ros ver
     else:
-        # get rid of d deveopmenrt demos
+        # get rid of d deveopment demos
         demo_list2=[]
         for d in demo_list:
             if d != test_demo : demo_list2.append((d))
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     for n in demo_list:
 
-        f=glob.glob(path.join(json_dir, 'demo' + '%02.0f' % n + '*.json'))
+        f=glob.glob(path.join(param_dir, 'demo' + '%02.0f' % n + '*.json'))
         if len(f)==0:
             exit('runOTdemos.py: No demo file number ' + str(n))
 

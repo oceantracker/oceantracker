@@ -6,7 +6,7 @@ import platform
 import argparse
 from datetime import datetime
 import numpy as np
-
+import pyinstrument
 import oceantracker.main
 
 
@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasource', default=1, type=int)
-    parser.add_argument('--profiler', default=1, type=int)
+    parser.add_argument('--profiler', default=0, type=int)
     parser.add_argument('-scatch_tests', action='store_true')
     parser.add_argument('-test', action='store_true')
     parser.add_argument('-dev', action='store_true')
@@ -127,7 +127,6 @@ if __name__ == '__main__':
     # scatch_tests choices of classes
     if args.dev:
         params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.scatch_tests.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
-
 
 
     if args.test:

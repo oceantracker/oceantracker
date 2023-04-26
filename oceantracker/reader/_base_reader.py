@@ -102,7 +102,7 @@ class _BaseReader(ParameterBaseClass):
 
     def _add_grid_attributes(self, grid): pass
 
-    def initialize(self):
+    def initial_setup(self):
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         si = self.shared_info

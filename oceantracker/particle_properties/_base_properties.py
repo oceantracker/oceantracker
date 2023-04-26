@@ -1,5 +1,5 @@
 import numpy as np
-from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
+from oceantracker.particle_properties import particle_comparisons_util, particle_operations_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
@@ -22,7 +22,7 @@ class _BasePropertyInfo(ParameterBaseClass):
 
         self.class_doc(role='Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
 
-    def initialize(self, **kwargs): pass
+    def initial_setup(self, **kwargs): pass
 
     def initial_value_at_birth(self, released_IDs):  pass
 
@@ -45,7 +45,7 @@ class TimeVaryingInfo(_BasePropertyInfo):
         super().__init__()  # required in children to get parent defaults and merge with give params
 
 
-    def initialize(self,**kwargs):
+    def initial_setup(self, **kwargs):
 
         s=(1,)
         if self.params['vector_dim'] > 1:
@@ -68,7 +68,7 @@ class ParticleProperty(_BasePropertyInfo):
                                             doc_str='particle property',
                                             possible_values=particle_info['known_prop_types']),
                                  })
-    def initialize(self):
+    def initial_setup(self):
         s=(self.shared_info.particle_buffer_size,)
         if self.params['vector_dim'] > 1:
             s += (self.params['vector_dim'],)
@@ -124,10 +124,10 @@ class ParticleProperty(_BasePropertyInfo):
         if self.is_vector():
             raise Exception('compare_all_to_a_value: particle property ' + self.params['name'] +'>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
 
-        # to search only those in buffer use dataInBufferPtr()
+        # to search only those in buffer use used_buffer()
         data = self.used_buffer()
         if out is None: out = np.full((data.shape[0],), -127, np.int32)
-        found = particle_comparisons_util.prop_compared_to_value(data, test, value, out)
+        found = particle_comparisons_util.compared_prop_to_value(data, test, value, out)
         return found
 
     def find_subset_where(self, active, test, value, out=None):
@@ -144,5 +144,5 @@ class ParticleProperty(_BasePropertyInfo):
         data = self.used_buffer()
         if out is None: out = np.full((data.shape[0],), -127, np.int32)
 
-        found= particle_comparisons_util._find_all_in_range(data, value1,value2, out)
+        found= particle_comparisons_util._find_all_in_range(data, value1, value2, out)
         return found

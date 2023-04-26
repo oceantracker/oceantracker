@@ -16,7 +16,7 @@ class VerticalGradient(UserFieldBase):
                                  })
         self.class_doc(description='Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"')
 
-    def initialize(self):
+    def initial_setup(self):
         si = self.shared_info
         # get fields prop from named field
 
@@ -25,7 +25,7 @@ class VerticalGradient(UserFieldBase):
                                'is_time_varying': named_field.params['is_time_varying'],
                                'is3D': True})
 
-        super().initialize()  # set up self.data with above params
+        super().initial_setup()  # set up self.data with above params
         a=1
 
     def check_requirements(self):

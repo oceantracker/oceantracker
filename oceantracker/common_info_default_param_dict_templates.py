@@ -2,6 +2,9 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
+
+code_version = '0.4.00.002 2023-04-11'
+
 max_timedelta_in_seconds = 1000*365*24*3600
 # template for oceanTracker params, with defaults to check against
 shared_params = {'user_note': PVC('No user note', str),

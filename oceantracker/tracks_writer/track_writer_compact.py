@@ -2,8 +2,8 @@ import numpy as np
 from oceantracker.tracks_writer.track_writer_retangular import RectangularTrackWriter
 class FlatTrackWriter(RectangularTrackWriter):
 
-    def initialize(self):
-        super().initialize()
+    def initial_setup(self):
+        super().initial_setup()
         si = self.shared_info
         self.add_dimension('particle_dim', None)
         self.add_dimension('time_particle_dim', None)

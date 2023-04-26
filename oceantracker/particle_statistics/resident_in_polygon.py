@@ -18,11 +18,11 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                  'z_range': PLC([], [float, int], min_length=2, doc_str='z range = [zmin, zmax] count particles in this z range in 3D'),
                                  })
 
-    def initialize(self, **kwargs):
+    def initial_setup(self, **kwargs):
         si= self.shared_info
         params = self.params
         # do standard stats initialize
-        super().initialize()  # set up using regular grid for  stats
+        super().initial_setup()  # set up using regular grid for  stats
 
         # find associated release group
         if params['name_of_polygon_release_group']  not in si.classes['particle_release_groups']:
