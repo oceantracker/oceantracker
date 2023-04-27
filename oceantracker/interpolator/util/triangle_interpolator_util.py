@@ -220,9 +220,8 @@ def make_get_depth_cell_time_varying_Slayer_or_LSCgrid(z_level_at_nodes,   tri, 
 
     @njit(nbt.void(nbt.float64[:, :],nbt.int32[:], nbt.int32[:], nbt.int8[:],nbt.float64[:, :], nbt.int32[:],
                    nbt.float32[:], nbt.float32[:], nbt.int32[:], nbt.int64[:], nbt.float64))
-
     def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, n_cell, nb, status, BCcord,  nz_cell,
-                                                      z_fraction, z_fraction_bottom_layer, active, walk_counts, step_dt_fraction):
+                                     z_fraction, z_fraction_bottom_layer, active, walk_counts, step_dt_fraction):
         # find the zlayer for each node of cell containing each particle and at two time slices of hindcast  between nz_bottom and number of z levels
         # LSC grid means must track vertical nodes for each particle
         # nz_with_bottom is lowest cell in grid, is 0 for slayer vertical grids, but may be > 0 for LSC grids
