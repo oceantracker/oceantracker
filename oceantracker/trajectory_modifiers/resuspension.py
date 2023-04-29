@@ -46,7 +46,7 @@ class BasicResuspension(_BaseTrajectoryModifier):
     def update(self, nb, time, active):
         # do resupension
         #todo move 'resuspension_factor' calc to initialize() when substeping removed
-        self.start_update_timer()
+
         si= self.shared_info
         info = self.info
         info['resuspension_factor']= 2.0*0.4*si.z0*si.solver_info['model_timestep']/(1. - 2./np.pi)
@@ -65,7 +65,6 @@ class BasicResuspension(_BaseTrajectoryModifier):
         self.info['number_resupended'] += resupend.shape[0]
         part_prop['status'].set_values(si.particle_status_flags['moving'], resupend)
 
-        self.stop_update_timer()
 
     @staticmethod
     @njit

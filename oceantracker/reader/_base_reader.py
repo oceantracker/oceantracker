@@ -317,7 +317,7 @@ class _BaseReader(ParameterBaseClass):
             buffer_index = b0 + np.arange(num_read)
             file_index = fi['file_offset'][nt_available]
 
-            s =  f'Reading-file-{(n_file+1):02} ' + path.basename(fi['names'][n_file]) + f'{file_index[0]:04}:{file_index[-1]:04}'
+            s =  f'Reading-file-{n_file:02} ' + path.basename(fi['names'][n_file]) + f'{file_index[0]:04}:{file_index[-1]:04}'
             s += f' Steps in file {fi["n_time_steps"][-1]:4} nt available {nt_available[0]:03} :{nt_available[-1]:03},'
             s += f' file offsets {file_index[0]:4} : {file_index[-1]:4}  nt required {nt_required[0]:4}:{nt_required[-1]:4}, number required: {nt_required.shape[0]:4}'
 

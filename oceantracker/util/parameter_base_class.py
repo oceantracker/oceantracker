@@ -96,6 +96,9 @@ class ParameterBaseClass(object):
         # deep update to defaults
         basic_util.deep_dict_update(self.default_params, d)
 
+    def update(self): pass  # future supplied update method
+
+
     def class_doc(self,description=None, role= None):
         self.docs['description']=description
         self.docs['role'] = role # only in base class
@@ -180,6 +183,7 @@ class ParameterBaseClass(object):
         self.info['update_calls'] += 1
 
         # note effect of any numba compilation on first call
-        if self.info['update_calls'] == 1: self.info['time_first_update_call'] = dt
+        if self.info['update_calls'] == 1:
+            self.info['time_first_update_call'] = dt
 
 

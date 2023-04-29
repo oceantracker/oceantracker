@@ -39,7 +39,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         self.set_up_output_file(['event_polygon'] )
 
     def update(self,**kwargs):
-        self.start_update_timer()
+
         part_prop = self.shared_info.classes['particle_properties']
 
         # find where polygon number has changed due to entry or exit
@@ -54,5 +54,3 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
 
         # now updates written change polygon ID to no polygon for those exiting
         part_prop['event_polygon'].set_values(-1, IDs_event_ended)
-
-        self.stop_update_timer()

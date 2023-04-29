@@ -147,7 +147,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         if not self.is_time_to_count(): return
 
-        self.start_update_timer()
         time = kwargs['time']
         self.record_time_stats_last_recorded(time)
 
@@ -166,7 +165,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         self.write_time_varying_stats(self.nWrites, time)
         self.nWrites += 1
-        self.stop_update_timer()
+
 
     @staticmethod
     @njit
@@ -271,14 +270,10 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         # do counts for each release  location and grid cell, over rides parent
         if not self.is_time_to_count(): return
 
-        self.start_update_timer()
-
 
         time = kwargs['time']
         self.record_time_stats_last_recorded(time)
         stats_grid = self.grid
-
-
 
         # set up pointers to particle properties
         part_prop = self.shared_info.classes['particle_properties']
@@ -289,8 +284,6 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         sel = self.select_particles_to_count(self.get_particle_index_buffer())
 
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'], self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, stats_grid['age_bin_edges'], p_age, sel)
-
-        self.stop_update_timer()
 
     @staticmethod
     @njit

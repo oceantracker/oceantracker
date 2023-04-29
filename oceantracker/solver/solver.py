@@ -99,7 +99,9 @@ class Solver(ParameterBaseClass):
                 # update particle velocity modification
                 part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
                 for i in si.class_interators_using_name['velocity_modifiers']['all'].values():
+                    i.start_update_timer()
                     i.update(nb, t1, is_moving)
+                    i.stop_update_timer()
 
                 # dispersion is done by random walk velocity modification prior to integration step
                 si.classes['dispersion'].update(nb, t1,  is_moving)
@@ -156,7 +158,9 @@ class Solver(ParameterBaseClass):
         
         # modify status
         for i in si.class_interators_using_name['status_modifiers']['all'].values():
+            i.start_update_timer()
             i.update(nb, t, alive)
+            i.stop_update_timer()
 
         pgm.kill_old_particles(t) # todo convert to status modifier
         if si.compact_mode: pgm.remove_dead_particles_from_memory()
@@ -166,7 +170,9 @@ class Solver(ParameterBaseClass):
 
         # trajectory modifiers,
         for i in si.class_interators_using_name['trajectory_modifiers']['all'].values():
+            i.start_update_timer()
             i.update(nb, t, alive)
+            i.stop_update_timer()
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
 
@@ -284,9 +290,11 @@ class Solver(ParameterBaseClass):
         # update and write stats
         si= self.shared_info
         self.code_timer.start('on_the_fly_statistics')
-        for s in si.class_interators_using_name['particle_statistics']['all'].values():
-            if abs(t - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
-                s.update(time=t)
+        for i in si.class_interators_using_name['particle_statistics']['all'].values():
+            if abs(t - i.info['time_last_stats_recorded']) >= i.params['calculation_interval']:
+                i.start_update_timer()
+                i.update(time=t)
+                i.stop_update_timer()
 
         self.code_timer.stop('on_the_fly_statistics')
 
@@ -294,9 +302,11 @@ class Solver(ParameterBaseClass):
         # update triangle concentrations
         si = self.shared_info
         self.code_timer.start('particle_concentrations')
-        for s in si.class_interators_using_name['particle_concentrations']['all'].values():
-            if abs(t - s.info['time_last_stats_recorded']) >= s.params['calculation_interval']:
-                s.update(nb, t)
+        for i in si.class_interators_using_name['particle_concentrations']['all'].values():
+            if abs(t - i.info['time_last_stats_recorded']) >= i.params['calculation_interval']:
+                i.start_update_timer()
+                i.update(nb, t)
+                i.stop_update_timer()
 
         self.code_timer.stop('particle_concentrations')
 
@@ -305,8 +315,10 @@ class Solver(ParameterBaseClass):
         si = self.shared_info
 
         self.code_timer.start('event_logging')
-        for e in si.class_interators_using_name['event_loggers']['all'].values():
-            e.update(time=t)
+        for i in si.class_interators_using_name['event_loggers']['all'].values():
+            i.start_update_timer()
+            i.update(time=t)
+            i.stop_update_timer()
 
         self.code_timer.stop('event_logging')
 
