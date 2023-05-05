@@ -45,11 +45,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.z0 = si.settings['z0']
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
-        si.processor_number = runner_params['processor_number']
+        si.processorID = runner_params['processorID']
 
         # set up message logging
         output_files=runner_params['output_files']
-        si.msg_logger = MessageLogger('P%03.0f:' % si.processor_number, si.settings['advanced_settings']['max_warnings'])
+        si.msg_logger = MessageLogger('P%03.0f:' % si.processorID, si.settings['advanced_settings']['max_warnings'])
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'],output_files['output_file_base'] + '_caseLog')
 
@@ -98,19 +98,19 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
-            si.msg_logger.msg(f' Cae Funner graceful exit from case number [{si.processor_number:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+            si.msg_logger.msg(f' Cae Funner graceful exit from case number [{si.processorID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
             return None, True
 
         except Exception as e:
             si.msg_logger.show_all_warnings_and_errors(e)
             si.msg_logger.write_error_log_file(e)
-            si.msg_logger.msg(f' Unexpected error in case number [{si.processor_number:2}] ', fatal_error=True,hint='check above or .err file')
+            si.msg_logger.msg(f' Unexpected error in case number [{si.processorID:2}] ', fatal_error=True,hint='check above or .err file')
             return None, True
 
         # reshow warnings
         si.msg_logger.show_all_warnings_and_errors()
         si.msg_logger.insert_screen_line()
-        si.msg_logger.progress_marker('Finished case number %3.0f, ' % si.processor_number + ' '
+        si.msg_logger.progress_marker('Finished case number %3.0f, ' % si.processorID + ' '
                                       + si.output_files['output_file_base']
                                       + ' started: ' + str(t0)
                                       + ', ended: ' + str(datetime.now()))
@@ -125,7 +125,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si =self.shared_info
 
         si.msg_logger.insert_screen_line()
-        si.msg_logger.msg('Starting case number %3.0f, ' % si.processor_number + ' '
+        si.msg_logger.msg('Starting case number %3.0f, ' % si.processorID + ' '
                                       + si.output_files['output_file_base']
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
         si.msg_logger.insert_screen_line()
@@ -137,7 +137,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # get short class names map
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
         if si.settings['advanced_settings']['multiprocessing_case_start_delay'] is not None:
-            delay = si.settings['advanced_settings']['multiprocessing_case_start_delay'] * (si.processor_number % si.settings['processors'])
+            delay = si.settings['advanced_settings']['multiprocessing_case_start_delay'] * (si.processorID % si.settings['processors'])
             si.msg_logger.progress_marker('Delaying start by  ' + str(delay) + ' sec')
             sleep(delay)
             si.msg_logger.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
@@ -405,7 +405,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'user_note': si.settings['user_note'],
-             'processor_number' : si.processor_number,
+             'processorID' : si.processorID,
              'file_written': datetime.now().isoformat(),
              'code_version_info': si.case_runner_params['code_version_info'],
              'run_info' : info,

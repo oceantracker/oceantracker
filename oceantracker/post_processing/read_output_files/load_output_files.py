@@ -43,19 +43,19 @@ def get_case_info_files_from_dir(dir_name, case = None):
     if len(case_file_names)==0:  raise IOError('No case info files in dir '  + dir_name + ', matching mask *_caseInfo.json')
 
     # get cases as process IDs matching mask
-    case_file_list, processor_number = [], []
+    case_file_list, processorID = [], []
     for case_name in case_file_names:
         case_file_list.append(case_name)
         d = read_case_info_file(case_name)
-        processor_number.append(d['processor_number'])
+        processorID.append(d['processorID'])
 
-    # make a full list of cases from their processor_number's,  which allows for any missing cases due to dead rund
-    case_files_out = max(processor_number)*[None]
-    for ID, c in zip(processor_number, case_file_list):
-        case_files_out[ID-1] = c
+    # make a full list of cases from their processorID's,  which allows for any missing cases due to dead rund
+    case_files_out = max(processorID+1)*[None]
+    for ID, c in zip(processorID, case_file_list):
+        case_files_out[ID] = c
 
     missing_cases = [i for i, x in enumerate(case_files_out) if x is None]
-    if len(missing_cases) > 0: print('Warning  some cases file missing from dir ', dir_name, ', missing case files for case number(s) =', str( (np.asarray(missing_cases)+1).tolist()))
+    if len(missing_cases) > 0: print('Warning  some cases file missing from dir ', dir_name, ', missing case files for case number(s) =', str( (np.asarray(missing_cases)).tolist()))
 
     # look for requested case
     if case is not None:

@@ -42,7 +42,7 @@ class SharedInfoClass(object):
 
         instance_index = len(self.classes[class_type])
 
-        crumbs += f' >>> adding_class type >> {class_type}  (group=  {iteration_group} #{instance_index+1: 1d})'
+        crumbs += f' >>> adding_class type >> {class_type}  (group=  {iteration_group} #{instance_index: 1d})'
 
         i = make_class_instance_from_params(params, self.msg_logger, crumbs='user fields')
 
