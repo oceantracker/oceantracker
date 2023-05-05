@@ -5,7 +5,8 @@ from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredR
 from copy import  copy
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
-from oceantracker.reader.util.reader_util import split_quad_cells, append_split_cell_data
+from oceantracker.reader.util.reader_util import append_split_cell_data
+from oceantracker.util.triangle_utilities_code import split_quad_cells
 
 #todo add optional standard feilds by list of internal names, using a stanard feild maping maping
 #todo a way to map al stanard feilds but supress reading them unless requested?

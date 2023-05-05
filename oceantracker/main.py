@@ -273,7 +273,7 @@ class OceanTracker(object):
             case_list_params=[self.decompose_params({}, msg_logger)] # ensure there is at least one empty case
 
         # build each case params
-        processor_number = 0
+
         full_list_case_params=[]
 
         for n_case, case in enumerate(case_list_params):
@@ -317,19 +317,16 @@ class OceanTracker(object):
 
             # form case output file base name
             if len(case_list_params) > 1 :
-                c['output_files']['output_file_base'] += '_C%03.0f' % (n_case+1)
+                c['output_files']['output_file_base'] += '_C%03.0f' % (n_case)
             if c['settings']['case_output_file_tag'] is not None :
                 c['output_files']['output_file_base'] += '_' + c['settings']['case_output_file_tag']
 
             # now build full params  for a single run
-            processor_number += 1  # is one base
-            
             c.update({ 'processorID' : n_case,
-                    'processor_number': n_case + 1,
-                    'code_version_info' : self._U2_code_version_info(),                    
+                    'code_version_info' : self._U2_code_version_info(),
                                 })
             full_list_case_params.append(c)
-            
+
         msg_logger.exit_if_prior_errors('Errors in merging case parameters')
         msg_logger.progress_marker('merged param defaults and buildting case params', start_time=t0)
         return full_list_case_params

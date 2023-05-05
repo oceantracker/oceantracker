@@ -1,30 +1,35 @@
 #import pprofile
 import cProfile
 from os import makedirs, path
-from scalene import scalene_profiler
 import platform
 import argparse
 from datetime import datetime
 import numpy as np
-import pyinstrument
+
 import oceantracker.main
 
 
 from oceantracker.util.json_util import read_JSON , write_JSON
 
 def get_params(datasource=1):
-
+    time_step = 300  # 5min
+    release_interval = 3600
+    pulse_size = 500
+    calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
         input_dir =  'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2008'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = 'F:\\OceanTrackerOuput\\OceanTrackerProfiling'
-        time_step = 300  #5min
-        release_interval = 3600
-        pulse_size = 500
-        calculation_interval = 3 * 3600
 
     elif datasource==2:
+        output_file_base= 'Sounds'
+        input_dir =  '/hpcfreenas/hindcast/MarlbroughSounds_hindcast_10years_BenPhd_2019ver/2008'
+        file_mask  = 'schism_marl200801*.nc'
+        root_output_dir = '/hpcfreenas/ross/oceanTrackerOutput/profiling/'
+
+
+    elif datasource==3:
         output_file_base= 'demo_SCHISM_3D'
         input_dir =  '..\\demos\\demo_hindcast'
         file_mask  = 'demoHindcastSchism3D.nc'
@@ -137,7 +142,7 @@ if __name__ == '__main__':
         oceantracker.main.run(params)
 
     elif args.profiler==1:
-
+        import pyinstrument
         from pyinstrument import Profiler, renderers
 
         profiler = Profiler(interval=0.0001)

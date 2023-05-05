@@ -222,7 +222,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
          # find nearest node
         dist, nodes = self.KDtree.query(xq[:, :2])
-        nodes = nodes.astype(np.int32)  # KD tre gives in644need for compatibility of types
+        nodes = nodes.astype(np.int32)  # KD tree gives int64,need for compatibility of types
 
         # look in triangles attached to each node for tri containing the point
         n_cell= triangle_interpolator_util.check_if_point_inside_triangle_connected_to_node(xq, nodes,

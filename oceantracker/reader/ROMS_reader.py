@@ -15,7 +15,8 @@ from datetime import datetime
 from numba import njit
 from oceantracker.util.cord_transforms import WGS84_to_UTM
 from matplotlib import pyplot as plt, tri
-from oceantracker.reader.util.reader_util import split_quad_cells, append_split_cell_data
+from oceantracker.reader.util.reader_util import append_split_cell_data
+from oceantracker.util.triangle_utilities_code import split_quad_cells
 
 
 from oceantracker.util.basic_util import  is_substring_in_list

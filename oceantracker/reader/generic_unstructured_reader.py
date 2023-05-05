@@ -192,7 +192,9 @@ class GenericUnstructuredReader(_BaseReader):
         grid['is_boundary_triangle'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
         msg_logger.progress_marker('found boundary triangles', start_time=t0)
         t0 = perf_counter()
-        grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid)
+        grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid['triangles'], grid['adjacency'],
+                                                    grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
+
         msg_logger.progress_marker('built domain and island outlines', start_time=t0)
 
         # make island and domain nodes
