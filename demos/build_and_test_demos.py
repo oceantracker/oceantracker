@@ -43,10 +43,7 @@ demo_base_params=\
                 }
 
 p1= deepcopy(demo_base_params)
-p1.update({'case_list': [{ 'particle_release_groups': [{
-           'points':  [ [1598000, 5489100]],  'pulse_size': 1, 'release_interval': 3 * 3600}]
-            }]
-            } )
+p1.update({'particle_release_groups': [{'points':  [ [1598000, 5489100]],  'pulse_size': 1, 'release_interval': 3 * 3600}] })
 p1.update({'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
                         'time_steps_per_per_file':700}}
                                 )
@@ -228,7 +225,7 @@ params.append(p10)
 # case 50 schism basic
 schsim_base_params=\
 {'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,
- 'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+ 'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
                     'input_dir': 'demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',
                      'field_variables':{'water_temperature':'temp'}

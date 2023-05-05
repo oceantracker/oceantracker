@@ -1,0 +1,21 @@
+output_file_base: B_fallvel_resuspension
+particle_release_groups_list:
+- points:
+  - - 1595000
+    - 5482600
+  - - 1599000
+    - 5486200
+  pulse_size: 10
+  release_interval: 3600
+reader_class:
+  class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
+  file_mask: demoHindcastSchism*.nc
+  input_dir: ..\demos\demo_hindcast
+resupension_class:
+  critical_friction_velocity: 0.005
+root_output_dir: output
+time_step: 120
+velocity_modifiers_list:
+- class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
+  mean: -0.002
+  variance: 0.0002

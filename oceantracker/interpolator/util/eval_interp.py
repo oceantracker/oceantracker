@@ -153,6 +153,17 @@ def eval_water_velocity_3D(V_out, V_data, nb, step_dt_fraction,
                 V_out[n, c] +=  BCcord[n, m] * (v1[n_node, nz_below, c] * zf1 + v1[n_node, nz_above, c] * zf) * dt1 \
                              +  BCcord[n, m] * (v2[n_node, nz_below, c] * zf1 + v2[n_node, nz_above, c] * zf) * step_dt_fraction  # second time step
                 pass
+
+@njit
+def update_dry_cell_index(nb ,time_step_fraction, dry_cells, dry_cell_index):
+    # make 0-255 index of how dry cells are
+    tf2= 1.0 - time_step_fraction
+    for n in range(dry_cell_index.shape[0]):
+
+        dry_cell_index[n]= int(255.*(tf2*float(dry_cells[nb[0], n]) + time_step_fraction*float(dry_cells[nb[1], n])))
+
+
+
 # below are development ideas
 #_______________________________________________
 

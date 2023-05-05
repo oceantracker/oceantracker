@@ -27,7 +27,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         super().__init__()
         self.add_default_params({'bc_walk_tol': PVC(1.0e-5, float,min = 0.),
                                  'max_search_steps': PVC(200,int, min =1)})
-        self.grid = {}
+        self.grid = {} #todo get rid?
+        self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
 
     def initial_setup(self):
         super().initial_setup()  # children must call this parent class to default shared_params etc
@@ -54,7 +55,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         p.create_particle_property('manual_update',dict(name='bc_cords',  write=False, initial_value=0., vector_dim=3,dtype=np.float64))
 
         # BC walk info
-
         # build cell walk info dtype
         self.walk_counts = np.zeros((5,),dtype=np.int64)
         self.info['walk_info'] = {'particles_killed_after_triangle_walk_retry_failed': 0,'triangle_walks_retried':0}
@@ -66,69 +66,83 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             p.create_particle_property('manual_update',dict(name='z_fraction',   write=False, dtype=np.float32, initial_value=0.))
             p.create_particle_property('manual_update', dict(name='z_fraction_bottom_layer', write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
-
     def final_setup(self):
-        # assign functions to roles
-        params = self.params
+       pass
+
+    def setup_interp_time_step(self, time_sec, xq, active):
+        # set up stuff needed by all fields before any 2D interpolation
+        # eg query point and nt the current global time step, from which we are making nt+1
+        si =self.shared_info
+        info = self.info
+        reader = si.classes['reader']
+        self.code_timer.start('reader_setup_interp_time_step')
+        # ger buffer index from this time and next
+
+        nt_hindcast_step = reader.time_to_hydro_model_index(time_sec)
+        info['current_buffer_index'][0] = reader.hydro_model_index_to_buffer_offset(nt_hindcast_step)
+        info['current_buffer_index'][1] = reader.hydro_model_index_to_buffer_offset(nt_hindcast_step + si.model_direction) # buffer is forward in timenext index could be wrapped in ring buffer
+        info['current_hydro_model_step'] = nt_hindcast_step
+
+        grid_time_buffers = reader.grid_time_buffers
+
+        time_hindcast =   grid_time_buffers['time'][info['current_buffer_index'][0]]
+
+        info['current_step_dt_fraction'] = abs(time_sec - time_hindcast) / reader.info['hydro_model_time_step']
+
+        # update 0-255 dry cell index
+        eval_interp.update_dry_cell_index(info['current_buffer_index'], info['current_step_dt_fraction'], grid_time_buffers['is_dry_cell'],   grid_time_buffers['dry_cell_index'])
+
+        # find cell for xq, node list and weight for interp at calls
+        self.find_cell(xq, info['current_buffer_index'], info['current_step_dt_fraction'], active)
+
+        self.code_timer.stop('reader_setup_interp_time_step')
+
+    def interp_field_at_particle_locations(self, fieldName, active, output):
+        # interp reader fieldName inplace to particle locations to same time and memory
+        # output can optionally be redirected to another particle property name different from  reader's fieldName
+        # particle_prop_name
+
         si = self.shared_info
-        grid = si.classes['reader'].grid
-        grid_time_buffers = si.classes['reader'].grid_time_buffers
-        part_prop = si.classes['particle_properties']
-
-        self.find_horizontal_cell = triangle_interpolator_util.make_BCwalk_with_move_backs_numba2D(part_prop,grid, grid_time_buffers,
-                                    params['bc_walk_tol'],  params['max_search_steps'], si.settings['block_dry_cells'],  si.settings['open_boundary_type'] == 1)
-
-        if si.is_3D_run:
-            triangles=  grid['triangles']
-            z_level_at_nodes= grid_time_buffers['zlevel']
-            nz_with_bottom = grid['bottom_cell_index']
+        info= self.info
+        si.classes['interpolator'].eval_field_interpolation_at_particle_locations(
+            si.classes['fields'][fieldName], info['current_buffer_index'],
+            output, active, step_dt_fraction=info['current_step_dt_fraction'])
 
 
-            self.find_vertical_cell = triangle_interpolator_util.make_get_depth_cell_time_varying_Slayer_or_LSCgrid(z_level_at_nodes,
-                                                           triangles,   nz_with_bottom,  si.z0)
-            pass
+    def interp_named_field_at_given_locations_and_time(self, fieldName, x, time=None, n_cell=None, output=None):
+        # interp reader fieldName at specfied locations,  not particle locations
+        # output can optionally be redirected to another particle property name different from  reader's fieldName
+        # particle_prop_name
+        self.code_timer.start('interp_at_given_locations_and_time')
+        si = self.shared_info
+
+        output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(si.classes['fields'][fieldName], x, time, output=output, n_cell=n_cell)
+
+        self.code_timer.stop('interp_at_given_locations_and_time')
+
+        return output
 
     #@profile
     def find_cell(self, xq, nb,step_dt_fraction, active):
         # locate cell in place
         # nt give but not needed in 2D
         si= self.shared_info
-        part_prop = si.classes['particle_properties']
-
         self.code_timer.start('find_horizontal_cell_and_bc_weights')
-        self.locate_BCwalk(xq, active)  # best method!
+        self.find_horizontal_cell(xq, active)  # best method!
         self.code_timer.stop('find_horizontal_cell_and_bc_weights')
 
         if si.hydro_model_is3D:
-            self.code_timer.start('find_depth_cell')
-            n_cell = part_prop['n_cell'].data
-            z_fraction = part_prop['z_fraction'].data
-            z_fraction_bottom_layer =  part_prop['z_fraction_bottom_layer'].data
-            status = part_prop['status'].data
-            BCcord     = part_prop['bc_cords'].data
-            nz_cell = part_prop['nz_cell'].data
+            self.find_vertical_cell( xq,nb,step_dt_fraction, active)
 
-            #xq, nb, step_dt_fraction, status, nz_cell,        z_fraction, z_fraction_bottom_layer, active, walk_counts
-            self.find_vertical_cell(xq, n_cell, nb,status, BCcord, nz_cell, z_fraction, z_fraction_bottom_layer, active, self.walk_counts, step_dt_fraction)
-            # unpack counts
-            wi = self.info['walk_info']
-            wi['total_vertical_steps'], wi['longest_vertical_walk'] = self.walk_counts[3:]
-            self.code_timer.stop('find_depth_cell')
-        pass
     #@profile
-    def locate_BCwalk(self,xq, active):
+    def find_horizontal_cell(self,xq, active):
         # Bary Centric walk, flags land triangles in numba code
         si = self.shared_info
         info = self.info
+
         wi = info['walk_info']
-
         part_prop = si.classes['particle_properties']
-        status=  part_prop['status'].data
-        n_cell= part_prop['n_cell'].data
-        bc_cords= part_prop['bc_cords'].data
-
-        self.find_horizontal_cell(xq, status, n_cell, bc_cords, active, self.walk_counts)
-
+        self.locate_BCwalk(xq, active)
         # transphere count info
         wi['particles_located_by_walking'],wi['number_of_triangles_walked'],\
                 wi['longest_triangle_walk'], wi['nans_encountered_triangle_walk'] = self.walk_counts[:4]
@@ -142,7 +156,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
             new_cell  = self.initial_cell_guess(xq[sel,:])
             part_prop['n_cell'].set_values(new_cell, sel)
-            self.find_horizontal_cell(xq, status, n_cell, bc_cords, sel)
+            self.locate_BCwalk(xq, sel)
 
             sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_particle_subset_buffer())
             if sel.size > 0:
@@ -157,6 +171,48 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
             self.code_timer.stop('kd-tree_retrys')
 
+    def locate_BCwalk(self,xq, active):
+        si = self.shared_info
+        reader = si.classes['reader']
+        grid = reader.grid
+        grid_time_buffers = reader.grid_time_buffers
+
+        params = self.params
+        part_prop = si.classes['particle_properties']
+        x_old = part_prop['x_last_good'].data
+        status = part_prop['status'].data
+        n_cell = part_prop['n_cell'].data
+        bc_cords = part_prop['bc_cords'].data
+
+        triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
+            params['bc_walk_tol'], params['max_search_steps'], si.settings['block_dry_cells'], si.settings['open_boundary_type'] == 1,
+            grid['bc_transform'], grid['adjacency'],
+            xq, x_old, status, n_cell,
+            grid_time_buffers['dry_cell_index'], bc_cords, active, self.walk_counts)
+
+    def find_vertical_cell(self,xq,nb,step_dt_fraction, active):
+        self.code_timer.start('find_depth_cell')
+        si = self.shared_info
+        reader = si.classes['reader']
+        grid = reader.grid
+
+        part_prop = si.classes['particle_properties']
+        n_cell = part_prop['n_cell'].data
+        z_fraction = part_prop['z_fraction'].data
+        z_fraction_bottom_layer =  part_prop['z_fraction_bottom_layer'].data
+        status = part_prop['status'].data
+        BCcord     = part_prop['bc_cords'].data
+        nz_cell = part_prop['nz_cell'].data
+        grid_time_buffers = reader.grid_time_buffers
+
+        triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(
+                        grid_time_buffers['zlevel'],   grid['triangles'], grid['bottom_cell_index'],   si.z0,
+                        xq, n_cell, nb, status, BCcord, nz_cell, z_fraction, z_fraction_bottom_layer, active, self.walk_counts, step_dt_fraction)
+
+        # unpack counts
+        wi = self.info['walk_info']
+        wi['total_vertical_steps'], wi['longest_vertical_walk'] = self.walk_counts[3:]
+        self.code_timer.stop('find_depth_cell')
 
     def initial_cell_guess(self, xq):
         # find nearest cell

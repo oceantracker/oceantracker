@@ -5,6 +5,7 @@ from oceantracker.util import time_util
 from oceantracker.reader._base_reader import _BaseReader
 from oceantracker.reader.util import reader_util, shared_reader_memory_util
 from datetime import datetime
+from time import  perf_counter
 
 class GenericUnstructuredReader(_BaseReader):
 
@@ -22,7 +23,7 @@ class GenericUnstructuredReader(_BaseReader):
         # add to reader build info
         grid['x'] = self.read_nodal_x_as_float64(nc).astype(np.float64)
         grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
-        grid['quad_cell_to_split'] = np.flatnonzero(grid['quad_cells_to_split']) # make as list of indcies for calculations
+        grid['quad_cells_to_split'] = np.flatnonzero(grid['quad_cells_to_split']) # make as list of indcies for calculations
 
         if self.is_hindcast3D(nc):
             grid['bottom_cell_index'] = self.read_bottom_cell_index_as_int32(nc)
@@ -179,15 +180,20 @@ class GenericUnstructuredReader(_BaseReader):
         # build adjacency etc from triangulation
         msg_logger = self.msg_logger
 
-        msg_logger.progress_marker('building node to triangles map')
+        t0 = perf_counter()
         grid['node_to_tri_map'],grid['tri_per_node'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
+        msg_logger.progress_marker('built node to triangles map', start_time=t0)
 
-        msg_logger.progress_marker('building triangle adjacency matrix')
+        t0 = perf_counter()
         grid['adjacency'] =  triangle_utilities_code.build_adjacency_from_node_cell_map(grid['node_to_tri_map'],grid['tri_per_node'], grid['triangles'])
+        msg_logger.progress_marker('built triangle adjacency matrix', start_time=t0)
 
-        msg_logger.progress_marker('building domain and island outlines')
+        t0 = perf_counter()
         grid['is_boundary_triangle'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
+        msg_logger.progress_marker('found boundary triangles', start_time=t0)
+        t0 = perf_counter()
         grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid)
+        msg_logger.progress_marker('built domain and island outlines', start_time=t0)
 
         # make island and domain nodes
         grid['node_type'] = np.zeros(grid['x'].shape[0], dtype=np.int8)
@@ -195,8 +201,10 @@ class GenericUnstructuredReader(_BaseReader):
             grid['node_type'][c['nodes']] = 1
 
         grid['node_type'][grid['grid_outline']['domain']['nodes']] = 2
-        msg_logger.progress_marker('calculating triangle areas')
+
+        t0 = perf_counter()
         grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
+        msg_logger.progress_marker('calculated triangle areas', start_time=t0)
         return grid
 
 

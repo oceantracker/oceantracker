@@ -13,7 +13,7 @@ _____________________________________
 New features
 --------------------
 
-#.  FVCOM reader built and passed tests_of_hindcasts so far
+#.  FVCOM reader built and passed misc so far
 #. ROMS reade started but not workng
 #. time variable grid data, eg zlevel, dry_cell flag have moved from from  reader variables to reader.grid_time_buffers
 

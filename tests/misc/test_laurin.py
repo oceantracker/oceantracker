@@ -525,18 +525,9 @@ if __name__ == '__main__':
                 'A_H': 0.2,
                 'A_V': 0.001
             },
-            'trajectory_modifiers': [
-                {
-                    'class_name': 'oceantracker.resuspension.BasicResuspension',
-                    'critical_friction_velocity': .01
-                },
-                # {
-                #     "class_name": "oceantracker.trajectory_modifiers.split_particles.SplitParticles",
-                #  "splitting_interval": 180,
-                #  "split_status_greater_than": 'dead',
-                #   "probability_of_splitting": 0.01
-                # },
-            ],
+            'resuspension':  {'class_name': 'oceantracker.resuspension.resuspension.BasicResuspension', 'critical_friction_velocity': .01  },
+
+
             'particle_properties': [
                 {
                     'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'
@@ -549,9 +540,7 @@ if __name__ == '__main__':
                 }
             ],
             'fields': [
-                {
-                    'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocity'
-                },
+
                 {
                     'class_name': 'oceantracker.fields.field_vertical_gradient.VerticalGradient',
                     'name_of_field': 'A_Z',
@@ -591,10 +580,7 @@ if __name__ == '__main__':
     if args.mode_debug:
         params['shared_params']['debug'] = True
 
-    json_util.write_JSON(
-        '../misc/test_param_files/LaurinTest.json', params)
-    yaml_util.write_YAML(
-        '../misc/test_param_files/LaurinTest.yaml', params)
+
 
     if not args.norun:
         run_info_file, has_errors = run(params)
@@ -615,7 +601,7 @@ if __name__ == '__main__':
         track_data = load_output_files.load_particle_track_vars(
             caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.9
         )
-        m = load_output_files.load_stats_file(caseInfoFile, nsequence=1)
+        m = load_output_files.load_stats_file(caseInfoFile, nsequence=0)
 
         plot_tracks.animate_particles(
             track_data, axis_lims=ax,

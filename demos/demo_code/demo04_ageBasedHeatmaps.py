@@ -16,7 +16,7 @@ output_file= "output\demo04_ageBasedHeatmaps"
 
 case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
-stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], nsequence=1)
+stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], nsequence=0)
 axis_lims = [1591000, 1601500, 5478500, 5491000]
 animate_heat_map(stats_data, axis_lims=axis_lims,
                                 heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',

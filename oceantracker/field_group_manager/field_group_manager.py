@@ -26,42 +26,13 @@ class FieldGroupManager(ParameterBaseClass):
         si=self.shared_info
 
 
-    def setup_interp_time_step(self, time_sec, xq, active):
-        # set up stuff needed by all fields before any 2D interpolation
+    def setup_time_step(self, time_sec, xq, active):
+        # set up stuff needed by all fields before any  interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
         si =self.shared_info
-        reader = si.classes['reader']
-
-        # ger buffer index from this time and next
-        nb = np.zeros((2, ), dtype=np.int32)
-
-        nt_hindcast_step = reader.time_to_hydro_model_index(time_sec)
-        nb[0] = reader.hydro_model_index_to_buffer_offset(nt_hindcast_step)
-        nb[1] = reader.hydro_model_index_to_buffer_offset(nt_hindcast_step + si.model_direction) # buffer is forward in timenext index could be wrapped in ring buffer
-        self.info['current_hydro_model_step'] = nt_hindcast_step
-        self.info['current_buffer_index'] = nb
-
-        grid_time_buffers = reader.grid_time_buffers
-
-        self.code_timer.start('setup_interp_time_step')
-        self.n_buffer = nb  # buffer offset just before given time ,
-
-        time_hindcast =   grid_time_buffers['time'][nb[0]]
-
-        self.step_dt_fraction = abs(time_sec -time_hindcast) / reader.info['hydro_model_time_step']
-        #if self.step_dt_fraction  < 0  or self.step_dt_fraction > 1.1:
-        #    print('feilds',self.step_dt_fraction,nt_hindcast_step, nb, 'timesec',time_util.seconds_to_datetime64(time_sec),    'hindcast time',time_util.seconds_to_datetime64(time_hindcast),'buffer times',              grid_time_buffers['date'][nb],time_sec -time_hindcast,self.step_dt_fraction)
-        # update 0-255 dry cell index
-        field_group_manager_util.update_dry_cell_index(nb, self.step_dt_fraction, grid_time_buffers['is_dry_cell'],   grid_time_buffers['dry_cell_index'])
-
-        # find cell for xq, node list and weight for interp at calls
-        si.classes['interpolator'].find_cell(xq, nb, self.step_dt_fraction, active)
-
-        self.code_timer.stop('setup_interp_time_step')
-
+        # todo one reader/interp at the moment but may be more later
+        si.classes['interpolator'].setup_interp_time_step(time_sec, xq, active)
         return active
-
-
 
     def interp_named_field_at_particle_locations(self, fieldName, active, output=None):
         # interp reader fieldName inplace to particle locations to same time and memory
@@ -71,9 +42,10 @@ class FieldGroupManager(ParameterBaseClass):
         self.code_timer.start('interp_named_field_at_particle_locations')
         si = self.shared_info
         if output is None:
+            # over write current values
             output = si.classes['particle_properties'][fieldName].used_buffer()
 
-        si.classes['interpolator'].eval_field_interpolation_at_particle_locations(si.classes['fields'][fieldName], self.n_buffer, output, active, step_dt_fraction=self.step_dt_fraction)
+        si.classes['interpolator'].interp_field_at_particle_locations(fieldName, active, output)
 
         self.code_timer.stop('interp_named_field_at_particle_locations')
 

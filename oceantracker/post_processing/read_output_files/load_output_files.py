@@ -96,16 +96,16 @@ def load_particle_track_vars(case_info_file_name, var_list=None, release_group= 
     return tracks
 
 def _get_user_class_filename(user_class_type, case_info,nsequence):
-    if nsequence < 1:
-        print ('Warning load output files , nsequence must be >=1 (setting equal to 1, the first in sequence) for user class type = ' + user_class_type)
-        nsequence = 1
+    if nsequence < 0:
+        print ('Warning load output files , nsequence must be >=0 for user class type = ' + user_class_type)
+        nsequence = 0
 
     user_class_files = case_info['output_files'][user_class_type]
-    if nsequence  >  len(user_class_files):
+    if nsequence+1  >  len(user_class_files):
         print ('Warning load output files , nsequence is greater than numer of users classes (setting to last in sequence), for user class type = ' + user_class_type)
-        nsequence = len(user_class_files)
+        nsequence = len(user_class_files)-1
 
-    file_name = path.join(case_info['output_files']['run_output_dir'], user_class_files[nsequence -1])
+    file_name = path.join(case_info['output_files']['run_output_dir'], user_class_files[nsequence])
     return file_name
 
 def _extract_useful_params(case_info, d):
@@ -115,7 +115,7 @@ def _extract_useful_params(case_info, d):
 
     return d
 
-def load_concentration_vars(case_info_file_name, var_list=[], nsequence = 1):
+def load_concentration_vars(case_info_file_name, var_list=[], nsequence = 0):
     case_info = read_case_info_file(case_info_file_name)
     nc_file_name= _get_user_class_filename('particle_concentrations', case_info,nsequence)
     d = read_ncdf_output_files.read_concentration_file(nc_file_name, var_list=var_list)
@@ -142,14 +142,14 @@ def load_grid(case_info_file_name):
 
     return d
 
-def load_stats_file(case_info_file_name, nsequence = 1, var_list=[]):
+def load_stats_file(case_info_file_name, nsequence = 0, var_list=[]):
     # load gridded or polygon stas file using runcase_info, the output of  load_runcase_info()
 
     case_info = read_case_info_file(case_info_file_name)
     nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
 
-    params= case_info['full_params']['particle_statistics'][nsequence-1]
-    s= case_info['class_info']['particle_statistics'][nsequence-1]
+    params= case_info['full_case_params']['class_lists']['particle_statistics'][nsequence]
+    s= case_info['class_info']['particle_statistics'][nsequence]
 
     d= read_ncdf_output_files.read_stats_file(nc_file_name, var_list)
     d['info']= s
@@ -166,14 +166,14 @@ def load_stats_file(case_info_file_name, nsequence = 1, var_list=[]):
     d['grid'] = load_grid(case_info_file_name)
     return d
 
-def load_residence_file(case_info_file_name,nsequence=1, var_list=[]):
+def load_residence_file(case_info_file_name,nsequence=0, var_list=[]):
     # load residence time in relese polygon
 
     case_info = read_case_info_file(case_info_file_name)
     nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
 
-    params= case_info['full_params']['particle_statistics'][nsequence-1]
-    s= case_info['class_info']['particle_statistics'][nsequence-1]
+    params= case_info['full_params']['particle_statistics'][nsequence]
+    s= case_info['class_info']['particle_statistics'][nsequence]
 
     d= read_ncdf_output_files.read_residence_file(nc_file_name, var_list)
     d['info']= s
@@ -182,7 +182,7 @@ def load_residence_file(case_info_file_name,nsequence=1, var_list=[]):
     d['grid'] = load_grid(case_info_file_name)
     return d
 
-def load_events_file(case_info_file_name, nsequence = 1, ncase=0):
+def load_events_file(case_info_file_name, nsequence = 0, ncase=0):
     # load  flat events
     #todo finish
     case_info = read_case_info_file(case_info_file_name)

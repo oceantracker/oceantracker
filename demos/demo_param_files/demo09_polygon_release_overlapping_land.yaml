@@ -1,12 +1,5 @@
 add_date_to_run_output_dir: false
 backtracking: true
-case_list:
-- particle_release_groups:
-  - points:
-    - - 1598000
-      - 5489100
-    pulse_size: 1
-    release_interval: 10800
 dispersion:
   A_H: 0.1
 output_file_base: demo09_polygon_release_overlapping_land

@@ -296,7 +296,7 @@ if __name__ == '__main__':
     t0 = time.time()
 
     for ntest in testList:
-        # tests_of_hindcasts or development choices of classes
+        # misc or development choices of classes
 
         if ntest==1:
             # zero dispersion test 2d/3D

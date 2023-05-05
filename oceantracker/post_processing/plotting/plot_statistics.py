@@ -9,7 +9,7 @@ from matplotlib import animation
 from oceantracker.util import time_util
 
 def animate_heat_map(stats_data, var='count',  axis_lims=None, credit=None, interval=20,heading=None,
-                     vmin=None, vmax=None,show_grid=False,title=None,logscale=False, caxis= None,nsequence=1,cmap='viridis',
+                     vmin=None, vmax=None,show_grid=False,title=None,logscale=False, caxis= None,nsequence=0,cmap='viridis',
                      movie_file= None, fps=15, dpi=300, release_group=1, back_ground_depth=True, back_ground_color_map= None):
 
     def draw_frame(nt):
@@ -103,7 +103,7 @@ def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, cr
 
     return anim
 
-def plot_heat_map(stats_data, nsequence=1, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
+def plot_heat_map(stats_data, nsequence=0, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
                   var='count',vmin=None, vmax=None, release_group=1,credit=None, cmap='viridis', heading = None,
                   plot_file_name=None, back_ground_depth=True,back_ground_color_map= None):
     #todo repace var with data_to_plot=, as in other ploting code

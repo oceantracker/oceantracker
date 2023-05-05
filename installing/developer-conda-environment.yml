@@ -1,4 +1,4 @@
-name: developer-oceantracker
+conda activate name: developer-oceantracker
 channels:
   - numba
   - conda-forge

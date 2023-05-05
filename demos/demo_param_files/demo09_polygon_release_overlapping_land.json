@@ -114,22 +114,6 @@
             "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
         }
     ],
-    "case_list": [
-        {
-            "particle_release_groups": [
-                {
-                    "points": [
-                        [
-                            1598000,
-                            5489100
-                        ]
-                    ],
-                    "pulse_size": 1,
-                    "release_interval": 10800
-                }
-            ]
-        }
-    ],
     "backtracking": true,
     "root_output_dir": "output"
 }

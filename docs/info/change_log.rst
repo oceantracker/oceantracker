@@ -6,6 +6,23 @@ Change log
 Known issues
 __________________
 
+Version 0.4 Major upgrade
+_________________________
+
+Known breaking changes- ask for help if needed to transition
+___________________________________________________________
+#.  new flatter paramter structure
+#. solver sub-stepping replaced by time_step in seconds param
+#. writer output step count replaced by update_interval time for writing
+
+
+
+New features
+--------------------
+
+#. Automatically determine hindcast file type, so reader class_name param not needed for know file type
+#. FVCOM and ROMS readers working
+#. reader uses rinf buffer bsed on hincast step,  needed for shared reader deveopment
 
 Version 0.3.03.000 2023-01-03
 _____________________________________

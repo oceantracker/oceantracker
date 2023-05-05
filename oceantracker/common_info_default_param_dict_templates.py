@@ -26,7 +26,7 @@ shared_params = {'user_note': PVC('No user note', str),
                 'advanced_settings': { 'max_warnings':        PVC(50,    int, min=0),  # dont record more that this number of warnings, to keep caseInfo.json finite
                               'use_numpy_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
                                'numba_function_cache_size' :  PVC(1024, int, min=128),
-                                'multiprocessing_case_start_delay': PVC(1., float, min=0.),  # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
+                                'multiprocessing_case_start_delay': PVC(None, float, min=0.),  # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
                             },
                   # params needed for later scatch_tests work
                   # 'list_paths_of_user_modules': PVC(None,list, contains = str), # todo not implemented yet
@@ -103,7 +103,7 @@ default_class_names={ 'solver': 'oceantracker.solver.solver.Solver',
              'resuspension':     'oceantracker.resuspension.resuspension.BasicResuspension',
              'particle_release_groups': 'oceantracker.particle_release_groups.point_release.PointRelease',
               'fields' :  'oceantracker.fields._base_field.BaseField',
-              'reader': 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader'}
+        }
 
 default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0), 'user_polygon_name': PVC(None, str),
                 'points': PVC([], 'vector', list_contains_type=float, is_required=True,
@@ -114,9 +114,122 @@ particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search
                                   'stranded_by_tide': 3,  'on_bottom': 6,  'moving': 10},
                  'known_prop_types': ['manual_update', 'from_fields','user']
                  }
+# default reader classes used by auto dection of file type
+
+default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+                 'fvcom': 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
+                 'roms': 'oceantracker.reader.ROMS_reader.OMsNativeReader',}
+# TODO LIST
+# todo for version 0.40.01
+    #TODO BUGS
+            # todo stray particle location in track plots
+            # todo no file found graceful exit
+            # todo active count when culling?
+            # todo why BC walk oo long for large steps sizes?
+            # todo cope wih empty relese goups, ie non released
+            # todo int32/64 signature issue in linux, eg contat mixed types
+            # todo amimations ignoring release group argument?
+            # todo no releses in particle buffer to small?
+
+    #TODO TUTORIALS
+        #todo parameters tut, _class, _list etc
+        # todo release groups
+        # todo on fly statistiics
+        # todo Reader param and adding fields
+        # todo resupension
+        # todo random walk
+        # todo
+    #TODO PARAMETERS
+        # todo vector type to array type
+        # todo allow numpy arrays in array type
+        # todo allow isostr, datetime, np.dateime64 for dates
+        # todo allow user to give class_instance instead of class_name
+        # todo add units to Parameter check and show in user docs
+        # todo max time steps per file option?
+        # todo add CPC for check class parameters??
+        # todo add default class instance checking
+        # todo remove leading/trailling blanks from string values
+        # todo full use of  'update_interval' for stats eves and some part prop
+        # todo check time_step default is hindcast time step
+    # TODO DOCUMENTATION
+        # todo update docs and build docs for new flat param structure
+        #todo  add doc string for improtant methods and classes
+        #todo hyperlinks to online docs where useful
+        # add units to doc
+    # TODO STRUCTURE
+        # todo use update_interval everywhere as parmateter fo periodic actions
+        # todo revert to index zero for all IDs and data loading
+    # TODO SIMPLIFY
+        #todo compact model only with self expanding buffer??
+        #todo remove depth range stats and make depth range part of stats
+        # add part property from field wwhich checks if field exists
+        # field type reader, derived from reader feild ,  or custom
+        # simplfy run in depth average mode and depth averaing fields, swap to explict depth aver tags feild names??
+    #TODO MODELS
+        #todo design and make base class
+        # todo make template
 
 
 
+#TODO FASTER STARTUP
+    #todo add timing of start up blocks to improve setup speed
+    # todo make outline builer faster by using numpy based rather than list based
+
+
+#TODO PERFORMANCE
+    # todo Kernal RK steps
+        # todo kernal forms of hori/vert walk
+        # todo kernal form of water vel interpolator
+        # todo kernal RK solver
+
+# TODO STRUCTURE
+    # todo use update_interval everywhere as parmateter fo periodic actions
+    # todo revert to index zero for all IDs and data loading
+    # todo show defauls on param eros?
+    # todo move writing to first case and make it a fieldgroup method
+    # todo move particle comparison methods to wrapper methods
+    # todo always give all non core part prop two buffers?
+    # todo full use of initial setup, final set up and update with timers
+    # todo get rid of used nseq in favour of instanceID
+    # todo add check for use of known class prop types, eg 'maunal_update'
+
+
+# TODO IMPROVEMENTS
+    # todo rotate particle relese polygns to reduce searches for points in side
+    # todo extend inside polygon to have list of cells fully inside plogon for faster serach
+    # todo integerise all periodic evets to model time steps
+    # todo to enable mutliple readers,  do all particle tracking in lon-lat
+
+# TODO FUTURE
+    #todo shared reader
+    #todo FIELD group to manage readers/interp in multi-reader future
+        # todo  move reader opertions to feild group mangager to allow for future with multiple readers
+        # todo attach reader/interp to each  feild instance to
+    # todo support for lat long inout/output
+
+
+# TODO OUTPUT/POSTPROCESSING
+    #todo put relese info in seperate json?
+
+# TODO TESTING
+    # todo test case fall vel no dispersion
+    # todo reprducable  test cases with random seed to test is working
+
+# TODO ERROR HANDLING
+    #todo improve crumb trail use in paramters and elsewhere
+    #todo  check in no if main for parralel case, to avoid  error on windows if running in //
+    #todo case info not found on graceful exit error
+
+# TODO SIMPLIFY
+    #todo compact model only with self expanding buffer??
+    #todo remove depth range stats and make depth range part of stats
+    # add part property from field wwhich checks if field exists
+    # field type reader, derived from reader feild ,  or custom
+    # simplfy run in depth average mode and depth averaing fields, swap to explict depth aver tags feild names??
+
+#TODO ISSUES
+    #  todo in making custom fields how do i know fiels have been added before i use i
+    #  todo how doi know part prop which depend on others are up to date before use
 
 
 

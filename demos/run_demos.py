@@ -11,7 +11,7 @@ from oceantracker.post_processing.plotting import plot_statistics,plot_tracks, p
 import make_demo_plots
 import build_and_test_demos
 import numpy as np
-
+from oceantracker.post_processing.read_output_files import load_output_files
 
 def mfn(movie_file, n=None):
     if movie_file is not None:
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         demo_name= params['output_file_base']
         params['reader']['input_dir'] = path.join(path.dirname(__file__),'demo_hindcast')
 
-        # tests_of_hindcasts or development choices of classes
+        # misc or development choices of classes
         if args.testing:
             pass
             params['reader'].update({'input_dir': 'F:\Hindcasts\Hindcast_samples_tests\ROMS_samples',
@@ -118,9 +118,8 @@ if __name__ == "__main__":
             #display_grid(tracks['grid'],ginput=3)
             pass
 
-
         # do plots
-        if n <90:
+        if n < 90:
             getattr(make_demo_plots,demo_name)(runInfo_file_name,output_file_base)
 
         else:

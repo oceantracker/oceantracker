@@ -136,7 +136,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # get short class names map
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
-        if si.settings['advanced_settings']['multiprocessing_case_start_delay'] > 0:
+        if si.settings['advanced_settings']['multiprocessing_case_start_delay'] is not None:
             delay = si.settings['advanced_settings']['multiprocessing_case_start_delay'] * (si.processor_number % si.settings['processors'])
             si.msg_logger.progress_marker('Delaying start by  ' + str(delay) + ' sec')
             sleep(delay)

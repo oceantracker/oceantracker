@@ -37,55 +37,35 @@ from oceantracker import common_info_default_param_dict_templates as common_info
 
 from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
-
+from oceantracker.reader.util import check_hydro_model
 import subprocess
 import traceback
 
+def run(params):
+    # run oceantracker
+    ot = OceanTracker(params)  # make an instance with given parameters
+    run_info_file_name, has_errors = ot.run()  # run oceantracker
+    return run_info_file_name, has_errors
 
-def run(raw_params):
-    if type(raw_params) is not dict:
-        raise GracefulError('Parameter must be a dictionary or json/yaml file readable as a dictionary, given parameters are type=' + str(type(raw_params)),
-                            hint='check parameter file or parameter variable is in dictionary form')
+class OceanTracker(object):
 
-    OT = _RunOceanTrackerClass()
-    if 'shared_params' in raw_params:
-        raw_params = convert_ver03_to_04_params(raw_params)
+    def __init__(self, raw_params):
+        if type(raw_params) is not dict:
+            raise GracefulError('Parameter must be a dictionary or json/yaml file readable as a dictionary, given parameters are type=' + str(type(raw_params)),
+                                hint='check parameter file or parameter variable is in dictionary form')
 
-    full_runInfoJSON_file_name, has_errors = OT.run(raw_params)
+        # legacy parsm which partially works
+        if 'shared_params' in raw_params:
+            raw_params = convert_ver03_to_04_params(raw_params)
 
-    return  full_runInfoJSON_file_name, has_errors
+        self.params = raw_params
 
+    def run(self):
+        raw_params = self.params
 
-def decompose_params(params, msg_logger, crumbs=''):
-    if type(params) != dict:
-        msg_logger.msg(f'Unpacking given parameters, params must be a dictionary , got type ={str(type(params))}', fatal_error=True,
-                       crumbs=crumbs, exit_now=True)
-    if 'case_list' in params and type(params['case_list']) != list:
-        msg_logger.msg(f'Unpacking given parameters, "case_list"" must be a list , got type ={str(type(params["case_list"]) )}', fatal_error=True,
-                       crumbs=crumbs, exit_now=True)
-
-    param_parts = {'settings': {}, 'core_classes': {}, 'class_lists': {}}
-    for key in params.keys():
-        if key in common_info.shared_params:
-            param_parts['settings'][key] = params[key]
-
-        elif key in common_info.run_params:
-                param_parts['settings'][key] = params[key]
-
-        elif key.removesuffix('_class') in common_info.core_classes:
-            param_parts['core_classes'][key.removesuffix('_class')] = params[key]
-
-        elif key.removesuffix('_list') in common_info.class_lists:
-            param_parts['class_lists'][key.removesuffix('_list')] = params[key]
-
-        else:
-            msg_logger.msg('Unexpected parameter key "' + key, warning=True, crumbs=crumbs)
-    return param_parts
-
-class _RunOceanTrackerClass(object):
-
-    def run(self, raw_params):
         self.msg_logger = MessageLogger('M:')
+
+
         ml = self.msg_logger
         ml.insert_screen_line()
         ml.msg(common_info.package_fancy_name + ' preliminary setup')
@@ -100,12 +80,12 @@ class _RunOceanTrackerClass(object):
             # unpack case list params
             case_list_params =[]
             for c in cl:
-                case_list_params.append(decompose_params(c,msg_logger=ml))
+                case_list_params.append(self.decompose_params(c,msg_logger=ml))
         else:
             case_list_params = []
 
         # split  top level params into useful blocks
-        run_builder = decompose_params(params, ml, crumbs='top level params check-')
+        run_builder = self.decompose_params(params, ml, crumbs='top level params check-')
 
 
         # merge top level run_params params with defaults
@@ -276,7 +256,7 @@ class _RunOceanTrackerClass(object):
 
     def setup_build_full_case_params(self, run_builder,case_list_params, msg_logger):
         # make set of case params merged with defaults and checked
-
+        t0  = perf_counter()
         # fill in any missing class lists
         run_builder['class_lists'] = self.check_top_level_class_keys(run_builder['class_lists'],
                                                   common_info.class_lists, msg_logger,
@@ -290,14 +270,14 @@ class _RunOceanTrackerClass(object):
                 run_builder['class_lists'][key][n] = i.params
 
         if len(case_list_params) ==0 :
-            case_list_params=[decompose_params({}, msg_logger)] # ensure there is at least one empty case
+            case_list_params=[self.decompose_params({}, msg_logger)] # ensure there is at least one empty case
 
         # build each case params
         processor_number = 0
         full_list_case_params=[]
 
         for n_case, case in enumerate(case_list_params):
-            tag = 'case #' +str(n_case+1)
+            tag = 'case #' +str(n_case)
             # parameter list to run same particle on multiple threads
             c  = deepcopy(run_builder)  # a set of parameters for this case
 
@@ -351,15 +331,18 @@ class _RunOceanTrackerClass(object):
             full_list_case_params.append(c)
             
         msg_logger.exit_if_prior_errors('Errors in merging case parameters')
+        msg_logger.progress_marker('merged param defaults and buildting case params', start_time=t0)
         return full_list_case_params
 
 
     def _setup_reader_builder(self,run_builder , msg_logger):
         # created a dict which can be used to build a reader
-
+        t0= perf_counter()
         reader_params =  run_builder['core_classes']['reader']
         if 'class_name' not in  reader_params:
-            msg_logger.msg(' Cannot find  "class_name" in reader_class parameter, cannot continue',fatal_error=True, exit_now=True)
+            # infer class name from netcdf files if possible
+            reader_params= check_hydro_model.check_fileformat(reader_params, msg_logger)
+
 
         reader = make_class_instance_from_params(reader_params, msg_logger,  class_type_name='reader')
         msg_logger.exit_if_prior_errors() # class name missing or missimg requied variables
@@ -372,7 +355,7 @@ class _RunOceanTrackerClass(object):
         reader_build_info = run_builder['reader_build_info']
         reader_build_info['file_info'] , reader_build_info['hindcast_is3D'] = reader.get_hindcast_files_info() # get file lists
 
-        msg_logger.progress_marker('Finished sorting hyrdo-model  files ', tabs=3)
+        msg_logger.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
 
         # read and set up reader grid now as  required for writing grid file
         # also if requested shared grid memory is set up
@@ -590,6 +573,33 @@ class _RunOceanTrackerClass(object):
                       hint= 'must be one of keys = ' + str(list(template.keys())), tabs=1)
 
         return params
+
+
+    def decompose_params(self, params, msg_logger, crumbs=''):
+        if type(params) != dict:
+            msg_logger.msg(f'Unpacking given parameters, params must be a dictionary , got type ={str(type(params))}', fatal_error=True,
+                           crumbs=crumbs, exit_now=True)
+        if 'case_list' in params and type(params['case_list']) != list:
+            msg_logger.msg(f'Unpacking given parameters, "case_list"" must be a list , got type ={str(type(params["case_list"]) )}', fatal_error=True,
+                           crumbs=crumbs, exit_now=True)
+
+        param_parts = {'settings': {}, 'core_classes': {}, 'class_lists': {}}
+        for key in params.keys():
+            if key in common_info.shared_params:
+                param_parts['settings'][key] = params[key]
+
+            elif key in common_info.run_params:
+                    param_parts['settings'][key] = params[key]
+
+            elif key.removesuffix('_class') in common_info.core_classes:
+                param_parts['core_classes'][key.removesuffix('_class')] = params[key]
+
+            elif key.removesuffix('_list') in common_info.class_lists:
+                param_parts['class_lists'][key.removesuffix('_list')] = params[key]
+
+            else:
+                msg_logger.msg('Unexpected parameter key "' + key, warning=True, crumbs=crumbs)
+        return param_parts
 
 def convert_ver03_to_04_params(params):
     p= {}

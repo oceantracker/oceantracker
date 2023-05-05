@@ -4,18 +4,12 @@ from oceantracker.util.module_importing_util  import import_module_from_string
 from oceantracker.util.parameter_checking import merge_params_with_defaults
 
 def make_class_instance_from_params(params,msg_logger, class_type_name=None, base_case_params =None,
-                                    nseq=None, crumbs='', merge_params=True):
+                                     crumbs='', merge_params=True):
     # make a class instance  dynamically,  get instance of class from string eg oceantracker.solver.Solver
     # assumes class_name param exists
     if base_case_params is None : base_case_params={}
     crumbs += ' merging and making instance'
     # add class sequence number, used for in class list
-    if nseq is None:
-        nseq= 0
-        sequ_tag = ''
-    else:
-        sequ_tag = '[#' + str(nseq) + '] '
-    crumbs +=  sequ_tag
 
     # work out class name
     if 'class_name' not in params or params['class_name'] is None:
@@ -28,11 +22,9 @@ def make_class_instance_from_params(params,msg_logger, class_type_name=None, bas
 
     i = import_module_from_string(params['class_name'], msg_logger,crumbs = crumbs + ' > importing module')
 
-    i.info['nseq']= nseq
     i.info['class_type'] = class_type_name
 
     if merge_params:
-        # merge template with base case first
         i.params  = merge_params_with_defaults(params, i.default_params, base_case_params, msg_logger, crumbs=crumbs)
 
     # attach the current message loger
