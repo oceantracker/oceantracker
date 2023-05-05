@@ -71,7 +71,6 @@ particle_release_groups:
   pulse_size: 10
   release_interval: 3600
 reader:
-  class_name: oceantracker.reader.schism_reader.SCHSIMreaderNCDF
   field_variables:
     water_temperature: temp
   file_mask: demoHindcastSchism3D.nc

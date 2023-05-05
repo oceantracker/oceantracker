@@ -4,7 +4,5 @@ venv
 /demos/output/
 /tests/nextVer/output/
 /docs/_build/doctrees/
-/profiling/output/
 /oceantracker.egg-info/
-/colborators/tests/output/
-
+/tutorials_how_to/output/

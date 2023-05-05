@@ -20,7 +20,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.add_default_params({
                                 'role_output_file_tag': PVC('tracks', str),
-                                'write_time_interval': PVC(None, int, min=1, doc_str='the time in seconds between writes (will be rounded to model time step)'),
+                                'update_interval': PVC(None, int, min=1,units='s', doc_str='the time in seconds between writes (will be rounded to model time step)'),
                                 'output_step_count': PVC(None,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
                                 'turn_on_write_particle_properties_list': PLC([], [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                                  'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
@@ -45,10 +45,10 @@ class _BaseWriter(ParameterBaseClass):
         params = self.params
 
         # find steps between wrtites, rounded to nearest model time step
-        if params['write_time_interval'] is None :
+        if params['update_interval'] is None :
             nt_step = 1
         else:
-            nt_step = int(np.round(params['write_time_interval']/si.model_time_step))
+            nt_step = int(np.round(params['update_interval']/si.model_time_step))
         self.info['output_step_count'] = min(nt_step,1)
 
         if params['write_dry_cell_index']:

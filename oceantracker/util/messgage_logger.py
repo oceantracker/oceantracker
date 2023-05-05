@@ -1,5 +1,6 @@
 from os import path, remove
 import traceback
+from time import  perf_counter
 
 class GracefulError(Exception):
     def __init__(self, message='-no error message given',hint=None):
@@ -105,7 +106,13 @@ class MessageLogger(object):
     def insert_screen_line(self):
         self.msg('--------------------------------------------------------------------------')
 
-    def progress_marker(self, msg, tabs=0):
+    def progress_marker(self, msg, tabs=0, start_time=None):
+
+        # add completion time if start given
+        if start_time is not None:
+            msg = f' {msg},\t  {perf_counter()-start_time:1.3f} sec'
+            tabs += 2
+
         self.msg('- ' + msg, tabs=tabs + 1)
 
     def show_all_warnings_and_errors(self,error=None):

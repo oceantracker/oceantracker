@@ -3,7 +3,6 @@
     "debug": true,
     "time_step": 120,
     "reader": {
-        "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
         "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",
         "field_variables": {

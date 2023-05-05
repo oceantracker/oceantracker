@@ -38,7 +38,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
                       back_ground_depth=True, back_ground_color_map = None, credit=None, heading= None,
                       size_using_data= None,  part_color_map=None,
                       vmin=None, vmax=None,
-                      release_group=None, show_dry_cells = False):
+                      release_group=None, show_dry_cells = False, show=True):
     def draw_frame(nt):
         if show_dry_cells:
             dry_cell_plot.set_array(dry_cell_data[nt, :])
@@ -107,7 +107,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
     fig.tight_layout()
 
     anim = animation.FuncAnimation(fig, draw_frame, frames=num_frames, interval=interval, blit=True)
-    plot_utilities.animation_output(anim, movie_file, fps=fps, dpi=dpi)
+    plot_utilities.animation_output(anim, movie_file, fps=fps, dpi=dpi, show=show)
     return anim
 
 

@@ -6,7 +6,6 @@ from os import path, walk
 from glob import glob
 from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
-from oceantracker.fields.util import fields_util
 from oceantracker.util.basic_util import nopass
 from oceantracker.reader.util.reader_util import append_split_cell_data
 from oceantracker.util import  cord_transforms
@@ -22,7 +21,6 @@ class _BaseReader(ParameterBaseClass):
         self.add_default_params({'input_dir': PVC(None, str),
                                  'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
                                  'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
-                                 'coordinate_projection' : PVC(None, str, doc_str='string map project for meters grid for use by pyproj module, eg  "proj=utm +zone=16 +datum=NAD83" '),
                                  'time_zone': PVC(None, int, min=-12, max=12,doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
                                  'cords_in_lat_long': PVC(False, bool),
                                  'time_buffer_size': PVC(48, int, min=2),
@@ -30,7 +28,9 @@ class _BaseReader(ParameterBaseClass):
                                  'required_file_dimensions': PLC([], [str]),
                                  'water_density': PVC(48, int, min=2),
                                  'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
-                                 'one_based_indices' :  PVC(False, bool,doc_str='indcies in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
+                                 'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
+                                 'EPSG_transform_code' : PVC(None, int, min=0,
+                                                   doc_str='Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)'),
                                  'grid_variables': {'time': PVC('time', str, is_required=True),
                                                     'x': PLC(['x', 'y'], [str], fixed_len=2),
                                                     'zlevel': PVC(None, str),
@@ -428,7 +428,7 @@ class _BaseReader(ParameterBaseClass):
                     field.data[buffer_index, ...] = data_added_to_buffer
 
                     if name in self.params['field_variables_to_depth_average']:
-                       si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = fields_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid_time_buffers['zlevel'], grid['bottom_cell_index'])
+                       si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = reader_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid_time_buffers['zlevel'], grid['bottom_cell_index'])
 
             # read grid time, zlevel
             # do this after reading fields as some hindcasts required tide field to get zlevel, eg FVCOM
@@ -474,7 +474,7 @@ class _BaseReader(ParameterBaseClass):
             data = self.read_file_field_variable_as4D(nc, component_info,var_info['is_time_varying'], file_index)
 
             if var_info['requires_depth_averaging']:
-                data = fields_util.depth_aver_SlayerLSC_in4D(data, grid_time_buffers['zlevel'], grid['bottom_cell_index'])
+                data = reader_util.depth_aver_SlayerLSC_in4D(data, grid_time_buffers['zlevel'], grid['bottom_cell_index'])
 
             m1 = m + component_info['num_components']
 
@@ -527,7 +527,6 @@ class _BaseReader(ParameterBaseClass):
             # get dry cells for each triangle allowing for splitting quad cells
             data_added_to_buffer = nc.read_a_variable(self.params['grid_variables']['is_dry_cell'], file_index)
             is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
-            #grid['is_dry_cell'][buffer_index, :] =  np.concatenate((data_added_to_buffer, data_added_to_buffer[:, grid['quad_cell_to_split_index']]), axis=1)
 
     def read_open_boundary_data_as_boolean(self, grid):
         is_open_boundary_node = np.full((grid['x'].shape[0],), False)
@@ -599,6 +598,8 @@ class _BaseReader(ParameterBaseClass):
             #todo make it work with users transform?
             x_out = cord_transforms.WGS84_to_UTM(x, out=None)
         return x_out
+
+
 
     def close(self):
         # release any shared memory

@@ -48,7 +48,7 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
 
     def read_dry_cell_data(self,nc,file_index, is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry
-        #todo enforce read as boolean
+        #todo enforce read as boolean??
         grid = self.grid
         # get dry cells for each triangle allowing for splitting of quad cells
         data_added_to_buffer = nc.read_a_variable('wetdry_elem', file_index)

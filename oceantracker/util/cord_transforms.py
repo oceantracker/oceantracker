@@ -10,7 +10,8 @@ from math import floor
 ID_WGS84 = 4326
 ID_NZTM  = 2193
 
-# set up class instances once to speed computation
+# set up class instances once to speed computation,
+# xy=True will assume (lon,lat) input output
 transformerNZTM_to_WGS84 = Transformer.from_crs(ID_NZTM , ID_WGS84, always_xy = True)
 transformerWGS84_to_NZTM = Transformer.from_crs(ID_WGS84, ID_NZTM , always_xy = True)
 
@@ -24,7 +25,7 @@ def WGS84_to_NZTM(lon_lat, out=None):
 def NZTM_to_WGS84(xy, out=None):
     #  NZTM ( east, north)  to (lat, lng) for numpy arays
     if out is None: out = np.full_like(xy)
-    out[:,0],out[:,1] = transformerNZTM_to_WGS84.transform(xy[:,0], xy[:,1]) # not sure why xy are swapped here but it works
+    out[:,0],out[:,1] = transformerNZTM_to_WGS84.transform(xy[:,0], xy[:,1])
 
     # ensure longitude > 0
     sel= out[:,0] < 0

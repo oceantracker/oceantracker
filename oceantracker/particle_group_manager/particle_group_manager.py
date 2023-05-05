@@ -79,7 +79,7 @@ class ParticleGroupManager(ParameterBaseClass):
         part_prop = si.classes['particle_properties']
 
         #todo does this setup_interp_time_step have to be here?
-        si.classes['field_group_manager'].setup_interp_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
+        si.classes['field_group_manager'].setup_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
 
         # initial values  part prop derived from fields
         for name, i  in si.classes['particle_properties'].items():

@@ -85,8 +85,7 @@ def  CheckParameterValues(key,value_checker, user_param, base_param, crumbs, msg
 
 class ParamValueChecker(object):
     def __init__(self, default_value, dtype, is_required=False, list_contains_type=None,
-                 min=None, max=None,
-                 possible_values=None,
+                 min=None, max=None,units=None,  possible_values=None,
                  doc_str=None,
                  class_doc_feature=None,
                  obsolete = None):
@@ -102,6 +101,7 @@ class ParamValueChecker(object):
                  type=dtype,
                  min=min,
                  max=max,
+                 units=units,
                  possible_values=possible_values,
                  is_required=is_required,
                  list_contains_type=list_contains_type,

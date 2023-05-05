@@ -203,18 +203,16 @@ def show_output(plot_file_name=None, ):
     plt.show()
     plt.close()  # prevents over plotting
 
-def animation_output(anim, movie_file, fps = 15, dpi=300):
+def animation_output(anim, movie_file, fps = 15, dpi=300,show=True):
 
-    if movie_file is  None :
-        plt.show()
-    else:
+    if show :    plt.show()
+    if movie_file is not None:
         print('Building movie:  ' + movie_file)
         try:
             FFMpegWriter = animation.writers['ffmpeg']
         except Exception as e:
             print('OceanTracker post_processing error: could not make movie as ffmpeg no installed or other error initialising ffmpeg')
             print('           Install ffmpeg??, doing screen plot instead')
-            plt.show()
             plt.close()
             return
 

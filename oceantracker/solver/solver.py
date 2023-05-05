@@ -173,7 +173,7 @@ class Solver(ParameterBaseClass):
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
 
         # setup_interp_time_step
-        fgm.setup_interp_time_step(time_sec, part_prop['x'].data, alive)
+        fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
 
         # update particle properties
         pgm.update_PartProp(time_sec, alive)
@@ -218,7 +218,7 @@ class Solver(ParameterBaseClass):
         particle_operations_util.copy(x1, x2, is_moving)
 
         #  step 1 from current location and time
-        fgm.setup_interp_time_step(time_sec, x1, is_moving)
+        fgm.setup_time_step(time_sec, x1, is_moving)
 
         if RK_order==1:
             fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v)
@@ -232,7 +232,7 @@ class Solver(ParameterBaseClass):
 
         # step 2, get improved half step velocity
         t2= time_sec + 0.5 * dt
-        fgm.setup_interp_time_step(t2, x2, is_moving)
+        fgm.setup_time_step(t2, x2, is_moving)
 
         if RK_order==2:
             fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v)
@@ -245,14 +245,14 @@ class Solver(ParameterBaseClass):
 
         # step 3, a second half step
         t2 = time_sec + 0.5 * dt
-        fgm.setup_interp_time_step(t2, x2, is_moving)
+        fgm.setup_time_step(t2, x2, is_moving)
         fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
         solver_util.euler_substep( x1, v_temp, velocity_modifier, dt, is_moving, x2)  # improve half step position values
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity from step 3
 
         # step 4, full step
         t2 = time_sec + dt
-        fgm.setup_interp_time_step(t2,  x2, is_moving)
+        fgm.setup_time_step(t2,  x2, is_moving)
         fgm.interp_named_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
         particle_operations_util.add_to(v, v_temp, is_moving, scale=1.0 / 6.0)  # last accumulation of velocity for v4
 
@@ -267,11 +267,11 @@ class Solver(ParameterBaseClass):
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
         si= self.shared_info
-        fm= si.classes["field_group_manager"]
+        interp_info= si.classes["interpolator"].info #todo more than one reader?
 
         fraction_done= abs((time_sec - si.solver_info['model_start_time']) / si.solver_info['model_duration'])
         s = f'{100* fraction_done:02.0f}%'
-        s += f' step {nt:04d}:H{fm.info["current_hydro_model_step"]:04d}b{fm.n_buffer[0]:02d}-{fm.n_buffer[1]:02d}'
+        s += f' step {nt:04d}:H{interp_info["current_hydro_model_step"]:04d}b{interp_info["current_buffer_index"][0]:02d}-{interp_info["current_buffer_index"][1]:02d}'
         t = abs(time_sec - si.solver_info['model_start_time'])
         s += ' Day ' +  ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)
