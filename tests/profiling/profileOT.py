@@ -154,6 +154,7 @@ if __name__ == '__main__':
             f.write(profiler.output_html(timeline=False))
 
     elif args.profiler == 2:
+        #params['profiler'] = 'none'
         params['profiler'] = 'scalene'
         run('scalene', params)
 

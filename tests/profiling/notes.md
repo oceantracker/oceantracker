@@ -8,5 +8,4 @@ kernprof -l -v profileOT.py -test > output.txt
 
 # scalene
 
-python -m scalene --profile-all  profileOT.py --d 2
-output in profile.html by default 
+python -m scalene --profile-all profileOT.py --d 2 --pr 2

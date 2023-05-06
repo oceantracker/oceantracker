@@ -25,8 +25,14 @@ def function_profiler(modual_name):
             return func
         elif profile_type =='oceantracker':
             return functions_wrapper(func,tag)
+
         elif profile_type =='scalene':
-            return scalene_wrapper(func,tag)
+            # just use function as is
+            #return func
+            print('xxx-scalene', )
+            return profile(func) # use scalene profile wrapper
+        else:
+            return func
 
     return profiler_function
 
@@ -39,7 +45,9 @@ def functions_wrapper(func,tag):
             func_timings[name] = deepcopy(timing_template)
         func_timings[name]['calls'] += 1
         t0 = perf_counter()
+
         result = func(*args, **kwargs)
+
         func_timings[name]['time'] += perf_counter() - t0
         if func_timings[name]['calls'] ==1:
             func_timings[name]['time_first_call'] =func_timings[name]['time']

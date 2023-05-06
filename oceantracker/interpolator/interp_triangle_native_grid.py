@@ -159,7 +159,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 # kill particles
                 part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
 
-    @function_profiler(__name__)
     def locate_BCwalk(self,xq, active):
         si = self.shared_info
         reader = si.classes['reader']
