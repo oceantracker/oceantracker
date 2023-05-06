@@ -1,9 +1,7 @@
 
 # line_profiler
 
-kernprof -l -v profileOT.py -test
-
-kernprof -l -v profileOT.py -test > output.txt
+kernprof -l -v profileOT.py --pro 3 --d 2 > output.txt
 
 
 # scalene

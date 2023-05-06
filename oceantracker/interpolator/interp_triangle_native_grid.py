@@ -116,6 +116,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         return output
 
+    @function_profiler(__name__)
     def find_cell(self, xq, nb,step_dt_fraction, active):
         # locate cell in place
         # nt give but not needed in 2D
@@ -226,7 +227,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         is_inside=  np.all(np.logical_and(bc >= -self.params['bc_walk_tol'], bc  <= 1.+self.params['bc_walk_tol']),axis=1)
         return is_inside, n_cell  # is inside if  magnitude of all BC < 1
 
-
+    @function_profiler(__name__)
     def eval_field_interpolation_at_particle_locations(self, fieldObj, nb  , output, active, step_dt_fraction=None):
         # in place evaluation of field interpolation
         si = self.shared_info
@@ -287,6 +288,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                      n_cell,
                                                      bc_cords, active)
 
+    @function_profiler(__name__)
     def eval_field_interpolation_at_given_locations(self, fieldObj,x, time=None,  output=None, n_cell= None):
         # in  evaluation of field interpolation at specific locations, ie not particle locations
         #todo not working - eval_field_interpolation_at_given_locations

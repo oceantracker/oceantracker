@@ -14,6 +14,8 @@ def set_profile_mode(name):
         # this aviods always having scalene installed
         global scalene_profiler
         from scalene import scalene_profiler
+    elif name=='line_profiler':
+        pass
 
 # Wrap the profiling decorator in another function that checks the global switch
 def function_profiler(modual_name):
@@ -29,8 +31,13 @@ def function_profiler(modual_name):
         elif profile_type =='scalene':
             # just use function as is
             #return func
-            print('xxx-scalene', )
+            #print('xxx-scalene', )
             return profile(func) # use scalene profile wrapper
+        elif profile_type == 'line_profiler':
+            # just use function as is
+            # return func
+            # print('xxx-scalene', )
+            return profile(func)  # use scalene profile wrapper
         else:
             return func
 
