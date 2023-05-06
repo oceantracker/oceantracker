@@ -159,12 +159,7 @@ if __name__ == '__main__':
         run('scalene', params)
 
     elif args.profiler == 3:
-        import cProfile, pstats
-        profiler = cProfile.Profile()
-        profiler.enable()
-        run(params)
-        profiler.disable()
-        stats = pstats.Stats(profiler).sort_stats('cumtime')
-        stats.print_stats()
+        params['profiler'] = 'line_profiler'
+        run( 'line_profiler',params)
 
     print('Done')

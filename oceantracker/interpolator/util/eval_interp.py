@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit, float64, int32, float32, int8, int64, boolean, uint8
 from oceantracker.util import  basic_util
-
+from oceantracker.util.profiling_util import function_profiler
 
 
 @njit()
@@ -68,6 +68,7 @@ def time_independent_3Dfield(F_out, F_data, tri, n_cell, nz_node, z_fraction, BC
             for c in range(n_comp):
                 # add contributions from layer above and below particle, for each spatial component
                 F_out[n, c] += bc * (F[n_node, nz, c] * zf1 + F[n_node, nz + 1, c] * zf)
+@function_profiler(__name__)
 @njit()
 def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz_cell, nz_bottom, z_fraction, BCcord,  active):
     #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
@@ -105,7 +106,7 @@ def time_dependent_3Dfield(F_out, F_data, nb, step_dt_fraction, tri,  n_cell, nz
                 F_out[n, c] +=     BCcord[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*dt1  \
                                 +  BCcord[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*step_dt_fraction  # second time step
 
-#@njit
+@function_profiler(__name__)
 @njit( ( (float64[:,:], float32[:, :, :, :],int32[:],float64,
                     int32[:,:],int32[:], int32[:], int32[:],
                     float32[:], float32[:], float64[:,:], int32[:] )))
