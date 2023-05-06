@@ -11,6 +11,8 @@ def set_profile_mode(name):
     global profile_type
     profile_type = name
     if name =='scalene' :
+        # this aviods always having scalene installed
+        global scalene_profiler
         from scalene import scalene_profiler
 
 # Wrap the profiling decorator in another function that checks the global switch
