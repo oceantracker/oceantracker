@@ -20,7 +20,6 @@ class ParameterBaseClass(object):
     # 6) Defaults must be set in .__init__()  using method ._update_default_param_dictionary({})
     # 7) children must call   super().__init__()   to get defaults of parent
 
-    code_timer = basic_util.BlockTimer()
     shared_info = SharedInfoClass()  # for all to access
 
     def initial_setup(self): pass

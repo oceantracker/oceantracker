@@ -154,12 +154,8 @@ if __name__ == '__main__':
             f.write(profiler.output_html(timeline=False))
 
     elif args.profiler == 2:
-        # not working!
-        scalene_profiler.start()
-        run('scalelene', params)
-        # Turn profiling off
-        scalene_profiler.stop()
-
+        params['profiler'] = 'scalene'
+        run('scalene', params)
 
     elif args.profiler == 3:
         import cProfile, pstats

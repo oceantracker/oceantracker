@@ -10,7 +10,7 @@ from oceantracker.util.basic_util import nopass
 from oceantracker.reader.util.reader_util import append_split_cell_data
 from oceantracker.util import  cord_transforms
 from oceantracker.reader.util import shared_reader_memory_util
-
+from oceantracker.util.profiling_util import function_profiler
 
 from oceantracker.reader.util import reader_util
 
@@ -247,11 +247,10 @@ class _BaseReader(ParameterBaseClass):
 
         return run_builder
 
-
+    @function_profiler(__name__)
     def setup_reader_fields(self):
         si = self.shared_info
         fgm = si.classes['field_group_manager']
-        self.code_timer.start('build_hindcast_reader')
         nc = NetCDFhandler(si.reader_build_info['file_info']['names'][0], 'r')
 
         # setup reader fields from their named components in field_variables param ( water depth ad tide done earlier from grid variables)
@@ -289,7 +288,6 @@ class _BaseReader(ParameterBaseClass):
         bi['buffer_available'] = bi['buffer_size']
         bi['nt_buffer0'] = 0
 
-        self.code_timer.stop('build_hindcast_reader')
 
     def _basic_file_checks(self, nc, msg_logger):
         # check named variables are in first file
@@ -359,16 +357,14 @@ class _BaseReader(ParameterBaseClass):
             }
 
         return params, var_info
-    
 
-
+    @function_profiler(__name__)
     def fill_time_buffer(self, time_sec):
         # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
         # fill buffer starting at hindcast time step nt0_buffer
         # todo change so does not read current step again after first fill of buffer
 
         si = self.shared_info
-        self.code_timer.start('reading_to_fill_time_buffer')
         t0 = perf_counter()
 
         grid = self.grid
@@ -452,15 +448,9 @@ class _BaseReader(ParameterBaseClass):
             bi['time_steps_in_buffer'] += nt_file.tolist()
 
         si.msg_logger.progress_marker(f' read {total_read:3d} time steps in  {perf_counter() - t0:3.1f} sec', tabs=2)
-
-
         # record useful info/diagnostics
-
-
         bi['n_filled'] = total_read
 
-
-        self.code_timer.stop('reading_to_fill_time_buffer')
 
     def assemble_field_components(self,nc, field, buffer_index=None, file_index=None):
         # read scalar fields / join together the components which make vector from component list

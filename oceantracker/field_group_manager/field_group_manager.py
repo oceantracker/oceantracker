@@ -3,7 +3,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
 from oceantracker.util import time_util
-
+from oceantracker.util.profiling_util import function_profiler
 
 
 #TODO allow feilds to be spread across mutiple files and file types
@@ -34,12 +34,12 @@ class FieldGroupManager(ParameterBaseClass):
         si.classes['interpolator'].setup_interp_time_step(time_sec, xq, active)
         return active
 
+    @function_profiler(__name__)
     def interp_named_field_at_particle_locations(self, fieldName, active, output=None):
         # interp reader fieldName inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's fieldName
         # particle_prop_name
 
-        self.code_timer.start('interp_named_field_at_particle_locations')
         si = self.shared_info
         if output is None:
             # over write current values
@@ -47,19 +47,13 @@ class FieldGroupManager(ParameterBaseClass):
 
         si.classes['interpolator'].interp_field_at_particle_locations(fieldName, active, output)
 
-        self.code_timer.stop('interp_named_field_at_particle_locations')
-
     def interp_named_field_at_given_locations_and_time(self, fieldName, x, time= None, n_cell=None, output=None):
         # interp reader fieldName at specfied locations,  not particle locations
         # output can optionally be redirected to another particle property name different from  reader's fieldName
         # particle_prop_name
-        self.code_timer.start('interp_at_given_locations_and_time')
+
         si = self.shared_info
-
         output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(si.classes['fields'][fieldName], x, time, output=output, n_cell=n_cell)
-
-        self.code_timer.stop('interp_at_given_locations_and_time')
-
         return output
 
     def create_field(self, field_type, field_params, crumbs=''):
