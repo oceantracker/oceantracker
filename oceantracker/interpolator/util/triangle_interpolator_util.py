@@ -1,6 +1,6 @@
 import numpy as np
 from numba import njit,typeof, float64, int32, float32, int8, int64, boolean, uint8, void, types as nbt
-from oceantracker.util import basic_util
+from oceantracker.util.profiling_util import function_profiler
 from oceantracker.common_info_default_param_dict_templates import particle_info
 
 # walk counts order
@@ -44,7 +44,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
     return np.argmin(bc), np.argmax(bc)
 
 # ________ Barycentric triangle walk________
-
+@function_profiler(__name__)
 @njit(nbt.void(nbt.float64,nbt.int64, nbt.bool_, nbt.bool_,
                nbt.float64[:, :,:], nbt.int32[:,:],
                 nbt.float64[:, :], nbt.float64[:, :],nbt.int8[:],nbt.int32[:],
@@ -201,6 +201,7 @@ def get_BC_transform_matrix(points, simplices):
     return Tinvs
 
 #no signature needed as called by a numba function
+
 @njit()
 def _eval_z_at_nz_cell( tf,nb, nz_cell, z_level_at_nodes,  nz_bottom_nodes, BCcord, nodes):
     # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
@@ -211,6 +212,7 @@ def _eval_z_at_nz_cell( tf,nb, nz_cell, z_level_at_nodes,  nz_bottom_nodes, BCco
              + z_level_at_nodes[nb[1], nodes[m], nz] * BCcord[m] * tf[0]
     return z
 
+@function_profiler(__name__)
 @njit(nbt.void(nbt.float32[:, :, :],nbt.int32[:,:], nbt.int32[:],nbt.float64,
             nbt.float64[:, :],nbt.int32[:], nbt.int32[:], nbt.int8[:],nbt.float64[:, :], nbt.int32[:],
                nbt.float32[:], nbt.float32[:], nbt.int32[:], nbt.int64[:], nbt.float64))

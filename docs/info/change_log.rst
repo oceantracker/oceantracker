@@ -20,9 +20,14 @@ ___________________________________________________________
 New features
 --------------------
 
-#. Automatically determine hindcast file type, so reader class_name param not needed for know file type
+#. Automatically determine hindcast file type, if reader class_name param not given
+#. Much faster start up with improved grid outline builder
 #. FVCOM and ROMS readers working
-#. reader uses rinf buffer bsed on hincast step,  needed for shared reader deveopment
+
+Internal changes
+_________________
+
+#. reader uses ring buffer based on hindcast step mod buffer size,  needed for shared reader development
 
 Version 0.3.03.000 2023-01-03
 _____________________________________

@@ -8,7 +8,7 @@ from oceantracker.particle_properties import particle_operations_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
-
+from oceantracker.util.profiling_util import function_profiler
 
 class Solver(ParameterBaseClass):
     #  does particle tracking solution as class to allow multi processing
@@ -25,13 +25,11 @@ class Solver(ParameterBaseClass):
                             })
 
     def initial_setup(self):
-
-        self.code_timer.start('solver_initialization')
         si = self.shared_info
         si.classes['particle_group_manager'].create_particle_property('manual_update', dict(name='v_temp', vector_dim=si.classes['particle_properties']['x'].num_vector_dimensions(), write=False))
 
         # set up working space for RK stesp to impriove L3 cache performance
-        self.code_timer.stop('solver_initialization')
+
 
     def check_requirements(self):
 
@@ -103,11 +101,10 @@ class Solver(ParameterBaseClass):
             si.classes['dispersion'].update(time_sec, is_moving)
 
             #  Main integration step
-            self.code_timer.start('integration_step')
             #--------------------------------------
             self.integration_step(time_sec, is_moving)
             #--------------------------------------
-            self.code_timer.stop('integration_step')
+
 
             t2 = time_sec + info['model_time_step'] * si.model_direction
 
@@ -133,9 +130,8 @@ class Solver(ParameterBaseClass):
         info['computation_ended'] = datetime.now()
         info['computation_duration'] = datetime.now() -computation_started
 
-    #@profile
+    @function_profiler(__name__)
     def pre_step_bookkeeping(self, nt,time_sec):
-        self.code_timer.start('pre_step_bookkeeping')
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
@@ -192,9 +188,8 @@ class Solver(ParameterBaseClass):
             # write tracks file
             tracks_writer.write_all_time_varying_prop_and_data()
 
-        self.code_timer.stop('pre_step_bookkeeping')
 
-    #@profile
+    @function_profiler(__name__)
     def integration_step(self, time_sec, is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties
@@ -286,39 +281,34 @@ class Solver(ParameterBaseClass):
         s += f' step time = { (perf_counter() - t0_step) * 1000:4.1f} ms'
         si.msg_logger.msg(s)
 
-
     def _update_stats(self,time_sec):
         # update and write stats
         si= self.shared_info
-        self.code_timer.start('on_the_fly_statistics')
         for name, i in si.classes['particle_statistics'].items():
             if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['calculation_interval']:
+                i.start_update_timer()
                 i.update(time_sec)
-
-        self.code_timer.stop('on_the_fly_statistics')
+                i.stop_update_timer()
 
     def _update_concentrations(self, time_sec):
         # update triangle concentrations
         si = self.shared_info
-        self.code_timer.start('particle_concentrations')
         for name, i in si.classes['particle_concentrations'].items():
             if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['calculation_interval']:
+                i.start_update_timer()
                 i.update(time_sec)
-
-        self.code_timer.stop('particle_concentrations')
+                i.stop_update_timer()
 
     def _update_events(self, t):
         # write events
         si = self.shared_info
-
-        self.code_timer.start('event_logging')
         for name, i in si.classes['event_loggers'].items():
+            i.start_update_timer()
             i.update(time_sec=t)
-
-        self.code_timer.stop('event_logging')
+            i.stop_update_timer()
 
     def close(self):
-        a=1
+        pass
 
 
 

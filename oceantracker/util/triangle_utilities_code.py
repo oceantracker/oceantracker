@@ -144,18 +144,16 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
     segs = join_segments(edge_node_pairs)
     #print('join_segments', perf_counter() - t0)
 
-    # use first segment to work out if an island or domain
+    # work out if an island or domain and unpack data
     out= {'domain' : {},'islands':[]}
-    # longest segment must be the domain
-    len_seg = [len(l) for l in segs ]
-    max(len_seg)
+    len_seg = [len(l) for l in segs] # f
+
     for s in segs:
         nodes=np.asarray(s).astype(np.int32)
         points = x[s, :]
-
         face_nodes= np.stack((nodes[:-1],nodes[1:]), axis=1)
-        # if midpoint inside then it is not an island
-        if max(len_seg) == len(s) :#not poly.is_inside(x1)[0]:
+        # longest segment must be the domain
+        if max(len_seg) == len(s) :
             out['domain'].update({'nodes': nodes, 'points': points, 'face_nodes': face_nodes})
         else:
             out['islands'].append({'nodes': nodes, 'points': points, 'face_nodes': face_nodes})

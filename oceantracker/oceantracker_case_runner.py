@@ -2,9 +2,10 @@ from copy import deepcopy
 from os import path, environ, remove
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_util import  make_class_instance_from_params
+from oceantracker.util.profiling_util import function_profiler
 
 from oceantracker.util.messgage_logger import MessageLogger, GracefulError
-
+from oceantracker.util import profiling_util
 import numpy as np
 from oceantracker.util import time_util
 
@@ -23,7 +24,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def run(self, runner_params):
         si=self.shared_info
         si.reset()  # clear out classes from class instance of SharedInfo if running series of mains
-        t0 = datetime.now()
+        d0 = datetime.now()
         # basic param shortcuts
         si.case_runner_params = runner_params
         si.settings = si.case_runner_params['settings']
@@ -52,6 +53,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger = MessageLogger('P%03.0f:' % si.processorID, si.settings['advanced_settings']['max_warnings'])
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'],output_files['output_file_base'] + '_caseLog')
+
+        # set up profiling
+        profiling_util.set_profile_mode(si.settings['profiler'])
 
         case_info_file = None
         case_exception = None
@@ -89,7 +93,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # try running case
         try:
             self._do_a_run()
-            case_info = self._get_case_info(t0)
+            case_info = self._get_case_info(d0)
 
             if si.settings['write_output_files']:
                 case_info_file = si.output_file_base + '_caseInfo.json'
@@ -112,9 +116,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.insert_screen_line()
         si.msg_logger.progress_marker('Finished case number %3.0f, ' % si.processorID + ' '
                                       + si.output_files['output_file_base']
-                                      + ' started: ' + str(t0)
+                                      + ' started: ' + str(d0)
                                       + ', ended: ' + str(datetime.now()))
-        si.msg_logger.msg('Elapsed time =' + str(datetime.now() - t0), tabs=3)
+        si.msg_logger.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
         si.msg_logger.insert_screen_line()
         si.msg_logger.close()
         return case_info_file, False
@@ -151,12 +155,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             environ['NUMBA_FULL_TRACEBACKS'] = '1'
             si.msg_logger.msg('Running in debug mode',note=True)
 
-
+    @function_profiler(__name__)
     def _do_a_run(self):
         # build and run solver from parameter dictionary
         # run from a given dictionary to enable particle tracking on demand from JSON type parameter set
         # also used for parallel  version
-        self.code_timer.start('total_model_all')
         si = self.shared_info
 
         info= self.info
@@ -179,10 +182,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # close all instances
         for i in si.all_class_instance_pointers_iterator():
             i.close()
-
-
-        self.code_timer.stop('total_model_all')
-
 
 
     def _do_run_integrity_checks(self):
@@ -389,7 +388,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     # ____________________________
     # internal methods below
     # ____________________________
-    def _get_case_info(self, t0):
+    def _get_case_info(self, d0):
         si = self.shared_info
         pgm= si.classes['particle_group_manager']
         info = self.info
@@ -398,9 +397,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         info['time_zone'] = r.params['time_zone']
         info['backtracking'] = si.backtracking
-
-        info.update(dict(started=str(t0), ended=str(datetime.now()),
-                         elapsed_time=str(datetime.now() - t0),
+        elapsed_time_sec = (datetime.now()-d0).total_seconds()
+        info.update(dict(started=str(d0), ended=str(datetime.now()),
+                         duration=str(datetime.now() - d0),
+                         elapsed_time_sec=elapsed_time_sec,
                          number_particles_released= pgm.particles_released))
 
         # base class variable warnings is common with all descendents of parameter_base_class
@@ -416,7 +416,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'particle_release_group_info' : [],
              'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),
              'warnings_errors': si.msg_logger.warnings_and_errors,
-             'timers': self.code_timer.time_sorted_timings(),
+             'function_timers': {},
              'output_files': si.output_files,
              'class_info': {}, }
 
@@ -439,4 +439,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             rginfo.update(item.info['release_info'])
             d['particle_release_group_info'].append(rginfo)
 
+        # sort function times into order
+        keys= []
+        times=[]
+        for key, f in profiling_util.func_timings.items():
+            times.append(f['time'])
+            keys.append(key)
+            f['msec_per_call'] = 1000*f['time']/f['calls']
+            f['% of total time'] = 100*f['time']/elapsed_time_sec
+
+        # add in reverse timing order
+        for n in np.argsort(np.asarray(times))[::-1]:
+            d['function_timers'][keys[n]]= profiling_util.func_timings[keys[n]]
         return d

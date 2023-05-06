@@ -5,7 +5,7 @@ from scipy.spatial import cKDTree
 
 from oceantracker.interpolator._base_interp import _BaseInterp
 from oceantracker.util import basic_util
-
+from oceantracker.util.profiling_util import function_profiler
 #  use record dtype to reduce numer of params which must be passed to cell walk
 #  requires set up walk_info dtype before importing triangle_interpolator_util,
 # as dtype  is used  in a numba signature in triangle_interpolator_util at time of import
@@ -30,10 +30,10 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.grid = {} #todo get rid?
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
 
+    @function_profiler(__name__)
     def initial_setup(self):
         super().initial_setup()  # children must call this parent class to default shared_params etc
         params = self.params
-        self.code_timer.start('intialize_interplolation_grid')
         si= self.shared_info
         grid = si.classes['reader'].grid
         grid_time_buffers = si.classes['reader'].grid_time_buffers
@@ -46,7 +46,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         #todo deleteself.KDtree = cKDTree(xy_centriod)
         self.KDtree = cKDTree(grid['x'])
 
-        self.code_timer.stop('intialize_interplolation_grid')
         # create particle properties to  store history of current triangle  for reuse
 
         p = si.classes['particle_group_manager']
@@ -69,13 +68,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def final_setup(self):
        pass
 
+    @function_profiler(__name__)
     def setup_interp_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
         si =self.shared_info
         info = self.info
         reader = si.classes['reader']
-        self.code_timer.start('reader_setup_interp_time_step')
         # ger buffer index from this time and next
 
         nt_hindcast_step = reader.time_to_hydro_model_index(time_sec)
@@ -95,8 +94,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # find cell for xq, node list and weight for interp at calls
         self.find_cell(xq, info['current_buffer_index'], info['current_step_dt_fraction'], active)
 
-        self.code_timer.stop('reader_setup_interp_time_step')
-
+    @function_profiler(__name__)
     def interp_field_at_particle_locations(self, fieldName, active, output):
         # interp reader fieldName inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's fieldName
@@ -108,33 +106,26 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             si.classes['fields'][fieldName], info['current_buffer_index'],
             output, active, step_dt_fraction=info['current_step_dt_fraction'])
 
-
+    @function_profiler(__name__)
     def interp_named_field_at_given_locations_and_time(self, fieldName, x, time=None, n_cell=None, output=None):
         # interp reader fieldName at specfied locations,  not particle locations
         # output can optionally be redirected to another particle property name different from  reader's fieldName
         # particle_prop_name
-        self.code_timer.start('interp_at_given_locations_and_time')
         si = self.shared_info
-
         output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(si.classes['fields'][fieldName], x, time, output=output, n_cell=n_cell)
-
-        self.code_timer.stop('interp_at_given_locations_and_time')
 
         return output
 
-    #@profile
     def find_cell(self, xq, nb,step_dt_fraction, active):
         # locate cell in place
         # nt give but not needed in 2D
         si= self.shared_info
-        self.code_timer.start('find_horizontal_cell_and_bc_weights')
         self.find_horizontal_cell(xq, active)  # best method!
-        self.code_timer.stop('find_horizontal_cell_and_bc_weights')
 
         if si.hydro_model_is3D:
             self.find_vertical_cell( xq,nb,step_dt_fraction, active)
 
-    #@profile
+    @function_profiler(__name__)
     def find_horizontal_cell(self,xq, active):
         # Bary Centric walk, flags land triangles in numba code
         si = self.shared_info
@@ -150,8 +141,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_particle_subset_buffer())
 
         if sel.size > 0:
-            self.code_timer.start('kd-tree_retrys')
-
             wi['triangle_walks_retried'] += sel.size
 
             new_cell  = self.initial_cell_guess(xq[sel,:])
@@ -169,8 +158,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 si.msg_logger.msg(' x_old =' + str(part_prop['x_last_good'].data[sel[:3], :].tolist()),warning=True,tabs=2)
                 # kill particles
                 part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
-            self.code_timer.stop('kd-tree_retrys')
 
+    @function_profiler(__name__)
     def locate_BCwalk(self,xq, active):
         si = self.shared_info
         reader = si.classes['reader']
@@ -190,8 +179,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             xq, x_old, status, n_cell,
             grid_time_buffers['dry_cell_index'], bc_cords, active, self.walk_counts)
 
+    @function_profiler(__name__)
     def find_vertical_cell(self,xq,nb,step_dt_fraction, active):
-        self.code_timer.start('find_depth_cell')
         si = self.shared_info
         reader = si.classes['reader']
         grid = reader.grid
@@ -212,8 +201,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # unpack counts
         wi = self.info['walk_info']
         wi['total_vertical_steps'], wi['longest_vertical_walk'] = self.walk_counts[3:]
-        self.code_timer.stop('find_depth_cell')
 
+    @function_profiler(__name__)
     def initial_cell_guess(self, xq):
         # find nearest cell
         si=self.shared_info

@@ -5,7 +5,7 @@ from oceantracker.util.parameter_base_class import  ParameterBaseClass
 from oceantracker.util.basic_util import nopass
 from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
-
+from oceantracker.util.profiling_util import  function_profiler
 
 # class to write with, outline methods needed
 # a non-writer, as all methods are None
@@ -146,11 +146,10 @@ class _BaseWriter(ParameterBaseClass):
                 if not prop.params['time_varying'] and prop.params['write']:
                     writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs)
 
-
+    @function_profiler(__name__)
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none the a forced write
 
-        self.code_timer.start('write_output')
         si= self.shared_info
 
         if si.solver_info['time_steps_completed'] % self.info['output_step_count'] != 0: return
@@ -174,8 +173,6 @@ class _BaseWriter(ParameterBaseClass):
 
         self.time_steps_written_to_current_file +=1 # time steps in current file
         self.total_time_steps_written  += 1 # time steps written since the start
-
-        self.code_timer.stop('write_output')
 
     def close(self):
         si= self.shared_info

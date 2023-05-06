@@ -3,6 +3,7 @@ from numba import njit
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.particle_properties import particle_operations_util
 from oceantracker.util import time_util
+from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 # holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
@@ -59,9 +60,9 @@ class ParticleGroupManager(ParameterBaseClass):
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
 
+    @function_profiler(__name__)
     def release_particles(self, time_sec):
         # see if any group is ready to release
-        self.code_timer.start('release_particles')
         si = self.shared_info
         new_buffer_indices = np.full((0,), 0, np.int32)
 
@@ -104,11 +105,6 @@ class ParticleGroupManager(ParameterBaseClass):
         if bad.shape[0] > 0:
             si.msg_logger.msg(str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain',warning=True)
             si.msg_logger.msgg(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)),warning=True)
-
-
-
-        self.code_timer.stop('release_particles')
-
         return new_buffer_indices #indices of all new particles
 
     def release_a_particle_group_pulse(self, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess):
@@ -206,9 +202,9 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def get_particle_time(self): return self.time_varying_group_info['time'].get_values()
 
+    @function_profiler(__name__)
     def update_PartProp(self, t, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
-        self.code_timer.start('update_part_prop')
         si = self.shared_info
         si.classes['time_varying_info']['time'].set_values(t)
         part_prop =si.classes['particle_properties']
@@ -228,7 +224,6 @@ class ParticleGroupManager(ParameterBaseClass):
             if i.info['prop_type'] == 'user':
                 i.update(active)
 
-        self.code_timer.stop('update_part_prop')
 
     def kill_old_particles(self, t):
         # deactivate old particles for each release group
