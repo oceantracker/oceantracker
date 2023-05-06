@@ -379,7 +379,7 @@ class OceanTracker(object):
 
             reader_build_info = reader.set_up_shared_grid_memory(reader_build_info)
 
-            # add to class to shared info, alows fileds to be built
+            # add to class to shared info, alows fields to be built
             si = reader.shared_info
             si.reset() # needed to clear out old run on windows
             si.classes['reader'] = reader
