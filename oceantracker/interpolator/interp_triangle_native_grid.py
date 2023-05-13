@@ -6,6 +6,7 @@ from scipy.spatial import cKDTree
 from oceantracker.interpolator._base_interp import _BaseInterp
 from oceantracker.util import basic_util
 from oceantracker.util.profiling_util import function_profiler
+from time import perf_counter
 #  use record dtype to reduce numer of params which must be passed to cell walk
 #  requires set up walk_info dtype before importing triangle_interpolator_util,
 # as dtype  is used  in a numba signature in triangle_interpolator_util at time of import
@@ -13,9 +14,6 @@ from oceantracker.util.profiling_util import function_profiler
 from oceantracker.interpolator.util import triangle_interpolator_util ,  eval_interp
 
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
-
-# interp info numpy dtype to reduce args passed to numba
-#dtype([('f0', '<i4'), ('f1', '<f8', (2, 3))])
 
 
 class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
@@ -30,7 +28,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.grid = {} #todo get rid?
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def initial_setup(self):
         super().initial_setup()  # children must call this parent class to default shared_params etc
         params = self.params
@@ -39,8 +37,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         grid_time_buffers = si.classes['reader'].grid_time_buffers
 
         # make barcentric transform matrix for the grid,  typee to match numba signature
+        t0 = perf_counter()
         grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles'].data).astype(np.float64)
-
+        si.msg_logger.progress_marker('built barycentric-transform matrix', start_time=t0)
         # build kd tree for initial triangle find node nearest node locations
         #todo delete xy_centriod = np.mean(grid['x'][grid['triangles']], axis=1)
         #todo deleteself.KDtree = cKDTree(xy_centriod)
@@ -54,9 +53,14 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         p.create_particle_property('manual_update',dict(name='bc_cords',  write=False, initial_value=0., vector_dim=3,dtype=np.float64))
 
         # BC walk info
-        # build cell walk info dtype
-        self.walk_counts = np.zeros((5,),dtype=np.int64)
-        self.info['walk_info'] = {'particles_killed_after_triangle_walk_retry_failed': 0,'triangle_walks_retried':0}
+        # build cell walk info recored dtype
+        self.walk_info = np.zeros((1,), dtype= triangle_interpolator_util.walk_info_dtype)[0]
+        wi = self.walk_info
+        wi['bc_walk_tol'] =self.params[ 'bc_walk_tol']
+        wi['max_triangle_walk_steps'] = self.params[ 'max_search_steps']
+        wi['block_dry_cells'] = si.settings['block_dry_cells']
+        wi['open_boundary_type'] =  si.settings['open_boundary_type']
+        wi['z0'] = si.settings['z0']
 
         if si.hydro_model_is3D:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
@@ -68,7 +72,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def final_setup(self):
        pass
 
-    @function_profiler(__name__)
     def setup_interp_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
@@ -94,7 +97,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # find cell for xq, node list and weight for interp at calls
         self.find_cell(xq, info['current_buffer_index'], info['current_step_dt_fraction'], active)
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def interp_field_at_particle_locations(self, fieldName, active, output):
         # interp reader fieldName inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's fieldName
@@ -106,7 +109,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             si.classes['fields'][fieldName], info['current_buffer_index'],
             output, active, step_dt_fraction=info['current_step_dt_fraction'])
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def interp_named_field_at_given_locations_and_time(self, fieldName, x, time=None, n_cell=None, output=None):
         # interp reader fieldName at specfied locations,  not particle locations
         # output can optionally be redirected to another particle property name different from  reader's fieldName
@@ -116,7 +119,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         return output
 
-    @function_profiler(__name__)
     def find_cell(self, xq, nb,step_dt_fraction, active):
         # locate cell in place
         # nt give but not needed in 2D
@@ -126,22 +128,19 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if si.hydro_model_is3D:
             self.find_vertical_cell( xq,nb,step_dt_fraction, active)
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def find_horizontal_cell(self,xq, active):
         # Bary Centric walk, flags land triangles in numba code
         si = self.shared_info
         info = self.info
 
-        wi = info['walk_info']
         part_prop = si.classes['particle_properties']
         self.locate_BCwalk(xq, active)
-        # transphere count info
-        wi['particles_located_by_walking'],wi['number_of_triangles_walked'],\
-                wi['longest_triangle_walk'], wi['nans_encountered_triangle_walk'] = self.walk_counts[:4]
 
         sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_particle_subset_buffer())
 
         if sel.size > 0:
+            wi = self.walk_info
             wi['triangle_walks_retried'] += sel.size
 
             new_cell  = self.initial_cell_guess(xq[sel,:])
@@ -173,13 +172,12 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
 
-        triangle_interpolator_util.BCwalk_with_move_backs_numba2D(
-            params['bc_walk_tol'], params['max_search_steps'], si.settings['block_dry_cells'], si.settings['open_boundary_type'] == 1,
+        triangle_interpolator_util.BCwalk_with_move_backs(
             grid['bc_transform'], grid['adjacency'],
             xq, x_old, status, n_cell,
-            grid_time_buffers['dry_cell_index'], bc_cords, active, self.walk_counts)
+            grid_time_buffers['dry_cell_index'], bc_cords, active, self.walk_info)
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def find_vertical_cell(self,xq,nb,step_dt_fraction, active):
         si = self.shared_info
         reader = si.classes['reader']
@@ -195,14 +193,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         grid_time_buffers = reader.grid_time_buffers
 
         triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(
-                        grid_time_buffers['zlevel'],   grid['triangles'], grid['bottom_cell_index'],   si.z0,
-                        xq, n_cell, nb, status, BCcord, nz_cell, z_fraction, z_fraction_bottom_layer, active, self.walk_counts, step_dt_fraction)
+                        grid_time_buffers['zlevel'],   grid['triangles'], grid['bottom_cell_index'],
+                        xq, n_cell, nb, status, BCcord, nz_cell, z_fraction, z_fraction_bottom_layer, active, self.walk_info, step_dt_fraction)
 
-        # unpack counts
-        wi = self.info['walk_info']
-        wi['total_vertical_steps'], wi['longest_vertical_walk'] = self.walk_counts[3:]
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def initial_cell_guess(self, xq):
         # find nearest cell
         si=self.shared_info
@@ -227,7 +222,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         is_inside=  np.all(np.logical_and(bc >= -self.params['bc_walk_tol'], bc  <= 1.+self.params['bc_walk_tol']),axis=1)
         return is_inside, n_cell  # is inside if  magnitude of all BC < 1
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def eval_field_interpolation_at_particle_locations(self, fieldObj, nb  , output, active, step_dt_fraction=None):
         # in place evaluation of field interpolation
         si = self.shared_info
@@ -288,7 +283,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                      n_cell,
                                                      bc_cords, active)
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def eval_field_interpolation_at_given_locations(self, fieldObj,x, time=None,  output=None, n_cell= None):
         # in  evaluation of field interpolation at specific locations, ie not particle locations
         #todo not working - eval_field_interpolation_at_given_locations
@@ -378,16 +373,18 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def close(self):
         si=self.shared_info
         info = self.info
-
         # transfer walk stats to class info to write  in case_info file
-
-        wi = info['walk_info']
-        wi['average_number_of_triangles_walked']= wi['number_of_triangles_walked']/max(1,wi['particles_located_by_walking'])
+        info['walk_info'] ={}
+        w = info['walk_info']
+        for name in self.walk_info.dtype.names:
+            w[name] = self.walk_info[name]
+     
+        w['average_number_of_triangles_walked']= w['number_of_triangles_walked']/max(1,w['particles_located_by_walking'])
         if si.is_3D_run:
-            wi['average_vertical_walk_steps'] = wi['total_vertical_steps'] / max(1, wi['particles_located_by_walking'])
+            w['average_vertical_walk_steps'] = w['total_vertical_steps_walked'] / max(1, w['particles_located_by_walking'])
 
-        if wi['particles_killed_after_triangle_walk_retry_failed'] > 0:
-            si.msg_logger.msg(f" Of {wi['particles_located_by_walking']:3d} particles located {wi['particles_killed_after_triangle_walk_retry_failed']:3d}, failed to find cell",
+        if w['particles_killed_after_triangle_walk_retry_failed'] > 0:
+            si.msg_logger.msg(f" Of {w['particles_located_by_walking']:3d} particles located {w['particles_killed_after_triangle_walk_retry_failed']:3d}, failed to find cell",
                               crumbs='Interpolator cals, InterpTriangularNativeGrid_Slayer_and_LSCgrid',
                               hint= f"Try increasing interpolator parameter 'max_search_steps', current value ={self.params['max_search_steps']:3d}")
 

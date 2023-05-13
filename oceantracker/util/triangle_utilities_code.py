@@ -1,11 +1,11 @@
 import numpy as np
-from numba import njit
+from numba import njit, prange
 from numba.typed import List as NumbaList
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.util import  basic_util
 
 # build node to cell map
-@njit
+@njit()
 def build_node_to_cell_map(tri,x):
     # build list  giving map from each node to list of cells which contain that node
 
@@ -34,10 +34,7 @@ def build_node_to_cell_map(tri,x):
             # log one more triangle for this node
             node_to_tri_map[node, tri_per_node[node]-1] = nTri
 
-
-
     return node_to_tri_map, tri_per_node
-
 
 # build adjacency matrix from node to triangles map
 @njit

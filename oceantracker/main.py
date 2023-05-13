@@ -100,8 +100,9 @@ class OceanTracker(object):
         run_builder =  self.setup_output_folders_and_msg_loger_file(run_builder, raw_params)
 
         # complete the setup with message logger
+        ml.msg('Version ' + common_info.code_version, tabs=1)
+        ml.msg('Python version: ' + version, tabs=2)
         ml.insert_screen_line()
-        ml.msg('Running ' + common_info.package_fancy_name + ' started ' + str(datetime.now()))
         ml.progress_marker('Starting: ' + run_builder['settings']['output_file_base'])
         run_builder = self.setup_check_python_version(run_builder, ml)
 
@@ -178,8 +179,7 @@ class OceanTracker(object):
         # set up log files for run
 
         msg_logger.insert_screen_line()
-        msg_logger.msg('Starting ' + common_info.package_fancy_name + '  Version ' + common_info.code_version)
-        msg_logger.msg('Python version: ' + version, tabs=1)
+
 
         vi = version_info
         install_hint = 'Install Python 3.10 or used environment.yml to build a Conda virtual environment named oceantracker'

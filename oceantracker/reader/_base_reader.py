@@ -247,7 +247,7 @@ class _BaseReader(ParameterBaseClass):
 
         return run_builder
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def setup_reader_fields(self):
         si = self.shared_info
         fgm = si.classes['field_group_manager']
@@ -358,7 +358,7 @@ class _BaseReader(ParameterBaseClass):
 
         return params, var_info
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def fill_time_buffer(self, time_sec):
         # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
         # fill buffer starting at hindcast time step nt0_buffer

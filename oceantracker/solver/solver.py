@@ -130,7 +130,6 @@ class Solver(ParameterBaseClass):
         info['computation_ended'] = datetime.now()
         info['computation_duration'] = datetime.now() -computation_started
 
-    @function_profiler(__name__)
     def pre_step_bookkeeping(self, nt,time_sec):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
@@ -189,7 +188,6 @@ class Solver(ParameterBaseClass):
             tracks_writer.write_all_time_varying_prop_and_data()
 
 
-    @function_profiler(__name__)
     def integration_step(self, time_sec, is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties
@@ -268,7 +266,7 @@ class Solver(ParameterBaseClass):
         s = f'{100* fraction_done:02.0f}%'
         s += f' step {nt:04d}:H{interp_info["current_hydro_model_step"]:04d}b{interp_info["current_buffer_index"][0]:02d}-{interp_info["current_buffer_index"][1]:02d}'
         t = abs(time_sec - si.solver_info['model_start_time'])
-        s += ' Day ' +  ('-' if si.backtracking else '+')
+        s += ' Day ' + ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(time_sec) + ':'
         s +=   si.classes['particle_group_manager'].screen_info()
@@ -276,7 +274,7 @@ class Solver(ParameterBaseClass):
         elapsed_time= perf_counter() - t0_model
         remaining_time= (1 - fraction_done) * elapsed_time / max(.01, fraction_done)
         if elapsed_time > 300.:
-            s += ' remaining: ' + time_util.seconds_to_pretty_duration_string(abs(remaining_time), seconds=False) +','
+            s += ' remaining: ' + time_util.seconds_to_hours_mins_string(abs(remaining_time)) +','
 
         s += f' step time = { (perf_counter() - t0_step) * 1000:4.1f} ms'
         si.msg_logger.msg(s)

@@ -60,7 +60,7 @@ class ParticleGroupManager(ParameterBaseClass):
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def release_particles(self, time_sec):
         # see if any group is ready to release
         si = self.shared_info
@@ -202,7 +202,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def get_particle_time(self): return self.time_varying_group_info['time'].get_values()
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def update_PartProp(self, t, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
         si = self.shared_info
