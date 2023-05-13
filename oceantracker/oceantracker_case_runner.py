@@ -156,7 +156,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             environ['NUMBA_FULL_TRACEBACKS'] = '1'
             si.msg_logger.msg('Running in debug mode',note=True)
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def _do_a_run(self):
         # build and run solver from parameter dictionary
         # run from a given dictionary to enable particle tracking on demand from JSON type parameter set

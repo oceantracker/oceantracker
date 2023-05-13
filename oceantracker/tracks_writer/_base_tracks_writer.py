@@ -146,7 +146,7 @@ class _BaseWriter(ParameterBaseClass):
                 if not prop.params['time_varying'] and prop.params['write']:
                     writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs)
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none the a forced write
 

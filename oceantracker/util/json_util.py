@@ -102,3 +102,42 @@ class MyEncoder(json.JSONEncoder):
         except:
             raise ValueError(' basic_util- catch JSON encode error- object type ' + str(type(obj))+ ' as ' + str(obj))
             return 'BadValue'
+
+# geojson polygons
+#todo make reader to/from internal polygon format
+geojson_polygon_template ={
+   "type": "Feature",
+   "geometry":  "Polygon",
+        "coordinates": None ,#[] N by 2 list
+
+        "properties": {
+                "polygon_group": None,  # use for tagging domain and islands?
+                'name' : None, # name of polygo assigrn by user or code
+                'user_polygonID': None,
+                'user_polygon_name' : None,
+
+        }
+}
+
+
+geometries_template = {
+'type': 'FeatureCollection',
+'features': None,
+}
+
+def writegeojson(f,polygonlist):
+    features = [F0]
+    for i in map['islands']:
+        f = {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": i['points']
+            },
+            "properties": {
+                "boundary_type": "island",
+            }
+        }
+        features.append(f)
+    #with open('data\oceanum_grid_outline.geojson','w') as f:
+    #    geojson.dump(geometries,f)

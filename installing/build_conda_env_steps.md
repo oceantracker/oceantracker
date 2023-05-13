@@ -20,26 +20,33 @@ ________________________________________
 
 3. Change dir to oceantracker folder, eg.
 
-    cd ./oceantracker
+    ``cd ./oceantracker``
 
 
-4. Make conda  environment
+4. Either: Make conda  environment from given file
 
-    1. Easy way t
+Note: In Windows may need to run conda prompt window as administrator to install packages
+
+   From root dir of oceantracker package run 
     
+           ``conda env create -f environment.yml``
     
-    From root dir of oceantracker package run 
-    
-        ``conda env create -f environment.yml``
-    
+   Activate new environment
+
+        ``conda activate oceantracker``
 
     
-    2.  Manual steps
-    
-    
-        ~~~        
-        conda create -n oceantracker python=3.10 
-        conda activate oceantracker
+5. Or : Manually build Conda environment
+
+        ``conda create -n oceantracker python=3.10`` 
+
+   Activate new environment
+
+        ``conda activate oceantracker``
+   
+   Then install these packages
+
+      ~~~  
         conda install -c conda-forge numba
         conda install -c conda-forge netcdf4
         conda install -c anaconda numpy
@@ -50,13 +57,20 @@ ________________________________________
         conda install -c conda-forge matplotlib
         conda install -c conda-forge python-dateutil
         conda install -c anaconda scipy
+        conda install -c conda-forge geojson
         ~~~
 
 
-5.  Make oceantracker module findable
+6. Make oceantracker package findable
+   
+   From root dir of oceantracker 
 
-``pip install --no-deps -e .`` 
+   ``pip install --no-deps -e .`` 
 
-6. To add ability to make animation movies 
+8. To add ability to make animation movies if needed
 
    ``conda install -c conda-forge ffmpeg``
+
+9. To work with iPython/Jupyter notebooks
+
+   ``conda install -c anaconda ipykernel``

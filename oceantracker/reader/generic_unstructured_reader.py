@@ -21,6 +21,7 @@ class GenericUnstructuredReader(_BaseReader):
     def make_non_time_varying_grid(self,nc, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
+        si = self.shared_info
         grid['x'] = self.read_nodal_x_as_float64(nc).astype(np.float64)
         grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
         grid['quad_cells_to_split'] = np.flatnonzero(grid['quad_cells_to_split']) # make as list of indcies for calculations
@@ -31,6 +32,7 @@ class GenericUnstructuredReader(_BaseReader):
             grid['bottom_cell_index_at_triangle_nodes'] = grid['bottom_cell_index'][grid['triangles']]
 
         # find model outline, make adjacency matrix etc
+
         grid = self._add_grid_attributes(grid)
 
         # adjust node type and adjacent for open boundaries

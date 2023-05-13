@@ -4,7 +4,7 @@ package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
 
-code_version = '0.4.00.003 2023-04-27'
+code_version = '0.4.00.007 2023-05-13'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 # template for oceanTracker params, with defaults to check against
@@ -61,19 +61,6 @@ core_classes= { 'reader': {},
     'dispersion': {},
      'resuspension': {}}
 
-default_class_names={
-    'solver': 'oceantracker.solver.solver.Solver',
-    'field_group_manager_class': 'oceantracker.field_group_manager.field_group_manager.FieldGroupManager',
-    'interpolator': 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid',
-    'particle_group_manager':'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager',
-    'tracks_writer': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
-    'dispersion': 'oceantracker.dispersion.random_walk.RandomWalk',
-    'resuspension': 'oceantracker.resuspension.resuspension.BasicResuspension',
-'particle_release_groups': 'oceantracker.particle_release_groups.point_release.PointRelease',
-'fields' :  'oceantracker.fields._base_field.BaseField',
-'reader': 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader'}
-
-
 class_lists={ # class lists
     'particle_release_groups':  [],
     # above classes are required classes/family members/ parameters, below are user classes held in named lists
@@ -108,7 +95,8 @@ default_class_names={ 'solver': 'oceantracker.solver.solver.Solver',
               'fields' :  'oceantracker.fields._base_field.BaseField',
         }
 
-default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0), 'user_polygon_name': PVC(None, str),
+default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
+                               'name': PVC(None, str),
                 'points': PVC([], 'vector', list_contains_type=float, is_required=True,
                  doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
                                }
@@ -126,7 +114,6 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
 # TODO LIST
 # todo for version 0.40.01
     #TODO BUGS
-            # todo stray particle location in track plots
             # todo no file found graceful exit
             # todo active count when culling?
             # todo why BC walk oo long for large steps sizes?
@@ -162,6 +149,11 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # TODO STRUCTURE
         # todo use update_interval everywhere as parmateter fo periodic actions
         # todo revert to index zero for all IDs and data loading
+
+    #TODO Feathures
+        #todo read write polygons from geo-jsons, release groups poly stats
+        #todo line profile reader buffer fill to improve spped of copys, eg np.copyto()
+
     # TODO SIMPLIFY
         #todo compact model only with self expanding buffer??
         #todo remove depth range stats and make depth range part of stats

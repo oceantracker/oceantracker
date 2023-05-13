@@ -30,6 +30,12 @@ def seconds_to_pretty_duration_string(s,seconds=True):
 
     return  s
 
+def seconds_to_hours_mins_string(s):
+    min = int(s / 60)
+    hours =int(min /60)
+    min  = int(min - hours * 60)
+    return   f"{hours:1d} hrs {min:2d} min"
+
 def seconds_to_pretty_str(s, seconds= True):
     fmt="%Y-%m-%d %H:%M"
     if seconds: fmt +=":%S"

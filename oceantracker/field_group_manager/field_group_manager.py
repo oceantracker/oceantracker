@@ -34,7 +34,7 @@ class FieldGroupManager(ParameterBaseClass):
         si.classes['interpolator'].setup_interp_time_step(time_sec, xq, active)
         return active
 
-    @function_profiler(__name__)
+    #@function_profiler(__name__)
     def interp_named_field_at_particle_locations(self, fieldName, active, output=None):
         # interp reader fieldName inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's fieldName
