@@ -139,7 +139,7 @@ class ParamValueChecker(object):
             # ensure  ints are floats
             value = float(value)
 
-        elif info['type'] == 'vector':
+        elif info['type'] == 'array':
             # a position, eg release location, needs to be a numpy array
             m='Coordinate vector "' + crumb_trail + '" must be a list of coordinate pairs or triples, eg [[ 34., 56.]], convertible to N by 2 or 3 numpy array  '
             if type(value)  not in [list , np.ndarray]:
