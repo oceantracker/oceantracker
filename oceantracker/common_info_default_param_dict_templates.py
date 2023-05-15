@@ -97,7 +97,7 @@ default_class_names={ 'solver': 'oceantracker.solver.solver.Solver',
 
 default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
                                'name': PVC(None, str),
-                'points': PVC([], 'vector', list_contains_type=float, is_required=True,
+                'points': PVC([], 'array', list_contains_type=float, is_required=True,
                  doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
                                }
 
@@ -119,28 +119,27 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
             # todo why BC walk oo long for large steps sizes?
             # todo cope wih empty relese goups, ie non released
             # todo amimations ignoring release group argument?
-            # todo no releses in particle buffer to small?
+            # todo no releases in particle buffer to small?
+            # todo check time_step default is hindcast time step
 
     #TODO TUTORIALS
         #todo parameters tut, _class, _list etc
         # todo release groups
-        # todo on fly statistiics
+        # todo on fly statistics
         # todo Reader param and adding fields
         # todo resupension
         # todo random walk
         # todo
     #TODO PARAMETERS
-        # todo vector type to array type
-        # todo allow numpy arrays in array type
-        # todo allow isostr, datetime, np.dateime64 for dates
-        # todo allow user to give class_instance instead of class_name
-        # todo add units to Parameter check and show in user docs
+        # todo use names in dict rather class lists
+        # todo user to give class_instance instead of class_name
+        # todo allow user to give "class" instead of class_name
+
         # todo max time steps per file option?
         # todo add CPC for check class parameters??
         # todo add default class instance checking
-        # todo remove leading/trailling blanks from string values
         # todo full use of  'update_interval' for stats eves and some part prop
-        # todo check time_step default is hindcast time step
+
     # TODO DOCUMENTATION
         # todo update docs and build docs for new flat param structure
         #todo  add doc string for improtant methods and classes
@@ -148,27 +147,30 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # add units to doc
     # TODO STRUCTURE
         # todo use update_interval everywhere as parmateter fo periodic actions
-        # todo revert to index zero for all IDs and data loading
+        # todo  move interpolate set up to the end, to enable record dtypes to be formed used to reduce numba params, eg for all particle props
 
-    #TODO Feathures
-        #todo read write polygons from geo-jsons, release groups poly stats
-        #todo line profile reader buffer fill to improve spped of copys, eg np.copyto()
+    #TODO Features
 
     # TODO SIMPLIFY
-        #todo compact model only with self expanding buffer??
         #todo remove depth range stats and make depth range part of stats
         # add part property from field wwhich checks if field exists
-        # field type reader, derived from reader feild ,  or custom
-        # simplfy run in depth average mode and depth averaing fields, swap to explict depth aver tags feild names??
-    #TODO MODELS
+      #TODO MODELS
         #todo design and make base class
         # todo make template
 
-
+    #TODO Nice to haves
+        # todo remove leading/trailling blanks from string values/param names
+        # todo allow numpy arrays in "array" type
+        # todo allow isostr, datetime, np.dateime64 for dates
+        # todo field type reader, derived from reader feild ,  or custom
+        # todo simplfy run in depth average mode and depth averaing fields, swap to explict depth aver tags feild names??
+        # todo check time_step default is hindcast time step
+        # todo read write polygons from geo-jsons, release groups poly stats
+        # todo add units to Parameter check and show in user docs
 
 #TODO FASTER STARTUP
     #todo add timing of start up blocks to improve setup speed
-
+    # todo line profile reader buffer fill to improve spped of copys, eg np.copyto()
 
 #TODO PERFORMANCE
     # todo Kernal RK steps
@@ -186,6 +188,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # todo full use of initial setup, final set up and update with timers
     # todo get rid of used nseq in favour of instanceID
     # todo add check for use of known class prop types, eg 'maunal_update'
+    # todo compact model only with self expanding buffer??
 
 
 # TODO IMPROVEMENTS

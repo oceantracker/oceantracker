@@ -405,7 +405,7 @@ class _BaseReader(ParameterBaseClass):
 
             file_index = nt_file - fi['nt_starts'][n_file]
             buffer_index = self.hydro_model_index_to_buffer_offset(nt_file)
-            s =  f'Reading-file-{(n_file+1):02d}  {path.basename(fi["names"][n_file])}, steps in file {fi["n_time_steps"][n_file]:3d},'
+            s =  f'Reading-file-{(n_file):02d}  {path.basename(fi["names"][n_file])}, steps in file {fi["n_time_steps"][n_file]:3d},'
             s += f' steps  available {fi["nt_starts"][n_file]:03d}:{fi["nt_starts"][n_file]+fi["n_time_steps"][n_file]-1:03d}, '
             s += f'reading  {num_read:2d} of {bi["buffer_available"]:2d} steps, '
             s += f' for hydo-model time steps {nt_file[0]:02d}:{nt_file[-1]:02d}, '

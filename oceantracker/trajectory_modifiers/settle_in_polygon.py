@@ -9,7 +9,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'name': PVC('settle_in_polygon', str),
-                                 'polygon': {'points': PVC(None,'vector', is_required=True)},
+                                 'polygon': {'points': PVC(None,'array', is_required=True)},
                                  'probability_of_settlement': PVC(0.,float),
                                  'settlement_duration': PVC(0., float),  #  time block stranding after stranding has occured
                                  })
