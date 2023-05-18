@@ -196,6 +196,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # todo extend inside polygon to have list of cells fully inside plogon for faster serach
     # todo integerise all periodic evets to model time steps
     # todo to enable mutliple readers,  do all particle tracking in lon-lat
+    # todo replace retain_culled_part_locations with use of "last known location", and add mask_dead praticles in readers
 
 # TODO FUTURE
     #todo shared reader

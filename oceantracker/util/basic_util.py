@@ -46,8 +46,10 @@ def is_substring_in_list(sub_str,str_list):
 
 def get_computer_info():
     # can fail on some hardware??
+
     try:
-        d={'OS':  platform.system() ,
+        d={'name': platform.node(),
+            'OS':  platform.system() ,
            'OS Version' :platform.version(),
            'processor': platform.processor(),
             'CPUs_hardware':cpu_count(logical=False),
