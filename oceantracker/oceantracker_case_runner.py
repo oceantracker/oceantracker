@@ -8,7 +8,7 @@ from oceantracker.util.messgage_logger import MessageLogger, GracefulError
 from oceantracker.util import profiling_util
 import numpy as np
 from oceantracker.util import time_util
-
+from numba import set_num_threads
 from oceantracker.util import json_util
 from datetime import datetime
 from time import sleep
@@ -49,6 +49,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
         si.processorID = runner_params['processorID']
 
+        # set processors for threading, ie numba/parallel prange loops
+        if si.settings['max_processors'] is None:
+            si.settings['max_processors']= si.case_runner_params['computer_info']['CPUs_hardware'] - 2
+
+        set_num_threads(max(1, si.settings['max_processors']))
+        #set_num_threads(5)
         # set up message logging
         output_files=runner_params['output_files']
         si.msg_logger = MessageLogger('P%03.0f:' % si.processorID, si.settings['advanced_settings']['max_warnings'])
