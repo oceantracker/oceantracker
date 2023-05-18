@@ -113,39 +113,39 @@ def eval_water_velocity_3D(V_out, V_data, grid,part_prop,  active, step_info):
     n_comp = V_data.shape[3]  # time step of data is always [node,z,comp] even in 2D
 
     # create views to remove redundant dim at current and next time step, improves speed?
-    v1,     v2 = V_data[step_info.nb[0] , :, :, :], V_data[step_info.nb[1], :, :, :]
+    v1,     v2 = V_data[step_info['nb'][0] , :, :, :], V_data[step_info['nb'][1], :, :, :]
 
-    dt1= 1.0- step_info.step_dt_fraction
+    dt1= 1.0- step_info['step_dt_fraction']
 
     # loop over active particles and vector components
     for n in active:
         for i in range(n_comp): V_out[n, i] = 0. # zero out for summing
 
-        nz = part_prop.nz_cell[n]
+        nz = part_prop['nz_cell'][n]
 
         # if in bottom cell adjust fraction to larger value to give log layer interp
         # first time step z_fraction[n, 10, m]
-        if part_prop.z_fraction_bottom_layer[n] >= 0 :
-            zf = part_prop.z_fraction_bottom_layer[n]
+        if part_prop['z_fraction_bottom_layer'][n] >= 0 :
+            zf = part_prop['z_fraction_bottom_layer'][n]
         else:
             # fraction =-00 is not on the bottom
-            zf = part_prop.z_fraction[n]
+            zf = part_prop['z_fraction'][n]
 
         zf1 = 1.0 - zf
 
         # loop over each vertex in triangle
         for m in range(3):
-            n_node = grid.triangles[part_prop.n_cell[n], m]
+            n_node = grid['triangles'][part_prop['n_cell'][n], m]
 
             # for LSC grid need to get highest node of nz or bottom at each triangle vertex
-            nzb =  grid.bottom_cell_index[n_node]  # bottom node at this vertex
+            nzb =  grid['bottom_cell_index'][n_node]  # bottom node at this vertex
             nz_below = max(nzb, nz    )
             nz_above = max(nzb, nz + 1)
             # loop over vector components
             for c in range(n_comp):
                 # add contributions from layer above and below particle, for each spatial component at two time steps
-                V_out[n, c] +=  part_prop.bc_cords[n, m] * (v1[n_node, nz_below, c] * zf1 + v1[n_node, nz_above, c] * zf) * dt1 \
-                             +  part_prop.bc_cords[n, m] * (v2[n_node, nz_below, c] * zf1 + v2[n_node, nz_above, c] * zf) * step_info.step_dt_fraction  # second time step
+                V_out[n, c] +=  part_prop['bc_cords'][n, m] * (v1[n_node, nz_below, c] * zf1 + v1[n_node, nz_above, c] * zf) * dt1 \
+                             +  part_prop['bc_cords'][n, m] * (v2[n_node, nz_below, c] * zf1 + v2[n_node, nz_above, c] * zf) * step_info['step_dt_fraction']  # second time step
                 pass
 
 @njit

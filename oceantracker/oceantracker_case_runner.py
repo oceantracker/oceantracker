@@ -354,7 +354,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # do final setp which may depend on settingd from intitial st up
         t0= perf_counter()
-        for name in ['field_group_manager','particle_group_manager', 'interpolator', 'solver'] : # order may matter?
+        # order matters, must do interpolator after particle_group_manager, to get stucted arrays and solver last
+        for name in ['field_group_manager','particle_group_manager', 'interpolator', 'solver'] :
             si.classes[name].final_setup()
         si.msg_logger.progress_marker('final set up of core classes',start_time=t0)
 

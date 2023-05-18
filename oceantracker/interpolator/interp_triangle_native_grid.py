@@ -8,7 +8,8 @@ from oceantracker.util import basic_util
 from oceantracker.util.profiling_util import function_profiler
 from time import perf_counter
 from oceantracker.util import numba_util
-from numba import typeof, types as nbt
+from oceantracker.util import numpy_util
+from numba import typeof, types as nbt, from_dtype
 
 from oceantracker.interpolator.util import triangle_interpolator_util ,  eval_interp
 
@@ -70,15 +71,10 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         #todo z0, move this where grid is built?
         grid['z0'] = si.case_runner_params['settings']['z0']
 
+        # todo move to base reader??
         grid.update(si.classes['reader'].grid_time_buffers)
-        self.grid_as_class = numba_util.numba_class_from_dict(grid)
+        self.grid_as_structure = numpy_util.numpy_structure_from_dict(grid)
 
-        # get part prop data fields as a class
-        part_prop = si.classes['particle_properties']
-        pp ={}
-        for name,i in part_prop.items():
-           pp[name] = i.data
-        self.part_prop_as_class = numba_util.numba_class_from_dict(pp)
 
         # build cell walk info
         step_info = dict(   max_triangle_walk_steps =  self.params[ 'max_search_steps'],
@@ -95,13 +91,16 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                             longest_vertical_walk=0,
                             nb = np.zeros((2,),dtype=np.int32),
                             step_dt_fraction = 0.)
-        self.step_info= numba_util.numba_class_from_dict(step_info) # class to use inside numba functions
+        self.step_info= numpy_util.numpy_structure_from_dict(step_info) # class to use inside numba functions
+
+        # point at particle prop block
+        part_prop_as_structure = si.classes['particle_group_manager'].part_prop_as_structure
 
         # types for signatures
-        part_prop_type = typeof(self.part_prop_as_class)
-        grid_type= typeof(self.grid_as_class)
+        part_prop_type = typeof(part_prop_as_structure)
+        grid_type= typeof(self.grid_as_structure)
         step_info_type = typeof(self.step_info)
-        x_type = typeof(part_prop['x'].data)
+        x_type = typeof(part_prop_as_structure['x'])
 
         # same signature for both walk functions
         sig_walk = [x_type,grid_type , part_prop_type, nbt.int32[:],step_info_type ]
@@ -171,8 +170,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         si= self.shared_info
         # set stepping info in class
         st = self.step_info
-        st.step_dt_fraction = step_dt_fraction
-        st.nb = nb
+        st['step_dt_fraction'] = step_dt_fraction
+        st['nb'] = nb
 
 
         self.find_horizontal_cell(xq, active)  # best method!
@@ -186,19 +185,19 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # Bary Centric walk, flags land triangles in numba code
         si = self.shared_info
         info = self.info
-
-        self.horizontal_walk_func( xq, self.grid_as_class, self.part_prop_as_class,  active, self.step_info)
+        part_prop_as_structure = si.classes['particle_group_manager'].part_prop_as_structure
+        self.horizontal_walk_func(xq, self.grid_as_structure, part_prop_as_structure, active, self.step_info)
         part_prop = si.classes['particle_properties']
 
         sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_particle_subset_buffer())
-
+        part_prop_as_structure = si.classes['particle_group_manager'].part_prop_as_structure
         if sel.size > 0:
             wi = self.walk_info
             wi['triangle_walks_retried'] += sel.size
 
             new_cell  = self.initial_cell_guess(xq[sel,:])
             part_prop['n_cell'].set_values(new_cell, sel)
-            self.horizontal_walk_func(xq, self.grid_as_class, self.part_prop_as_class, sel, self.step_info)
+            self.horizontal_walk_func(xq, self.grid_as_structure, part_prop_as_structure, sel, self.step_info)
             sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_particle_subset_buffer())
             if sel.size > 0:
                 wi['particles_killed_after_triangle_walk_retry_failed'] += sel.size # total failed walks
@@ -213,7 +212,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     # @function_profiler(__name__)
     def find_vertical_cell(self, xq, active):
-        self.verical_walk_func(xq, self.grid_as_class, self.part_prop_as_class, active, self.step_info)
+        si = self.shared_info
+        part_prop_as_structure = si.classes['particle_group_manager'].part_prop_as_structure
+        self.verical_walk_func(xq, self.grid_as_structure, part_prop_as_structure, active, self.step_info)
 
     #@function_profiler(__name__)
     def initial_cell_guess(self, xq):
@@ -248,6 +249,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         part_prop= si.classes['particle_properties']
         n_cell   = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
+        part_prop_as_structure = si.classes['particle_group_manager'].part_prop_as_structure
 
         if fieldObj.is_time_varying():
             if fieldObj.is3D():
@@ -260,10 +262,10 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                     z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
 
                     self.eval_water_velocity_3D_func(basic_util.atLeast_Nby1(output),
-                                                       fieldObj.data,
-                                                       self.grid_as_class,
-                                                       self.part_prop_as_class,
-                                                        active, self.step_info)
+                                                     fieldObj.data,
+                                                     self.grid_as_structure,
+                                                     part_prop_as_structure,
+                                                     active, self.step_info)
                 else:
                     eval_interp.time_dependent_3Dfield(basic_util.atLeast_Nby1(output),
                                                        fieldObj.data,
@@ -389,8 +391,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # transfer walk / step info from to class attributes to write in case_info file
         info['walk_info'] = {}
         w = info['walk_info']
-        for name in [a for a in dir(self.step_info) if not a.startswith('_')]:
-            w[name] = getattr(self.step_info,name)
+        for name in self.step_info.dtype.names:
+            w[name] = self.step_info[name]
      
         w['average_number_of_triangles_walked']= w['number_of_triangles_walked']/max(1,w['particles_located_by_walking'])
         if si.is_3D_run:

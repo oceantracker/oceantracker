@@ -4,7 +4,7 @@ package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
 
-code_version = '0.4.00.008 2023-05-18'
+code_version = '0.4.00.009 2023-05-18'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 # template for oceanTracker params, with defaults to check against
