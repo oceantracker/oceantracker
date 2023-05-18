@@ -26,6 +26,7 @@ class GenericUnstructuredReader(_BaseReader):
         grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
         grid['quad_cells_to_split'] = np.flatnonzero(grid['quad_cells_to_split']) # make as list of indcies for calculations
 
+
         if self.is_hindcast3D(nc):
             grid['bottom_cell_index'] = self.read_bottom_cell_index_as_int32(nc)
             # below are used in cell find and 3D interp evaluation
