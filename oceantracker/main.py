@@ -429,7 +429,7 @@ class OceanTracker(object):
         nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributesDict={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
-        nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'].astype(np.int8), ('triangle_dim',))
+        nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
         nc.write_a_new_variable('water_depth', grid['water_depth'], ('node_dim',))
         nc.close()
 

@@ -33,7 +33,7 @@ def find_open_boundary_faces(triangles, is_boundary_triangle, adjacency, is_open
     is_open_node = np.full((3,),False)
     # search only boundary triangles
     op_nodes = np.flatnonzero(is_open_boundary_node)
-    for n in np.flatnonzero(is_boundary_triangle):
+    for n in np.flatnonzero(is_boundary_triangle==1):
         is_open_node[:] = False
         for m in range(3):
              for o in op_nodes:

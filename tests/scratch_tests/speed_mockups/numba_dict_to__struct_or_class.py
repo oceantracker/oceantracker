@@ -6,7 +6,6 @@ from oceantracker.util.numpy_util import  numpy_structure_from_dict
 def add0(x, y):
     return x +y
 
-#@njit()
 def sum(a):
     s = 0.
 
@@ -32,3 +31,5 @@ F= numba_util.njitter(sum,[typeof(a)], parallel=True)
 print( F(a))
 
 s= numpy_structure_from_dict(d)
+
+print( sum(s))

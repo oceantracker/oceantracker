@@ -65,7 +65,7 @@ def display_grid(grid, ginput=0, axis_lims=None):
 
     draw_base_map(grid, show_grid=True, axis_lims=axis_lims)
     if 1==0:
-        bt = np.flatnonzero(grid['is_boundary_triangle'])
+        bt = np.flatnonzero(grid['is_boundary_triangle']==1)
         plt.plot(grid['x'][grid['triangles'][bt,:],0].T, grid['x'][grid['triangles'][bt,:],1].T,'r', zorder=9)
 
     if ginput > 0:

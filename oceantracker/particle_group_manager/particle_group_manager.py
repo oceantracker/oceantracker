@@ -6,6 +6,7 @@ from oceantracker.util import time_util
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
+from oceantracker.util import numpy_util
 # holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
 
 class ParticleGroupManager(ParameterBaseClass):
@@ -59,6 +60,21 @@ class ParticleGroupManager(ParameterBaseClass):
 
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
+
+    def final_setup(self):
+        # make a single block of memory from all particle properties
+        # as numpy dtype structured array
+        si = self.shared_info
+
+        part_prop = si.classes['particle_properties']
+        pp ={}
+        for name,i in part_prop.items():
+           pp[name] = i.data
+        self.part_prop_as_structure = numpy_util.numpy_structure_from_dict(pp)
+
+        # point property.data at new memory strcture
+        for name, i in part_prop.items():
+            i.data = self.part_prop_as_structure[name]
 
     #@function_profiler(__name__)
     def release_particles(self, time_sec):

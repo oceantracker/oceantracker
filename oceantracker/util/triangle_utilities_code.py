@@ -71,7 +71,7 @@ def build_adjacency_from_node_cell_map(node_to_tri_map,tri_per_node, tri):
 
 def get_boundary_triangles(adjacency_matrix):
     # true false for boundary triangles where adjacency < 0
-    return np.any(adjacency_matrix < 0, axis=1)
+    return np.any(adjacency_matrix < 0, axis=1).astype(np.int8)
 
 def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_map,x):
 
@@ -133,7 +133,7 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
 
     # build pairs of edge nodes from boundary triangles
     #t0= perf_counter()
-    edge_node_pairs = build_edge_node_pairs(triangles, adjacency, np.flatnonzero(is_boundary_triangle))
+    edge_node_pairs = build_edge_node_pairs(triangles, adjacency, np.flatnonzero(is_boundary_triangle==1))
     #print('build_edge_node_pairs',perf_counter()-t0)
 
     # join segments into continuous lines
@@ -249,7 +249,7 @@ if __name__ == "__main__":
 
 
     plt.triplot(x,y,tri,c=[.8,.8,.8],lw=.5)
-    plt.triplot(x, y, tri[is_boundary_triangle,:], c=[.2, .2, .5],lw=.5)
+    plt.triplot(x, y, tri[is_boundary_triangle,:]==1, c=[.2, .2, .5],lw=.5)
 
     plt.plot(outlines['domain']['points'][:,0],outlines['domain']['points'][:,1],c=[.9,.1,.1])
     for i in outlines['islands']:
