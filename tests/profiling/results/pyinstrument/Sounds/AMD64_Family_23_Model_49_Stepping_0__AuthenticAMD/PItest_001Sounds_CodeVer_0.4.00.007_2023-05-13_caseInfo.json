@@ -1,26 +1,26 @@
 {
     "user_note": "No user note",
     "processorID": 0,
-    "file_written": "2023-05-18T16:18:31.856539",
+    "file_written": "2023-05-18T17:37:06.155653",
     "code_version_info": {
         "version": "0.4.00.007 2023-05-13",
-        "git_revision": "aeb88b8031df7cb4a3dfc4d926ab78d0ffb0cbbc",
+        "git_revision": "62baf2004c10370854ee6781e3860678664610bc",
         "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]"
     },
     "run_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2023-05-18T16:02:03.492278",
+        "model_run_started": "2023-05-18T17:18:45.987227",
         "date_of_time_zero": [
             "1970-01-01T00:00:00"
         ],
         "time_zone": null,
         "backtracking": false,
-        "started": "2023-05-18 16:01:32.046234",
-        "ended": "2023-05-18 16:18:31.856539",
-        "duration": "0:16:59.810305",
-        "elapsed_time_sec": 1019.8024965999939,
+        "started": "2023-05-18 17:18:25.906595",
+        "ended": "2023-05-18 17:37:06.155653",
+        "duration": "0:18:40.249058",
+        "elapsed_time_sec": 1120.2434674999968,
         "number_particles_released": 504000
     },
     "solver_info": {
@@ -42,9 +42,9 @@
         "current_model_time_step": 1726,
         "current_model_time": 1199665500.0,
         "model_run_duration": 518100.0,
-        "computation_started": "2023-05-18T16:02:03.500355",
-        "computation_ended": "2023-05-18T16:18:31.484068",
-        "computation_duration": "0:16:27.983713"
+        "computation_started": "2023-05-18T17:18:45.987227",
+        "computation_ended": "2023-05-18T17:37:05.776550",
+        "computation_duration": "0:18:19.789323"
     },
     "hindcast_info": {
         "time_spent_updating": 0.0,
@@ -4048,7 +4048,7 @@
         "processorID": 0,
         "code_version_info": {
             "version": "0.4.00.007 2023-05-13",
-            "git_revision": "aeb88b8031df7cb4a3dfc4d926ab78d0ffb0cbbc",
+            "git_revision": "62baf2004c10370854ee6781e3860678664610bc",
             "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]"
         }
     },
@@ -9019,9 +9019,9 @@
         "trajectory_modifiers": [],
         "particle_statistics": [
             {
-                "time_spent_updating": 10.689748200078611,
+                "time_spent_updating": 5.513173499988625,
                 "update_calls": 96,
-                "time_first_update_call": 4.9287270000058925,
+                "time_first_update_call": 2.344141200010199,
                 "output_file": "Sounds_stats_gridded_age_001.nc",
                 "class_type": null,
                 "instance_index": 0,
@@ -9032,9 +9032,9 @@
                 "type": "gridded"
             },
             {
-                "time_spent_updating": 3.1403841000428656,
+                "time_spent_updating": 6.658707200156641,
                 "update_calls": 96,
-                "time_first_update_call": 1.3785313999978825,
+                "time_first_update_call": 3.137069199990947,
                 "output_file": "Sounds_stats_polygon_age_002.nc",
                 "class_type": null,
                 "instance_index": 1,
@@ -9048,21 +9048,21 @@
         ],
         "event_loggers": [
             {
-                "time_spent_updating": 17.797920200464432,
+                "time_spent_updating": 12.306236800199258,
                 "update_calls": 3456,
-                "time_first_update_call": 0.7988959999929648,
+                "time_first_update_call": 0.7575393000006443,
                 "class_type": null,
                 "instance_index": 0,
                 "instance_number": 1,
                 "prop_to_write": [
-                    "ID",
-                    "IDrelease_group",
-                    "status",
-                    "age",
-                    "user_release_groupID",
+                    "event_polygon",
                     "IDpulse",
+                    "user_release_groupID",
+                    "IDrelease_group",
+                    "ID",
                     "x",
-                    "event_polygon"
+                    "status",
+                    "age"
                 ],
                 "output_file": "Sounds_events_001.nc"
             }
@@ -9977,9 +9977,9 @@
             "current_model_time_step": 1726,
             "current_model_time": 1199665500.0,
             "model_run_duration": 518100.0,
-            "computation_started": "2023-05-18T16:02:03.500355",
-            "computation_ended": "2023-05-18T16:18:31.484068",
-            "computation_duration": "0:16:27.983713"
+            "computation_started": "2023-05-18T17:18:45.987227",
+            "computation_ended": "2023-05-18T17:37:05.776550",
+            "computation_duration": "0:18:19.789323"
         },
         "field_group_manager": {
             "time_spent_updating": 0.0,
@@ -10001,7 +10001,7 @@
             "walk_info": {
                 "bc_walk_tol": 1e-05,
                 "block_dry_cells": true,
-                "longest_triangle_walk": 2084979964,
+                "longest_triangle_walk": 2084858828,
                 "longest_vertical_walk": 13,
                 "max_triangle_walk_steps": 200,
                 "nans_encountered_triangle_walk": 0,
@@ -10009,15 +10009,15 @@
                     47,
                     0
                 ],
-                "number_of_triangles_walked": 54107376,
+                "number_of_triangles_walked": 53974838,
                 "open_boundary_type": 0,
                 "particles_killed_after_triangle_walk_retry_failed": 0,
-                "particles_located_by_walking": 2084979964,
+                "particles_located_by_walking": 2084858828,
                 "step_dt_fraction": 0.8333333333333334,
-                "total_vertical_steps_walked": 197099603,
+                "total_vertical_steps_walked": 197088271,
                 "triangle_walks_retried": 0,
-                "average_number_of_triangles_walked": 0.0259510292349265,
-                "average_vertical_walk_steps": 0.09453309211752214
+                "average_number_of_triangles_walked": 0.025888965370273024,
+                "average_vertical_walk_steps": 0.09453314936871111
             }
         },
         "particle_group_manager": {
@@ -10049,11 +10049,11 @@
             "class_type": "tracks_writer"
         },
         "resuspension": {
-            "time_spent_updating": 12.943303099804325,
+            "time_spent_updating": 10.301762199989753,
             "update_calls": 1728,
-            "time_first_update_call": 11.426944899998489,
+            "time_first_update_call": 8.820768600009615,
             "class_type": "resuspension",
-            "number_resupended": 17937163,
+            "number_resupended": 17913922,
             "resuspension_factor": 3.3023260726609305,
             "min_resuspension_jump": 0.0
         }

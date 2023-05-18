@@ -63,11 +63,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def final_setup(self):
 
-        # set up a grid class and vertical cel find
-        si =self.shared_info
+        # set up a grid class,part_prop and vertical cell find functions to minimise numba function arguments
+        si = self.shared_info
         grid = si.classes['reader'].grid
+
+        #todo z0, move this where grid is built?
         grid['z0'] = si.case_runner_params['settings']['z0']
-        #todo merge grid_time_buffers back into grid
+
         grid.update(si.classes['reader'].grid_time_buffers)
         self.grid_as_class = numba_util.numba_class_from_dict(grid)
 
@@ -93,18 +95,28 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                             longest_vertical_walk=0,
                             nb = np.zeros((2,),dtype=np.int32),
                             step_dt_fraction = 0.)
-        self.step_info= numba_util.numba_class_from_dict(step_info)
+        self.step_info= numba_util.numba_class_from_dict(step_info) # class to use inside numba functions
 
-        # same signature for both functions
-        sig = [typeof(part_prop['x'].data), typeof(self.grid_as_class),
-               typeof(self.part_prop_as_class), nbt.int32[:],
-                typeof(self.step_info)]
+        # types for signatures
+        part_prop_type = typeof(self.part_prop_as_class)
+        grid_type= typeof(self.grid_as_class)
+        step_info_type = typeof(self.step_info)
+        x_type = typeof(part_prop['x'].data)
 
+        # same signature for both walk functions
+        sig_walk = [x_type,grid_type , part_prop_type, nbt.int32[:],step_info_type ]
         self.horizontal_walk_func = numba_util.njitter(triangle_interpolator_util.BCwalk_with_move_backs,
-                                                    sig)
-        self.verical_walk_func = numba_util.njitter(triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid,
-                                            sig)
+                                                       sig_walk, parallel = False)
+
+        # define water velocity eval interpolator function
+        sig_vel = [x_type, nbt.float32[:, :, :, :], grid_type, part_prop_type, nbt.int32[:], step_info_type]
+        if si.is_3D_run:
+            self.verical_walk_func = numba_util.njitter(triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid,
+                                                        sig_walk)
+            self.eval_water_velocity_3D_func = numba_util.njitter(eval_interp.eval_water_velocity_3D,sig_vel)
         pass
+
+        #todo put 2d vel eval value here to??
 
     def setup_interp_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
@@ -112,8 +124,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         si =self.shared_info
         info = self.info
         reader = si.classes['reader']
-        # ger buffer index from this time and next
-
+        # get buffer index from this time and next
+        #todo merge info with self.step_info?
         nt_hindcast_step = reader.time_to_hydro_model_index(time_sec)
         info['current_buffer_index'][0] = reader.hydro_model_index_to_buffer_offset(nt_hindcast_step)
         info['current_buffer_index'][1] = reader.hydro_model_index_to_buffer_offset(nt_hindcast_step + si.model_direction) # buffer is forward in timenext index could be wrapped in ring buffer
@@ -157,16 +169,17 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # locate cell in place
         # nt give but not needed in 2D
         si= self.shared_info
-        # set steppoing info in class
+        # set stepping info in class
         st = self.step_info
         st.step_dt_fraction = step_dt_fraction
         st.nb = nb
 
+
         self.find_horizontal_cell(xq, active)  # best method!
 
         if si.hydro_model_is3D:
-            self.verical_walk_func(xq, self.grid_as_class, self.part_prop_as_class,
-                                   active, self.step_info)
+            self.find_vertical_cell(xq, active)
+
 
     #@function_profiler(__name__)
     def find_horizontal_cell(self,xq, active):
@@ -198,6 +211,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 # kill particles
                 part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
 
+    # @function_profiler(__name__)
+    def find_vertical_cell(self, xq, active):
+        self.verical_walk_func(xq, self.grid_as_class, self.part_prop_as_class, active, self.step_info)
 
     #@function_profiler(__name__)
     def initial_cell_guess(self, xq):
@@ -243,17 +259,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                     # 3D vel needs log layer interp in bottom cell
                     z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
 
-                    eval_interp.eval_water_velocity_3D(basic_util.atLeast_Nby1(output),
+                    self.eval_water_velocity_3D_func(basic_util.atLeast_Nby1(output),
                                                        fieldObj.data,
-                                                       nb,
-                                                       step_dt_fraction,
-                                                       grid['triangles'],
-                                                       n_cell,
-                                                       nz_cell,
-                                                       nz_bottom,
-                                                       z_fraction,
-                                                    z_fraction_bottom_layer,
-                                                       bc_cords,     active)
+                                                       self.grid_as_class,
+                                                       self.part_prop_as_class,
+                                                        active, self.step_info)
                 else:
                     eval_interp.time_dependent_3Dfield(basic_util.atLeast_Nby1(output),
                                                        fieldObj.data,
@@ -366,6 +376,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
 
     def get_bc_cords(self,x,n_cells):
+        # get BC cords for given x's
         si= self.shared_info
         grid = si.classes['reader'].grid
         bc_cords = np.full((x.shape[0],3), 0.)

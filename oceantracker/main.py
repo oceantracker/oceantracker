@@ -258,10 +258,11 @@ class OceanTracker(object):
         # make set of case params merged with defaults and checked
         t0  = perf_counter()
         # fill in any missing class lists
+
         run_builder['class_lists'] = self.check_top_level_class_keys(run_builder['class_lists'],
                                                   common_info.class_lists, msg_logger,
                                                         crumbs='checking class_lists')
-
+        run_builder['computer_info'] = basic_util.get_computer_info()
         # merge params of base case class lists
         for key, item in  run_builder['class_lists'].items():
             for n in range(len(item)):
@@ -290,7 +291,7 @@ class OceanTracker(object):
                                                      crumbs='checking class_lists  ' + tag)
 
             # check if trying to change param which are shared by all runs
-            for key in common_info.shared_params:
+            for key in common_info.settings_defaults:
                 if key in case['settings']:
                     msg_logger.msg(f'Cannot set parameter {key} within a case, it must be the same for all cases, ignoring this value' ,
                                    warning=True, hint ='move this param to top level or delete  from ' + tag)
@@ -398,8 +399,6 @@ class OceanTracker(object):
 
         run_builder['reader_build_info'] = reader_build_info
         return run_builder, reader
-
-
 
     def _write_run_grid_netCDF(self, output_files, reader_build_info, reader):
         # write a netcdf of the grid from first hindcast file
@@ -582,7 +581,7 @@ class OceanTracker(object):
 
         param_parts = {'settings': {}, 'core_classes': {}, 'class_lists': {}}
         for key in params.keys():
-            if key in common_info.shared_params:
+            if key in common_info.settings_defaults:
                 param_parts['settings'][key] = params[key]
 
             elif key in common_info.run_params:
