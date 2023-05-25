@@ -1,26 +1,26 @@
 {
     "user_note": "No user note",
     "processorID": 0,
-    "file_written": "2023-05-13T21:23:03.049123",
+    "file_written": "2023-05-19T11:36:52.240100",
     "code_version_info": {
-        "version": "0.4.00.007 2023-05-11",
-        "git_revision": "350ec293f34a5d16995668c8c7b1a330fdcac442",
+        "version": "0.4.00.010 2023-05-19",
+        "git_revision": "f1be160cf8614a849d540fdf9e1bc29de5dbbc7c",
         "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]"
     },
     "run_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2023-05-13T21:08:07.918437",
+        "model_run_started": "2023-05-19T11:21:08.107754",
         "date_of_time_zero": [
             "1970-01-01T00:00:00"
         ],
         "time_zone": null,
         "backtracking": false,
-        "started": "2023-05-13 21:07:39.217710",
-        "ended": "2023-05-13 21:23:03.049123",
-        "duration": "0:15:23.831413",
-        "elapsed_time_sec": 923.8346300000012,
+        "started": "2023-05-19 11:20:08.534535",
+        "ended": "2023-05-19 11:36:52.240100",
+        "duration": "0:16:43.705565",
+        "elapsed_time_sec": 1003.7003941999865,
         "number_particles_released": 504000
     },
     "solver_info": {
@@ -42,9 +42,9 @@
         "current_model_time_step": 1726,
         "current_model_time": 1199665500.0,
         "model_run_duration": 518100.0,
-        "computation_started": "2023-05-13T21:08:07.918437",
-        "computation_ended": "2023-05-13T21:23:02.636720",
-        "computation_duration": "0:14:54.718283"
+        "computation_started": "2023-05-19T11:21:08.107754",
+        "computation_ended": "2023-05-19T11:36:51.865318",
+        "computation_duration": "0:15:43.757564"
     },
     "hindcast_info": {
         "time_spent_updating": 0.0,
@@ -418,7 +418,7 @@
             "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
         },
         "hindcast_is3D": true,
-        "grid_constant_arrays_builder": {
+        "grid_builder": {
             "x": {
                 "shape": [
                     149233,
@@ -476,7 +476,7 @@
                 "shape": [
                     274446
                 ],
-                "dtype": "bool"
+                "dtype": "int8"
             },
             "node_type": {
                 "shape": [
@@ -495,9 +495,7 @@
                     4
                 ],
                 "dtype": "float64"
-            }
-        },
-        "grid_time_buffers_builder": {
+            },
             "time": {
                 "shape": [
                     48
@@ -926,6 +924,7 @@
             "write_grid": true,
             "max_duration": 31536000000.0,
             "processors": 1,
+            "max_processors": 30,
             "profiler": "oceantracker",
             "shared_reader_memory": false,
             "advanced_settings": {
@@ -3825,7 +3824,7 @@
                 "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
             },
             "hindcast_is3D": true,
-            "grid_constant_arrays_builder": {
+            "grid_builder": {
                 "x": {
                     "shape": [
                         149233,
@@ -3883,7 +3882,7 @@
                     "shape": [
                         274446
                     ],
-                    "dtype": "bool"
+                    "dtype": "int8"
                 },
                 "node_type": {
                     "shape": [
@@ -3902,9 +3901,7 @@
                         4
                     ],
                     "dtype": "float64"
-                }
-            },
-            "grid_time_buffers_builder": {
+                },
                 "time": {
                     "shape": [
                         48
@@ -4045,10 +4042,20 @@
             }
         },
         "is_3D_run": true,
+        "computer_info": {
+            "name": "2006d10148w",
+            "OS": "Windows",
+            "OS Version": "10.0.19044",
+            "processor": "AMD64 Family 23 Model 49 Stepping 0, AuthenticAMD",
+            "CPUs_hardware": 32,
+            "CPUs_logical": 64,
+            "Freq_Mhz": 3.693,
+            "python": []
+        },
         "processorID": 0,
         "code_version_info": {
-            "version": "0.4.00.007 2023-05-11",
-            "git_revision": "350ec293f34a5d16995668c8c7b1a330fdcac442",
+            "version": "0.4.00.010 2023-05-19",
+            "git_revision": "f1be160cf8614a849d540fdf9e1bc29de5dbbc7c",
             "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]"
         }
     },
@@ -9019,9 +9026,9 @@
         "trajectory_modifiers": [],
         "particle_statistics": [
             {
-                "time_spent_updating": 5.383871299996827,
+                "time_spent_updating": 5.744304100022418,
                 "update_calls": 96,
-                "time_first_update_call": 2.2800150999973994,
+                "time_first_update_call": 2.457964700006414,
                 "output_file": "Sounds_stats_gridded_age_001.nc",
                 "class_type": null,
                 "instance_index": 0,
@@ -9032,9 +9039,9 @@
                 "type": "gridded"
             },
             {
-                "time_spent_updating": 2.6535370999881707,
+                "time_spent_updating": 2.8189385000732727,
                 "update_calls": 96,
-                "time_first_update_call": 1.137823799999751,
+                "time_first_update_call": 1.2186733999988064,
                 "output_file": "Sounds_stats_polygon_age_002.nc",
                 "class_type": null,
                 "instance_index": 1,
@@ -9048,21 +9055,21 @@
         ],
         "event_loggers": [
             {
-                "time_spent_updating": 16.600989899976412,
+                "time_spent_updating": 24.58915820036782,
                 "update_calls": 3456,
-                "time_first_update_call": 0.7513858999991498,
+                "time_first_update_call": 0.7699644999811426,
                 "class_type": null,
                 "instance_index": 0,
                 "instance_number": 1,
                 "prop_to_write": [
                     "IDrelease_group",
-                    "event_polygon",
+                    "IDpulse",
                     "status",
-                    "ID",
-                    "x",
-                    "age",
                     "user_release_groupID",
-                    "IDpulse"
+                    "ID",
+                    "age",
+                    "x",
+                    "event_polygon"
                 ],
                 "output_file": "Sounds_events_001.nc"
             }
@@ -9451,7 +9458,7 @@
                 "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
             },
             "hindcast_is3D": true,
-            "grid_constant_arrays_builder": {
+            "grid_builder": {
                 "x": {
                     "shape": [
                         149233,
@@ -9509,7 +9516,7 @@
                     "shape": [
                         274446
                     ],
-                    "dtype": "bool"
+                    "dtype": "int8"
                 },
                 "node_type": {
                     "shape": [
@@ -9528,9 +9535,7 @@
                         4
                     ],
                     "dtype": "float64"
-                }
-            },
-            "grid_time_buffers_builder": {
+                },
                 "time": {
                     "shape": [
                         48
@@ -9977,9 +9982,9 @@
             "current_model_time_step": 1726,
             "current_model_time": 1199665500.0,
             "model_run_duration": 518100.0,
-            "computation_started": "2023-05-13T21:08:07.918437",
-            "computation_ended": "2023-05-13T21:23:02.636720",
-            "computation_duration": "0:14:54.718283"
+            "computation_started": "2023-05-19T11:21:08.107754",
+            "computation_ended": "2023-05-19T11:36:51.865318",
+            "computation_duration": "0:15:43.757564"
         },
         "field_group_manager": {
             "time_spent_updating": 0.0,
@@ -9997,22 +10002,32 @@
             ],
             "class_type": "interpolator",
             "current_hydro_model_step": 287,
-            "current_step_dt_fraction": 0.8333333333333334,
+            "current_fractional_time_step": 0.8333333333333334,
             "walk_info": {
                 "max_triangle_walk_steps": 200,
                 "open_boundary_type": 0,
                 "block_dry_cells": true,
                 "bc_walk_tol": 1e-05,
-                "particles_located_by_walking": 2084730436,
-                "number_of_triangles_walked": 54690879,
-                "longest_triangle_walk": 5,
+                "particles_located_by_walking": 2085153268,
+                "number_of_triangles_walked": 54106303,
+                "longest_triangle_walk": 2085153268,
                 "nans_encountered_triangle_walk": 0,
                 "triangle_walks_retried": 0,
                 "particles_killed_after_triangle_walk_retry_failed": 0,
-                "total_vertical_steps_walked": 199044612,
+                "total_vertical_steps_walked": 197019146,
                 "longest_vertical_walk": 13,
-                "average_number_of_triangles_walked": 0.0262340291366092,
-                "average_vertical_walk_steps": 0.09547738573909323
+                "nb": [
+                    47,
+                    0
+                ],
+                "fractional_time_step": 0.8333333333333334,
+                "both_fractional_time_steps": [
+                    0.8333333333333334,
+                    0.16666666666666663
+                ],
+                "reader_time_buffer_size": 48,
+                "average_number_of_triangles_walked": 0.02594835776839403,
+                "average_vertical_walk_steps": 0.09448664950609281
             }
         },
         "particle_group_manager": {
@@ -10044,11 +10059,11 @@
             "class_type": "tracks_writer"
         },
         "resuspension": {
-            "time_spent_updating": 11.638054199924227,
+            "time_spent_updating": 14.24776869919151,
             "update_calls": 1728,
-            "time_first_update_call": 10.142379400000209,
+            "time_first_update_call": 12.727025200001663,
             "class_type": "resuspension",
-            "number_resupended": 18147878,
+            "number_resupended": 17887914,
             "resuspension_factor": 3.3023260726609305,
             "min_resuspension_jump": 0.0
         }

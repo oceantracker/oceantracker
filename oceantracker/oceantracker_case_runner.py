@@ -54,7 +54,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.settings['max_processors']= si.case_runner_params['computer_info']['CPUs_hardware'] - 2
 
         set_num_threads(max(1, si.settings['max_processors']))
-        #set_num_threads(5)
+
         # set up message logging
         output_files=runner_params['output_files']
         si.msg_logger = MessageLogger('P%03.0f:' % si.processorID, si.settings['advanced_settings']['max_warnings'])
@@ -390,7 +390,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # add default classes, eg tidal stranding
         #todo this may be better else where
-        if 'dry_cell_index' in si.classes['reader'].grid_time_buffers and 'tidal_stranding' not in  si.case_runner_params['class_lists']['status_modifiers']:
+        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.case_runner_params['class_lists']['status_modifiers']:
             si.case_runner_params['class_lists']['status_modifiers'].append({'name':'tidal_stranding','class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'})
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters

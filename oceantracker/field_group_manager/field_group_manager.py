@@ -6,7 +6,7 @@ from oceantracker.util import time_util
 from oceantracker.util.profiling_util import function_profiler
 
 
-#TODO allow feilds to be spread across mutiple files and file types
+#TODO allow fields to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
 
 class FieldGroupManager(ParameterBaseClass):
@@ -24,6 +24,11 @@ class FieldGroupManager(ParameterBaseClass):
 
     def initial_setup(self):
         si=self.shared_info
+
+    def fill_reader_buffers_if_needed(self,time_sec):
+        # check if all interpolators have the time steps they need
+        si  = self.shared_info
+        si.classes['interpolator'].check_steps_in_reader_buffer(time_sec)
 
 
     def setup_time_step(self, time_sec, xq, active):
@@ -44,8 +49,8 @@ class FieldGroupManager(ParameterBaseClass):
         if output is None:
             # over write current values
             output = si.classes['particle_properties'][fieldName].used_buffer()
-
-        si.classes['interpolator'].interp_field_at_particle_locations(fieldName, active, output)
+        i = si.classes['fields'][fieldName]
+        si.classes['interpolator'].interp_field_at_current_particle_locations(i, active, output)
 
     def interp_named_field_at_given_locations_and_time(self, fieldName, x, time= None, n_cell=None, output=None):
         # interp reader fieldName at specfied locations,  not particle locations
@@ -62,6 +67,13 @@ class FieldGroupManager(ParameterBaseClass):
         i.info['field_type'] = field_type
         i.initial_setup()
         return i
+
+
+    def update_dry_cells(self):
+        # update 0-255 dry cell index for each interpolator
+        si =self. shared_info
+        si.classes['interpolator'].update_dry_cells()
+
 
 
 

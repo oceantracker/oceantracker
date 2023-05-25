@@ -359,14 +359,12 @@ class OceanTracker(object):
         # also if requested shared grid memory is set up
         # and shared memory info will be also added to reader_build_info for case runner to build reader
         grid = reader.grid
-        grid_time_buffers = reader.grid_time_buffers
         nc = reader._open_grid_file(reader_build_info)
 
         grid = reader.make_non_time_varying_grid(nc, grid)
-        grid_time_buffers = reader.make_grid_time_buffers(nc,grid,grid_time_buffers)
 
-        # add information to build grid and grid_time_buffers to reader_build_info
-        run_builder = reader.make_grid_builder(grid, grid_time_buffers, run_builder)
+        # add information to build grid  to reader_build_info
+        run_builder = reader.make_grid_builder(grid, run_builder)
 
         # get information required to build reader fields
         run_builder = reader.maker_field_builder(nc, run_builder)
@@ -493,7 +491,7 @@ class OceanTracker(object):
         # shared grid is already to allow grid to be written  and case
 
         # shared reader control arrays
-        time_steps_in_buffer = shared_memory.SharedMemArray(shape=(2,0),dtype=np.int2)
+        time_steps_in_buffer = shared_memory.CreateSharedMemArray(shape=(2, 0), dtype=np.int2)
         c = {'time_steps_in_buffer':time_steps_in_buffer.get_shared_mem_map() }
 
         # add field shared memory build info to each case

@@ -3,12 +3,14 @@ from time import perf_counter
 import numpy as np
 from oceantracker.util import time_util
 from datetime import datetime
-
+from numba import types as nbt ,from_dtype,typeof
+from oceantracker.util.numba_util import njitter
 from oceantracker.particle_properties import particle_operations_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.solver.util import solver_util
+from oceantracker.solver.util import solver_util ,dev_triangle_kernnal_solver
 from oceantracker.util.profiling_util import function_profiler
+from oceantracker.util import numpy_util
 
 class Solver(ParameterBaseClass):
     #  does particle tracking solution as class to allow multi processing
@@ -49,6 +51,31 @@ class Solver(ParameterBaseClass):
         # set up particle velocity working space for solver
         info['total_alive_particles'] = 0
 
+        # todo kernal solvnot working yet
+        # kernal working space as numpy structure
+        val = np.zeros((3,), dtype=np.float64)
+        self.kernal_solver_info = numpy_util.numpy_structure_from_dict(
+            dict( bc=val.copy(), x_temp= val.copy(),
+                v1 =val.copy(),v2 =val.copy(),v3 =val.copy(),v4 =val.copy(),
+                v=val.copy()
+                ))  # barycentric coords
+        if False:
+            # wrap kernal solver with signature
+            interp = si.classes['interpolator']
+            pgm = si.classes['particle_group_manager']
+            sig =[  nbt.float64,
+                    nbt.float32[:, :, :, :],
+                    from_dtype(interp.grid_as_struct.dtype),
+                   from_dtype(pgm.part_prop_as_struct.dtype),
+                   from_dtype(interp.step_info.dtype),
+                   from_dtype(self.kernal_solver_info.dtype),
+                   nbt.float64,
+                   typeof(self.params['RK_order']),
+                   nbt.float32[:]]
+            #'(nestedarray(float64, (947, 3)), Tuple(float32, slice<a:b>))
+
+            self.kernal_solver_fun = njitter(triangle_kernnal_solver.RKsolver, sig)
+
     #@profile
     def solve(self):
         # solve for data in buffer
@@ -56,7 +83,6 @@ class Solver(ParameterBaseClass):
 
         reader = si.classes['reader']
         grid = reader.grid
-        grid_time_buffers = reader.grid_time_buffers
 
         info = self.info # same as si.solver_info
         computation_started = datetime.now()
@@ -84,8 +110,7 @@ class Solver(ParameterBaseClass):
             t0_step = perf_counter()
             time_sec = model_times[nt]
 
-            if not reader.are_time_steps_in_buffer(time_sec):
-                reader.fill_time_buffer(time_sec) # get next steps into buffer if not in buffer
+            fgm.fill_reader_buffers_if_needed(time_sec)
 
             self.pre_step_bookkeeping(nt, time_sec)
 
@@ -102,7 +127,8 @@ class Solver(ParameterBaseClass):
 
             #  Main integration step
             #--------------------------------------
-            self.integration_step(time_sec, is_moving)
+            #self.integration_step(time_sec, is_moving)
+            self.kernal_solver(time_sec, is_moving)
             #--------------------------------------
 
 
@@ -169,6 +195,7 @@ class Solver(ParameterBaseClass):
 
         # setup_interp_time_step
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
+        fgm.update_dry_cells()
 
         # update particle properties
         pgm.update_PartProp(time_sec, alive)
@@ -177,6 +204,7 @@ class Solver(ParameterBaseClass):
         self._update_stats(time_sec)
         self._update_concentrations(time_sec)
         self._update_events(time_sec)
+
 
         # write tracks
         if si.write_tracks:
@@ -187,6 +215,17 @@ class Solver(ParameterBaseClass):
             # write tracks file
             tracks_writer.write_all_time_varying_prop_and_data()
 
+    def kernal_solver(self, time_sec, is_moving):
+        si=self.shared_info
+        pgm = si.classes['particle_group_manager']
+        interp = si.classes['interpolator']
+        time_step = si.solver_info['model_time_step'] * si.model_direction
+        vel_field = si.classes['fields']['water_velocity'].data
+
+        triangle_kernnal_solver.RKsolver(time_sec, vel_field,
+                 interp.grid_as_struct, pgm.part_prop_as_struct, interp.step_info,
+                  self.kernal_solver_info,
+                time_step, self.params['RK_order'],is_moving)
 
     def integration_step(self, time_sec, is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
@@ -260,11 +299,11 @@ class Solver(ParameterBaseClass):
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
         si= self.shared_info
-        interp_info= si.classes["interpolator"].info #todo more than one reader?
+        interp_info= si.classes["interpolator"].step_info #todo more than one reader?
 
         fraction_done= abs((time_sec - si.solver_info['model_start_time']) / si.solver_info['model_duration'])
         s = f'{100* fraction_done:02.0f}%'
-        s += f' step {nt:04d}:H{interp_info["current_hydro_model_step"]:04d}b{interp_info["current_buffer_index"][0]:02d}-{interp_info["current_buffer_index"][1]:02d}'
+        s += f' step {nt:04d}:H{interp_info["current_hydro_model_step"]:04d}b{interp_info["nb"][0]:02d}-{interp_info["nb"][1]:02d}'
         t = abs(time_sec - si.solver_info['model_start_time'])
         s += ' Day ' + ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)

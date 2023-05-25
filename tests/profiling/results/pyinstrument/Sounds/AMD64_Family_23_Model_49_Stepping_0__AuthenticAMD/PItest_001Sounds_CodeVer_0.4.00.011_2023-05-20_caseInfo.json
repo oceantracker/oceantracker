@@ -1,26 +1,26 @@
 {
     "user_note": "No user note",
     "processorID": 0,
-    "file_written": "2023-05-18T17:37:06.155653",
+    "file_written": "2023-05-20T14:36:11.290253",
     "code_version_info": {
-        "version": "0.4.00.007 2023-05-13",
-        "git_revision": "62baf2004c10370854ee6781e3860678664610bc",
+        "version": "0.4.00.011 2023-05-20",
+        "git_revision": "f1be160cf8614a849d540fdf9e1bc29de5dbbc7c",
         "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]"
     },
     "run_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2023-05-18T17:18:45.987227",
+        "model_run_started": "2023-05-20T14:16:45.858921",
         "date_of_time_zero": [
             "1970-01-01T00:00:00"
         ],
         "time_zone": null,
         "backtracking": false,
-        "started": "2023-05-18 17:18:25.906595",
-        "ended": "2023-05-18 17:37:06.155653",
-        "duration": "0:18:40.249058",
-        "elapsed_time_sec": 1120.2434674999968,
+        "started": "2023-05-20 14:15:56.192827",
+        "ended": "2023-05-20 14:36:11.290253",
+        "duration": "0:20:15.097426",
+        "elapsed_time_sec": 1215.081115100009,
         "number_particles_released": 504000
     },
     "solver_info": {
@@ -42,9 +42,9 @@
         "current_model_time_step": 1726,
         "current_model_time": 1199665500.0,
         "model_run_duration": 518100.0,
-        "computation_started": "2023-05-18T17:18:45.987227",
-        "computation_ended": "2023-05-18T17:37:05.776550",
-        "computation_duration": "0:18:19.789323"
+        "computation_started": "2023-05-20T14:16:45.866943",
+        "computation_ended": "2023-05-20T14:36:10.767719",
+        "computation_duration": "0:19:24.900776"
     },
     "hindcast_info": {
         "time_spent_updating": 0.0,
@@ -418,7 +418,7 @@
             "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
         },
         "hindcast_is3D": true,
-        "grid_constant_arrays_builder": {
+        "grid_builder": {
             "x": {
                 "shape": [
                     149233,
@@ -476,7 +476,7 @@
                 "shape": [
                     274446
                 ],
-                "dtype": "bool"
+                "dtype": "int8"
             },
             "node_type": {
                 "shape": [
@@ -495,9 +495,7 @@
                     4
                 ],
                 "dtype": "float64"
-            }
-        },
-        "grid_time_buffers_builder": {
+            },
             "time": {
                 "shape": [
                     48
@@ -926,6 +924,7 @@
             "write_grid": true,
             "max_duration": 31536000000.0,
             "processors": 1,
+            "max_processors": 30,
             "profiler": "oceantracker",
             "shared_reader_memory": false,
             "advanced_settings": {
@@ -1010,7 +1009,7 @@
                 "user_note": null,
                 "requires_3D": false,
                 "bc_walk_tol": 1e-05,
-                "max_search_steps": 200
+                "max_search_steps": 500
             },
             "particle_group_manager": {
                 "class_name": "oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager",
@@ -3825,7 +3824,7 @@
                 "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
             },
             "hindcast_is3D": true,
-            "grid_constant_arrays_builder": {
+            "grid_builder": {
                 "x": {
                     "shape": [
                         149233,
@@ -3883,7 +3882,7 @@
                     "shape": [
                         274446
                     ],
-                    "dtype": "bool"
+                    "dtype": "int8"
                 },
                 "node_type": {
                     "shape": [
@@ -3902,9 +3901,7 @@
                         4
                     ],
                     "dtype": "float64"
-                }
-            },
-            "grid_time_buffers_builder": {
+                },
                 "time": {
                     "shape": [
                         48
@@ -4045,10 +4042,20 @@
             }
         },
         "is_3D_run": true,
+        "computer_info": {
+            "name": "2006d10148w",
+            "OS": "Windows",
+            "OS Version": "10.0.19044",
+            "processor": "AMD64 Family 23 Model 49 Stepping 0, AuthenticAMD",
+            "CPUs_hardware": 32,
+            "CPUs_logical": 64,
+            "Freq_Mhz": 3.693,
+            "python": []
+        },
         "processorID": 0,
         "code_version_info": {
-            "version": "0.4.00.007 2023-05-13",
-            "git_revision": "62baf2004c10370854ee6781e3860678664610bc",
+            "version": "0.4.00.011 2023-05-20",
+            "git_revision": "f1be160cf8614a849d540fdf9e1bc29de5dbbc7c",
             "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]"
         }
     },
@@ -9019,9 +9026,9 @@
         "trajectory_modifiers": [],
         "particle_statistics": [
             {
-                "time_spent_updating": 5.513173499988625,
+                "time_spent_updating": 10.252860300068278,
                 "update_calls": 96,
-                "time_first_update_call": 2.344141200010199,
+                "time_first_update_call": 4.717101600021124,
                 "output_file": "Sounds_stats_gridded_age_001.nc",
                 "class_type": null,
                 "instance_index": 0,
@@ -9032,9 +9039,9 @@
                 "type": "gridded"
             },
             {
-                "time_spent_updating": 6.658707200156641,
+                "time_spent_updating": 2.693289800256025,
                 "update_calls": 96,
-                "time_first_update_call": 3.137069199990947,
+                "time_first_update_call": 1.1567095000064,
                 "output_file": "Sounds_stats_polygon_age_002.nc",
                 "class_type": null,
                 "instance_index": 1,
@@ -9048,21 +9055,21 @@
         ],
         "event_loggers": [
             {
-                "time_spent_updating": 12.306236800199258,
+                "time_spent_updating": 26.508224399993196,
                 "update_calls": 3456,
-                "time_first_update_call": 0.7575393000006443,
+                "time_first_update_call": 0.752441699965857,
                 "class_type": null,
                 "instance_index": 0,
                 "instance_number": 1,
                 "prop_to_write": [
                     "event_polygon",
                     "IDpulse",
-                    "user_release_groupID",
-                    "IDrelease_group",
                     "ID",
+                    "user_release_groupID",
+                    "age",
+                    "IDrelease_group",
                     "x",
-                    "status",
-                    "age"
+                    "status"
                 ],
                 "output_file": "Sounds_events_001.nc"
             }
@@ -9451,7 +9458,7 @@
                 "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
             },
             "hindcast_is3D": true,
-            "grid_constant_arrays_builder": {
+            "grid_builder": {
                 "x": {
                     "shape": [
                         149233,
@@ -9509,7 +9516,7 @@
                     "shape": [
                         274446
                     ],
-                    "dtype": "bool"
+                    "dtype": "int8"
                 },
                 "node_type": {
                     "shape": [
@@ -9528,9 +9535,7 @@
                         4
                     ],
                     "dtype": "float64"
-                }
-            },
-            "grid_time_buffers_builder": {
+                },
                 "time": {
                     "shape": [
                         48
@@ -9977,9 +9982,9 @@
             "current_model_time_step": 1726,
             "current_model_time": 1199665500.0,
             "model_run_duration": 518100.0,
-            "computation_started": "2023-05-18T17:18:45.987227",
-            "computation_ended": "2023-05-18T17:37:05.776550",
-            "computation_duration": "0:18:19.789323"
+            "computation_started": "2023-05-20T14:16:45.866943",
+            "computation_ended": "2023-05-20T14:36:10.767719",
+            "computation_duration": "0:19:24.900776"
         },
         "field_group_manager": {
             "time_spent_updating": 0.0,
@@ -9992,32 +9997,45 @@
             "update_calls": 0,
             "time_first_update_call": 0.0,
             "current_buffer_index": [
-                47,
+                0,
                 0
             ],
             "class_type": "interpolator",
-            "current_hydro_model_step": 287,
-            "current_step_dt_fraction": 0.8333333333333334,
             "walk_info": {
-                "bc_walk_tol": 1e-05,
+                "walk_failures": {
+                    "retries": [],
+                    "full_failures": []
+                },
+                "is_3D_run": true,
+                "max_triangle_walk_steps": 500,
+                "open_boundary_type": 0,
                 "block_dry_cells": true,
-                "longest_triangle_walk": 2084858828,
-                "longest_vertical_walk": 13,
-                "max_triangle_walk_steps": 200,
+                "bc_walk_tol": 1e-05,
+                "particles_located_by_walking": 2081675808,
+                "number_of_triangles_walked": 226801688,
+                "longest_triangle_walk": 79,
                 "nans_encountered_triangle_walk": 0,
+                "triangle_walks_retried": 0,
+                "particles_killed_after_triangle_walk_retry_failed": 0,
+                "total_vertical_steps_walked": 226638777,
+                "longest_vertical_walk": 14,
                 "nb": [
                     47,
                     0
                 ],
-                "number_of_triangles_walked": 53974838,
-                "open_boundary_type": 0,
-                "particles_killed_after_triangle_walk_retry_failed": 0,
-                "particles_located_by_walking": 2084858828,
-                "step_dt_fraction": 0.8333333333333334,
-                "total_vertical_steps_walked": 197088271,
-                "triangle_walks_retried": 0,
-                "average_number_of_triangles_walked": 0.025888965370273024,
-                "average_vertical_walk_steps": 0.09453314936871111
+                "fractional_time_steps": [
+                    0.8333333333333334,
+                    0.16666666666666663
+                ],
+                "hindcast_first_time": 1199147400.0,
+                "hindcast_last_time": 1201824000.0,
+                "n_time_steps_in_hindcast": 1488,
+                "time_buffer_size": 48,
+                "model_direction": 1,
+                "current_hydro_model_step": 287,
+                "hydro_model_time_step": 1800.0,
+                "average_number_of_triangles_walked": 0.1089514933729777,
+                "average_vertical_walk_steps": 0.10887323382873267
             }
         },
         "particle_group_manager": {
@@ -10049,11 +10067,11 @@
             "class_type": "tracks_writer"
         },
         "resuspension": {
-            "time_spent_updating": 10.301762199989753,
+            "time_spent_updating": 7.250371600966901,
             "update_calls": 1728,
-            "time_first_update_call": 8.820768600009615,
+            "time_first_update_call": 5.653487400035374,
             "class_type": "resuspension",
-            "number_resupended": 17913922,
+            "number_resupended": 21965604,
             "resuspension_factor": 3.3023260726609305,
             "min_resuspension_jump": 0.0
         }

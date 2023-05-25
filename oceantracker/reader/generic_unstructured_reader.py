@@ -45,37 +45,33 @@ class GenericUnstructuredReader(_BaseReader):
         grid['adjacency'][is_open_boundary_adjacent] = -2
         grid['limits'] = np.asarray([np.min(grid['x'][:,0]),np.max(grid['x'][:,0]),np.min(grid['x'][:,1]),np.max(grid['x'][:,1])])
 
-        return grid
-
-    def make_grid_time_buffers(self,nc, grid, grid_time_buffers):
         # now set up time buffers
         time_buffer_size = self.params['time_buffer_size']
-        grid_time_buffers['time'] = np.zeros((time_buffer_size,), dtype=np.float64)
-        grid_time_buffers['date'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')# time buffer
-        grid_time_buffers['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
+        grid['time'] = np.zeros((time_buffer_size,), dtype=np.float64)
+        grid['date'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')# time buffer
+        grid['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
 
         # set up zlevel
         if self.is_hindcast3D(nc):
             s = [self.params['time_buffer_size'], grid['x'].shape[0], self.get_number_of_z_levels(nc)]
-            grid_time_buffers['zlevel'] = np.full(s, 0., dtype=np.float32)
+            grid['zlevel'] = np.full(s, 0., dtype=np.float32)
 
         # space for dry cell info
-        grid_time_buffers['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0] ), 1, np.int8)
+        grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0] ), 1, np.int8)
 
         # working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
-        grid_time_buffers['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
+        grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
 
         # note which are time buffers
-        return grid_time_buffers
+        return grid
 
     def build_case_runner_reader(self):
         # build the reader need for case runner to work, based on shared memory
         # or build from crstch
         si=self.shared_info
         grid = self.grid
-        grid_time_buffers = self.grid_time_buffers
         # time buffers , eg time
-        grid_time_buffers.update({'zlevel': None, 'dry_cell_index': None})
+        grid.update({'zlevel': None, 'dry_cell_index': None})
 
         super().build_case_runner_reader()
 
@@ -83,21 +79,17 @@ class GenericUnstructuredReader(_BaseReader):
             # build from scatch
             nc = self._open_grid_file(si.reader_build_info)
             grid = self.make_non_time_varying_grid(nc, grid)
-            grid_time_buffers = self.make_grid_time_buffers(nc, grid, grid_time_buffers)
             nc.close()
         else:   # shared memory grid
-            for key, item in si.reader_build_info['grid_constant_arrays_builder'].items():
+            for key, item in si.reader_build_info['grid_builder'].items():
                     sm = shared_reader_memory_util.create_shared_arrayy(sm_map=item)
                     self.shared_memory['grid'][key] = sm # need to retain a reference to shared or will be deleted
                     grid[key] = sm.data
-            for key, item in si.reader_build_info['grid_time_buffers_builder'].items():
-                    sm = shared_reader_memory_util.create_shared_array(sm_map=item)
-                    self.shared_memory['grid'][key] = sm  # need to retain a reference to shared or will be deleted
-                    grid_time_buffers[key] = sm.data
+
             #todo  shared fields
 
         # note if 3D
-        grid['nz'] = 1 if grid_time_buffers['zlevel'] is None else grid_time_buffers['zlevel'].shape[2]
+        grid['nz'] = 1 if grid['zlevel'] is None else grid['zlevel'].shape[2]
         # set up reader fields, using shared memory if requested
         self.setup_reader_fields()
 
@@ -150,18 +142,18 @@ class GenericUnstructuredReader(_BaseReader):
 
     def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
         # read time and  grid variables, eg time, tide, zlevel
-        grid_time_buffers = self.grid_time_buffers
+        grid = self.grid
 
-        grid_time_buffers['time'][buffer_index] = self.read_time_sec_since_1970(nc, file_index=file_index)
+        grid['time'][buffer_index] = self.read_time_sec_since_1970(nc, file_index=file_index)
 
         # add date for convenience
-        grid_time_buffers['date'][buffer_index] = time_util.seconds_to_datetime64(grid_time_buffers['time'][buffer_index])
+        grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
 
-        if grid_time_buffers['zlevel'] is not None:
+        if grid['zlevel'] is not None:
             # read zlevel inplace to save memory?
-            self.read_zlevel_as_float32(nc, file_index, grid_time_buffers['zlevel'], buffer_index)
+            self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
 
-        self.read_dry_cell_data(nc, file_index, grid_time_buffers['is_dry_cell'],buffer_index)
+        self.read_dry_cell_data(nc, file_index, grid['is_dry_cell'],buffer_index)
 
     def read_triangles_as_int32(self, nc):
         data = nc.read_a_variable(self.params['grid_variables']['triangles'])

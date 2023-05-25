@@ -4,8 +4,9 @@ from numba.experimental import jitclass
 
 
 
-def njitter(f,signature, parallel=False, nogil=True):
-    custom_njit = njit(tuple(signature), parallel=parallel,nogil=nogil)
+def njitter(f,signature,return_type=None, parallel=False, nogil=True):
+
+    custom_njit = njit( signature, parallel=parallel,nogil=nogil)
     return custom_njit(f)
     #return f
     #return njit(f)

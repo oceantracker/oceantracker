@@ -4,7 +4,7 @@ package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
 
-code_version = '0.4.00.009 2023-05-18'
+code_version = '0.4.00.011 2023-05-20'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 # template for oceanTracker params, with defaults to check against
@@ -13,7 +13,7 @@ settings_defaults = {'user_note': PVC('No user note', str),
                  'add_date_to_run_output_dir':  PVC(False, bool),
                  'output_file_base':    PVC('output_file_base', str,doc_str= 'The start/base of all output files and name of sub-dir where output will be written'),
                  'time_step': PVC(None, float, min=0.01,doc_str='Time step in seconds for all cases'),
-                    'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
+                'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
                  'backtracking':        PVC(False, bool),
                   'run_as_depth_averaged': PVC(False, bool),  # turns 3D hindcast into a 2D one
                  'debug':               PVC(False, bool),
@@ -181,7 +181,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo kernal RK solver
 
 # TODO STRUCTURE
-    # todo merge grid_time_buffers back into grid
+
     # todo use update_interval everywhere as parmateter fo periodic actions
     # todo revert to index zero for all IDs and data loading
     # todo show defauls on param eros?

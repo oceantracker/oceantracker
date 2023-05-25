@@ -52,8 +52,6 @@ class _BaseReader(ParameterBaseClass):
                                  'max_numb_files_to_load': PVC(10 ** 7, int, min=1)
                                  })  # list of normal required dimensions
         self.grid = {}
-        self.grid_time_buffers = {} # for time varying grid variables
-
         # store instances of shared memory classes for variables shared between processes
         self.shared_memory= {'grid' :{}, 'fields':{},'control':{}}
 
@@ -200,38 +198,28 @@ class _BaseReader(ParameterBaseClass):
         # check if time diff between starts of file and end of last are larger than average time step
         if len(fi['time_start']) > 1:
             dt_gaps = fi['time_start'][1:] - fi['time_end'][:-1]
-            sel = np.abs(dt_gaps) > 1.8 * fi['hydro_model_time_step']
+            sel = np.abs(dt_gaps) > 2* fi['hydro_model_time_step']
             if np.any(sel):
                 msg_logger.msg('Some time gaps between hindcast files is are > 1.8 times average time step, check hindcast files are all present??', hint='check hindcast files are all present and times in files consistent', warning=True)
                 for n in np.flatnonzero(sel):
-                    msg_logger.msg('file gaps between ' + fi['names'][n] + ' and ' + fi['names'][n + 1], tabs=1)
+                    msg_logger.msg(' large time gaps bwteen flies > 2 time steps) for  files in squence ' + fi['names'][n] + ' and ' + fi['names'][n + 1], tabs=1)
 
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
         return fi, hindcast_is3D
 
-    def make_grid_builder(self, grid,grid_time_buffers,run_builder):
+    def make_grid_builder(self, grid,run_builder):
         # make share memory builder for the non time varying grid variables
         #todo put reader_build_info['use_shared_memory'] test around all below
         reader_build_info = run_builder['reader_build_info']
-        reader_build_info['grid_constant_arrays_builder'] = {}
+        reader_build_info['grid_builder'] = {}
         for key, item in grid.items():
             if item is not None and type(item) == np.ndarray:
                 if run_builder['settings']['shared_reader_memory']:
                     sm = shared_reader_memory_util.create_shared_arrayy(values=item)
                     self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
-                    reader_build_info['grid_constant_arrays_builder'][key] = sm.get_shared_mem_map()
+                    reader_build_info['grid_builder'][key] = sm.get_shared_mem_map()
                 else:
-                    reader_build_info['grid_constant_arrays_builder'][key] = {'shape': item.shape, 'dtype': item.dtype}
-
-        # now make info to build time buffers, eg time, zlevel
-        reader_build_info['grid_time_buffers_builder'] = {}
-        for key, item in grid_time_buffers.items():
-            if  run_builder['settings']['shared_reader_memory']:  # make shared moemory for shared_reader
-                sm = shared_reader_memory_util.create_shared_arrayy(values=item)
-                self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
-                reader_build_info['grid_time_buffers_builder'][key] = sm.get_shared_mem_map()
-            else:
-                reader_build_info['grid_time_buffers_builder'][key] = {'shape': item.shape, 'dtype': item.dtype}
+                    reader_build_info['grid_builder'][key] = {'shape': item.shape, 'dtype': item.dtype}
 
         return run_builder
 
@@ -368,7 +356,6 @@ class _BaseReader(ParameterBaseClass):
         t0 = perf_counter()
 
         grid = self.grid
-        grid_time_buffers = self.grid_time_buffers
         info= self.info
         fi = info['file_info']
         bi = info['buffer_info']
@@ -413,7 +400,7 @@ class _BaseReader(ParameterBaseClass):
             s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03d} '
             si.msg_logger.progress_marker(s)
 
-            grid_time_buffers['nt_hindcast'][buffer_index] = nt_hindcast_required[:num_read]  # add a grid variable with global hindcast time steps
+            grid['nt_hindcast'][buffer_index] = nt_hindcast_required[:num_read]  # add a grid variable with global hindcast time steps
 
             # read time varying vector and scalar reader fields
             for name, field in si.classes['fields'].items():
@@ -424,7 +411,7 @@ class _BaseReader(ParameterBaseClass):
                     field.data[buffer_index, ...] = data_added_to_buffer
 
                     if name in self.params['field_variables_to_depth_average']:
-                       si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = reader_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid_time_buffers['zlevel'], grid['bottom_cell_index'])
+                       si.classes['fields'][name + '_depth_average'].data[buffer_index, ...] = reader_util.depth_aver_SlayerLSC_in4D(data_added_to_buffer, grid['zlevel'], grid['bottom_cell_index'])
 
             # read grid time, zlevel
             # do this after reading fields as some hindcasts required tide field to get zlevel, eg FVCOM
@@ -456,7 +443,6 @@ class _BaseReader(ParameterBaseClass):
         # read scalar fields / join together the components which make vector from component list
 
         grid = self.grid
-        grid_time_buffers = self.grid_time_buffers
 
         m= 0 # num of vector components read so far
         var_info = field.info['variable_info']
@@ -464,7 +450,7 @@ class _BaseReader(ParameterBaseClass):
             data = self.read_file_field_variable_as4D(nc, component_info,var_info['is_time_varying'], file_index)
 
             if var_info['requires_depth_averaging']:
-                data = reader_util.depth_aver_SlayerLSC_in4D(data, grid_time_buffers['zlevel'], grid['bottom_cell_index'])
+                data = reader_util.depth_aver_SlayerLSC_in4D(data, grid['zlevel'], grid['bottom_cell_index'])
 
             m1 = m + component_info['num_components']
 
@@ -500,18 +486,17 @@ class _BaseReader(ParameterBaseClass):
     def read_dry_cell_data(self,nc,file_index,is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry
         grid = self.grid
-        grid_time_buffers = self.grid_time_buffers
         si = self.shared_info
         fields = si.classes['fields']
 
         if self.params['grid_variables']['is_dry_cell'] is None:
-            if grid_time_buffers['zlevel'] is None:
+            if grid['zlevel'] is None:
                 reader_util.set_dry_cell_flag_from_tide( grid['triangles'],
                                                         fields['tide'].data, fields['water_depth'].data,
                                                         si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
             else:
                 reader_util.set_dry_cell_flag_from_zlevel( grid['triangles'],
-                                                          grid_time_buffers['zlevel'], grid['bottom_cell_index'],
+                                                          grid['zlevel'], grid['bottom_cell_index'],
                                                           si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
         else:
             # get dry cells for each triangle allowing for splitting quad cells
@@ -570,19 +555,19 @@ class _BaseReader(ParameterBaseClass):
             reader_build_info['shared_memory'] = {'grid': {},'fields':{}}
             for key, item in self.grid.items():
                 if item is not None:
-                    sm = shared_memory.SharedMemArray(values=item)
+                    sm = shared_memory.CreateSharedMemArray(values=item)
                     self.shared_memory['grid'][key] = sm
                     reader_build_info['shared_memory']['grid'][key] = sm.get_shared_mem_map()
         else:
             # build grid variables from reader_build_info shared_memory info
             for key, item in reader_build_info['shared_memory']['grid'].items():
-                self.shared_memory['grid'][key] = shared_memory.SharedMemArray(sm_map=item)
+                self.shared_memory['grid'][key] = shared_memory.CreateSharedMemArray(sm_map=item)
                 self.grid[key] = self.shared_memory['grid'][key].data  # grid variables is shared version
         return reader_build_info
 
     def convert_lon_lat_to_meters_grid(self, x):
 
-        if self.params['coordinate_projection'] is None:
+        if self.params['EPSG_transform_code'] is None:
             x_out, self.cord_transformer= cord_transforms.WGS84_to_UTM( x, out=None)
         else:
             #todo make it work with users transform?

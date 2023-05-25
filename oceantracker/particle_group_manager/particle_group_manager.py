@@ -70,11 +70,11 @@ class ParticleGroupManager(ParameterBaseClass):
         pp ={}
         for name,i in part_prop.items():
            pp[name] = i.data
-        self.part_prop_as_structure = numpy_util.numpy_structure_from_dict(pp)
+        self.part_prop_as_struct = numpy_util.numpy_structure_from_dict(pp)
 
         # point property.data at new memory strcture
         for name, i in part_prop.items():
-            i.data = self.part_prop_as_structure[name]
+            i.data = self.part_prop_as_struct[name]
 
     #@function_profiler(__name__)
     def release_particles(self, time_sec):

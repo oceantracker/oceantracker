@@ -1,26 +1,26 @@
 {
     "user_note": "No user note",
     "processorID": 0,
-    "file_written": "2023-05-19T07:49:37.234756",
+    "file_written": "2023-05-19T10:30:52.463557",
     "code_version_info": {
         "version": "0.4.00.009 2023-05-18",
-        "git_revision": "98e1b49cac396188c1b793c995c69a3b57713e43",
+        "git_revision": "f1be160cf8614a849d540fdf9e1bc29de5dbbc7c",
         "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]"
     },
     "run_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2023-05-19T07:37:29.043133",
+        "model_run_started": "2023-05-19T10:12:11.969099",
         "date_of_time_zero": [
             "1970-01-01T00:00:00"
         ],
         "time_zone": null,
         "backtracking": false,
-        "started": "2023-05-19 07:36:55.460748",
-        "ended": "2023-05-19 07:49:37.234756",
-        "duration": "0:12:41.774008",
-        "elapsed_time_sec": 761.7633273999963,
+        "started": "2023-05-19 10:11:04.514442",
+        "ended": "2023-05-19 10:30:52.463557",
+        "duration": "0:19:47.949115",
+        "elapsed_time_sec": 1187.938544100005,
         "number_particles_released": 504000
     },
     "solver_info": {
@@ -42,9 +42,9 @@
         "current_model_time_step": 1726,
         "current_model_time": 1199665500.0,
         "model_run_duration": 518100.0,
-        "computation_started": "2023-05-19T07:37:29.043133",
-        "computation_ended": "2023-05-19T07:49:36.476309",
-        "computation_duration": "0:12:07.433176"
+        "computation_started": "2023-05-19T10:12:11.969099",
+        "computation_ended": "2023-05-19T10:30:52.098686",
+        "computation_duration": "0:18:40.129587"
     },
     "hindcast_info": {
         "time_spent_updating": 0.0,
@@ -418,7 +418,7 @@
             "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
         },
         "hindcast_is3D": true,
-        "grid_constant_arrays_builder": {
+        "grid_builder": {
             "x": {
                 "shape": [
                     149233,
@@ -495,9 +495,7 @@
                     4
                 ],
                 "dtype": "float64"
-            }
-        },
-        "grid_time_buffers_builder": {
+            },
             "time": {
                 "shape": [
                     48
@@ -3826,7 +3824,7 @@
                 "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
             },
             "hindcast_is3D": true,
-            "grid_constant_arrays_builder": {
+            "grid_builder": {
                 "x": {
                     "shape": [
                         149233,
@@ -3903,9 +3901,7 @@
                         4
                     ],
                     "dtype": "float64"
-                }
-            },
-            "grid_time_buffers_builder": {
+                },
                 "time": {
                     "shape": [
                         48
@@ -4059,7 +4055,7 @@
         "processorID": 0,
         "code_version_info": {
             "version": "0.4.00.009 2023-05-18",
-            "git_revision": "98e1b49cac396188c1b793c995c69a3b57713e43",
+            "git_revision": "f1be160cf8614a849d540fdf9e1bc29de5dbbc7c",
             "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]"
         }
     },
@@ -9030,9 +9026,9 @@
         "trajectory_modifiers": [],
         "particle_statistics": [
             {
-                "time_spent_updating": 5.584133500087773,
+                "time_spent_updating": 5.5883524998498615,
                 "update_calls": 96,
-                "time_first_update_call": 2.3853647999931127,
+                "time_first_update_call": 2.381000399996992,
                 "output_file": "Sounds_stats_gridded_age_001.nc",
                 "class_type": null,
                 "instance_index": 0,
@@ -9043,9 +9039,9 @@
                 "type": "gridded"
             },
             {
-                "time_spent_updating": 2.7556137998763006,
+                "time_spent_updating": 2.7625627999659628,
                 "update_calls": 96,
-                "time_first_update_call": 1.1930186999961734,
+                "time_first_update_call": 1.1907249999931082,
                 "output_file": "Sounds_stats_polygon_age_002.nc",
                 "class_type": null,
                 "instance_index": 1,
@@ -9059,21 +9055,21 @@
         ],
         "event_loggers": [
             {
-                "time_spent_updating": 25.949757100723218,
+                "time_spent_updating": 24.496440701303072,
                 "update_calls": 3456,
-                "time_first_update_call": 2.9743725000007544,
+                "time_first_update_call": 0.759021899983054,
                 "class_type": null,
                 "instance_index": 0,
                 "instance_number": 1,
                 "prop_to_write": [
                     "user_release_groupID",
-                    "event_polygon",
-                    "IDpulse",
-                    "x",
                     "IDrelease_group",
+                    "x",
+                    "IDpulse",
                     "status",
-                    "ID",
-                    "age"
+                    "event_polygon",
+                    "age",
+                    "ID"
                 ],
                 "output_file": "Sounds_events_001.nc"
             }
@@ -9462,7 +9458,7 @@
                 "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
             },
             "hindcast_is3D": true,
-            "grid_constant_arrays_builder": {
+            "grid_builder": {
                 "x": {
                     "shape": [
                         149233,
@@ -9539,9 +9535,7 @@
                         4
                     ],
                     "dtype": "float64"
-                }
-            },
-            "grid_time_buffers_builder": {
+                },
                 "time": {
                     "shape": [
                         48
@@ -9988,9 +9982,9 @@
             "current_model_time_step": 1726,
             "current_model_time": 1199665500.0,
             "model_run_duration": 518100.0,
-            "computation_started": "2023-05-19T07:37:29.043133",
-            "computation_ended": "2023-05-19T07:49:36.476309",
-            "computation_duration": "0:12:07.433176"
+            "computation_started": "2023-05-19T10:12:11.969099",
+            "computation_ended": "2023-05-19T10:30:52.098686",
+            "computation_duration": "0:18:40.129587"
         },
         "field_group_manager": {
             "time_spent_updating": 0.0,
@@ -10014,21 +10008,26 @@
                 "open_boundary_type": 0,
                 "block_dry_cells": true,
                 "bc_walk_tol": 1e-05,
-                "particles_located_by_walking": 1454224796,
-                "number_of_triangles_walked": 30460998,
-                "longest_triangle_walk": 1454224796,
+                "particles_located_by_walking": 2085392588,
+                "number_of_triangles_walked": 54083049,
+                "longest_triangle_walk": 2085392588,
                 "nans_encountered_triangle_walk": 0,
                 "triangle_walks_retried": 0,
                 "particles_killed_after_triangle_walk_retry_failed": 0,
-                "total_vertical_steps_walked": -938371690,
+                "total_vertical_steps_walked": 197024769,
                 "longest_vertical_walk": 13,
                 "nb": [
                     47,
                     0
                 ],
                 "step_dt_fraction": 0.8333333333333334,
-                "average_number_of_triangles_walked": 0.020946553850399344,
-                "average_vertical_walk_steps": -0.6452727890358432
+                "both_step_dt_fractions": [
+                    0.8333333333333334,
+                    0.16666666666666663
+                ],
+                "reader_time_buffer_size": 48,
+                "average_number_of_triangles_walked": 0.02593422903256238,
+                "average_vertical_walk_steps": 0.09447850257728067
             }
         },
         "particle_group_manager": {
@@ -10060,11 +10059,11 @@
             "class_type": "tracks_writer"
         },
         "resuspension": {
-            "time_spent_updating": 17.007779400446452,
+            "time_spent_updating": 10.87059930092073,
             "update_calls": 1728,
-            "time_first_update_call": 9.247485800005961,
+            "time_first_update_call": 9.354738499998348,
             "class_type": "resuspension",
-            "number_resupended": 239993739,
+            "number_resupended": 17903679,
             "resuspension_factor": 3.3023260726609305,
             "min_resuspension_jump": 0.0
         }

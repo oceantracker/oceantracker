@@ -18,18 +18,15 @@ class FrictionVelocity(UserFieldBase):
 
         self.check_class_required_fields_prop_etc(
             required_fields_list=['water_velocity'],
-            required_grid_var_list=['bottom_cell_index'],
-            required_grid_time_buffers_var_list=['zlevel'],
+            required_grid_var_list=['bottom_cell_index','zlevel'],
             requires3D=True)
 
 
     def update(self, buffer_index):
         si = self.shared_info
         grid = si.classes['reader'].grid
-        grid_time_buffers = si.classes['reader'].grid_time_buffers
-
         fields = si.classes['fields']
-        self.calc_fiction_velocity(buffer_index, grid_time_buffers['zlevel'], grid['bottom_cell_index'], si.z0, fields['water_velocity'].data , self.data)
+        self.calc_fiction_velocity(buffer_index, grid['zlevel'], grid['bottom_cell_index'], si.z0, fields['water_velocity'].data , self.data)
 
 
     @staticmethod

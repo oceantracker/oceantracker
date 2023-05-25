@@ -10,34 +10,33 @@ import argparse
 def set_params(args, x0, duration_sec= 5. * 24 * 3600):
 
 
-    case = {'run_params': {'duration': duration_sec,
-                            'write_tracks': True},
-        'tracks_writer': {'update_interval':3600},
-        'dispersion': {'A_H': 1.0, 'A_V': 0.001},
-        'particle_properties':[{'name' :'eDNA', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24}],
-        'particle_statistics': [{
-            'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-            'calculation_interval': 1800, 'particle_property_list': ['eDNA'],
-            'release_group_centered_grids': True,
-            'grid_span': [25000., 25000.],
-            'grid_size': [150, 151]}]
-    }
+
 
     # set up one release group per release location to allow heat maps for each point
     rg= []
     for x in x0:
        rg.append({'points': [x], 'pulse_size': 150, 'release_interval': 1800})
-    case['particle_release_groups'] = rg
 
-    params = {'shared_params': {'output_file_base': 'PPBtest','time_step': 600,
-                                'root_output_dir': 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay',
-                                },
+
+    params = {'output_file_base': 'PPBtest','time_step': 1800,
+              'root_output_dir': 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay',
               'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF', 'input_dir': 'F:\\Hindcasts\Deakin_EricT\\PPB_Hydro_netCDF',
                          'file_mask': 'schout_*.nc',
                          'cords_in_lat_long': True,
                          # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                          },
-              'case_list': [case]
+            'particle_release_groups' :rg,
+            'duration': duration_sec,
+            'write_tracks': True,
+            'tracks_writer': {'update_interval':3600},
+            'dispersion': {'A_H': 1.0, 'A_V': 0.001},
+            'particle_properties':[{'name' :'eDNA', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24}],
+            'particle_statistics': [{                'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+                'calculation_interval': 1800, 'particle_property_list': ['eDNA'],
+                'release_group_centered_grids': True,
+                'grid_span': [25000., 25000.],
+                'grid_size': [150, 151]}]
+
               }
 
     if args.mode_debug: params['debug'] = True
@@ -61,15 +60,15 @@ if __name__ == '__main__':
 
     params['reader']['input_dir'] = r'F:\Hindcasts\Hindcast_samples_tests\Deakin_EricT\PPB_Hydro_netCDF'
     params['reader']['file_mask']= 'schout_*.nc'
-    params['shared_params']['root_output_dir'] = 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay'
+    params['root_output_dir'] = 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay'
 
     if not args.norun:
         run_info_file, has_errors = run(params)
     else:
         run_info_file = path.join(
-            params['shared_params']['root_output_dir'],
-            params['shared_params']['output_file_base'],
-            params['shared_params']['output_file_base'] + '_runInfo.json'
+            params['root_output_dir'],
+            params['output_file_base'],
+            params['output_file_base'] + '_runInfo.json'
         )
 
     # do plots
