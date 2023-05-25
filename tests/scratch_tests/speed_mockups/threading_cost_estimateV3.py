@@ -22,24 +22,19 @@ def test_treading_cost(N=10**4, repeats=10, work=1):
     # compare non-parallel to // for differing number of threads
     
     # time non-parallel version
-    F0 = njit(F,parallel=False)
-    F0(A,work) # compile for thread count
-    t0= np.asarray(timeit.repeat(lambda  : F0(A,work),  number =repeats)) 
-    t0_out=np.asarray([t0.min(),t0.mean(),t0.max()  ])
+
     
     # parallel/threaded version 
-    t1_out = np.zeros(( phyiscal_cores.size,3))
+    t = np.zeros(( phyiscal_cores.size,3))
     F1 = njit(F,parallel=True)
 
     for n in range(phyiscal_cores.size):
             set_num_threads(phyiscal_cores[n])
             F1(A,work) # compile for thread count
-            t1= np.asarray(timeit.repeat(lambda  : F1(A,work),  number =repeats)) 
-            t1_out[n-1,0] = t1.min()  
-            t1_out[n-1,1] = t1.mean()
-            t1_out[n-1,2] = t1.max()
+            t[n]= np.asarray(timeit.timeit(lambda  : F1(A,work),  number =repeats)) 
 
-    return t0_out, t1_out, phyiscal_cores    
+
+    return t, phyiscal_cores    
 
 
 if __name__ == "__main__":
@@ -50,10 +45,10 @@ if __name__ == "__main__":
     marker =['x','+']
     fig,ax = plt.subplots()
     for n_work, work in enumerate( [1, 10]):
-        for n, N in enumerate([10**3,10**4,10**5,10**6]):
-            t0_out, t1_out, phyiscal_cores = test_treading_cost(N=N, work=work)
+        for n, N in enumerate([10**4,10**5,10**6]):
+            t, phyiscal_cores = test_treading_cost(N=N, work=work)
             # plot curves
-            ax.plot(phyiscal_cores,t0_out[1]/t1_out[:,1],c=colours[n],label = f'N={N:1.0e}, work={work:3d}',linestyle =linestyle[n_work])
+            ax.plot(phyiscal_cores,t[1]/t,c=colours[n],label = f'N={N:1.0e}, work={work:3d}',linestyle =linestyle[n_work])
         
 
             #ax.scatter(1, t0_out[1],c=colours[n],marker=marker[n_work])

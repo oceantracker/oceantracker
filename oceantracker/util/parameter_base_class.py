@@ -66,19 +66,12 @@ class ParameterBaseClass(object):
 
 
     def check_class_required_fields_prop_etc(self, required_props_list=[], required_fields_list=[],
-                                             required_grid_time_buffers_var_list=[],
                                              required_grid_var_list=[], requires3D=None):
         si = self.shared_info
         grid = si.classes['reader'].grid
-        grid_time_buffers=  si.classes['reader'].grid_time_buffers
 
         for name in required_grid_var_list:
             if name not in grid:
-               si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name']
-                                + ' requires grid variable  "' + name + '"' + ' to work', fatal_error=True)
-
-        for name in required_grid_time_buffers_var_list:
-            if name not in grid_time_buffers:
                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name']
                                 + ' requires grid variable  "' + name + '"' + ' to work', fatal_error=True)
 

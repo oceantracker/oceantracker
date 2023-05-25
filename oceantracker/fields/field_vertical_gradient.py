@@ -30,16 +30,14 @@ class VerticalGradient(UserFieldBase):
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True,
-                                    required_grid_var_list=['bottom_cell_index'],
-                                    required_grid_time_buffers_var_list=['zlevel'],
+                                    required_grid_var_list=['bottom_cell_index','zlevel'],
                                     required_fields_list=[self.params['name_of_field']])
     def update(self,active):
         si = self.shared_info
         fields= si.classes['fields']
         grid= si.classes['reader'].grid
-        grid_time_buffers = si.classes['reader'].grid_time_buffers
 
-        _calc_field_vert_grad(fields[self.params['name_of_field']].data,grid_time_buffers['zlevel'],
+        _calc_field_vert_grad(fields[self.params['name_of_field']].data,grid['zlevel'],
                                     grid['bottom_cell_index'], si.z0, fields[self.params['name']].data)
 @njit
 def _calc_field_vert_grad(feild4D,zlevel,bottom_cell_index,z0,gradient_field):
