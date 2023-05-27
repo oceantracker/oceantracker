@@ -72,24 +72,17 @@ if __name__ == "__main__":
             exit('runOTdemos.py: No demo file number ' + str(n))
 
         params = json_util.read_JSON(f[0])
+        if type(params) is list:
+            demo_name = params[0]['output_file_base']
+            params[0]['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')
+            output_folder = path.join(params[0]['root_output_dir'], params[0]['output_file_base'])
+            params[0]['root_output_dir'] = 'output'
+        else:
+            demo_name = params['output_file_base']
+            params['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')
+            params['root_output_dir'] = 'output'
+            output_folder = path.join(params['root_output_dir'], params['output_file_base'])
 
-        demo_name= params['output_file_base']
-        params['reader']['input_dir'] = path.join(path.dirname(__file__),'demo_hindcast')
-
-        # misc or development choices of classes
-        if args.testing:
-            pass
-            params['reader'].update({'input_dir': 'F:\Hindcasts\Hindcast_samples_tests\ROMS_samples',
-                                        'file_mask': 'DopAnV2R3-ini2007_da_his.nc', })
-            #params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.scatch_tests.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
-            #params['base_case_params']['dispersion'].update({'A_V':0., 'A_H':0.})
-            #params['base_case_params']['particle_release_groups'][0]['pulse_size']=1
-
-
-
-        # clean output folder
-        params['root_output_dir'] = 'output'
-        output_folder = path.join(params['root_output_dir'], params['output_file_base'])
 
         if not args.skiprun:
             case_info_file_name, has_errors = main.run(params)
