@@ -4,7 +4,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.particle_properties import particle_operations_util
 from oceantracker.util import time_util
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.util import numpy_util
 # holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
@@ -181,14 +181,14 @@ class ParticleGroupManager(ParameterBaseClass):
         params = kwargs
         params['class_name'] = 'oceantracker.particle_properties._base_properties.TimeVaryingInfo'
         si = self.shared_info
-        i = si.create_class_instance_as_interator('time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
+        i = si.create_class_dict_instance('time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
         i.initial_setup()
 
         if si.write_tracks and i.params['write']:
             w = si.classes['tracks_writer']
             w.create_variable_to_write(i.params['name'], 'time', None,i.params['vector_dim'], attributes_dict=None, dtype=i.params['dtype'] )
 
-    def create_particle_property(self,prop_type, prop_params, crumbs=''):
+    def create_particle_property(self, prop_type, prop_params, crumbs=''):
         si = self.shared_info
 
         if type(prop_type) != str or type(prop_params) !=dict:
@@ -199,8 +199,9 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # set default class
         if 'class_name' not in prop_params: prop_params['class_name'] = 'oceantracker.particle_properties._base_properties.ParticleProperty'
-        i = si.create_class_instance_as_interator('particle_properties', prop_type, prop_params,
-                                                  crumbs=crumbs +' adding "particle_properties" name= "' + str(prop_params['name']) + '" of type=' +   prop_type)
+        i = si.create_class_dict_instance('particle_properties', prop_type, prop_params,
+                                          crumbs=crumbs +' adding "particle_properties of type=' +  prop_type)
+
         i.initial_setup()
         i.info['prop_type'] = prop_type
         name = i.params['name']

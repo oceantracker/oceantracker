@@ -87,8 +87,8 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
                 msg_logger.msg('No "vertical_velocity" variable in Schism hydro-model files, assuming vertical_velocity=0', note=True)
 
 
-    def make_non_time_varying_grid(self,nc, grid):
-        grid =super().make_non_time_varying_grid(nc, grid)
+    def build_grid(self, nc, grid):
+        grid =super().build_grid(nc, grid)
         return grid
 
     def read_time_sec_since_1970(self, nc, file_index=None):

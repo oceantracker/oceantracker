@@ -51,17 +51,20 @@ class _BaseReader(ParameterBaseClass):
                                  'search_sub_dirs': PVC(True, bool),
                                  'max_numb_files_to_load': PVC(10 ** 7, int, min=1)
                                  })  # list of normal required dimensions
-        self.grid = {}
+
         # store instances of shared memory classes for variables shared between processes
         self.shared_memory= {'grid' :{}, 'fields':{},'control':{}}
+        self.grid={}
 
-    #required read methods non time dependent variables
-    def build_case_runner_reader(self):
-        # build a reader for a case runner
+    def initial_setup(self):
         si = self.shared_info
-        # make short cuts
-        self.reader_build_info = si.reader_build_info
-        self.info.update(si.reader_build_info)  # useful for json file
+        self.file_info = si.working_params['file_info']
+        nc= self._open_first_file(self.file_info)
+
+        self.grid = self.build_grid(nc, self.grid)
+
+        nc.close()
+
 
     def read_nodal_x_as_float64(self, nc): nopass('reader method: read_x is required')
     def read_bottom_cell_index_as_int32(self, nc):nopass('reader method: read_bottom_cell_index_as_int32 is required for 3D hindcasts')
@@ -72,7 +75,7 @@ class _BaseReader(ParameterBaseClass):
     # checks on first hindcast file
     def additional_setup_and_hindcast_file_checks(self, nc,msg_logger): pass
 
-    def make_non_time_varying_grid(self,nc, grid): nopass('setup_grid required')
+    def build_grid(self, nc, grid): nopass('setup_grid required')
 
     # required variable  structure query methods
     def is_var_in_file_3D(self, nc, var_name_in_file):
@@ -104,6 +107,15 @@ class _BaseReader(ParameterBaseClass):
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         si = self.shared_info
+        grid = self.grid
+        self.info['file_info']= si.working_params['file_info'] # add file_info to reader info
+
+        nc = self._open_first_file(self.info['file_info'])
+        grid = self.build_grid(nc, grid)
+
+        # set up reader fields, using shared memory if requested
+        self.setup_reader_fields(nc)
+        nc.close()
 
     def get_list_of_files_and_hindcast_times(self):
         # get time sorted list of files matching mask
@@ -176,7 +188,6 @@ class _BaseReader(ParameterBaseClass):
         hindcast_is3D = self.is_hindcast3D(nc)
         nc.close()
 
-
         t =  np.concatenate((fi['time_start'],   fi['time_end']))
         fi['first_time'] = np.min(t)
         fi['last_time'] = np.max(t)
@@ -207,48 +218,18 @@ class _BaseReader(ParameterBaseClass):
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
         return fi, hindcast_is3D
 
-    def make_grid_builder(self, grid,run_builder):
-        # make share memory builder for the non time varying grid variables
-        #todo put reader_build_info['use_shared_memory'] test around all below
-        reader_build_info = run_builder['reader_build_info']
-        reader_build_info['grid_builder'] = {}
-        for key, item in grid.items():
-            if item is not None and type(item) == np.ndarray:
-                if run_builder['settings']['shared_reader_memory']:
-                    sm = shared_reader_memory_util.create_shared_arrayy(values=item)
-                    self.shared_memory['grid'][key] = sm  # retains a reference to keep sm alive in windows, othewise will quickly be deleted
-                    reader_build_info['grid_builder'][key] = sm.get_shared_mem_map()
-                else:
-                    reader_build_info['grid_builder'][key] = {'shape': item.shape, 'dtype': item.dtype}
-
-        return run_builder
-
-    def maker_field_builder(self,nc, run_builder):
-        # loop over reader field params
-        reader_build_info = run_builder['reader_build_info']
-        reader_build_info['field_builder'] ={}
-        for name, field_variable_comps in self.params['field_variables'].items():
-            if field_variable_comps is not None:
-                field_params, comp_info = self.get_field_variable_info(nc, name, field_variable_comps)
-                reader_build_info['field_builder'][name] = {'field_params': field_params,'variable_info': comp_info}
-                pass
-
-        return run_builder
 
     #@function_profiler(__name__)
-    def setup_reader_fields(self):
+    def setup_reader_fields(self, nc ):
         si = self.shared_info
         fgm = si.classes['field_group_manager']
-        nc = NetCDFhandler(si.reader_build_info['file_info']['names'][0], 'r')
 
         # setup reader fields from their named components in field_variables param ( water depth ad tide done earlier from grid variables)
-        for name, item in si.reader_build_info['field_builder'].items():
-            i = fgm.create_field('from_reader_field', item['field_params'], crumbs='Reader - making reader field ')
-            i.info['variable_info'] = item['variable_info'] #needed to unpack reader variables
-
-            if si.settings['shared_reader_memory']:
-                #todo make this part of reader field intialize???
-                self.shared_memory['fields'][name] = shared_reader_memory_util.create_shared_arrayy(values=i.data)
+        for name, item in self.params['field_variables'].items():
+            if item is None : continue
+            field_params,field_info =self.get_field_variable_info(nc,name,item)
+            i = fgm.create_field('from_reader_field',field_params, crumbs='Reader - making reader field ')
+            i.info['variable_info'] = field_info #needed to unpack reader variables
 
             if not i.params['is_time_varying']:
                 # if not time dependent field read in now,
@@ -264,8 +245,6 @@ class _BaseReader(ParameterBaseClass):
                      'is_time_varying': i.params['is_time_varying'],
                     'is3D': False}
                 fgm.create_field('depth_averaged_from_reader_field', p, crumbs='Reader - making depth averged version of reader field')
-
-        nc.close()
 
         # rinf buffer ono, needed to force read at first time step read to make
         bi = self.info['buffer_info']
@@ -512,7 +491,7 @@ class _BaseReader(ParameterBaseClass):
         #convert date time to global time step in hindcast just before/after when forward/backtracking
         # always move forward through buffer, but file info is always forward in time
         si = self.shared_info
-        fi = self.reader_build_info['file_info']
+        fi = self.info['file_info']
         model_dir = si.model_direction
 
 
@@ -540,30 +519,10 @@ class _BaseReader(ParameterBaseClass):
 
         return  nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
-    def _open_grid_file(self,reader_build_info):
-        if self.params['grid_file']:
-            file_name = path.join(self.params['input_dir'],self.params['grid_file'])
-        else:
-            file_name= reader_build_info['file_info']['names'][0]
-
+    def _open_first_file(self,file_info):
+        file_name= file_info['names'][0]
         nc =NetCDFhandler(file_name, 'r')
         return nc
-
-    def set_up_shared_grid_memory(self, reader_build_info):
-        if 'shared_memory' not in reader_build_info:
-            # build shared memory and add to reader_build_info
-            reader_build_info['shared_memory'] = {'grid': {},'fields':{}}
-            for key, item in self.grid.items():
-                if item is not None:
-                    sm = shared_memory.CreateSharedMemArray(values=item)
-                    self.shared_memory['grid'][key] = sm
-                    reader_build_info['shared_memory']['grid'][key] = sm.get_shared_mem_map()
-        else:
-            # build grid variables from reader_build_info shared_memory info
-            for key, item in reader_build_info['shared_memory']['grid'].items():
-                self.shared_memory['grid'][key] = shared_memory.CreateSharedMemArray(sm_map=item)
-                self.grid[key] = self.shared_memory['grid'][key].data  # grid variables is shared version
-        return reader_build_info
 
     def convert_lon_lat_to_meters_grid(self, x):
 
@@ -573,8 +532,6 @@ class _BaseReader(ParameterBaseClass):
             #todo make it work with users transform?
             x_out = cord_transforms.WGS84_to_UTM(x, out=None)
         return x_out
-
-
 
     def close(self):
         # release any shared memory

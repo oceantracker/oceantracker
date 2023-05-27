@@ -15,8 +15,6 @@ from oceantracker.post_processing.plotting.plot_statistics import plot_residence
 
 output_file= "output\demo10_polygon_residence_demo"
 
-case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
-
 residence_data = load_residence_file(case_info_file_name)
 plot_residence(residence_data, heading='Number residence in release polygon demo',
                plot_file_name=output_file + '.jpeg' if output_file is not None else None)

@@ -24,7 +24,7 @@ def build_reader(input_dir, params):
 
     # get dummry oceanTrackerSimulation instance with intialised reader
     otsim = OceanTrackerCaseRunner()
-    otsim.shared_info.case_runner_params= {'sorted_hindcast_file_info' : file_info}  # nack to give reader acess to hindcastr file info
+    otsim.shared_info.working_params= {'sorted_hindcast_file_info' : file_info}  # nack to give reader acess to hindcastr file info
 
     params['reader'].update({'time_buffer_size': file_info['n_time_steps_in_hindcast']})  # set buffer size to hindcast size
 

@@ -55,7 +55,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
 
     def is_file_variable_time_varying(self, nc, var_name_in_file): return  'ocean_time' in nc.get_var_dims(var_name_in_file)
 
-    def make_non_time_varying_grid(self,nc, grid):
+    def build_grid(self, nc, grid):
         # pre-read useful info
         grid['psi_land_mask'] = nc.read_a_variable('mask_psi') != 1
         grid['u_land_mask'] = nc.read_a_variable('mask_u') != 1
@@ -63,7 +63,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
         grid['rho_land_mask'] = nc.read_a_variable('mask_rho') != 1
 
 
-        grid = super().make_non_time_varying_grid(nc, grid)
+        grid = super().build_grid(nc, grid)
 
         grid['active_nodes'] = np.unique(grid['triangles']) # the nodes that are used in triangulation ( ie owithout land)
 

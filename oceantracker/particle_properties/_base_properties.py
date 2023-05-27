@@ -13,7 +13,8 @@ class _BasePropertyInfo(ParameterBaseClass):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
 
-        self.add_default_params({ 'description': PVC(None,str), 'time_varying':PVC(True, bool),'name': PVC(None, str),
+        self.add_default_params({ 'description': PVC(None,str), 'time_varying':PVC(True, bool),
+                                  'name': PVC(None, str),
             'write': PVC(True, bool), 'vector_dim': PVC(1, int, min = 1 ), 'prop_dim3': PVC(1, int, min=1),
              'dtype':PVC(np.float64, np.dtype),
              'initial_value':PVC(0.,float),

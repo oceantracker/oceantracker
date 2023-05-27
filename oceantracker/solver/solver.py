@@ -127,8 +127,8 @@ class Solver(ParameterBaseClass):
 
             #  Main integration step
             #--------------------------------------
-            #self.integration_step(time_sec, is_moving)
-            self.kernal_solver(time_sec, is_moving)
+            self.integration_step(time_sec, is_moving)
+            #self.kernal_solver(time_sec, is_moving)
             #--------------------------------------
 
 

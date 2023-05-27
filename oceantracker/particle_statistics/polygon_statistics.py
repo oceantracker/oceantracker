@@ -29,7 +29,7 @@ class _CorePolygonMethods(ParameterBaseClass):
         particles = si.classes['particle_group_manager']
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-        self.info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_ {self.info["instance_number"]}'
+        self.info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_ {self.info["instanceID"]}'
         particles.create_particle_property('manual_update',dict(name=  self.info['inside_polygon_particle_prop'],
                                                class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=self.params['polygon_list'],

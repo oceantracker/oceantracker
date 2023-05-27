@@ -22,7 +22,6 @@ class SharedMemArray():
         if fill_value is not None:
             self.data[:] = fill_value
 
-
         self.map={'shared_mem_name': self.sm.name,
                 'shape': self.data.shape,
                 'dtype': self.data.dtype.name,

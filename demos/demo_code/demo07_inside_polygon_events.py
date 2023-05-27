@@ -15,7 +15,6 @@ from matplotlib import colors
 
 output_file= "output\demo07_inside_polygon_events"
 
-case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 caseInfo = read_case_info_file(case_info_file_name)
 track_data = load_particle_track_vars(case_info_file_name, var_list=['event_polygon'])
 

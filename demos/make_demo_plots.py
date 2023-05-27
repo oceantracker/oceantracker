@@ -1,10 +1,8 @@
 
 
-def demo01_plot_tracks(runInfo_file_name,output_file=None):
-    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+def demo01_plot_tracks(case_info_file_name,output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars
     from oceantracker.post_processing.plotting.plot_tracks import plot_tracks
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name)
     plot_tracks(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
@@ -12,11 +10,9 @@ def demo01_plot_tracks(runInfo_file_name,output_file=None):
                  plot_file_name=output_file + '.jpeg' if output_file is not None else None)
     return None
 
-def demo02_animation(runInfo_file_name,output_file=None):
+def demo02_animation(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name, fraction_to_read=0.9)
 
@@ -27,11 +23,11 @@ def demo02_animation(runInfo_file_name,output_file=None):
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
-def demo03_heatmaps(runInfo_file_name,output_file=None):
+def demo03_heatmaps(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
 
     stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], nsequence=0)
     axis_lims = [1591000, 1601500, 5478500, 5491000]
@@ -44,11 +40,11 @@ def demo03_heatmaps(runInfo_file_name,output_file=None):
     s = load_stats_file(case_info_file_name, nsequence=1, var_list=['water_depth'])  # test polygon stats loading, in second stats file
     return None
 
-def demo04_ageBasedHeatmaps(runInfo_file_name,output_file=None):
+def demo04_ageBasedHeatmaps(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
 
     stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], nsequence=0)
     axis_lims = [1591000, 1601500, 5478500, 5491000]
@@ -58,18 +54,16 @@ def demo04_ageBasedHeatmaps(runInfo_file_name,output_file=None):
                                     fps=7)
     return None
 
-def demo05_parallel(runInfo_file_name,output_file=None):
+def demo05_parallel(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
     # parallel run no plot
     return None
 
 
-def demo06_reefstranding(runInfo_file_name,output_file=None):
+def demo06_reefstranding(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name)
 
@@ -81,12 +75,11 @@ def demo06_reefstranding(runInfo_file_name,output_file=None):
     return None
 
 
-def demo07_inside_polygon_events(runInfo_file_name,output_file=None):
+def demo07_inside_polygon_events(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file, read_case_info_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
     from matplotlib import colors
 
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
     caseInfo = read_case_info_file(case_info_file_name)
     track_data = load_particle_track_vars(case_info_file_name, var_list=['event_polygon'])
 
@@ -104,11 +97,11 @@ def demo07_inside_polygon_events(runInfo_file_name,output_file=None):
     return None
 
 
-def demo08_particle_splitting(runInfo_file_name,output_file=None):
+def demo08_particle_splitting(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
 
     track_data = load_particle_track_vars(case_info_file_name)
 
@@ -120,11 +113,10 @@ def demo08_particle_splitting(runInfo_file_name,output_file=None):
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
-def demo09_polygon_release_overlapping_land(runInfo_file_name,output_file=None):
+def demo09_polygon_release_overlapping_land(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name)
 
@@ -135,12 +127,10 @@ def demo09_polygon_release_overlapping_land(runInfo_file_name,output_file=None):
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=50)
     return None
 
-def demo10_polygon_residence_demo(runInfo_file_name,output_file=None):
+def demo10_polygon_residence_demo(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file,load_residence_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
     from oceantracker.post_processing.plotting.plot_statistics import plot_residence
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     residence_data = load_residence_file(case_info_file_name)
     plot_residence(residence_data, heading='Number residence in release polygon demo',
@@ -155,11 +145,9 @@ def demo10_polygon_residence_demo(runInfo_file_name,output_file=None):
 
     return None
 
-def demo50_SCHISM_depthAver(runInfo_file_name,output_file=None):
+def demo50_SCHISM_depthAver(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name)
 
@@ -169,11 +157,9 @@ def demo50_SCHISM_depthAver(runInfo_file_name,output_file=None):
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
-def demo55_SCHISM_3D_fall_velocity(runInfo_file_name,output_file=None):
+def demo55_SCHISM_3D_fall_velocity(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name)
 
@@ -183,11 +169,9 @@ def demo55_SCHISM_3D_fall_velocity(runInfo_file_name,output_file=None):
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
-def demo56_SCHISM_3D_resupend_crtitical_friction_vel(runInfo_file_name,output_file=None):
+def demo56_SCHISM_3D_resupend_crtitical_friction_vel(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name, fraction_to_read=.9)
     ax_lims= [1591000, 1601500, 5478500, 5491000]
@@ -206,11 +190,9 @@ def demo56_SCHISM_3D_resupend_crtitical_friction_vel(runInfo_file_name,output_fi
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
-def demo57_SCHISM_3D_lateralBoundaryTest(runInfo_file_name,output_file=None):
+def demo57_SCHISM_3D_lateralBoundaryTest(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name)
 
@@ -220,12 +202,10 @@ def demo57_SCHISM_3D_lateralBoundaryTest(runInfo_file_name,output_file=None):
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
-def demo58_bottomBounce(runInfo_file_name,output_file=None):
+def demo58_bottomBounce(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
     from oceantracker.post_processing.plotting.plot_vertical_tracks import plot_path_in_vertical_section, plot_relative_height
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth'])
 
@@ -238,11 +218,9 @@ def demo58_bottomBounce(runInfo_file_name,output_file=None):
     animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000], heading='vertical section tracks')
     return None
 
-def demo59_crit_shear_resupension(runInfo_file_name,output_file=None):
+def demo59_crit_shear_resupension(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_vertical_tracks import plot_path_in_vertical_section
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth'])
 
@@ -251,11 +229,9 @@ def demo59_crit_shear_resupension(runInfo_file_name,output_file=None):
     return None
 
 
-def demo60_SCHISM_3D_decaying_particle(runInfo_file_name,output_file=None):
+def demo60_SCHISM_3D_decaying_particle(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth', 'C'])
 
@@ -269,11 +245,9 @@ def demo60_SCHISM_3D_decaying_particle(runInfo_file_name,output_file=None):
                                 interval=20, show_dry_cells=True)
     return None
 
-def demo61_concentration_test(runInfo_file_name,output_file=None):
+def demo61_concentration_test(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_concentration_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_statistics import animate_concentrations
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     c = load_concentration_vars(case_info_file_name, var_list=['particle_concentration', 'C'])
 
@@ -294,11 +268,9 @@ def demo61_concentration_test(runInfo_file_name,output_file=None):
     return None
 
 
-def demo70_ROMS_reader(runInfo_file_name,output_file=None):
+def demo70_ROMS_reader(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-
-    case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
     track_data = load_particle_track_vars(case_info_file_name, fraction_to_read=0.9)
 

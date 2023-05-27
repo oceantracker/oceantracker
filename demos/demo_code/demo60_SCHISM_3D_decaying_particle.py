@@ -14,8 +14,6 @@ from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 
 output_file= "output\demo60_SCHISM_3D_decaying_particle"
 
-case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
-
 track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth', 'C'])
 
 animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],

@@ -6,6 +6,8 @@ from oceantracker.reader._base_reader import _BaseReader
 from oceantracker.reader.util import reader_util, shared_reader_memory_util
 from datetime import datetime
 from time import  perf_counter
+from oceantracker.util import json_util, ncdf_util
+from os import  path
 
 class GenericUnstructuredReader(_BaseReader):
 
@@ -17,11 +19,14 @@ class GenericUnstructuredReader(_BaseReader):
         self.info['buffer_info'] ={'n_filled' : None}
         self.class_doc(description='Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names')
 
+
+      
     #@profile
-    def make_non_time_varying_grid(self,nc, grid):
+    def build_grid(self, nc, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
         si = self.shared_info
+
         grid['x'] = self.read_nodal_x_as_float64(nc).astype(np.float64)
         grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
         grid['quad_cells_to_split'] = np.flatnonzero(grid['quad_cells_to_split']) # make as list of indcies for calculations
@@ -55,8 +60,12 @@ class GenericUnstructuredReader(_BaseReader):
         if self.is_hindcast3D(nc):
             s = [self.params['time_buffer_size'], grid['x'].shape[0], self.get_number_of_z_levels(nc)]
             grid['zlevel'] = np.full(s, 0., dtype=np.float32)
+            grid['zlevel'].shape[2]
+        else:
+            grid['zlevel'] = None
+            grid['nz'] = 1 # note if 3D
 
-        # space for dry cell info
+            # space for dry cell info
         grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0] ), 1, np.int8)
 
         # working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
@@ -64,37 +73,6 @@ class GenericUnstructuredReader(_BaseReader):
 
         # note which are time buffers
         return grid
-
-    def build_case_runner_reader(self):
-        # build the reader need for case runner to work, based on shared memory
-        # or build from crstch
-        si=self.shared_info
-        grid = self.grid
-        # time buffers , eg time
-        grid.update({'zlevel': None, 'dry_cell_index': None})
-
-        super().build_case_runner_reader()
-
-        if not si.settings['shared_reader_memory']:
-            # build from scatch
-            nc = self._open_grid_file(si.reader_build_info)
-            grid = self.make_non_time_varying_grid(nc, grid)
-            nc.close()
-        else:   # shared memory grid
-            for key, item in si.reader_build_info['grid_builder'].items():
-                    sm = shared_reader_memory_util.create_shared_arrayy(sm_map=item)
-                    self.shared_memory['grid'][key] = sm # need to retain a reference to shared or will be deleted
-                    grid[key] = sm.data
-
-            #todo  shared fields
-
-        # note if 3D
-        grid['nz'] = 1 if grid['zlevel'] is None else grid['zlevel'].shape[2]
-        # set up reader fields, using shared memory if requested
-        self.setup_reader_fields()
-
-        #useful info for working and json output
-        self.info.update(si.reader_build_info['file_info'])
 
     def check_grid(self,grid):
         tt='Grid Check, '
@@ -209,5 +187,28 @@ class GenericUnstructuredReader(_BaseReader):
         #is zlevel defined then it is 3D
         return  self.params['grid_variables']['zlevel'] is not None
 
+    def write_hydro_model_grid(self):
+        # write a netcdf of the grid from first hindcast file
+        si =self.shared_info
+        output_files = si.output_files
+        grid = self.grid
+
+        # write grid file
+        output_files['grid'] = output_files['output_file_base'] + '_grid.nc'
+        nc = ncdf_util.NetCDFhandler(path.join(output_files['run_output_dir'], output_files['grid'] ), 'w')
+        nc.write_global_attribute('Notes', ' all indices are zero based')
+        nc.write_global_attribute('created', str(datetime.now().isoformat()))
+
+        nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
+        nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
+        nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
+        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
+        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributesDict={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
+        nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
+        nc.write_a_new_variable('water_depth', si.classes['fields']['water_depth'].data.squeeze(), ('node_dim',))
+        nc.close()
+
+        output_files['grid_outline'] = output_files['output_file_base'] + '_grid_outline.json'
+        json_util.write_JSON(path.join(output_files['run_output_dir'], output_files['grid_outline']), grid['grid_outline'])
 
 

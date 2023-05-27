@@ -9,12 +9,10 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo01_plot_tracks
 
 # below only required for plotting
-from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
+from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars
 from oceantracker.post_processing.plotting.plot_tracks import plot_tracks
 
 output_file= "output\demo01_plot_tracks"
-
-case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
 
 track_data = load_particle_track_vars(case_info_file_name)
 plot_tracks(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],

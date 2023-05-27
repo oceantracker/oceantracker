@@ -41,7 +41,7 @@ class MessageLogger(object):
     #todo add abilty to return excecption/traceback?
     def msg(self, msg_text, warning=False, note=False,
             hint=None, tag=None, tabs=0, crumbs=None,
-            fatal_error=False,exit_now=False, exception = None, traceback_str=None):
+            fatal_error=False, exit_now=False, exception = None, traceback_str=None):
 
         if exception is not None:
             fatal_error = True
