@@ -43,14 +43,14 @@ import traceback
 
 def run(params):
     # run oceantracker
-    msg_logger = MessageLogger('T')
+    msg_logger = MessageLogger('startup:')
     msg_logger.insert_screen_line()
     msg_logger.msg('Oceantracker- preliminary setup')
     if type(params) == dict:
         case_info_files, has_errors =_run_single(params, msg_logger)
     elif type(params) == list:
         #run list of cases in  parallel
-        pass
+        case_info_files, has_errors = _run_parallel(params, msg_logger)
     else:
         msg_logger.msg('parameters must be a parameter dictionary, or a list parameter dictionaries, params is type = ' + str(type(params)),
                        crumbs='oceantracker.main.run(params')
@@ -66,11 +66,57 @@ def _run_single(params,msg_logger):
     msg_logger.exit_if_prior_errors('errors in top level settings parameters')
     ot = OceanTrackerCaseRunner()
     case_info_file, has_errors = ot.run(working_params)
-
-
     return case_info_file, has_errors
 
-def _decompose_params(params,msg_logger):
+def _run_parallel(params, msg_logger):
+    # run list of case params
+
+    w0 = _decompose_params(params[0], msg_logger)
+    msg_logger.exit_if_prior_errors('first case parameter errors')
+    w0 = _get_hindcast_file_info(w0, msg_logger)
+    w0 = _setup_output_folders(params, w0, msg_logger)
+
+    # get list working params, with setting merged with defaults
+    working_params_list = []
+    for n_case, p in enumerate(params):
+        # decompose params but innore share params , as they come from first case
+        # overwrite shared params from first case
+        tag = 'case #' + str(n_case)
+        working_params = _decompose_params(p, msg_logger, add_shared_settings=False)
+        msg_logger.exit_if_prior_errors('parameter errors case ' + tag)
+        working_params['shared_settings'] = w0['shared_settings'] # used first cases shared settings
+        working_params['processorID'] = n_case
+
+        working_params['output_files'] = deepcopy(w0['output_files'])
+        working_params['output_files']['output_file_base'] += '_C%03.0f' % (n_case)
+        working_params['is_3D_run'] = w0['is_3D_run']
+        working_params['file_info'] = w0['file_info']
+        working_params_list.append(working_params)
+
+    num_proc = working_params_list[0]['shared_settings']['processors']
+    num_proc = min(num_proc, len(working_params_list))
+    msg_logger.progress_marker('oceantracker:multiProcessing: processors:' + str(num_proc))
+
+    # run // cases
+    with multiprocessing.Pool(processes=num_proc) as pool:
+        case_results = pool.map(_run1_case, working_params_list)
+
+    msg_logger.progress_marker('parallel pool complete')
+
+    # write run info json
+
+    case_info_files=[x[0] for x in case_results]
+    has_errors = [x[1] for x in case_results]
+    return case_info_files, has_errors
+
+def _run1_case(working_params):
+    # run one process on a particle based on given family class parameters
+    # by creating an independent instances of  model classes, with given parameters
+    ot = OceanTrackerCaseRunner()
+    caseInfo_file, case_error = ot.run(deepcopy(working_params))
+    return caseInfo_file, case_error
+
+def _decompose_params(params,msg_logger, add_shared_settings=True):
 
     w={'processorID':0, 'shared_settings':{},'case_settings':{},
        'core_classes':deepcopy(common_info.core_classes), # insert full lis and defaults
@@ -80,8 +126,9 @@ def _decompose_params(params,msg_logger):
     # split   and check for unknown keys
     for key, item in params.items():
         k = key.removesuffix('_class').removesuffix('_list')
-        if k in common_info.shared_settings_defaults.keys():
-            w['shared_settings'][k] = item
+        if add_shared_settings:
+            if k in common_info.shared_settings_defaults.keys():
+                w['shared_settings'][k] = item
         if k in common_info.case_settings_defaults.keys():
                 w['case_settings'][k] = item
         elif k in common_info.core_classes.keys():
@@ -321,12 +368,8 @@ class OceanTracker(object):
                     'performance': {},
                     'output_files': {},
                     }
-
-
         output_files= run_builder['output_files']
-
         ml = self.msg_logger
-
         ml.insert_screen_line()
 
         # run the cases, return list of case info json files which make up the run of all cases

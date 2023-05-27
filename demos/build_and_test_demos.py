@@ -113,25 +113,19 @@ p4.update({'output_file_base' :'demo04_ageBasedHeatmaps' })
 params.append (p4)
 
 # demo 5 parallel
-p5 = deepcopy(p2)
+c = deepcopy(p2)
 
-p5.update({'output_file_base' :'demo05_parallel',
+c.update({'output_file_base' :'demo05_parallel',
             'processors': 2,
-            #'multiprocessing_start_method_spawn': True,
             'multiprocessing_case_start_delay' : 1.0})
-
-pg= deepcopy(p5['particle_release_groups'][0])
-p5['particle_release_groups'] =[]
-
-pg.update({'pulse_size': 2})
-c= {'particle_release_groups_list' : [pg],'root_output_dir': 'bad'}
-p5['case_list'] = []
+c['particle_release_groups'] =[deepcopy(p2['particle_release_groups'][0])]
+p5=[]
 for n in range(5):
     p= deepcopy(c)
     p['case_output_file_tag']='test_case_tag_' + str(n)
-    p5['case_list'].append(p)
+    p5.append(p)
 
-params.append (p5)
+params.append(p5)
 
 # track animation with settlement on reef polygon
 # demo 6
@@ -424,10 +418,16 @@ def build_demos(testrun=False):
     # make all JSONS
     for demo in params:
         if demo is None: continue
-        demo_name = demo['output_file_base']
+        if type(demo) is list:
+            demo_name = demo[0]['output_file_base']
+            demo[0]['reader']['input_dir'] = input_dir
+            demo[0]['root_output_dir'] = 'output'  # wil put in cwd
+        else:
+            demo_name = demo['output_file_base']
+            demo['reader']['input_dir'] = input_dir
+            demo['root_output_dir'] = 'output'  # wil put in cwd
+
         print('building> ', demo_name)
-        demo['reader']['input_dir'] = input_dir
-        demo['root_output_dir'] = 'output' # wil put in cwd
 
         json_util.write_JSON(path.join(paramdir, demo_name + '.json'), demo)
         yaml_util.write_YAML(path.join(paramdir, demo_name + '.yaml'), demo)

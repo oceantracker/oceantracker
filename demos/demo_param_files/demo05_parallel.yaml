@@ -1,99 +1,256 @@
-add_date_to_run_output_dir: false
-block_dry_cells: true
-case_list:
-- case_output_file_tag: test_case_tag_0
-  particle_release_groups_list:
+- add_date_to_run_output_dir: false
+  block_dry_cells: true
+  case_output_file_tag: test_case_tag_0
+  compact_mode: true
+  dispersion:
+    A_H: 0.1
+  multiprocessing_case_start_delay: 1.0
+  output_file_base: demo05_parallel
+  particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+    initial_value: 20.0
+    name: Oxygen
+  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
       - 5483000
     - - 1598000
       - 5486100
-    pulse_size: 2
+    pulse_size: 10
     release_interval: 10800
-  root_output_dir: bad
-- case_output_file_tag: test_case_tag_1
-  particle_release_groups_list:
+  processors: 2
+  reader:
+    class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+    dimension_map:
+      node: nodes
+      time: time
+    field_variables:
+      tide: tide
+      water_depth: depth
+      water_velocity:
+      - east_vel
+      - north_vel
+    file_mask: demoHindcast2D*.nc
+    grid_variables:
+      time: time_sec
+      triangles: tri
+      x:
+      - east
+      - north
+    input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+    isodate_of_hindcast_time_zero: '2020-06-01'
+    search_sub_dirs: true
+    time_buffer_size: 15
+  root_output_dir: output
+  time_step: 600
+  tracks_writer:
+    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
+    write_dry_cell_index: true
+  user_note: test of notes
+- add_date_to_run_output_dir: false
+  block_dry_cells: true
+  case_output_file_tag: test_case_tag_1
+  compact_mode: true
+  dispersion:
+    A_H: 0.1
+  multiprocessing_case_start_delay: 1.0
+  output_file_base: demo05_parallel
+  particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+    initial_value: 20.0
+    name: Oxygen
+  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
       - 5483000
     - - 1598000
       - 5486100
-    pulse_size: 2
+    pulse_size: 10
     release_interval: 10800
-  root_output_dir: bad
-- case_output_file_tag: test_case_tag_2
-  particle_release_groups_list:
+  processors: 2
+  reader:
+    class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+    dimension_map:
+      node: nodes
+      time: time
+    field_variables:
+      tide: tide
+      water_depth: depth
+      water_velocity:
+      - east_vel
+      - north_vel
+    file_mask: demoHindcast2D*.nc
+    grid_variables:
+      time: time_sec
+      triangles: tri
+      x:
+      - east
+      - north
+    input_dir: demo_hindcast
+    isodate_of_hindcast_time_zero: '2020-06-01'
+    search_sub_dirs: true
+    time_buffer_size: 15
+  time_step: 600
+  tracks_writer:
+    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
+    write_dry_cell_index: true
+  user_note: test of notes
+- add_date_to_run_output_dir: false
+  block_dry_cells: true
+  case_output_file_tag: test_case_tag_2
+  compact_mode: true
+  dispersion:
+    A_H: 0.1
+  multiprocessing_case_start_delay: 1.0
+  output_file_base: demo05_parallel
+  particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+    initial_value: 20.0
+    name: Oxygen
+  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
       - 5483000
     - - 1598000
       - 5486100
-    pulse_size: 2
+    pulse_size: 10
     release_interval: 10800
-  root_output_dir: bad
-- case_output_file_tag: test_case_tag_3
-  particle_release_groups_list:
+  processors: 2
+  reader:
+    class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+    dimension_map:
+      node: nodes
+      time: time
+    field_variables:
+      tide: tide
+      water_depth: depth
+      water_velocity:
+      - east_vel
+      - north_vel
+    file_mask: demoHindcast2D*.nc
+    grid_variables:
+      time: time_sec
+      triangles: tri
+      x:
+      - east
+      - north
+    input_dir: demo_hindcast
+    isodate_of_hindcast_time_zero: '2020-06-01'
+    search_sub_dirs: true
+    time_buffer_size: 15
+  time_step: 600
+  tracks_writer:
+    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
+    write_dry_cell_index: true
+  user_note: test of notes
+- add_date_to_run_output_dir: false
+  block_dry_cells: true
+  case_output_file_tag: test_case_tag_3
+  compact_mode: true
+  dispersion:
+    A_H: 0.1
+  multiprocessing_case_start_delay: 1.0
+  output_file_base: demo05_parallel
+  particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+    initial_value: 20.0
+    name: Oxygen
+  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
       - 5483000
     - - 1598000
       - 5486100
-    pulse_size: 2
+    pulse_size: 10
     release_interval: 10800
-  root_output_dir: bad
-- case_output_file_tag: test_case_tag_4
-  particle_release_groups_list:
+  processors: 2
+  reader:
+    class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+    dimension_map:
+      node: nodes
+      time: time
+    field_variables:
+      tide: tide
+      water_depth: depth
+      water_velocity:
+      - east_vel
+      - north_vel
+    file_mask: demoHindcast2D*.nc
+    grid_variables:
+      time: time_sec
+      triangles: tri
+      x:
+      - east
+      - north
+    input_dir: demo_hindcast
+    isodate_of_hindcast_time_zero: '2020-06-01'
+    search_sub_dirs: true
+    time_buffer_size: 15
+  time_step: 600
+  tracks_writer:
+    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
+    write_dry_cell_index: true
+  user_note: test of notes
+- add_date_to_run_output_dir: false
+  block_dry_cells: true
+  case_output_file_tag: test_case_tag_4
+  compact_mode: true
+  dispersion:
+    A_H: 0.1
+  multiprocessing_case_start_delay: 1.0
+  output_file_base: demo05_parallel
+  particle_properties:
+  - class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+    initial_value: 20.0
+    name: Oxygen
+  - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+  particle_release_groups:
   - allow_release_in_dry_cells: true
     points:
     - - 1594500
       - 5483000
     - - 1598000
       - 5486100
-    pulse_size: 2
+    pulse_size: 10
     release_interval: 10800
-  root_output_dir: bad
-compact_mode: true
-dispersion:
-  A_H: 0.1
-multiprocessing_case_start_delay: 1.0
-output_file_base: demo05_parallel
-particle_properties:
-- class_name: oceantracker.particle_properties.age_decay.AgeDecay
-  decay_time_scale: 86400.0
-  initial_value: 20.0
-  name: Oxygen
-- class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-particle_release_groups: []
-processors: 2
-reader:
-  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
-  dimension_map:
-    node: nodes
-    time: time
-  field_variables:
-    tide: tide
-    water_depth: depth
-    water_velocity:
-    - east_vel
-    - north_vel
-  file_mask: demoHindcast2D*.nc
-  grid_variables:
-    time: time_sec
-    triangles: tri
-    x:
-    - east
-    - north
-  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
-  isodate_of_hindcast_time_zero: '2020-06-01'
-  search_sub_dirs: true
-  time_buffer_size: 15
-root_output_dir: output
-time_step: 600
-tracks_writer:
-  class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
-  write_dry_cell_index: true
-user_note: test of notes
+  processors: 2
+  reader:
+    class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+    dimension_map:
+      node: nodes
+      time: time
+    field_variables:
+      tide: tide
+      water_depth: depth
+      water_velocity:
+      - east_vel
+      - north_vel
+    file_mask: demoHindcast2D*.nc
+    grid_variables:
+      time: time_sec
+      triangles: tri
+      x:
+      - east
+      - north
+    input_dir: demo_hindcast
+    isodate_of_hindcast_time_zero: '2020-06-01'
+    search_sub_dirs: true
+    time_buffer_size: 15
+  time_step: 600
+  tracks_writer:
+    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
+    write_dry_cell_index: true
+  user_note: test of notes
