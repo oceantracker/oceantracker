@@ -14,8 +14,6 @@ from oceantracker.post_processing.plotting.plot_statistics import animate_concen
 
 output_file= "output\demo61_concentration_test"
 
-case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
-
 c = load_concentration_vars(case_info_file_name, var_list=['particle_concentration', 'C'])
 
 axis_lims = [1591000, 1601500, 5478500, 5491000]

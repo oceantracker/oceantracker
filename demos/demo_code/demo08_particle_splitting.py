@@ -14,7 +14,7 @@ from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 
 output_file= "output\demo08_particle_splitting"
 
-case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+
 
 track_data = load_particle_track_vars(case_info_file_name)
 

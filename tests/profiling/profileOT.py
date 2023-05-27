@@ -57,7 +57,7 @@ def get_params(datasource=1):
     params = \
         {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': True,
          'time_step': time_step,
-         'max_processors' : 5,
+         'max_threads' : 5,
             'screen_output_time_interval':6*time_step, 'compact_mode': True,
          'duration': 6 *24*3600,  # 10 days
          'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',

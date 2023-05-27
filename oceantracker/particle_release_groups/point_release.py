@@ -57,8 +57,8 @@ class PointRelease(ParameterBaseClass):
 
         #todo for multiple readers, get  field group ot hold overlaping range
         reader =  si.classes['reader']
-        hindcast_start = reader.info['first_time']
-        hindcast_end   = reader.info['last_time']
+        hindcast_start = reader.info['file_info']['first_time']
+        hindcast_end   = reader.info['file_info']['last_time']
         model_time_step = si.settings['time_step']
 
         self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,
@@ -180,7 +180,7 @@ class PointRelease(ParameterBaseClass):
         n_cell_guess = n_cell_guess [:n_required]
 
         n = x0.shape[0]
-        IDrelease_group = self.info['instance_index']
+        IDrelease_group = self.info['instanceID']
         IDpulse = info['pulse_count']
         info['pulse_count'] += 1
         user_release_groupID = self.params['user_release_groupID']

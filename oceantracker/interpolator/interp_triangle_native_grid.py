@@ -75,7 +75,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         bi = reader.info['buffer_info']
 
         #todo z0, move this where grid is built?
-        grid['z0'] = si.case_runner_params['settings']['z0']
+        grid['z0'] = si.settings['z0']
 
         self.grid_as_struct = numpy_util.numpy_structure_from_dict(grid)
 
@@ -102,7 +102,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                         time_buffer_size =  bi['buffer_size'],
                         model_direction= int(si.model_direction),
                         current_hydro_model_step= 0,
-                        hydro_model_time_step =reader.info['hydro_model_time_step']
+                        hydro_model_time_step =reader.info['file_info']['hydro_model_time_step']
                         )
         self.step_info= numpy_util.numpy_structure_from_dict(step_info) # class to use inside numba functions
 

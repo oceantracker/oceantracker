@@ -169,7 +169,7 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
 
         otsim = self.otsim
         si = otsim.shared_info
-        case_params = si.case_runner_params['case_params']
+        case_params = si.working_params['case_params']
 
         rparams, region_info = region_setup_params(front_end_params['regionID'])
         self.response_start()

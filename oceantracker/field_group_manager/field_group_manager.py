@@ -63,7 +63,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def create_field(self, field_type, field_params, crumbs=''):
         si = self.shared_info
-        i = si.create_class_instance_as_interator('fields', field_type, field_params, crumbs=crumbs + ' adding  a field ')
+        i = si.create_class_dict_instance('fields', field_type, field_params, crumbs=crumbs + ' adding  a field ')
         i.info['field_type'] = field_type
         i.initial_setup()
         return i
@@ -76,4 +76,6 @@ class FieldGroupManager(ParameterBaseClass):
 
 
 
-
+    def write_hydro_model_grids(self):
+        si = self.shared_info
+        si.classes['reader'].write_hydro_model_grid()

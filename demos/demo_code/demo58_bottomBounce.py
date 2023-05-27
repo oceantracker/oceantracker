@@ -15,8 +15,6 @@ from oceantracker.post_processing.plotting.plot_vertical_tracks import plot_path
 
 output_file= "output\demo58_bottomBounce"
 
-case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
-
 track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth'])
 
 plot_path_in_vertical_section(track_data,  title= 'fall velocity and resuspension with critical friction velocity ',

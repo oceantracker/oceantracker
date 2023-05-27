@@ -35,7 +35,7 @@ class PolygonRelease(PointRelease):
         info['polygon_area'] = self.polygon._get_area()
 
         if info['polygon_area']  < 1:
-            si.msg_logger.msg('Release group = ' + str(self.info['instance_number'])
+            si.msg_logger.msg('Release group = ' + str(self.info['instanceID'])
                                     + ', a Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
 
         info['number_released'] = 0
