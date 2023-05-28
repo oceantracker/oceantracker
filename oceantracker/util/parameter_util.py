@@ -3,11 +3,10 @@ from oceantracker import common_info_default_param_dict_templates as common_info
 from oceantracker.util.module_importing_util  import import_module_from_string
 from oceantracker.util.parameter_checking import merge_params_with_defaults
 
-def make_class_instance_from_params(params,msg_logger, class_type_name=None, base_case_params =None,
+def make_class_instance_from_params(params,msg_logger, class_type_name=None,
                                      crumbs='', merge_params=True):
     # make a class instance  dynamically,  get instance of class from string eg oceantracker.solver.Solver
     # assumes class_name param exists
-    if base_case_params is None : base_case_params={}
     crumbs += ' merging and making instance'
     # add class sequence number, used for in class list
 
@@ -25,7 +24,7 @@ def make_class_instance_from_params(params,msg_logger, class_type_name=None, bas
     i.info['class_type'] = class_type_name
 
     if merge_params:
-        i.params  = merge_params_with_defaults(params, i.default_params, base_case_params, msg_logger, crumbs=crumbs)
+        i.params  = merge_params_with_defaults(params, i.default_params, msg_logger, crumbs=crumbs)
 
     # attach the current message loger
     i.msg_logger = msg_logger

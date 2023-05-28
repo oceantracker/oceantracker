@@ -38,9 +38,9 @@ class SharedInfoClass(object):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         ml= self.msg_logger
 
-        instance_index = len(self.classes[class_type])
+        instanceID = len(self.classes[class_type])
 
-        crumbs += f' >>> adding_class type >> {class_type}  (group=  {iteration_group} #{instance_index: 1d})'
+        crumbs += f' >>> adding_class type >> {class_type}  (group=  {iteration_group} #{instanceID: 1d})'
 
         # make instance  and merge params
         i = make_class_instance_from_params(params, self.msg_logger, crumbs='user fields')
@@ -52,7 +52,7 @@ class SharedInfoClass(object):
         # todo  check it is known interation group
 
         # needed for release group identification info etc, zero based
-        i.info['instanceID'] =  instance_index
+        i.info['instanceID'] =  instanceID
 
         if 'name' not in i.params or i.params['name'] is None:
             i.params['name'] = f"instanceID{ i.info['instanceID']:04d}"
@@ -69,10 +69,6 @@ class SharedInfoClass(object):
         else:
             self.classes[class_type][name] = i
         return i
-
-    def delete_add_class_instance_to_interators(self, name, class_type, iteration_group, i):
-        i.info['instance_index'] = len(self.classes[class_type]) # needed for release group identification info etc
-        self.classes[class_type][name] = i
 
     def all_class_instance_pointers_iterator(self, asdict=False):
         # build list of all points for iteration, eg in calling all close methods

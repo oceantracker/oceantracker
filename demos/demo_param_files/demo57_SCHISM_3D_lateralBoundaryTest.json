@@ -104,5 +104,6 @@
             ]
         }
     ],
+    "run_as_depth_averaged": true,
     "root_output_dir": "output"
 }

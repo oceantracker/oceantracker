@@ -243,7 +243,6 @@ schsim_base_params=\
 
 s50 = deepcopy(schsim_base_params)
 s50['run_as_depth_averaged'] =  True
-s50 = deepcopy(schsim_base_params)
 params.append (s50)
 
 # schsim 3D

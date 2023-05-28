@@ -169,7 +169,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo kernal RK solver
 
 # TODO STRUCTURE
-
+    #todo much cleaner to  do residence times/stats for all polygon release groups given!
+            #or better get user to define polygons like polygond statistcs, or merge with polygon stats
     # todo use update_interval everywhere as parmateter fo periodic actions
     # todo revert to index zero for all IDs and data loading
     # todo show defauls on param eros?
@@ -180,6 +181,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # todo get rid of used nseq in favour of instanceID
     # todo add check for use of known class prop types, eg 'maunal_update'
     # todo compact model only with self expanding buffer??
+    # todo enable on the fly depth avering of fieds if running depth avearged,
+    #  currently diabled in base reader.setup_reader_fields
 
 # TODO IMPROVEMENTS
     # todo rotate particle relese polygns to reduce searches for points in side

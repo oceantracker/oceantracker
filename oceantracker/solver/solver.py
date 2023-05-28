@@ -188,7 +188,7 @@ class Solver(ParameterBaseClass):
         for name, i in si.classes['trajectory_modifiers'].items():
             i.update(time_sec, alive)
 
-        if si.hydro_model_is3D:
+        if si.is_3D_run:
             si.classes['resuspension'].update(time_sec, alive)
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
