@@ -10,18 +10,19 @@ particle_properties:
 - class_name: oceantracker.particle_properties.age_decay.AgeDecay
   decay_time_scale: 86400.0
 particle_release_groups:
-- points:
-  - - 616042
-    - 4219971
-    - -1
-  - - 616042
-    - 4729971
-    - -1
-  - - 616042
-    - 4910000
-    - -1
-  pulse_size: 10
-  release_interval: 1800
+  group1:
+    points:
+    - - 616042
+      - 4219971
+      - -1
+    - - 616042
+      - 4729971
+      - -1
+    - - 616042
+      - 4910000
+      - -1
+    pulse_size: 10
+    release_interval: 1800
 reader:
   class_name: oceantracker.reader.ROMS_reader.ROMsNativeReader
   field_variables:

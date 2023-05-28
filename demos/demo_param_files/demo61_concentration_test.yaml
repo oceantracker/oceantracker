@@ -50,32 +50,34 @@ particle_properties:
   decay_time_scale: 86400.0
 - class_name: oceantracker.particle_properties.total_water_depth.TotalWaterDepth
 particle_release_groups:
-- allow_release_in_dry_cells: true
-  points:
-  - - 1595000
-    - 5482600
-    - -1
-  - - 1599000
-    - 5486200
-    - -1
-  pulse_size: 1000
-  release_interval: 3600
-- class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
-  points:
-  - - 1597682.1237
-    - 5489972.7479
-  - - 1598604.1667
-    - 5490275.5488
-  - - 1598886.4247
-    - 5489464.0424
-  - - 1597917.3387
-    - 5489000
-  - - 1597300
-    - 5489000
-  - - 1597682.1237
-    - 5489972.7479
-  pulse_size: 1000
-  release_interval: 3600
+  P1:
+    allow_release_in_dry_cells: true
+    points:
+    - - 1595000
+      - 5482600
+      - -1
+    - - 1599000
+      - 5486200
+      - -1
+    pulse_size: 1000
+    release_interval: 3600
+  Poly1:
+    class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
+    points:
+    - - 1597682.1237
+      - 5489972.7479
+    - - 1598604.1667
+      - 5490275.5488
+    - - 1598886.4247
+      - 5489464.0424
+    - - 1597917.3387
+      - 5489000
+    - - 1597300
+      - 5489000
+    - - 1597682.1237
+      - 5489972.7479
+    pulse_size: 1000
+    release_interval: 3600
 reader:
   field_variables:
     water_temperature: temp

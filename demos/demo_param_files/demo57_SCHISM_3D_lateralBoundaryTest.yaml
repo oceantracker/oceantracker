@@ -44,12 +44,13 @@ particle_properties:
 - class_name: oceantracker.particle_properties.age_decay.AgeDecay
   decay_time_scale: 86400.0
 particle_release_groups:
-- points:
-  - - 1599750
-    - 5485600
-    - -1
-  pulse_size: 20
-  release_interval: 3600
+  P1:
+    points:
+    - - 1599750
+      - 5485600
+      - -1
+    pulse_size: 20
+    release_interval: 3600
 reader:
   field_variables:
     water_temperature: temp

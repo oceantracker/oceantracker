@@ -243,7 +243,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.add_core_class('reader', si.working_params['core_classes']['reader'],check_if_core_class=False, crumbs='Making reader core class')  # use cor ecars as name
 
 
-    def _setup_particle_release_groups(self, particle_release_groups_params_list):
+    def _setup_particle_release_groups(self, particle_release_groups_params_dict):
         # particle_release groups setup and instances,
         # find extremes of  particle existence to calculate model start time and duration
         #todo move to particle group manager and run in main at set up to get reader range etc , better for shared reader development
@@ -255,16 +255,19 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         first_release_time = []
         last_time_alive = []
 
-        for n, pg_params in enumerate(particle_release_groups_params_list):
+        for name, pg_params in particle_release_groups_params_dict.items():
             # make instance
             if 'class_name' not in pg_params: pg_params['class_name'] = 'oceantracker.particle_release_groups.point_release.PointRelease'
 
             # make instance and initialise
-            i = si.create_class_dict_instance('particle_release_groups', 'user', pg_params, crumbs='Adding release groups')
+
+            i = si.create_class_dict_instance('particle_release_groups', 'user', pg_params,
+                                              name =  name,
+                                              crumbs='Adding release groups')
             i.initial_setup()
 
             # set up release times so duration of run known
-            i.set_up_release_times(n)
+            i.set_up_release_times()
             release_info = i.info['release_info']
 
             if release_info['release_times'].size == 0:
@@ -313,7 +316,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # set up start time and duration based on particle releases
         t0 = perf_counter()
-        time_start, time_end = self._setup_particle_release_groups(si.working_params['class_lists']['particle_release_groups'])
+        time_start, time_end = self._setup_particle_release_groups(si.working_params['class_dicts']['particle_release_groups'])
 
 
         #clip times to maximum duration in shared and case params

@@ -34,7 +34,7 @@ class SharedInfoClass(object):
         return i
 
 
-    def create_class_dict_instance(self, class_type, iteration_group, params, crumbs=''):
+    def create_class_dict_instance(self, class_type, iteration_group, params,name =None, crumbs=''):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         ml= self.msg_logger
 
@@ -53,11 +53,14 @@ class SharedInfoClass(object):
 
         # needed for release group identification info etc, zero based
         i.info['instanceID'] =  instanceID
+        if name is None:
+            if 'name' not in i.params or i.params['name'] is None:
+                name = f"instanceID{ i.info['instanceID']:04d}"
+            else:
+                name = i.params['name']
 
-        if 'name' not in i.params or i.params['name'] is None:
-            i.params['name'] = f"instanceID{ i.info['instanceID']:04d}"
+        i.params['name'] = name
 
-        name = i.params['name']
         if name in self.classes[class_type]:
             ml.msg('Class type"' + class_type + '" already has a class with name = "' + i.params['name']
                          + '", "name" parameter must be unique',
@@ -70,21 +73,24 @@ class SharedInfoClass(object):
             self.classes[class_type][name] = i
         return i
 
-    def all_class_instance_pointers_iterator(self, asdict=False):
+    def all_class_instance_pointers_iterator(self):
         # build list of all points for iteration, eg in calling all close methods
-        if asdict:  p={}
-        else:  p = []
+        p = []
 
         for name, item in self.classes.items():
-           if type(item) != dict:
-                if item is not None:
-                    if asdict: p[name] = item
-                    else: p.append(item)
-           else:
+           if name in common_info.class_dicts.keys():
+               # set of classes
+               if item is not None:
+                    for key, i in item.items():
+                        if i is not None:  p.append(i)
+           elif name in common_info.class_lists.keys():
                # must be list  dict
-               for key, i in item.items():
-                    if i is not None:
-                        if asdict: p[name] = i
-                        else:  p.append(i)
+               if item is not None:
+                   for key, i in item.items():
+                       if i is not None:  p.append(i)
+           else:
+                if item is not None:
+                    p.append(item)
+
         return p
 

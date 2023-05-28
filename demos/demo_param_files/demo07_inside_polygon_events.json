@@ -38,8 +38,26 @@
         "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
         "write_dry_cell_index": true
     },
-    "particle_release_groups": [
+    "particle_release_groups_dict": {
+        "mypoints1": {
+            "points": [
+                [
+                    1594500,
+                    5483000
+                ]
+            ],
+            "pulse_size": 200,
+            "release_interval": 0
+        }
+    },
+    "particle_properties": [
         {
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 86400.0
+        }
+    ],
+    "particle_release_groups": {
+        "P1": {
             "points": [
                 [
                     1594500,
@@ -53,13 +71,7 @@
             "pulse_size": 10,
             "release_interval": 10800
         }
-    ],
-    "particle_properties": [
-        {
-            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-            "decay_time_scale": 86400.0
-        }
-    ],
+    },
     "block_dry_cells": true,
     "compact_mode": true,
     "event_loggers": [
