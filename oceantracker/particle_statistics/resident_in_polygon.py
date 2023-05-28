@@ -1,11 +1,12 @@
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
-
-
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC, merge_params_with_defaults
+from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
+from copy import  deepcopy
 from oceantracker.particle_release_groups.polygon_release import PolygonRelease
-from oceantracker.util.polygon_util import InsidePolygon, inside_ray_tracing_single_point
+
 import numpy as np
 from numba import njit
+#todo much clearner to  have user define polygon list for residewnce time per polygon like stats polygon!
 
 class ResidentInPolygon(_BaseParticleLocationStats):
     def __init__(self):
@@ -13,7 +14,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         super().__init__()
 
         self.add_default_params({'name_of_polygon_release_group':  PVC(None, str,is_required=True,
-                                     doc_str='"name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time'),
+                                doc_str='"name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time'),
                                  'role_output_file_tag': PVC('residence', str),
                                  'z_range': PLC([], [float, int], min_length=2, doc_str='z range = [zmin, zmax] count particles in this z range in 3D'),
                                  })
@@ -37,10 +38,23 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
         self.release_group_to_count = rg
         self.info['release_group_name'] = rg.params['name']
-        self.info['release_group_ID_to_count'] = rg.info['instance_index']
+        self.info['release_group_ID_to_count'] = rg.info['instanceID']
+
+        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
 
 
-        self.polygon = InsidePolygon(self.release_group_to_count.params['points'])
+        polygon =merge_params_with_defaults({'name': 'residence_for_release_group' + params['name_of_polygon_release_group'],
+                                             'points': self.release_group_to_count.info['points']},default_polygon_dict_params ,
+                                             si.msg_logger)
+
+        # create resident in polygon for single release group
+        particles = si.classes['particle_group_manager']
+        self.info['inside_polygon_particle_prop'] = f'resident_in_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
+        particles.create_particle_property('manual_update',dict(name=  self.info['inside_polygon_particle_prop'],
+                                               class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
+                                               polygon_list=[polygon],
+                                                write=False))
+
 
         # tag file with release group number
         #params['role_output_file_tag'] += '_RG%3.0f ' % params['count_release_group']
@@ -93,13 +107,17 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
         rg  = self.release_group_to_count
-        poly= self.polygon
+
 
         # update time stats  recorded
         self.record_time_stats_last_recorded(time_sec)
 
+        # manual update which polygon particles are inside
+        inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
+        inside_poly_prop.update(sel)
+
         # do counts
-        self.do_counts_and_summing_numba(poly.line_bounds, poly.slope_inv, poly.polygon_bounds,
+        self.do_counts_and_summing_numba(inside_poly_prop.data,
                                     part_prop['IDrelease_group'].data,
                                     part_prop['IDpulse'].data,
                                     self.info['release_group_ID_to_count'],
@@ -109,14 +127,13 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                     self.prop_list, self.sum_prop_list, sel)
 
 
-
     def info_to_write_at_end(self):
         nc = self.nc
         nc.write_a_new_variable('release_times', self.release_group_to_count.info['release_info']['release_times'],['pulse_dim'], dtype=np.float64,attributesDict={'times_pulses_released': ' times in seconds since 1970'})
 
     @staticmethod
     @njit
-    def do_counts_and_summing_numba(lb, slope_inv, bounds,
+    def do_counts_and_summing_numba(in_polgon,
                                     release_group_ID, pulse_ID, required_release_group,zrange, x, count,
                                     count_all_particles, prop_list, sum_prop_list, active):
         # count those of each pulse inside release polygon
@@ -136,7 +153,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
                 if x.shape[1] == 3 and not (zrange[0] <= x[n, 2] <= zrange[1]): continue
 
-                if inside_ray_tracing_single_point(x[n,:], lb, slope_inv, bounds):
+                if in_polgon[n] >= 0: # only one polygon
 
                     count[pulse] += 1
                     # sum particle properties

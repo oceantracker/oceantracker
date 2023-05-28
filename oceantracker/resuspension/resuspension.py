@@ -25,7 +25,8 @@ class BasicResuspension(_BaseResuspension):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(
                         required_fields_list=['water_velocity'],
-                        required_props_list=['status','water_velocity'], requires3D=True)
+                        required_props_list=['status','water_velocity'],
+                        requires3D=True)
 
     def initial_setup(self, **kwargs):
         si = self.shared_info

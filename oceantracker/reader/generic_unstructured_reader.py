@@ -57,10 +57,10 @@ class GenericUnstructuredReader(_BaseReader):
         grid['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
 
         # set up zlevel
-        if self.is_hindcast3D(nc):
+        if self.is_hindcast3D(nc) and not si.settings['run_as_depth_averaged']:
             s = [self.params['time_buffer_size'], grid['x'].shape[0], self.get_number_of_z_levels(nc)]
             grid['zlevel'] = np.full(s, 0., dtype=np.float32)
-            grid['zlevel'].shape[2]
+            grid['nz'] = grid['zlevel'].shape[2]
         else:
             grid['zlevel'] = None
             grid['nz'] = 1 # note if 3D

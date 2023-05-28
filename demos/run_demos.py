@@ -87,9 +87,14 @@ if __name__ == "__main__":
         if not args.skiprun:
             case_info_file_name, has_errors = main.run(params)
 
-            if has_errors:
+            errors= any(has_errors) if type(has_errors) == list else has_errors
+            if errors:
                 print('Error during demo')
                 exit()
+            if type(params) is list:  continue
+        # no plotting // cases
+        else:
+            case_info_file_name =path.join('output', params['output_file_base'],params['output_file_base']+'_caseInfo.json')
 
         caseInfo = load_output_files.read_case_info_file(case_info_file_name)
 

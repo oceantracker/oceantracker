@@ -69,7 +69,6 @@ class SCHSIMreaderNCDF(GenericUnstructuredReader):
         else:
             fv['water_velocity'] = ['hvel']
 
-
         if si.settings['run_as_depth_averaged']:
             #sort out which velo to use
             if  nc.is_var('dahv'):

@@ -59,11 +59,11 @@ class _BaseReader(ParameterBaseClass):
     def initial_setup(self):
         si = self.shared_info
         self.file_info = si.working_params['file_info']
-        nc= self._open_first_file(self.file_info)
-
+        nc = self._open_first_file(self.file_info)
         self.grid = self.build_grid(nc, self.grid)
-
         nc.close()
+
+
 
 
     def read_nodal_x_as_float64(self, nc): nopass('reader method: read_x is required')
@@ -107,10 +107,13 @@ class _BaseReader(ParameterBaseClass):
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         si = self.shared_info
+        msg_logger= si.msg_logger
         grid = self.grid
         self.info['file_info']= si.working_params['file_info'] # add file_info to reader info
 
         nc = self._open_first_file(self.info['file_info'])
+
+        self.additional_setup_and_hindcast_file_checks(nc, msg_logger)
         grid = self.build_grid(nc, grid)
 
         # set up reader fields, using shared memory if requested
@@ -184,7 +187,6 @@ class _BaseReader(ParameterBaseClass):
         # checks on hindcast using first hindcast file
         nc = NetCDFhandler(fi['names'][0], 'r')
         self._basic_file_checks(nc, msg_logger)
-        self.additional_setup_and_hindcast_file_checks(nc, msg_logger)
         hindcast_is3D = self.is_hindcast3D(nc)
         nc.close()
 
@@ -224,10 +226,19 @@ class _BaseReader(ParameterBaseClass):
         si = self.shared_info
         fgm = si.classes['field_group_manager']
 
+        # todo disable depth avering of fieds if running depth avearged
+        #todo could enable this with more work
+        if si.settings['run_as_depth_averaged']:
+            self.params['field_variables_to_depth_average']=[]
+
         # setup reader fields from their named components in field_variables param ( water depth ad tide done earlier from grid variables)
         for name, item in self.params['field_variables'].items():
             if item is None : continue
-            field_params,field_info =self.get_field_variable_info(nc,name,item)
+            field_params, field_info =self.get_field_variable_info(nc,name,item)
+
+            # todo disable depth avering of fieds if running depth avearged
+            # todo could enable this with more work
+            if field_info['requires_depth_averaging'] : continue
             i = fgm.create_field('from_reader_field',field_params, crumbs='Reader - making reader field ')
             i.info['variable_info'] = field_info #needed to unpack reader variables
 

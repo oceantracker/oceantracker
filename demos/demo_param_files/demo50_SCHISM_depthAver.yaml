@@ -76,4 +76,5 @@ reader:
   file_mask: demoHindcastSchism3D.nc
   input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
 root_output_dir: output
+run_as_depth_averaged: true
 time_step: 120

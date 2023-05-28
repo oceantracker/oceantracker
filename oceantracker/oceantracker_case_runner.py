@@ -5,7 +5,7 @@ from oceantracker.util.parameter_util import  make_class_instance_from_params
 from oceantracker.util.profiling_util import function_profiler
 from time import  perf_counter
 from oceantracker.util.messgage_logger import MessageLogger, GracefulError
-from oceantracker.util import profiling_util
+from oceantracker.util import profiling_util, get_versions_computer_info
 import numpy as np
 from oceantracker.util import time_util
 from numba import set_num_threads
@@ -52,7 +52,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # other useful shared values
         si.backtracking = si.settings['backtracking']
         si.model_direction = -1 if si.backtracking else 1
-        si.is_3D_run = si.working_params['is_3D_run']
+        si.is_3D_run = working_params['hindcast_is3D'] and not si.settings['run_as_depth_averaged']
 
         si.write_output_files = si.settings['write_output_files']
         si.write_tracks = si.settings['write_tracks']
@@ -61,11 +61,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.z0 = si.settings['z0']
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
-
+        si.computer_info = get_versions_computer_info.get_computer_info()
 
         # set processors for threading, ie numba/parallel prange loops
         if si.settings['max_threads'] is None:
-            si.settings['max_threads']= si.working_params['computer_info']['CPUs_hardware'] - 2
+            si.settings['max_threads']= si.computer_info['CPUs_hardware'] - 2
 
         set_num_threads(max(1, si.settings['max_threads']))
 
@@ -436,6 +436,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'user_note': si.settings['user_note'],
+             'output_files': si.output_files,
              'processorID' : si.processorID,
              'file_written': datetime.now().isoformat(),
              'code_version_info': common_info.code_version,
@@ -448,7 +449,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),
              'warnings_errors': si.msg_logger.warnings_and_errors,
              'function_timers': {},
-             'output_files': si.output_files,
+
              'class_info': {}, }
 
         for key, i in si.classes.items():
