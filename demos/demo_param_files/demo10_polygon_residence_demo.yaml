@@ -11,23 +11,31 @@ particle_properties:
   name: Oxygen
 - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
 particle_release_groups:
-- class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
-  name: near_shore
-  points:
-  - - 1594682.1237
-    - 5483472.7479
-  - - 1595604.1667
-    - 5483775.5488
-  - - 1595886.4247
-    - 5482964.0424
-  - - 1594917.3387
-    - 5482500.0
-  - - 1594300.0
-    - 5482500.0
-  - - 1594682.1237
-    - 5483472.7479
-  pulse_size: 100
-  release_interval: 43200
+  near_shore:
+    class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
+    name: near_shore
+    points:
+    - - 1594682.1237
+      - 5483472.7479
+    - - 1595604.1667
+      - 5483775.5488
+    - - 1595886.4247
+      - 5482964.0424
+    - - 1594917.3387
+      - 5482500.0
+    - - 1594300.0
+      - 5482500.0
+    - - 1594682.1237
+      - 5483472.7479
+    pulse_size: 100
+    release_interval: 43200
+particle_release_groups_dict:
+  mypoints1:
+    points:
+    - - 1594500
+      - 5483000
+    pulse_size: 200
+    release_interval: 0
 particle_statistics:
 - calculation_interval: 1800
   class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon

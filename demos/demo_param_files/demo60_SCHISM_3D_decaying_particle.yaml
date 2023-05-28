@@ -9,19 +9,20 @@ particle_properties:
   decay_time_scale: 25714.28571428571
   name: C
 particle_release_groups:
-- maximum_age: 17280.000000000004
-  points:
-  - - 1594500
-    - 5487000
-    - -1
-  - - 1594500
-    - 5483000
-    - -1
-  - - 1598000
-    - 5486100
-    - -1
-  pulse_size: 1
-  release_interval: 150.0
+  P1:
+    maximum_age: 17280.000000000004
+    points:
+    - - 1594500
+      - 5487000
+      - -1
+    - - 1594500
+      - 5483000
+      - -1
+    - - 1598000
+      - 5486100
+      - -1
+    pulse_size: 1
+    release_interval: 150.0
 reader:
   field_variables:
     water_temperature: temp

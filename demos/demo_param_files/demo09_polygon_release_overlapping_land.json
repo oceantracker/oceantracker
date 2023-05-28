@@ -38,8 +38,32 @@
         "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
         "time_steps_per_per_file": 700
     },
-    "particle_release_groups": [
+    "particle_release_groups_dict": {
+        "mypoints1": {
+            "points": [
+                [
+                    1594500,
+                    5483000
+                ]
+            ],
+            "pulse_size": 200,
+            "release_interval": 0
+        }
+    },
+    "particle_properties": [
         {
+            "name": "Oxygen",
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 86400.0,
+            "initial_value": 20.0
+        },
+        {
+            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
+        }
+    ],
+    "backtracking": true,
+    "particle_release_groups": {
+        "Poly1": {
             "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
             "points": [
                 [
@@ -70,7 +94,7 @@
             "pulse_size": 10,
             "release_interval": 10800
         },
-        {
+        "Poly2": {
             "class_name": "oceantracker.particle_release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange",
             "min_water_depth": 30,
             "points": [
@@ -102,18 +126,6 @@
             "pulse_size": 10,
             "release_interval": 10800
         }
-    ],
-    "particle_properties": [
-        {
-            "name": "Oxygen",
-            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-            "decay_time_scale": 86400.0,
-            "initial_value": 20.0
-        },
-        {
-            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
-        }
-    ],
-    "backtracking": true,
+    },
     "root_output_dir": "output"
 }

@@ -15,8 +15,8 @@
         "A_H": 0.2,
         "A_V": 0.001
     },
-    "particle_release_groups": [
-        {
+    "particle_release_groups": {
+        "group1": {
             "points": [
                 [
                     616042,
@@ -37,7 +37,7 @@
             "pulse_size": 10,
             "release_interval": 1800
         }
-    ],
+    },
     "fields": [
         {
             "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"

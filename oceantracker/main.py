@@ -134,12 +134,13 @@ def _decompose_params(params,msg_logger, add_shared_settings=True):
 
     w={'processorID':0, 'shared_settings':{},'case_settings':{},
        'core_classes':deepcopy(common_info.core_classes), # insert full lis and defaults
-       'class_lists':deepcopy(common_info.class_lists),
+       'class_dicts': deepcopy(common_info.class_dicts),
+       'class_lists':deepcopy(common_info.class_lists), # old way
        }
 
     # split   and check for unknown keys
     for key, item in params.items():
-        k = key.removesuffix('_class').removesuffix('_list')
+        k = key.removesuffix('_class').removesuffix('_dict').removesuffix('_list')
         if k in common_info.shared_settings_defaults.keys():
             if add_shared_settings:
                 w['shared_settings'][k] = item
@@ -147,8 +148,15 @@ def _decompose_params(params,msg_logger, add_shared_settings=True):
                 w['case_settings'][k] = item
         elif k in common_info.core_classes.keys():
             w['core_classes'][k].update(item)
+        elif k in common_info.class_dicts.keys():
+            if type(item) is not dict:
+                msg_logger.msg('class dict type "' + key +'" must contain a dictionary, where key is name of class, values are its parameters',
+                               fatal_error=True)
+            w['class_dicts'][k] = item
+        # old way below
         elif k in common_info.class_lists.keys():
             w['class_lists'][k] = item
+
         else:
             msg_logger.msg('Unknown top level parameter "' + key +'"', warning=True)
 

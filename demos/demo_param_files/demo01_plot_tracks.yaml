@@ -9,12 +9,13 @@ particle_properties:
   initial_value: 20.0
   name: Oxygen
 - class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-particle_release_groups:
-- points:
-  - - 1598000
-    - 5489100
-  pulse_size: 1
-  release_interval: 10800
+particle_release_groups_dict:
+  mypoints1:
+    points:
+    - - 1594500
+      - 5483000
+    pulse_size: 200
+    release_interval: 0
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:

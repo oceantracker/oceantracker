@@ -66,9 +66,11 @@ core_classes= { 'reader': {},
 reader_classes={'reader':{}} # in future wil have primary , secondary and acliary filed readers
 
 #'particle_release_groups': 'oceantracker.particle_release_groups.point_release.PointRelease',}
-
+class_dicts={ # class dicts which replace lists
+            'particle_release_groups': {},
+                }
 class_lists={ # class lists
-    'particle_release_groups':  [],
+    'particle_release_groups': {},
     # above classes are required classes/family members/ parameters, below are user classes held in named lists
     # below are optional user classes held in named lists
     'fields': [],  # prop calculated from other fields  on reading
