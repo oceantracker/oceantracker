@@ -140,10 +140,10 @@ def _decompose_params(params,msg_logger, add_shared_settings=True):
     # split   and check for unknown keys
     for key, item in params.items():
         k = key.removesuffix('_class').removesuffix('_list')
-        if add_shared_settings:
-            if k in common_info.shared_settings_defaults.keys():
+        if k in common_info.shared_settings_defaults.keys():
+            if add_shared_settings:
                 w['shared_settings'][k] = item
-        if k in common_info.case_settings_defaults.keys():
+        elif k in common_info.case_settings_defaults.keys():
                 w['case_settings'][k] = item
         elif k in common_info.core_classes.keys():
             w['core_classes'][k].update(item)
@@ -228,12 +228,13 @@ def _check_python_version(msg_logger):
         # set up log files for run
         v = get_versions_computer_info.get_code_version()
         msg_logger.msg(' Python version: ' + v['python_version'], tabs=2)
-        vi = v['python_version_details']
+        p_major =v['python_major_version']
+        p_minor= v['python_minor_version']
         install_hint = 'Install Python 3.10 or used environment.yml to build a Conda virtual environment named oceantracker'
-        if not (vi.major > 2 and vi.minor >= 9):
+        if not ( p_major > 2 and p_minor >= 9):
             msg_logger.msg(common_info.package_fancy_name + ' requires Python 3 , version >= 3.9  and < 3.11',
                          hint=install_hint, warning=True, tabs=1)
-        if (vi.major == 3 and vi.major >= 11):
+        if (p_major == 3 and p_minor >= 11):
             msg_logger.msg(common_info.package_fancy_name + ' is not yet compatible with Python 3.11, as not all imported packages have been updated, eg Numba')
 
         msg_logger.exit_if_prior_errors()
@@ -265,13 +266,13 @@ def _write_run_info_json(case_info_files, has_errors, msg_logger, t0):
 
     # JSON parallel run info data
     d = {'output_files' :{},
+        'version_info': get_versions_computer_info.get_code_version(),
         'computer_info': get_versions_computer_info.get_computer_info(),
-         'version_info' : get_versions_computer_info.get_code_version(),
-         'num_cases': num_cases,
+        'num_cases': num_cases,
         'elapsed_time' :perf_counter() - t0,
         'average_active_particles': total_alive_particles / num_cases if num_cases > 0 else None,
-         'average_number_of_time_steps': n_time_steps/num_cases  if num_cases > 0 else None,
-         'particles_processed_per_second': total_alive_particles /(perf_counter() - t0)
+        'average_number_of_time_steps': n_time_steps/num_cases  if num_cases > 0 else None,
+        'particles_processed_per_second': total_alive_particles /(perf_counter() - t0)
          }
 
     # get output file names

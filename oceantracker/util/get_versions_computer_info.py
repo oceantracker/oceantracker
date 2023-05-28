@@ -15,7 +15,10 @@ def get_code_version():
     d ={'version': common_info.code_version,
         'git_revision': git_revision,
         'python_version': version,
-        'python_version_details': version_info}
+        'python_major_version': version_info.major,
+        'python_minor_version': version_info.minor,
+        'python_micro_version': version_info.micro,
+        }
 
     return d
 
