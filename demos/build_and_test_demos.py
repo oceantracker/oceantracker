@@ -21,8 +21,7 @@ poly_points_large=[[1597682.1237, 5489972.7479],
                         [1597300, 5487000],
                        [1597682.1237, 5489972.7479]]
 
-demo_base_params=param_template()
-demo_base_params.update({'output_file_base' : None,
+demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
    'time_step' : 900,
     'reader': {"class_name": 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
@@ -43,7 +42,7 @@ demo_base_params.update({'output_file_base' : None,
                         'Oxygen': { 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24,'initial_value' : 20.},
                         'distance_travelled':   {'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'},
                             }
-    })
+    }
 
 p1= deepcopy(demo_base_params)
 p1.update({'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
@@ -79,14 +78,15 @@ p3['particle_release_groups']= {
                   'myP2': {'points': [[1596000, 5490000]], 'pulse_size': 2000, 'release_interval': 7200}
                     }
 
-p3['particle_statistics_dict']['gridstats1']= {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+p3['particle_statistics_dict'] = {'gridstats1': {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
                    'count_start_date': '2020-06-01 21:16:07',
-                      'grid_size': [220, 221]}
-p3['particle_statistics_dict']['polystats1']= {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
+                      'grid_size': [220, 221]},
+                'polystats1' : {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                         'count_status_in_range' : ['moving','moving'],
                       'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
                        'polygon_list':[ {'points':poly_points}]}
+                     }
 
 p3.update({ 'write_tracks': False,  'duration': 3 * 24 * 3600  })
 
@@ -97,16 +97,16 @@ params.append(p3)
 # demo 4 age based heat maps
 p4 = deepcopy(p3)
 p4['junk']='h'
-p4['particle_statistics']=[
-            {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
+p4['particle_statistics'] = {}
+p4['particle_statistics']['age_grid']=   {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
              'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
              'grid_size': [220, 221],
-             'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},
-            {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
+             'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.}
+p4['particle_statistics']['age_poly'] =          {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
              'calculation_interval': 1800, 'particle_property_list': ['water_depth', 'water_velocity'],
              'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.,
              'polygon_list': [{'points': poly_points} ] }
-              ]
+
 p4.update({'output_file_base' :'demo04_ageBasedHeatmaps' })
 
 params.append (p4)
@@ -155,12 +155,13 @@ p7['particle_properties'] ={
                 'age_decay': {'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay','decay_time_scale': 1. * 3600 * 24}
                     }
 
-p7['event_loggers_dict']['in_out_poly']= {'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
+p7['event_loggers_dict']= {'in_out_poly': {'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
                                                     'particle_prop_to_write_list' : [ 'ID','x', 'IDrelease_group', 'status', 'age'],
                                                         'polygon_list': [{'user_polygon_name' : 'A','points': (np.asarray(poly_points) + np.asarray([-5000,0])).tolist()},
                                                                          {'user_polygon_name' : 'B', 'points': poly_points_large}
                                                                          ]
                                               }
+                           }
 
 
 p7.update({'output_file_base' :'demo07_inside_polygon_events' })
@@ -213,9 +214,9 @@ p10['particle_release_groups']= {
             'points': (np.asarray(poly_points) + np.asarray([[-3000.,-6500]])).tolist(),'name': 'near_shore',
             'pulse_size': 100, 'release_interval': 12 * 3600}
         }
-p10['particle_statistics']=[
-                  {'class_name': 'oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon',
-                  'name_of_polygon_release_group':'near_shore', 'calculation_interval': 1800}]
+p10['particle_statistics']={'residentpoly': {'class_name': 'oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon',
+                  'name_of_polygon_release_group':'near_shore', 'calculation_interval': 1800}}
+
 
 params.append(p10)
 
@@ -267,10 +268,10 @@ s56['particle_release_groups']={
 s56['velocity_modifiers']={'terminal_velocity':
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
                            }
-s56['particle_statistics']=[
+s56['particle_statistics']= {'grid1':
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
-                      'grid_size': [120, 121]}]
+                      'grid_size': [120, 121]}}
 
 
 s56['resuspension'] = {'critical_friction_velocity': .005}

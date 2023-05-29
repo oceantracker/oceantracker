@@ -142,7 +142,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # TODO STRUCTURE
         # todo use update_interval everywhere as parmateter fo periodic actions
         # todo  move interpolate set up to the end, to enable record dtypes to be formed used to reduce numba params, eg for all particle props
-
+        #todo add run_dir option to all output reads
     #TODO Features
 
     # TODO SIMPLIFY
@@ -194,6 +194,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # todo integerise all periodic evets to model time steps
     # todo to enable mutliple readers,  do all particle tracking in lon-lat
     # todo replace retain_culled_part_locations with use of "last known location", and add mask_dead praticles in readers
+    #todo plot routines using message logger
+    #todo merge residence time into polygon stats
 
 # TODO FUTURE
     #todo shared reader

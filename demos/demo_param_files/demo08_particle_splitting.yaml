@@ -3,7 +3,6 @@ block_dry_cells: true
 compact_mode: false
 dispersion:
   A_H: 0.1
-dispersion_class: {}
 event_loggers_dict:
   in_out_poly:
     class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
@@ -42,10 +41,8 @@ event_loggers_dict:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-fields_dict: {}
 output_file_base: demo08_particle_splitting
 particle_buffer_size: 5000
-particle_concentrations_dict: {}
 particle_properties:
   age_decay:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
@@ -73,7 +70,6 @@ particle_release_groups_dict:
       - 5483000
     pulse_size: 200
     release_interval: 0
-particle_statistics_dict: {}
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -96,17 +92,12 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
-reader_class: {}
-resuspension_class: {}
 retain_culled_part_locations: true
 root_output_dir: output
-status_modifiers_dict: {}
 time_step: 600
-time_varying_info_dict: {}
 tracks_writer:
   class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
   write_dry_cell_index: true
-tracks_writer_class: {}
 trajectory_modifiers:
   part_culling:
     class_name: oceantracker.trajectory_modifiers.cull_particles.CullParticles
@@ -117,6 +108,4 @@ trajectory_modifiers:
     class_name: oceantracker.trajectory_modifiers.split_particles.SplitParticles
     split_status_greater_than: frozen
     splitting_interval: 21600
-trajectory_modifiers_dict: {}
 user_note: test of notes
-velocity_modifiers_dict: {}

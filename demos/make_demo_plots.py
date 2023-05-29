@@ -23,13 +23,12 @@ def demo02_animation(case_info_file_name,output_file=None):
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
-def demo03_heatmaps(case_info_file_name,output_file=None):
-    from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
+def demo03_heatmaps(case_info_file_name, output_file=None):
+    from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file
     from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
 
-
-    stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], nsequence=0)
+    stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'])
     axis_lims = [1591000, 1601500, 5478500, 5491000]
     animate_heat_map(stats_data, axis_lims=axis_lims,
                                     heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
@@ -37,7 +36,6 @@ def demo03_heatmaps(case_info_file_name,output_file=None):
                                     fps=7)
     plot_heat_map(stats_data, axis_lims=axis_lims, var='water_depth', heading='Water depth built on the fly, no tracks recorded',
                                  plot_file_name=output_file + '_water_depth.jpeg' if output_file is not None else None)
-    s = load_stats_file(case_info_file_name, nsequence=1, var_list=['water_depth'])  # test polygon stats loading, in second stats file
     return None
 
 def demo04_ageBasedHeatmaps(case_info_file_name,output_file=None):
@@ -46,7 +44,7 @@ def demo04_ageBasedHeatmaps(case_info_file_name,output_file=None):
 
 
 
-    stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], nsequence=0)
+    stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], name='age_grid')
     axis_lims = [1591000, 1601500, 5478500, 5491000]
     animate_heat_map(stats_data, axis_lims=axis_lims,
                                     heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
@@ -92,7 +90,7 @@ def demo07_inside_polygon_events(case_info_file_name,output_file=None):
                                     vmax=1,
                                     movie_file=output_file + '.mp4' if output_file is not None else None,
                                     fps=15,
-                                    polygon_list_to_plot=caseInfo['full_params']['event_loggers'][0]['polygon_list'],
+                                    polygon_list_to_plot=caseInfo['full_case_params']['class_dicts']['event_loggers']['in_out_poly']['polygon_list'],
                                     show_dry_cells=True, interval=30)
     return None
 
@@ -233,12 +231,12 @@ def demo60_SCHISM_3D_decaying_particle(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 
-    track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth', 'C'])
+    track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth', 'age_decay'])
 
     animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
                                 heading='SCHISIM reader, 3D, decaying particles, decay time 3.5 hrs',
-                                colour_using_data=track_data['C'], part_color_map='hot_r',
-                                size_using_data=track_data['C'],
+                                colour_using_data=track_data['age_decay'], part_color_map='hot_r',
+                                size_using_data=track_data['age_decay'],
                                 vmax=1.0,
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
                                 fps=24,

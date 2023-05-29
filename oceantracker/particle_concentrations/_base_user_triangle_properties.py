@@ -15,7 +15,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         self.add_default_params({'class_name' : PVC(None, str,is_required=True),
                                  'particle_properties_to_track': PLC([],[str],  make_list_unique=True),
                                  'write': PVC(True, bool),
-                                 'role_output_file_tag': PVC(None, str),
+                                 'role_output_file_tag': PVC('_concentrations_', str),
                                  'count_status_equal_to': PVC(None, str, possible_values=particle_info['status_flags'].keys()),
                                  'release_group_to_track': PVC(None, int, min=0),
                                  'only_update_concentrations_on_write': PVC(False, bool),
@@ -34,9 +34,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         si = self.shared_info
         grid = si.classes['reader'].grid
 
-        tag = '' if self.params['role_output_file_tag'] is None else '_' + self.params['role_output_file_tag']
-        self.info['output_file'] = si.output_file_base + '_concentrations_%03.0f' % self.info['instanceID'] + tag + '.nc'
-
+        self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_' + self.info['name'] + '.nc'
         si.msg_logger.progress_marker('opening concentrations output to : ' + self.info['output_file'])
 
         self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')

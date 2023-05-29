@@ -6,12 +6,8 @@ debug: true
 dispersion:
   A_H: 0.0
   A_V: 0.0
-dispersion_class: {}
-event_loggers_dict: {}
-fields_dict: {}
 max_duration: 172800.0
 output_file_base: demo90forward
-particle_concentrations_dict: {}
 particle_properties_dict:
   Oxygen:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
@@ -37,7 +33,6 @@ particle_release_groups_dict:
       - 5483000
     pulse_size: 200
     release_interval: 0
-particle_statistics_dict: {}
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -60,16 +55,9 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 2
-reader_class: {}
-resuspension_class: {}
 root_output_dir: output
-status_modifiers_dict: {}
 time_step: 60
-time_varying_info_dict: {}
 tracks_writer:
   class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
   write_dry_cell_index: true
-tracks_writer_class: {}
-trajectory_modifiers_dict: {}
 user_note: test of notes
-velocity_modifiers_dict: {}

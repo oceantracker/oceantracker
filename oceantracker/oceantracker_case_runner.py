@@ -234,13 +234,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             case_params['core_classes']['tracks_writer']['class_name']='oceantracker.tracks_writer.track_writer_compact.FlatTrackWriter'
 
         # make core classes, eg. field group
-
-        for key, params in case_params['core_classes'].items():
-            si.add_core_class(key, params, crumbs= ' Making all core class ' + key )
-
+        for name, params in case_params['core_classes'].items():
+            si.add_core_class(name, params, crumbs= ' Making all core class ' + name )
 
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags
-        si.add_core_class('reader', si.working_params['core_classes']['reader'],check_if_core_class=False, crumbs='Making reader core class')  # use cor ecars as name
+
 
 
     def _setup_particle_release_groups(self, particle_release_groups_params_dict):
@@ -261,9 +259,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             # make instance and initialise
 
-            i = si.create_class_dict_instance('particle_release_groups', 'user', pg_params,
-                                              name =  name,
-                                              crumbs='Adding release groups')
+            i = si.create_class_dict_instance( 'particle_release_groups', 'user', pg_params, name=None,crumbs='Adding release groups')
             i.initial_setup()
 
             # set up release times so duration of run known
@@ -458,12 +454,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for key, i in si.classes.items():
 
             if type(i) == dict:
-                d['class_info'][key] = []
-                d['output_files'][key] = []
+                d['class_info'][key] = {}
+                d['output_files'][key] = {}
                 # interate over dict
                 for key2, i2 in i.items():
-                    d['class_info'][key].append(i2.info)
-                    d['output_files'][key].append(i2.info['output_file'] if 'output_file' in i2.info else None)
+                    d['class_info'][key][key2]= i2.info
+                    d['output_files'][key][key2]= i2.info['output_file'] if 'output_file' in i2.info else None
 
             else:
                 d['class_info'][key] = i.info
