@@ -259,7 +259,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             # make instance and initialise
 
-            i = si.create_class_dict_instance( 'particle_release_groups', 'user', pg_params, name=None,crumbs='Adding release groups')
+            i = si.create_class_dict_instance(name, 'particle_release_groups', 'user', pg_params, crumbs='Adding release groups')
             i.initial_setup()
 
             # set up release times so duration of run known
@@ -410,7 +410,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for user_type in ['velocity_modifiers','trajectory_modifiers','status_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
             for name, params in si.working_params['class_dicts'][user_type].items():
-                i = si.create_class_dict_instance(user_type, 'user', params,name=name, crumbs=' making class type ' + user_type + ' ')
+                i = si.create_class_dict_instance(name, user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
 
     # ____________________________

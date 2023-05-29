@@ -34,7 +34,7 @@ class SharedInfoClass(object):
         return i
 
 
-    def create_class_dict_instance(self,class_type, iteration_group, params,name=None,  crumbs=''):
+    def create_class_dict_instance(self,name,class_type, iteration_group, params,  crumbs=''):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         ml= self.msg_logger
 

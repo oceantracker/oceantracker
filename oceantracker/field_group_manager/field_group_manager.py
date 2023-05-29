@@ -62,9 +62,9 @@ class FieldGroupManager(ParameterBaseClass):
         output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(si.classes['fields'][fieldName], x, time, output=output, n_cell=n_cell)
         return output
 
-    def create_field(self, field_type, field_params, crumbs=''):
+    def create_field(self, name, field_type, field_params, crumbs=''):
         si = self.shared_info
-        i = si.create_class_dict_instance('fields', field_type, field_params, crumbs=crumbs + ' adding  a field ')
+        i = si.create_class_dict_instance(name,'fields', field_type, field_params, crumbs=crumbs + ' adding  a field ')
         i.info['field_type'] = field_type
         i.initial_setup()
         return i

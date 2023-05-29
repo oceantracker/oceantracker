@@ -7,8 +7,7 @@ from copy import  copy
 class _BaseField(ParameterBaseClass):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params
-        self.add_default_params({'name': PVC( None, str, is_required=True),
-                                 'write_interp_particle_prop_to_tracks_file': PVC(True, bool),
+        self.add_default_params({'write_interp_particle_prop_to_tracks_file': PVC(True, bool),
                                # 'create_particle_property_with_same_name': PVC( True, bool),
                                  'is_time_varying': PVC(True, bool,is_required=True),
                                  'is3D': PVC(True, bool,is_required=True ),
