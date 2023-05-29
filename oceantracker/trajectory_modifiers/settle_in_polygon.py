@@ -37,10 +37,10 @@ class SettleInPolygon(_BaseTrajectoryModifier):
 
         # add particle prop to track which are inside polygon, which will be automatically written to output
         particle= si.classes['particle_group_manager']
-        particle.create_particle_property( 'manual_update',dict(name='is_frozen_in_polygon', dtype=np.int8))
+        particle.create_particle_property('is_frozen_in_polygon', 'manual_update',dict( dtype=np.int8))
 
         # ad a parameter to record when last released
-        particle.create_particle_property('manual_update',dict(name='time_of_settlement',  initial_value=0.))
+        particle.create_particle_property('time_of_settlement','manual_update',dict(  initial_value=0.))
 
     # all particles checked to see if they need status changing
     def update(self, time_sec, active):

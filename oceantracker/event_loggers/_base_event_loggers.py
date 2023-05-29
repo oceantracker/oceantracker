@@ -26,7 +26,7 @@ class _BaseEventLogger(ParameterBaseClass):
 
         # boolean buffer partile prop to recorded history of event having started (must be prop to be managed in compact mode)
         particle = si.classes['particle_group_manager']
-        particle.create_particle_property('manual_update',dict(name='event_has_started_boolean',  initial_value=False, dtype=bool, write=False))
+        particle.create_particle_property('event_has_started_boolean','manual_update',dict(initial_value=False, dtype=bool, write=False))
 
         # place to record which particles where events has just started or
         # just end based on changes in event_has_started_boolean to know which events to write

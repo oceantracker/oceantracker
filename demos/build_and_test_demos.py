@@ -116,7 +116,8 @@ c = deepcopy(p2)
 
 c.update({'output_file_base' :'demo05_parallel',
             'processors': 2,
-            'multiprocessing_case_start_delay' : 1.0})
+           'advanced_settings':{ 'multiprocessing_case_start_delay' : 1.0}
+          })
 c['particle_release_groups'] =deepcopy(p2['particle_release_groups'])
 p5=[]
 for n in range(5):
