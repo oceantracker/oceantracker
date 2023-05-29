@@ -14,27 +14,27 @@ class SharedInfoClass(object):
         for key in list(common_info.class_lists.keys())+list(common_info.class_dicts.keys()):
             self.classes[key] = {}
 
-    def add_core_class(self, class_type, params,  check_if_core_class=True, crumbs =''):
+    def add_core_class(self, name, params, check_if_core_class=True, crumbs =''):
 
         ml= self.msg_logger
 
         #todo make check if in common.shared_info_default_params
-        if class_type not in common_info.core_classes and check_if_core_class:
-            ml.msg('add_core_class, name is not a known core class, name=' + class_type,
-                         crumbs='Adding core class type=' + class_type,
-                         exception = True)
+        if name not in common_info.core_classes and check_if_core_class:
+            ml.msg('add_core_class, name is not a known core class, name=' + name,
+                   crumbs='Adding core class type=' + name,
+                   exception = True)
         # make instance  and merge params
-        i = make_class_instance_from_params(params, ml, class_type_name=class_type,
-                                            crumbs=crumbs + ' adding core class, type =  ' + class_type)
+        i = make_class_instance_from_params(params, ml, class_type_name=name,
+                                            crumbs=crumbs + ' adding core class, type =  ' + name)
         if i.params['requires_3D'] and not self.is_3D_run :
                 # dont add a 3D class if i not a 3D run
                 self.msg_logger.msg(' Not using add core class,' + i.params['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
         else:
-            self.classes[class_type]= i
+            self.classes[name] = i
         return i
 
 
-    def create_class_dict_instance(self, class_type, iteration_group, params,name =None, crumbs=''):
+    def create_class_dict_instance(self,class_type, iteration_group, params,name=None,  crumbs=''):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         ml= self.msg_logger
 
@@ -54,12 +54,14 @@ class SharedInfoClass(object):
         # needed for release group identification info etc, zero based
         i.info['instanceID'] =  instanceID
         if name is None:
+            #todo this will go as names become compulsory
             if 'name' not in i.params or i.params['name'] is None:
                 name = f"instanceID{ i.info['instanceID']:04d}"
             else:
                 name = i.params['name']
 
-        i.params['name'] = name
+        i.params['name'] = name #todo this wil be redunent
+        i.info['name'] = name
 
         if name in self.classes[class_type]:
             ml.msg('Class type"' + class_type + '" already has a class with name = "' + i.params['name']

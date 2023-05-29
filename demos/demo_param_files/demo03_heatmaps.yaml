@@ -1,12 +1,8 @@
 add_date_to_run_output_dir: false
 dispersion:
   A_H: 0.1
-dispersion_class: {}
 duration: 259200
-event_loggers_dict: {}
-fields_dict: {}
 output_file_base: demo03_heatmaps
-particle_concentrations_dict: {}
 particle_properties_dict:
   Oxygen:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
@@ -89,18 +85,11 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
-reader_class: {}
-resuspension_class: {}
 root_output_dir: output
-status_modifiers_dict: {}
 time_step: 900
-time_varying_info_dict: {}
 tracks_writer:
   turn_on_write_particle_properties_list:
   - n_cell
   write_dry_cell_index: true
-tracks_writer_class: {}
-trajectory_modifiers_dict: {}
 user_note: test of notes
-velocity_modifiers_dict: {}
 write_tracks: false

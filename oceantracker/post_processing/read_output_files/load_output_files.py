@@ -3,12 +3,12 @@ import numpy as np
 
 from oceantracker.util import json_util
 from oceantracker.post_processing.read_output_files import read_ncdf_output_files
-from oceantracker.post_processing import post_proc_util
 from os import path
 from glob import glob
 
 
-def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 1, run_output_dir= None):
+
+def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0, run_output_dir= None):
     # get case_info.json file name from runInfo dict or json file name, can also set root_output_dir, if output moved to new location
     # ncase is one based
     if type(runInfo_fileName_or_runInfoDict) is str:
@@ -23,7 +23,7 @@ def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 1,
     if run_output_dir is None:
         run_output_dir = run_case_info['output_files']['run_output_dir']
 
-    case_info_file_name = run_case_info['output_files']['case_info'][ncase-1]
+    case_info_file_name = run_case_info['output_files']['case_info'][ncase]
 
     try:
         case_info_file_name = path.join(run_output_dir, case_info_file_name)
@@ -73,6 +73,11 @@ def read_case_info_file(case_info_file_name):
     # runcase_info is used as input for all particle_plot methods
 
     case_info = json_util.read_JSON(case_info_file_name)
+
+    # make case info output dir consistent with given file name
+    case_info['output_files']['run_output_dir'] = path.dirname(case_info_file_name)
+    case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
+
     # force run out dir and root output dir to match that of case_info_file name if user has data in another folder name
     case_info['output_files']['run_output_dir']  = path.dirname(case_info_file_name)
     case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
@@ -90,38 +95,25 @@ def load_particle_track_vars(case_info_file_name, var_list=None, release_group= 
     tracks = read_ncdf_output_files.read_particle_tracks_file(track_file, var_list, release_group=release_group, fraction_to_read=fraction_to_read)
     tracks['grid'] = load_grid(case_info_file_name)
 
-    tracks= _extract_useful_params(case_info, tracks)
+    tracks= _extract_useful_info(case_info, tracks)
     x= tracks['x'][:,:,0]
     y = tracks['x'][:, :, 1]
     tracks['axis_lim'] = np.asarray([np.nanmin(x), np.nanmax(x),np.nanmin(y), np.nanmax(y)])
     return tracks
 
-def _get_user_class_filename(user_class_type, case_info,nsequence):
-    if nsequence < 0:
-        print ('Warning load output files , nsequence must be >=0 for user class type = ' + user_class_type)
-        nsequence = 0
-
-    user_class_files = case_info['output_files'][user_class_type]
-    if nsequence+1  >  len(user_class_files):
-        print ('Warning load output files , nsequence is greater than numer of users classes (setting to last in sequence), for user class type = ' + user_class_type)
-        nsequence = len(user_class_files)-1
-
-    file_name = path.join(case_info['output_files']['run_output_dir'], user_class_files[nsequence])
-    return file_name
-
-def _extract_useful_params(case_info, d):
+def _extract_useful_info(case_info, d):
     d.update({'particle_status_flags': case_info['particle_status_flags'],
                  'particle_release_group_info': case_info['particle_release_group_info']})
     d['full_case_params'] = case_info['full_case_params']
 
     return d
 
-def load_concentration_vars(case_info_file_name, var_list=[], nsequence = 0):
+def load_concentration_vars(case_info_file_name, var_list=[], name= None):
     case_info = read_case_info_file(case_info_file_name)
-    nc_file_name= _get_user_class_filename('particle_concentrations', case_info,nsequence)
+    nc_file_name= _get_class_dict_file_name(case_info,'particle_concentrations', name)
     d = read_ncdf_output_files.read_concentration_file(nc_file_name, var_list=var_list)
     d['grid'] = load_grid(case_info_file_name)
-    d =  _extract_useful_params(case_info, d)
+    d =  _extract_useful_info(case_info, d)
     return d
 
 def load_grid(case_info_file_name):
@@ -143,53 +135,63 @@ def load_grid(case_info_file_name):
 
     return d
 
-def load_stats_file(case_info_file_name, stat_name = 0, var_list=[]):
+def load_stats_file(case_info_file_name, name = None, var_list=[]):
     # load gridded or polygon stas file using runcase_info, the output of  load_runcase_info()
 
     case_info = read_case_info_file(case_info_file_name)
+    name = _get_class_dict_name(case_info, 'particle_statistics', name)  # check the name
+    stat_nc_file_name = _get_class_dict_file_name(case_info, 'particle_statistics', name)
 
-    stat_name = post_proc_util.get_class_dict_name(case_info, stat_name)
-    nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
-    rg_name = post_proc_util.get_release_group_name(case_info, nsequence)
-    params= case_info['full_case_params']['class_dicts']['particle_statistics'][nsequence]
-    s= case_info['class_info']['particle_statistics'][nsequence]
+    d= read_ncdf_output_files.read_stats_file(stat_nc_file_name, var_list)
+    d['info']= case_info['class_info']['particle_statistics'][name]
+    d['params'] = case_info['full_case_params']['class_dicts']['particle_statistics'][name]
 
-    d= read_ncdf_output_files.read_stats_file(nc_file_name, var_list)
-    d['info']= s
-    if 'release_group_centered_grids' in params and params['release_group_centered_grids']:
+    if 'release_group_centered_grids' in d['params'] and d['params']['release_group_centered_grids']:
         d['release_group_centered_grids'] = True
     else:
         d['release_group_centered_grids'] = False
 
     # add stats polygons to output, if stats grid its loaded by
-    if 'polygon_list' in params:
-        d['polygon_list'] = params['polygon_list']
+    if 'polygon_list' in d['params']:
+        d['polygon_list'] = d['params']['polygon_list']
 
-    d = _extract_useful_params(case_info, d)
+    d = _extract_useful_info(case_info, d)
     d['grid'] = load_grid(case_info_file_name)
     return d
 
-def load_residence_file(case_info_file_name,nsequence=0, var_list=[]):
+def load_residence_file(case_info_file_name=None,name=None, var_list=[]):
     # load residence time in relese polygon
 
     case_info = read_case_info_file(case_info_file_name)
-    nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
+    name = _get_class_dict_name(case_info, 'particle_statistics', name)
+    nc_file_name =  _get_class_dict_file_name(case_info, 'particle_statistics', name)
+    d = read_ncdf_output_files.read_residence_file(nc_file_name, var_list)
+    d['info']= case_info['class_info']['particle_statistics'][name]
+    d['params'] = case_info['full_case_params']['class_dicts']['particle_statistics'][name]
 
-    params= case_info['full_case_params']['class_lists']['particle_statistics'][nsequence]
-    s= case_info['class_info']['particle_statistics'][nsequence]
-
-    d= read_ncdf_output_files.read_residence_file(nc_file_name, var_list)
-    d['info']= s
-
-    d = _extract_useful_params(case_info, d)
+    d = _extract_useful_info(case_info, d)
     d['grid'] = load_grid(case_info_file_name)
     return d
 
-def load_events_file(case_info_file_name, nsequence = 0, ncase=0):
+def _get_class_dict_name(caseinfo, class_dict, name= None):
+    o = caseinfo['output_files']
+    c = o[class_dict]
+    if name is None:
+        name = list(caseinfo['class_info'][class_dict].keys())[0]  # use first one
+        print('Post processing ,no name given loading "' + class_dict + '" named  "' + name + '"')
+    if name not in c:
+        raise ('Post processing error, "' + class_dict + '" does not have clas name  "' + name + '"')
+    return  name
+
+def _get_class_dict_file_name(caseinfo, class_dict, name= None):
+    # val is astring name of relese group ot integer
+    o = caseinfo['output_files']
+    name =  _get_class_dict_name(caseinfo, class_dict, name= None)
+    return path.join(o['run_output_dir'],o[class_dict][name])
+
+# ubder dev
+def dev_load_events_file(case_info_file_name, name=None):
     # load  flat events
     #todo finish
     case_info = read_case_info_file(case_info_file_name)
-    nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
-
-    
-
+    nc_file_name = _get_class_dict_file_name(case_info, 'event_loggers', name)

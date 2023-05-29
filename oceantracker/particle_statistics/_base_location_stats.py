@@ -17,7 +17,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                   'count_start_date': PVC(None, 'iso8601date',doc_str= 'Start particle counting from this date'),
                                   'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this date'),
                                   'role_output_file_tag' :           PVC('stats_base',str),
-                                  'file_tag': PVC(None, str),
                                   'write':                      PVC(True,bool),
                                   'count_status_in_range' :  PLC(['frozen', 'moving'], [str], min_length=2, max_length=2,
                                                                  doc_str=' Count only those particles with status which fall in the given range'),
@@ -49,8 +48,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def open_output_file(self):
         si=self.shared_info
         if self.params['write']:
-            self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_%03.0f' % self.info['instanceID']
-            self.info['output_file'] += '.nc' if self.params['file_tag'] is None else '_'+ self.params['file_tag'] + '.nc'
+            self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag']
+            self.info['output_file'] += '_' + self.info['name'] + '.nc'
             self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
         else:
             self.nc = None

@@ -1,8 +1,89 @@
 {
-    "dispersion_class": {},
-    "reader_class": {},
-    "resuspension_class": {},
-    "tracks_writer_class": {},
+    "output_file_base": "demo07_inside_polygon_events",
+    "add_date_to_run_output_dir": false,
+    "time_step": 600,
+    "reader": {
+        "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
+        "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "demoHindcast2D*.nc",
+        "search_sub_dirs": true,
+        "dimension_map": {
+            "time": "time",
+            "node": "nodes"
+        },
+        "grid_variables": {
+            "time": "time_sec",
+            "x": [
+                "east",
+                "north"
+            ],
+            "triangles": "tri"
+        },
+        "field_variables": {
+            "water_velocity": [
+                "east_vel",
+                "north_vel"
+            ],
+            "water_depth": "depth",
+            "tide": "tide"
+        },
+        "time_buffer_size": 15,
+        "isodate_of_hindcast_time_zero": "2020-06-01"
+    },
+    "user_note": "test of notes",
+    "dispersion": {
+        "A_H": 0.1
+    },
+    "tracks_writer": {
+        "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
+        "write_dry_cell_index": true
+    },
+    "particle_release_groups_dict": {
+        "mypoints1": {
+            "points": [
+                [
+                    1594500,
+                    5483000
+                ]
+            ],
+            "pulse_size": 200,
+            "release_interval": 0
+        }
+    },
+    "particle_properties_dict": {
+        "Oxygen": {
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 86400.0,
+            "initial_value": 20.0
+        },
+        "distance_travelled": {
+            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
+        }
+    },
+    "particle_release_groups": {
+        "P1": {
+            "points": [
+                [
+                    1594500,
+                    5490000
+                ],
+                [
+                    1598000,
+                    5488500
+                ]
+            ],
+            "pulse_size": 10,
+            "release_interval": 10800
+        }
+    },
+    "block_dry_cells": true,
+    "compact_mode": true,
+    "particle_properties": {
+        "age_decay": {
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 86400.0
+        }
+    },
     "event_loggers_dict": {
         "in_out_poly": {
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
@@ -73,98 +154,6 @@
                     ]
                 }
             ]
-        }
-    },
-    "fields_dict": {},
-    "particle_concentrations_dict": {},
-    "particle_properties_dict": {
-        "Oxygen": {
-            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-            "decay_time_scale": 86400.0,
-            "initial_value": 20.0
-        },
-        "distance_travelled": {
-            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
-        }
-    },
-    "particle_release_groups_dict": {
-        "mypoints1": {
-            "points": [
-                [
-                    1594500,
-                    5483000
-                ]
-            ],
-            "pulse_size": 200,
-            "release_interval": 0
-        }
-    },
-    "particle_statistics_dict": {},
-    "status_modifiers_dict": {},
-    "time_varying_info_dict": {},
-    "trajectory_modifiers_dict": {},
-    "velocity_modifiers_dict": {},
-    "output_file_base": "demo07_inside_polygon_events",
-    "add_date_to_run_output_dir": false,
-    "time_step": 600,
-    "reader": {
-        "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
-        "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "demoHindcast2D*.nc",
-        "search_sub_dirs": true,
-        "dimension_map": {
-            "time": "time",
-            "node": "nodes"
-        },
-        "grid_variables": {
-            "time": "time_sec",
-            "x": [
-                "east",
-                "north"
-            ],
-            "triangles": "tri"
-        },
-        "field_variables": {
-            "water_velocity": [
-                "east_vel",
-                "north_vel"
-            ],
-            "water_depth": "depth",
-            "tide": "tide"
-        },
-        "time_buffer_size": 15,
-        "isodate_of_hindcast_time_zero": "2020-06-01"
-    },
-    "user_note": "test of notes",
-    "dispersion": {
-        "A_H": 0.1
-    },
-    "tracks_writer": {
-        "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
-        "write_dry_cell_index": true
-    },
-    "particle_release_groups": {
-        "P1": {
-            "points": [
-                [
-                    1594500,
-                    5490000
-                ],
-                [
-                    1598000,
-                    5488500
-                ]
-            ],
-            "pulse_size": 10,
-            "release_interval": 10800
-        }
-    },
-    "block_dry_cells": true,
-    "compact_mode": true,
-    "particle_properties": {
-        "age_decay": {
-            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-            "decay_time_scale": 86400.0
         }
     },
     "root_output_dir": "output"

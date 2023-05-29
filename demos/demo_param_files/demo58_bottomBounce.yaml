@@ -77,13 +77,14 @@ particle_release_groups:
     - -2
     - -4.0
 particle_statistics:
-- calculation_interval: 3600
-  class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
-  grid_size:
-  - 120
-  - 121
-  particle_property_list:
-  - water_depth
+  grid1:
+    calculation_interval: 3600
+    class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
+    grid_size:
+    - 120
+    - 121
+    particle_property_list:
+    - water_depth
 reader:
   depth_average: false
   field_variables:

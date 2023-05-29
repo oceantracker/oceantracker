@@ -136,15 +136,11 @@ if __name__ == "__main__":
 
             params['output_file_base'] = 'Demo90backward'
             params['backtracking'] = True
-            params['particle_release_groups'][0].update({
-                'points': d90['x'][-1, :, :],
-                'release_start_date': start_date})
+            params['particle_release_groups']['P1'].update({ 'points': d90['x'][-1, :, :], 'release_start_date': start_date})
 
             print('backtracking start', start_date)
 
-            runInfo_file_name2, has_errors = main.run(params)
-
-            caseInfoFile2 = load_output_files.get_case_info_file_from_run_file(runInfo_file_name2)
+            caseInfoFile2, has_errors = main.run(params)
             d2 = load_output_files.load_particle_track_vars(caseInfoFile2)
 
             ax.plot(d2['x'][:, :, 0], d2['x'][:, :, 1], color='y', linewidth=1,linestyle='dashed')

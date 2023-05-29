@@ -163,8 +163,8 @@
             "variance": 0.0002
         }
     },
-    "particle_statistics": [
-        {
+    "particle_statistics": {
+        "grid1": {
             "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
             "calculation_interval": 3600,
             "particle_property_list": [
@@ -175,7 +175,7 @@
                 121
             ]
         }
-    ],
+    },
     "resuspension": {
         "critical_friction_velocity": 0.005
     },

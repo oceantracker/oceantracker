@@ -14,12 +14,12 @@ from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 
 output_file= "output\demo60_SCHISM_3D_decaying_particle"
 
-track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth', 'C'])
+track_data = load_particle_track_vars(case_info_file_name, var_list=['tide', 'water_depth', 'age_decay'])
 
 animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
                             heading='SCHISIM reader, 3D, decaying particles, decay time 3.5 hrs',
-                            colour_using_data=track_data['C'], part_color_map='hot_r',
-                            size_using_data=track_data['C'],
+                            colour_using_data=track_data['age_decay'], part_color_map='hot_r',
+                            size_using_data=track_data['age_decay'],
                             vmax=1.0,
                             movie_file=output_file + '.mp4' if output_file is not None else None,
                             fps=24,
