@@ -178,7 +178,7 @@ class ParticleGroupManager(ParameterBaseClass):
         params = kwargs
         params['class_name'] = 'oceantracker.particle_properties._base_properties.TimeVaryingInfo'
         si = self.shared_info
-        i = si.create_class_dict_instance('time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
+        i = si.create_class_dict_instance(params['name'],'time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
         i.initial_setup()
 
         if si.write_tracks and i.params['write']:
@@ -209,7 +209,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # todo make name first colpulsory argument of this function and create_class_dict_instance
         if name is None:  name = prop_params['name']
-        i = si.create_class_dict_instance('particle_properties', prop_type, prop_params,name=name,
+        i = si.create_class_dict_instance(name, 'particle_properties', prop_type, prop_params,
                                           crumbs=crumbs +' adding "particle_properties of type=' +  prop_type)
 
 

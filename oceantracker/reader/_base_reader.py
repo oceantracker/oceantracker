@@ -239,7 +239,7 @@ class _BaseReader(ParameterBaseClass):
             # todo disable depth avering of fieds if running depth avearged
             # todo could enable this with more work
             if field_info['requires_depth_averaging'] : continue
-            i = fgm.create_field('from_reader_field',field_params, crumbs='Reader - making reader field ')
+            i = fgm.create_field(name, 'from_reader_field',field_params, crumbs='Reader - making reader field ')
             i.info['variable_info'] = field_info #needed to unpack reader variables
 
             if not i.params['is_time_varying']:
@@ -252,10 +252,10 @@ class _BaseReader(ParameterBaseClass):
             if name in self.params['field_variables_to_depth_average']:
                 # tweak shape to fit depth average of scalar or 3D vector
                 p = {'class_name':'oceantracker.fields._base_field._BaseField',
-                     'name': name + '_depth_average','num_components': min(2, i.params['num_components']),
+                     'num_components': min(2, i.params['num_components']),
                      'is_time_varying': i.params['is_time_varying'],
                     'is3D': False}
-                fgm.create_field('depth_averaged_from_reader_field', p, crumbs='Reader - making depth averged version of reader field')
+                fgm.create_field(name + '_depth_average','depth_averaged_from_reader_field', p, crumbs='Reader - making depth averged version of reader field')
 
         # rinf buffer ono, needed to force read at first time step read to make
         bi = self.info['buffer_info']

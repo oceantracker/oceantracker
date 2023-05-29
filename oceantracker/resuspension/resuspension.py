@@ -17,8 +17,7 @@ class BasicResuspension(_BaseResuspension):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'name': PVC('BasicResuspension',str),
                 'critical_friction_velocity': PVC(0., float, min=0., doc_str='Critical friction velocity, u_* in m/s defined in terms of bottom stress (this param is not the same as near seabed velocity)'),
-                'friction_velocity_field_class_name': PVC(
-                        'oceantracker.fields.friction_velocity.FrictionVelocity', str)
+                'friction_velocity_field_class_name': PVC('oceantracker.fields.friction_velocity.FrictionVelocity', str)
                                  })
 
     # is 3D test of parent
@@ -33,9 +32,8 @@ class BasicResuspension(_BaseResuspension):
         info = self.info
         info['number_resupended'] = 0
         # add required field and particle property for resuspension
-        si.classes['field_group_manager'].create_field('derived_from_reader_field',
-                    {'class_name':self.params['friction_velocity_field_class_name'],
-                     }, crumbs='initializing resuspension class ')
+        si.classes['field_group_manager'].create_field('friction_velocity', 'derived_from_reader_field',   {'class_name':self.params['friction_velocity_field_class_name']},
+                                                       crumbs='initializing resuspension class ')
         si.classes['particle_group_manager'].create_particle_property('friction_velocity','from_fields', {}, crumbs='initializing resuspension class ')
 
     from oceantracker.fields.friction_velocity import FrictionVelocity
