@@ -188,23 +188,38 @@ class ParticleGroupManager(ParameterBaseClass):
             w = si.classes['tracks_writer']
             w.create_variable_to_write(i.params['name'], 'time', None,i.params['vector_dim'], attributes_dict=None, dtype=i.params['dtype'] )
 
-    def create_particle_property(self, prop_type, prop_params, crumbs=''):
+    def create_particle_property(self, prop_type, prop_params,name=None, crumbs=''):
         si = self.shared_info
+        ml= si.msg_logger
 
-        if type(prop_type) != str or type(prop_params) !=dict:
-            #todo move all raise exception to msglogger
-            raise Exception('ParticleGroupManager.create_particle_property, must be create_particle_property(prop_type(str), prop_params(dict))' )
-        if prop_type not in self.known_prop_types:
+        if type(prop_type) != str :
+            ml.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str',
+                   hint='got prop_type of type=' + str(type(prop_type)),
+                   fatal_error=True, exit_now=True)
+
+        if type(prop_params) !=dict:
+            ml.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ',
+                    hint= 'got parameters of type=' + str(type(prop_params)) +',  values='+str(prop_params),
+                       fatal_error=True, exit_now=True)
+
+
+        if prop_type not in self.known_prop_types:    #todo move all raise exception to msglogger
             Exception('Create_particle_property: type is "' + prop_type + '", must be one of ' + str(self.known_prop_types))
 
         # set default class
-        if 'class_name' not in prop_params: prop_params['class_name'] = 'oceantracker.particle_properties._base_properties.ParticleProperty'
-        i = si.create_class_dict_instance('particle_properties', prop_type, prop_params,
+        if 'class_name' not in prop_params:
+            prop_params['class_name'] = 'oceantracker.particle_properties._base_properties.ParticleProperty'
+
+        # todo make name first colpulsory argument of this function and create_class_dict_instance
+        if name is None:  name = prop_params['name']
+        i = si.create_class_dict_instance('particle_properties', prop_type, prop_params,name=name,
                                           crumbs=crumbs +' adding "particle_properties of type=' +  prop_type)
+
 
         i.initial_setup()
         i.info['prop_type'] = prop_type
-        name = i.params['name']
+
+
         if si.write_tracks:
             # tweak write flag if in param lists
             w = si.classes['tracks_writer']

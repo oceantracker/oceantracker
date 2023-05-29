@@ -6,8 +6,9 @@ import numpy as np
 from oceantracker.util import json_util
 from oceantracker.util import yaml_util
 from copy import deepcopy
+from oceantracker.main import param_template
 
-params = []
+params =[]
 poly_points=[[1597682.1237, 5489972.7479],
                         [1598604.1667, 5490275.5488],
                         [1598886.4247, 5489464.0424],
@@ -19,8 +20,9 @@ poly_points_large=[[1597682.1237, 5489972.7479],
                         [1597917.3387, 5487000],
                         [1597300, 5487000],
                        [1597682.1237, 5489972.7479]]
-demo_base_params=\
-{'output_file_base' : None,
+
+demo_base_params=param_template()
+demo_base_params.update({'output_file_base' : None,
   'add_date_to_run_output_dir': False,
    'time_step' : 900,
     'reader': {"class_name": 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
@@ -37,11 +39,11 @@ demo_base_params=\
     'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_index': True},
     'particle_release_groups_dict': {'mypoints1':{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}
                                 },
-    'particle_properties': [
-                        {'name': 'Oxygen', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24,'initial_value' : 20.},
-                        {'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'},
-                                    ],
-                }
+    'particle_properties_dict': {
+                        'Oxygen': { 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24,'initial_value' : 20.},
+                        'distance_travelled':   {'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'},
+                            }
+    })
 
 p1= deepcopy(demo_base_params)
 p1.update({'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
@@ -77,16 +79,15 @@ p3['particle_release_groups']= {
                   'myP2': {'points': [[1596000, 5490000]], 'pulse_size': 2000, 'release_interval': 7200}
                     }
 
-p3['particle_statistics']=[
-                  {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+p3['particle_statistics_dict']['gridstats1']= {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
                    'count_start_date': '2020-06-01 21:16:07',
-                      'grid_size': [220, 221]},
-                  {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
+                      'grid_size': [220, 221]}
+p3['particle_statistics_dict']['polystats1']= {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                         'count_status_in_range' : ['moving','moving'],
                       'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
                        'polygon_list':[ {'points':poly_points}]}
-                        ]
+
 p3.update({ 'write_tracks': False,  'duration': 3 * 24 * 3600  })
 
 p3.update({'output_file_base' :'demo03_heatmaps' })
@@ -135,11 +136,11 @@ p6['particle_release_groups']= {
              'points': deepcopy(poly_points),
              'pulse_size': 1, 'release_interval': 0}
             }
-p6['trajectory_modifiers']=  [
+p6['trajectory_modifiers']= {'settle_in+polygon':
             {'class_name': 'oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon',
              'polygon': {'points':  deepcopy(poly_points)},
              'probability_of_settlement': .1,
-             'settlement_duration': 3.*3600}]
+             'settlement_duration': 3.*3600}}
 p6.update({'output_file_base' :'demo06_reefstranding' ,'backtracking': True})
 params.append (p6)
 
@@ -150,14 +151,16 @@ p7 = deepcopy(p2)
 p7['particle_release_groups']= {
         'P1':  {'points': [[1594500, 5490000], [1598000, 5488500]], 'pulse_size': 10, 'release_interval': 3 * 3600}
         }
-p7['particle_properties'] =[{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay','decay_time_scale': 1. * 3600 * 24}]
+p7['particle_properties'] ={
+                'age_decay': {'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay','decay_time_scale': 1. * 3600 * 24}
+                    }
 
-p7['event_loggers'] =[{'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
+p7['event_loggers_dict']['in_out_poly']= {'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
                                                     'particle_prop_to_write_list' : [ 'ID','x', 'IDrelease_group', 'status', 'age'],
                                                         'polygon_list': [{'user_polygon_name' : 'A','points': (np.asarray(poly_points) + np.asarray([-5000,0])).tolist()},
                                                                          {'user_polygon_name' : 'B', 'points': poly_points_large}
                                                                          ]
-                                              }]
+                                              }
 
 
 p7.update({'output_file_base' :'demo07_inside_polygon_events' })
@@ -172,16 +175,16 @@ p8.update({'retain_culled_part_locations' : True,'particle_buffer_size':  5000})
 p8['particle_release_groups']={
         'P1':{'points': [[1594500, 5483500],[1594500, 5483500+3000]], 'pulse_size': 1, 'release_interval': 0}
         }
-p8['trajectory_modifiers']=[
+p8['trajectory_modifiers']={'part_spliting':
            {'class_name': 'oceantracker.trajectory_modifiers.split_particles.SplitParticles',
              'splitting_interval':6*3600,
                 'split_status_greater_than' : 'frozen',
                     },
-           {'class_name': 'oceantracker.trajectory_modifiers.cull_particles.CullParticles',
+        'part_culling': {'class_name': 'oceantracker.trajectory_modifiers.cull_particles.CullParticles',
              'cull_interval': 6 * 3600,
              'cull_status_greater_than': 'dead',
             'probability_of_culling': .05}
-             ]
+                    }
 
 p8.update({'output_file_base' :'demo08_particle_splitting',  })
 params.append (p8)
@@ -235,14 +238,15 @@ schsim_base_params=\
                             'points': poly_points,
                             'pulse_size': 10, 'release_interval':  3600}
                 },
-            'particle_properties': [{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
-                                                  'decay_time_scale': 1. * 3600 * 24} ],
-            'event_loggers':[{'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
+            'particle_properties': {
+                        'age_decay':{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
+                                                  'decay_time_scale': 1. * 3600 * 24} },
+            'event_loggers': {'inoutpoly':{'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
                                                 'particle_prop_to_write_list' : [ 'ID','x', 'IDrelease_group', 'status', 'age'],
                                                     'polygon_list': [{'user_polygon_name' : 'A','points': (np.asarray(poly_points) + np.asarray([-5000,0])).tolist()},
                                                                      {'user_polygon_name' : 'B', 'points': poly_points_large}
                                                                      ]
-                                          }]
+                                          }}
                 }
 
 s50 = deepcopy(schsim_base_params)
@@ -260,9 +264,9 @@ s56['particle_release_groups']={
                                     'points': poly_points, 'z_range' :[-2, -4.],
                                     'pulse_size': 10, 'release_interval':  3600}
             }
-s56['velocity_modifiers']= [
+s56['velocity_modifiers']={'terminal_velocity':
        {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
-]
+                           }
 s56['particle_statistics']=[
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
@@ -271,8 +275,9 @@ s56['particle_statistics']=[
 
 s56['resuspension'] = {'critical_friction_velocity': .005}
 s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
-s56['velocity_modifiers']= [
-       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}]
+s56['velocity_modifiers']= {'terminal_velocity':
+                                {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
+                            }
 params.append (s56)
 
 # schsim 3D, dont resupend lateral boundary test
@@ -291,7 +296,7 @@ s58.update({'output_file_base' : 'demo58_bottomBounce', 'backtracking': False})
 s58['dispersion'].update({'A_H': 0.1, 'A_V': .005})
 bc = s58
 
-bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002,'variance': 0.0002}]
+bc['velocity_modifiers']={'terminal_velocity':{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002,'variance': 0.0002}}
 pg1= bc['particle_release_groups']['P1']
 pg1.update({'pulse_size':10,'release_interval':0, 'points': [[1593000., 5484000.+2000, -1]] }) # 1 release only
 bc['particle_release_groups']['P11']= pg1 # only point release
@@ -303,7 +308,7 @@ params.append(s58)
 s59 = deepcopy(s58)
 s59.update({'output_file_base' : 'demo59_crit_shear_resupension', 'backtracking': False})
 bc = s59
-bc['velocity_modifiers']= [{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002}]
+bc['velocity_modifiers']['terminal_velocity']= {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002}
 params.append(s59)
 
 # decaying particles sized on c
@@ -313,8 +318,9 @@ s60['particle_release_groups']={
                 'P1':{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
                                                      'pulse_size': 1, 'release_interval': 2.5*60, 'maximum_age': .2*24*3600}
                         }
-s60['particle_properties']= [{'name': 'C', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
-                              'decay_time_scale':1*3600./0.14}]
+s60['particle_properties']= {
+    'age_decay' :{'name': 'C', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
+                              'decay_time_scale':1*3600./0.14}}
 s60.pop('event_loggers')
 params.append(s60)
 
@@ -322,9 +328,9 @@ params.append(s60)
 s61 = deepcopy(schsim_base_params)
 s61.update({'max_duration': 15*24*3600.,'output_file_base': 'demo61_concentration_test'})
 s61['write_tracks']= False
-s61['particle_concentrations']=[{'class_name':'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
-                                                          'case_output_file_tag': 'siteA','calculation_interval': 1800}]
-s61['particle_properties'].append({'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'})
+s61['particle_concentrations']={'outfall_conc':{'class_name':'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
+                                                          'case_output_file_tag': 'siteA','calculation_interval': 1800}}
+s61['particle_properties']['total_water_depth']={'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'}
 
 for rg in s61['particle_release_groups'].values():
     rg.update({'pulse_size': 1000, 'release_interval': 3600})
@@ -364,8 +370,9 @@ ROMS_params={'output_file_base' :'demo70_ROMS_reader', 'debug': True,
                                 'pulse_size': 10, 'release_interval': 1800}
                             },
                 'fields' :[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}],
-                'particle_properties': [{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
-                                                      'decay_time_scale': 1. * 3600 * 24} ],
+                'particle_properties':{
+                 'age_decay':{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
+                                                      'decay_time_scale': 1. * 3600 * 24} },
                 'resupension':{'critical_friction_velocity': .00}
                 }
 

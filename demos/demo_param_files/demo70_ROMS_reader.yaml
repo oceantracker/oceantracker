@@ -7,8 +7,9 @@ fields:
 open_boundary_type: 1
 output_file_base: demo70_ROMS_reader
 particle_properties:
-- class_name: oceantracker.particle_properties.age_decay.AgeDecay
-  decay_time_scale: 86400.0
+  age_decay:
+    class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
 particle_release_groups:
   group1:
     points:

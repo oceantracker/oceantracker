@@ -68,22 +68,24 @@ reader_classes={'reader':{}} # in future wil have primary , secondary and acliar
 #'particle_release_groups': 'oceantracker.particle_release_groups.point_release.PointRelease',}
 class_dicts={ # class dicts which replace lists
             'particle_release_groups': {},
-                }
+            'fields': {},  # user fields calculated from other fields  on reading
+            'particle_properties': {},  # user added particle properties, eg DistanceTraveled
+            'status_modifiers': {},  # change status of particles, eg tidal stranding
+            'velocity_modifiers': {},  # user added velocity effects, eg TerminalVelocity
+            'trajectory_modifiers': {},  # change particle paths, eg. re-suspension
+            'particle_statistics': {},  # heat map inside polygon statistics calculated on the fly
+            'particle_concentrations': {},  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
+
+    'event_loggers': {},  # writes events files ,eg PolygonEntryExit
+    # below still to be developed
+    # 'post_processing':      PDLdefaults({}), #todo after run post processing not implemented yet
+    'time_varying_info': {}, # particle info,eg. time,or  tide at at tide gauge, core example is particle time
+
+}
 class_lists={ # class lists
-    'particle_release_groups': {},
     # above classes are required classes/family members/ parameters, below are user classes held in named lists
     # below are optional user classes held in named lists
-    'fields': [],  # prop calculated from other fields  on reading
-    'particle_properties': [],  # user added particle properties, eg DistanceTraveled
-    'status_modifiers': [],  # change status of particles, eg tidal stranding
-    'velocity_modifiers': [],  # user added velocity effects, eg TerminalVelocity
-    'trajectory_modifiers': [],  # change particle paths, eg. re-suspension
     'particle_statistics': [],  # heat map inside polygon statistics calculated on the fly
-    'event_loggers': [],  # writes events files ,eg PolygonEntryExit
-    'particle_concentrations': [],  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
-    # below still to be developed
-     # 'post_processing':      PDLdefaults({}), #todo after run post processing not implemented yet
-    'time_varying_info' :[] # particle info, eg tide at at tide gauge, core example is particle time
      }
 
 

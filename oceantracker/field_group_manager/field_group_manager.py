@@ -22,6 +22,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         self.n_buffer = np.zeros((2, ), dtype=np.int32)
 
+
     def initial_setup(self):
         si=self.shared_info
 

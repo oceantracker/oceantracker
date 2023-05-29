@@ -37,13 +37,13 @@
             "maximum_age": 17280.000000000004
         }
     },
-    "particle_properties": [
-        {
+    "particle_properties": {
+        "age_decay": {
             "name": "C",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 25714.28571428571
         }
-    ],
+    },
     "compact_mode": true,
     "root_output_dir": "output"
 }

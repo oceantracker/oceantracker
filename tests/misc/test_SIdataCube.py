@@ -29,7 +29,7 @@ if __name__ == '__main__':
         'tracks_writer' : {'turn_on_write_particle_properties_list':['n_cell'],'output_step_count': 3},
         'particle_release_groups': [ {'points': x0 ,'pulse_size':70, 'release_interval': 600}],
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
-        'velocity_modifiers' : [{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0.001}],
+        'velocity_modifiers' :{'terminal_velocity':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0.001}},
         'trajectory_modifiers': [{'class_name': 'oceantracker.resuspension.BasicResuspension',
                                        'critical_friction_velocity': 0.00},],
         'particle_properties': [{'class_name': 'oceantracker.particle_properties.friction_velocity.FrictionVelocity'}],

@@ -43,12 +43,12 @@
             "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
         }
     ],
-    "particle_properties": [
-        {
+    "particle_properties": {
+        "age_decay": {
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
-    ],
+    },
     "resupension": {
         "critical_friction_velocity": 0.0
     },
