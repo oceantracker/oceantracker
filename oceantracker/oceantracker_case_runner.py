@@ -391,7 +391,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                                                  write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
         si.msg_logger.progress_marker('created particle properties derived from fields', start_time=t0)
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
-        for n, params in enumerate(si.working_params['class_lists']['fields']):
+        for n, params in enumerate(si.working_params['class_dicts']['fields']):
             i = si.create_class_dict_instance('fields', 'user', params, crumbs='Adding "fields" from user params')
             i.initial_setup()
             # now add custom prop based on  this field
@@ -403,22 +403,21 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if not i.is_time_varying(): i.update()
 
         # any custom particle properties added by user
-        for p in si.working_params['class_lists']['particle_properties']:
-            pgm.create_particle_property('user',p)
+        for name, p in si.working_params['class_dicts']['particle_properties'].items():
+            pgm.create_particle_property('user',p,name=name)
 
         # add default classes, eg tidal stranding
         #todo this may be better else where
-        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.working_params['class_lists']['status_modifiers']:
-            si.working_params['class_lists']['status_modifiers'].append({'name': 'tidal_stranding', 'class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'})
+        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.working_params['class_dicts']['status_modifiers']:
+            si.working_params['class_dicts']['status_modifiers']['tidal_stranding'] ={'name': 'tidal_stranding', 'class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'}
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
-        for user_type in ['velocity_modifiers', 'trajectory_modifiers',
-                     'particle_statistics',
-                     'particle_concentrations', 'event_loggers','status_modifiers']:
-            for params in si.working_params['class_lists'][user_type]:
-                i = si.create_class_dict_instance(user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
+        for user_type in ['velocity_modifiers','trajectory_modifiers','status_modifiers',
+                             'particle_statistics', 'particle_concentrations', 'event_loggers']:
+            for name, params in si.working_params['class_dicts'][user_type].items():
+                i = si.create_class_dict_instance(user_type, 'user', params,name=name, crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
-        pass
+
     # ____________________________
     # internal methods below
     # ____________________________

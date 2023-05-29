@@ -1,4 +1,92 @@
 {
+    "dispersion_class": {},
+    "reader_class": {},
+    "resuspension_class": {},
+    "tracks_writer_class": {},
+    "event_loggers_dict": {},
+    "fields_dict": {},
+    "particle_concentrations_dict": {},
+    "particle_properties_dict": {
+        "Oxygen": {
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 86400.0,
+            "initial_value": 20.0
+        },
+        "distance_travelled": {
+            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
+        }
+    },
+    "particle_release_groups_dict": {
+        "mypoints1": {
+            "points": [
+                [
+                    1594500,
+                    5483000
+                ]
+            ],
+            "pulse_size": 200,
+            "release_interval": 0
+        }
+    },
+    "particle_statistics_dict": {
+        "gridstats1": {
+            "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
+            "calculation_interval": 1800,
+            "particle_property_list": [
+                "water_depth"
+            ],
+            "count_start_date": "2020-06-01 21:16:07",
+            "grid_size": [
+                220,
+                221
+            ]
+        },
+        "polystats1": {
+            "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
+            "count_status_in_range": [
+                "moving",
+                "moving"
+            ],
+            "calculation_interval": 1800,
+            "particle_property_list": [
+                "water_depth"
+            ],
+            "polygon_list": [
+                {
+                    "points": [
+                        [
+                            1597682.1237,
+                            5489972.7479
+                        ],
+                        [
+                            1598604.1667,
+                            5490275.5488
+                        ],
+                        [
+                            1598886.4247,
+                            5489464.0424
+                        ],
+                        [
+                            1597917.3387,
+                            5489000
+                        ],
+                        [
+                            1597300,
+                            5489000
+                        ],
+                        [
+                            1597682.1237,
+                            5489972.7479
+                        ]
+                    ]
+                }
+            ]
+        }
+    },
+    "status_modifiers_dict": {},
+    "time_varying_info_dict": {},
+    "trajectory_modifiers_dict": {},
+    "velocity_modifiers_dict": {},
     "output_file_base": "demo04_ageBasedHeatmaps",
     "add_date_to_run_output_dir": false,
     "time_step": 900,
@@ -40,29 +128,6 @@
         ],
         "write_dry_cell_index": true
     },
-    "particle_release_groups_dict": {
-        "mypoints1": {
-            "points": [
-                [
-                    1594500,
-                    5483000
-                ]
-            ],
-            "pulse_size": 200,
-            "release_interval": 0
-        }
-    },
-    "particle_properties": [
-        {
-            "name": "Oxygen",
-            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-            "decay_time_scale": 86400.0,
-            "initial_value": 20.0
-        },
-        {
-            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
-        }
-    ],
     "particle_release_groups": {
         "myP1": {
             "points": [
@@ -86,6 +151,9 @@
             "release_interval": 7200
         }
     },
+    "write_tracks": false,
+    "duration": 259200,
+    "junk": "h",
     "particle_statistics": [
         {
             "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased",
@@ -143,8 +211,5 @@
             ]
         }
     ],
-    "write_tracks": false,
-    "duration": 259200,
-    "junk": "h",
     "root_output_dir": "output"
 }

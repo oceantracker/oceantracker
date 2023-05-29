@@ -3,6 +3,7 @@ import numpy as np
 
 from oceantracker.util import json_util
 from oceantracker.post_processing.read_output_files import read_ncdf_output_files
+from oceantracker.post_processing import post_proc_util
 from os import path
 from glob import glob
 
@@ -142,13 +143,15 @@ def load_grid(case_info_file_name):
 
     return d
 
-def load_stats_file(case_info_file_name, nsequence = 0, var_list=[]):
+def load_stats_file(case_info_file_name, stat_name = 0, var_list=[]):
     # load gridded or polygon stas file using runcase_info, the output of  load_runcase_info()
 
     case_info = read_case_info_file(case_info_file_name)
-    nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
 
-    params= case_info['full_case_params']['class_lists']['particle_statistics'][nsequence]
+    stat_name = post_proc_util.get_class_dict_name(case_info, stat_name)
+    nc_file_name = _get_user_class_filename('particle_statistics', case_info, nsequence)
+    rg_name = post_proc_util.get_release_group_name(case_info, nsequence)
+    params= case_info['full_case_params']['class_dicts']['particle_statistics'][nsequence]
     s= case_info['class_info']['particle_statistics'][nsequence]
 
     d= read_ncdf_output_files.read_stats_file(nc_file_name, var_list)

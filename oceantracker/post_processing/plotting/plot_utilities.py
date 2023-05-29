@@ -221,3 +221,4 @@ def animation_output(anim, movie_file, fps = 15, dpi=300,show=True):
         anim.save(movie_file, writer=writer, dpi=dpi)
 
         plt.close() # prevents over plotting
+

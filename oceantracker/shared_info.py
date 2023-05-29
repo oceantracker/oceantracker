@@ -11,7 +11,7 @@ class SharedInfoClass(object):
     def reset(self):
         self.classes = {}
         # fill in known user class and iterator names
-        for key in common_info.class_lists.keys():
+        for key in list(common_info.class_lists.keys())+list(common_info.class_dicts.keys()):
             self.classes[key] = {}
 
     def add_core_class(self, class_type, params,  check_if_core_class=True, crumbs =''):
@@ -45,7 +45,7 @@ class SharedInfoClass(object):
         # make instance  and merge params
         i = make_class_instance_from_params(params, self.msg_logger, crumbs='user fields')
 
-        if class_type not in common_info.class_lists.keys():
+        if class_type not in common_info.class_lists.keys() and class_type not in common_info.class_dicts.keys() :
             ml.msg('add_to_class_list: name is not a known class list,class_type=' + class_type , exception = True, crumbs = crumbs)
 
         # now add to class lists and interators

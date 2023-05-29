@@ -1,81 +1,10 @@
 {
-    "output_file_base": "demo08_particle_splitting",
-    "add_date_to_run_output_dir": false,
-    "time_step": 600,
-    "reader": {
-        "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
-        "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "demoHindcast2D*.nc",
-        "search_sub_dirs": true,
-        "dimension_map": {
-            "time": "time",
-            "node": "nodes"
-        },
-        "grid_variables": {
-            "time": "time_sec",
-            "x": [
-                "east",
-                "north"
-            ],
-            "triangles": "tri"
-        },
-        "field_variables": {
-            "water_velocity": [
-                "east_vel",
-                "north_vel"
-            ],
-            "water_depth": "depth",
-            "tide": "tide"
-        },
-        "time_buffer_size": 15,
-        "isodate_of_hindcast_time_zero": "2020-06-01"
-    },
-    "user_note": "test of notes",
-    "dispersion": {
-        "A_H": 0.1
-    },
-    "tracks_writer": {
-        "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
-        "write_dry_cell_index": true
-    },
-    "particle_release_groups_dict": {
-        "mypoints1": {
-            "points": [
-                [
-                    1594500,
-                    5483000
-                ]
-            ],
-            "pulse_size": 200,
-            "release_interval": 0
-        }
-    },
-    "particle_properties": [
-        {
-            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-            "decay_time_scale": 86400.0
-        }
-    ],
-    "particle_release_groups": {
-        "P1": {
-            "points": [
-                [
-                    1594500,
-                    5483500
-                ],
-                [
-                    1594500,
-                    5486500
-                ]
-            ],
-            "pulse_size": 1,
-            "release_interval": 0
-        }
-    },
-    "block_dry_cells": true,
-    "compact_mode": false,
-    "event_loggers": [
-        {
+    "dispersion_class": {},
+    "reader_class": {},
+    "resuspension_class": {},
+    "tracks_writer_class": {},
+    "event_loggers_dict": {
+        "in_out_poly": {
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [
                 "ID",
@@ -145,21 +74,113 @@
                 }
             ]
         }
-    ],
+    },
+    "fields_dict": {},
+    "particle_concentrations_dict": {},
+    "particle_properties_dict": {
+        "Oxygen": {
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 86400.0,
+            "initial_value": 20.0
+        },
+        "distance_travelled": {
+            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
+        }
+    },
+    "particle_release_groups_dict": {
+        "mypoints1": {
+            "points": [
+                [
+                    1594500,
+                    5483000
+                ]
+            ],
+            "pulse_size": 200,
+            "release_interval": 0
+        }
+    },
+    "particle_statistics_dict": {},
+    "status_modifiers_dict": {},
+    "time_varying_info_dict": {},
+    "trajectory_modifiers_dict": {},
+    "velocity_modifiers_dict": {},
+    "output_file_base": "demo08_particle_splitting",
+    "add_date_to_run_output_dir": false,
+    "time_step": 600,
+    "reader": {
+        "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
+        "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "demoHindcast2D*.nc",
+        "search_sub_dirs": true,
+        "dimension_map": {
+            "time": "time",
+            "node": "nodes"
+        },
+        "grid_variables": {
+            "time": "time_sec",
+            "x": [
+                "east",
+                "north"
+            ],
+            "triangles": "tri"
+        },
+        "field_variables": {
+            "water_velocity": [
+                "east_vel",
+                "north_vel"
+            ],
+            "water_depth": "depth",
+            "tide": "tide"
+        },
+        "time_buffer_size": 15,
+        "isodate_of_hindcast_time_zero": "2020-06-01"
+    },
+    "user_note": "test of notes",
+    "dispersion": {
+        "A_H": 0.1
+    },
+    "tracks_writer": {
+        "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
+        "write_dry_cell_index": true
+    },
+    "particle_release_groups": {
+        "P1": {
+            "points": [
+                [
+                    1594500,
+                    5483500
+                ],
+                [
+                    1594500,
+                    5486500
+                ]
+            ],
+            "pulse_size": 1,
+            "release_interval": 0
+        }
+    },
+    "block_dry_cells": true,
+    "compact_mode": false,
+    "particle_properties": {
+        "age_decay": {
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "decay_time_scale": 86400.0
+        }
+    },
     "retain_culled_part_locations": true,
     "particle_buffer_size": 5000,
-    "trajectory_modifiers": [
-        {
+    "trajectory_modifiers": {
+        "part_spliting": {
             "class_name": "oceantracker.trajectory_modifiers.split_particles.SplitParticles",
             "splitting_interval": 21600,
             "split_status_greater_than": "frozen"
         },
-        {
+        "part_culling": {
             "class_name": "oceantracker.trajectory_modifiers.cull_particles.CullParticles",
             "cull_interval": 21600,
             "cull_status_greater_than": "dead",
             "probability_of_culling": 0.05
         }
-    ],
+    },
     "root_output_dir": "output"
 }

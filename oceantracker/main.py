@@ -41,6 +41,17 @@ from oceantracker.reader.util import check_hydro_model
 
 import traceback
 OTname = common_info.package_fancy_name
+
+def param_template():
+    # return an empty parameter dictionary, with important class keys
+    d= {}
+    for key in sorted(common_info.core_classes.keys()):
+        if not 'manager' in key and key not in ['solver','interpolator','time_varying_info']:
+            d[key+'_class'] ={}
+    for key in sorted(common_info.class_dicts.keys()):
+        d[key + '_dict'] = {}
+    return d
+
 def run(params):
     # run oceantracker
     msg_logger = MessageLogger('startup:')
@@ -138,9 +149,9 @@ def _decompose_params(params,msg_logger, add_shared_settings=True):
        'class_lists':deepcopy(common_info.class_lists), # old way
        }
 
-    # split   and check for unknown keys
+    # split and check for unknown keys
     for key, item in params.items():
-        k = key.removesuffix('_class').removesuffix('_dict').removesuffix('_list')
+        k = key.removesuffix('_class').removesuffix('_dict').removesuffix('_dicts').removesuffix('_list')
         if k in common_info.shared_settings_defaults.keys():
             if add_shared_settings:
                 w['shared_settings'][k] = item
@@ -148,9 +159,11 @@ def _decompose_params(params,msg_logger, add_shared_settings=True):
                 w['case_settings'][k] = item
         elif k in common_info.core_classes.keys():
             w['core_classes'][k].update(item)
+
         elif k in common_info.class_dicts.keys():
             if type(item) is not dict:
-                msg_logger.msg('class dict type "' + key +'" must contain a dictionary, where key is name of class, values are its parameters',
+                msg_logger.msg('class dict type "' + key +'" must contain a dictionary, where key is name of class, value is a dictionary of parameters',
+                                 hint = ' for this key got type =' +str(type(item)),
                                fatal_error=True)
             w['class_dicts'][k] = item
         # old way below

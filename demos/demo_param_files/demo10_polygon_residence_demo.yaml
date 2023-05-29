@@ -3,13 +3,18 @@ block_dry_cells: true
 compact_mode: true
 dispersion:
   A_H: 0.1
+dispersion_class: {}
+event_loggers_dict: {}
+fields_dict: {}
 output_file_base: demo10_polygon_residence_demo
-particle_properties:
-- class_name: oceantracker.particle_properties.age_decay.AgeDecay
-  decay_time_scale: 86400.0
-  initial_value: 20.0
-  name: Oxygen
-- class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+particle_concentrations_dict: {}
+particle_properties_dict:
+  Oxygen:
+    class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+    initial_value: 20.0
+  distance_travelled:
+    class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
 particle_release_groups:
   near_shore:
     class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
@@ -40,6 +45,7 @@ particle_statistics:
 - calculation_interval: 1800
   class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
   name_of_polygon_release_group: near_shore
+particle_statistics_dict: {}
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -62,9 +68,16 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
+reader_class: {}
+resuspension_class: {}
 root_output_dir: output
+status_modifiers_dict: {}
 time_step: 600
+time_varying_info_dict: {}
 tracks_writer:
   class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
   write_dry_cell_index: true
+tracks_writer_class: {}
+trajectory_modifiers_dict: {}
 user_note: test of notes
+velocity_modifiers_dict: {}

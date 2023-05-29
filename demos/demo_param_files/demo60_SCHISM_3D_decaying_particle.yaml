@@ -5,9 +5,10 @@ dispersion:
   A_V: 0.001
 output_file_base: demo60_SCHISM_3D_decaying_particle
 particle_properties:
-- class_name: oceantracker.particle_properties.age_decay.AgeDecay
-  decay_time_scale: 25714.28571428571
-  name: C
+  age_decay:
+    class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 25714.28571428571
+    name: C
 particle_release_groups:
   P1:
     maximum_age: 17280.000000000004
