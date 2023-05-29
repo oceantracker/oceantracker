@@ -180,6 +180,7 @@ class GenericUnstructuredReader(_BaseReader):
         t0 = perf_counter()
         grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
         msg_logger.progress_marker('calculated triangle areas', start_time=t0)
+        msg_logger.msg('Finished grid setup', start_time=t0, tabs=1)
         return grid
 
 

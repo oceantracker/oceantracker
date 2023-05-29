@@ -1,10 +1,11 @@
 - add_date_to_run_output_dir: false
+  advanced_settings:
+    multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_0
   compact_mode: true
   dispersion:
     A_H: 0.1
-  multiprocessing_case_start_delay: 1.0
   output_file_base: demo05_parallel
   particle_properties_dict:
     Oxygen:
@@ -78,12 +79,13 @@
     write_dry_cell_index: true
   user_note: test of notes
 - add_date_to_run_output_dir: false
+  advanced_settings:
+    multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_1
   compact_mode: true
   dispersion:
     A_H: 0.1
-  multiprocessing_case_start_delay: 1.0
   output_file_base: demo05_parallel
   particle_properties_dict:
     Oxygen:
@@ -156,12 +158,13 @@
     write_dry_cell_index: true
   user_note: test of notes
 - add_date_to_run_output_dir: false
+  advanced_settings:
+    multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_2
   compact_mode: true
   dispersion:
     A_H: 0.1
-  multiprocessing_case_start_delay: 1.0
   output_file_base: demo05_parallel
   particle_properties_dict:
     Oxygen:
@@ -234,12 +237,13 @@
     write_dry_cell_index: true
   user_note: test of notes
 - add_date_to_run_output_dir: false
+  advanced_settings:
+    multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_3
   compact_mode: true
   dispersion:
     A_H: 0.1
-  multiprocessing_case_start_delay: 1.0
   output_file_base: demo05_parallel
   particle_properties_dict:
     Oxygen:
@@ -312,12 +316,13 @@
     write_dry_cell_index: true
   user_note: test of notes
 - add_date_to_run_output_dir: false
+  advanced_settings:
+    multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_4
   compact_mode: true
   dispersion:
     A_H: 0.1
-  multiprocessing_case_start_delay: 1.0
   output_file_base: demo05_parallel
   particle_properties_dict:
     Oxygen:

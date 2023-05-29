@@ -36,9 +36,7 @@ class BasicResuspension(_BaseResuspension):
         si.classes['field_group_manager'].create_field('derived_from_reader_field',
                     {'class_name':self.params['friction_velocity_field_class_name'],
                      }, crumbs='initializing resuspension class ')
-        si.classes['particle_group_manager'].create_particle_property('from_fields',
-                    {'name':'friction_velocity'},
-                    crumbs='initializing resuspension class ')
+        si.classes['particle_group_manager'].create_particle_property('friction_velocity','from_fields', {}, crumbs='initializing resuspension class ')
 
     from oceantracker.fields.friction_velocity import FrictionVelocity
     def select_particles_to_resupend(self, active):

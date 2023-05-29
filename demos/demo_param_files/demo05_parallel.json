@@ -113,7 +113,9 @@
         "block_dry_cells": true,
         "compact_mode": true,
         "processors": 2,
-        "multiprocessing_case_start_delay": 1.0,
+        "advanced_settings": {
+            "multiprocessing_case_start_delay": 1.0
+        },
         "case_output_file_tag": "test_case_tag_0",
         "root_output_dir": "output"
     },
@@ -231,7 +233,9 @@
         "block_dry_cells": true,
         "compact_mode": true,
         "processors": 2,
-        "multiprocessing_case_start_delay": 1.0,
+        "advanced_settings": {
+            "multiprocessing_case_start_delay": 1.0
+        },
         "case_output_file_tag": "test_case_tag_1"
     },
     {
@@ -348,7 +352,9 @@
         "block_dry_cells": true,
         "compact_mode": true,
         "processors": 2,
-        "multiprocessing_case_start_delay": 1.0,
+        "advanced_settings": {
+            "multiprocessing_case_start_delay": 1.0
+        },
         "case_output_file_tag": "test_case_tag_2"
     },
     {
@@ -465,7 +471,9 @@
         "block_dry_cells": true,
         "compact_mode": true,
         "processors": 2,
-        "multiprocessing_case_start_delay": 1.0,
+        "advanced_settings": {
+            "multiprocessing_case_start_delay": 1.0
+        },
         "case_output_file_tag": "test_case_tag_3"
     },
     {
@@ -582,7 +590,9 @@
         "block_dry_cells": true,
         "compact_mode": true,
         "processors": 2,
-        "multiprocessing_case_start_delay": 1.0,
+        "advanced_settings": {
+            "multiprocessing_case_start_delay": 1.0
+        },
         "case_output_file_tag": "test_case_tag_4"
     }
 ]

@@ -383,7 +383,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for prop_type in ['from_reader_field','derived_from_reader_field','depth_averaged_from_reader_field']:
             for name, i in si.classes['fields'].items():
                 if i.info['field_type'] == prop_type:
-                    pgm.create_particle_property('from_fields', dict(name=name,  vector_dim=i.get_number_components(), time_varying=True,
+                    pgm.create_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
                                                                  write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
         si.msg_logger.progress_marker('created particle properties derived from fields', start_time=t0)
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
@@ -391,8 +391,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             i = si.create_class_dict_instance('fields', 'user', params, crumbs='Adding "fields" from user params')
             i.initial_setup()
             # now add custom prop based on  this field
-            pgm.create_particle_property('from_fields', dict(name=i.params['name'], vector_dim=i.get_number_components(),
-                                                             time_varying=i.is_time_varying(),
+            pgm.create_particle_property(i.params['name'], 'from_fields', dict(vector_dim=i.get_number_components(), time_varying=i.is_time_varying(),
                                                              write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
 
             # if not time varying can update once at start from other non-time varying fields
@@ -400,7 +399,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # any custom particle properties added by user
         for name, p in si.working_params['class_dicts']['particle_properties'].items():
-            pgm.create_particle_property('user',p,name=name)
+            pgm.create_particle_property(name, 'user',p)
 
         # add default classes, eg tidal stranding
         #todo this may be better else where
