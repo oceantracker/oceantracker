@@ -120,21 +120,20 @@
 <span class="c1">#---------------------------------------</span>
 <span class="kn">import</span> <span class="nn">oceantracker.main</span> <span class="k">as</span> <span class="nn">main</span>
 <span class="kn">from</span> <span class="nn">oceantracker.util</span> <span class="kn">import</span> <span class="n">json_util</span>
-<span class="n">params</span> <span class="o">=</span> <span class="n">json_util</span><span class="o">.</span><span class="n">read_JSON</span><span class="p">(</span><span class="s2">&quot;..\demo_json\demo03_heatmaps.json&quot;</span><span class="p">)</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">json_util</span><span class="o">.</span><span class="n">read_JSON</span><span class="p">(</span><span class="s2">&quot;..\demo_param_files\demo03_heatmaps.json&quot;</span><span class="p">)</span>
 
 <span class="n">runInfo_file_name</span><span class="p">,</span> <span class="n">has_errors</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 
 <span class="c1"># output is now in output/demo03_heatmaps</span>
 
 <span class="c1"># below only required for plotting</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files.load_output_files</span> <span class="kn">import</span> <span class="n">load_stats_file</span><span class="p">,</span> <span class="n">get_case_info_file_from_run_file</span>
+<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files.load_output_files</span> <span class="kn">import</span> <span class="n">load_stats_file</span>
 <span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_statistics</span> <span class="kn">import</span> <span class="n">plot_heat_map</span><span class="p">,</span> <span class="n">animate_heat_map</span>
 
 <span class="n">output_file</span><span class="o">=</span> <span class="s2">&quot;output\demo03_heatmaps&quot;</span>
 
-<span class="n">case_info_file_name</span> <span class="o">=</span> <span class="n">get_case_info_file_from_run_file</span><span class="p">(</span><span class="n">runInfo_file_name</span><span class="p">)</span>
 
-<span class="n">stats_data</span> <span class="o">=</span> <span class="n">load_stats_file</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;water_depth&#39;</span><span class="p">],</span> <span class="n">nsequence</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">stats_data</span> <span class="o">=</span> <span class="n">load_stats_file</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;water_depth&#39;</span><span class="p">])</span>
 <span class="n">axis_lims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5478500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">]</span>
 <span class="n">animate_heat_map</span><span class="p">(</span><span class="n">stats_data</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">axis_lims</span><span class="p">,</span>
                                 <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Particle count heatmaps built on the fly, no tracks recorded, log scale&#39;</span><span class="p">,</span>
@@ -142,189 +141,58 @@
                                 <span class="n">fps</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 <span class="n">plot_heat_map</span><span class="p">(</span><span class="n">stats_data</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">axis_lims</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;water_depth&#39;</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Water depth built on the fly, no tracks recorded&#39;</span><span class="p">,</span>
                              <span class="n">plot_file_name</span><span class="o">=</span><span class="n">output_file</span> <span class="o">+</span> <span class="s1">&#39;_water_depth.jpeg&#39;</span> <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">load_stats_file</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">,</span> <span class="n">nsequence</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;water_depth&#39;</span><span class="p">])</span>  <span class="c1"># test polygon stats loading, in second stats file</span>
 </pre></div>
 </div>
 </div>
 </details><details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="container-2">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/demo03_heatmaps.json</span><a class="headerlink" href="#container-2" title="Permalink to this code">¶</a></div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;shared_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo03_heatmaps&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;add_date_to_run_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;time_step&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoHindcast2D*.nc&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;search_sub_dirs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;dimension_map&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;time&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;node&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nodes&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;grid_variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;time_sec&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;east&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;north&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;triangles&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tri&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;field_variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;water_velocity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;east_vel&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;north_vel&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;water_depth&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;depth&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;tide&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tide&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;time_buffer_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;isodate_of_hindcast_time_zero&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-06-01&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;base_case_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;run_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;user_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test of notes&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;write_tracks&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">259200</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;dispersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;A_H&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;tracks_writer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;turn_on_write_particle_properties_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;n_cell&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;write_dry_cell_index&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;particle_release_groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="p">[</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">1596000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">5486000</span><span class="w"></span>
-<span class="w">                    </span><span class="p">]</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7200</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;release_radius&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100.0</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="p">[</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">1596000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">5490000</span><span class="w"></span>
-<span class="w">                    </span><span class="p">]</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7200</span><span class="w"></span>
-<span class="w">            </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="p">],</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;particle_properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Oxygen&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.age_decay.AgeDecay&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;decay_time_scale&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">86400.0</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;initial_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">20.0</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.distance_travelled.DistanceTravelled&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="p">],</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;particle_statistics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;calculation_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;particle_property_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;water_depth&quot;</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;grid_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">220</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">221</span><span class="w"></span>
-<span class="w">                </span><span class="p">]</span><span class="w"></span>
-<span class="w">            </span><span class="p">},</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;count_status_in_range&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;moving&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;moving&quot;</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;calculation_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;particle_property_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="s2">&quot;water_depth&quot;</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;polygon_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="p">{</span><span class="w"></span>
-<span class="w">                        </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="p">[</span><span class="w"></span>
-<span class="w">                                </span><span class="mf">1597682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                            </span><span class="p">],</span><span class="w"></span>
-<span class="w">                            </span><span class="p">[</span><span class="w"></span>
-<span class="w">                                </span><span class="mf">1598604.1667</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                </span><span class="mf">5490275.5488</span><span class="w"></span>
-<span class="w">                            </span><span class="p">],</span><span class="w"></span>
-<span class="w">                            </span><span class="p">[</span><span class="w"></span>
-<span class="w">                                </span><span class="mf">1598886.4247</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                </span><span class="mf">5489464.0424</span><span class="w"></span>
-<span class="w">                            </span><span class="p">],</span><span class="w"></span>
-<span class="w">                            </span><span class="p">[</span><span class="w"></span>
-<span class="w">                                </span><span class="mf">1597917.3387</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                </span><span class="mi">5489000</span><span class="w"></span>
-<span class="w">                            </span><span class="p">],</span><span class="w"></span>
-<span class="w">                            </span><span class="p">[</span><span class="w"></span>
-<span class="w">                                </span><span class="mi">1597300</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                </span><span class="mi">5489000</span><span class="w"></span>
-<span class="w">                            </span><span class="p">],</span><span class="w"></span>
-<span class="w">                            </span><span class="p">[</span><span class="w"></span>
-<span class="w">                                </span><span class="mf">1597682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                            </span><span class="p">]</span><span class="w"></span>
-<span class="w">                        </span><span class="p">]</span><span class="w"></span>
-<span class="w">                    </span><span class="p">}</span><span class="w"></span>
-<span class="w">                </span><span class="p">]</span><span class="w"></span>
-<span class="w">            </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="p">]</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</pre></div>
-</div>
-</div>
-</details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-3">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo03_heatmaps.yaml</span><a class="headerlink" href="#container-3" title="Permalink to this code">¶</a></div>
-<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base_case_params</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">particle_properties</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.age_decay.AgeDecay</span><span class="w"></span>
+<summary> json parameters </summary></details><details>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-2">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo03_heatmaps.yaml</span><a class="headerlink" href="#container-2" title="Permalink to this code">¶</a></div>
+<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">add_date_to_run_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">259200</span><span class="w"></span>
+<span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo03_heatmaps</span><span class="w"></span>
+<span class="nt">particle_properties_dict</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">Oxygen</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.age_decay.AgeDecay</span><span class="w"></span>
 <span class="w">    </span><span class="nt">decay_time_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">86400.0</span><span class="w"></span>
 <span class="w">    </span><span class="nt">initial_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20.0</span><span class="w"></span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Oxygen</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.distance_travelled.DistanceTravelled</span><span class="w"></span>
-<span class="w">  </span><span class="nt">particle_release_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">distance_travelled</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.distance_travelled.DistanceTravelled</span><span class="w"></span>
+<span class="nt">particle_release_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">myP1</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1596000</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5486000</span><span class="w"></span>
 <span class="w">    </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span><span class="w"></span>
 <span class="w">    </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7200</span><span class="w"></span>
 <span class="w">    </span><span class="nt">release_radius</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100.0</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">myP2</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1596000</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490000</span><span class="w"></span>
 <span class="w">    </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span><span class="w"></span>
 <span class="w">    </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7200</span><span class="w"></span>
-<span class="w">  </span><span class="nt">particle_statistics</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">calculation_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span><span class="w"></span>
+<span class="nt">particle_release_groups_dict</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">mypoints1</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5483000</span><span class="w"></span>
+<span class="w">    </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span><span class="w"></span>
+<span class="w">    </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="nt">particle_statistics_dict</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">gridstats1</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">calculation_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span><span class="w"></span>
 <span class="w">    </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased</span><span class="w"></span>
+<span class="w">    </span><span class="nt">count_start_date</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2020-06-01</span><span class="nv"> </span><span class="s">21:16:07&#39;</span><span class="w"></span>
 <span class="w">    </span><span class="nt">grid_size</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">220</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">221</span><span class="w"></span>
 <span class="w">    </span><span class="nt">particle_property_list</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_depth</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">calculation_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span><span class="w"></span>
+<span class="w">  </span><span class="nt">polystats1</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">calculation_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span><span class="w"></span>
 <span class="w">    </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased</span><span class="w"></span>
 <span class="w">    </span><span class="nt">count_status_in_range</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">moving</span><span class="w"></span>
@@ -345,14 +213,6 @@
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">  </span><span class="nt">run_params</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">259200</span><span class="w"></span>
-<span class="w">    </span><span class="nt">user_note</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test of notes</span><span class="w"></span>
-<span class="w">    </span><span class="nt">write_tracks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">  </span><span class="nt">tracks_writer</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">turn_on_write_particle_properties_list</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">n_cell</span><span class="w"></span>
-<span class="w">    </span><span class="nt">write_dry_cell_index</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="nt">reader</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dimension_map</span><span class="p">:</span><span class="w"></span>
@@ -375,11 +235,14 @@
 <span class="w">  </span><span class="nt">isodate_of_hindcast_time_zero</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2020-06-01&#39;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">search_sub_dirs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">  </span><span class="nt">time_buffer_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span><span class="w"></span>
-<span class="nt">shared_params</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">add_date_to_run_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">  </span><span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo03_heatmaps</span><span class="w"></span>
-<span class="w">  </span><span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span><span class="w"></span>
-<span class="w">  </span><span class="nt">time_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">900</span><span class="w"></span>
+<span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span><span class="w"></span>
+<span class="nt">time_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">900</span><span class="w"></span>
+<span class="nt">tracks_writer</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">turn_on_write_particle_properties_list</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">n_cell</span><span class="w"></span>
+<span class="w">  </span><span class="nt">write_dry_cell_index</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="nt">user_note</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test of notes</span><span class="w"></span>
+<span class="nt">write_tracks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
 </pre></div>
 </div>
 </div>

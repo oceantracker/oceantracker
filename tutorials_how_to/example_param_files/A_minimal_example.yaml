@@ -1,12 +1,13 @@
 output_file_base: minimal_example
-particle_release_groups_list:
-- points:
-  - - 1595000
-    - 5482600
-  - - 1599000
-    - 5486200
-  pulse_size: 10
-  release_interval: 3600
+particle_release_groups_dict:
+  my_release_point:
+    points:
+    - - 1595000
+      - 5482600
+    - - 1599000
+      - 5486200
+    pulse_size: 10
+    release_interval: 3600
 reader_class:
   file_mask: demoHindcastSchism*.nc
   input_dir: ..\demos\demo_hindcast

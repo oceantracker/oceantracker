@@ -394,7 +394,7 @@ class _BaseReader(ParameterBaseClass):
 
             # read time varying vector and scalar reader fields
             for name, field in si.classes['fields'].items():
-                if field.is_time_varying() and field.info['field_type'] == 'from_reader_field':
+                if field.is_time_varying() and field.info['group'] == 'from_reader_field':
                     data_added_to_buffer = self.assemble_field_components(nc, field, buffer_index=buffer_index, file_index=file_index)
                     data_added_to_buffer = self.preprocess_field_variable(nc, name, data_added_to_buffer) # do any customised tweaks
 
@@ -412,7 +412,7 @@ class _BaseReader(ParameterBaseClass):
             # now all  data has been read from file, now
             # update user fields from newly read fields and data
             for name, i in si.classes['fields'].items():
-                if i.is_time_varying() and i.info['field_type'] in ['derived_from_reader_field','user']:
+                if i.is_time_varying() and i.info['group'] in ['derived_from_reader_field','user']:
                     i.update(buffer_index)
 
             total_read += num_read

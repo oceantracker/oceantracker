@@ -16,21 +16,18 @@ SCHSIMreaderNCDF
 Parameters:
 ************
 
+	* ``EPSG_transform_code`` :   ``<class 'int'>``   *<optional>*
+		Description: - Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)
+
+		- default: ``None``
+		- min: ``0``
+
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
 
-	* ``coordinate_projection`` :   ``<class 'str'>``   *<optional>*
-		Description: - string map project for meters grid for use by pyproj module, eg  "proj=utm +zone=16 +datum=NAD83"
-
-		- default: ``None``
-
 	* ``cords_in_lat_long`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
-	* ``depth_average`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
@@ -53,7 +50,7 @@ Parameters:
 
 		* ``water_velocity``:  *<optional>*
 			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['hvel']``
+			- default list : ``[]``
 			- can_be_empty_list: ``True``
 			- fixed_len: ``2``
 
@@ -105,8 +102,12 @@ Parameters:
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
 
-	* ``search_sub_dirs`` :   ``<class 'bool'>``   *<optional>*
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``search_sub_dirs`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
 		- possible_values: ``[True, False]``
 
 	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*

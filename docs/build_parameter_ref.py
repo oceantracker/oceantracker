@@ -4,7 +4,7 @@ from glob import  glob
 import inspect
 import importlib
 
-from oceantracker.common_info_default_param_dict_templates import run_params_defaults_template, default_param_template, default_class_names
+import oceantracker.common_info_default_param_dict_templates as common_info
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
@@ -13,7 +13,7 @@ root_param_ref_dir = path.join(package_util.get_root_package_dir(),'docs', 'info
 
 
 class RSTfileBuilder(object):
-    def __init__(self, file_name,title):
+    def __init__(self, file_name, title):
         self.lines=[]
         self.toc_dict = {}
         self.file_name = file_name + '.rst'
@@ -160,10 +160,7 @@ class RSTfileBuilder(object):
 def make_sub_pages(class_type):
     # make doc pages from defaults of all python in named dir
 
-    if class_type in default_class_names:
-        mod_name= default_class_names[class_type].rsplit('.', maxsplit=2)[0]
-    else:
-        mod_name=package_util.get_package_name()+ '.' +class_type
+    mod_name=package_util.get_package_name() + '.' + class_type
 
     mod = importlib.import_module( mod_name)
 
@@ -245,12 +242,37 @@ def build_param_ref():
     page.add_lines()
     page.add_directive('note',body= 'Lots more to add here!!')
 
-    page.add_heading('Top level parameters',level=1)
-    sp = RSTfileBuilder('shared_params', 'shared_params')
-    sp.write_param_dict_defaults(run_params_defaults_template['shared_params'])
+    page.add_heading('Settings',level=1)
+    sp = RSTfileBuilder('settings', 'settings')
 
+    settings_dict = common_info.shared_settings_defaults
+    settings_dict.update(common_info.case_settings_defaults)
+
+    sp.write_param_dict_defaults(settings_dict)
     page.add_new_toc_to_page('top', maxdepth=1)
+
+    page.add_new_toc_to_page('settings', sp)
+
+
+
+    # core classes
+    page.add_heading('Core classes',level=2)
+    page.add_new_toc_to_page('core', maxdepth=1)
+    for key in sorted(common_info.core_classes.keys()):
+        #if key in ['run_params'] or  type(common_info.core_classes[key])==list: continue
+
+        toc = make_sub_pages(key)
+        page.add_toc_link('core', toc)
+
+    page.write()
+    return
+
+
     page.add_toc_link('top', sp)
+
+
+
+
 
     # look at readers
     toc= make_sub_pages('reader')

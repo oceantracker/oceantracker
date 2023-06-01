@@ -156,72 +156,8 @@ For this 3D hindcast, grey particles are stranded on the bottom, green ones are 
 <div><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run_oceantracker.py</span> <span class="pre">--param_file</span> <span class="pre">minimal_example.yaml</span></code></p>
 </div></blockquote>
 <details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="container-2">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_json/minimal_example.json</span><a class="headerlink" href="#container-2" title="Permalink to this code">¶</a></div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;shared_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;minimal_example&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.reader.schism_reader.SCHSIMreaderNCDF&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoHindcastSchism3D.nc&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;base_case_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;solver&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;n_sub_steps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;particle_release_groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">            </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="p">[</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">1595000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">5483300</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">-2</span><span class="w"></span>
-<span class="w">                    </span><span class="p">],</span><span class="w"></span>
-<span class="w">                    </span><span class="p">[</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">1596000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">5487200</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="mi">-2</span><span class="w"></span>
-<span class="w">                    </span><span class="p">]</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="w"></span>
-<span class="w">            </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="p">]</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</pre></div>
-</div>
-</div>
-</details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-3">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/minimal_example.yaml</span><a class="headerlink" href="#container-3" title="Permalink to this code">¶</a></div>
-<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base_case_params</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">particle_release_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1595000</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5483300</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-2</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1596000</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487200</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">    </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span><span class="w"></span>
-<span class="w">  </span><span class="nt">solver</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">n_sub_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12</span><span class="w"></span>
-<span class="nt">reader</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.reader.schism_reader.SCHSIMreaderNCDF</span><span class="w"></span>
-<span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoHindcastSchism3D.nc</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo_hindcast</span><span class="w"></span>
-<span class="nt">shared_params</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">minimal_example</span><span class="w"></span>
-<span class="w">  </span><span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span><span class="w"></span>
-</pre></div>
-</div>
-</div>
-</details><p>Output is written to directory given set by shared_parameters, ie. a dir named</p>
+<summary> json parameters </summary></details><details>
+<summary> yaml parameters </summary></details><p>Output is written to directory given set by shared_parameters, ie. a dir named</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">['root_output_dir']/['output_file_base']</span></code></p>
 </div></blockquote>

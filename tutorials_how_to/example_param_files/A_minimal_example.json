@@ -1,1 +1,25 @@
-{"output_file_base": "minimal_example", "root_output_dir": "output", "reader_class": {"input_dir": "..\\demos\\demo_hindcast", "file_mask": "demoHindcastSchism*.nc"}, "particle_release_groups_list": [{"points": [[1595000, 5482600], [1599000, 5486200]], "release_interval": 3600, "pulse_size": 10}], "time_step": 120}
+{
+    "reader_class": {
+        "input_dir": "..\\demos\\demo_hindcast",
+        "file_mask": "demoHindcastSchism*.nc"
+    },
+    "particle_release_groups_dict": {
+        "my_release_point": {
+            "points": [
+                [
+                    1595000,
+                    5482600
+                ],
+                [
+                    1599000,
+                    5486200
+                ]
+            ],
+            "release_interval": 3600,
+            "pulse_size": 10
+        }
+    },
+    "output_file_base": "minimal_example",
+    "root_output_dir": "output",
+    "time_step": 120
+}

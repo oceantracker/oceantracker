@@ -9,7 +9,7 @@ def check_fileformat(reader_params, msg_logger):
 
     #first check if folder exists
     if not path.isdir(input_dir):
-        msg_logger.msg('Cannot find hydro-model file directory= ' + str(input_dir), fatal_error=True,exit_now=True,
+        msg_logger.msg('Cannot find hydro-model file directory= "' + str(input_dir)+ '"', fatal_error=True,exit_now=True,
                        hint='check reader parameter "input_dir"')
 
     file_mask = reader_params['file_mask']

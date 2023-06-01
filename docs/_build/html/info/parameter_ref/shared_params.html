@@ -123,9 +123,74 @@
 </dl>
 </li>
 <li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">advanced_settings</span></code>: nested parameter dictionary</dt><dd><ul>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">max_warnings</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">50</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">multiprocessing_case_start_delay</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">numba_function_cache_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1024</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">128</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">profiler</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">oceantracker</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['none',</span> <span class="pre">'oceantracker',</span> <span class="pre">'cprofiler',</span> <span class="pre">'line_profiler',</span> <span class="pre">'scalene']</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">use_random_seed</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Makes results reproducible, only use for testing developments give the same results!</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">backtracking</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">block_dry_cells</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">case_output_file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - insert this tag into output files name fore each case</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -148,17 +213,16 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">max_duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">timedelta</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Maximun duation in seconds to run all cases. Each case can have its own duration, this sets the maximum, useful in tsstingUseful</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">31536000000</span></code></p></li>
+<dt><code class="docutils literal notranslate"><span class="pre">duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1e+300</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">max_warnings</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">50</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<dt><code class="docutils literal notranslate"><span class="pre">max_duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Maximum duration in seconds to run all cases. Each case can have its own duration, this sets the maximum, useful in testing</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">31536000000</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -173,17 +237,11 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">multiprocessing_case_start_delay</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">numba_function_cache_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">1024</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">128</span></code></p></li>
+<dt><code class="docutils literal notranslate"><span class="pre">open_boundary_type</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p>max: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -191,7 +249,15 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">output_file_base</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - The start/base of all output files and name of sub-dir where output will be written</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">default_output_file_base</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">output_file_base</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">particle_buffer_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -206,10 +272,10 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">replicates</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - number of replicates of each case to run, allows running larger particle numbers for each case in less time if running in parallel</p>
+<dt><code class="docutils literal notranslate"><span class="pre">retain_culled_part_locations</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - When particle marked dead/culled keep its position value, ie dont set position to nan so it does not appear in plots etc after death</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -217,7 +283,15 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">root_output_dir</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - base dir for all output files</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">default_root_output_dir</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">root_output_dir</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">run_as_depth_averaged</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -225,15 +299,7 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">screen_output_time_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Time in seconds between writing progress to the screen/log file</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">shared_reader_memory</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">3600.0</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -241,17 +307,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">time_step</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Time step in seconds for all cases</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">3600.0</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.001</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">use_numpy_random_seed</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Makes results reproducible, only use for testing developments give the same results!</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.01</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -276,6 +333,22 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">write_tracks</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">z0</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">0.005</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0001</span></code></p></li>
 </ul>
 </dd>
 </dl>

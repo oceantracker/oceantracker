@@ -207,7 +207,7 @@ the computational pipeline by the ParticleGroupManager. Then it will automatical
 <div class="code-block-caption"><span class="caption-text">../../../oceantracker/particle_properties/age_decay.py</span><a class="headerlink" href="#container-1" title="Permalink to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">oceantracker.particle_properties._base_properties</span> <span class="kn">import</span> <span class="n">ParticleProperty</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">oceantracker.util.parameter_checking</span> <span class="kn">import</span> <span class="n">ParamDictValueChecker</span> <span class="k">as</span> <span class="n">PVC</span>
+<span class="kn">from</span> <span class="nn">oceantracker.util.parameter_checking</span> <span class="kn">import</span> <span class="n">ParamValueChecker</span> <span class="k">as</span> <span class="n">PVC</span>
 <span class="k">class</span> <span class="nc">AgeDecay</span><span class="p">(</span><span class="n">ParticleProperty</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

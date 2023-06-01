@@ -64,13 +64,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.computer_info = get_versions_computer_info.get_computer_info()
 
         # set processors for threading, ie numba/parallel prange loops
-        if si.settings['max_threads'] is None:
-            si.settings['max_threads']= si.computer_info['CPUs_hardware'] - 2
+        #if si.settings['max_threads'] is None:
+         #   si.settings['max_threads']= si.computer_info['CPUs_hardware'] - 2
 
-        set_num_threads(max(1, si.settings['max_threads']))
+        #set_num_threads(max(1, si.settings['max_threads']))
 
         # set up profiling
-        profiling_util.set_profile_mode(si.settings['profiler'])
+        profiling_util.set_profile_mode(si.settings['advanced_settings']['profiler'])
 
         case_info_file = None
         case_exception = None
@@ -139,6 +139,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                       + ', ended: ' + str(datetime.now()))
         si.msg_logger.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
         si.msg_logger.insert_screen_line()
+
+        self.close()  # close al classes
         si.msg_logger.close()
         case_info_file = path.join(si.run_output_dir,case_info_file)
         return case_info_file, False
@@ -200,9 +202,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # ------------------------------------------
 
 
-        # close all instances
-        for i in si.all_class_instance_pointers_iterator():
-            i.close()
 
 
     def _do_run_integrity_checks(self):
@@ -382,7 +381,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         t0= perf_counter()
         for prop_type in ['from_reader_field','derived_from_reader_field','depth_averaged_from_reader_field']:
             for name, i in si.classes['fields'].items():
-                if i.info['field_type'] == prop_type:
+                if i.info['group'] == prop_type:
                     pgm.create_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
                                                                  write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
         si.msg_logger.progress_marker('created particle properties derived from fields', start_time=t0)
@@ -410,7 +409,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for user_type in ['velocity_modifiers','trajectory_modifiers','status_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
             for name, params in si.working_params['class_dicts'][user_type].items():
-                i = si.create_class_dict_instance(name, user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
+                i = si.create_class_dict_instance(name,user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
 
     # ____________________________
@@ -484,3 +483,15 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         return d
 
 
+    def close(self):
+        # close all instances, eg their files if not close etc
+        si=self.shared_info
+        ml = si.msg_logger
+
+        for i in si.all_class_instance_pointers_iterator():
+            try:
+                i.close()
+
+            except Exception as e:
+
+                ml.msg(f'Unexpected error closing class ="{ i.info["name"]}"', fatal_error= True, exception=e)

@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Future development" href="future_dev.html" />
-    <link rel="prev" title="Internal code structure" href="users_guide/internal_structure.html" />
+    <link rel="prev" title="Post processing" href="users_guide/post_processing.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -58,44 +58,50 @@
 <li class="toctree-l1 current"><a class="reference internal" href="users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="users_guide/installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="users_guide/code_structure.html">Code Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html">Parameters overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html">Post processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/documentation.html">Documentation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Change log</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#known-issues">Known issues</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#version-0-3-03-000-2023-01-03">Version 0.3.03.000 2023-01-03</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#version-0-4-major-upgrade">Version 0.4 Major upgrade</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#known-breaking-changes-ask-for-help-if-needed-to-transition">Known breaking changes- ask for help if needed to transition</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#internal-changes">Internal changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#version-0-3-03-000-2023-01-03">Version 0.3.03.000 2023-01-03</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#new-features-1">New features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#changes">Changes</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#version-0-3-01-04-06-oct-04-2022">Version 0.3.01.04-06, Oct 04 2022</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#new-features-1">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#new-features-2">New features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#changes-1">Changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bug-fixes">Bug fixes</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#version-0-3-01-02-sept-13-2022">Version 0.3.01.02 Sept 13 2022</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#new-features-2">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#new-features-3">New features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#changes-2">Changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bug-fixes-1">Bug fixes</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#version-0-3-01-00-sept-6-2022">Version 0.3.01.00 Sept 6 2022</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#new-features-3">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#new-features-4">New features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#changes-3">Changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bug-fixes-2">Bug fixes</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#version-0-3-00-23-30-7-22">Version 0.3.00.23 30/7/22</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#new-features-4">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#new-features-5">New features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#changes-4">Changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bug-fixes-3">Bug fixes</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#version-0-2-774-20-7-22">Version 0.2.774 20/7/22</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#new-features-5">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#new-features-6">New features</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#changes-5">Changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bug-fixes-4">Bug fixes</a></li>
 </ul>
@@ -116,7 +122,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="users_guide.html">Users guide</a><ul>
-      <li>Previous: <a href="users_guide/internal_structure.html" title="previous chapter">Internal code structure</a></li>
+      <li>Previous: <a href="users_guide/post_processing.html" title="previous chapter">Post processing</a></li>
       <li>Next: <a href="future_dev.html" title="next chapter">Future development</a></li>
   </ul></li>
   </ul></li>
@@ -145,10 +151,35 @@
 <section id="known-issues">
 <h2>Known issues<a class="headerlink" href="#known-issues" title="Permalink to this headline">¶</a></h2>
 </section>
-<section id="version-0-3-03-000-2023-01-03">
-<h2>Version 0.3.03.000 2023-01-03<a class="headerlink" href="#version-0-3-03-000-2023-01-03" title="Permalink to this headline">¶</a></h2>
+<section id="version-0-4-major-upgrade">
+<h2>Version 0.4 Major upgrade<a class="headerlink" href="#version-0-4-major-upgrade" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="known-breaking-changes-ask-for-help-if-needed-to-transition">
+<h2>Known breaking changes- ask for help if needed to transition<a class="headerlink" href="#known-breaking-changes-ask-for-help-if-needed-to-transition" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><p>new flatter paramter structure</p></li>
+<li><p>solver sub-stepping replaced by time_step in seconds param</p></li>
+<li><p>writer output step count replaced by update_interval time for writing</p></li>
+</ol>
 <section id="new-features">
 <h3>New features<a class="headerlink" href="#new-features" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Automatically determine hindcast file type, if reader class_name param not given</p></li>
+<li><p>Much faster start up with improved grid outline builder</p></li>
+<li><p>FVCOM and ROMS readers working</p></li>
+</ol>
+</section>
+</section>
+<section id="internal-changes">
+<h2>Internal changes<a class="headerlink" href="#internal-changes" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><p>reader uses ring buffer based on hindcast step mod buffer size,  needed for shared reader development</p></li>
+</ol>
+</section>
+<section id="version-0-3-03-000-2023-01-03">
+<h2>Version 0.3.03.000 2023-01-03<a class="headerlink" href="#version-0-3-03-000-2023-01-03" title="Permalink to this headline">¶</a></h2>
+<section id="new-features-1">
+<h3>New features<a class="headerlink" href="#new-features-1" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>FVCOM reader built and passed tests so far</p></li>
 <li><p>ROMS reade started but not workng</p></li>
@@ -165,8 +196,8 @@
 </section>
 <section id="version-0-3-01-04-06-oct-04-2022">
 <h2>Version 0.3.01.04-06, Oct 04 2022<a class="headerlink" href="#version-0-3-01-04-06-oct-04-2022" title="Permalink to this headline">¶</a></h2>
-<section id="new-features-1">
-<h3>New features<a class="headerlink" href="#new-features-1" title="Permalink to this headline">¶</a></h3>
+<section id="new-features-2">
+<h3>New features<a class="headerlink" href="#new-features-2" title="Permalink to this headline">¶</a></h3>
 <p>#.?? internal rebuilt of buffered reader, as step towards using ring buffer needed for share reader</p>
 </section>
 <section id="changes-1">
@@ -187,8 +218,8 @@
 </section>
 <section id="version-0-3-01-02-sept-13-2022">
 <h2>Version 0.3.01.02 Sept 13 2022<a class="headerlink" href="#version-0-3-01-02-sept-13-2022" title="Permalink to this headline">¶</a></h2>
-<section id="new-features-2">
-<h3>New features<a class="headerlink" href="#new-features-2" title="Permalink to this headline">¶</a></h3>
+<section id="new-features-3">
+<h3>New features<a class="headerlink" href="#new-features-3" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Added residence count particle statistic, counts number of particles still inside designated release polygon at given time inervals, . Can be used to find residence time with release polygon, eg residence time in an estuary. See new demo 10</p></li>
 </ol>
@@ -209,8 +240,8 @@
 </section>
 <section id="version-0-3-01-00-sept-6-2022">
 <h2>Version 0.3.01.00 Sept 6 2022<a class="headerlink" href="#version-0-3-01-00-sept-6-2022" title="Permalink to this headline">¶</a></h2>
-<section id="new-features-3">
-<h3>New features<a class="headerlink" href="#new-features-3" title="Permalink to this headline">¶</a></h3>
+<section id="new-features-4">
+<h3>New features<a class="headerlink" href="#new-features-4" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>3D water_velocity in bottom bin  now uses loglayer interpolation (as in schisim), by adjusting fraction of cell to make linear vertical interp behave like log layer interp</p></li>
 <li><dl class="simple">
@@ -245,8 +276,8 @@
 </section>
 <section id="version-0-3-00-23-30-7-22">
 <h2>Version 0.3.00.23 30/7/22<a class="headerlink" href="#version-0-3-00-23-30-7-22" title="Permalink to this headline">¶</a></h2>
-<section id="new-features-4">
-<h3>New features<a class="headerlink" href="#new-features-4" title="Permalink to this headline">¶</a></h3>
+<section id="new-features-5">
+<h3>New features<a class="headerlink" href="#new-features-5" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>added ability to split track output files into blocks with given number of time steps per file</p></li>
 <li><p>added individual timers to stats, events classes written to case info file</p></li>
@@ -267,8 +298,8 @@
 </section>
 <section id="version-0-2-774-20-7-22">
 <h2>Version 0.2.774 20/7/22<a class="headerlink" href="#version-0-2-774-20-7-22" title="Permalink to this headline">¶</a></h2>
-<section id="new-features-5">
-<h3>New features<a class="headerlink" href="#new-features-5" title="Permalink to this headline">¶</a></h3>
+<section id="new-features-6">
+<h3>New features<a class="headerlink" href="#new-features-6" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>polygon release only releases into wet cells, not just those inside domain</p></li>
 <li><p>added pages giving full most of default parameters for each class to doc</p></li>
@@ -363,7 +394,7 @@
     <ul>
         <li>
           &larr;
-          <a href="users_guide/internal_structure.html" title="Previous document">Internal code structure</a>
+          <a href="users_guide/post_processing.html" title="Previous document">Post processing</a>
         </li>
         <li>
           <a href="future_dev.html" title="Next document">Future development</a>
