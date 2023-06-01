@@ -26,6 +26,9 @@ class SharedInfoClass(object):
         # make instance  and merge params
         i = make_class_instance_from_params(params, ml, class_type_name=name,
                                             crumbs=crumbs + ' adding core class, type =  ' + name)
+
+        i.info['name'] = name
+
         if i.params['requires_3D'] and not self.is_3D_run :
                 # dont add a 3D class if i not a 3D run
                 self.msg_logger.msg(' Not using add core class,' + i.params['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
@@ -34,13 +37,13 @@ class SharedInfoClass(object):
         return i
 
 
-    def create_class_dict_instance(self,name,class_type, iteration_group, params,  crumbs=''):
+    def create_class_dict_instance(self,name,class_type, group, params,  crumbs=''):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         ml= self.msg_logger
 
         instanceID = len(self.classes[class_type])
 
-        crumbs += f' >>> adding_class type >> {class_type}  (group=  {iteration_group} #{instanceID: 1d})'
+        crumbs += f' >>> adding_class type >> {class_type}  (name=  {name} instance #{instanceID: 1d})'
 
         # make instance  and merge params
         i = make_class_instance_from_params(params, self.msg_logger, crumbs='user fields')
@@ -49,7 +52,7 @@ class SharedInfoClass(object):
             ml.msg('add_to_class_list: name is not a known class list,class_type=' + class_type , exception = True, crumbs = crumbs)
 
         # now add to class lists and interators
-        # todo  check it is known interation group
+        i.info['group'] = group
 
         # needed for release group identification info etc, zero based
         i.info['instanceID'] =  instanceID
@@ -62,6 +65,7 @@ class SharedInfoClass(object):
 
         i.params['name'] = name #todo this wil be redunent
         i.info['name'] = name
+        i.info['class_type'] = class_type
 
         if name in self.classes[class_type]:
             ml.msg('Class type"' + class_type + '" already has a class with name = "' + i.params['name']

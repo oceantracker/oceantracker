@@ -31,7 +31,7 @@ from oceantracker.util import basic_util , get_versions_computer_info
 from oceantracker.util import json_util ,yaml_util
 
 from oceantracker.util.parameter_checking import merge_params_with_defaults
-from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
+
 
 from oceantracker import common_info_default_param_dict_templates as common_info
 
@@ -45,12 +45,17 @@ OTname = common_info.package_fancy_name
 def param_template():
     # return an empty parameter dictionary, with important class keys
     d= {}
+    for key in sorted(common_info.shared_settings_defaults.keys()):
+        d[key] = None
+    for key in sorted(common_info.case_settings_defaults.keys()):
+            d[key] = None
+
     for key in sorted(common_info.core_classes.keys()):
         if not 'manager' in key and key not in ['solver','interpolator','time_varying_info']:
             d[key+'_class'] ={}
     for key in sorted(common_info.class_dicts.keys()):
         d[key + '_dict'] = {}
-    return d
+    return deepcopy(d)
 
 def run(params):
     # run oceantracker
@@ -74,15 +79,21 @@ def run(params):
 
     # final info output
     _write_run_info_json(case_info_files, has_errors, msg_logger,t0)
-
+    msg_logger.close()
     return case_info_files, has_errors
 
-def _run_single(params,msg_logger):
+def _run_single(user_given_params,msg_logger):
+
+    # keep oceantracker_case_runner out of main namespace
+    from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
+
+    params = deepcopy(user_given_params)
+
     working_params = _decompose_params(params,msg_logger)
 
     working_params = _get_hindcast_file_info(working_params, msg_logger)
     working_params= _setup_output_folders(params, working_params, msg_logger)
-    _write_raw_user_params(params, working_params, msg_logger)
+    _write_raw_user_params(user_given_params, working_params, msg_logger)
     o = working_params['output_files']
     o['run_log'],o['run_error_file']= msg_logger.set_up_files(o['run_output_dir'],o['output_file_base'])
     msg_logger.exit_if_prior_errors('errors in top level settings parameters')
@@ -90,14 +101,16 @@ def _run_single(params,msg_logger):
     case_info_file, has_errors = ot.run(working_params)
     return case_info_file, has_errors
 
-def _run_parallel(params, msg_logger):
+def _run_parallel(user_given_params, msg_logger):
     # run list of case params
 
+    params = deepcopy(user_given_params)
     w0 = _decompose_params(params[0], msg_logger)
     msg_logger.exit_if_prior_errors('first case parameter errors')
     w0 = _get_hindcast_file_info(w0, msg_logger)
     w0 = _setup_output_folders(params, w0, msg_logger)
-    _write_raw_user_params(params, w0, msg_logger)
+    _write_raw_user_params(user_given_params, w0, msg_logger)
+
     o = w0['output_files']
     o['run_log'], o['run_error_file'] = msg_logger.set_up_files(o['run_output_dir'], o['output_file_base'])
 
@@ -137,6 +150,10 @@ def _run_parallel(params, msg_logger):
 def _run1_case(working_params):
     # run one process on a particle based on given family class parameters
     # by creating an independent instances of  model classes, with given parameters
+
+    # keep oceantracker_case_runner out of main namespace
+    from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
+
     ot = OceanTrackerCaseRunner()
     caseInfo_file, case_error = ot.run(deepcopy(working_params))
     return caseInfo_file, case_error
@@ -152,7 +169,13 @@ def _decompose_params(params,msg_logger, add_shared_settings=True):
     # split and check for unknown keys
     for key, item in params.items():
         k = key.removesuffix('_class').removesuffix('_dict').removesuffix('_dicts').removesuffix('_list')
-        if k in common_info.shared_settings_defaults.keys():
+
+        if type(item) is tuple:
+            # check item not a tuple
+            msg_logger.msg(f'Top level setting or class must be "key" : value pairs, got a tuple for key= "{key}", value= "{str(item)}"', fatal_error=True,
+                           hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead ')
+
+        elif k in common_info.shared_settings_defaults.keys():
             if add_shared_settings:
                 w['shared_settings'][k] = item
         elif k in common_info.case_settings_defaults.keys():
@@ -172,7 +195,7 @@ def _decompose_params(params,msg_logger, add_shared_settings=True):
 
         else:
             msg_logger.msg('Unknown top level parameter "' + key +'"', warning=True)
-
+    msg_logger.exit_if_prior_errors('Errors in decomposing paramaters')
     # merge settings params
     w['shared_settings'] = merge_params_with_defaults(w['shared_settings'],  common_info.shared_settings_defaults,
                             msg_logger, crumbs='merging settings and checking against defaults')
@@ -312,28 +335,3 @@ def _write_run_info_json(case_info_files, has_errors, msg_logger, t0):
     msg_logger.msg('run summary with case in file names   "' + o['runInfo_file'] + '"',
                    tabs=2, note=True)
 
-def __convert_ver03_to_04_params(params):
-    p= {}
-    p.update(params['shared_params'])
-    p['reader_class'] = params['reader']
-
-    if 'base_case_params' in params:
-        p.update(convert03_case_params_to04(params['base_case_params']))
-        p.update(params['shared_params'])
-    if 'case_list_params' in params:
-        p['case_list_params'] = []
-        for c in params['case_list_params']:
-            p['case_list_params'].append(convert03_case_params_to04(c))
-    return p
-
-def convert03_case_params_to04(case_params):
-    p ={}
-    for key in case_params.keys():
-        if key=='settings':
-            p.update(case_params[key])
-        else:
-            name = copy(key)
-            if key in common_info.class_lists: name += '_list'
-            if key in common_info.core_classes: name += '_class'
-            p[name] = case_params[key]
-    return p

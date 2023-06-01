@@ -97,12 +97,12 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # initial values  part prop derived from fields
         for name, i  in si.classes['particle_properties'].items():
-            if i.info['prop_type'] =='from_fields':
+            if i.info['group'] =='from_fields':
                 i.initial_value_at_birth(new_buffer_indices)
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
         for name, i  in si.classes['particle_properties'].items():
-            if i.info['prop_type'] == 'user':
+            if i.info['group'] == 'user':
                 i.initial_value_at_birth(new_buffer_indices)
 
         # update new particles props
@@ -144,7 +144,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # important for prop, for which initial values is meaning full, eg polygon events writer, where initial -1 means in no polygon
 
         for name, i in si.classes['particle_properties'].items():  # catch any not manually updated with their initial value
-            if i.info['prop_type'] == 'manual_update':
+            if i.info['group'] == 'manual_update':
                 i.initial_value_at_birth(new_buffer_indices)
 
         #  set initial conditions/properties of new particles
@@ -185,37 +185,36 @@ class ParticleGroupManager(ParameterBaseClass):
             w = si.classes['tracks_writer']
             w.create_variable_to_write(i.params['name'], 'time', None,i.params['vector_dim'], attributes_dict=None, dtype=i.params['dtype'] )
 
-    def create_particle_property(self,name, prop_type, prop_params, crumbs=''):
+    def create_particle_property(self, name, prop_group, prop_params, crumbs=''):
         si = self.shared_info
         ml= si.msg_logger
 
-        if type(prop_type) != str :
-            ml.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str',
-                   hint='got prop_type of type=' + str(type(prop_type)),
+        # todo make name first colpulsory argument of this function and create_class_dict_instance
+        if name is None:
+            ml.msg('ParticleGroupManager.create_particle_property, prop name cannot be None, must be unique str',
+                   hint='got prop_type of type=' + str(type(prop_group)),
                    fatal_error=True, exit_now=True)
 
-        if type(prop_params) !=dict:
+        if type(prop_group) != str :
+            ml.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str',
+                   hint='got prop_type of type=' + str(type(prop_group)),
+                   fatal_error=True, exit_now=True)
+
+        if type(prop_params) != dict:
             ml.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ',
-                    hint= 'got parameters of type=' + str(type(prop_params)) +',  values='+str(prop_params),
-                       fatal_error=True, exit_now=True)
+                    hint= 'got parameters of type=' + str(type(prop_params)) +',  values='+str(prop_params), fatal_error=True, exit_now=True)
 
-
-        if prop_type not in self.known_prop_types:    #todo move all raise exception to msglogger
-            Exception('Create_particle_property: type is "' + prop_type + '", must be one of ' + str(self.known_prop_types))
-
+        if prop_group not in self.known_prop_types:    #todo move all raise exception to msglogger
+            ml.msg('ParticleGroupManager.create_particle_property, unknown prop_group name',
+                   hint='prop_group must be one of ' + str(self.known_prop_types),   fatal_error=True, exit_now=True)
         # set default class
         if 'class_name' not in prop_params:
             prop_params['class_name'] = 'oceantracker.particle_properties._base_properties.ParticleProperty'
 
-        # todo make name first colpulsory argument of this function and create_class_dict_instance
-        if name is None:  name = prop_params['name']
-        i = si.create_class_dict_instance(name, 'particle_properties', prop_type, prop_params,
-                                          crumbs=crumbs +' adding "particle_properties of type=' +  prop_type)
 
-
+        i = si.create_class_dict_instance(name, 'particle_properties', prop_group, prop_params,
+                                          crumbs=crumbs +' adding "particle_properties of type=' + prop_group)
         i.initial_setup()
-        i.info['prop_type'] = prop_type
-
 
         if si.write_tracks:
             # tweak write flag if in param lists
@@ -245,12 +244,12 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # first interpolate to give particle properties from reader derived  fields
         for key,i in si.classes['particle_properties'].items():
-            if i.info['prop_type'] == 'from_fields':
+            if i.info['group'] == 'from_fields':
                 si.classes['field_group_manager'].interp_named_field_at_particle_locations(key, active)
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for key, i in si.classes['particle_properties'].items():
-            if i.info['prop_type'] == 'user':
+            if i.info['group'] == 'user':
                 i.update(active)
 
 

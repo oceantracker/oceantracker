@@ -60,7 +60,10 @@ class MyEncoder(json.JSONEncoder):
             # first numpy types
             if isinstance(obj, np.ndarray):
                 if np.all(np.isfinite(obj)):
-                    return  obj.tolist()
+                    if obj.dtype == np.datetime64:
+                        str(obj)
+                    else:
+                        return  obj.tolist()
                 else:
                     # fire fox cant read nan in json so make an object array, with nan as none
                     r= np.full_like(obj, None, dtype=object)

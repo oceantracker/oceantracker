@@ -22,17 +22,16 @@ shared_settings_defaults ={'user_note': PVC('No user note', str),
                 'compact_mode':        PVC(False, bool,doc_str='Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format'),  # discard dead/inactive particles from memory
                 'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
                 'write_grid':          PVC(True,  bool),
-                'max_duration':        PVC(max_timedelta_in_seconds, float,doc_str='Maximun duation in seconds to run all cases. Each case can have its own duration, this sets the maximum, useful in testing'),  # limit all cases to this duration
+                'max_duration':        PVC(max_timedelta_in_seconds, float,doc_str='Maximum duration in seconds to run all cases. Each case can have its own duration, this sets the maximum, useful in testing'),  # limit all cases to this duration
                 'processors':          PVC(1, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
-                'max_threads':   PVC(None, int, min=1,doc_str='maximum number of processors used for threading to process particles in parallel'),
-                'profiler' : PVC('oceantracker',  str, possible_values=available_profile_types,
-                                 doc_str='Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
-                'shared_reader_memory' : PVC(False,  bool),
+                #'max_threads':   PVC(None, int, min=1,doc_str='maximum number of processors used for threading to process particles in parallel'),
                 'advanced_settings': { 'max_warnings':        PVC(50,    int, min=0),  # dont record more that this number of warnings, to keep caseInfo.json finite
                               'use_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
                                'numba_function_cache_size' :  PVC(1024, int, min=128),
                                 'multiprocessing_case_start_delay': PVC(None, float, min=0.),  # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
-                            }
+                                'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
+                                                       doc_str='Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
+                                       }
                     }     
                      # params needed for later scatch_tests work
                      # 'list_paths_of_user_modules': PVC(None,list, contains = str), # todo not implemented yet
@@ -61,7 +60,7 @@ core_classes= { 'reader': {},
     'particle_group_manager': {'class_name': 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager'},
     'tracks_writer': {'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter'},
     'dispersion': {'class_name': 'oceantracker.dispersion.random_walk.RandomWalk'},
-     'resuspension': {'class_name':'oceantracker.resuspension.resuspension.BasicResuspension' }}
+    'resuspension': {'class_name':'oceantracker.resuspension.resuspension.BasicResuspension' }}
 
 reader_classes={'reader':{}} # in future wil have primary , secondary and acliary filed readers
 
@@ -161,6 +160,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo check time_step default is hindcast time step
         # todo read write polygons from geo-jsons, release groups poly stats
         # todo add units to Parameter check and show in user docs
+        # todo  add msegae logging to post processing
+        # todo add read case info file with not found errors
 
 #TODO FASTER STARTUP
     #todo add timing of start up blocks to improve setup speed
