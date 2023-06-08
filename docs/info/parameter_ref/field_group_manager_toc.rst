@@ -1,6 +1,6 @@
-####################
-field_group_manager
-####################
+##########################
+field_group_manager_class
+##########################
 
 **Module:** oceantracker.field_group_manager
 

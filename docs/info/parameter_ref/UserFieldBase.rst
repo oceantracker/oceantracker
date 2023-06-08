@@ -29,11 +29,17 @@ Parameters:
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``name`` :   ``<class 'str'>`` **<isrequired>**
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
+
 		- default: ``None``
 
 	* ``num_components`` :   ``<class 'int'>`` **<isrequired>**
 		- default: ``None``
+
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

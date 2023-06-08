@@ -2,7 +2,7 @@ from oceantracker.particle_statistics._base_location_stats import _BaseParticleL
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC, merge_params_with_defaults
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from copy import  deepcopy
-from oceantracker.particle_release_groups.polygon_release import PolygonRelease
+from oceantracker.release_groups.polygon_release import PolygonRelease
 
 import numpy as np
 from numba import njit
@@ -26,12 +26,12 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         super().initial_setup()  # set up using regular grid for  stats
 
         # find associated release group
-        if params['name_of_polygon_release_group']  not in si.classes['particle_release_groups']:
+        if params['name_of_polygon_release_group']  not in si.classes['release_groups']:
             #todo add crumb trail to error
             si.msg_logger.msg(params['class_name'].split('.')[-1] + ' no polygon release group of name ' + params['name_of_polygon_release_group'] +
-                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.classes['particle_release_groups'].keys())), fatal_error=True)
+                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.classes['release_groups'].keys())), fatal_error=True)
 
-        rg = si.classes['particle_release_groups'][params['name_of_polygon_release_group']]
+        rg = si.classes['release_groups'][params['name_of_polygon_release_group']]
         if not isinstance(rg, PolygonRelease) :
             si.msg_logger.msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params['name_of_polygon_release_group'] +
                                   '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ', fatal_error=True)
@@ -129,7 +129,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
     def info_to_write_at_end(self):
         nc = self.nc
-        nc.write_a_new_variable('release_times', self.release_group_to_count.info['release_info']['release_times'],['pulse_dim'], dtype=np.float64,attributesDict={'times_pulses_released': ' times in seconds since 1970'})
+        nc.write_a_new_variable('release_times', self.release_group_to_count.info['release_info']['release_times'],['pulse_dim'], dtype=np.float64,attributes={'times_pulses_released': ' times in seconds since 1970'})
 
     @staticmethod
     @njit

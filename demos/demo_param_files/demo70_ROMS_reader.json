@@ -15,7 +15,7 @@
         "A_H": 0.2,
         "A_V": 0.001
     },
-    "particle_release_groups": {
+    "release_groups": {
         "group1": {
             "points": [
                 [

@@ -1,6 +1,6 @@
-#######
-solver
-#######
+#############
+solver_class
+#############
 
 **Module:** oceantracker.solver
 

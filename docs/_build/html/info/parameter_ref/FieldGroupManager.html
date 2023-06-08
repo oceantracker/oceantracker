@@ -1,22 +1,23 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>FieldGroupManager &#8212; OceanTracker Beta 0.3 documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="interpolator" href="interpolator_toc.html" />
-    <link rel="prev" title="field_group_manager" href="field_group_manager_toc.html" />
+    <link rel="next" title="interpolator_class" href="interpolator_toc.html" />
+    <link rel="prev" title="field_group_manager_class" href="field_group_manager_toc.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -50,7 +51,7 @@
 
 
 <h3>Navigation</h3>
-<p><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -61,11 +62,17 @@
 <li class="toctree-l2"><a class="reference internal" href="../users_guide/code_structure.html">Code Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../users_guide/parameters_overview.html">Parameters overview</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="parameter_ref_toc.html#top-level-parameters">Top level parameters</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="parameter_ref_toc.html#case-parameters">Case parameters</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="run_params.html">run_params</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="parameter_ref_toc.html#core-classes">Core classes</a></li>
-<li class="toctree-l4"><a class="reference internal" href="parameter_ref_toc.html#user-added-classes">User added classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="parameter_ref_toc.html#core-class-roles">Core “_class” roles</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="dispersion_toc.html">dispersion_class</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="field_group_manager_toc.html">field_group_manager_class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="interpolator_toc.html">interpolator_class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="particle_group_manager_toc.html">particle_group_manager_class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reader_toc.html">reader_class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="resuspension_toc.html">resuspension_class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solver_toc.html">solver_class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tracks_writer_toc.html">tracks_writer_class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parameter_ref_toc.html#class-dict-roles">class “_dict”  roles</a></li>
 </ul>
 </li>
 </ul>
@@ -84,9 +91,9 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
-  <li><a href="field_group_manager_toc.html">field_group_manager</a><ul>
-      <li>Previous: <a href="field_group_manager_toc.html" title="previous chapter">field_group_manager</a></li>
-      <li>Next: <a href="interpolator_toc.html" title="next chapter">interpolator</a></li>
+  <li><a href="field_group_manager_toc.html">field_group_manager_class</a><ul>
+      <li>Previous: <a href="field_group_manager_toc.html" title="previous chapter">field_group_manager_class</a></li>
+      <li>Next: <a href="interpolator_toc.html" title="next chapter">interpolator_class</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -97,12 +104,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -112,14 +119,14 @@
           <div class="body" role="main">
             
   <section id="fieldgroupmanager">
-<h1>FieldGroupManager<a class="headerlink" href="#fieldgroupmanager" title="Permalink to this headline">¶</a></h1>
+<h1>FieldGroupManager<a class="headerlink" href="#fieldgroupmanager" title="Permalink to this heading">¶</a></h1>
 <p><strong>Description:</strong></p>
 <p><strong>Class:</strong> oceantracker.field_group_manager.field_group_manager.FieldGroupManager</p>
 <p><strong>File:</strong> oceantracker/field_group_manager/field_group_manager.py</p>
 <p><strong>Inheritance:</strong> FieldGroupManager</p>
 <p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;field_group_manager&quot;</span></code></p>
 <section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
 <div><ul>
 <li><dl>
@@ -133,6 +140,14 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">field_group_manager</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">requires_3D</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -157,10 +172,10 @@
     <ul>
         <li>
           &larr;
-          <a href="field_group_manager_toc.html" title="Previous document">field_group_manager</a>
+          <a href="field_group_manager_toc.html" title="Previous document">field_group_manager_class</a>
         </li>
         <li>
-          <a href="interpolator_toc.html" title="Next document">interpolator</a>
+          <a href="interpolator_toc.html" title="Next document">interpolator_class</a>
           &rarr;
         </li>
     </ul>
@@ -175,7 +190,7 @@
       &copy;2022, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

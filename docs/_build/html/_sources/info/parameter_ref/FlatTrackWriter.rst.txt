@@ -30,11 +30,9 @@ Parameters:
 
 		- default: ``None``
 
-	* ``output_step_count`` :   ``<class 'int'>``   *<optional>*
-		Description: - Write track data every output_step_count steps of the model
-
-		- default: ``1``
-		- min: ``1``
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``tracks``
@@ -58,6 +56,13 @@ Parameters:
 		- a list containing type:  ``[<class 'str'>]``
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
+
+	* ``update_interval`` :   ``<class 'int'>``   *<optional>*
+		Description: - the time in seconds between writes (will be rounded to model time step)
+
+		- default: ``None``
+		- min: ``1``
+		- units: ``s``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

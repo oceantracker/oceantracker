@@ -1,6 +1,6 @@
-#################
-status_modifiers
-#################
+######################
+status_modifiers_dict
+######################
 
 **Module:** oceantracker.status_modifiers
 

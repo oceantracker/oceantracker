@@ -1,6 +1,6 @@
-##################
-time_varying_info
-##################
+#######################
+time_varying_info_dict
+#######################
 
 **Module:** oceantracker.time_varying_info
 

@@ -5,7 +5,6 @@ from numba import njit
 
 from oceantracker.util import json_util
 
-
 def read_particle_tracks_file(file_name, var_list=[], release_group= None, fraction_to_read=None):
     # release group is 1 based
     nc = NetCDFhandler(file_name, mode='r')
@@ -23,7 +22,11 @@ def read_particle_tracks_file(file_name, var_list=[], release_group= None, fract
         d=  _read_compact_tracks(nc,working_var_list,release_group)
     else:
         d= _read_rectangular_tracks(nc, working_var_list,release_group)
+
+    d.update(_get_release_group_map_and_points(nc))
+
     nc.close()
+
     if d['x'].shape[2] == 3: d['z'] = d['x'][:,:,2] # make a z variable if 3D
 
     if fraction_to_read is not None:
@@ -36,6 +39,8 @@ def read_particle_tracks_file(file_name, var_list=[], release_group= None, fract
                     d[key]= item[sel_particles,...]
                 if len(item.shape) > 1 and item.shape[1] == n0:
                     d[key] = item[:, sel_particles, ...]
+
+
     return d
 
 def _read_rectangular_tracks(nc,var_list, release_group):
@@ -148,6 +153,8 @@ def read_stats_file(file_name, var_list=[]):
     num_released = nc.get_global_attr('total_num_particles_released')
     d = {'total_num_particles_released': num_released,'limits' : {}}
 
+    d.update(_get_release_group_map_and_points(nc))
+
     if nc.is_var('time') :
         var_list =  var_list +['time']
         d['time_var'] = 'time'
@@ -188,7 +195,7 @@ def read_concentration_file(file_name, var_list=[]):
     d={}
     nc = NetCDFhandler(file_name, 'r')
     var_list= list(set(['time','particle_count', 'particle_concentration']+ var_list))
-
+    d.update(_get_release_group_map_and_points(nc))
     for var in var_list:
         if nc.is_var(var):
             d[var]= nc.read_a_variable(var)
@@ -205,7 +212,10 @@ def read_residence_file(file_name, var_list=[]):
     nc = NetCDFhandler(file_name, mode='r')
     num_released = nc.get_global_attr('total_num_particles_released')
     d = {'total_num_particles_released': num_released,'limits' : {}}
+
     d['release_times']= nc.read_a_variable('release_times')
+
+    d.update(_get_release_group_map_and_points(nc))
 
     # read count first for mean value calc
     for v in ['count','count_all_particles','time']:
@@ -225,6 +235,7 @@ def read_residence_file(file_name, var_list=[]):
         else:
             print('Warning reading residence file ' + file_name + ', cannot load variable ' + var + ', is not in file ')
         d['limits'][var] = {'min': np.nanmin(d[var]), 'max': np.nanmax(d[var])}
+
     nc.close()
     return d
 
@@ -241,7 +252,30 @@ def read_grid_file(file_name):
 def read_grid_outline_file(file_name):
     return json_util.read_JSON((file_name))
 
-def read_event_file(file_name):
+def dev_read_event_file(file_name):
     #todo finish event reader
     nc = NetCDFhandler(file_name, 'r')
     nc.close()
+
+def _get_release_group_map_and_points(nc):
+    # get a dict mapping release group index to names and the reverse
+    m = {'release_groupID': {},'release_locations':{} }
+    name_list=[]
+    for n, a  in enumerate(nc.all_global_attr()):
+        val = nc.get_global_attr(a)
+        if a.startswith('release_groupID_'):
+            name= a.split('release_groupID_')[-1]
+            m['release_groupID'][name] = val
+            name_list.append(name)
+
+    # unpack release points
+    is_polygon_release = nc.read_a_variable('is_polygon_release')
+    number_of_release_points = nc.read_a_variable('number_of_release_points')
+    release_points = nc.read_a_variable('release_points')
+
+    for n in range( is_polygon_release.size):
+        m['release_locations'][name_list[n]]=dict(points =release_points[n,:number_of_release_points[n],:],is_polygon= is_polygon_release[n]==1)
+    return m
+
+
+

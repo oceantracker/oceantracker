@@ -9,7 +9,7 @@ from oceantracker.post_processing.read_output_files import load_output_files
 
 from oceantracker.util import time_util
 
-def plot_tracks(track_data, fraction_to_plot=None, show_grid=False,credit=None, heading =None,
+def plot_tracks(track_data, show_grid=False,credit=None, heading =None,
                 title=None, axis_lims=None, show_start=False, back_ground_depth=True, back_ground_color_map= None,
                 plot_file_name=None, polygon_list_to_plot = None):
 

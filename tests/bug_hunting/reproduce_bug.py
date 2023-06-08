@@ -100,7 +100,7 @@ def create_case_dict_for_pen(pen_position,depth_range,
         {
             "particle_release_groups": [
                 {
-                    "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
+                    "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
                     "points": [
                         [
                             x_min,
@@ -147,7 +147,7 @@ def create_case_dict_for_pen(pen_position,depth_range,
         {
             "particle_release_groups": [
                 {
-                    "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
+                    "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
                     "points": [
                         [
                             x_min,

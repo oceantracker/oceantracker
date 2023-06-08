@@ -1,6 +1,6 @@
-##############
-tracks_writer
-##############
+####################
+tracks_writer_class
+####################
 
 **Module:** oceantracker.tracks_writer
 

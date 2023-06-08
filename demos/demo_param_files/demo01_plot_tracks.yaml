@@ -10,13 +10,6 @@ particle_properties_dict:
     initial_value: 20.0
   distance_travelled:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-particle_release_groups_dict:
-  mypoints1:
-    points:
-    - - 1594500
-      - 5483000
-    pulse_size: 200
-    release_interval: 0
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -39,6 +32,13 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
+release_groups_dict:
+  mypoints1:
+    points:
+    - - 1594500
+      - 5483000
+    pulse_size: 200
+    release_interval: 0
 root_output_dir: output
 time_step: 600
 tracks_writer:

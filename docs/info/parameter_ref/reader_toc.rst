@@ -1,6 +1,6 @@
-#######
-reader
-#######
+#############
+reader_class
+#############
 
 **Module:** oceantracker.reader
 

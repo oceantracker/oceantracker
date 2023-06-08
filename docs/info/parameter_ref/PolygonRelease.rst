@@ -4,9 +4,9 @@ PolygonRelease
 
 **Description:** Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.
 
-**Class:** oceantracker.particle_release_groups.polygon_release.PolygonRelease
+**Class:** oceantracker.release_groups.polygon_release.PolygonRelease
 
-**File:** oceantracker/particle_release_groups/polygon_release.py
+**File:** oceantracker/release_groups/polygon_release.py
 
 **Inheritance:** PointRelease> PolygonRelease
 
@@ -40,11 +40,11 @@ Parameters:
 		- min: ``1.0``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
-
 		- default: ``None``
 
-	* ``points`` :   ``vector`` **<isrequired>**
+	* ``points`` :   ``array`` **<isrequired>**
+		Description: - Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array
+
 		- default: ``[]``
 		- list_contains_type: ``<class 'float'>``
 
@@ -70,11 +70,16 @@ Parameters:
 
 		- default: ``0.0``
 		- min: ``0.0``
+		- units: ``s``
 
 	* ``release_start_date`` :   ``iso8601date``   *<optional>*
 		Description: - Must be an ISO date as string eg. "2017-01-01T00:30:00"
 
 		- default: ``None``
+
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
@@ -83,9 +88,6 @@ Parameters:
 	* ``user_polygonID`` :   ``<class 'int'>``   *<optional>*
 		- default: ``0``
 		- min: ``0``
-
-	* ``user_polygon_name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
 
 	* ``user_release_groupID`` :   ``<class 'int'>``   *<optional>*
 		Description: - User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.

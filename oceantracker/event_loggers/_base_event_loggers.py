@@ -5,6 +5,8 @@ from numba  import njit
 from copy import copy,deepcopy
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.ncdf_util import  NetCDFhandler
+from oceantracker.util import  output_util
+
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 
 class _BaseEventLogger(ParameterBaseClass):
@@ -135,4 +137,9 @@ class _BaseEventLogger(ParameterBaseClass):
         return event_has_started_IDbuffer[:n_started], event_has_ended_IDbuffer[:n_finished]
 
     def close(self):
-        if self.params['write']:  self.nc.close()
+        if self.params['write']:
+            # add attributes mapping release index to release group name
+            si = self.shared_info
+            nc = self.nc
+            output_util.add_release_group_ID_info_to_netCDF(nc, si.classes['release_groups'])
+            nc.close()

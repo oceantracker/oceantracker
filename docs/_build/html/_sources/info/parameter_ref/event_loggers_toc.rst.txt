@@ -1,6 +1,6 @@
-##############
-event_loggers
-##############
+###################
+event_loggers_dict
+###################
 
 **Module:** oceantracker.event_loggers
 

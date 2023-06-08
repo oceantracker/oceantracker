@@ -1,6 +1,6 @@
-###################
-velocity_modifiers
-###################
+########################
+velocity_modifiers_dict
+########################
 
 **Module:** oceantracker.velocity_modifiers
 

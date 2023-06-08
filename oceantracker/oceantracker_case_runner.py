@@ -246,7 +246,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         #todo move to particle group manager and run in main at set up to get reader range etc , better for shared reader development
         si = self.shared_info
 
-        # set up to start end times based on particle_release_groups
+        # set up to start end times based on release_groups
         # find earliest and last release times+life_duration ( if going forwards)
 
         first_release_time = []
@@ -254,11 +254,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         for name, pg_params in particle_release_groups_params_dict.items():
             # make instance
-            if 'class_name' not in pg_params: pg_params['class_name'] = 'oceantracker.particle_release_groups.point_release.PointRelease'
+            if 'class_name' not in pg_params: pg_params['class_name'] = 'oceantracker.release_groups.point_release.PointRelease'
 
             # make instance and initialise
 
-            i = si.create_class_dict_instance(name, 'particle_release_groups', 'user', pg_params, crumbs='Adding release groups')
+            i = si.create_class_dict_instance(name, 'release_groups', 'user', pg_params, crumbs='Adding release groups')
             i.initial_setup()
 
             # set up release times so duration of run known
@@ -272,7 +272,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 first_release_time.append(release_info['first_release_time'])
                 last_time_alive.append(release_info['last_time_alive'])
 
-        if len(si.classes['particle_release_groups']) == 0:
+        if len(si.classes['release_groups']) == 0:
             # guard against there being no release groups
             si.msg_logger.msg('No valid release groups, exiting' , fatal_error=True, exit_now=True)
 
@@ -311,12 +311,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # set up start time and duration based on particle releases
         t0 = perf_counter()
-        time_start, time_end = self._setup_particle_release_groups(si.working_params['class_dicts']['particle_release_groups'])
+        time_start, time_end = self._setup_particle_release_groups(si.working_params['class_dicts']['release_groups'])
 
 
         #clip times to maximum duration in shared and case params
         duration = abs(time_end - time_start)
-        duration = min(duration, si.settings['duration'], si.settings['max_duration'])
+        duration = min(duration, si.settings['duration'], si.settings['max_run_duration'])
         time_end = time_start + duration* si.model_direction
 
         # note results
@@ -327,7 +327,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # estimate total particle released  to use as particle buffer size
         # first need to clip particle releases times to fit within run duration, which may be shorter than the hindcast
         estimated_total_particles = 0
-        for name, rg in si.classes['particle_release_groups'].items():
+        for name, rg in si.classes['release_groups'].items():
             ri = rg.info['release_info']
             sel = np.logical_and( time_start * si.model_direction <=  ri['release_times']  * si.model_direction,
                                     ri['release_times']  * si.model_direction<= time_end  * si.model_direction)
@@ -335,7 +335,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             ri['release_dates'] = time_util.seconds_to_datetime64(ri['release_times'])
             estimated_total_particles += rg.estimated_total_number_released() # get number from clipped r
 
-        si.msg_logger.progress_marker('set up particle_release_groups', start_time=t0)
+        si.msg_logger.progress_marker('set up release_groups', start_time=t0)
 
         # useful info
         si.solver_info['model_start_date'] = time_util.seconds_to_datetime64(time_start)
@@ -463,7 +463,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 d['class_info'][key] = i.info
                 d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
 
-        for key, item in si.classes['particle_release_groups'].items():
+        for key, item in si.classes['release_groups'].items():
             rginfo=item.params
             rginfo.update(item.info['release_info'])
             d['particle_release_group_info'].append(rginfo)

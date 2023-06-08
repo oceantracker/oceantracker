@@ -217,11 +217,11 @@ def base_param(is3D=False, isBackwards = False):
 
             'solver' : { 'RK_order': 4, 'n_sub_steps': 9 }, # 5min steps to mact OT v01 paper
             'particle_group_manager' : {},
-            'particle_release_groups': [
+            'release_groups': [
                                         {'points': p0, 'pulse_size': 1, 'release_interval': 3600,'userRelease_groupID':5,
                                           'maximum_age' : 7*24*3600, 'user_release_group_name': 'A group','z_range' :[-1,0],
                                          },
-                                       {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+                                       {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                                        'points': poly0, 'pulse_size': 1, 'release_interval': 3600,'userRelease_groupID':200,
                                       'maximum_age' : 4*24*3600, 'user_release_group_name': 'B group',
                                         'z_range' :[-1,0],
@@ -303,12 +303,12 @@ if __name__ == '__main__':
             for is3D in [False, True]:
                 for isBackwards in[True, False ]:
                     params = base_param(is3D=is3D, isBackwards=isBackwards)
-                    params['shared_params']['max_duration']= 14 * 24 * 3600.
+                    params['shared_params']['max_run_duration']= 14 * 24 * 3600.
                     params['base_case_params']['dispersion'].update( {'A_H': 0.,'A_V':0.0})
                     if args.dev:
                         params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.scatch_tests.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
                         # params['base_case_params']['dispersion'].update({'A_V':0., 'A_H':0.})
-                        # params['base_case_params']['particle_release_groups'][0]['pulse_size']=1
+                        # params['base_case_params']['release_groups'][0]['pulse_size']=1
 
                     runInfoFile = run_test(params)
                     plot_sample(runInfoFile)
@@ -320,9 +320,9 @@ if __name__ == '__main__':
                 for is3D in [False]:
                     for isBackwards in [False, True]:
                         params = base_param(is3D=is3D, isBackwards=isBackwards)
-                        params['reader']['max_duration'] = 1 * 24 * 3600.
+                        params['reader']['max_run_duration'] = 1 * 24 * 3600.
                         params['base_case_params']['dispersion'].update({'A_H': 50.})
-                        params['base_case_params']['particle_release_groups'][0].update({'pulse_size': 10 ** 1})
+                        params['base_case_params']['release_groups'][0].update({'pulse_size': 10 ** 1})
 
                         runInfoFile = run_test(params)
                         trackdata= load_output_files.load_particle_track_vars(runInfoFile)

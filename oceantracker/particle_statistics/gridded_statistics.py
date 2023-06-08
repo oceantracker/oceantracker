@@ -32,7 +32,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.open_output_file()
         nc = self.nc
         if self.params['write']:
-              nc.add_dimension('release_group_dim', len(si.classes['particle_release_groups']))
+              nc.add_dimension('release_group_dim', len(si.classes['release_groups']))
 
         # get release group IDs to split bt
         self.set_up_spatial_bins(nc)
@@ -85,7 +85,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         base_y = np.linspace(-params['grid_span'][1]/2., params['grid_span'][1]/2., params['grid_size'][0]).reshape(-1,1)
 
         # center of grid cells
-        ngroups= len(si.classes['particle_release_groups'])
+        ngroups= len(si.classes['release_groups'])
 
         if params['release_group_centered_grids']:
             # form grids around mean of each release group locations
@@ -94,8 +94,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             stats_grid['y_bin_edges'] = np.full((ngroups,len(base_y)), 0., dtype=np.float64)
 
             # loop over release groups to get bin edges
-            for ngroup, name  in enumerate(si.classes['particle_release_groups'].keys()):
-                x0 = si.classes['particle_release_groups'][name].info['points'] # works for point and polygon releases,
+            for ngroup, name  in enumerate(si.classes['release_groups'].keys()):
+                x0 = si.classes['release_groups'][name].info['points'] # works for point and polygon releases,
                 x_release_group_center= np.nanmean(x0[:,:2], axis=0)
                 stats_grid['x_bin_edges'][ngroup, :] = base_x.T + x_release_group_center[0]
                 stats_grid['y_bin_edges'][ngroup, :] = base_y.T + x_release_group_center[1]
@@ -123,7 +123,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         stats_grid = self.grid
 
         dim_names= ['time_dim', 'release_group_dim', 'y_dim', 'x_dim']
-        dim_sizes =[None, len(si.classes['particle_release_groups']), stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
+        dim_sizes =[None, len(si.classes['release_groups']), stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
         nc.create_a_variable('count', dim_names,
                              {'notes': 'counts of particles in grid at given times, for each release group'}, np.int64)
 
@@ -242,12 +242,12 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         si =self.shared_info
         stats_grid = self.grid
 
-        dim_sizes= (stats_grid['age_bins'].shape[0], len(si.classes['particle_release_groups']), stats_grid['y'].shape[1], stats_grid['x'].shape[1])
+        dim_sizes= (stats_grid['age_bins'].shape[0], len(si.classes['release_groups']), stats_grid['y'].shape[1], stats_grid['x'].shape[1])
 
         # working count space, row are (y,x)
         self.count_age_bins = np.full(dim_sizes, 0, np.int64)
         # counts in each age bin, whether inside grid cell or not
-        self.count_all_particles =  np.full((stats_grid['age_bins'].shape[0], len(si.classes['particle_release_groups'])) , 0, np.int64)
+        self.count_all_particles =  np.full((stats_grid['age_bins'].shape[0], len(si.classes['release_groups'])) , 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
             if p_name in si.classes['particle_properties']:

@@ -38,7 +38,7 @@
         "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
         "time_steps_per_per_file": 700
     },
-    "particle_release_groups_dict": {
+    "release_groups_dict": {
         "mypoints1": {
             "points": [
                 [
@@ -61,9 +61,9 @@
         }
     },
     "backtracking": true,
-    "particle_release_groups": {
+    "release_groups": {
         "Poly1": {
-            "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
+            "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
             "points": [
                 [
                     1597682.1237,
@@ -94,7 +94,7 @@
             "release_interval": 10800
         },
         "Poly2": {
-            "class_name": "oceantracker.particle_release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange",
+            "class_name": "oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange",
             "min_water_depth": 30,
             "points": [
                 [

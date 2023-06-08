@@ -24,6 +24,16 @@ Parameters:
 
 		- default: ``None``
 
+	* ``count_end_date`` :   ``iso8601date``   *<optional>*
+		Description: - Stop particle counting from this date
+
+		- default: ``None``
+
+	* ``count_start_date`` :   ``iso8601date``   *<optional>*
+		Description: - Start particle counting from this date
+
+		- default: ``None``
+
 	* ``count_status_in_range``:  *<optional>*
 		Description: - Count only those particles with status which fall in the given range
 
@@ -32,9 +42,6 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- min_length: ``2``
 		- max_length: ``2``
-
-	* ``file_tag`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
@@ -51,6 +58,10 @@ Parameters:
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
+
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``residence``

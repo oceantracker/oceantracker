@@ -25,7 +25,7 @@ Parameters:
 		- default: ``settle_in_polygon``
 
 	* ``polygon``: nested parameter dictionary
-		* ``points`` :   ``vector`` **<isrequired>**
+		* ``points`` :   ``array`` **<isrequired>**
 			- default: ``None``
 
 	* ``probability_of_settlement`` :   ``<class 'float'>``   *<optional>*

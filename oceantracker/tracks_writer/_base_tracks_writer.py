@@ -2,7 +2,7 @@ import numpy as np
 from os import  path
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import  ParameterBaseClass
-from oceantracker.util.basic_util import nopass
+from oceantracker.util import output_util
 from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
 from oceantracker.util.profiling_util import  function_profiler
@@ -184,6 +184,9 @@ class _BaseWriter(ParameterBaseClass):
             for name, item in self.info['file_builder']['attributes'].items():
                 nc.write_global_attribute(name,item)
 
+            # add attributes mapping release index to release group name
+            output_util.add_release_group_ID_info_to_netCDF(nc, si.classes['release_groups'])
             nc.close()
+            self.nc = None
 
 

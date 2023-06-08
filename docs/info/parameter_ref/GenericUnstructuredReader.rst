@@ -111,7 +111,7 @@ Parameters:
 		* ``zlevel`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
 
-	* ``input_dir`` :   ``<class 'str'>``   *<optional>*
+	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
 
 	* ``isodate_of_hindcast_time_zero`` :   ``iso8601date``   *<optional>*

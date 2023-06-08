@@ -14,7 +14,7 @@ if __name__ == "__main__":
     #params_that_work = json_util.read_JSON('../demos/demo_param_files/demo02_animation.json')
     params_that_work = json_util.read_JSON('../demos/demo_param_files/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json')
 
-    params_that_work['shared_params']['max_duration']=3600
+    params_that_work['shared_params']['max_run_duration']=3600
     params_that_work['case_list']=[]
 
     for n in range(12) if args.test is None else  [args.test] :
@@ -38,11 +38,11 @@ if __name__ == "__main__":
             lab='bad hindcast folder'
             p['reader'].pop('input_dir')
             p['reader']['input_dir']='\\badfolder'
-            #['particle_release_groups'][0].pop('points')
+            #['release_groups'][0].pop('points')
 
         elif n ==4 :
-            lab = 'particle_release_groups empty'
-            p['base_case_params']['particle_release_groups'] =[]
+            lab = 'release_groups empty'
+            p['base_case_params']['release_groups'] =[]
 
         if n == 5:
             lab = 'value errors'

@@ -26,6 +26,16 @@ Parameters:
 
 		- default: ``None``
 
+	* ``count_end_date`` :   ``iso8601date``   *<optional>*
+		Description: - Stop particle counting from this date
+
+		- default: ``None``
+
+	* ``count_start_date`` :   ``iso8601date``   *<optional>*
+		Description: - Start particle counting from this date
+
+		- default: ``None``
+
 	* ``count_status_in_range``:  *<optional>*
 		Description: - Count only those particles with status which fall in the given range
 
@@ -34,9 +44,6 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- min_length: ``2``
 		- max_length: ``2``
-
-	* ``file_tag`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
 
 	* ``grid_center``:  *<optional>*
 		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
@@ -74,6 +81,10 @@ Parameters:
 		- make_list_unique: ``True``
 
 	* ``release_group_centered_grids`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
 

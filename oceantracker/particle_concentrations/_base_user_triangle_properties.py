@@ -3,6 +3,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from oceantracker.util.basic_util import nopass
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.util.ncdf_util import NetCDFhandler
+from oceantracker.util import output_util
 from os import path
 from datetime import datetime
 
@@ -69,7 +70,15 @@ class _BaseTriangleProperties(ParameterBaseClass):
     def record_time_stats_last_recorded(self, t): self.info['time_last_stats_recorded'] = t
 
     def close(self):
-        if hasattr(self,'nc'): self.nc.close()
+
+        if hasattr(self,'nc'):
+            si = self.shared_info
+            nc = self.nc
+
+            # add attributes mapping release index to release group name
+            output_util.add_release_group_ID_info_to_netCDF(nc, si.classes['release_groups'])
+
+            nc.close()
 
 
 

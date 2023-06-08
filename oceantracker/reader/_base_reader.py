@@ -18,7 +18,7 @@ class _BaseReader(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
-        self.add_default_params({'input_dir': PVC(None, str),
+        self.add_default_params({'input_dir': PVC(None, str, is_required=True),
                                  'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
                                  'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
                                  'time_zone': PVC(None, int, min=-12, max=12,doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),

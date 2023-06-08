@@ -1,6 +1,6 @@
-########################
-particle_concentrations
-########################
+#############################
+particle_concentrations_dict
+#############################
 
 **Module:** oceantracker.particle_concentrations
 

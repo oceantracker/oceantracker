@@ -54,7 +54,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         if not self.params['write']: return
         
         dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
-        dim_sizes  = ( None, len(si.classes['particle_release_groups']), nc.get_dim_size('polygon_dim') )
+        dim_sizes  = ( None, len(si.classes['release_groups']), nc.get_dim_size('polygon_dim') )
 
         nc.add_dimension('release_group_dim', dim_sizes[1])
         nc.create_a_variable('count', dim_names,
@@ -66,7 +66,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         self.count_time_slice = np.full(dim_sizes[1:], 0, np.int64)
 
         # counts in each age bin, whether inside polygon or not
-        self.count_all_particles_time_slice =  np.full((len(si.classes['particle_release_groups']),) , 0, np.int64)
+        self.count_all_particles_time_slice =  np.full((len(si.classes['release_groups']),) , 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
             if p_name in si.classes['particle_properties']:
@@ -133,7 +133,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
     def set_up_binned_variables(self,nc):
         si = self.shared_info
         # set up space for requested particle properties
-        dims= ( self.grid['age_bins'].shape[0], len(si.classes['particle_release_groups']), len(self.params['polygon_list']))
+        dims= ( self.grid['age_bins'].shape[0], len(si.classes['release_groups']), len(self.params['polygon_list']))
         # working count space, row are (y,x)
         self.count_age_bins = np.full(dims, 0, np.int64)
         # counts in each age bin, whether inside polygon or not

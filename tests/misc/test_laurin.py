@@ -506,14 +506,14 @@ if __name__ == '__main__':
 
                 'RK_order': 2,
                 },
-            'particle_release_groups': [
+            'release_groups': [
                 {
                     'points': x0,
                     'pulse_size': pulse_size,
                     'release_interval': release_interval
                 },
                 {
-                    'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+                    'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                     'points': statistical_polygon_list[1]['points'],
                     'pulse_size': 10*pulse_size,
                     'release_interval': release_interval

@@ -89,8 +89,8 @@ class OceanTrackerReRunner(object):
         reader = self.otsim.shared_info.classes['reader']
 
         # clear, then add new release groups   re formed with new param
-        si.classes['particle_release_groups']=[]
-        t_start, t_end, estimated_total_particles= otsim._setup_particle_release_groups(case_params['particle_release_groups'])
+        si.classes['release_groups']=[]
+        t_start, t_end, estimated_total_particles= otsim._setup_particle_release_groups(case_params['release_groups'])
 
         # adjust shared model run time and duration
         si.model_start_time= t_start
@@ -161,10 +161,10 @@ if __name__ == '__main__':
                 'class_name': 'oceantracker.interpolator.interp_triangle_native_grid.Interp3DTriangular_native_grid'},
             'particle_group_manager': {'class_name': 'OTreRunner.EmitOutputParticle'},
             'dispersion': {'A_H': 0.1, },
-            'particle_release_groups': [
+            'release_groups': [
                 {'points': [[1594500, 5482700], [1598000, 5486100]],
                  'pulse_size': 1, 'release_interval': 6 * 3600},
-                {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+                {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                  'points': [[1597682.1237, 5489972.7479],
                             [1598604.1667, 5490275.5488],
                             [1598886.4247, 5489464.0424],
@@ -224,7 +224,7 @@ if __name__ == '__main__':
         {'release_start_date': '2017-01-05', 'points': [[1594500, 5482700], [
             1598000, 5486100]], 'pulse_size': 10, 'release_interval': 1 * 3600},
         {'release_start_date': '2017-01-05',
-            'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+            'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
          'points': [[1597682.1237, 5489972.7479],
                     [1598604.1667, 5490275.5488],
                     [1598886.4247, 5489464.0424],

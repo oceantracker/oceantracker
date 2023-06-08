@@ -139,7 +139,7 @@ class ParamValueChecker(object):
                 msg_logger.msg('Coordinate vector "' + crumb_trail + '", must be type list, or numpy array', hint= 'got type =' + str(type(value)) + ' , value given =' +str(value), fatal_error=True)
             else:
                 try:
-                    value = np.asarray(value)
+                    value = np.asarray(value, dtype=np.float64)
                     # now check shape
                     if value.ndim == 1 or  value.shape[1]  < 2 or  value.shape[1]  > 3:
                         msg_logger.msg(m, fatal_error=True)

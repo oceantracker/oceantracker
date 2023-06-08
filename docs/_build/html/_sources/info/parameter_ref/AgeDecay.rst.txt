@@ -42,6 +42,10 @@ Parameters:
 		- default: ``1``
 		- min: ``1``
 
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``

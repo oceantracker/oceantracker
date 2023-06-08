@@ -39,7 +39,7 @@
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
             "write_dry_cell_index": true
         },
-        "particle_release_groups_dict": {
+        "release_groups_dict": {
             "mypoints1": {
                 "points": [
                     [
@@ -61,7 +61,7 @@
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
         },
-        "particle_release_groups": {
+        "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
                 "points": [
@@ -78,7 +78,7 @@
                 "release_interval": 10800
             },
             "poly1": {
-                "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
+                "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
                 "name": "userA",
                 "points": [
                     [
@@ -159,7 +159,7 @@
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
             "write_dry_cell_index": true
         },
-        "particle_release_groups_dict": {
+        "release_groups_dict": {
             "mypoints1": {
                 "points": [
                     [
@@ -181,7 +181,7 @@
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
         },
-        "particle_release_groups": {
+        "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
                 "points": [
@@ -198,7 +198,7 @@
                 "release_interval": 10800
             },
             "poly1": {
-                "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
+                "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
                 "name": "userA",
                 "points": [
                     [
@@ -278,7 +278,7 @@
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
             "write_dry_cell_index": true
         },
-        "particle_release_groups_dict": {
+        "release_groups_dict": {
             "mypoints1": {
                 "points": [
                     [
@@ -300,7 +300,7 @@
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
         },
-        "particle_release_groups": {
+        "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
                 "points": [
@@ -317,7 +317,7 @@
                 "release_interval": 10800
             },
             "poly1": {
-                "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
+                "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
                 "name": "userA",
                 "points": [
                     [
@@ -397,7 +397,7 @@
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
             "write_dry_cell_index": true
         },
-        "particle_release_groups_dict": {
+        "release_groups_dict": {
             "mypoints1": {
                 "points": [
                     [
@@ -419,7 +419,7 @@
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
         },
-        "particle_release_groups": {
+        "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
                 "points": [
@@ -436,7 +436,7 @@
                 "release_interval": 10800
             },
             "poly1": {
-                "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
+                "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
                 "name": "userA",
                 "points": [
                     [
@@ -516,7 +516,7 @@
             "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
             "write_dry_cell_index": true
         },
-        "particle_release_groups_dict": {
+        "release_groups_dict": {
             "mypoints1": {
                 "points": [
                     [
@@ -538,7 +538,7 @@
                 "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
             }
         },
-        "particle_release_groups": {
+        "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
                 "points": [
@@ -555,7 +555,7 @@
                 "release_interval": 10800
             },
             "poly1": {
-                "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
+                "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
                 "name": "userA",
                 "points": [
                     [

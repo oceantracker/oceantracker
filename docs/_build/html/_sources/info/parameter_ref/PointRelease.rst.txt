@@ -4,9 +4,9 @@ PointRelease
 
 **Description:** Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.
 
-**Class:** oceantracker.particle_release_groups.point_release.PointRelease
+**Class:** oceantracker.release_groups.point_release.PointRelease
 
-**File:** oceantracker/particle_release_groups/point_release.py
+**File:** oceantracker/release_groups/point_release.py
 
 **Inheritance:** PointRelease
 
@@ -44,7 +44,7 @@ Parameters:
 
 		- default: ``None``
 
-	* ``points`` :   ``vector`` **<isrequired>**
+	* ``points`` :   ``array`` **<isrequired>**
 		Description: - A N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array
 
 		- default: ``[]``
@@ -71,6 +71,7 @@ Parameters:
 
 		- default: ``0.0``
 		- min: ``0.0``
+		- units: ``s``
 
 	* ``release_radius`` :   ``<class 'float'>``   *<optional>*
 		Description: - Particles are released from random locations in circle of given radius around each point.
@@ -82,6 +83,10 @@ Parameters:
 		Description: - Must be an ISO date as string eg. "2017-01-01T00:30:00"
 
 		- default: ``None``
+
+	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

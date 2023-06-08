@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
             params['output_file_base'] = 'Demo90backward'
             params['backtracking'] = True
-            params['particle_release_groups']['P1'].update({ 'points': d90['x'][-1, :, :], 'release_start_date': start_date})
+            params['release_groups']['P1'].update({ 'points': d90['x'][-1, :, :], 'release_start_date': start_date})
 
             print('backtracking start', start_date)
 

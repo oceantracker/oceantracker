@@ -38,7 +38,7 @@
         "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
         "write_dry_cell_index": true
     },
-    "particle_release_groups_dict": {
+    "release_groups_dict": {
         "mypoints1": {
             "points": [
                 [
@@ -60,7 +60,7 @@
             "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
         }
     },
-    "particle_release_groups": {
+    "release_groups": {
         "P1": {
             "points": [
                 [
