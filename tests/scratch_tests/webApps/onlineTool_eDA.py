@@ -21,7 +21,7 @@ def get_base_params():
                                   'output_file_base': None,
                                   'write_case_info': False,
                                   'debug' : True,
-                                   'max_duration' : 6*24*3600,
+                                   'max_run_duration' : 6*24*3600,
                                   },
                 'reader': {'class_name': 'oceantracker.reader.generic_ncdf_readerUnstructured.GenericReaderNCDF','input_dir':None,
                                         'water_velocity_map': {'u': 'u', 'v': 'v'},
@@ -41,7 +41,7 @@ def get_base_params():
                                        'particle_group_manager': {},
                                        'tracks_writer': {'output_step_count': 3},
                                        'dispersion': {'A_H': 1.0},
-                                        'particle_release_groups' :  [],
+                                        'release_groups' :  [],
 
                                         'particle_properties': [
                                                {'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
@@ -64,7 +64,7 @@ def get_base_params():
                        'release_interval': 900., 'release_duration': 3600.,
                        'maximum_age' : None,'release_radius' : 20,
                        'user_particle_property_parameters': { 'DNAdecay': {'initial_value' : 1.0}} }  # initial value may be + or - for detection/non-detection
-    params['base_case_params']['particle_release_groups'] =[release_template]
+    params['base_case_params']['release_groups'] =[release_template]
     return params
 
 def region_setup_params(regionID, test_root_output_dir=None):
@@ -97,7 +97,7 @@ def region_setup_params(regionID, test_root_output_dir=None):
     params['shared_params']['output_file_base'] = output_file_base
     params['reader']['file_mask']= file_mask
     case_params = params['base_case_params']
-    pg = case_params['particle_release_groups'][0]
+    pg = case_params['release_groups'][0]
     pg.update(rg)
 
     max_part = int(region_info['max_release_points']*pulse_size* pg['release_duration']/pg['release_interval'] + 10)
@@ -178,7 +178,7 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
         pNZTM=[]
 
         for p in front_end_params['points_list_WGS84']:
-            pg = deepcopy(rparams['base_case_params']['particle_release_groups'][0])
+            pg = deepcopy(rparams['base_case_params']['release_groups'][0])
             t0 = time_util.iso8601str_to_seconds(region_info['high_tides'][tideID]) + front_end_params['time_afterHW_hours'] * 3600.
             t0 += pg['release_duration']/2  # center particle rleases on given time
             p1= WGS84_to_NZTM(np.asarray(p)).tolist()
@@ -190,7 +190,7 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
 
             pNZTM.append (p1[0]) # to get mean location
 
-        case_params['particle_release_groups'] = pg_param
+        case_params['release_groups'] = pg_param
 
         case_params['particle_properties'][0]['decay_time_scale'] = front_end_params['decay_time_scale_hours']
 
@@ -215,7 +215,7 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
             unit_conc = unit_conc / abs(depth) / s.grid['cell_area'] # concentration perm^3 based un unit initial value
 
         # get load per particle
-        release_interval= case_params['particle_release_groups'][0]['release_interval']
+        release_interval= case_params['release_groups'][0]['release_interval']
 
         copies_per_sec = front_end_params['number_of_animals']*front_end_params['DNA_shedding_rate_million_copies_perAdultAnimal_perHour']*1.0E6/3600
         copies_per_particle = copies_per_sec*release_interval

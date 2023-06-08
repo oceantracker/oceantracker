@@ -195,7 +195,17 @@ def _decompose_params(params,msg_logger, add_shared_settings=True):
 
         else:
             msg_logger.msg('Unknown top level parameter "' + key +'"', warning=True)
-    msg_logger.exit_if_prior_errors('Errors in decomposing paramaters')
+
+    # check require classes are given
+    if 'reader' not in w['core_classes'] :
+        msg_logger.msg( 'Parameter "reader_class" or "reader" or  is required',
+                       hint='Add a "reader_class" top level key to parameters with a dictionary containing  at least "input_dir" and file mask keys and values', fatal_error=True)
+
+    if 'release_groups' not in w['class_dicts'] :
+        msg_logger.msg( 'Parameter "release_groups_dict" or "release_groups" or  is required',
+                       hint=' add a least one named release group class to the "release_groups_dict" key', fatal_error=True)
+
+    msg_logger.exit_if_prior_errors('Errors in decomposing parameters')
     # merge settings params
     w['shared_settings'] = merge_params_with_defaults(w['shared_settings'],  common_info.shared_settings_defaults,
                             msg_logger, crumbs='merging settings and checking against defaults')

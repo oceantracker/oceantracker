@@ -37,7 +37,7 @@ class NetCDFhandler(object):
         if name not in self.file_handle.dimensions:
             self.file_handle.createDimension(name, dim_size)
 
-    def create_a_variable(self, name, dimList, attributes=None, dtype=None, chunksizes=None, compressionLevel=0):
+    def create_a_variable(self, name, dimList, description=None, attributes=None, dtype=None, chunksizes=None, compressionLevel=0):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
         if dtype is None: dtype = np.float64  # double by default
@@ -49,6 +49,9 @@ class NetCDFhandler(object):
 
 
         # set attributes the hard way, must be easier way!
+        if description is not None:
+            setattr(self.file_handle.variables[name], 'description', self._sanitize_attribute(description))
+
         if attributes is not None:
             for key, value in attributes.items():
                 setattr(self.file_handle.variables[name], key, self._sanitize_attribute(value))
@@ -71,7 +74,7 @@ class NetCDFhandler(object):
             output[name]=self.read_a_variable(name)
         return output
 
-    def write_a_new_variable(self, name, X, dimList,  attributesDict=None,dtype=None, chunksizes=None, compressionLevel=0):
+    def write_a_new_variable(self, name, X, dimList, description=None, attributes=None,dtype=None, chunksizes=None, compressionLevel=0):
         # write a whole variable and add dimensions if required
         if type(dimList) != list and type(dimList) != tuple :dimList =[dimList]
 
@@ -84,7 +87,7 @@ class NetCDFhandler(object):
 
         if dtype is None: dtype = X.dtype  # preserve type unless explicitly changed
 
-        v = self.create_a_variable(name, dimList, attributesDict, dtype, chunksizes, compressionLevel)
+        v = self.create_a_variable(name, dimList,description=description,attributes= attributes,dtype=dtype, chunksizes= chunksizes, compressionLevel=compressionLevel)
 
         # check dims match as below write does not repect shape
         for n,dn in enumerate(dimList):
@@ -119,6 +122,8 @@ class NetCDFhandler(object):
     def get_dim_size(self,dim_name):  return self.file_handle.dimensions[dim_name].size
 
     def is_dim(self,dim_name):return dim_name in self.file_handle.dimensions
+
+    def all_global_attr(self): return  self.file_handle.ncattrs()# Get all  attributes of the NetCDF file
 
     def get_global_attr(self, attr_name): return getattr(self.file_handle, attr_name)
 

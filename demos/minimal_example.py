@@ -10,7 +10,7 @@ params= {'shared_params' : {'output_file_base' :'minimal_example',
                 'file_mask': 'demoHindcastSchism3D.nc',
                 },
     'base_case_params' : { 'solver': {'n_sub_steps': 12}, #not required but runs 5min steps in 1hr time step hindcast
-                'particle_release_groups':
+                'release_groups':
                       [{'points': [[1595000, 5483300, -2],[1596000, 5487200, -2] ], # two 3D release locations
                         'pulse_size': 10, 'release_interval': 3600}
                        ]

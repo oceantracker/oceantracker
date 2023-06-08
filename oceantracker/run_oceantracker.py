@@ -11,7 +11,7 @@ def tweak_params(params, args):
     if args.root_output_dir: params['root_output_dir'] = args.root_output_dir
     if args.input_dir: params['reader']['input_dir'] = args.input_dir
     if args.processors: params['processors'] = args.processors
-    if args.duration: params['max_duration'] = args.duration
+    if args.duration: params['max_run_duration'] = args.duration
     if args.debug: params['debug'] = args.debug
 
     return params

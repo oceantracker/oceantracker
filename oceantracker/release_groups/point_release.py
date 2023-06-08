@@ -47,6 +47,7 @@ class PointRelease(ParameterBaseClass):
 
         info['number_released'] = 0 # count of particles released in this group
         info['pulse_count'] = 0
+        info['release_type'] = 'point'
 
     def set_up_release_times(self):
         # get release times based on release_start_date, duration
@@ -75,7 +76,7 @@ class PointRelease(ParameterBaseClass):
             time_start = time_util.isostr_to_seconds(params['release_start_date'])
 
         # now check if start in range
-        n_groups_so_far =len(si.classes['particle_release_groups'])
+        n_groups_so_far =len(si.classes['release_groups'])
         if not hindcast_start <= time_start <= hindcast_end:
             si.msg_logger.msg('Release group= ' + str(n_groups_so_far + 1) + ', name= ' + self.params['name'] + ',  parameter release_start_time is ' +
                                     time_util.seconds_to_isostr(time_start)

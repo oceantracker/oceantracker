@@ -124,15 +124,15 @@ def plot_dry_cells(track_data,show_dry_cells=True, nt=0):
 def plot_release_points_and_polygons(d, release_group=None, ax = plt.gca(), color =[.2, .8, .2]):
     # release_group is 1 based
     if release_group is None :
-        sel= range(len(d['particle_release_group_info'])) # show all
+        sel = list(d['release_locations'].keys()) # plot all release groups
+
     else:
-        sel = [release_group-1]
+        sel= [release_group]
 
-    for n in sel:
-
-        rg = d['particle_release_group_info'][n]
-        p = np.asarray(rg['points'])
-        if 'user_polygonID' in rg:
+    for name in sel:
+        rg = d['release_locations'][name]
+        p = rg['points'][:,:2]
+        if rg['is_polygon']:
             ax.plot(p[:, 0], p[:, 1], '-', color=color,zorder=8, linewidth=1)
         else:
             ax.plot(p[:, 0], p[:, 1], '.', color=color, markersize=10,zorder=14)

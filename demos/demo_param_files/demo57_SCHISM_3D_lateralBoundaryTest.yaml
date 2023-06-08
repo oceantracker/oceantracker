@@ -45,7 +45,12 @@ particle_properties:
   age_decay:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
-particle_release_groups:
+reader:
+  field_variables:
+    water_temperature: temp
+  file_mask: demoHindcastSchism3D.nc
+  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+release_groups:
   P1:
     points:
     - - 1599750
@@ -53,11 +58,6 @@ particle_release_groups:
       - -1
     pulse_size: 20
     release_interval: 3600
-reader:
-  field_variables:
-    water_temperature: temp
-  file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
 root_output_dir: output
 run_as_depth_averaged: true
 time_step: 120

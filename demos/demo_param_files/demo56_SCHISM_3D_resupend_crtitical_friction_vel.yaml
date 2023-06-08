@@ -46,40 +46,6 @@ particle_properties:
   age_decay:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
-particle_release_groups:
-  P1:
-    points:
-    - - 1594500
-      - 5487000
-      - -1
-    - - 1594500
-      - 5483000
-      - -1
-    - - 1598000
-      - 5486100
-      - -1
-    pulse_size: 10
-    release_interval: 3600
-  poly1:
-    class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
-    points:
-    - - 1597682.1237
-      - 5489972.7479
-    - - 1598604.1667
-      - 5490275.5488
-    - - 1598886.4247
-      - 5489464.0424
-    - - 1597917.3387
-      - 5489000
-    - - 1597300
-      - 5489000
-    - - 1597682.1237
-      - 5489972.7479
-    pulse_size: 10
-    release_interval: 3600
-    z_range:
-    - -2
-    - -4.0
 particle_statistics:
   grid1:
     calculation_interval: 3600
@@ -99,6 +65,40 @@ reader:
   - water_temperature
   file_mask: demoHindcastSchism3D.nc
   input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+release_groups:
+  P1:
+    points:
+    - - 1594500
+      - 5487000
+      - -1
+    - - 1594500
+      - 5483000
+      - -1
+    - - 1598000
+      - 5486100
+      - -1
+    pulse_size: 10
+    release_interval: 3600
+  poly1:
+    class_name: oceantracker.release_groups.polygon_release.PolygonRelease
+    points:
+    - - 1597682.1237
+      - 5489972.7479
+    - - 1598604.1667
+      - 5490275.5488
+    - - 1598886.4247
+      - 5489464.0424
+    - - 1597917.3387
+      - 5489000
+    - - 1597300
+      - 5489000
+    - - 1597682.1237
+      - 5489972.7479
+    pulse_size: 10
+    release_interval: 3600
+    z_range:
+    - -2
+    - -4.0
 resuspension:
   critical_friction_velocity: 0.005
 root_output_dir: output

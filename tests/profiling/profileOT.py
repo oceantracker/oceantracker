@@ -67,10 +67,10 @@ def get_params(datasource=1):
                     },
        'write_tracks': False,
                               'dispersion': {'A_H': .2, 'A_V': 0.001},
-                              'particle_release_groups': [{'points': points,
+                              'release_groups': [{'points': points,
                                                            'pulse_size': pulse_size, 'release_interval': release_interval,
                                                            'allow_release_in_dry_cells': True},
-                                                          {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+                                                          {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                                                            'points': poly_points,
                                                            'pulse_size': pulse_size, 'release_interval': release_interval}
                                                           ],
@@ -136,7 +136,7 @@ if __name__ == '__main__':
 
 
     if args.test:
-        params['max_duration'] = 12.*3600  # 12 hour test
+        params['max_run_duration'] = 12.*3600  # 12 hour test
 
 
     if args.profiler == 0:

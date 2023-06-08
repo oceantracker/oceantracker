@@ -25,7 +25,7 @@ def set_params(args, x0, duration_sec= 5. * 24 * 3600):
                          'cords_in_lat_long': True,
                          # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                          },
-            'particle_release_groups' :rg,
+            'release_groups' :rg,
             'duration': duration_sec,
             'write_tracks': True,
             'tracks_writer': {'update_interval':3600},

@@ -40,7 +40,7 @@ params={'shared_params' :{'output_file_base' : output_file_base,'root_output_dir
                 'file_mask': file_mask},
     'base_case_params' : {
         'run_params' : {'user_note':'test of notes'},
-        'particle_release_groups': [{'points': points, 'pulse_size': 250, 'release_interval': 7200}] ,
+        'release_groups': [{'points': points, 'pulse_size': 250, 'release_interval': 7200}] ,
         'trajectory_modifiers': [{'class_name': 'oceantracker.resuspension.BasicResuspension',
                                                         'critical_friction_velocity': .000}],
         'fields' :[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}],

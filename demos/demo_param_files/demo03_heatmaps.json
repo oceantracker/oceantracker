@@ -40,7 +40,7 @@
         ],
         "write_dry_cell_index": true
     },
-    "particle_release_groups_dict": {
+    "release_groups_dict": {
         "mypoints1": {
             "points": [
                 [
@@ -62,7 +62,7 @@
             "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
         }
     },
-    "particle_release_groups": {
+    "release_groups": {
         "myP1": {
             "points": [
                 [

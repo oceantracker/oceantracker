@@ -30,7 +30,7 @@ def demo03_heatmaps(case_info_file_name, output_file=None):
 
     stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'])
     axis_lims = [1591000, 1601500, 5478500, 5491000]
-    animate_heat_map(stats_data, axis_lims=axis_lims,
+    animate_heat_map(stats_data,'myP1', axis_lims=axis_lims,
                                     heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
                                     movie_file=output_file + '.mp4' if output_file is not None else None,
                                     fps=7)
@@ -46,7 +46,7 @@ def demo04_ageBasedHeatmaps(case_info_file_name,output_file=None):
 
     stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], name='age_grid')
     axis_lims = [1591000, 1601500, 5478500, 5491000]
-    animate_heat_map(stats_data, axis_lims=axis_lims,
+    animate_heat_map(stats_data,'myP1', axis_lims=axis_lims,
                                     heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
                                     movie_file=output_file + '.mp4' if output_file is not None else None,
                                     fps=7)

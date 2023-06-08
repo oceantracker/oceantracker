@@ -33,7 +33,7 @@ if __name__ == '__main__':
                 'duration': 8. * 24 * 3600,
                 'write_tracks': True},
         'tracks_writer' : {'output_step_count': 3},
-        'particle_release_groups': [ {'points': x0 ,'pulse_size':1000, 'release_interval': 0}],
+        'release_groups': [ {'points': x0 ,'pulse_size':1000, 'release_interval': 0}],
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
 
         'particle_statistics' : [{
@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     params={ 'shared_params': {'output_file_base': 'soundstest',
                             'root_output_dir': 'F:\\OceanTrackerOuput\\Sounds\\test',
-                               'max_duration': 30*24*3600.},
+                               'max_run_duration': 30*24*3600.},
         'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
                       'file_mask': 'schism_marl201701*.nc', 'input_dir': 'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2017',
                       'depth_average': args.depthaverage,

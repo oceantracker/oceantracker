@@ -13,7 +13,7 @@
         "A_H": 0.2,
         "A_V": 0.001
     },
-    "particle_release_groups": {
+    "release_groups": {
         "P1": {
             "points": [
                 [
@@ -32,7 +32,7 @@
             "allow_release_in_dry_cells": true
         },
         "Poly1": {
-            "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
+            "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
             "points": [
                 [
                     1597682.1237,
@@ -144,7 +144,7 @@
             ]
         }
     },
-    "max_duration": 1296000.0,
+    "max_run_duration": 1296000.0,
     "write_tracks": false,
     "particle_concentrations": {
         "outfall_conc": {

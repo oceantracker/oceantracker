@@ -40,7 +40,7 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-max_duration: 1296000.0
+max_run_duration: 1296000.0
 output_file_base: demo61_concentration_test
 particle_concentrations:
   outfall_conc:
@@ -53,7 +53,12 @@ particle_properties:
     decay_time_scale: 86400.0
   total_water_depth:
     class_name: oceantracker.particle_properties.total_water_depth.TotalWaterDepth
-particle_release_groups:
+reader:
+  field_variables:
+    water_temperature: temp
+  file_mask: demoHindcastSchism3D.nc
+  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+release_groups:
   P1:
     allow_release_in_dry_cells: true
     points:
@@ -66,7 +71,7 @@ particle_release_groups:
     pulse_size: 1000
     release_interval: 3600
   Poly1:
-    class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
+    class_name: oceantracker.release_groups.polygon_release.PolygonRelease
     points:
     - - 1597682.1237
       - 5489972.7479
@@ -82,11 +87,6 @@ particle_release_groups:
       - 5489972.7479
     pulse_size: 1000
     release_interval: 3600
-reader:
-  field_variables:
-    water_temperature: temp
-  file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
 root_output_dir: output
 time_step: 120
 write_tracks: false

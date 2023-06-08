@@ -8,13 +8,13 @@ import oceantracker.post_processing.plotting.plot_utilities as plot_utilities
 from matplotlib import animation
 from oceantracker.util import time_util
 
-def animate_heat_map(stats_data, var='count',  axis_lims=None, credit=None, interval=20,heading=None,
-                     vmin=None, vmax=None,show_grid=False,title=None,logscale=False, caxis= None,nsequence=0,cmap='viridis',
-                     movie_file= None, fps=15, dpi=300, release_group=1, back_ground_depth=True, back_ground_color_map= None):
+def animate_heat_map(stats_data, release_group, var='count',  axis_lims=None, credit=None, interval=20,heading=None,
+                     vmin=None, vmax=None,show_grid=False,title=None,logscale=False, caxis= None,cmap='viridis',
+                     movie_file= None, fps=15, dpi=300,  back_ground_depth=True, back_ground_color_map= None):
 
     def draw_frame(nt):
 
-        x,y, z = get_stats_data(nt, stats_data, var,  logscale, release_group=release_group, zmin=caxis[0])
+        x,y, z = _get_stats_data(nt, stats_data, var, release_group, logscale, zmin=caxis[0])
         pc.set_array(z.ravel())
         pc.set_clim(caxis[0],caxis[1])
         if 'time' in stats_data:
@@ -29,7 +29,8 @@ def animate_heat_map(stats_data, var='count',  axis_lims=None, credit=None, inte
     ax = plt.gca()
     zmin = np.nanmin(stats_data[var])
     zmax = np.nanmax(stats_data[var])
-    x, y, z  = get_stats_data(-1, stats_data, var, logscale, release_group=release_group, zmin=vmin)
+
+    x, y, z  = _get_stats_data(-1, stats_data, var, release_group, logscale, zmin=vmin)
     caxis = [zmin if vmin is None else vmin, zmax if vmax is None else vmax]
 
     if not back_ground_depth:
@@ -107,7 +108,7 @@ def plot_heat_map(stats_data, nsequence=0, nt=-1, axis_lims=None,show_grid=False
                   var='count',vmin=None, vmax=None, release_group=1,credit=None, cmap='viridis', heading = None,
                   plot_file_name=None, back_ground_depth=True,back_ground_color_map= None):
     #todo repace var with data_to_plot=, as in other ploting code
-    x,y, z = get_stats_data(nt, stats_data, var, logscale= logscale, release_group=release_group)
+    x,y, z = _get_stats_data(nt, stats_data, var, release_group, logscale)
 
     fig = plt.gcf()
     ax  = plt.gca()
@@ -134,20 +135,20 @@ def plot_heat_map(stats_data, nsequence=0, nt=-1, axis_lims=None,show_grid=False
     return plot_file_name
 
 
-def get_stats_data(nt, d, var, logscale=False, release_group=1, zmin=None):
+def _get_stats_data(nt, d, var, release_group, logscale, zmin=None):
     # get count or variable patch Nan in zero counts
     # sum/average over all or 1 release group dim
     # nt is time step or age bin
     z= d[var][nt, :, :, :].astype(np.float64)
     count = d['count'][nt, :, :, :]
 
-    # get single requested release group
-    release_group -=1  # make release group zero based
-    z = z[release_group, :, :]
+    # get ID of named release group
+    release_groupID = d['release_groupID'][release_group]
+    z = z[release_groupID, :, :]
 
-    count = count[release_group, :, :]
-    x = d['x'][release_group, :]
-    y = d['y'][release_group, :]
+    count = count[release_groupID, :, :]
+    x = d['x'][release_groupID, :]
+    y = d['y'][release_groupID, :]
 
     # make zero counts nan or zero and tose less than min value, so they won't plot
     if zmin is None:  zmin = np.nanmin(z)

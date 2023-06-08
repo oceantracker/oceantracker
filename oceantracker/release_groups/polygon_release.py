@@ -1,6 +1,6 @@
 import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
-from oceantracker.particle_release_groups.point_release import PointRelease
+from oceantracker.release_groups.point_release import PointRelease
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 
 
@@ -26,7 +26,7 @@ class PolygonRelease(PointRelease):
 
 
         info['points'] = np.asarray( self.params['points']).astype(np.float64)[:,:2] # make sure i is 2D
-
+        info['release_type'] = 'polygon'
         if info['points'].shape[0] < 3:
             si.msg_logger.msg('For polygon release group  "points" parameter have at least 3 points, given ' + str(info['points']), fatal_error=True)
 

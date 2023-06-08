@@ -22,7 +22,7 @@ shared_settings_defaults ={'user_note': PVC('No user note', str),
                 'compact_mode':        PVC(False, bool,doc_str='Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format'),  # discard dead/inactive particles from memory
                 'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
                 'write_grid':          PVC(True,  bool),
-                'max_duration':        PVC(max_timedelta_in_seconds, float,doc_str='Maximum duration in seconds to run all cases. Each case can have its own duration, this sets the maximum, useful in testing'),  # limit all cases to this duration
+                'max_run_duration':    PVC(max_timedelta_in_seconds, float,doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration
                 'processors':          PVC(1, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
                 #'max_threads':   PVC(None, int, min=1,doc_str='maximum number of processors used for threading to process particles in parallel'),
                 'advanced_settings': { 'max_warnings':        PVC(50,    int, min=0),  # dont record more that this number of warnings, to keep caseInfo.json finite
@@ -51,7 +51,7 @@ case_settings_defaults ={
               }
 
 
-#'particle_release_groups': 'oceantracker.particle_release_groups.point_release.PointRelease',
+#'release_groups': 'oceantracker.release_groups.point_release.PointRelease',
 
 core_classes= { 'reader': {},
    'solver': {'class_name': 'oceantracker.solver.solver.Solver'},
@@ -64,9 +64,9 @@ core_classes= { 'reader': {},
 
 reader_classes={'reader':{}} # in future wil have primary , secondary and acliary filed readers
 
-#'particle_release_groups': 'oceantracker.particle_release_groups.point_release.PointRelease',}
+#'release_groups': 'oceantracker.release_groups.point_release.PointRelease',}
 class_dicts={ # class dicts which replace lists
-            'particle_release_groups': {},
+            'release_groups': {},
             'fields': {},  # user fields calculated from other fields  on reading
             'particle_properties': {},  # user added particle properties, eg DistanceTraveled
             'status_modifiers': {},  # change status of particles, eg tidal stranding
@@ -109,8 +109,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     #TODO BUGS
             # todo no file found graceful exit
             # todo active count when culling?
-            # todo why BC walk oo long for large steps sizes?
-            # todo cope wih empty relese goups, ie non released
+            # todo why BC walk too long for large steps sizes?
+            # todo cope wih empty relese groups, ie non released
             # todo amimations ignoring release group argument?
             # todo no releases in particle buffer to small?
             # todo check time_step default is hindcast time step
@@ -124,9 +124,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo random walk
         # todo
     #TODO PARAMETERS
-        # todo use names in dict rather class lists
-        # todo user to give class_instance instead of class_name
-        # todo allow user to give "class" instead of class_name
+         # todo allow user to give "class" instead of class_name ( not an insatnce) 
 
         # todo max time steps per file option?
         # todo add CPC for check class parameters??
@@ -142,7 +140,11 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo use update_interval everywhere as parmateter fo periodic actions
         # todo  move interpolate set up to the end, to enable record dtypes to be formed used to reduce numba params, eg for all particle props
         #todo add run_dir option to all output reads
+        # remove writing to file or mp4, and show how to save it by example???
+
     #TODO Features
+        #todo add time units attr={'units': 'seconds since 1970-01-01'}
+        # add description kwarg to all netcdf variables
 
     # TODO SIMPLIFY
         #todo remove depth range stats and make depth range part of stats
@@ -162,6 +164,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo add units to Parameter check and show in user docs
         # todo  add msegae logging to post processing
         # todo add read case info file with not found errors
+        # todo get rid of info[points], just alter params points
+        # todo get rid of info[points], just alter params points
 
 #TODO FASTER STARTUP
     #todo add timing of start up blocks to improve setup speed
@@ -187,16 +191,22 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # todo add check for use of known class prop types, eg 'maunal_update'
     # todo compact model only with self expanding buffer??
     # todo enable on the fly depth avering of fieds if running depth avearged,
-    #  currently diabled in base reader.setup_reader_fields
+    #  currently disabled in base reader.setup_reader_fields
+    #todo only have compact mode tracks, and add a convert at end if requested
 
 # TODO IMPROVEMENTS
     # todo rotate particle relese polygns to reduce searches for points in side
     # todo extend inside polygon to have list of cells fully inside plogon for faster serach
     # todo integerise all periodic evets to model time steps
     # todo to enable mutliple readers,  do all particle tracking in lon-lat
-    # todo replace retain_culled_part_locations with use of "last known location", and add mask_dead praticles in readers
+    # todo replace retain_culled_part_locations with use of "last known location",
+    #  todo and add "show_dead_particles" option to tracks plotting
     #todo plot routines using message logger
-    #todo merge residence time into polygon stats
+    #todo merge residence time into polygon stats?
+    #todo add varainc cacl got on fly stats partivle prop, by adding sum of squares heatmap/ploygon
+    # todo read geojson polygons
+    # todo free run through statr/gaps/ends when no active particles
+    # todo read-ahead async reader
 
 # TODO FUTURE
     #todo shared reader

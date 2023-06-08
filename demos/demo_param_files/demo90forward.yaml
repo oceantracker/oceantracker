@@ -6,7 +6,7 @@ debug: true
 dispersion:
   A_H: 0.0
   A_V: 0.0
-max_duration: 172800.0
+max_run_duration: 172800.0
 output_file_base: demo90forward
 particle_properties_dict:
   Oxygen:
@@ -15,24 +15,6 @@ particle_properties_dict:
     initial_value: 20.0
   distance_travelled:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-particle_release_groups:
-  P1:
-    points:
-    - - 1594500
-      - 5486500
-    - - 1596500
-      - 5489000
-    - - 1595000
-      - 5483000
-    pulse_size: 1
-    release_interval: 0
-particle_release_groups_dict:
-  mypoints1:
-    points:
-    - - 1594500
-      - 5483000
-    pulse_size: 200
-    release_interval: 0
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -55,6 +37,24 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 2
+release_groups:
+  P1:
+    points:
+    - - 1594500
+      - 5486500
+    - - 1596500
+      - 5489000
+    - - 1595000
+      - 5483000
+    pulse_size: 1
+    release_interval: 0
+release_groups_dict:
+  mypoints1:
+    points:
+    - - 1594500
+      - 5483000
+    pulse_size: 200
+    release_interval: 0
 root_output_dir: output
 time_step: 60
 tracks_writer:

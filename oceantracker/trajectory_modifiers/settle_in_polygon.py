@@ -11,7 +11,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         self.add_default_params({'name': PVC('settle_in_polygon', str),
                                  'polygon': {'points': PVC(None,'array', is_required=True)},
                                  'probability_of_settlement': PVC(0.,float),
-                                 'settlement_duration': PVC(0., float),  #  time block stranding after stranding has occured
+                                 'settlement_duration': PVC(0., float,min=0.),  #  time block stranding after stranding has occured
                                  })
         self.polygons = []
 

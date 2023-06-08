@@ -204,7 +204,7 @@ class GenericUnstructuredReader(_BaseReader):
         nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
-        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributesDict={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
+        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
         nc.write_a_new_variable('water_depth', si.classes['fields']['water_depth'].data.squeeze(), ('node_dim',))
         nc.close()

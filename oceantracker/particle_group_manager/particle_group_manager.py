@@ -79,7 +79,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         new_buffer_indices = np.full((0,), 0, np.int32)
 
-        for g in si.classes['particle_release_groups'].values():
+        for g in si.classes['release_groups'].values():
             ri = g.info['release_info']
             sel =  time_sec* si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
             num_pulses= np.count_nonzero(sel)
@@ -258,7 +258,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
-        for n,p in enumerate(si.classes['particle_release_groups'].values()):
+        for n,p in enumerate(si.classes['release_groups'].values()):
 
             if p.params['maximum_age'] is not None:
 
@@ -309,7 +309,7 @@ class ParticleGroupManager(ParameterBaseClass):
         releaseGroups_user_maps = {'particle_release_userRelease_groupID_map': {} , 'particle_release_user_release_group_name_map': {}}
 
         #todo use i.info['nsequence'] for rg id
-        for n, i in enumerate(self.shared_info.classes['particle_release_groups'].values()):
+        for n, i in enumerate(self.shared_info.classes['release_groups'].values()):
             releaseGroups_user_maps['particle_release_userRelease_groupID_map'][str(i.params['user_release_groupID'])] = n
             releaseGroups_user_maps['particle_release_user_release_group_name_map'][str(i.params['user_release_group_name'])] = n
 

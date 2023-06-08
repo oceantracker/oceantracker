@@ -6,6 +6,7 @@ Users guide
     :maxdepth: 2
 
     users_guide/installing.rst
+    users_guide/how_to.rst
     users_guide/running_ocean_tracker.rst
     users_guide/code_structure.rst
     users_guide/parameters_overview.rst

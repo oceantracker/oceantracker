@@ -105,11 +105,8 @@ class RSTfileBuilder(object):
 
             if type(item) == dict:
                 self.add_lines('* ``' + key + '``:' + ' nested parameter dictionary' , indent=indent+1)
-
                 self.add_params_from_dict( item, indent=1)
-
                 continue
-
 
             if type(item) == PVC:
 
@@ -157,7 +154,7 @@ class RSTfileBuilder(object):
                 self.add_lines()
 
 
-def make_sub_pages(class_type):
+def make_class_sub_pages(class_type, link_tag=''):
     # make doc pages from defaults of all python in named dir
 
     mod_name=package_util.get_package_name() + '.' + class_type
@@ -166,7 +163,7 @@ def make_sub_pages(class_type):
 
     package_dir= package_util.get_package_dir()
 
-    toc = RSTfileBuilder(class_type+'_toc', class_type)
+    toc = RSTfileBuilder(class_type+'_toc', class_type + link_tag)
 
     toc.add_lines('**Module:** ' + package_util.package_relative_file_name(mod.__name__).strip())
     toc.add_lines()
@@ -236,69 +233,39 @@ def build_param_ref():
     # parameter ref  TOC
 
     page= RSTfileBuilder('parameter_ref_toc','Parameter details')
-
-
-    page.add_lines('Links to details of parameter default values, acceptable values etc.')
+    page.add_lines('Links to details of parameter default values for settings and classes, acceptable values etc.')
     page.add_lines()
-    page.add_directive('note',body= 'Lots more to add here!!')
 
-    page.add_heading('Settings',level=1)
-    sp = RSTfileBuilder('settings', 'settings')
-
+    # settings sub page
+    sp = RSTfileBuilder('settings', 'Settings')
     settings_dict = common_info.shared_settings_defaults
     settings_dict.update(common_info.case_settings_defaults)
-
+    sp.add_heading('Top level settings/parameters', level=2)
     sp.write_param_dict_defaults(settings_dict)
-    page.add_new_toc_to_page('top', maxdepth=1)
 
-    page.add_new_toc_to_page('settings', sp)
-
+    page.add_lines('Top level settings')
+    page.add_new_toc_to_page('Settings', maxdepth=1)
+    page.add_toc_link('Settings',sp)
 
 
     # core classes
-    page.add_heading('Core classes',level=2)
+    page.add_heading('Core "_class" roles',level=2)
     page.add_new_toc_to_page('core', maxdepth=1)
     for key in sorted(common_info.core_classes.keys()):
         #if key in ['run_params'] or  type(common_info.core_classes[key])==list: continue
 
-        toc = make_sub_pages(key)
+        toc = make_class_sub_pages(key, link_tag='_class')
         page.add_toc_link('core', toc)
 
     page.write()
-    return
 
+    page.add_heading('class "_dict"  roles',level=1)
 
-    page.add_toc_link('top', sp)
+    page.add_new_toc_to_page('class_dicts', maxdepth=1, sort_body=True)
 
-
-
-
-
-    # look at readers
-    toc= make_sub_pages('reader')
-    page.add_toc_link('top', toc)
-
-    page.add_heading('Case parameters',level=1)
-
-    page.add_new_toc_to_page('case', maxdepth=1, sort_body=True)
-
-    rp = RSTfileBuilder('run_params', 'run_params')
-    rp.write_param_dict_defaults(default_param_template['run_params'])
-    page.add_toc_link('case',rp)
-
-    page.add_heading('Core classes',level=2)
-    page.add_new_toc_to_page('core', maxdepth=1)
-    for key in sorted(default_param_template.keys()):
-        if key in ['run_params'] or  type(default_param_template[key])==list: continue
-
-        toc = make_sub_pages(key)
-        page.add_toc_link('core', toc)
-
-    page.add_heading('User added classes',level=2)
     page.add_new_toc_to_page('user', maxdepth=1)
-    for key in sorted(default_param_template.keys()):
-        if type(default_param_template[key]) != list: continue
-        toc = make_sub_pages(key)
+    for key in sorted(common_info.class_dicts.keys()):
+        toc = make_class_sub_pages(key,link_tag='_dict')
         page.add_toc_link('user', toc)
 
     # write toc page at end

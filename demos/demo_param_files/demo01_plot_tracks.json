@@ -38,7 +38,7 @@
         "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
         "time_steps_per_per_file": 700
     },
-    "particle_release_groups_dict": {
+    "release_groups_dict": {
         "mypoints1": {
             "points": [
                 [

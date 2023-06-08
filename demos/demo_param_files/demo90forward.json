@@ -39,7 +39,7 @@
         "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
         "write_dry_cell_index": true
     },
-    "particle_release_groups_dict": {
+    "release_groups_dict": {
         "mypoints1": {
             "points": [
                 [
@@ -61,7 +61,7 @@
             "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
         }
     },
-    "particle_release_groups": {
+    "release_groups": {
         "P1": {
             "pulse_size": 1,
             "release_interval": 0,
@@ -83,7 +83,7 @@
     },
     "block_dry_cells": true,
     "compact_mode": true,
-    "max_duration": 172800.0,
+    "max_run_duration": 172800.0,
     "backtracking": false,
     "debug": true,
     "root_output_dir": "output"

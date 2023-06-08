@@ -24,7 +24,7 @@ params={
     'run_params' : {},
     'dispersion': {'A_H': 1.},
     'solver': {'n_sub_steps': 12},
-        'particle_release_groups': [],
+        'release_groups': [],
                                   }
  }
 
@@ -37,7 +37,7 @@ poly_points=np.asarray([[1597682.1237, 5489972.7479],
 # make polygons staggered to south west, by appending polygon release groups
 for n in range(4):
     points=poly_points+np.asarray([[-1050*n,-2100*n]])
-    params['base_case_params']['particle_release_groups'].append({'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease',
+    params['base_case_params']['release_groups'].append({'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                                                                  'points': points.tolist(), 'pulse_size': 10, 'release_interval': 2*3600})
 
 runInfo_file_name, has_errors = run(params)
