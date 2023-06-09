@@ -50,11 +50,11 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
     def info_to_write_at_end(self):
         nc = self.nc
         stats_grid = self.grid
-        nc.write_a_new_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], {'Notes': 'Mid point of grid cell'})
-        nc.write_a_new_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'], {'Notes': 'Mid point of grid cell'})
+        nc.write_a_new_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], description='Mid point of grid cell')
+        nc.write_a_new_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'],  description='Mid point of grid cell')
 
         area = np.diff(stats_grid['y_bin_edges'][0,:]).reshape((-1,1))*np.diff(stats_grid['x_bin_edges'][0,:]).reshape((1,-1))
-        nc.write_a_new_variable('grid_cell_area', area, [ 'y_dim','x_dim'], {'Notes': 'Horizontal area of each cell'})
+        nc.write_a_new_variable('grid_cell_area', area, [ 'y_dim','x_dim'],  description='Horizontal area of each cell')
 
     def set_up_spatial_bins(self,nc):
         si = self.shared_info
@@ -124,11 +124,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         dim_names= ['time_dim', 'release_group_dim', 'y_dim', 'x_dim']
         dim_sizes =[None, len(si.classes['release_groups']), stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
-        nc.create_a_variable('count', dim_names,
-                             {'notes': 'counts of particles in grid at given times, for each release group'}, np.int64)
-
-        nc.create_a_variable('count_all_particles', dim_names[:2],
-                             {'notes': 'counts of particles whether in grid or not'}, np.int64)
+        nc.create_a_variable('count', dim_names, np.int64, description= 'counts of particles in grid at given times, for each release group')
+        nc.create_a_variable('count_all_particles', dim_names[:2], np.int64, description='counts of particles whether in grid or not')
 
         # set up space for requested particle properties
         # working count space, row are (y,x)
@@ -138,7 +135,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         for p in self.params['particle_property_list']:
             if p in si.classes['particle_properties']:
                 self.sum_binned_part_prop[p] = np.full(dim_sizes[1:], 0.)  # zero for  summing
-                nc.create_a_variable( 'sum_' + p, dim_names, {'notes': 'sum of particle property inside bin  ' + p}, np.float64)
+                nc.create_a_variable( 'sum_' + p, dim_names, np.float64, description= 'sum of particle property inside bin' )
             else:
                 si.msg_logger.msg('Part Prop "' + p + '" not a particle property, ignored and no stats calculated',warning=True)
 
@@ -304,16 +301,14 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         stats_grid = self.grid
 
         nc.write_a_new_variable('count', self.count_age_bins, ['age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim'],
-                                {'notes': 'counts of particles in grid at given ages, for each release group'}, np.int64)
-
+                                description= 'counts of particles in grid at given ages, for each release group')
         nc.write_a_new_variable('count_all_particles', self.count_all_particles, ['age_bin_dim', 'release_group_dim'],
-                                {'notes': 'counts of all particles age bands for each release group'}, np.int64)
-
-        nc.write_a_new_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], {'notes': 'center of age bin, ie age axis of heat map in seconds'}, np.float64)
-        nc.write_a_new_variable('age_bin_edges', stats_grid['age_bin_edges'], ['age_bin_edges'], {'notes': 'center of age bin, ie age axis of heat map in seconds'}, np.float64)
+                                description='counts of all particles age bands for each release group')
+        nc.write_a_new_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], description= 'center of age bin, ie age axis of heat map in seconds')
+        nc.write_a_new_variable('age_bin_edges', stats_grid['age_bin_edges'], ['age_bin_edges'],description='center of age bin, ie age axis of heat map in seconds')
         # particle property sums
         dims = ('age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim')
         for key, item in self.sum_binned_part_prop.items():
             # need to write final sums of propetries  after all age counts done across all times
-            nc.write_a_new_variable('sum_' + key, item[:], dims, {'notes': 'sum of particle property inside bin  ' + key}, np.float64)
+            nc.write_a_new_variable('sum_' + key, item[:], dims, description= 'sum of particle property inside bin  ' + key)
 

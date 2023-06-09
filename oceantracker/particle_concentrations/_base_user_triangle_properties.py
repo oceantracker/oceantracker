@@ -6,7 +6,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import output_util
 from os import path
 from datetime import datetime
-
+import numpy as np
 
 class _BaseTriangleProperties(ParameterBaseClass):
 
@@ -44,7 +44,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         nc.add_dimension('time_dim', None)
         nc.add_dimension('triangle_dim', grid['triangles'].shape[0])
 
-        nc.create_a_variable('time', ['time_dim'])
+        nc.create_a_variable('time', ['time_dim'], np.float64,description='time in seconds since 1970-01-01')
         self.time_steps_written = 0
         # need to add other variables in children
         self.info['time_last_stats_recorded'] = si.time_of_nominal_first_occurrence

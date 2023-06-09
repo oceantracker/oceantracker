@@ -13,14 +13,7 @@ import build_and_test_demos
 import numpy as np
 from oceantracker.post_processing.read_output_files import load_output_files
 
-def mfn(movie_file, n=None):
-    if movie_file is not None:
-        if n is None:
-            return movie_file + '.mp4'
-        else:
-            return movie_file + '_' + str(n) + '.mp4' if args.mp4 else None
-    else:
-        return None
+
     
 if __name__ == "__main__":
     # run demos from build json files
@@ -30,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('-skiprun', action='store_true')
     parser.add_argument('--demo', default=None, type= int)
     parser.add_argument('--root_output_dir', default='output', type=str)
-    parser.add_argument('-mp4', action='store_true')
+    parser.add_argument('-save_plot', action='store_true')
     parser.add_argument('-testing', action='store_true')
     args = parser.parse_args()
 
@@ -114,9 +107,13 @@ if __name__ == "__main__":
             #display_grid(tracks['grid'],ginput=3)
             pass
 
+        plot_output_file = output_file_base if args.save_plot else None
+
+
         # do plots
         if n < 90:
-            getattr(make_demo_plots,demo_name)(case_info_file_name,output_file_base)
+
+            getattr(make_demo_plots,demo_name)(case_info_file_name, plot_output_file)
 
         else:
             ax_lims = [1591000, 1601500, 5478500, 5491000]

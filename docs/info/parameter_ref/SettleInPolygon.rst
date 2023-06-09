@@ -37,6 +37,7 @@ Parameters:
 
 	* ``settlement_duration`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
+		- min: ``0.0``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

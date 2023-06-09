@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>&lt;no title&gt; &#8212; OceanTracker Beta 0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=oceantracker&repo=oceantracker&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/demos.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide.html">Users guide</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># running in paramlet</span>
+      <span class="mf">4.</span> <span class="s2">&quot;case_list_params&quot;</span><span class="p">,</span> <span class="n">these</span> <span class="n">are</span> <span class="n">the</span> <span class="n">paramters</span> <span class="k">as</span> <span class="n">above</span> <span class="n">which</span> <span class="n">will</span> <span class="n">run</span> <span class="n">cases</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">parallel</span><span class="o">.</span>  <span class="n">This</span> <span class="ow">is</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">top</span> <span class="n">level</span> <span class="n">parameters</span> <span class="n">used</span> <span class="k">for</span> <span class="n">each</span> <span class="n">case</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">paralle</span><span class="o">.</span> <span class="n">The</span> <span class="n">top</span> <span class="n">level</span>  <span class="n">essttial</span> <span class="n">user</span> <span class="n">given</span> <span class="n">defaults</span> <span class="k">for</span> <span class="n">those</span> <span class="ow">in</span> <span class="n">each</span> <span class="n">case</span><span class="o">.</span> <span class="n">Eg</span><span class="o">.</span> <span class="n">a</span> <span class="n">case</span> <span class="n">may</span> <span class="n">have</span> <span class="n">its</span> <span class="n">own</span> <span class="n">time_step</span><span class="p">,</span> <span class="ow">or</span> <span class="n">add</span> <span class="n">items</span> <span class="n">to</span> <span class="n">the</span> <span class="n">class_lists</span> <span class="n">eg</span> <span class="n">releases_groups</span><span class="p">,</span>  <span class="n">which</span> <span class="n">are</span> <span class="n">used</span> <span class="k">with</span> <span class="n">the</span> <span class="n">case</span><span class="o">.</span>  <span class="n">For</span> <span class="n">technical</span> <span class="n">reasons</span><span class="p">,</span> <span class="n">a</span> <span class="n">small</span> <span class="n">numer</span> <span class="n">of</span> <span class="n">parameters</span> <span class="n">cannot</span> <span class="n">be</span> <span class="nb">set</span> <span class="k">for</span> <span class="n">an</span> <span class="n">individual</span> <span class="n">case</span><span class="p">,</span> <span class="n">eg</span> <span class="s2">&quot;back_tracking&quot;</span><span class="p">,</span> <span class="n">atempting</span> <span class="n">to</span> <span class="nb">set</span> <span class="n">these</span> <span class="k">with</span> <span class="k">raise</span> <span class="ow">and</span> <span class="n">error</span><span class="o">.</span> <span class="n">See</span> <span class="n">running</span> <span class="ow">in</span> <span class="n">parallel</span> <span class="n">tutourial</span> <span class="k">for</span> <span class="n">more</span> <span class="n">details</span><span class="o">.</span>
+</pre></div>
+</div>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2022, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/info/how_to/dev_P_running_cases_in_parallel.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
