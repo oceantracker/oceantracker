@@ -197,7 +197,7 @@ class GenericUnstructuredReader(_BaseReader):
         # write grid file
         output_files['grid'] = output_files['output_file_base'] + '_grid.nc'
         nc = ncdf_util.NetCDFhandler(path.join(output_files['run_output_dir'], output_files['grid'] ), 'w')
-        nc.write_global_attribute('Notes', ' all indices are zero based')
+        nc.write_global_attribute('index_note', ' all indices are zero based')
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
 
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))

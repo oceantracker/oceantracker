@@ -200,7 +200,7 @@ def set_up_list_of_polygon_instances(polygon_list):
 
 if __name__ == '__main__':
 
-    N=10**6
+    N=10**4
 
 
     v = np.array([[5.5      , -5],
@@ -247,7 +247,6 @@ if __name__ == '__main__':
     plt.plot(P.points[:, 0], P.points[:, 1], 'k--', markersize=10, )
     plt.plot(xtest[:,0],xtest[:,1],'x',markersize=3,color=[1,0,0])
     plt.plot(xtest[indices_inside, 0], xtest[indices_inside, 1], '.', markersize=4, color=[0, 1, 0])
-
 
     x,y = np.meshgrid(P.sub_grid_x,P.sub_grid_y)
     x = .5*(x[:-1,:-1]+x[1:,1:])

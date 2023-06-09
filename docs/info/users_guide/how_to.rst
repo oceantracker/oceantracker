@@ -4,11 +4,12 @@ How to notebooks
 
 The below show a web view of ipython notebooks which are in the folder "tutorials_how_to".
 
+test3
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 1
 
-    code_structure.rst
+    ../how_to/A_minimal_example.rst
+    ../how_to/B_runningOT_and_parameters.rst
 
 

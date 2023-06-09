@@ -74,8 +74,8 @@ class _BaseEventLogger(ParameterBaseClass):
         vec_dims= ['oneD','twoD','threeD' ]
         for n, d in enumerate(vec_dims): self.nc.add_dimension(d, dim_size=n + 1)
 
-        self.nc.create_a_variable('event_flag', ['event_dim'], {'notes': 'event strated =1, ended = -1'}, np.int8, chunksizes=[chunk])
-        self.nc.create_a_variable('time', ['event_dim'], {'notes': 'time in sec'}, np.float64,  chunksizes=[chunk])
+        self.nc.create_a_variable('event_flag',['event_dim'], np.int8, description='event started=1, ended = -1', chunksizes=[chunk])
+        self.nc.create_a_variable('time', ['event_dim'],np.float64, description='time in seconds since 1970-01-01', chunksizes=[chunk])
 
         for prop_name in  info['prop_to_write']:
             pp = part_prop[prop_name]
@@ -86,7 +86,7 @@ class _BaseEventLogger(ParameterBaseClass):
                 dims +=  [vec_dims[pp.num_vector_dimensions() - 1]]
                 cs +=  [pp.num_vector_dimensions()]
 
-            self.nc.create_a_variable(prop_name, dims, {'notes': 'values when event started or ended'}, pp.get_dtype(), chunksizes= cs)
+            self.nc.create_a_variable(prop_name, dims, pp.get_dtype(),description='values when event started or ended', chunksizes= cs)
 
     def write_events(self,IDs_event_began, IDs_event_ended):
         # prop to write is list of particle prop to write beyond the standard ones, e.g.  ID of polygon each particle is inside, to note which polygon event is associated with

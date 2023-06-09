@@ -104,8 +104,8 @@ def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, cr
 
     return anim
 
-def plot_heat_map(stats_data, nsequence=0, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
-                  var='count',vmin=None, vmax=None, release_group=1,credit=None, cmap='viridis', heading = None,
+def plot_heat_map(stats_data,  release_group, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
+                  var='count',vmin=None, vmax=None, credit=None, cmap='viridis', heading = None,
                   plot_file_name=None, back_ground_depth=True,back_ground_color_map= None):
     #todo repace var with data_to_plot=, as in other ploting code
     x,y, z = _get_stats_data(nt, stats_data, var, release_group, logscale)

@@ -272,4 +272,33 @@ def build_param_ref():
     page.write()
 
 if __name__ == "__main__":
+
     build_param_ref()
+
+    # convert ipyhton to
+    import subprocess
+    from os import  path, chdir, rename, remove
+    import shutil
+    from glob import  glob
+
+    chdir(r'..\\tutorials_how_to')
+    print('h')
+    dest = r'..\\docs\\info\\how_to'
+    for f in glob('*.ipynb'):
+        subprocess.run('jupyter nbconvert '+ f + '  --to rst')
+        f_base = f.split('.')[0]
+        print(f_base)
+        f_base + '_files'
+        old_fn = f_base+'.rst'
+        new_fn = path.join(dest,old_fn)
+        if path.isfile(new_fn):
+            remove(new_fn)
+        shutil.move(old_fn, dest)
+
+        old_dir = f_base  +'_files'
+        new_dir = path.join(dest, old_dir)
+        print(old_dir,new_dir)
+        if path.isdir(old_dir) :
+            if path.isdir(new_dir): shutil.rmtree(new_dir, ignore_errors=True)
+            shutil.move(old_dir, new_dir)
+

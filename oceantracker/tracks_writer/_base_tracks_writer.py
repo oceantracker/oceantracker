@@ -124,7 +124,7 @@ class _BaseWriter(ParameterBaseClass):
                                             hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time', )
 
             try:
-                nc.create_a_variable(name,item['dim_list'], chunksizes=item['chunks'], dtype=item['dtype'], attributes=item['attributes'])
+                nc.create_a_variable(name,item['dim_list'] , item['dtype'], attributes=item['attributes'], chunksizes=item['chunks'],)
             except:
                 A=1
 

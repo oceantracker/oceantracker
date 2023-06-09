@@ -37,7 +37,7 @@ class NetCDFhandler(object):
         if name not in self.file_handle.dimensions:
             self.file_handle.createDimension(name, dim_size)
 
-    def create_a_variable(self, name, dimList, description=None, attributes=None, dtype=None, chunksizes=None, compressionLevel=0):
+    def create_a_variable(self, name, dimList,dtype, description=None, attributes=None,  chunksizes=None, compressionLevel=0):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
         if dtype is None: dtype = np.float64  # double by default

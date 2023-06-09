@@ -21,5 +21,5 @@ animate_heat_map(stats_data,'myP1', axis_lims=axis_lims,
                                 heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
                                 fps=7)
-plot_heat_map(stats_data, axis_lims=axis_lims, var='water_depth', heading='Water depth built on the fly, no tracks recorded',
+plot_heat_map(stats_data,'myP1', axis_lims=axis_lims, var='water_depth', heading='Water depth built on the fly, no tracks recorded',
                              plot_file_name=output_file + '_water_depth.jpeg' if output_file is not None else None)

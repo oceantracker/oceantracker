@@ -27,8 +27,8 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
         super().set_up_output_file()
         # add 2D variables
         nc= self.nc
-        nc.create_a_variable('particle_count', ['time_dim','triangle_dim'], dtype=self.particle_count.dtype)
-        nc.create_a_variable('particle_concentration', ['time_dim', 'triangle_dim'], dtype=self.particle_concentration.dtype)
+        nc.create_a_variable('particle_count',['time_dim','triangle_dim'], self.particle_count.dtype, description='count of particles in each triangle at given time')
+        nc.create_a_variable('particle_concentration', ['time_dim', 'triangle_dim'], self.particle_concentration.dtype, description='concentration of particles in each triangle at given time')
 
     def update(self, time_sec):
         si=self.shared_info

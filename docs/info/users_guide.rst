@@ -15,4 +15,4 @@ Users guide
     users_guide/post_processing.rst
     change_log.rst
     future_dev.rst
-
+    how_to.rst
