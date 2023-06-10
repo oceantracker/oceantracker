@@ -2,6 +2,6 @@
 Installing
 ##########################
 
-.. include:: ../../../installing/installing.md
+.. include:: ../../installing/installing.md
 
 

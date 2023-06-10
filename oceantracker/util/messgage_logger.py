@@ -40,7 +40,7 @@ class MessageLogger(object):
         return  log_file_name, error_file_name
     #todo add abilty to return excecption/traceback?
     def msg(self, msg_text, warning=False, note=False,
-            hint=None, tag=None, tabs=0, crumbs=None,
+            hint=None, tag=None, tabs=0, crumbs=None,link=None,
             fatal_error=False, exit_now=False, exception = None, traceback_str=None):
 
         if exception is not None:
@@ -78,6 +78,9 @@ class MessageLogger(object):
             m.append(msg_str('in: ' + crumbs, tabs + 3))
         if hint is not None:
             m.append(msg_str('Hint: ' + hint, tabs + 3))
+        if link is not None:
+            #todo make this work
+            m.append(msg_str('see user documentation: ' + link, tabs + 3))
 
         # write message lines
         for l in m:

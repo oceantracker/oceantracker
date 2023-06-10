@@ -1,34 +1,36 @@
 # minimal_example.py
 #-------------------
-from oceantracker import main
 
-# create parameters as a dictionary
-params= {'shared_params' : {'output_file_base' :'minimal_example',
-                           'root_output_dir':'output'},
-    'reader': { 'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
-                'input_dir': 'demo_hindcast',
-                'file_mask': 'demoHindcastSchism3D.nc',
-                },
-    'base_case_params' : { 'solver': {'n_sub_steps': 12}, #not required but runs 5min steps in 1hr time step hindcast
-                'release_groups':
-                      [{'points': [[1595000, 5483300, -2],[1596000, 5487200, -2] ], # two 3D release locations
-                        'pulse_size': 10, 'release_interval': 3600}
-                       ]
-                           }
-        }
+from oceantracker.main import OceanTracker
+# make instance of oceantracker to use to set parameters using code, then run
+ot = OceanTracker()
 
-# run OceanTracker to give track output files
-runInfo_file_name, has_errors = main.run(params)
+# ot.settings method use to set basic settings
+ot.settings(output_file_base='minimal_example', # name used as base for output files
+            root_output_dir='output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
+            time_step= 120. #  2 min time step as seconds
+            )
+# ot.set_class, sets parameters for a named class
+ot.add_class('reader', input_dir= '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                      file_mask=  'demoHindcastSchism*.nc')  # hindcast file mask
+# add  release locations from two points,
+#               (ie locations where particles are released at the same times and locations)
+#  note : can add multiple release groups
+ot.add_class('release_groups', name ='my_release_point', # user must provide a name for release group
+                     points= [[1595000, 5482600],
+                              [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
+                    release_interval= 3600,           # seconds between releasing particles
+                    pulse_size= 10,                   # number of particles released each release_interval
+                    )
 
+case_info_file_name, has_errors = ot.run()
+# case_info_file_name is a json file with useful ingo for post processing, eg output file names
 # output now in folder output/minimal_example
 
 # below is optional code for plotting
 #-------------------------------------
 from oceantracker.post_processing.plotting.plot_tracks import animate_particles, plot_tracks
-from oceantracker.post_processing.read_output_files.load_output_files import get_case_info_file_from_run_file, load_particle_track_vars
-
-# find case_info_file name, to used to locate output for the caseInfo file
-case_info_file_name = get_case_info_file_from_run_file(runInfo_file_name)
+from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars
 
 # read particle tracks for plotting
 track_data = load_particle_track_vars(case_info_file_name)

@@ -36,7 +36,7 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_json/demo06_reefstranding.json
+.. literalinclude:: ../../../demos/demo_param_files/demo06_reefstranding.json
     :language: json
     :caption:
 
@@ -94,7 +94,7 @@ Vertical slice showing one example of a falling particle and resuspension, with 
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_json/demo58_bottomBounce.json
+.. literalinclude:: ../../../demos/demo_param_files/demo58_bottomBounce.json
     :language: json
     :caption:
 
@@ -150,7 +150,7 @@ Particles with splitting in two every 6 hours and a 5% chance of dying every 6 h
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_json/demo08_particle_splitting.json
+.. literalinclude:: ../../../demos/demo_param_files/demo08_particle_splitting.json
     :language: json
     :caption:
 

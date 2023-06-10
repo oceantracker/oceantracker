@@ -44,7 +44,7 @@ along with counts of particles inside polygons
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_json/demo03_heatmaps.json
+.. literalinclude:: ../../../demos/demo_param_files/demo03_heatmaps.json
     :language: json
     :caption:
 

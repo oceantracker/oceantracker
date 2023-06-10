@@ -38,7 +38,7 @@ Decaying particle property used to size and colour  particles. ``decay_time_scal
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_json/demo60_SCHISM_3D_decaying_particle.json
+.. literalinclude:: ../../../demos/demo_param_files/demo60_SCHISM_3D_decaying_particle.json
     :language: json
     :caption:
 
@@ -92,7 +92,7 @@ Particles with additional inside polygon  property, with optional logging of pol
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_json/demo07_inside_polygon_events.json
+.. literalinclude:: ../../../demos/demo_param_files/demo07_inside_polygon_events.json
     :language: json
     :caption:
 
@@ -151,7 +151,7 @@ Particles coloured by their status property. Status can be one of following stri
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_json/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json
+.. literalinclude:: ../../../demos/demo_param_files/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json
     :language: json
     :caption:
 
