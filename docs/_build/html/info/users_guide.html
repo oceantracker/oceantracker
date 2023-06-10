@@ -16,8 +16,8 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Installing" href="users_guide/installing.html" />
-    <link rel="prev" title="Particle Statistics" href="demos/particle_statistics.html" />
+    <link rel="next" title="Installing" href="installing.html" />
+    <link rel="prev" title="Run in parallel" href="how_to/P_running_cases_in_parallel.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -55,18 +55,17 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="demos/demos.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Users guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/how_to.html">How to notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html">Running OceanTracker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/code_structure.html">Code Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html">Parameters overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installing.html">Installing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html">Post processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html">Change log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="future_dev.html">Future development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
 </ul>
 </li>
 </ul>
@@ -75,8 +74,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="demos/particle_statistics.html" title="previous chapter">Particle Statistics</a></li>
-      <li>Next: <a href="users_guide/installing.html" title="next chapter">Installing</a></li>
+      <li>Previous: <a href="how_to/P_running_cases_in_parallel.html" title="previous chapter">Run in parallel</a></li>
+      <li>Next: <a href="installing.html" title="next chapter">Installing</a></li>
   </ul></li>
 </ul>
 </div>
@@ -102,38 +101,21 @@
 <h1>Users guide<a class="headerlink" href="#users-guide" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="users_guide/installing.html">Installing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/installing.html#build-oceantracker-conda-environment">Build oceantracker conda environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installing.html#build-oceantracker-conda-environment">Build oceantracker conda environment</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="users_guide/how_to.html">How to notebooks</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="how_to.html">How to notebooks</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="how_to/A_minimal_example.html">Minimal example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Parameter structure and Running OceanTracker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html#running-oceantracker">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Parameters and Running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/C_release_groups.html">Output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/P_running_cases_in_parallel.html">Run in parallel</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="users_guide/running_ocean_tracker.html">Running OceanTracker</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html#ways-to-run">Ways to run</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html#minimal-example">Minimal example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html#run-from-parameter-file">Run from parameter file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html#run-from-code">Run from code</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/running_ocean_tracker.html#run-from-code-in-python-ide">Run from code in python IDE</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="users_guide/code_structure.html">Code Structure</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/code_structure.html#types-of-class">Types of Class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/code_structure.html#making-a-user-version-of-a-class">Making a user version of a class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/code_structure.html#readers-role-construction">Readers Role/Construction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/code_structure.html#reader-required-methods">Reader required methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/code_structure.html#to-do">To do</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="users_guide/parameters_overview.html">Parameters overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#top-level-params">Top level params</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#case-level-params">Case level params</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#defaults">Defaults</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#checking">Checking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/parameters_overview.html#class-name-parameter">class_name parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Parameters and Running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a><ul>
@@ -141,18 +123,7 @@
 <li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html#core-class-roles">Core “_class” roles</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="users_guide/output_files.html">Output files</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html#output-location">Output location</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html#file-names">File names</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/output_files.html#file-types-and-roles">File types and roles</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="users_guide/post_processing.html">Post processing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html#reading-output-files">Reading output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html#read-case-info-netcdf-and-grid-methods">Read case_info,  NetCDF and grid methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="users_guide/post_processing.html#plotting">Plotting</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="change_log.html">Change log</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#known-issues">Known issues</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-4-major-upgrade">Version 0.4 Major upgrade</a></li>
@@ -176,6 +147,14 @@
 <li class="toctree-l2"><a class="reference internal" href="future_dev.html#minor-features-fixes">Minor features/fixes</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="how_to.html">How to notebooks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="how_to/A_minimal_example.html">Minimal example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Parameters and Running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/C_release_groups.html">Output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/P_running_cases_in_parallel.html">Run in parallel</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -188,10 +167,10 @@
     <ul>
         <li>
           &larr;
-          <a href="demos/particle_statistics.html" title="Previous document">Particle Statistics</a>
+          <a href="how_to/P_running_cases_in_parallel.html" title="Previous document">Run in parallel</a>
         </li>
         <li>
-          <a href="users_guide/installing.html" title="Next document">Installing</a>
+          <a href="installing.html" title="Next document">Installing</a>
           &rarr;
         </li>
     </ul>

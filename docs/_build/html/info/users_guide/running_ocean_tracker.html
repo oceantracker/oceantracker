@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Code Structure" href="code_structure.html" />
-    <link rel="prev" title="Parameter structure and Running OceanTracker" href="../how_to/B_runningOT_and_parameters.html" />
+    <link rel="prev" title="Installing" href="installing.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -55,13 +55,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../demos/demos.html">Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Running OceanTracker</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ways-to-run">Ways to run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#minimal-example">Minimal example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#run-from-parameter-file">Run from parameter file</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#yaml-files">YAML files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#json-files">JSON files</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l2"><a class="reference internal" href="post_processing.html">Post processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 </ul>
 </li>
 </ul>
@@ -87,7 +87,7 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
-      <li>Previous: <a href="../how_to/B_runningOT_and_parameters.html" title="previous chapter">Parameter structure and Running OceanTracker</a></li>
+      <li>Previous: <a href="installing.html" title="previous chapter">Installing</a></li>
       <li>Next: <a href="code_structure.html" title="next chapter">Code Structure</a></li>
   </ul></li>
   </ul></li>
@@ -150,79 +150,6 @@
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
 </div>
 </section>
-<section id="minimal-example">
-<h2>Minimal example<a class="headerlink" href="#minimal-example" title="Permalink to this heading">¶</a></h2>
-<center>
-  <video width="95%" controls muted autoplay loop src="../../_static/demos/minimal_example.mp4">
- </video>
-</center><p>Example to show the minmum required to run oceanTracker, using code to both run and plot, or from parameter file.
-For this 3D hindcast, grey particles are stranded on the bottom, green ones are stranded on the shore by the tide.</p>
-<p><strong>Run and plot using code:</strong></p>
-<details>
-<summary> code </summary><div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">../../../demos/minimal_example.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># minimal_example.py</span>
-<span class="c1">#-------------------</span>
-<span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
-
-<span class="c1"># create parameters as a dictionary</span>
-<span class="n">params</span><span class="o">=</span> <span class="p">{</span><span class="s1">&#39;shared_params&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;output_file_base&#39;</span> <span class="p">:</span><span class="s1">&#39;minimal_example&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;root_output_dir&#39;</span><span class="p">:</span><span class="s1">&#39;output&#39;</span><span class="p">},</span>
-    <span class="s1">&#39;reader&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="s1">&#39;class_name&#39;</span><span class="p">:</span> <span class="s1">&#39;oceantracker.reader.schism_reader.SCHSIMreaderNCDF&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;input_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;demo_hindcast&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;file_mask&#39;</span><span class="p">:</span> <span class="s1">&#39;demoHindcastSchism3D.nc&#39;</span><span class="p">,</span>
-                <span class="p">},</span>
-    <span class="s1">&#39;base_case_params&#39;</span> <span class="p">:</span> <span class="p">{</span> <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;n_sub_steps&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">},</span> <span class="c1">#not required but runs 5min steps in 1hr time step hindcast</span>
-                <span class="s1">&#39;release_groups&#39;</span><span class="p">:</span>
-                      <span class="p">[{</span><span class="s1">&#39;points&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">1595000</span><span class="p">,</span> <span class="mi">5483300</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">],[</span><span class="mi">1596000</span><span class="p">,</span> <span class="mi">5487200</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="p">],</span> <span class="c1"># two 3D release locations</span>
-                        <span class="s1">&#39;pulse_size&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;release_interval&#39;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">}</span>
-                       <span class="p">]</span>
-                           <span class="p">}</span>
-        <span class="p">}</span>
-
-<span class="c1"># run OceanTracker to give track output files</span>
-<span class="n">runInfo_file_name</span><span class="p">,</span> <span class="n">has_errors</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-
-<span class="c1"># output now in folder output/minimal_example</span>
-
-<span class="c1"># below is optional code for plotting</span>
-<span class="c1">#-------------------------------------</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span><span class="p">,</span> <span class="n">plot_tracks</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files.load_output_files</span> <span class="kn">import</span> <span class="n">get_case_info_file_from_run_file</span><span class="p">,</span> <span class="n">load_particle_track_vars</span>
-
-<span class="c1"># find case_info_file name, to used to locate output for the caseInfo file</span>
-<span class="n">case_info_file_name</span> <span class="o">=</span> <span class="n">get_case_info_file_from_run_file</span><span class="p">(</span><span class="n">runInfo_file_name</span><span class="p">)</span>
-
-<span class="c1"># read particle tracks for plotting</span>
-<span class="n">track_data</span> <span class="o">=</span> <span class="n">load_particle_track_vars</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">)</span>
-
-<span class="c1"># plot tracks</span>
-<span class="n">anim</span> <span class="o">=</span> <span class="n">plot_tracks</span><span class="p">(</span><span class="n">track_data</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5478500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">],</span>
-                            <span class="n">plot_file_name</span><span class="o">=</span><span class="s1">&#39;output</span><span class="se">\\</span><span class="s1">minimal_example.jpeg&#39;</span><span class="p">)</span>
-
-<span class="c1"># animate particles</span>
-<span class="n">anim</span> <span class="o">=</span> <span class="n">animate_particles</span><span class="p">(</span><span class="n">track_data</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5478500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">],</span>
-                         <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Minimal example of OceanTracker with 3D point release&#39;</span><span class="p">,</span>
-                         <span class="n">movie_file</span><span class="o">=</span><span class="s1">&#39;output</span><span class="se">\\</span><span class="s1">minimal_example.mp4&#39;</span><span class="p">,</span> <span class="n">show_dry_cells</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-</pre></div>
-</div>
-</div>
-</details><p><strong>Run using parameter file:</strong></p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run_oceantracker.py</span> <span class="pre">--param_file</span> <span class="pre">minimal_example.yaml</span></code></p>
-</div></blockquote>
-<details>
-<summary> json parameters </summary></details><details>
-<summary> yaml parameters </summary></details><p>Output is written to directory given set by shared_parameters, ie. a dir named</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">['root_output_dir']/['output_file_base']</span></code></p>
-</div></blockquote>
-<p>in this example output is in</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">output/minimal_example</span></code></p>
-</div></blockquote>
-</section>
 <section id="run-from-parameter-file">
 <h2>Run from parameter file<a class="headerlink" href="#run-from-parameter-file" title="Permalink to this heading">¶</a></h2>
 <p>Using run_oceantracker.py, eg.</p>
@@ -272,8 +199,8 @@ For this 3D hindcast, grey particles are stranded on the bottom, green ones are 
 <h2>Run from code<a class="headerlink" href="#run-from-code" title="Permalink to this heading">¶</a></h2>
 <p>Below is example of building a dictionary of parameters, running particle tracking and plotting:</p>
 <p>Another exmaple</p>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">../../../demos/run_from_code_demo.py</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">../../../demos/run_from_code_demo.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># run oceantracker direct from code from dictionary built in code</span>
 <span class="c1"># make polygons staggered to south west, by appending polygon release groups</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -339,7 +266,7 @@ For this 3D hindcast, grey particles are stranded on the bottom, green ones are 
     <ul>
         <li>
           &larr;
-          <a href="../how_to/B_runningOT_and_parameters.html" title="Previous document">Parameter structure and Running OceanTracker</a>
+          <a href="installing.html" title="Previous document">Installing</a>
         </li>
         <li>
           <a href="code_structure.html" title="Next document">Code Structure</a>

@@ -36,9 +36,9 @@ demo_base_params={'output_file_base' : None,
     'user_note':'test of notes',
     'dispersion': {'A_H': .1},
     'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_index': True},
-    'release_groups_dict': {'mypoints1':{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}
+    'release_groups': {'mypoints1':{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}
                                 },
-    'particle_properties_dict': {
+    'particle_properties': {
                         'Oxygen': { 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24,'initial_value' : 20.},
                         'distance_travelled':   {'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'},
                             }
@@ -78,7 +78,7 @@ p3['release_groups']= {
                   'myP2': {'points': [[1596000, 5490000]], 'pulse_size': 2000, 'release_interval': 7200}
                     }
 
-p3['particle_statistics_dict'] = {'gridstats1': {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+p3['particle_statistics'] = {'gridstats1': {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
                    'count_start_date': '2020-06-01 21:16:07',
                       'grid_size': [220, 221]},
@@ -156,7 +156,7 @@ p7['particle_properties'] ={
                 'age_decay': {'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay','decay_time_scale': 1. * 3600 * 24}
                     }
 
-p7['event_loggers_dict']= {'in_out_poly': {'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
+p7['event_loggers']= {'in_out_poly': {'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
                                                     'particle_prop_to_write_list' : [ 'ID','x', 'IDrelease_group', 'status', 'age'],
                                                         'polygon_list': [{'user_polygon_name' : 'A','points': (np.asarray(poly_points) + np.asarray([-5000,0])).tolist()},
                                                                          {'user_polygon_name' : 'B', 'points': poly_points_large}

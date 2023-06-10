@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Output files &#8212; OceanTracker Beta 0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Change log" href="../change_log.html" />
+    <link rel="prev" title="VelocityModiferBase" href="../parameter_ref/VelocityModiferBase.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=oceantracker&repo=oceantracker&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../users_guide.html">Users guide</a><ul>
+      <li>Previous: <a href="../parameter_ref/VelocityModiferBase.html" title="previous chapter">VelocityModiferBase</a></li>
+      <li>Next: <a href="../change_log.html" title="next chapter">Change log</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="output-files">
+<h1>Output files<a class="headerlink" href="#output-files" title="Permalink to this heading">¶</a></h1>
+<p>After runnnig ouput files are in the iles are folder given by parameters
+.\“root_output_dir”\“output_file_base”</p>
+<p>The main files are:</p>
+<ul class="simple">
+<li><p>users_params_*.json, a copy of the parameters as supplied by the user</p></li>
+<li><p>_runInfo.json holds file names of case files</p></li>
+<li><p>_caseInfo.json files, have all the output files for each case run
+(only 1 case in this example), plus infomation about the run and data
+useful in plotting</p></li>
+<li><p>_caseLog_log.txt has a copy of what appeared on the screen during
+the run</p></li>
+<li><p>_tracks.nc holds the particle tracks in a netcdf file, see below for
+code example on reading the tracks</p></li>
+<li><p>_grid_outline.json are the boundaries of hydrodynamic model’s domain
+and islands, useful in plotting</p></li>
+<li><p>_grid.nc a net cdf of the hydo-model’s grid and other infomation,
+useful in plotting and analysis</p></li>
+</ul>
+<p>Below list the files after running the minimmal example.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># show a list of output files afte running  mimmal_exampe</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;.</span><span class="se">\\</span><span class="s1">output</span><span class="se">\\</span><span class="s1">minimal_example</span><span class="se">\\</span><span class="s1">*&#39;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<pre class="literal-block">.outputminimal_exampleminimal_example_caseInfo.json
+.outputminimal_exampleminimal_example_caseLog_log.txt
+.outputminimal_exampleminimal_example_grid.nc
+.outputminimal_exampleminimal_example_grid_outline.json
+.outputminimal_exampleminimal_example_log.txt
+.outputminimal_exampleminimal_example_runInfo.json
+.outputminimal_exampleminimal_example_tracks.nc
+.outputminimal_exampleusers_params_minimal_example.json</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---------------------------------------------------------------------------</span>
+
+<span class="ne">NameError</span>                                 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">9</span>
+      <span class="mi">7</span> <span class="kn">import</span> <span class="nn">json</span>
+      <span class="mi">8</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;A_minimal_example.json&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="o">----&gt;</span> <span class="mi">9</span>     <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+
+<span class="ne">NameError</span><span class="p">:</span> <span class="n">name</span> <span class="s1">&#39;params&#39;</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">defined</span>
+</pre></div>
+</div>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="../parameter_ref/VelocityModiferBase.html" title="Previous document">VelocityModiferBase</a>
+        </li>
+        <li>
+          <a href="../change_log.html" title="Next document">Change log</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2022, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/info/how_to/D_output_files.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

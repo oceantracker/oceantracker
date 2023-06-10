@@ -50,7 +50,8 @@ case_settings_defaults ={
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
               }
 
-
+all_default_settings = shared_settings_defaults
+all_default_settings.update(case_settings_defaults)
 #'release_groups': 'oceantracker.release_groups.point_release.PointRelease',
 
 core_classes= { 'reader': {},
@@ -81,11 +82,7 @@ class_dicts={ # class dicts which replace lists
     'time_varying_info': {}, # particle info,eg. time,or  tide at at tide gauge, core example is particle time
 
 }
-class_lists={ # class lists
-    # above classes are required classes/family members/ parameters, below are user classes held in named lists
-    # below are optional user classes held in named lists
-    'particle_statistics': [],  # heat map inside polygon statistics calculated on the fly
-     }
+
 
 
 default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),

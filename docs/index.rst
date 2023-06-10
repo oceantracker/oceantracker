@@ -77,7 +77,8 @@ Architecture
 
    info/about.rst
    info/features.rst
-   info/demos/demos.rst
+   info/gallery.rst
+   info/how_to.rst
    info/users_guide.rst
 
 .. warning::

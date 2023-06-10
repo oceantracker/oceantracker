@@ -7,59 +7,50 @@ Main steps are
 
 ::
 
-   1. build parameter dictionary
+   1. build parameters, ie. provide users settings and add "classes" with their specific settings, to the computational pipeline.
 
-   2. run oceantracker with the parameter dictionary
+   2. run oceantracker with these parameters
 
    3. plot results
 
-This example is part of a a 3D Schisim model, where particles always
-resupend if the land on the bottom. Particles stranded by the falling
-tide in dry cells are frozen, until the cell becomes wet.
+See next notebook for more details on the process.
+
+This example uses helper methods of OceanTracker class to build
+parameters. The example is part of a a 3D Schisim model, where particles
+always re-suspend if the land on the bottom. Particles stranded by the
+falling tide in dry cells are frozen, until the cell becomes wet.
 
 .. code:: ipython3
 
-    # build a dictionary of parameters using code
-    params={'reader_class':{'input_dir': '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                            'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-                            },
-            # add  release locations from two points, 
-            #       particle_release_groups are a list of one or more release groups 
-            #               (ie locations where particles are released at the same times and locations) 
-            'particle_release_groups_dict': {
-                         'my_release_point' :{'points':[[1595000, 5482600],
-                                                       [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertable to a numpy array
-                            'release_interval': 3600,           # seconds between releasing particles
-                            'pulse_size': 10,                   # number of particles released each release_interval
-                                                },  
-                                            },
-            # the above are required parameters, below are optional
-            'output_file_base' :'minimal_example', # name used as base for output files
-            'root_output_dir':'output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
-            'time_step' : 120 #  2 min time step as seconds                        
-            }
+    # minimal_example.py
+    #-------------------
     
-    # write params to build on for later examples
-    from oceantracker.util import json_util, yaml_util
-    json_util.write_JSON('.\\example_param_files\\A_minimal_example.json', params) 
-    yaml_util.write_YAML('.\\example_param_files\\A_minimal_example.yaml', params)
-
-Run Ocean tracker
------------------
-
-Note: the run_info_file_name returned helps with reading output,
-run_info file is a json that has information on all the cases and output
-file names
-
-.. code:: ipython3
-
+    from oceantracker.main import OceanTracker
+    # make instance of oceantracker to use to set parameters using code, then run
+    ot = OceanTracker()
+    
+    # ot.settings method use to set basic settings
+    ot.settings(output_file_base='minimal_example', # name used as base for output files
+                root_output_dir='output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
+                time_step= 120. #  2 min time step as seconds
+                )
+    # ot.set_class, sets parameters for a named class
+    ot.add_class('reader',input_dir= '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                          file_mask=  'demoHindcastSchism*.nc')  # hindcast file mask
+    # add  release locations from two points,
+    #               (ie locations where particles are released at the same times and locations)
+    # note : can add multiple release groups
+    ot.add_class('release_groups', name='my_release_point', # user must provide a name for group first
+                        points= [[1595000, 5482600],        #[x,y] pairs of release locations
+                                 [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
+                        release_interval= 3600,           # seconds between releasing particles
+                        pulse_size= 10,                   # number of particles released each release_interval
+                )
     # run oceantracker
-    from oceantracker import main
+    case_info_file_name, has_errors = ot.run()
     
-    case_info_file_name, has_errors = main.run(params) # make an instance with given parameters
-    
-    # output files are now in folder .\\output\\minimal_example
-    # case_info_file_name is the name of a json file useful in loading data for reading and plotting output
+    # output now in folder output/minimal_example
+    # case_info_file_name the name a json file with useful ingo for post processing, eg output file names
     
 
 
@@ -69,21 +60,21 @@ file names
     startup: OceanTracker- preliminary setup
     startup:      Python version: 3.10.10 | packaged by Anaconda, Inc. | (main, Mar 21 2023, 18:39:17) [MSC v.1916 64 bit (AMD64)]
     startup:   - found hydro-model files of type SCHISIM
-    startup:       -  sorted hyrdo-model files in time order,	  0.593 sec
+    startup:       -  sorted hyrdo-model files in time order,	  0.603 sec
     startup:     >>> Note: output is in dir= e:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\minimal_example
     startup:     >>> Note: to help with debugging, parameters as given by user  are in "minimal_example_raw_user_params.json"
     P000: --------------------------------------------------------------------------
-    P000: Starting case number   0,  minimal_example at 2023-05-30T15:24:38.759751
+    P000: Starting case number   0,  minimal_example at 2023-06-10T06:35:26.533109
     P000: --------------------------------------------------------------------------
-    P000:       -  built node to triangles map,	  0.651 sec
-    P000:       -  built triangle adjacency matrix,	  0.311 sec
+    P000:       -  built node to triangles map,	  0.636 sec
+    P000:       -  built triangle adjacency matrix,	  0.300 sec
     P000:       -  found boundary triangles,	  0.000 sec
-    P000:       -  built domain and island outlines,	  1.431 sec
+    P000:       -  built domain and island outlines,	  1.388 sec
     P000:       -  calculated triangle areas,	  0.000 sec
     P000:   Finished grid setup
-    P000:       -  set up particle_release_groups,	  0.002 sec
-    P000:       -  built barycentric-transform matrix,	  0.408 sec
-    P000:       -  initial set up of core classes,	  0.412 sec
+    P000:       -  set up release_groups,	  0.002 sec
+    P000:       -  built barycentric-transform matrix,	  0.398 sec
+    P000:       -  initial set up of core classes,	  0.403 sec
     P000:       -  final set up of core classes,	  0.003 sec
     P000:       -  created particle properties derived from fields,	  0.000 sec
     P000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
@@ -93,38 +84,38 @@ file names
     P000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
     P000:       -  read  24 time steps in  0.5 sec
     P000:   - opening tracks output to : minimal_example_tracks.nc
-    P000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:000020: Active:00020 M:00020 S:00000 B:00000 D:000 O:00 N:0 Buffer:  20-  4% step time = 7773.8 ms
+    P000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:000020: Active:00020 M:00018 S:00000 B:00002 D:000 O:00 N:0 Buffer:  20-  4% step time = 7675.5 ms
     P000: 04% step 0030:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:000040: Active:00040 M:00036 S:00000 B:00004 D:000 O:00 N:0 Buffer:  40-  8% step time =  2.7 ms
-    P000: 09% step 0060:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:000060: Active:00060 M:00053 S:00000 B:00007 D:000 O:00 N:0 Buffer:  60- 13% step time =  2.8 ms
-    P000: 13% step 0090:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:000080: Active:00080 M:00064 S:00013 B:00003 D:000 O:00 N:0 Buffer:  80- 17% step time =  2.7 ms
-    P000: 17% step 0120:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:000100: Active:00100 M:00083 S:00015 B:00002 D:000 O:00 N:0 Buffer: 100- 21% step time =  3.0 ms
-    P000: 22% step 0150:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:000120: Active:00120 M:00103 S:00015 B:00002 D:000 O:00 N:0 Buffer: 120- 25% step time =  2.7 ms
-    P000: 26% step 0180:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:000140: Active:00140 M:00122 S:00015 B:00003 D:000 O:00 N:0 Buffer: 140- 30% step time =  2.8 ms
-    P000: 30% step 0210:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:000160: Active:00160 M:00144 S:00015 B:00001 D:000 O:00 N:0 Buffer: 160- 34% step time =  2.8 ms
-    P000: 35% step 0240:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:000180: Active:00180 M:00163 S:00013 B:00004 D:000 O:00 N:0 Buffer: 180- 38% step time =  3.0 ms
-    P000: 39% step 0270:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:000200: Active:00200 M:00195 S:00000 B:00005 D:000 O:00 N:0 Buffer: 200- 42% step time =  2.8 ms
-    P000: 43% step 0300:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:000220: Active:00220 M:00207 S:00000 B:00013 D:000 O:00 N:0 Buffer: 220- 47% step time =  2.9 ms
+    P000: 09% step 0060:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:000060: Active:00060 M:00058 S:00000 B:00002 D:000 O:00 N:0 Buffer:  60- 13% step time =  2.6 ms
+    P000: 13% step 0090:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:000080: Active:00080 M:00064 S:00013 B:00003 D:000 O:00 N:0 Buffer:  80- 17% step time =  2.8 ms
+    P000: 17% step 0120:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:000100: Active:00100 M:00083 S:00014 B:00003 D:000 O:00 N:0 Buffer: 100- 21% step time =  3.1 ms
+    P000: 22% step 0150:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:000120: Active:00120 M:00101 S:00014 B:00005 D:000 O:00 N:0 Buffer: 120- 25% step time =  2.8 ms
+    P000: 26% step 0180:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:000140: Active:00140 M:00125 S:00014 B:00001 D:000 O:00 N:0 Buffer: 140- 30% step time =  2.9 ms
+    P000: 30% step 0210:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:000160: Active:00160 M:00145 S:00014 B:00001 D:000 O:00 N:0 Buffer: 160- 34% step time =  2.8 ms
+    P000: 35% step 0240:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:000180: Active:00180 M:00165 S:00013 B:00002 D:000 O:00 N:0 Buffer: 180- 38% step time =  3.2 ms
+    P000: 39% step 0270:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:000200: Active:00200 M:00191 S:00000 B:00009 D:000 O:00 N:0 Buffer: 200- 42% step time =  2.8 ms
+    P000: 43% step 0300:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:000220: Active:00220 M:00206 S:00000 B:00014 D:000 O:00 N:0 Buffer: 220- 47% step time =  2.8 ms
     P000: 48% step 0330:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:000240: Active:00240 M:00222 S:00000 B:00018 D:000 O:00 N:0 Buffer: 240- 51% step time =  2.9 ms
-    P000: 52% step 0360:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:000260: Active:00260 M:00245 S:00000 B:00015 D:000 O:00 N:0 Buffer: 260- 55% step time =  3.0 ms
-    P000: 57% step 0390:H0013b13-14 Day +00 13:00 2017-01-01 13:30:00: Rel.:000280: Active:00280 M:00253 S:00013 B:00014 D:000 O:00 N:0 Buffer: 280- 59% step time =  3.1 ms
-    P000: 61% step 0420:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:000300: Active:00300 M:00260 S:00019 B:00021 D:000 O:00 N:0 Buffer: 300- 63% step time =  3.1 ms
-    P000: 65% step 0450:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:000320: Active:00320 M:00263 S:00052 B:00005 D:000 O:00 N:0 Buffer: 320- 68% step time =  3.0 ms
-    P000: 70% step 0480:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:000340: Active:00340 M:00281 S:00057 B:00002 D:000 O:00 N:0 Buffer: 340- 72% step time =  3.3 ms
-    P000: 74% step 0510:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:000360: Active:00360 M:00292 S:00066 B:00002 D:000 O:00 N:0 Buffer: 360- 76% step time =  3.1 ms
-    P000: 78% step 0540:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:000380: Active:00380 M:00313 S:00066 B:00001 D:000 O:00 N:0 Buffer: 380- 80% step time =  3.0 ms
-    P000: 83% step 0570:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:000400: Active:00400 M:00334 S:00064 B:00002 D:000 O:00 N:0 Buffer: 400- 85% step time =  3.0 ms
-    P000: 87% step 0600:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:000420: Active:00420 M:00356 S:00059 B:00005 D:000 O:00 N:0 Buffer: 420- 89% step time =  3.4 ms
-    P000: 91% step 0630:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:000440: Active:00440 M:00402 S:00019 B:00019 D:000 O:00 N:0 Buffer: 440- 93% step time =  3.2 ms
-    P000: 96% step 0660:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:000460: Active:00460 M:00422 S:00013 B:00025 D:000 O:00 N:0 Buffer: 460- 97% step time =  3.1 ms
-    P000: 100% step 0689:H0022b22-23 Day +00 22:58 2017-01-01 23:28:00: Rel.:000460: Active:00460 M:00449 S:00000 B:00011 D:000 O:00 N:0 Buffer: 460- 97% step time =  3.5 ms
-    P000:   -  Triangle walk summary: Of  754,448 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
+    P000: 52% step 0360:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:000260: Active:00260 M:00243 S:00000 B:00017 D:000 O:00 N:0 Buffer: 260- 55% step time =  3.2 ms
+    P000: 57% step 0390:H0013b13-14 Day +00 13:00 2017-01-01 13:30:00: Rel.:000280: Active:00280 M:00256 S:00011 B:00013 D:000 O:00 N:0 Buffer: 280- 59% step time =  2.9 ms
+    P000: 61% step 0420:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:000300: Active:00300 M:00268 S:00018 B:00014 D:000 O:00 N:0 Buffer: 300- 63% step time =  2.9 ms
+    P000: 65% step 0450:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:000320: Active:00320 M:00260 S:00057 B:00003 D:000 O:00 N:0 Buffer: 320- 68% step time =  3.0 ms
+    P000: 70% step 0480:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:000340: Active:00340 M:00275 S:00060 B:00005 D:000 O:00 N:0 Buffer: 340- 72% step time =  3.6 ms
+    P000: 74% step 0510:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:000360: Active:00360 M:00290 S:00069 B:00001 D:000 O:00 N:0 Buffer: 360- 76% step time =  3.0 ms
+    P000: 78% step 0540:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:000380: Active:00380 M:00311 S:00069 B:00000 D:000 O:00 N:0 Buffer: 380- 80% step time =  3.1 ms
+    P000: 83% step 0570:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:000400: Active:00400 M:00332 S:00065 B:00003 D:000 O:00 N:0 Buffer: 400- 85% step time =  3.1 ms
+    P000: 87% step 0600:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:000420: Active:00420 M:00354 S:00062 B:00004 D:000 O:00 N:0 Buffer: 420- 89% step time =  3.5 ms
+    P000: 91% step 0630:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:000440: Active:00440 M:00401 S:00018 B:00021 D:000 O:00 N:0 Buffer: 440- 93% step time =  3.1 ms
+    P000: 96% step 0660:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:000460: Active:00460 M:00435 S:00011 B:00014 D:000 O:00 N:0 Buffer: 460- 97% step time =  3.1 ms
+    P000: 100% step 0689:H0022b22-23 Day +00 22:58 2017-01-01 23:28:00: Rel.:000460: Active:00460 M:00447 S:00000 B:00013 D:000 O:00 N:0 Buffer: 460- 97% step time =  3.6 ms
     P000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
     P000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
     P000: --------------------------------------------------------------------------
-    P000:   - Finished case number   0,  minimal_example started: 2023-05-30 15:24:38.759751, ended: 2023-05-30 15:24:51.965444
-    P000:       Elapsed time =0:00:13.205693
+    P000:   - Finished case number   0,  minimal_example started: 2023-06-10 06:35:26.533109, ended: 2023-06-10 06:35:39.576927
+    P000:       Elapsed time =0:00:13.043818
     P000: --------------------------------------------------------------------------
-    startup:     >>> Note: run summary with case in file names   "minimal_example_runInfo.json"
+    P000:   -  Triangle walk summary: Of  754,280 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
+    startup:     >>> Note: run summary with case file names   "minimal_example_runInfo.json"
     
 
 Read and plot output
@@ -135,32 +126,25 @@ A first basic plot of particle tracks
 .. code:: ipython3
 
     # read output files
-    
     from oceantracker.post_processing.read_output_files import  load_output_files
     
-    # use run info file, to get name of file with detailed information about the single case from case_info json file,
-    #   this case_info file holds all the output file names pls lots of other run info
-    print('caseinfo file=', case_info_file_name)
-    
-    # read particle track data into a dictionary 
+    # read particle track data into a dictionary using case_info_file_name
     tracks = load_output_files.load_particle_track_vars(case_info_file_name)
-    
-    print(tracks.keys()) # show what is in tracks dictionary
+    print(tracks.keys()) # show what is in tracks dictionary holds
     
     from oceantracker.post_processing.plotting.plot_tracks import plot_tracks
     
-    ax= [1591000, 1601500, 5478500, 5491000]  # aread to plot
+    ax= [1591000, 1601500, 5478500, 5491000]  # area to plot
     plot_tracks(tracks, axis_lims=ax)
 
 
 .. parsed-literal::
 
-    caseinfo file= e:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\minimal_example\minimal_example_caseInfo.json
-    dict_keys(['dimensions', 'total_num_particles_released', 'x', 'dry_cell_index', 'time', 'x0', 'IDpulse', 'status', 'IDrelease_group', 'z', 'grid', 'particle_status_flags', 'particle_release_group_info', 'full_case_params', 'axis_lim'])
+    dict_keys(['dimensions', 'total_num_particles_released', 'IDpulse', 'time', 'IDrelease_group', 'dry_cell_index', 'status', 'x0', 'x', 'release_groupID', 'release_locations', 'z', 'grid', 'particle_status_flags', 'particle_release_group_info', 'full_case_params', 'axis_lim'])
     
 
 
-.. image:: A_minimal_example_files%5CA_minimal_example_5_1.png
+.. image:: A_minimal_example_files%5CA_minimal_example_3_1.png
 
 
 Add aminations
@@ -168,14 +152,14 @@ Add aminations
 
 play movie when done
 
-animations require aditional install of ffpeg, after activating
+animations require additional install of ffpeg, after activating
 oceantracker conda environment run
 
 ``conda install -c conda-forge ffmpeg``
 
-In amimation , blue particles are moving, green are stranded by the tide
-in dry cells, gray are on the sea bed, from which they resupend in this
-example.
+In animation, sand colored area shows dry cells, blue particles are
+moving, green are stranded by the tide in dry cells, gray are on the sea
+bed, from which they resupend in this example.
 
 By default particles are blocked from moving from a wet cell to a dry
 cell and will not be released if the release location lies within a dry
@@ -183,13 +167,8 @@ cell.
 
 .. code:: ipython3
 
-    
-    
-    
     from matplotlib import pyplot as plt
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-    
-    # need to do animation in separate window
     
     # animate particles
     anim = animate_particles(tracks, axis_lims=ax,title='Minimal OceanTracker example', 
@@ -34388,5 +34367,5 @@ cell.
 
 
 
-.. image:: A_minimal_example_files%5CA_minimal_example_7_1.png
+.. image:: A_minimal_example_files%5CA_minimal_example_5_1.png
 

@@ -1,196 +1,230 @@
-Parameter structure and Running OceanTracker
-============================================
+Parameters and Running
+======================
 
-[This note-book is in dir oceantracker/tutorials_how_to]
+[This note-book is in oceantracker/tutorials_how_to/]
 
 Oceantracker is designed so that both coders and non-coders can get
-almost the same level of adaptability to their specific needs, and to
-streamline building the adaptability into online particle tracking as a
-service. This achieved by adding “classes” to the computational pipeline
-using parameters given in a python dictionary or, for non-coders, read
-from a editable json or yaml file.
+almost the same level of adaptability to their specific needs. Also to
+streamline running many cases across distributed computers, along with
+enabling online particle tracking as a service.
+
+To achieve these capabilities, it uses parameters to both change the
+settings to meet the users needs, but all so to build the computational
+pipeline for the users specific needs. This flexibility in the
+computational pipeline is achieved using “class” parameters.
 
 Classes perform specific roles in the pipeline. Parameters tell
 Oceantracker which version of core classes the user wants to use for
 each role, or add optional classes. Eg. add multiple “release_groups”
-classes which may release particles at points, or within a polygon, at
+classes, which may release particles at points, or within a polygon, at
 different times, rates and locations, all within the same computational
 run.
 
 Simply by changing the parameters, users can load their own version of a
-class. There are base classes for all the major roles within the
-computational pipeline, including the “solver” class which orchestrates
-the time stepping and operations by other classes. Classes can be
-adapted by inheriting the bases class, or one of its children, and
-overwriting some of the methods to alter how the class performs its
-role.
+class, including the “solver” class which orchestrates the time stepping
+and operations by other classes. There are base classes for all the
+major roles within the computational pipeline. Classes can be adapted by
+inheriting the bases class, or one of its children, and overwriting some
+of the methods to alter how the class performs its role.
 
-Parameter Structure
--------------------
+To make the ideas of settings and classes easier to adopt, the below
+uses helper methods to add settings and classes. The notebook
+E_run_using_parameter_dictionaries.ipynb, shows how run directly from
+parameter dictionaries, which are built in code or read from a json or
+yaml file.
 
-The parameters are a python dictionary structure of “key”: value pairs.
-They can be written in code or made by creating a json or yaml text file
+Parameters using helper
+-----------------------
 
-Parameters have 2 types:
+There are two types of parameters:
 
-1. Settings eg “time_step”, the model time step in seconds.
+1. Settings parameters
 
-2. Class dictionaries.
+These are set with one or more calls to helper method, ot.setting(…),
+where … are keyword arguments. eg “time_step”, the model time step in
+seconds is set using, time_step= 1800.
 
-Classes add specific tasks to the computational pipeline, eg how to
-release particles, write output, particle suspension etc. The python
-code given by the “class_name” parameter, is imported and used with the
-given individual settings/parameters for that class. The “class_name”
-parameter’s value is a string which is used to import the class at set
-up (so is the same as that used in a python import statement).
+There are default values for most settings. A full set of settings and
+their defaults is at ….
 
-All but a few parameters have inbuilt default values. Some classes have
-a default “class_name”, eg. in minimal_example “particle_release_groups”
-assumes a point_release, and the reader “class_name” is chosen by
-looking at variable names within the hindcasts netcdf file.
+2. Class parameters
 
-Classes are added in two ways
+Classes add specific tasks to the computational pipeline, eg. how to
+release particles, write output, particle suspension etc. These are
+added using helper method ot.add_class(class_type, ….). The first
+argument is a “class_type”, the remainder are keyword arguments of the
+settings specific to this class. Eg. ot.add_class(‘reader’,input_dir=
+‘my_hindcast_dir’, ….) adds a reader class and tells is it which folder
+contains the hindcast files.
+
+A full set of classes and their default settings is at ….
+
+Normally there must be a keyword argument “class_name” setting. This is
+used to import the required class into the computational pipeline, with
+its specific settings. This “class_name” is a string, used to import the
+class at setup (so is the same as that used to import any a python class
+within a module).
+
+The “class_name” setting is normally required, class_types have a
+default class_name. Eg. in minimal_example “release_groups” assumes a
+point_release, and the reader’s “class_name” is chosen by looking at
+variable names within the hindcast’s netcdf file.
+
+There are two types of “class_type”s
 
 When
 
-a) Only a single class is required, eg reader, these keys end with
-   “_class”, have a value which is a dictionary of parameters.
+a) Only a single class is required, these have singular “class_type”,
+   eg.”reader” and “solver”.
 
-b) One or more classes can added (eg. multiple
-   “particle_release_groups”). These top level keys end in “_dict” and
-   holds a dict of sub-keys and values. The sub-key is the user given
-   name of the class instance, and the values a parameter dictionary.
-   The sub-key is used to refer to the results of this class internally
-   and for plotting/post-processing.
+b) One or more classes can be added. These have plural “class_type” (eg.
+   multiple “release_groups”).
 
-Documentation for all parameters and their default values.
-----------------------------------------------------------
+Documentation for all parameters/settings and their default values.
 
 Add link here
 
 Extend the minimal example
 --------------------------
 
-The below extends the minimal_example, shows two ways to build a
-parameter dictionary and different ways to run OceanTracker, from code
-or command line.
-
-The example adds:
+The below extends the minimal_example, it adds:
 
 -  release at random locations within a polygon, at random water depths
+   (the default)
 
--  a particle fall velocity, where each particle has an individual fall
-   velocity, which can optionally be drawn from a random normal
-   distribution.
+-  a particle fall velocity
 
--  particles on the bottom are suspended if friction velocity exceeds a
-   critical value.
-
-.. code:: ipython3
-
-    # build a more complex dictionary of parameters using code
-    params={
-        'output_file_base' :'param_test1',      # name used as base for output files
-        'root_output_dir':'output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
-        'time_step' : 120,  #  2 min time step as seconds  
-        'reader_class':{'input_dir': '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                            'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-                            },
-        # add  release locations from two points, 
-        #       particle_release_groups are a list of one or more release groups 
-        #               (ie locations where particles are released at the same times and locations) 
-        'particle_release_groups_dict': {
-                    'my_release_point' :{'points':[[1595000, 5482600],
-                                                    [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
-                                        'release_interval': 3600,           # seconds between releasing particles
-                                        'pulse_size': 10,                   # number of particles released each release_interval
-                                        },
-                    'my_polygon_release': {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease', # use a polygon release
-                                            'points':[   [1597682.1237, 5489972.7479],
-                                                        [1598604.1667, 5490275.5488],
-                                                        [1598886.4247, 5489464.0424],
-                                                        [1597917.3387, 5489000],
-                                                        [1597300, 5489000], [1597682.1237, 5489972.7479]],
-                                            'release_interval': 7200,           # seconds between releasing particles
-                                            'pulse_size': 20,                   # number of particles released each release_interval
-                                            },    
-                                        },
-        'resuspension_class' : {'critical_friction_velocity': .005}, # only re-suspend particles if friction vel. exceeds this value
-        
-        # velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model's 
-        'velocity_modifiers_dict' : {   # here a fall velocity with given mean and variance is added to the computation 
-                                    'fall_velocity': {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
-                                                        'mean': -0.001,'variance': 0.0002}
-                                    },                      
-            }
-    
-    # write params to build on for later examples
-    from oceantracker.util import json_util, yaml_util
-    json_util.write_JSON('.\\example_param_files\\param_test1.json', params) 
-    yaml_util.write_YAML('.\\example_param_files\\param_test1.yaml', params)
-
-### Parameters built using a template
-
-Use a provided template, which pre-defines most top level that can be
-used, then set these using assignments. Reproducing the above in code…
+-  particles on the bottom are re-suspended if friction velocity exceeds
+   a critical value.
 
 .. code:: ipython3
 
-    from oceantracker import main
+    # build parameters using helper class
+    from oceantracker.main import OceanTracker
+    ot = OceanTracker() # make an instance of the helper class
     
-    # repeat above using a template
-    params = main.param_template()  # get a copy of the template
+    # one or more settings can be set by calls to os.settings
+    ot.settings(output_file_base='param_test1',# name used as base for output files
+                root_output_dir='output' #  output is put in dir   'root_output_dir'\\'output_file_base'
+                )
+    # ot.settings can be used more than once to add more settings
+    ot.settings(time_step =120) #  2 min model time step as seconds  
     
-    params['output_file_base'] ='param_test1'
-    params['root_output_dir']= 'output'             #  output is put in dir   'root_output_dir'\\'output_file_base'
-    params['time_step']= 120  #  2 min time step as seconds  
-    params['reader_class'] = {  'input_dir': '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                                'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-                            }
-    params['particle_release_groups_dict']['my_release_point'] = {
-                                                'points':[[1595000, 5482600],
-                                                       [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
-                                                'release_interval': 3600,           # seconds between releasing particles
-                                                'pulse_size': 10,                   # number of particles released each release_interval
-                                                }
-    params['particle_release_groups_dict']['my_polygon_release'] = {
-                                                'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease', # use a polygon release
-                                                'points':[   [1597682.1237, 5489972.7479],
-                                                            [1598604.1667, 5490275.5488],
-                                                            [1598886.4247, 5489464.0424],
-                                                            [1597917.3387, 5489000],
-                                                            [1597300, 5489000], [1597682.1237, 5489972.7479]],
-                                                'release_interval': 7200,           # seconds between releasing particles
-                                                'pulse_size': 20,                   # number of particles released each release_interval
-                                                }   
-    params['resuspension_class'] =  {'critical_friction_velocity': .005}
+    # add a compulsory hindcast reader class
+    # no class_name setting required 
+    # as will detect that it needs a a schism reader class
+    ot.add_class('reader',
+                input_dir= '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                file_mask = 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
+                )
     
-    params['velocity_modifiers_dict']['fall_velocity']= {   # here a fall velocity with given mean and variance is added to the computation 
-                                                        'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
-                                                         'mean': -0.001,'variance': 0.0002
-                                                        }
+    # add some release groups
+    # release_groups are one or more release groups 
+    #     (ie locations where particles are released at the same times and locations) 
+    # there must be at least one release group
     
+    # add  release locations from two points,
+    ot.add_class('release_groups', 
+                name ='my_release_points1', 
+                    # the required name setting, is used to refer to this release group internally anf in postprocsing
+                points= [[1595000, 5482600],
+                        [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
+                        release_interval= 3600,           # seconds between releasing particles
+                        pulse_size = 10,                   # number of particles released each release_interval
+                        # no class_name setting, so assumes a point release
+                        ) 
+    # add a second release group, from random locations within a polygon
+    ot.add_class('release_groups',
+                name ='my_polygon_release1',
+                class_name= 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
+                # this time is a ploygon , so below points are polygon cords
+                points = [  [1597682.1237, 5489972.7479],
+                            [1598604.1667, 5490275.5488],
+                            [1598886.4247, 5489464.0424],
+                            [1597917.3387, 5489000],
+                            [1597300, 5489000],
+                            [1597682.1237, 5489972.7479]
+                        ],
+                release_interval= 7200,    # seconds between releasing particles
+                pulse_size = 20,                   # number of particles released each release_interval
+                )    
     
+    # alter default re-suspension class's settings                                 
+    ot.add_class('resuspension',critical_friction_velocity = .005) # only re-suspend particles if friction vel. exceeds this value
+    
+    # add a class to modify the particle velocity           
+    # velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model's 
+    # here a fall velocity with given  value is added to the computation 
+    ot.add_class('velocity_modifiers',
+                 name ='my_fall_velocity',
+                class_name = 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
+                mean= -0.001, # mean terminal vel < 0 for falling
+                # optionally variance can also be use to give each particles its own fall velocity 
+                )
+
+Running OceanTracker
+--------------------
+
+There are several ways to run OceanTracker
+
+1) By coding
+
+   -  user “class helper” method to build parameters (as above) then run
+   -  build parameters dictionary in code then run
+   -  read parameter file and then run
+
+2) Without coding
+
+   -  run from command line with parameter file which is built by
+      editing a json/yaml text file
+
+Here we use the “class helper” method approach, the other ways to run
+directly using parameter dictionaries outlined in
+E_run_using_parameter_dictionaries.ipynb, add link…
+
+Note:
+
+There are many ways to run the code, eg. with IDE like Pycharm, Visual
+Studio Code. It can also, as here, be run in iPython notebooks. However
+the way notebooks are implemented can sometimes result in issues
+
+See E_run_using_parameter_dictionaries.ipynb for work around.
+
+Below runs oceantracker using the helper class
 
 .. code:: ipython3
 
-    # show the full template as json
-    import json
-    print( json.dumps(params, indent=4))
+    # first see the parameters build using the helper class instance
+    # this is a dictionary ot.params
+    print(ot.params)  # ugly!
+    
+    # use json.dumps() to make it pretty
+    import json 
+    print(json.dumps(ot.params, indent=4))
+    
+    # lots of  are shown! 
+    # null or None are optional ones which have defaults
 
 
 .. parsed-literal::
 
+    {'add_date_to_run_output_dir': None, 'advanced_settings': {}, 'backtracking': None, 'block_dry_cells': None, 'case_output_file_tag': None, 'compact_mode': None, 'debug': None, 'duration': None, 'max_run_duration': None, 'minimum_total_water_depth': None, 'open_boundary_type': None, 'output_file_base': 'param_test1', 'particle_buffer_size': None, 'processors': None, 'retain_culled_part_locations': None, 'root_output_dir': 'output', 'run_as_depth_averaged': None, 'screen_output_time_interval': None, 'time_step': 120, 'user_note': None, 'write_grid': None, 'write_output_files': None, 'write_tracks': None, 'z0': None, 'dispersion': {}, 'field_group_manager': {}, 'interpolator': {}, 'particle_group_manager': {}, 'reader': {'input_dir': '..\\demos\\demo_hindcast', 'file_mask': 'demoHindcastSchism*.nc'}, 'resuspension': {'critical_friction_velocity': 0.005}, 'solver': {}, 'tracks_writer': {}, 'event_loggers': {}, 'fields': {}, 'particle_concentrations': {}, 'particle_properties': {}, 'particle_statistics': {}, 'release_groups': {'my_release_points1': {'points': [[1595000, 5482600], [1599000, 5486200]], 'release_interval': 3600, 'pulse_size': 10}, 'my_polygon_release1': {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease', 'points': [[1597682.1237, 5489972.7479], [1598604.1667, 5490275.5488], [1598886.4247, 5489464.0424], [1597917.3387, 5489000], [1597300, 5489000], [1597682.1237, 5489972.7479]], 'release_interval': 7200, 'pulse_size': 20}}, 'status_modifiers': {}, 'time_varying_info': {}, 'trajectory_modifiers': {}, 'velocity_modifiers': {'my_fall_velocity': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}}}
     {
         "add_date_to_run_output_dir": null,
-        "advanced_settings": null,
+        "advanced_settings": {},
         "backtracking": null,
+        "block_dry_cells": null,
+        "case_output_file_tag": null,
         "compact_mode": null,
         "debug": null,
-        "max_duration": null,
+        "duration": null,
+        "max_run_duration": null,
         "minimum_total_water_depth": null,
+        "open_boundary_type": null,
         "output_file_base": "param_test1",
+        "particle_buffer_size": null,
         "processors": null,
+        "retain_culled_part_locations": null,
         "root_output_dir": "output",
         "run_as_depth_averaged": null,
         "screen_output_time_interval": null,
@@ -198,29 +232,28 @@ used, then set these using assignments. Reproducing the above in code…
         "user_note": null,
         "write_grid": null,
         "write_output_files": null,
-        "block_dry_cells": null,
-        "case_output_file_tag": null,
-        "duration": null,
-        "open_boundary_type": null,
-        "particle_buffer_size": null,
-        "retain_culled_part_locations": null,
         "write_tracks": null,
         "z0": null,
-        "dispersion_class": {},
-        "reader_class": {
+        "dispersion": {},
+        "field_group_manager": {},
+        "interpolator": {},
+        "particle_group_manager": {},
+        "reader": {
             "input_dir": "..\\demos\\demo_hindcast",
             "file_mask": "demoHindcastSchism*.nc"
         },
-        "resuspension_class": {
+        "resuspension": {
             "critical_friction_velocity": 0.005
         },
-        "tracks_writer_class": {},
-        "event_loggers_dict": {},
-        "fields_dict": {},
-        "particle_concentrations_dict": {},
-        "particle_properties_dict": {},
-        "particle_release_groups_dict": {
-            "my_release_point": {
+        "solver": {},
+        "tracks_writer": {},
+        "event_loggers": {},
+        "fields": {},
+        "particle_concentrations": {},
+        "particle_properties": {},
+        "particle_statistics": {},
+        "release_groups": {
+            "my_release_points1": {
                 "points": [
                     [
                         1595000,
@@ -234,7 +267,7 @@ used, then set these using assignments. Reproducing the above in code…
                 "release_interval": 3600,
                 "pulse_size": 10
             },
-            "my_polygon_release": {
+            "my_polygon_release1": {
                 "class_name": "oceantracker.particle_release_groups.polygon_release.PolygonRelease",
                 "points": [
                     [
@@ -266,147 +299,32 @@ used, then set these using assignments. Reproducing the above in code…
                 "pulse_size": 20
             }
         },
-        "particle_statistics_dict": {},
-        "status_modifiers_dict": {},
-        "time_varying_info_dict": {},
-        "trajectory_modifiers_dict": {},
-        "velocity_modifiers_dict": {
-            "fall_velocity": {
+        "status_modifiers": {},
+        "time_varying_info": {},
+        "trajectory_modifiers": {},
+        "velocity_modifiers": {
+            "my_fall_velocity": {
                 "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
-                "mean": -0.001,
-                "variance": 0.0002
+                "mean": -0.001
             }
         }
     }
     
 
-### Show parameters in yaml format
-
-yaml format has no brackets/braces and relies on tab indenting to nest
-items
-
 .. code:: ipython3
 
-    # show the full template in yaml format
-    import yaml
-    print( yaml.dump(params))
-
-
-.. parsed-literal::
-
-    add_date_to_run_output_dir: null
-    advanced_settings: null
-    backtracking: null
-    block_dry_cells: null
-    case_output_file_tag: null
-    compact_mode: null
-    debug: null
-    dispersion_class: {}
-    duration: null
-    event_loggers_dict: {}
-    fields_dict: {}
-    max_duration: null
-    minimum_total_water_depth: null
-    open_boundary_type: null
-    output_file_base: param_test1
-    particle_buffer_size: null
-    particle_concentrations_dict: {}
-    particle_properties_dict: {}
-    particle_release_groups_dict:
-      my_polygon_release:
-        class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
-        points:
-        - - 1597682.1237
-          - 5489972.7479
-        - - 1598604.1667
-          - 5490275.5488
-        - - 1598886.4247
-          - 5489464.0424
-        - - 1597917.3387
-          - 5489000
-        - - 1597300
-          - 5489000
-        - - 1597682.1237
-          - 5489972.7479
-        pulse_size: 20
-        release_interval: 7200
-      my_release_point:
-        points:
-        - - 1595000
-          - 5482600
-        - - 1599000
-          - 5486200
-        pulse_size: 10
-        release_interval: 3600
-    particle_statistics_dict: {}
-    processors: null
-    reader_class:
-      file_mask: demoHindcastSchism*.nc
-      input_dir: ..\demos\demo_hindcast
-    resuspension_class:
-      critical_friction_velocity: 0.005
-    retain_culled_part_locations: null
-    root_output_dir: output
-    run_as_depth_averaged: null
-    screen_output_time_interval: null
-    status_modifiers_dict: {}
-    time_step: 120
-    time_varying_info_dict: {}
-    tracks_writer_class: {}
-    trajectory_modifiers_dict: {}
-    user_note: null
-    velocity_modifiers_dict:
-      fall_velocity:
-        class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
-        mean: -0.001
-        variance: 0.0002
-    write_grid: null
-    write_output_files: null
-    write_tracks: null
-    z0: null
+    # now run oceantracker 
+    # as helper "ot" has set params above, simply run it
     
+    case_info_file_name, has_errors = ot.run()
     
-
-Running OceanTracker
-====================
-
-There are several ways to run OceanTracker
-
-1) By coding
-
-   -  build parameters in code and run
-
-   -  or coding to read parameter file and then run
-
-2) Without coding
-
-   -  run from command line with parameter file which is built by
-      editing a json/yaml text file
-
-Note:
------
-
-There are many ways to run the code, eg. with IDE like Pycharm, Visual
-Studio Code. It can also, as here, be run in iPython notebooks. However
-the way notebooks are implemented can sometimes result in issues:
-
--  errors when running Oceantracker a second time or other unexpected
-   behavior, due to shared memory space, fix by reloading the kernel
-
--  if using note books on Windows, it is not possible to run
-   Oceantracker cases in parallel, without a work around given in a
-   later “how to”.
-
-Build parameters in code and run
---------------------------------
-
-.. code:: ipython3
-
-    # run oceantracker using param dict built in cells above
-    from oceantracker import main
+    # output now in folder "root_output_dir"/"output_file_base"
+    # in this example output is in directory  output/param_test1'
     
-    case_info_file_name, has_errors = main.run(params) 
-    # case_info file is the name of a json file useful in plotting results 
+    # case_info_file_name the name 
+    # a json file with useful for post processing, 
+    # eg holds output file names to assist in reading data
+    print('case file name=',case_info_file_name)
 
 
 .. parsed-literal::
@@ -415,21 +333,21 @@ Build parameters in code and run
     startup: OceanTracker- preliminary setup
     startup:      Python version: 3.10.10 | packaged by Anaconda, Inc. | (main, Mar 21 2023, 18:39:17) [MSC v.1916 64 bit (AMD64)]
     startup:   - found hydro-model files of type SCHISIM
-    startup:       -  sorted hyrdo-model files in time order,	  0.008 sec
+    startup:       -  sorted hyrdo-model files in time order,	  0.585 sec
     startup:     >>> Note: output is in dir= e:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
     startup:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
     P000: --------------------------------------------------------------------------
-    P000: Starting case number   0,  param_test1 at 2023-05-31T11:58:38.389693
+    P000: Starting case number   0,  param_test1 at 2023-06-10T08:47:33.245069
     P000: --------------------------------------------------------------------------
-    P000:       -  built node to triangles map,	  0.000 sec
-    P000:       -  built triangle adjacency matrix,	  0.000 sec
+    P000:       -  built node to triangles map,	  0.634 sec
+    P000:       -  built triangle adjacency matrix,	  0.304 sec
     P000:       -  found boundary triangles,	  0.000 sec
-    P000:       -  built domain and island outlines,	  0.555 sec
+    P000:       -  built domain and island outlines,	  1.392 sec
     P000:       -  calculated triangle areas,	  0.000 sec
     P000:   Finished grid setup
-    P000:       -  set up particle_release_groups,	  1.052 sec
-    P000:       -  built barycentric-transform matrix,	  0.000 sec
-    P000:       -  initial set up of core classes,	  0.003 sec
+    P000:       -  set up release_groups,	  0.960 sec
+    P000:       -  built barycentric-transform matrix,	  0.399 sec
+    P000:       -  initial set up of core classes,	  0.403 sec
     P000:       -  final set up of core classes,	  0.002 sec
     P000:       -  created particle properties derived from fields,	  0.000 sec
     P000: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
@@ -438,41 +356,42 @@ Build parameters in code and run
     P000: --------------------------------------------------------------------------
     P000:   - Starting param_test1,  duration: 0 days 23 hrs 0 min 0 sec
     P000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
-    P000:       -  read  24 time steps in  0.0 sec
+    P000:       -  read  24 time steps in  0.4 sec
     P000:   - opening tracks output to : param_test1_tracks.nc
-    P000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:000040: Active:00040 M:00039 S:00000 B:00001 D:000 O:00 N:0 Buffer:  40-  6% step time = 714.4 ms
-    P000: 04% step 0030:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:000060: Active:00060 M:00052 S:00000 B:00008 D:000 O:00 N:0 Buffer:  60-  8% step time =  3.0 ms
-    P000: 09% step 0060:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:000100: Active:00100 M:00085 S:00000 B:00015 D:000 O:00 N:0 Buffer: 100- 14% step time =  3.4 ms
-    P000: 13% step 0090:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:000120: Active:00120 M:00091 S:00012 B:00017 D:000 O:00 N:0 Buffer: 120- 17% step time =  3.1 ms
-    P000: 17% step 0120:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:000160: Active:00160 M:00131 S:00012 B:00017 D:000 O:00 N:0 Buffer: 160- 22% step time =  3.8 ms
-    P000: 22% step 0150:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:000180: Active:00180 M:00149 S:00013 B:00018 D:000 O:00 N:0 Buffer: 180- 25% step time =  3.2 ms
-    P000: 26% step 0180:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:000220: Active:00220 M:00183 S:00013 B:00024 D:000 O:00 N:0 Buffer: 220- 31% step time =  3.6 ms
-    P000: 30% step 0210:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:000240: Active:00240 M:00196 S:00012 B:00032 D:000 O:00 N:0 Buffer: 240- 33% step time =  3.2 ms
-    P000: 35% step 0240:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:000280: Active:00280 M:00237 S:00012 B:00031 D:000 O:00 N:0 Buffer: 280- 39% step time =  3.9 ms
-    P000: 39% step 0270:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:000300: Active:00300 M:00242 S:00000 B:00058 D:000 O:00 N:0 Buffer: 300- 42% step time =  3.3 ms
-    P000: 43% step 0300:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:000340: Active:00340 M:00259 S:00000 B:00081 D:000 O:00 N:0 Buffer: 340- 47% step time =  3.7 ms
-    P000: 48% step 0330:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:000360: Active:00360 M:00248 S:00000 B:00112 D:000 O:00 N:0 Buffer: 360- 50% step time =  3.2 ms
-    P000: 52% step 0360:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:000400: Active:00400 M:00245 S:00000 B:00155 D:000 O:00 N:0 Buffer: 400- 55% step time =  4.1 ms
-    P000: 57% step 0390:H0013b13-14 Day +00 13:00 2017-01-01 13:30:00: Rel.:000420: Active:00420 M:00286 S:00008 B:00126 D:000 O:00 N:0 Buffer: 420- 58% step time =  3.4 ms
-    P000: 61% step 0420:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:000460: Active:00460 M:00320 S:00014 B:00126 D:000 O:00 N:0 Buffer: 460- 64% step time =  3.8 ms
-    P000: 65% step 0450:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:000480: Active:00480 M:00303 S:00059 B:00118 D:000 O:00 N:0 Buffer: 480- 67% step time =  4.0 ms
-    P000: 70% step 0480:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:000520: Active:00520 M:00311 S:00062 B:00147 D:000 O:00 N:0 Buffer: 520- 72% step time =  4.2 ms
-    P000: 74% step 0510:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:000540: Active:00540 M:00236 S:00073 B:00231 D:000 O:00 N:0 Buffer: 540- 75% step time =  3.4 ms
-    P000: 78% step 0540:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:000580: Active:00580 M:00338 S:00073 B:00169 D:000 O:00 N:0 Buffer: 580- 80% step time =  3.9 ms
-    P000: 83% step 0570:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:000600: Active:00600 M:00373 S:00071 B:00156 D:000 O:00 N:0 Buffer: 600- 83% step time =  3.7 ms
-    P000: 87% step 0600:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:000640: Active:00640 M:00403 S:00068 B:00169 D:000 O:00 N:0 Buffer: 640- 89% step time =  4.4 ms
-    P000: 91% step 0630:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:000660: Active:00660 M:00433 S:00014 B:00213 D:000 O:00 N:0 Buffer: 660- 92% step time =  3.7 ms
-    P000: 96% step 0660:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:000700: Active:00700 M:00421 S:00008 B:00271 D:000 O:00 N:0 Buffer: 700- 97% step time =  4.0 ms
-    P000: 100% step 0689:H0022b22-23 Day +00 22:58 2017-01-01 23:28:00: Rel.:000700: Active:00700 M:00509 S:00000 B:00191 D:000 O:00 N:0 Buffer: 700- 97% step time =  4.2 ms
+    P000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:000040: Active:00040 M:00037 S:00000 B:00003 D:000 O:00 N:0 Buffer:  40-  6% step time = 8204.8 ms
+    P000: 04% step 0030:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:000060: Active:00060 M:00054 S:00000 B:00006 D:000 O:00 N:0 Buffer:  60-  8% step time =  2.7 ms
+    P000: 09% step 0060:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:000100: Active:00100 M:00082 S:00001 B:00017 D:000 O:00 N:0 Buffer: 100- 14% step time =  3.1 ms
+    P000: 13% step 0090:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:000120: Active:00120 M:00093 S:00013 B:00014 D:000 O:00 N:0 Buffer: 120- 17% step time =  2.8 ms
+    P000: 17% step 0120:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:000160: Active:00160 M:00136 S:00014 B:00010 D:000 O:00 N:0 Buffer: 160- 22% step time =  3.6 ms
+    P000: 22% step 0150:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:000180: Active:00180 M:00145 S:00016 B:00019 D:000 O:00 N:0 Buffer: 180- 25% step time =  2.9 ms
+    P000: 26% step 0180:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:000220: Active:00220 M:00179 S:00016 B:00025 D:000 O:00 N:0 Buffer: 220- 31% step time =  3.3 ms
+    P000: 30% step 0210:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:000240: Active:00240 M:00201 S:00014 B:00025 D:000 O:00 N:0 Buffer: 240- 33% step time =  2.9 ms
+    P000: 35% step 0240:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:000280: Active:00280 M:00230 S:00013 B:00037 D:000 O:00 N:0 Buffer: 280- 39% step time =  3.8 ms
+    P000: 39% step 0270:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:000300: Active:00300 M:00230 S:00001 B:00069 D:000 O:00 N:0 Buffer: 300- 42% step time =  3.0 ms
+    P000: 43% step 0300:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:000340: Active:00340 M:00269 S:00000 B:00071 D:000 O:00 N:0 Buffer: 340- 47% step time =  3.3 ms
+    P000: 48% step 0330:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:000360: Active:00360 M:00247 S:00000 B:00113 D:000 O:00 N:0 Buffer: 360- 50% step time =  2.9 ms
+    P000: 52% step 0360:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:000400: Active:00400 M:00248 S:00000 B:00152 D:000 O:00 N:0 Buffer: 400- 55% step time =  3.7 ms
+    P000: 57% step 0390:H0013b13-14 Day +00 13:00 2017-01-01 13:30:00: Rel.:000420: Active:00420 M:00286 S:00006 B:00128 D:000 O:00 N:0 Buffer: 420- 58% step time =  3.1 ms
+    P000: 61% step 0420:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:000460: Active:00460 M:00314 S:00010 B:00136 D:000 O:00 N:0 Buffer: 460- 64% step time =  3.5 ms
+    P000: 65% step 0450:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:000480: Active:00480 M:00286 S:00055 B:00139 D:000 O:00 N:0 Buffer: 480- 67% step time =  3.2 ms
+    P000: 70% step 0480:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:000520: Active:00520 M:00294 S:00061 B:00165 D:000 O:00 N:0 Buffer: 520- 72% step time =  3.9 ms
+    P000: 74% step 0510:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:000540: Active:00540 M:00244 S:00071 B:00225 D:000 O:00 N:0 Buffer: 540- 75% step time =  3.1 ms
+    P000: 78% step 0540:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:000580: Active:00580 M:00340 S:00071 B:00169 D:000 O:00 N:0 Buffer: 580- 80% step time =  3.6 ms
+    P000: 83% step 0570:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:000600: Active:00600 M:00357 S:00070 B:00173 D:000 O:00 N:0 Buffer: 600- 83% step time =  3.2 ms
+    P000: 87% step 0600:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:000640: Active:00640 M:00405 S:00064 B:00171 D:000 O:00 N:0 Buffer: 640- 89% step time =  4.2 ms
+    P000: 91% step 0630:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:000660: Active:00660 M:00416 S:00010 B:00234 D:000 O:00 N:0 Buffer: 660- 92% step time =  3.3 ms
+    P000: 96% step 0660:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:000700: Active:00700 M:00389 S:00006 B:00305 D:000 O:00 N:0 Buffer: 700- 97% step time =  3.6 ms
+    P000: 100% step 0689:H0022b22-23 Day +00 22:58 2017-01-01 23:28:00: Rel.:000700: Active:00700 M:00499 S:00000 B:00201 D:000 O:00 N:0 Buffer: 700- 97% step time =  3.9 ms
     P000: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
     P000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
     P000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
     P000: --------------------------------------------------------------------------
-    P000:   - Finished case number   0,  param_test1 started: 2023-05-31 11:58:38.388693, ended: 2023-05-31 11:58:42.316575
-    P000:       Elapsed time =0:00:03.927882
+    P000:   - Finished case number   0,  param_test1 started: 2023-06-10 08:47:33.245069, ended: 2023-06-10 08:47:47.833968
+    P000:       Elapsed time =0:00:14.588899
     P000: --------------------------------------------------------------------------
-    P000:   -  Triangle walk summary: Of  1,013,412 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
-    startup:     >>> Note: run summary with case in file names   "param_test1_runInfo.json"
+    P000:   -  Triangle walk summary: Of  1,007,136 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
+    startup:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
+    case file name= e:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1\param_test1_caseInfo.json
     
 
 .. code:: ipython3
@@ -49580,214 +49499,5 @@ Build parameters in code and run
 
 
 
-.. image:: B_runningOT_and_parameters_files%5CB_runningOT_and_parameters_9_1.png
-
-
-Reading parameters from a file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code:: ipython3
-
-    from oceantracker import main
-    from oceantracker.util import yaml_util
-    
-    # read a json or yaml file  of parameters
-    params = yaml_util.read_YAML('.\\example_param_files\\param_test1.yaml')
-    
-    case_info_file_name, has_errors = main.run(params) 
-    
-
-
-.. parsed-literal::
-
-    startup: --------------------------------------------------------------------------
-    startup: OceanTracker- preliminary setup
-    startup:      Python version: 3.10.10 | packaged by Anaconda, Inc. | (main, Mar 21 2023, 18:39:17) [MSC v.1916 64 bit (AMD64)]
-    startup:   - found hydro-model files of type SCHISIM
-    startup:       -  sorted hyrdo-model files in time order,	  0.008 sec
-    startup:     >>> Note: output is in dir= e:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
-    startup:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
-    P000: --------------------------------------------------------------------------
-    P000: Starting case number   0,  param_test1 at 2023-05-31T11:54:18.875136
-    P000: --------------------------------------------------------------------------
-    P000:       -  built node to triangles map,	  0.000 sec
-    P000:       -  built triangle adjacency matrix,	  0.000 sec
-    P000:       -  found boundary triangles,	  0.000 sec
-    P000:       -  built domain and island outlines,	  0.548 sec
-    P000:       -  calculated triangle areas,	  0.000 sec
-    P000:   Finished grid setup
-    P000:       -  set up particle_release_groups,	  1.059 sec
-    P000:       -  built barycentric-transform matrix,	  0.000 sec
-    P000:       -  initial set up of core classes,	  0.002 sec
-    P000:       -  final set up of core classes,	  0.002 sec
-    P000:       -  created particle properties derived from fields,	  0.000 sec
-    P000: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
-    P000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
-    P000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
-    P000: --------------------------------------------------------------------------
-    P000:   - Starting param_test1,  duration: 0 days 23 hrs 0 min 0 sec
-    P000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
-    P000:       -  read  24 time steps in  0.0 sec
-    P000:   - opening tracks output to : param_test1_tracks.nc
-    P000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:000040: Active:00040 M:00039 S:00000 B:00001 D:000 O:00 N:0 Buffer:  40-  6% step time = 706.9 ms
-    P000: 04% step 0030:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:000060: Active:00060 M:00055 S:00000 B:00005 D:000 O:00 N:0 Buffer:  60-  8% step time =  2.9 ms
-    P000: 09% step 0060:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:000100: Active:00100 M:00084 S:00000 B:00016 D:000 O:00 N:0 Buffer: 100- 14% step time =  3.4 ms
-    P000: 13% step 0090:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:000120: Active:00120 M:00097 S:00010 B:00013 D:000 O:00 N:0 Buffer: 120- 17% step time =  3.1 ms
-    P000: 17% step 0120:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:000160: Active:00160 M:00131 S:00011 B:00018 D:000 O:00 N:0 Buffer: 160- 22% step time =  3.8 ms
-    P000: 22% step 0150:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:000180: Active:00180 M:00143 S:00011 B:00026 D:000 O:00 N:0 Buffer: 180- 25% step time =  3.1 ms
-    P000: 26% step 0180:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:000220: Active:00220 M:00179 S:00011 B:00030 D:000 O:00 N:0 Buffer: 220- 31% step time =  3.6 ms
-    P000: 30% step 0210:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:000240: Active:00240 M:00194 S:00011 B:00035 D:000 O:00 N:0 Buffer: 240- 33% step time =  3.2 ms
-    P000: 35% step 0240:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:000280: Active:00280 M:00224 S:00011 B:00045 D:000 O:00 N:0 Buffer: 280- 39% step time =  3.7 ms
-    P000: 39% step 0270:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:000300: Active:00300 M:00243 S:00000 B:00057 D:000 O:00 N:0 Buffer: 300- 42% step time =  3.3 ms
-    P000: 43% step 0300:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:000340: Active:00340 M:00259 S:00000 B:00081 D:000 O:00 N:0 Buffer: 340- 47% step time =  3.7 ms
-    P000: 48% step 0330:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:000360: Active:00360 M:00249 S:00000 B:00111 D:000 O:00 N:0 Buffer: 360- 50% step time =  3.2 ms
-    P000: 52% step 0360:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:000400: Active:00400 M:00258 S:00000 B:00142 D:000 O:00 N:0 Buffer: 400- 55% step time =  3.9 ms
-    P000: 57% step 0390:H0013b13-14 Day +00 13:00 2017-01-01 13:30:00: Rel.:000420: Active:00420 M:00296 S:00009 B:00115 D:000 O:00 N:0 Buffer: 420- 58% step time =  3.3 ms
-    P000: 61% step 0420:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:000460: Active:00460 M:00317 S:00013 B:00130 D:000 O:00 N:0 Buffer: 460- 64% step time =  3.8 ms
-    P000: 65% step 0450:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:000480: Active:00480 M:00295 S:00055 B:00130 D:000 O:00 N:0 Buffer: 480- 67% step time =  3.5 ms
-    P000: 70% step 0480:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:000520: Active:00520 M:00306 S:00060 B:00154 D:000 O:00 N:0 Buffer: 520- 72% step time =  4.2 ms
-    P000: 74% step 0510:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:000540: Active:00540 M:00230 S:00070 B:00240 D:000 O:00 N:0 Buffer: 540- 75% step time =  3.4 ms
-    P000: 78% step 0540:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:000580: Active:00580 M:00342 S:00070 B:00168 D:000 O:00 N:0 Buffer: 580- 80% step time =  3.9 ms
-    P000: 83% step 0570:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:000600: Active:00600 M:00362 S:00066 B:00172 D:000 O:00 N:0 Buffer: 600- 83% step time =  3.6 ms
-    P000: 87% step 0600:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:000640: Active:00640 M:00401 S:00061 B:00178 D:000 O:00 N:0 Buffer: 640- 89% step time =  4.5 ms
-    P000: 91% step 0630:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:000660: Active:00660 M:00424 S:00013 B:00223 D:000 O:00 N:0 Buffer: 660- 92% step time =  3.6 ms
-    P000: 96% step 0660:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:000700: Active:00700 M:00392 S:00009 B:00299 D:000 O:00 N:0 Buffer: 700- 97% step time =  3.9 ms
-    P000: 100% step 0689:H0022b22-23 Day +00 22:58 2017-01-01 23:28:00: Rel.:000700: Active:00700 M:00511 S:00000 B:00189 D:000 O:00 N:0 Buffer: 700- 97% step time =  4.1 ms
-    P000: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
-    P000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
-    P000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
-    P000: --------------------------------------------------------------------------
-    P000:   - Finished case number   0,  param_test1 started: 2023-05-31 11:54:18.874136, ended: 2023-05-31 11:54:22.770052
-    P000:       Elapsed time =0:00:03.895916
-    P000: --------------------------------------------------------------------------
-    P000:   -  Triangle walk summary: Of  1,009,564 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
-    startup:     >>> Note: run summary with case in file names   "param_test1_runInfo.json"
-    
-
-Without coding, from command line
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Use a parameter file pre-built in a text editor.
-
-From within an activated oceantracker conda environment, run command
-line below.
-
-On Windows, do this within an anaconda/miniconda prompt window with an
-activated environment.
-
-.. code:: ipython3
-
-    !python ..\\oceantracker\\run_oceantracker.py .\\example_param_files\\param_test1.json
-
-
-.. parsed-literal::
-
-    startup: --------------------------------------------------------------------------
-    startup: OceanTracker- preliminary setup
-    startup:      Python version: 3.10.10 | packaged by Anaconda, Inc. | (main, Mar 21 2023, 18:39:17) [MSC v.1916 64 bit (AMD64)]
-    startup:   - found hydro-model files of type SCHISIM
-    startup:       -  sorted hyrdo-model files in time order,	  0.615 sec
-    startup:     >>> Note: output is in dir= e:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
-    startup:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
-    P000: --------------------------------------------------------------------------
-    P000: Starting case number   0,  param_test1 at 2023-05-31T11:54:24.163503
-    P000: --------------------------------------------------------------------------
-    P000:       -  built node to triangles map,	  0.653 sec
-    P000:       -  built triangle adjacency matrix,	  0.291 sec
-    P000:       -  found boundary triangles,	  0.000 sec
-    P000:       -  built domain and island outlines,	  1.410 sec
-    P000:       -  calculated triangle areas,	  0.000 sec
-    P000:   Finished grid setup
-    P000:       -  set up particle_release_groups,	  0.967 sec
-    P000:       -  built barycentric-transform matrix,	  0.408 sec
-    P000:       -  initial set up of core classes,	  0.412 sec
-    P000:       -  final set up of core classes,	  0.003 sec
-    P000:       -  created particle properties derived from fields,	  0.000 sec
-    P000: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
-    P000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
-    P000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
-    P000: --------------------------------------------------------------------------
-    P000:   - Starting param_test1,  duration: 0 days 23 hrs 0 min 0 sec
-    P000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
-    P000:       -  read  24 time steps in  0.5 sec
-    P000:   - opening tracks output to : param_test1_tracks.nc
-    P000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:000040: Active:00040 M:00039 S:00000 B:00001 D:000 O:00 N:0 Buffer:  40-  6% step time = 8554.9 ms
-    P000: 04% step 0030:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:000060: Active:00060 M:00054 S:00000 B:00006 D:000 O:00 N:0 Buffer:  60-  8% step time =  2.9 ms
-    P000: 09% step 0060:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:000100: Active:00100 M:00090 S:00000 B:00010 D:000 O:00 N:0 Buffer: 100- 14% step time =  3.3 ms
-    P000: 13% step 0090:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:000120: Active:00120 M:00102 S:00011 B:00007 D:000 O:00 N:0 Buffer: 120- 17% step time =  3.0 ms
-    P000: 17% step 0120:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:000160: Active:00160 M:00139 S:00011 B:00010 D:000 O:00 N:0 Buffer: 160- 22% step time =  3.8 ms
-    P000: 22% step 0150:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:000180: Active:00180 M:00149 S:00011 B:00020 D:000 O:00 N:0 Buffer: 180- 25% step time =  2.9 ms
-    P000: 26% step 0180:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:000220: Active:00220 M:00179 S:00011 B:00030 D:000 O:00 N:0 Buffer: 220- 31% step time =  3.5 ms
-    P000: 30% step 0210:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:000240: Active:00240 M:00193 S:00011 B:00036 D:000 O:00 N:0 Buffer: 240- 33% step time =  3.0 ms
-    P000: 35% step 0240:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:000280: Active:00280 M:00235 S:00011 B:00034 D:000 O:00 N:0 Buffer: 280- 39% step time =  3.7 ms
-    P000: 39% step 0270:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:000300: Active:00300 M:00246 S:00000 B:00054 D:000 O:00 N:0 Buffer: 300- 42% step time =  3.0 ms
-    P000: 43% step 0300:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:000340: Active:00340 M:00263 S:00000 B:00077 D:000 O:00 N:0 Buffer: 340- 47% step time =  3.5 ms
-    P000: 48% step 0330:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:000360: Active:00360 M:00240 S:00000 B:00120 D:000 O:00 N:0 Buffer: 360- 50% step time =  3.1 ms
-    P000: 52% step 0360:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:000400: Active:00400 M:00257 S:00000 B:00143 D:000 O:00 N:0 Buffer: 400- 55% step time =  3.8 ms
-    P000: 57% step 0390:H0013b13-14 Day +00 13:00 2017-01-01 13:30:00: Rel.:000420: Active:00420 M:00320 S:00007 B:00093 D:000 O:00 N:0 Buffer: 420- 58% step time =  3.2 ms
-    P000: 61% step 0420:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:000460: Active:00460 M:00326 S:00014 B:00120 D:000 O:00 N:0 Buffer: 460- 64% step time =  3.6 ms
-    P000: 65% step 0450:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:000480: Active:00480 M:00303 S:00057 B:00120 D:000 O:00 N:0 Buffer: 480- 67% step time =  3.2 ms
-    P000: 70% step 0480:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:000520: Active:00520 M:00317 S:00062 B:00141 D:000 O:00 N:0 Buffer: 520- 72% step time =  4.0 ms
-    P000: 74% step 0510:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:000540: Active:00540 M:00244 S:00070 B:00226 D:000 O:00 N:0 Buffer: 540- 75% step time =  3.3 ms
-    P000: 78% step 0540:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:000580: Active:00580 M:00372 S:00070 B:00138 D:000 O:00 N:0 Buffer: 580- 80% step time =  3.8 ms
-    P000: 83% step 0570:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:000600: Active:00600 M:00367 S:00066 B:00167 D:000 O:00 N:0 Buffer: 600- 83% step time =  3.4 ms
-    P000: 87% step 0600:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:000640: Active:00640 M:00384 S:00061 B:00195 D:000 O:00 N:0 Buffer: 640- 89% step time =  4.1 ms
-    P000: 91% step 0630:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:000660: Active:00660 M:00426 S:00014 B:00220 D:000 O:00 N:0 Buffer: 660- 92% step time =  3.4 ms
-    P000: 96% step 0660:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:000700: Active:00700 M:00405 S:00007 B:00288 D:000 O:00 N:0 Buffer: 700- 97% step time =  3.7 ms
-    P000: 100% step 0689:H0022b22-23 Day +00 22:58 2017-01-01 23:28:00: Rel.:000700: Active:00700 M:00523 S:00000 B:00177 D:000 O:00 N:0 Buffer: 700- 97% step time =  3.8 ms
-    P000: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
-    P000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
-    P000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
-    P000: --------------------------------------------------------------------------
-    P000:   - Finished case number   0,  param_test1 started: 2023-05-31 11:54:24.163503, ended: 2023-05-31 11:54:39.138122
-    P000:       Elapsed time =0:00:14.974619
-    P000: --------------------------------------------------------------------------
-    P000:   -  Triangle walk summary: Of  1,020,120 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
-    startup:     >>> Note: run summary with case in file names   "param_test1_runInfo.json"
-    
-
-Options when running at command line
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-These allow
-
--  redefining the input and output dirs given within parameter file,
-   which may have been built for a different location
--  limiting the run duration or the number of parallel cases during
-   testing
-
-the full arguments are below
-
-.. code:: ipython3
-
-    !python ..\\oceantracker\\run_oceantracker.py -h
-
-
-.. parsed-literal::
-
-    usage: run_oceantracker.py [-h] [--input_dir INPUT_DIR]
-                               [--root_output_dir ROOT_OUTPUT_DIR]
-                               [--processors PROCESSORS] [--duration DURATION]
-                               [--cases CASES] [-debug]
-                               param_file
-    
-    positional arguments:
-      param_file            json or yaml file of input parameters
-    
-    options:
-      -h, --help            show this help message and exit
-      --input_dir INPUT_DIR
-                            overrides dir for hindcast files given in param file
-      --root_output_dir ROOT_OUTPUT_DIR
-                            overrides root output dir given in param file
-      --processors PROCESSORS
-                            overrides number of processors in param file
-      --duration DURATION   in seconds, overrides model duration in seconds of all
-                            of cases, useful in testing
-      --cases CASES         only runs first "cases" of the case_list, useful in
-                            testing
-      -debug                gives better error information, but runs slower, eg
-                            checks Numba array bounds
-    
-
+.. image:: B_runningOT_and_parameters_files%5CB_runningOT_and_parameters_5_1.png
 
