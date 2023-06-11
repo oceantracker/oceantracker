@@ -3,14 +3,14 @@ dispersion:
   A_H: 0.1
 duration: 259200
 output_file_base: demo03_heatmaps
-particle_properties_dict:
+particle_properties:
   Oxygen:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
     initial_value: 20.0
   distance_travelled:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-particle_statistics_dict:
+particle_statistics:
   gridstats1:
     calculation_interval: 1800
     class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
@@ -78,13 +78,6 @@ release_groups:
       - 5490000
     pulse_size: 2000
     release_interval: 7200
-release_groups_dict:
-  mypoints1:
-    points:
-    - - 1594500
-      - 5483000
-    pulse_size: 200
-    release_interval: 0
 root_output_dir: output
 time_step: 900
 tracks_writer:

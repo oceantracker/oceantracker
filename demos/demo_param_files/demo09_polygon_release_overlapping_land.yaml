@@ -3,7 +3,7 @@ backtracking: true
 dispersion:
   A_H: 0.1
 output_file_base: demo09_polygon_release_overlapping_land
-particle_properties_dict:
+particle_properties:
   Oxygen:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
@@ -68,13 +68,6 @@ release_groups:
       - 5489972.7479
     pulse_size: 10
     release_interval: 10800
-release_groups_dict:
-  mypoints1:
-    points:
-    - - 1594500
-      - 5483000
-    pulse_size: 200
-    release_interval: 0
 root_output_dir: output
 time_step: 600
 tracks_writer:

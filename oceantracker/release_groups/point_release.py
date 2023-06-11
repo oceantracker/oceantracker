@@ -3,6 +3,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from numba import njit
+
 class PointRelease(ParameterBaseClass):
     # releases particles at fixed points, inside optional radius
     # add checks to see if points inside domain and dry if released in a radius
@@ -159,6 +160,8 @@ class PointRelease(ParameterBaseClass):
         while x0.shape[0] < n_required:
             # get 2D release candidates
             x = self.get_release_location_candidates()
+
+
             x, n_cell = self.check_potential_release_locations_in_bounds(x)
 
             if x.shape[0] > 0:
@@ -176,6 +179,8 @@ class PointRelease(ParameterBaseClass):
             si.msg_logger.msg('Release, only found ' + str(n_found) + ' of ' + str(n_required) + ' required points inside domain after 50 cycles',warning=True,
                            hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  max_cycles_to_find_release_points, current value = {self.params["max_cycles_to_find_release_points"]:3}' )
             n_required = n_found #
+
+
 
         # trim initial location and cell  to required number
         x0 = x0[:n_required, :]
@@ -256,6 +261,8 @@ class PointRelease(ParameterBaseClass):
         sel, n_cell = si.classes['interpolator'].are_points_inside_domain(x[:,:2])
         grid = si.classes['reader'].grid
         # keep those inside domain
+
+
         x = x[sel, :]
         n_cell = n_cell[sel]
 
