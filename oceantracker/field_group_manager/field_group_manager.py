@@ -36,9 +36,13 @@ class FieldGroupManager(ParameterBaseClass):
         # set up stuff needed by all fields before any  interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
         si =self.shared_info
-        # todo one reader/interp at the moment but may be more later
+        # todo one reader/interp at the moment b    ut may be more later
         si.classes['interpolator'].setup_interp_time_step(time_sec, xq, active)
         return active
+
+    def eval_water_velocity(self, output, active ):
+        si = self.shared_info
+        si.classes['interpolator'].eval_water_velocity_at_particle_locations(output, active)
 
     #@function_profiler(__name__)
     def interp_named_field_at_particle_locations(self, fieldName, active, output=None):
@@ -53,13 +57,14 @@ class FieldGroupManager(ParameterBaseClass):
         i = si.classes['fields'][fieldName]
         si.classes['interpolator'].interp_field_at_current_particle_locations(i, active, output)
 
-    def interp_named_field_at_given_locations_and_time(self, fieldName, x, time= None, n_cell=None, output=None):
+    def interp_named_field_at_given_locations_and_time(self, fieldName, x, time= None, n_cell=None,bc_cord=None, output=None):
         # interp reader fieldName at specfied locations,  not particle locations
         # output can optionally be redirected to another particle property name different from  reader's fieldName
         # particle_prop_name
 
         si = self.shared_info
-        output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(si.classes['fields'][fieldName], x, time, output=output, n_cell=n_cell)
+        output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(si.classes['fields'][fieldName], x, time,
+                                                                        output=output, n_cell=n_cell,bc_cord=bc_cord)
         return output
 
     def create_field(self, name, field_group, field_params, crumbs=''):

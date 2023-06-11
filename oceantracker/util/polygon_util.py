@@ -125,12 +125,17 @@ class InsidePolygon(object):
     def _get_area(self):
         # area of closed polygon, by planimeter method?
         #todo move to own utility, use triangle util?
-        xy=self.points
-        xy0  = self.points[0,:]
-        a = 0
-        for n in range(xy.shape[0]):
-            a += (xy[n,0] * xy0[1] - xy[n,1] * xy0[0])
-        return abs(a / 2)
+        x, y=self.points[:,0], self.points[:,1]
+        n = len(x)
+        area = 0.0
+
+        for i in range(n):
+            j = (i + 1) % n
+            area += x[i] * y[j]
+            area -= x[j] * y[i]
+
+        area = abs(area) / 2.0
+        return area
 
 def make_inside_ray_tracing_indices(lb, slope_inv, bounds,sub_grid_x,sub_grid_y, sub_grid_overlaps_polygon):
     # wrapper to make faster reduce number of arguments anf faster by compling fixed array references into code

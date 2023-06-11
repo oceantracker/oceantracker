@@ -161,8 +161,7 @@ class PointRelease(ParameterBaseClass):
             # get 2D release candidates
             x = self.get_release_location_candidates()
 
-
-            x, n_cell = self.check_potential_release_locations_in_bounds(x)
+            x, n_cell, bc = self.check_potential_release_locations_in_bounds(x)
 
             if x.shape[0] > 0:
                 x, n_cell = self.filter_release_points(x, n_cell)
@@ -176,10 +175,11 @@ class PointRelease(ParameterBaseClass):
             if count > self.params["max_cycles_to_find_release_points"]: break
 
         if n_found < n_required:
-            si.msg_logger.msg('Release, only found ' + str(n_found) + ' of ' + str(n_required) + ' required points inside domain after 50 cycles',warning=True,
+            si.msg_logger.msg(f'Release group-"{self.info["name"]}", only found {n_found} of {n_required} required points inside domain after {self.params["max_cycles_to_find_release_points"]} cycles',
+
+                              warning=True,
                            hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  max_cycles_to_find_release_points, current value = {self.params["max_cycles_to_find_release_points"]:3}' )
             n_required = n_found #
-
 
 
         # trim initial location and cell  to required number
@@ -258,7 +258,7 @@ class PointRelease(ParameterBaseClass):
         si= self.shared_info
         # use KD tree to find points those outside model domain
 
-        sel, n_cell = si.classes['interpolator'].are_points_inside_domain(x[:,:2])
+        sel, n_cell ,bc  = si.classes['interpolator'].are_points_inside_domain(x[:,:2])
         grid = si.classes['reader'].grid
         # keep those inside domain
 
@@ -272,5 +272,5 @@ class PointRelease(ParameterBaseClass):
             x = x[sel, :]
             n_cell = n_cell[sel]
 
-        return x, n_cell
+        return x, n_cell, bc
 
