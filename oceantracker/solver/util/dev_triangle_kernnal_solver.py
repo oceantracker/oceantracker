@@ -1,7 +1,7 @@
 from numba import  njit , prange ,types as nbt
 import numpy as np
 from oceantracker.interpolator.util import triangle_interpolator_util as tri_interp_util
-from oceantracker.interpolator.util import eval_interp
+from oceantracker.interpolator.util import triangle_eval_interp
 
 #@njit(parallel = True, nogil=True)
 @njit()
@@ -67,9 +67,9 @@ def eval_water_velocity(xq, time_sec,vel_field, grid, part_prop, st, bc,  n, v_o
     if st['is_3D_run']:
         # vertical walk
         tri_interp_util._kernal_get_depth_cell_time_varying_Slayer(xq, grid, part_prop, st, n)
-        eval_interp._kernal_eval_water_velocity_3D(v_out, vel_field, grid, part_prop, st, n)
+        triangle_eval_interp._kernal_eval_water_velocity_3D(v_out, vel_field, grid, part_prop, st, n)
     else:
-        eval_interp._kernal_time_dependent_2Dfield(v_out, vel_field, grid, part_prop, st, n)
+        triangle_eval_interp._kernal_time_dependent_2Dfield(v_out, vel_field, grid, part_prop, st, n)
 
 @njit(nbt.void(nbt.float64[:],nbt.float64[:],nbt.float64[:],nbt.float64,nbt.float64[:]))
 def euler_substep(xold, water_velocity, velocity_modifier, dt, xnew):

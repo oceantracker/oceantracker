@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def numpy_structure_from_dict(d):
+def numpy_structure_from_dict(d, retain=True):
     # return a numpy sturcture with fields give by dict keys and copy of  from dictionary
 
     # used to pass many arguments to numba functions efficiently as attributes of one class variable

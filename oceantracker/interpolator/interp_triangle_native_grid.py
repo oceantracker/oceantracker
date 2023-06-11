@@ -11,7 +11,7 @@ from oceantracker.util import numba_util
 from oceantracker.util import numpy_util
 from numba import typeof, types as nbt, from_dtype
 
-from oceantracker.interpolator.util import triangle_interpolator_util as tri_interp_util ,  eval_interp
+from oceantracker.interpolator.util import triangle_interpolator_util as tri_interp_util ,  triangle_eval_interp
 
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
 
@@ -25,7 +25,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         super().__init__()
         self.add_default_params({'bc_walk_tol': PVC(1.0e-5, float,min = 0.),
                                  'max_search_steps': PVC(500,int, min =1)})
-        self.grid = {} #todo get rid?
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
 
     #@function_profiler(__name__)
@@ -69,7 +68,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # set up a grid class,part_prop and vertical cell find functions to minimise numba function arguments
         si = self.shared_info
         reader = self.reader
-        grid = reader.grid
+        self.grid = reader.grid
+        grid = self.grid
         fi = reader.info['file_info']
         bi = reader.info['buffer_info']
 
@@ -79,7 +79,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.grid_as_struct = numpy_util.numpy_structure_from_dict(grid)
 
         # build cell walk info
-        step_info = dict( is_3D_run = si.is_3D_run,
+        step_info_dict = dict( is_3D_run = si.is_3D_run,
                         max_triangle_walk_steps =  self.params[ 'max_search_steps'],
                         open_boundary_type= si.settings['open_boundary_type'],
                         block_dry_cells=si.settings['block_dry_cells'],
@@ -103,7 +103,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                         current_hydro_model_step= 0,
                         hydro_model_time_step =reader.info['file_info']['hydro_model_time_step']
                         )
-        self.step_info= numpy_util.numpy_structure_from_dict(step_info) # class to use inside numba functions
+        self.step_info= numpy_util.numpy_structure_from_dict(step_info_dict) # class to use inside numba functions
 
         # point at particle prop block
         part_prop_as_structure = si.classes['particle_group_manager'].part_prop_as_struct
@@ -150,6 +150,40 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if not self.reader.are_time_steps_in_buffer(time_sec):
             self.reader.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
 
+    # @function_profiler(__name__)
+    def eval_water_velocity_at_particle_locations(self,output, active ):
+        # interp reader fieldName inplace to particle locations to same time and memory
+        # output can optionally be redirected to another particle property name different from  reader's fieldName
+        # particle_prop_name
+        # in place evaluation of field interpolation
+        si = self.shared_info
+        grid = self.grid
+        field_instance = si.classes['fields']['water_velocity']
+        part_prop = si.classes['particle_properties']
+        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
+        n_cell = part_prop['n_cell'].data
+        bc_cords = part_prop['bc_cords'].data
+
+
+        if field_instance.is3D():
+            nz_cell = part_prop['nz_cell'].data
+            triangles = grid['triangles']
+            bottom_cell_index = grid['bottom_cell_index']
+            z_fraction = part_prop['z_fraction'].data
+            z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
+            st = self.step_info
+            nb = st['nb']
+            fractional_time_steps = st['fractional_time_steps']
+
+            triangle_eval_interp.eval_water_velocity_3D(nb, fractional_time_steps, basic_util.atLeast_Nby1(output),
+                                               field_instance.data,
+                                               triangles, bottom_cell_index,
+                                               n_cell, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
+                                               active)
+        else:
+
+            self._interp_field2D(nb, fractional_time_steps, field_instance, n_cell, bc_cords, output, active)
+
     #@function_profiler(__name__)
     def interp_field_at_current_particle_locations(self, field_instance, active, output):
         # interp reader fieldName inplace to particle locations to same time and memory
@@ -157,43 +191,118 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # particle_prop_name
        # in place evaluation of field interpolation
         si = self.shared_info
+        grid = self.grid
         part_prop = si.classes['particle_properties']
         part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
-        grid_struct = self.grid_as_struct
-        st = self.step_info
+        n_cell = part_prop['n_cell'].data
+        bc_cords = part_prop['bc_cords'].data
 
-        # args the same for all
-        args = (basic_util.atLeast_Nby1(output),
-                field_instance.data, grid_struct,
-                part_prop_struct,
-                active, st)
+        if field_instance.is3D():
+            nz_cell = part_prop['nz_cell'].data
+            z_fraction = part_prop['z_fraction'].data
+            bottom_cell_index = grid['bottom_cell_index']
 
-        if field_instance.is_time_varying():
-            if field_instance.is3D():
-                if field_instance.params['name'] == 'water_velocity':
-                    # 3D vel needs log layer interp in bottom cell
-                    eval_interp.eval_water_velocity_3D(*args)
-                else:
-                    eval_interp.time_dependent_3Dfield(*args)
-                    # F_out, F_data, nb, fractional_time_step, tri, nz_bottom, n_cell, nz_cell, z_fraction, BCcord, active
-            else:
-                eval_interp.time_dependent_2Dfield(*args)
+            self._interp_field3D(field_instance, n_cell, bc_cords, nz_cell,
+                                 z_fraction,bottom_cell_index, active, output)
         else:
-            # 2D or 3D non-time varying
-            if field_instance.is3D():
-                # todo eval_interp3D_timeIndependent not implented for 3D non-time varying fields
-                raise Exception('eval_field_interpolation_at_particle_locations : spatial interp using eval_interp3D_timeIndependent not implemented yet ')
-            else:
-                eval_interp.time_independent_2Dfield(*args)
 
-    #@function_profiler(__name__)
-    def interp_named_field_at_given_locations_and_time(self, fieldName, x, time=None, n_cell=None, output=None):
-        # interp reader fieldName at specfied locations,  not particle locations
+          self._interp_field2D(field_instance, n_cell, bc_cords,output, active)
+
+    # @function_profiler(__name__)
+    def _interp_field2D(self, field_instance, n_cell, bc_cords,output, active):
+        # interp reader fieldName inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's fieldName
         # particle_prop_name
-        #todo not working or used
+        # in place evaluation of field interpolation
         si = self.shared_info
-        output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(si.classes['fields'][fieldName], x, time, output=output, n_cell=n_cell)
+        part_prop = si.classes['particle_properties']
+        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
+        grid = self.grid
+        triangles = grid['triangles']
+        st = self.step_info
+        nb = st['nb']
+        fractional_time_steps = st['fractional_time_steps']
+
+        if field_instance.is_time_varying():
+            triangle_eval_interp.time_dependent_2Dfield(nb, fractional_time_steps,basic_util.atLeast_Nby1(output),
+                                                   field_instance.data, triangles,
+                                                   n_cell, bc_cords,
+                                                   active)
+        else:
+            triangle_eval_interp.time_independent_2Dfield(basic_util.atLeast_Nby1(output),
+                                                 field_instance.data, triangles,
+                                                 n_cell, bc_cords,
+                                                 active)
+
+    # @function_profiler(__name__)
+    def _interp_field3D(self, field_instance, n_cell, bc_cords,
+                        nz_cell, z_fraction, bottom_cell_index,active, output):
+        # interp reader fieldName inplace to particle locations to same time and memory
+        # output can optionally be redirected to another particle property name different from  reader's fieldName
+        # particle_prop_name
+        # in place evaluation of field interpolation
+        si = self.shared_info
+        part_prop = si.classes['particle_properties']
+        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
+        grid = self.grid
+        triangles = grid['triangles']
+        st = self.step_info
+
+        if field_instance.is_time_varying():
+            st = self.step_info
+            nb = st['nb']
+            fractional_time_steps = st['fractional_time_steps']
+            triangle_eval_interp.time_dependent_3Dfield(nb ,fractional_time_steps, field_instance.data,
+                           triangles,bottom_cell_index,
+                           n_cell, bc_cords, nz_cell, z_fraction,
+                           basic_util.atLeast_Nby1(output), active)
+        else:
+            # 3D non-time varying
+            # todo eval_interp3D_timeIndependent not implented for 3D non-time varying fields
+            raise Exception('eval_field_interpolation_at_particle_locations : spatial interp using eval_interp3D_timeIndependent not implemented yet ')
+
+    # @function_profiler(__name__)
+    def eval_field_interpolation_at_given_locations(self, field_instance, x, time=None, output=None, n_cell=None):
+        # in  evaluation of field interpolation at specific locations, ie not particle locations
+        # todo only time_dependent_2Dfield  working - eval_field_interpolation_at_given_locations
+        # todo add time dependence/ time fractions
+        # does this over write paricle props??
+        si = self.shared_info
+        reader = si.classes['reader']
+
+        part_prop = si.classes['particle_properties']
+
+        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
+        grid = self.grid
+        st = self.step_info
+
+        # is no output name give particle property for output is same as hindcast fieldName
+        if output is None:
+            if field_instance.data.shape[3] > 1:
+                output = np.full((x.shape[0], field_instance.data.shape[3]), np.nan)
+            else:
+                output = np.full((x.shape[0],), np.nan)
+
+        if n_cell is None:
+            n_cell = self.initial_cell_guess(x)
+
+        # get bc cords for the cells
+        bc_cords = self.get_bc_cords(x, n_cell)
+        active = np.arange(x.shape[0])
+        nt = reader.time_to_hydro_model_index(time)
+        nb = reader.buffer_index_to_buffer_offset(nt)
+
+        if field_instance.is3D():
+            nz_cell = part_prop['nz_cell'].data
+            z_fraction = part_prop['z_fraction'].data
+            bottom_cell_index = grid['bottom_cell_index']
+
+            self._interp_field3D(field_instance, n_cell, bc_cords, nz_cell,
+                                 z_fraction,bottom_cell_index, active, output)
+        else:
+
+          self._interp_field2D( field_instance, n_cell, bc_cords,output, active)
+
 
         return output
 
@@ -263,66 +372,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         n_cell  = self.initial_cell_guess(xq)
         bc = self.get_bc_cords(xq,n_cell)
         is_inside=  np.all(np.logical_and(bc >= -self.params['bc_walk_tol'], bc  <= 1.+self.params['bc_walk_tol']),axis=1)
-        return is_inside, n_cell  # is inside if  magnitude of all BC < 1
+        return is_inside, n_cell, bc  # is inside if  magnitude of all BC < 1
 
-    #@function_profiler(__name__)
-    def eval_field_interpolation_at_given_locations(self, field_instance,x, time=None,  output=None, n_cell= None):
-        # in  evaluation of field interpolation at specific locations, ie not particle locations
-        #todo only time_dependent_2Dfield  working - eval_field_interpolation_at_given_locations
-        # todo add time dependence/ time fractions
-        # does this over write paricle props??
-        si = self.shared_info
-        reader = si.classes['reader']
 
-        part_prop = si.classes['particle_properties']
-        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
-        grid_struct = self.grid_as_struct
-        st = self.step_info
-
-        # is no output name give particle property for output is same as hindcast fieldName
-        if output is None:
-            if  field_instance.data.shape[3]> 1:
-                output= np.full((x.shape[0], field_instance.data.shape[3]), np.nan)
-            else:
-                output = np.full((x.shape[0],),np.nan)
-
-        if n_cell is None:
-            n_cell= self.initial_cell_guess(x)
-
-        # get bc cords for the cells
-        bc_cords = self.get_bc_cords(x, n_cell)
-        active = np.arange(x.shape[0])
-        # args the same for all
-        args = (basic_util.atLeast_Nby1(output),
-                field_instance.data, grid_struct,
-                part_prop_struct,
-                active, st)
-
-        if field_instance.is_time_varying():
-            # get buffer time step and time fraction
-            nt = reader.time_to_hydro_model_index(time)
-            nb = reader.buffer_index_to_buffer_offset(nt)
-
-            if field_instance.is3D():
-                if field_instance.params['name']=='water_velocity':
-                    # 3D vel needs log layer interp in bottom cell
-                    eval_interp.eval_water_velocity_3D(*args)
-                else:
-                    eval_interp.time_dependent_3Dfield(*args)
-            else:
-                # todo 2D time dep not not working yet
-                eval_interp.time_dependent_2Dfield(*args)
-        else:
-            # 2D or 3D non-time varying
-            if field_instance.is3D():
-                # todo eval_interp3D_timeIndependent not implemented for 3D non-time varying fields
-                nz_nodes = part_prop['nz_cell'].data
-                z_fraction_nodes = part_prop['z_fraction_nodes'].data
-                raise Exception('eval_field_interpolation_at_given_locations: spatial interp using eval_interp3D_timeIndependent not implemented yet ')
-            else:
-                # is working
-                eval_interp.time_independent_2Dfield(*args)
-                return  output
 
     def get_bc_cords(self,x,n_cells):
         # get BC cords for given x's
@@ -334,7 +386,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def update_dry_cells(self):
         # update 0-255 dry cell index
-        eval_interp.update_dry_cell_index(self.grid_as_struct,self.step_info)
+        triangle_eval_interp.update_dry_cell_index(self.grid_as_struct,self.step_info)
 
     def close(self):
         si=self.shared_info
@@ -344,7 +396,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         w = info['walk_info']
         for name in self.step_info.dtype.names:
             w[name] = self.step_info[name]
-     
+
         w['average_number_of_triangles_walked']= w['number_of_triangles_walked']/max(1,w['particles_located_by_walking'])
         if si.is_3D_run:
             w['average_vertical_walk_steps'] = w['total_vertical_steps_walked'] / max(1, w['particles_located_by_walking'])
