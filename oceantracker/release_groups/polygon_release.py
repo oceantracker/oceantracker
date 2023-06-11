@@ -61,6 +61,18 @@ class PolygonRelease(PointRelease):
 
         # select those inside polygon and domain
         sel = self.polygon.inside_indices(xy_candidates)
+
+        if False and sel.sum()==0:
+            # debug plot when none in bounds
+            from oceantracker.util import debug_plotting_util
+            grid = si.classes['reader'].grid
+            debug_plotting_util.plot_grid(grid)
+            debug_plotting_util.plot_line(self.polygon.points)
+            debug_plotting_util.plot_points(xy_candidates)
+            debug_plotting_util.plot_points(xy_candidates[sel,:],c='g')
+            debug_plotting_util.show()
+            pass
+
         x = xy_candidates[sel, :]
 
         return x

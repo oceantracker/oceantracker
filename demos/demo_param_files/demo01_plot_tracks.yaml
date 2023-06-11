@@ -3,7 +3,7 @@ backtracking: true
 dispersion:
   A_H: 0.1
 output_file_base: demo01_plot_tracks
-particle_properties_dict:
+particle_properties:
   Oxygen:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
@@ -32,7 +32,7 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
-release_groups_dict:
+release_groups:
   mypoints1:
     points:
     - - 1594500

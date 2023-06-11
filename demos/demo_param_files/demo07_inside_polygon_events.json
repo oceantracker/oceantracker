@@ -38,28 +38,6 @@
         "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
         "write_dry_cell_index": true
     },
-    "release_groups_dict": {
-        "mypoints1": {
-            "points": [
-                [
-                    1594500,
-                    5483000
-                ]
-            ],
-            "pulse_size": 200,
-            "release_interval": 0
-        }
-    },
-    "particle_properties_dict": {
-        "Oxygen": {
-            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
-            "decay_time_scale": 86400.0,
-            "initial_value": 20.0
-        },
-        "distance_travelled": {
-            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
-        }
-    },
     "release_groups": {
         "P1": {
             "points": [
@@ -76,15 +54,15 @@
             "release_interval": 10800
         }
     },
-    "block_dry_cells": true,
-    "compact_mode": true,
     "particle_properties": {
         "age_decay": {
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
     },
-    "event_loggers_dict": {
+    "block_dry_cells": true,
+    "compact_mode": true,
+    "event_loggers": {
         "in_out_poly": {
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [

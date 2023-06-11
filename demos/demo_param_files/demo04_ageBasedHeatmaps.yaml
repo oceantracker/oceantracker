@@ -4,7 +4,7 @@ dispersion:
 duration: 259200
 junk: h
 output_file_base: demo04_ageBasedHeatmaps
-particle_properties_dict:
+particle_properties:
   Oxygen:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
@@ -32,38 +32,6 @@ particle_statistics:
     particle_property_list:
     - water_depth
     - water_velocity
-    polygon_list:
-    - points:
-      - - 1597682.1237
-        - 5489972.7479
-      - - 1598604.1667
-        - 5490275.5488
-      - - 1598886.4247
-        - 5489464.0424
-      - - 1597917.3387
-        - 5489000
-      - - 1597300
-        - 5489000
-      - - 1597682.1237
-        - 5489972.7479
-particle_statistics_dict:
-  gridstats1:
-    calculation_interval: 1800
-    class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
-    count_start_date: '2020-06-01 21:16:07'
-    grid_size:
-    - 220
-    - 221
-    particle_property_list:
-    - water_depth
-  polystats1:
-    calculation_interval: 1800
-    class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
-    count_status_in_range:
-    - moving
-    - moving
-    particle_property_list:
-    - water_depth
     polygon_list:
     - points:
       - - 1597682.1237
@@ -114,13 +82,6 @@ release_groups:
       - 5490000
     pulse_size: 2000
     release_interval: 7200
-release_groups_dict:
-  mypoints1:
-    points:
-    - - 1594500
-      - 5483000
-    pulse_size: 200
-    release_interval: 0
 root_output_dir: output
 time_step: 900
 tracks_writer:
