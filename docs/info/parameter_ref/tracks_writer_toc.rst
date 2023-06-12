@@ -8,8 +8,7 @@ tracks_writer_class
 .. toctree::
 	:maxdepth: 1
 
-	FlatTrackWriter.rst
-	RectangularTrackWriter.rst
+	CompactTracksWriter.rst
 
 **Role:** 
 
