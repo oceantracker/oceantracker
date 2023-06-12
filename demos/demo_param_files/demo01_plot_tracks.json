@@ -35,7 +35,6 @@
         "A_H": 0.1
     },
     "tracks_writer": {
-        "class_name": "oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter",
         "time_steps_per_per_file": 700
     },
     "release_groups": {

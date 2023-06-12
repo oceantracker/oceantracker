@@ -64,7 +64,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         si = self.shared_info
         output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(si.classes['fields'][fieldName], x, time,
-                                                                        output=output, n_cell=n_cell,bc_cord=bc_cord)
+                                                                        output=output, n_cell=n_cell)
         return output
 
     def create_field(self, name, field_group, field_params, crumbs=''):

@@ -45,8 +45,7 @@ demo_base_params={'output_file_base' : None,
     }
 
 p1= deepcopy(demo_base_params)
-p1.update({'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
-                        'time_steps_per_per_file':700}}
+p1.update({'tracks_writer':{'time_steps_per_per_file':700}}
                                 )
 p1.update({'output_file_base' :'demo01_plot_tracks' ,'backtracking': True,
                             'time_step': 600})
@@ -63,8 +62,7 @@ p2['release_groups']={
 }
 
 p2.update({'block_dry_cells': True,
-        'tracks_writer':{'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter',
-                                                'write_dry_cell_index': True,
+        'tracks_writer':{'write_dry_cell_index': True,
                                                }})
 p2.update({'output_file_base' :'demo02_animation' ,'compact_mode': True,'time_step': 10*60})
 params.append(p2)

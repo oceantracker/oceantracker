@@ -53,7 +53,7 @@ class _BaseWriter(ParameterBaseClass):
 
         if params['write_dry_cell_index']:
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])
-            self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes_dict={'description': 'Time series of grid dry index 0-255'},
+            self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])
 
 
@@ -63,8 +63,8 @@ class _BaseWriter(ParameterBaseClass):
     def add_global_attribute(self, name, value):
         self.info['file_builder']['attributes' ][name] = value
 
-    def add_new_variable(self,name, dim_list, attributes_dict=None, dtype=None, vector_dim=None, chunking=None):
-
+    def add_new_variable(self,name, dim_list,description=None, attributes=None, dtype=None, vector_dim=None, chunking=None):
+        # add a varaible builder to use on output file sequence, as may split time steps
         if dtype is bool: dtype = np.int8
         if dtype is None: dtype=np.float64
 
@@ -74,7 +74,8 @@ class _BaseWriter(ParameterBaseClass):
             chunking.append(vector_dim)
 
         var={'dim_list': dim_list,
-             'attributes': attributes_dict if attributes_dict is not None else {},
+             'description' :description if description is not None else 'no description given',
+             'attributes': attributes if attributes is not None else {},
              'chunks' : chunking,
             'dtype' : np.int8  if dtype is bool else dtype}
 
@@ -124,9 +125,12 @@ class _BaseWriter(ParameterBaseClass):
                                             hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time', )
 
             try:
-                nc.create_a_variable(name,item['dim_list'] , item['dtype'], attributes=item['attributes'], chunksizes=item['chunks'],)
+                nc.create_a_variable(name, item['dim_list'] , item['dtype'],
+                                    description=item['description'],
+                                     attributes=item['attributes'], chunksizes=item['chunks'],)
             except:
-                A=1
+                #todo need to handle this error
+                pass
 
     def pre_time_step_write_book_keeping(self): pass
 

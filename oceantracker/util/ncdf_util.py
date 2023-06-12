@@ -103,7 +103,7 @@ class NetCDFhandler(object):
 
     def write_global_attribute(self, name,value) :
         setattr(self.file_handle, name, self._sanitize_attribute(value))
-        a=1
+        pass
     # get data
     # check if variables or list of variables in file
     def is_var(self, name):
@@ -128,6 +128,8 @@ class NetCDFhandler(object):
     def get_global_attr(self, attr_name): return getattr(self.file_handle, attr_name)
 
     # variables
+    def get_var_data(self, name):   return self.file_handle.variables[name][:]
+
     def get_var_names(self): return list(self.file_handle.variables.keys())
     def get_var_dims(self,var):  return list(self.file_handle.variables[var].dimensions)
 
@@ -137,6 +139,7 @@ class NetCDFhandler(object):
 
     def get_var_attr(self, name, attr_name):
         return getattr(self.file_handle.variables[name], attr_name)
+
     def get_var_dtype(self,name):
         # to allow for netcd scaland fit of integers
         # get dtype by reading one  vaule
@@ -154,6 +157,16 @@ class NetCDFhandler(object):
         if type(value) is  bool: value =int(value) #  convert booleans
         if value       is None : value = 'None'  # convert Nones
         return value
+
+    def copy_global_attributes(self,nc_new):
+        for name in self.all_global_attr():
+            nc_new.write_global_attribute(name, self.get_global_attr(name))
+
+    def copy_variable(self, nc_new, name):
+        v = self.file_handle[name]
+        #write_a_new_variable(self, name, X, dimList, description=None, attributes=None, dtype=None, chunksizes=None, compressionLevel=0):
+        nc_new.write_a_new_variable(name,v[:], v.dimensions, description=v.description)
+        pass
 
     def close(self):
         self.file_handle.close()

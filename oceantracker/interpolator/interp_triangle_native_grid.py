@@ -163,7 +163,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
-
+        st = self.step_info
+        nb = st['nb']
+        fractional_time_steps = st['fractional_time_steps']
 
         if field_instance.is3D():
             nz_cell = part_prop['nz_cell'].data
@@ -171,9 +173,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             bottom_cell_index = grid['bottom_cell_index']
             z_fraction = part_prop['z_fraction'].data
             z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
-            st = self.step_info
-            nb = st['nb']
-            fractional_time_steps = st['fractional_time_steps']
 
             triangle_eval_interp.eval_water_velocity_3D(nb, fractional_time_steps, basic_util.atLeast_Nby1(output),
                                                field_instance.data,
@@ -182,7 +181,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                active)
         else:
 
-            self._interp_field2D(nb, fractional_time_steps, field_instance, n_cell, bc_cords, output, active)
+            self._interp_field2D(field_instance, n_cell, bc_cords, output, active)
 
     #@function_profiler(__name__)
     def interp_field_at_current_particle_locations(self, field_instance, active, output):
@@ -289,8 +288,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # get bc cords for the cells
         bc_cords = self.get_bc_cords(x, n_cell)
         active = np.arange(x.shape[0])
-        nt = reader.time_to_hydro_model_index(time)
-        nb = reader.buffer_index_to_buffer_offset(nt)
+        if time is  None:
+            # not time varing
+            nb = None
+            nt = None
+        else:
+            nt = reader.time_to_hydro_model_index(time)
+            nb = reader.buffer_index_to_buffer_offset(nt)
 
         if field_instance.is3D():
             nz_cell = part_prop['nz_cell'].data
