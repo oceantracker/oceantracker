@@ -82,7 +82,6 @@ retain_culled_part_locations: true
 root_output_dir: output
 time_step: 600
 tracks_writer:
-  class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
   write_dry_cell_index: true
 trajectory_modifiers:
   part_culling:

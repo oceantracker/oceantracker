@@ -230,7 +230,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # change writer for compact mode
         if si.settings['compact_mode']:
-            case_params['core_classes']['tracks_writer']['class_name']='oceantracker.tracks_writer.track_writer_compact.FlatTrackWriter'
+            case_params['core_classes']['tracks_writer']['class_name']='oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter'
 
         # make core classes, eg. field group
         for name, params in case_params['core_classes'].items():

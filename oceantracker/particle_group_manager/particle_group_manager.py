@@ -183,7 +183,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         if si.write_tracks and i.params['write']:
             w = si.classes['tracks_writer']
-            w.create_variable_to_write(i.params['name'], 'time', None,i.params['vector_dim'], attributes_dict=None, dtype=i.params['dtype'] )
+            w.create_variable_to_write(i.params['name'], 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
 
     def create_particle_property(self, name, prop_group, prop_params, crumbs=''):
         si = self.shared_info
@@ -225,7 +225,7 @@ class ParticleGroupManager(ParameterBaseClass):
                 w.create_variable_to_write(i.params['name'], is_time_varying=i.params['time_varying'],
                                            is_part_prop=True,
                                            vector_dim=i.params['vector_dim'],
-                                           attributes_dict={'description': i.params['description']},
+                                           attributes={'description': i.params['description']},
                                            dtype=i.params['dtype'])
 
     def get_particle_time(self): return self.time_varying_group_info['time'].get_values()

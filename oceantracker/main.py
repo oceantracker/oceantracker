@@ -178,7 +178,8 @@ class OceanTracker():
         has_errors = [x[1] for x in case_results]
         return case_info_files, has_errors
 
-    def _run1_case(self,working_params):
+    @staticmethod
+    def _run1_case(working_params):
         # run one process on a particle based on given family class parameters
         # by creating an independent instances of  model classes, with given parameters
 

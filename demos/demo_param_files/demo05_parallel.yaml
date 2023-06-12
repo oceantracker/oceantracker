@@ -68,7 +68,6 @@
   root_output_dir: output
   time_step: 600
   tracks_writer:
-    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
     write_dry_cell_index: true
   user_note: test of notes
 - add_date_to_run_output_dir: false
@@ -140,7 +139,6 @@
       release_interval: 10800
   time_step: 600
   tracks_writer:
-    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
     write_dry_cell_index: true
   user_note: test of notes
 - add_date_to_run_output_dir: false
@@ -212,7 +210,6 @@
       release_interval: 10800
   time_step: 600
   tracks_writer:
-    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
     write_dry_cell_index: true
   user_note: test of notes
 - add_date_to_run_output_dir: false
@@ -284,7 +281,6 @@
       release_interval: 10800
   time_step: 600
   tracks_writer:
-    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
     write_dry_cell_index: true
   user_note: test of notes
 - add_date_to_run_output_dir: false
@@ -356,6 +352,5 @@
       release_interval: 10800
   time_step: 600
   tracks_writer:
-    class_name: oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter
     write_dry_cell_index: true
   user_note: test of notes

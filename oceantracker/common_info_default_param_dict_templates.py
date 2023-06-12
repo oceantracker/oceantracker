@@ -59,7 +59,7 @@ core_classes= { 'reader': {},
    'field_group_manager':{'class_name':'oceantracker.field_group_manager.field_group_manager.FieldGroupManager'},
    'interpolator': {'class_name': 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'},
     'particle_group_manager': {'class_name': 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager'},
-    'tracks_writer': {'class_name': 'oceantracker.tracks_writer.track_writer_retangular.RectangularTrackWriter'},
+    'tracks_writer': {'class_name': 'oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter'},
     'dispersion': {'class_name': 'oceantracker.dispersion.random_walk.RandomWalk'},
     'resuspension': {'class_name':'oceantracker.resuspension.resuspension.BasicResuspension' }}
 
@@ -142,6 +142,9 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     #TODO Features
         #todo add time units attr={'units': 'seconds since 1970-01-01'}
         # add description kwarg to all netcdf variables
+        # todo  by default read all varaibles for plotting? or read on demand?
+        #todo matlab ncdf reader to read release group info
+        # add fraction to read to matlab code
 
     # TODO SIMPLIFY
         #todo remove depth range stats and make depth range part of stats
@@ -211,6 +214,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo  move reader opertions to feild group mangager to allow for future with multiple readers
         # todo attach reader/interp to each  feild instance to
     # todo support for lat long inout/output
+    # todo  as a utility set up reading geojson/ shapely polygons and show example
+    # todo grid outline file as geojson?
 
 
 # TODO OUTPUT/POSTPROCESSING

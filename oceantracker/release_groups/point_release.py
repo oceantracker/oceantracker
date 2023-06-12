@@ -164,7 +164,7 @@ class PointRelease(ParameterBaseClass):
             x, n_cell, bc = self.check_potential_release_locations_in_bounds(x)
 
             if x.shape[0] > 0:
-                x, n_cell = self.filter_release_points(x, n_cell)
+                x, n_cell = self.filter_release_points(x, n_cell,)
                 # if any ok then add to list
                 n_found += x.shape[0]
                 x0          = np.concatenate((x0, x), axis =0)

@@ -105,7 +105,6 @@ def demo08_particle_splitting(case_info_file_name,output_file=None):
 
     animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
                                 heading='Split moving particles in two and culling 5%  every 6 hours',
-                                release_group=0,
                                 min_status=-2,
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
