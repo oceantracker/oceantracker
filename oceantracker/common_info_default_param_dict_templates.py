@@ -166,6 +166,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo add read case info file with not found errors
         # todo get rid of info[points], just alter params points
         # todo get rid of info[points], just alter params points
+        # todo along with parameter docstr add "units" and display in docs
 
 #TODO FASTER STARTUP
     #todo add timing of start up blocks to improve setup speed
