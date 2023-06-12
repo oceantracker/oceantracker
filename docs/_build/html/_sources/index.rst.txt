@@ -71,14 +71,13 @@ Architecture
    :width: 200
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :hidden:
    :caption: Contents:
 
    info/about.rst
    info/features.rst
    info/gallery.rst
-   info/how_to.rst
    info/users_guide.rst
 
 .. warning::

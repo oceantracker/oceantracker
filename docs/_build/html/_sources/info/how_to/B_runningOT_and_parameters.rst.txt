@@ -1,5 +1,5 @@
-Parameters and Running
-======================
+Running with helper class
+=========================
 
 [This note-book is in oceantracker/tutorials_how_to/]
 
@@ -9,7 +9,7 @@ streamline running many cases across distributed computers, along with
 enabling online particle tracking as a service.
 
 To achieve these capabilities, it uses parameters to both change the
-settings to meet the users needs, but all so to build the computational
+settings to meet the users needs, but also to build the computational
 pipeline for the users specific needs. This flexibility in the
 computational pipeline is achieved using “class” parameters.
 
@@ -28,10 +28,10 @@ inheriting the bases class, or one of its children, and overwriting some
 of the methods to alter how the class performs its role.
 
 To make the ideas of settings and classes easier to adopt, the below
-uses helper methods to add settings and classes. The notebook
-E_run_using_parameter_dictionaries.ipynb, shows how run directly from
-parameter dictionaries, which are built in code or read from a json or
-yaml file.
+uses methods of a helper class to add settings and classes to the
+pipeline. The notebook E_run_using_parameter_dictionaries.ipynb, shows
+how run directly from parameter dictionaries, which are built in code or
+read from a json or yaml file.
 
 Parameters using helper
 -----------------------
@@ -52,21 +52,21 @@ their defaults is at ….
 Classes add specific tasks to the computational pipeline, eg. how to
 release particles, write output, particle suspension etc. These are
 added using helper method ot.add_class(class_type, ….). The first
-argument is a “class_type”, the remainder are keyword arguments of the
-settings specific to this class. Eg. ot.add_class(‘reader’,input_dir=
-‘my_hindcast_dir’, ….) adds a reader class and tells is it which folder
-contains the hindcast files.
+argument is a “class_type”. Each class has its own specific settings,
+which are set using keyword arguments of helper method. Eg.
+ot.add_class(‘reader’, input_dir= ‘my_hindcast_dir’, ….) adds a reader
+class and tells is it which folder contains the hindcast files.
 
 A full set of classes and their default settings is at ….
 
 Normally there must be a keyword argument “class_name” setting. This is
 used to import the required class into the computational pipeline, with
 its specific settings. This “class_name” is a string, used to import the
-class at setup (so is the same as that used to import any a python class
+class at setup (so is the same as that used to import any python class
 within a module).
 
-The “class_name” setting is normally required, class_types have a
-default class_name. Eg. in minimal_example “release_groups” assumes a
+The “class_name” setting is normally required. A few class_types have a
+default class_name, eg. in minimal_example “release_groups” assumes a
 point_release, and the reader’s “class_name” is chosen by looking at
 variable names within the hindcast’s netcdf file.
 
@@ -78,7 +78,7 @@ a) Only a single class is required, these have singular “class_type”,
    eg.”reader” and “solver”.
 
 b) One or more classes can be added. These have plural “class_type” (eg.
-   multiple “release_groups”).
+   can add multiple “release_groups”).
 
 Documentation for all parameters/settings and their default values.
 
@@ -110,8 +110,8 @@ The below extends the minimal_example, it adds:
     # ot.settings can be used more than once to add more settings
     ot.settings(time_step =120) #  2 min model time step as seconds  
     
-    # add a compulsory hindcast reader class
-    # no class_name setting required 
+    # add a compulsory reader class
+    # no class_name setting is required 
     # as will detect that it needs a a schism reader class
     ot.add_class('reader',
                 input_dir= '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
@@ -137,7 +137,7 @@ The below extends the minimal_example, it adds:
     ot.add_class('release_groups',
                 name ='my_polygon_release1',
                 class_name= 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
-                # this time is a ploygon , so below points are polygon cords
+                # this time is a polygon , so below points are polygon cords
                 points = [  [1597682.1237, 5489972.7479],
                             [1598604.1667, 5490275.5488],
                             [1598886.4247, 5489464.0424],
@@ -149,8 +149,8 @@ The below extends the minimal_example, it adds:
                 pulse_size = 20,                   # number of particles released each release_interval
                 )    
     
-    # alter default re-suspension class's settings                                 
-    ot.add_class('resuspension',critical_friction_velocity = .005) # only re-suspend particles if friction vel. exceeds this value
+    # alter default re-suspension class's default settings                                 
+    ot.add_class('resuspension', critical_friction_velocity = .005) # only re-suspend particles if friction vel. exceeds this value
     
     # add a class to modify the particle velocity           
     # velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model's 
@@ -186,11 +186,11 @@ Note:
 
 There are many ways to run the code, eg. with IDE like Pycharm, Visual
 Studio Code. It can also, as here, be run in iPython notebooks. However
-the way notebooks are implemented can sometimes result in issues
+the way notebooks are implemented can sometimes result in issues.
 
-See E_run_using_parameter_dictionaries.ipynb for work around.
+See … for more details
 
-Below runs oceantracker using the helper class
+Below runs oceantracker using the helper class.
 
 .. code:: ipython3
 
@@ -202,8 +202,9 @@ Below runs oceantracker using the helper class
     import json 
     print(json.dumps(ot.params, indent=4))
     
-    # lots of  are shown! 
-    # null or None are optional ones which have defaults
+    # lots of params are shown 
+    # as filling a template given by from user callable main.param_template() 
+    # null or None are optional ones which will use defaults
 
 
 .. parsed-literal::
@@ -393,6 +394,11 @@ Below runs oceantracker using the helper class
     startup:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
     case file name= e:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1\param_test1_caseInfo.json
     
+
+Basic plots of tracks
+---------------------
+
+also see … for more on plotting notebook
 
 .. code:: ipython3
 
@@ -49499,5 +49505,5 @@ Below runs oceantracker using the helper class
 
 
 
-.. image:: B_runningOT_and_parameters_files%5CB_runningOT_and_parameters_5_1.png
+.. image:: B_runningOT_and_parameters_files%5CB_runningOT_and_parameters_6_1.png
 

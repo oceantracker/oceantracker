@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Installing" href="installing.html" />
-    <link rel="prev" title="Run in parallel" href="how_to/P_running_cases_in_parallel.html" />
+    <link rel="prev" title="Particle Statistics" href="gallery/particle_statistics.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -56,7 +56,6 @@
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
-<li class="toctree-l1"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Users guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
@@ -74,7 +73,7 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="how_to/P_running_cases_in_parallel.html" title="previous chapter">Run in parallel</a></li>
+      <li>Previous: <a href="gallery/particle_statistics.html" title="previous chapter">Particle Statistics</a></li>
       <li>Next: <a href="installing.html" title="next chapter">Installing</a></li>
   </ul></li>
 </ul>
@@ -107,15 +106,18 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="how_to.html">How to notebooks</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="how_to/A_minimal_example.html">Minimal example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Parameters and Running</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/C_release_groups.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Running with helper class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/C_release_groups.html">Release Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using Param. Dict.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/F_plotting_tracks.html">plotting tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/G_onthefly_statistics.html">On-the-fly statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/P_running_cases_in_parallel.html">Run in parallel</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Parameters and Running</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Running with helper class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using Param. Dict.</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a><ul>
@@ -123,7 +125,10 @@
 <li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html#core-class-roles">Core “_class” roles</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_to/D_output_files.html">Output files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html#reading-particle-tracks">Reading particle tracks</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="change_log.html">Change log</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#known-issues">Known issues</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-4-major-upgrade">Version 0.4 Major upgrade</a></li>
@@ -149,9 +154,12 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="how_to.html">How to notebooks</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="how_to/A_minimal_example.html">Minimal example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Parameters and Running</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/C_release_groups.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Running with helper class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/C_release_groups.html">Release Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using Param. Dict.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/F_plotting_tracks.html">plotting tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/G_onthefly_statistics.html">On-the-fly statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/P_running_cases_in_parallel.html">Run in parallel</a></li>
 </ul>
 </li>
@@ -167,7 +175,7 @@
     <ul>
         <li>
           &larr;
-          <a href="how_to/P_running_cases_in_parallel.html" title="Previous document">Run in parallel</a>
+          <a href="gallery/particle_statistics.html" title="Previous document">Particle Statistics</a>
         </li>
         <li>
           <a href="installing.html" title="Next document">Installing</a>

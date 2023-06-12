@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Users guide" href="../users_guide.html" />
-    <link rel="prev" title="Running using Param. Dictionaries" href="E_run_using_parameter_dictionaries.html" />
+    <link rel="next" title="Running OceanTracker" href="../running_ocean_tracker.html" />
+    <link rel="prev" title="On-the-fly statistics" href="G_onthefly_statistics.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -56,37 +56,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../how_to.html">How to notebooks</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="A_minimal_example.html">Minimal example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="B_runningOT_and_parameters.html">Parameters and Running</a></li>
-<li class="toctree-l2"><a class="reference internal" href="C_release_groups.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Run in parallel</a></li>
-</ul>
-</li>
 <li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="A_minimal_example.html">Minimal example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="B_runningOT_and_parameters.html">Parameters and Running</a></li>
-<li class="toctree-l3"><a class="reference internal" href="C_release_groups.html">Output files</a></li>
-<li class="toctree-l3"><a class="reference internal" href="E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Run in parallel</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="A_minimal_example.html">Minimal example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="B_runningOT_and_parameters.html">Parameters and Running</a></li>
-<li class="toctree-l3"><a class="reference internal" href="C_release_groups.html">Output files</a></li>
-<li class="toctree-l3"><a class="reference internal" href="E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Run in parallel</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 </ul>
 </li>
 </ul>
@@ -95,9 +73,11 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="../how_to.html">How to notebooks</a><ul>
-      <li>Previous: <a href="E_run_using_parameter_dictionaries.html" title="previous chapter">Running using Param. Dictionaries</a></li>
-      <li>Next: <a href="../users_guide.html" title="next chapter">Users guide</a></li>
+      <li>Previous: <a href="G_onthefly_statistics.html" title="previous chapter">On-the-fly statistics</a></li>
+      <li>Next: <a href="../running_ocean_tracker.html" title="next chapter">Running OceanTracker</a></li>
+  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -122,6 +102,17 @@
             
   <section id="run-in-parallel">
 <h1>Run in parallel<a class="headerlink" href="#run-in-parallel" title="Permalink to this heading">¶</a></h1>
+<p>[This note-book is in oceantracker/tutorials_how_to/]</p>
+<p>Running in parallel can be done using the “run with parameters”
+approach, not the helper class method. Simply build a list of “cases”
+parameters , then pass this list, eg. main.run(case_list). This the
+output files for each case will be tagged with a processor number.</p>
+<p>The cases can be different, eg have differ release groups etc. A small
+number of settings must be the same for all cases, eg. setting
+“root_output_folder” must be the same for all cases. These setting will
+be taken from the first case. Warnings are given if trying to use
+different values of these settings than that given in the first case.</p>
+<p>Add example below</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># under develop</span>
 </pre></div>
 </div>
@@ -135,10 +126,10 @@
     <ul>
         <li>
           &larr;
-          <a href="E_run_using_parameter_dictionaries.html" title="Previous document">Running using Param. Dictionaries</a>
+          <a href="G_onthefly_statistics.html" title="Previous document">On-the-fly statistics</a>
         </li>
         <li>
-          <a href="../users_guide.html" title="Next document">Users guide</a>
+          <a href="../running_ocean_tracker.html" title="Next document">Running OceanTracker</a>
           &rarr;
         </li>
     </ul>

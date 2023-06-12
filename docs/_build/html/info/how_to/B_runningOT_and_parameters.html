@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Parameters and Running &#8212; OceanTracker Beta 0.3 documentation</title>
+    <title>Running with helper class &#8212; OceanTracker Beta 0.3 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -16,7 +16,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Output files" href="C_release_groups.html" />
+    <link rel="next" title="Release Groups" href="C_release_groups.html" />
     <link rel="prev" title="Minimal example" href="A_minimal_example.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -56,52 +56,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../how_to.html">How to notebooks</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="A_minimal_example.html">Minimal example</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Parameters and Running</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#parameters-using-helper">Parameters using helper</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#extend-the-minimal-example">Extend the minimal example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#running-oceantracker">Running OceanTracker</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="C_release_groups.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
-<li class="toctree-l2"><a class="reference internal" href="P_running_cases_in_parallel.html">Run in parallel</a></li>
-</ul>
-</li>
 <li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="A_minimal_example.html">Minimal example</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Parameters and Running</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#parameters-using-helper">Parameters using helper</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#extend-the-minimal-example">Extend the minimal example</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#running-oceantracker">Running OceanTracker</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="C_release_groups.html">Output files</a></li>
-<li class="toctree-l3"><a class="reference internal" href="E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
-<li class="toctree-l3"><a class="reference internal" href="P_running_cases_in_parallel.html">Run in parallel</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="A_minimal_example.html">Minimal example</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Parameters and Running</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#parameters-using-helper">Parameters using helper</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#extend-the-minimal-example">Extend the minimal example</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#running-oceantracker">Running OceanTracker</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="C_release_groups.html">Output files</a></li>
-<li class="toctree-l3"><a class="reference internal" href="E_run_using_parameter_dictionaries.html">Running using Param. Dictionaries</a></li>
-<li class="toctree-l3"><a class="reference internal" href="P_running_cases_in_parallel.html">Run in parallel</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 </ul>
 </li>
 </ul>
@@ -110,9 +73,11 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="../how_to.html">How to notebooks</a><ul>
       <li>Previous: <a href="A_minimal_example.html" title="previous chapter">Minimal example</a></li>
-      <li>Next: <a href="C_release_groups.html" title="next chapter">Output files</a></li>
+      <li>Next: <a href="C_release_groups.html" title="next chapter">Release Groups</a></li>
+  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -135,15 +100,15 @@
 
           <div class="body" role="main">
             
-  <section id="parameters-and-running">
-<h1>Parameters and Running<a class="headerlink" href="#parameters-and-running" title="Permalink to this heading">¶</a></h1>
+  <section id="running-with-helper-class">
+<h1>Running with helper class<a class="headerlink" href="#running-with-helper-class" title="Permalink to this heading">¶</a></h1>
 <p>[This note-book is in oceantracker/tutorials_how_to/]</p>
 <p>Oceantracker is designed so that both coders and non-coders can get
 almost the same level of adaptability to their specific needs. Also to
 streamline running many cases across distributed computers, along with
 enabling online particle tracking as a service.</p>
 <p>To achieve these capabilities, it uses parameters to both change the
-settings to meet the users needs, but all so to build the computational
+settings to meet the users needs, but also to build the computational
 pipeline for the users specific needs. This flexibility in the
 computational pipeline is achieved using “class” parameters.</p>
 <p>Classes perform specific roles in the pipeline. Parameters tell
@@ -159,10 +124,10 @@ major roles within the computational pipeline. Classes can be adapted by
 inheriting the bases class, or one of its children, and overwriting some
 of the methods to alter how the class performs its role.</p>
 <p>To make the ideas of settings and classes easier to adopt, the below
-uses helper methods to add settings and classes. The notebook
-E_run_using_parameter_dictionaries.ipynb, shows how run directly from
-parameter dictionaries, which are built in code or read from a json or
-yaml file.</p>
+uses methods of a helper class to add settings and classes to the
+pipeline. The notebook E_run_using_parameter_dictionaries.ipynb, shows
+how run directly from parameter dictionaries, which are built in code or
+read from a json or yaml file.</p>
 <section id="parameters-using-helper">
 <h2>Parameters using helper<a class="headerlink" href="#parameters-using-helper" title="Permalink to this heading">¶</a></h2>
 <p>There are two types of parameters:</p>
@@ -180,18 +145,18 @@ their defaults is at ….</p>
 <p>Classes add specific tasks to the computational pipeline, eg. how to
 release particles, write output, particle suspension etc. These are
 added using helper method ot.add_class(class_type, ….). The first
-argument is a “class_type”, the remainder are keyword arguments of the
-settings specific to this class. Eg. ot.add_class(‘reader’,input_dir=
-‘my_hindcast_dir’, ….) adds a reader class and tells is it which folder
-contains the hindcast files.</p>
+argument is a “class_type”. Each class has its own specific settings,
+which are set using keyword arguments of helper method. Eg.
+ot.add_class(‘reader’, input_dir= ‘my_hindcast_dir’, ….) adds a reader
+class and tells is it which folder contains the hindcast files.</p>
 <p>A full set of classes and their default settings is at ….</p>
 <p>Normally there must be a keyword argument “class_name” setting. This is
 used to import the required class into the computational pipeline, with
 its specific settings. This “class_name” is a string, used to import the
-class at setup (so is the same as that used to import any a python class
+class at setup (so is the same as that used to import any python class
 within a module).</p>
-<p>The “class_name” setting is normally required, class_types have a
-default class_name. Eg. in minimal_example “release_groups” assumes a
+<p>The “class_name” setting is normally required. A few class_types have a
+default class_name, eg. in minimal_example “release_groups” assumes a
 point_release, and the reader’s “class_name” is chosen by looking at
 variable names within the hindcast’s netcdf file.</p>
 <p>There are two types of “class_type”s</p>
@@ -200,7 +165,7 @@ variable names within the hindcast’s netcdf file.</p>
 <li><p>Only a single class is required, these have singular “class_type”,
 eg.”reader” and “solver”.</p></li>
 <li><p>One or more classes can be added. These have plural “class_type” (eg.
-multiple “release_groups”).</p></li>
+can add multiple “release_groups”).</p></li>
 </ol>
 <p>Documentation for all parameters/settings and their default values.</p>
 <p>Add link here</p>
@@ -226,8 +191,8 @@ a critical value.</p></li>
 <span class="c1"># ot.settings can be used more than once to add more settings</span>
 <span class="n">ot</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">time_step</span> <span class="o">=</span><span class="mi">120</span><span class="p">)</span> <span class="c1">#  2 min model time step as seconds</span>
 
-<span class="c1"># add a compulsory hindcast reader class</span>
-<span class="c1"># no class_name setting required</span>
+<span class="c1"># add a compulsory reader class</span>
+<span class="c1"># no class_name setting is required</span>
 <span class="c1"># as will detect that it needs a a schism reader class</span>
 <span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;reader&#39;</span><span class="p">,</span>
             <span class="n">input_dir</span><span class="o">=</span> <span class="s1">&#39;..</span><span class="se">\\</span><span class="s1">demos</span><span class="se">\\</span><span class="s1">demo_hindcast&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
@@ -253,7 +218,7 @@ a critical value.</p></li>
 <span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;release_groups&#39;</span><span class="p">,</span>
             <span class="n">name</span> <span class="o">=</span><span class="s1">&#39;my_polygon_release1&#39;</span><span class="p">,</span>
             <span class="n">class_name</span><span class="o">=</span> <span class="s1">&#39;oceantracker.release_groups.polygon_release.PolygonRelease&#39;</span><span class="p">,</span> <span class="c1"># use a polygon release</span>
-            <span class="c1"># this time is a ploygon , so below points are polygon cords</span>
+            <span class="c1"># this time is a polygon , so below points are polygon cords</span>
             <span class="n">points</span> <span class="o">=</span> <span class="p">[</span>  <span class="p">[</span><span class="mf">1597682.1237</span><span class="p">,</span> <span class="mf">5489972.7479</span><span class="p">],</span>
                         <span class="p">[</span><span class="mf">1598604.1667</span><span class="p">,</span> <span class="mf">5490275.5488</span><span class="p">],</span>
                         <span class="p">[</span><span class="mf">1598886.4247</span><span class="p">,</span> <span class="mf">5489464.0424</span><span class="p">],</span>
@@ -265,8 +230,8 @@ a critical value.</p></li>
             <span class="n">pulse_size</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>                   <span class="c1"># number of particles released each release_interval</span>
             <span class="p">)</span>
 
-<span class="c1"># alter default re-suspension class&#39;s settings</span>
-<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;resuspension&#39;</span><span class="p">,</span><span class="n">critical_friction_velocity</span> <span class="o">=</span> <span class="mf">.005</span><span class="p">)</span> <span class="c1"># only re-suspend particles if friction vel. exceeds this value</span>
+<span class="c1"># alter default re-suspension class&#39;s default settings</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;resuspension&#39;</span><span class="p">,</span> <span class="n">critical_friction_velocity</span> <span class="o">=</span> <span class="mf">.005</span><span class="p">)</span> <span class="c1"># only re-suspend particles if friction vel. exceeds this value</span>
 
 <span class="c1"># add a class to modify the particle velocity</span>
 <span class="c1"># velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model&#39;s</span>
@@ -304,9 +269,9 @@ E_run_using_parameter_dictionaries.ipynb, add link…</p>
 <p>Note:</p>
 <p>There are many ways to run the code, eg. with IDE like Pycharm, Visual
 Studio Code. It can also, as here, be run in iPython notebooks. However
-the way notebooks are implemented can sometimes result in issues</p>
-<p>See E_run_using_parameter_dictionaries.ipynb for work around.</p>
-<p>Below runs oceantracker using the helper class</p>
+the way notebooks are implemented can sometimes result in issues.</p>
+<p>See … for more details</p>
+<p>Below runs oceantracker using the helper class.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># first see the parameters build using the helper class instance</span>
 <span class="c1"># this is a dictionary ot.params</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">ot</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>  <span class="c1"># ugly!</span>
@@ -315,8 +280,9 @@ the way notebooks are implemented can sometimes result in issues</p>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">ot</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
 
-<span class="c1"># lots of  are shown!</span>
-<span class="c1"># null or None are optional ones which have defaults</span>
+<span class="c1"># lots of params are shown</span>
+<span class="c1"># as filling a template given by from user callable main.param_template()</span>
+<span class="c1"># null or None are optional ones which will use defaults</span>
 </pre></div>
 </div>
 <pre class="literal-block">{'add_date_to_run_output_dir': None, 'advanced_settings': {}, 'backtracking': None, 'block_dry_cells': None, 'case_output_file_tag': None, 'compact_mode': None, 'debug': None, 'duration': None, 'max_run_duration': None, 'minimum_total_water_depth': None, 'open_boundary_type': None, 'output_file_base': 'param_test1', 'particle_buffer_size': None, 'processors': None, 'retain_culled_part_locations': None, 'root_output_dir': 'output', 'run_as_depth_averaged': None, 'screen_output_time_interval': None, 'time_step': 120, 'user_note': None, 'write_grid': None, 'write_output_files': None, 'write_tracks': None, 'z0': None, 'dispersion': {}, 'field_group_manager': {}, 'interpolator': {}, 'particle_group_manager': {}, 'reader': {'input_dir': '..\demos\demo_hindcast', 'file_mask': 'demoHindcastSchism*.nc'}, 'resuspension': {'critical_friction_velocity': 0.005}, 'solver': {}, 'tracks_writer': {}, 'event_loggers': {}, 'fields': {}, 'particle_concentrations': {}, 'particle_properties': {}, 'particle_statistics': {}, 'release_groups': {'my_release_points1': {'points': [[1595000, 5482600], [1599000, 5486200]], 'release_interval': 3600, 'pulse_size': 10}, 'my_polygon_release1': {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease', 'points': [[1597682.1237, 5489972.7479], [1598604.1667, 5490275.5488], [1598886.4247, 5489464.0424], [1597917.3387, 5489000], [1597300, 5489000], [1597682.1237, 5489972.7479]], 'release_interval': 7200, 'pulse_size': 20}}, 'status_modifiers': {}, 'time_varying_info': {}, 'trajectory_modifiers': {}, 'velocity_modifiers': {'my_fall_velocity': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}}}
@@ -497,6 +463,10 @@ P000: --------------------------------------------------------------------------
 P000:   -  Triangle walk summary: Of  1,007,136 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
 startup:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
 case file name= e:OneDrive - CawthronH_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1param_test1_caseInfo.json</pre>
+</section>
+<section id="basic-plots-of-tracks">
+<h2>Basic plots of tracks<a class="headerlink" href="#basic-plots-of-tracks" title="Permalink to this heading">¶</a></h2>
+<p>also see … for more on plotting notebook</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot animation of results</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
@@ -49591,7 +49561,7 @@ AAAAAAAAIWhkbHIAAAAAAAAAAG1kaXJhcHBsAAAAAAAAAAAAAAAALWlsc3QAAAAlqXRvbwAAAB1k
 YXRhAAAAAQAAAABMYXZmNTguNDUuMTAw
 ">
   Your browser does not support the video tag.
-</video><img alt="info/how_to/B_runningOT_and_parameters_files%5CB_runningOT_and_parameters_5_1.png" src="info/how_to/B_runningOT_and_parameters_files%5CB_runningOT_and_parameters_5_1.png" />
+</video><img alt="info/how_to/B_runningOT_and_parameters_files%5CB_runningOT_and_parameters_6_1.png" src="info/how_to/B_runningOT_and_parameters_files%5CB_runningOT_and_parameters_6_1.png" />
 </section>
 </section>
 
@@ -49606,7 +49576,7 @@ YXRhAAAAAQAAAABMYXZmNTguNDUuMTAw
           <a href="A_minimal_example.html" title="Previous document">Minimal example</a>
         </li>
         <li>
-          <a href="C_release_groups.html" title="Next document">Output files</a>
+          <a href="C_release_groups.html" title="Next document">Release Groups</a>
           &rarr;
         </li>
     </ul>

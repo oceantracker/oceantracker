@@ -1,69 +1,53 @@
-Output files
-============
+Release Groups
+==============
 
-After runnnig ouput files are in the iles are folder given by parameters
-.\\“root_output_dir”\\“output_file_base”
+[This note-book is in oceantracker/tutorials_how_to/]
 
-The main files are:
+A release group is a set of particles released at the same times and
+location. There can be many release groups. This enables the fate of
+particles from different origins to be tracked separately within the
+same computational run. Importantly, on the fly statistics are separated
+into release groups. Eg. gridded statistics return a heat map for each
+release group, while polygon statistics give the connectivity between
+each given polygon and each release group.
 
--  users_params_*.json, a copy of the parameters as supplied by the user
+A release group may be
 
--  \_runInfo.json holds file names of case files
+-  a “point_releases” set points, giving one or more 2D or 3D locations
+   where particles are released. A radius for 2D release around theses
+   point also can be set.
 
--  \_caseInfo.json files, have all the output files for each case run
-   (only 1 case in this example), plus infomation about the run and data
-   useful in plotting
+-  “polygon release”, where particles are released randomly within
+   polygon made up of 3 or more 2D points. Particles will not be
+   released in any parts of the polygon outside the domain.
 
--  \_caseLog_log.txt has a copy of what appeared on the screen during
-   the run
+For polygons, the vertical release location is randomly chosen in the
+water column, or user a given in z range. If the z value of a point
+release is not given, then the vertical release location is chosen in
+the same manner.
 
--  \_tracks.nc holds the particle tracks in a netcdf file, see below for
-   code example on reading the tracks
+For both types user can specify:
 
--  \_grid_outline.json are the boundaries of hydrodynamic model’s domain
-   and islands, useful in plotting
+-  time to start and end the release, or the duration of the release.
+   Defaults are to start at beginning of hindcast and continue until
+   it’s end.
 
--  \_grid.nc a net cdf of the hydo-model’s grid and other infomation,
-   useful in plotting and analysis
+-  the time between releases, the “release_interval”, a zero value gives
+   a single release.
 
-Below list the files after running the minimmal example.
+-  the number of particles release each time, the “pulse_size”
+
+-  whether to release in dry cells, default “allow_release_in_dry_cells”
+   = False
+
+Plus other options see:
+
+add links…
 
 .. code:: ipython3
 
-    # show a list of output files afte running  mimmal_exampe
-    import glob
-    for f in glob.glob('.\\output\\minimal_example\\*'):
-        print(f) 
+    # show example of release types with start and end times, 
+    #  set up reading geojson/ shapely polygons and show example
     
-    
-
-
-.. parsed-literal::
-
-    .\output\minimal_example\minimal_example_caseInfo.json
-    .\output\minimal_example\minimal_example_caseLog_log.txt
-    .\output\minimal_example\minimal_example_grid.nc
-    .\output\minimal_example\minimal_example_grid_outline.json
-    .\output\minimal_example\minimal_example_log.txt
-    .\output\minimal_example\minimal_example_runInfo.json
-    .\output\minimal_example\minimal_example_tracks.nc
-    .\output\minimal_example\users_params_minimal_example.json
-    
-
-::
-
-
-    ---------------------------------------------------------------------------
-
-    NameError                                 Traceback (most recent call last)
-
-    Cell In[1], line 9
-          7 import json
-          8 with open('A_minimal_example.json','w') as f: 
-    ----> 9     json.dump(params, f)
-    
-
-    NameError: name 'params' is not defined
-
 
 

@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Change log" href="../change_log.html" />
-    <link rel="prev" title="VelocityModiferBase" href="../parameter_ref/VelocityModiferBase.html" />
+    <link rel="next" title="Running using Param. Dict." href="E_run_using_parameter_dictionaries.html" />
+    <link rel="prev" title="Release Groups" href="C_release_groups.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -56,16 +56,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 </ul>
 </li>
 </ul>
@@ -75,8 +74,10 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
-      <li>Previous: <a href="../parameter_ref/VelocityModiferBase.html" title="previous chapter">VelocityModiferBase</a></li>
-      <li>Next: <a href="../change_log.html" title="next chapter">Change log</a></li>
+  <li><a href="../how_to.html">How to notebooks</a><ul>
+      <li>Previous: <a href="C_release_groups.html" title="previous chapter">Release Groups</a></li>
+      <li>Next: <a href="E_run_using_parameter_dictionaries.html" title="next chapter">Running using Param. Dict.</a></li>
+  </ul></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -101,26 +102,46 @@
             
   <section id="output-files">
 <h1>Output files<a class="headerlink" href="#output-files" title="Permalink to this heading">¶</a></h1>
-<p>After runnnig ouput files are in the iles are folder given by parameters
-.\“root_output_dir”\“output_file_base”</p>
+<p>[This note-book is in oceantracker/tutorials_how_to/]</p>
+<p>After running OceanTacker, output files are in the files are the folder
+given by parameters .\“root_output_dir”\“output_file_base”</p>
 <p>The main files are:</p>
 <ul class="simple">
-<li><p>users_params_*.json, a copy of the parameters as supplied by the user</p></li>
-<li><p>_runInfo.json holds file names of case files</p></li>
-<li><p>_caseInfo.json files, have all the output files for each case run
-(only 1 case in this example), plus infomation about the run and data
-useful in plotting</p></li>
-<li><p>_caseLog_log.txt has a copy of what appeared on the screen during
-the run</p></li>
-<li><p>_tracks.nc holds the particle tracks in a netcdf file, see below for
-code example on reading the tracks</p></li>
-<li><p>_grid_outline.json are the boundaries of hydrodynamic model’s domain
-and islands, useful in plotting</p></li>
-<li><p>_grid.nc a net cdf of the hydo-model’s grid and other infomation,
-useful in plotting and analysis</p></li>
+<li><p>**users_params_*.json**, a copy of the parameters as supplied by the
+user, useful in debugging or re-running.</p></li>
+<li><p>**_runInfo.json** holds</p>
+<ul>
+<li><p>file names of case files</p></li>
+<li><p>information on computer used</p></li>
+<li><p>code version, including git commit ID to enable rerunning with
+exactly the same version</p></li>
 </ul>
-<p>Below list the files after running the minimmal example.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># show a list of output files afte running  mimmal_exampe</span>
+</li>
+<li><p>**_caseInfo.json** files, have all the output files for each
+parallel case run (only 1 case in examples give so far), plus
+information about the run and data useful in plotting. Eg.</p>
+<ul>
+<li><p>full set of working parameters with defaults used</p></li>
+<li><p>timings of parts of code</p></li>
+<li><p>output_files, the names of all output files generated by the run
+separated by type.</p></li>
+<li><p>information about the hindcast, eg start date, end date, time
+step, …</p></li>
+<li><p>basic information from each class used in the computational
+pipeline</p></li>
+</ul>
+</li>
+<li><p>**_caseLog_log.txt** has a copy of what appeared on the screen
+during the run</p></li>
+<li><p>**_tracks.nc** holds the particle tracks in a netcdf file, see
+below for code example on reading the tracks</p></li>
+<li><p>**_grid_outline.json** are the boundaries of hydrodynamic model’s
+domain and islands, useful in plotting</p></li>
+<li><p>**_grid.nc** a net cdf of the hydo-model’s grid and other
+information, useful in plotting and analysis</p></li>
+</ul>
+<p>Below list the files after running the minimal example.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># show a list of output files after running  minimal_example</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;.</span><span class="se">\\</span><span class="s1">output</span><span class="se">\\</span><span class="s1">minimal_example</span><span class="se">\\</span><span class="s1">*&#39;</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -131,22 +152,16 @@ useful in plotting and analysis</p></li>
 .outputminimal_exampleminimal_example_grid.nc
 .outputminimal_exampleminimal_example_grid_outline.json
 .outputminimal_exampleminimal_example_log.txt
+.outputminimal_exampleminimal_example_raw_user_params.json
 .outputminimal_exampleminimal_example_runInfo.json
 .outputminimal_exampleminimal_example_tracks.nc
 .outputminimal_exampleusers_params_minimal_example.json</pre>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---------------------------------------------------------------------------</span>
-
-<span class="ne">NameError</span>                                 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
-
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">9</span>
-      <span class="mi">7</span> <span class="kn">import</span> <span class="nn">json</span>
-      <span class="mi">8</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;A_minimal_example.json&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="o">----&gt;</span> <span class="mi">9</span>     <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-
-
-<span class="ne">NameError</span><span class="p">:</span> <span class="n">name</span> <span class="s1">&#39;params&#39;</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">defined</span>
+<section id="reading-particle-tracks">
+<h2>Reading particle tracks<a class="headerlink" href="#reading-particle-tracks" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># example of reading tracks file</span>
 </pre></div>
 </div>
+</section>
 </section>
 
 
@@ -157,10 +172,10 @@ useful in plotting and analysis</p></li>
     <ul>
         <li>
           &larr;
-          <a href="../parameter_ref/VelocityModiferBase.html" title="Previous document">VelocityModiferBase</a>
+          <a href="C_release_groups.html" title="Previous document">Release Groups</a>
         </li>
         <li>
-          <a href="../change_log.html" title="Next document">Change log</a>
+          <a href="E_run_using_parameter_dictionaries.html" title="Next document">Running using Param. Dict.</a>
           &rarr;
         </li>
     </ul>

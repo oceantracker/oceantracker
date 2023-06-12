@@ -1,6 +1,8 @@
 Release Groups
 ==============
 
+[This note-book is in oceantracker/tutorials_how_to/]
+
 A release group is a set of particles released at the same times and
 location. There can be many release groups. This enables the fate of
 particles from different origins to be tracked separately within the

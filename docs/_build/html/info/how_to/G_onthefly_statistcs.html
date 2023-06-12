@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>On-the-fly statistics &#8212; OceanTracker Beta 0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=oceantracker&repo=oceantracker&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../users_guide.html">Users guide</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="on-the-fly-statistics">
+<h1>On-the-fly statistics<a class="headerlink" href="#on-the-fly-statistics" title="Permalink to this heading">¶</a></h1>
+<p>Scaling up particle numbers to millions will create large volumes of
+particle track data. Storing and analyzing these tracks is slow and
+rapidly becomes overwhelming. For example, building a heat map from a
+terabyte of particle tracks after a run has completed. Ocean tracker can
+build some particle statistics on the fly, without recording any
+particle tracks. This results in more manageable data volumes and
+analysis.</p>
+<p>Currently there are two main classes of particle statistics. The counts
+are recorded separately for each release group. It is also possible to
+subset the counts, ie only count particles which are stranded by the
+tide by designating a range of particle status values to count. Or, only
+count particles in a given vertical “z” range. Users can add multiple
+statistics, all calculated in from the same particles during the run.
+Eg. could add a particle statistic for each status type, for different
+depth ranges, if wishing to count particles of each status and ranges
+separately.</p>
+<p>Statistics can be read, plotted or animated with OceanTrackers
+post-processing code, see below</p>
+<p>The available “particle_statistics” classes with their individual
+settings are at …. add link</p>
+<section id="gridded-statistics">
+<h2>Gridded statistics<a class="headerlink" href="#gridded-statistics" title="Permalink to this heading">¶</a></h2>
+<p>These are heat maps of counts binned into cells of a regular grid. Along
+with heat maps of particle counts, users can optionally build a heat
+maps of named particle properties, eg. the value decaying particle
+property. To ensure the heat map grids are not too large or too coarse,
+by default grids are centred on each release group, thus there are
+different grid locations for each release group.</p>
+</section>
+<section id="polygon-statistics">
+<h2>Polygon statistics<a class="headerlink" href="#polygon-statistics" title="Permalink to this heading">¶</a></h2>
+<p>These particle counts can be used to calculate the connectivity between
+each release group and a user given list of “statistics” polygons. Also,
+used to estimate the influence of each release group on a particle
+property with each given statistics polygon. The statistics polygons are
+not the same as those used in a polygon release (they can be if the user
+requires it). Polygon statistics show effect of each point or polygon
+release, on the given statistics polygons. A special case of a polygon
+statistic, is the “residence_time” class, which can be used to calculate
+the fraction of particles from each release group remaining within each
+statistics polygon at each ‘calculation_interval’ as one way to estimate
+particle residence time for each release group.</p>
+</section>
+<section id="particle-property-statistics">
+<h2>Particle property statistics<a class="headerlink" href="#particle-property-statistics" title="Permalink to this heading">¶</a></h2>
+<p>Both types of statistics can also record sums of user designated
+particle properties within each given grid cell or statistics polygon,
+which originate from each release group. These sums enabling mean values
+of designated particle properties within each grid cell or polygon to be
+calculated. They can also be used to estimate the relative influence of
+each release group on the value of a particle property within each given
+grid cell or statistics polygon.</p>
+<p>A future version with allow estimating the variance of the designated
+property values mean values and particle counts in each grid cell or
+polygon, for each release group.</p>
+</section>
+</section>
+<section id="time-verses-age-statistics">
+<h1>Time verses Age statistics<a class="headerlink" href="#time-verses-age-statistics" title="Permalink to this heading">¶</a></h1>
+<p>Both gridded and polygon statistics come in two types, “time” and “age”
+.</p>
+<ul class="simple">
+<li><p>“time” statistics are time series, or snapshots, of particle numbers
+and particle properties at time interval given by
+“calculation_interval” parameter. Eg. gridded stats showing how the
+heat map of a source’s plume evolves over time.</p></li>
+<li><p>“age” statistics are particle counts and properties binned by
+particle age. The result are age based histograms of counts or
+particle proprieties. This is useful to give numbers in each age band
+arriving at a given grid cell or polygon, from each release group.
+Eg. counting how many larvae are old enough to settle in a polygon or
+grid cell from each potential source location.</p></li>
+</ul>
+</section>
+<section id="gridded-example">
+<h1>Gridded example<a class="headerlink" href="#gridded-example" title="Permalink to this heading">¶</a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># add gridded stats example with plotting</span>
+</pre></div>
+</div>
+</section>
+<section id="polygon-example">
+<h1>Polygon example<a class="headerlink" href="#polygon-example" title="Permalink to this heading">¶</a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># add polygon stats example with plotting</span>
+</pre></div>
+</div>
+<section id="residence-time-statistic">
+<h2>Residence time statistic<a class="headerlink" href="#residence-time-statistic" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># add example</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2022, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/info/how_to/G_onthefly_statistcs.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

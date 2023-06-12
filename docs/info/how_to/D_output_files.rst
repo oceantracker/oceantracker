@@ -1,6 +1,8 @@
 Output files
 ============
 
+[This note-book is in oceantracker/tutorials_how_to/]
+
 After running OceanTacker, output files are in the files are the folder
 given by parameters .\\“root_output_dir”\\“output_file_base”
 

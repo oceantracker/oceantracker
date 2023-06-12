@@ -1,5 +1,5 @@
-Parameters and Running
-======================
+Running with helper class
+=========================
 
 [This note-book is in oceantracker/tutorials_how_to/]
 
@@ -9,7 +9,7 @@ streamline running many cases across distributed computers, along with
 enabling online particle tracking as a service.
 
 To achieve these capabilities, it uses parameters to both change the
-settings to meet the users needs, but all so to build the computational
+settings to meet the users needs, but also to build the computational
 pipeline for the users specific needs. This flexibility in the
 computational pipeline is achieved using “class” parameters.
 
@@ -28,10 +28,10 @@ inheriting the bases class, or one of its children, and overwriting some
 of the methods to alter how the class performs its role.
 
 To make the ideas of settings and classes easier to adopt, the below
-uses helper methods to add settings and classes. The notebook
-E_run_using_parameter_dictionaries.ipynb, shows how run directly from
-parameter dictionaries, which are built in code or read from a json or
-yaml file.
+uses methods of a helper class to add settings and classes to the
+pipeline. The notebook E_run_using_parameter_dictionaries.ipynb, shows
+how run directly from parameter dictionaries, which are built in code or
+read from a json or yaml file.
 
 Parameters using helper
 -----------------------
@@ -395,10 +395,10 @@ Below runs oceantracker using the helper class.
     case file name= e:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1\param_test1_caseInfo.json
     
 
-do basic plots of tracks
-------------------------
+Basic plots of tracks
+---------------------
 
-see … for more on plotting
+also see … for more on plotting notebook
 
 .. code:: ipython3
 

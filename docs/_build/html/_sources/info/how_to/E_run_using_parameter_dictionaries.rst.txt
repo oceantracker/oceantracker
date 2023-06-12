@@ -1,5 +1,5 @@
-Running using Param. Dictionaries
-=================================
+Running using Param. Dict.
+==========================
 
 [This note-book is in oceantracker/tutorials_how_to/]
 
