@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>CompactTracksWriter &#8212; OceanTracker Beta 0.3 documentation</title>
+    <title>CompactTracksWriter &#8212; OceanTracker Beta 0.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="event_loggers_dict" href="event_loggers_toc.html" />
-    <link rel="prev" title="tracks_writer_class" href="tracks_writer_toc.html" />
+    <link rel="next" title="event_loggers" href="event_loggers_toc.html" />
+    <link rel="prev" title="tracks_writer" href="tracks_writer_toc.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -64,7 +64,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 </ul>
 </li>
 </ul>
@@ -75,9 +74,9 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
-  <li><a href="tracks_writer_toc.html">tracks_writer_class</a><ul>
-      <li>Previous: <a href="tracks_writer_toc.html" title="previous chapter">tracks_writer_class</a></li>
-      <li>Next: <a href="event_loggers_toc.html" title="next chapter">event_loggers_dict</a></li>
+  <li><a href="tracks_writer_toc.html">tracks_writer</a><ul>
+      <li>Previous: <a href="tracks_writer_toc.html" title="previous chapter">tracks_writer</a></li>
+      <li>Next: <a href="event_loggers_toc.html" title="next chapter">event_loggers</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -172,7 +171,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time_steps_per_per_file</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Split track output into files with given number of time steps</p>
+<dt><code class="docutils literal notranslate"><span class="pre">time_steps_per_per_file</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - Split track output into files with given number of time integer steps</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
@@ -201,11 +200,11 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">update_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - the time in seconds between writes (will be rounded to model time step)</p>
+<dt><code class="docutils literal notranslate"><span class="pre">update_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - the time in model seconds between writes (will be rounded to model time step)</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
-<li><p>units: <code class="docutils literal notranslate"><span class="pre">s</span></code></p></li>
+<li><p>units: <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -239,10 +238,10 @@
     <ul>
         <li>
           &larr;
-          <a href="tracks_writer_toc.html" title="Previous document">tracks_writer_class</a>
+          <a href="tracks_writer_toc.html" title="Previous document">tracks_writer</a>
         </li>
         <li>
-          <a href="event_loggers_toc.html" title="Next document">event_loggers_dict</a>
+          <a href="event_loggers_toc.html" title="Next document">event_loggers</a>
           &rarr;
         </li>
     </ul>

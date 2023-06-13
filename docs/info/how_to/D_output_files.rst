@@ -46,8 +46,12 @@ The main files are:
 -  \**_grid_outline.json*\* are the boundaries of hydrodynamic model’s
    domain and islands, useful in plotting
 
--  \**_grid.nc*\* a net cdf of the hydo-model’s grid and other
+-  \**_grid.nc*\* a netcdf of the hydo-model’s grid and other
    information, useful in plotting and analysis
+
+-  \**_events.nc*\* a netcdf output from events classes, which only
+   writes output when events occur, eg. a particle entering or exiting
+   given polygons.
 
 Below list the files after running the minimal example.
 

@@ -82,11 +82,11 @@ def get_params(datasource=1):
                                                  }],
                                 'particle_statistics' : [
                                         {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
-                                         'calculation_interval': calculation_interval, 'particle_property_list': ['water_depth'],
+                                         'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'grid_size': [220, 221],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},
                                         {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
-                                         'calculation_interval': calculation_interval, 'particle_property_list': ['water_depth'],
+                                         'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.,
                                          'polygon_list': [{'points': poly_points}]}
     ]

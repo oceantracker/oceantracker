@@ -1,6 +1,6 @@
-####################
-release_groups_dict
-####################
+###############
+release_groups
+###############
 
 **Module:** oceantracker.release_groups
 

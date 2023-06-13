@@ -21,7 +21,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
                                  'release_group_to_track': PVC(None, int, min=0),
                                  'only_update_concentrations_on_write': PVC(False, bool),
                                  'output_step_count': PVC(1, int, min=1),
-                                 'calculation_interval' : PVC(1, float, min=1) # not 1 to keep file size small
+                                 'update_interval' : PVC(1, float, min=1) # not 1 to keep file size small
                                  })
     def initial_setup(self):
         # set up data buffer and output variables

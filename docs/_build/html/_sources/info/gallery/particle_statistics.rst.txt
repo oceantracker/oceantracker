@@ -28,20 +28,6 @@ along with counts of particles inside polygons
 .. raw:: html
 
    <details>
-   <summary> code </summary>
-
-.. literalinclude:: ../../../demos/demo_code/demo03_heatmaps.py
-    :language: python
-    :caption:
-
-.. raw:: html
-
-   </details>
-
-
-.. raw:: html
-
-   <details>
    <summary> json parameters </summary>
 
 .. literalinclude:: ../../../demos/demo_param_files/demo03_heatmaps.json

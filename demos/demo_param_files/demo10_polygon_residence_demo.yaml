@@ -13,9 +13,9 @@ particle_properties:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
 particle_statistics:
   residentpoly:
-    calculation_interval: 1800
     class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
     name_of_polygon_release_group: near_shore
+    update_interval: 1800
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:

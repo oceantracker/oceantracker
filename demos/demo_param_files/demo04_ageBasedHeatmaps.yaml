@@ -14,7 +14,6 @@ particle_properties:
 particle_statistics:
   age_grid:
     age_bin_size: 3600.0
-    calculation_interval: 1800
     class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased
     grid_size:
     - 220
@@ -23,9 +22,9 @@ particle_statistics:
     min_age_to_bin: 0.0
     particle_property_list:
     - water_depth
+    update_interval: 1800
   age_poly:
     age_bin_size: 3600.0
-    calculation_interval: 1800
     class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased
     max_age_to_bin: 259200.0
     min_age_to_bin: 0.0
@@ -46,6 +45,7 @@ particle_statistics:
         - 5489000
       - - 1597682.1237
         - 5489972.7479
+    update_interval: 1800
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:

@@ -16,7 +16,7 @@ class PointRelease(ParameterBaseClass):
                                  'points':          PVC([],'array', is_required=True, doc_str='A N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array'),
                                  'release_radius':  PVC(0., float, min= 0., doc_str= 'Particles are released from random locations in circle of given radius around each point.'),
                                  'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles released in a single pulse, this number is released every release_interval.'),
-                                 'release_interval':PVC(0., float, min =0.,units='s', doc_str= 'Time interval between released pulses. To release at only one time use release_interval=0.'),
+                                 'release_interval':PVC(0., float, min =0.,units='sec', doc_str= 'Time interval between released pulses. To release at only one time use release_interval=0.'),
                                  'release_start_date': PVC(None, 'iso8601date', doc_str='Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
                                    # to do add ability to release on set dates/times 'release_dates': PLC([], 'iso8601date'),
                                  'release_duration': PVC(None, float,min=0.,

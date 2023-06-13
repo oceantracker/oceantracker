@@ -1,6 +1,6 @@
-#########################
-particle_properties_dict
-#########################
+####################
+particle_properties
+####################
 
 **Module:** oceantracker.particle_properties
 

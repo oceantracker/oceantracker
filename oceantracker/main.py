@@ -197,6 +197,17 @@ class OceanTracker():
            'class_dicts': deepcopy(common_info.class_dicts),
            }
 
+        # check for compulsory classes
+        # check require classes are given
+        if 'reader' not in params or params['reader'] is None:
+            ml.msg('Parameter "reader_class" or "reader" or  is required',
+                   hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values', fatal_error=True)
+
+        if 'release_groups' not in params or params['release_groups'] is None:
+            ml.msg('Parameter "release_groups_dict" or "release_groups" or  is required',
+                   hint=' add a least one named release group class to the "release_groups" key', fatal_error=True)
+
+
         # split and check for unknown keys
         for key, item in params.items():
             k = key
@@ -224,14 +235,7 @@ class OceanTracker():
             else:
                 ml.msg('Unknown top level parameter "' + key +'"', warning=True)
 
-        # check require classes are given
-        if 'reader' not in w['core_classes'] :
-            ml.msg( 'Parameter "reader_class" or "reader" or  is required',
-                           hint='Add a "reader_class" top level key to parameters with a dictionary containing  at least "input_dir" and file mask keys and values', fatal_error=True)
 
-        if 'release_groups' not in w['class_dicts'] :
-            ml.msg( 'Parameter "release_groups_dict" or "release_groups" or  is required',
-                           hint=' add a least one named release group class to the "release_groups_dict" key', fatal_error=True)
 
         ml.exit_if_prior_errors('Errors in decomposing parameters')
         # merge settings params
@@ -387,7 +391,7 @@ def param_template():
     d = {}
     for key in sorted(common_info.all_default_settings.keys()):
         if type(common_info.all_default_settings[key]) is dict:
-            d[key] = {}
+            d[key] = None
         else:
             d[key] = None
 

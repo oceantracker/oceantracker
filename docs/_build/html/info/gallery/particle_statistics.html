@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Particle Statistics &#8212; OceanTracker Beta 0.3 documentation</title>
+    <title>Particle Statistics &#8212; OceanTracker Beta 0.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -16,7 +16,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="How to notebooks" href="../how_to.html" />
+    <link rel="next" title="Users guide" href="../users_guide.html" />
     <link rel="prev" title="Trajectory modifiers" href="trajectory_modifiers.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -58,13 +58,9 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../gallery.html">Gallery</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="particle_properties.html">Particle properties</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trajectory_modifiers.html">Trajectory modifiers</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Particle Statistics</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#heat-maps">Heat maps</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Particle Statistics</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../users_guide.html">Users guide</a></li>
 </ul>
 
@@ -74,7 +70,7 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../gallery.html">Gallery</a><ul>
       <li>Previous: <a href="trajectory_modifiers.html" title="previous chapter">Trajectory modifiers</a></li>
-      <li>Next: <a href="../how_to.html" title="next chapter">How to notebooks</a></li>
+      <li>Next: <a href="../users_guide.html" title="next chapter">Users guide</a></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -115,39 +111,8 @@
 <li><p>class: <code class="docutils literal notranslate"><span class="pre">particle_statistics.polygon_statistics.PolygonStats2D_ageBased</span></code></p></li>
 </ul>
 <details>
-<summary> code </summary><div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_code/demo03_heatmaps.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># demo03_heatmaps.py</span>
-<span class="c1">#---------------------------------------</span>
-<span class="kn">import</span> <span class="nn">oceantracker.main</span> <span class="k">as</span> <span class="nn">main</span>
-<span class="kn">from</span> <span class="nn">oceantracker.util</span> <span class="kn">import</span> <span class="n">json_util</span>
-<span class="n">params</span> <span class="o">=</span> <span class="n">json_util</span><span class="o">.</span><span class="n">read_JSON</span><span class="p">(</span><span class="s2">&quot;..\demo_param_files\demo03_heatmaps.json&quot;</span><span class="p">)</span>
-
-<span class="n">runInfo_file_name</span><span class="p">,</span> <span class="n">has_errors</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-
-<span class="c1"># output is now in output/demo03_heatmaps</span>
-
-<span class="c1"># below only required for plotting</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files.load_output_files</span> <span class="kn">import</span> <span class="n">load_stats_file</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_statistics</span> <span class="kn">import</span> <span class="n">plot_heat_map</span><span class="p">,</span> <span class="n">animate_heat_map</span>
-
-<span class="n">output_file</span><span class="o">=</span> <span class="s2">&quot;output\demo03_heatmaps&quot;</span>
-
-
-<span class="n">stats_data</span> <span class="o">=</span> <span class="n">load_stats_file</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;water_depth&#39;</span><span class="p">])</span>
-<span class="n">axis_lims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5478500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">]</span>
-<span class="n">animate_heat_map</span><span class="p">(</span><span class="n">stats_data</span><span class="p">,</span><span class="s1">&#39;myP1&#39;</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">axis_lims</span><span class="p">,</span>
-                                <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Particle count heatmaps built on the fly, no tracks recorded, log scale&#39;</span><span class="p">,</span>
-                                <span class="n">movie_file</span><span class="o">=</span><span class="n">output_file</span> <span class="o">+</span> <span class="s1">&#39;.mp4&#39;</span> <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                                <span class="n">fps</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
-<span class="n">plot_heat_map</span><span class="p">(</span><span class="n">stats_data</span><span class="p">,</span><span class="s1">&#39;myP1&#39;</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">axis_lims</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;water_depth&#39;</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Water depth built on the fly, no tracks recorded&#39;</span><span class="p">,</span>
-                             <span class="n">plot_file_name</span><span class="o">=</span><span class="n">output_file</span> <span class="o">+</span> <span class="s1">&#39;_water_depth.jpeg&#39;</span> <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</details><details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo03_heatmaps.json</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo03_heatmaps.json</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo03_heatmaps&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;add_date_to_run_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
@@ -226,7 +191,7 @@
 <span class="w">    </span><span class="nt">&quot;particle_statistics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;gridstats1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;calculation_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;update_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;particle_property_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">                </span><span class="s2">&quot;water_depth&quot;</span><span class="w"></span>
 <span class="w">            </span><span class="p">],</span><span class="w"></span>
@@ -242,7 +207,7 @@
 <span class="w">                </span><span class="s2">&quot;moving&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">                </span><span class="s2">&quot;moving&quot;</span><span class="w"></span>
 <span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;calculation_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;update_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;particle_property_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">                </span><span class="s2">&quot;water_depth&quot;</span><span class="w"></span>
 <span class="w">            </span><span class="p">],</span><span class="w"></span>
@@ -286,8 +251,8 @@
 </div>
 </div>
 </details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo03_heatmaps.yaml</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo03_heatmaps.yaml</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
 <div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">add_date_to_run_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
 <span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
@@ -302,7 +267,6 @@
 <span class="w">    </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.distance_travelled.DistanceTravelled</span><span class="w"></span>
 <span class="nt">particle_statistics</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">gridstats1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">calculation_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span><span class="w"></span>
 <span class="w">    </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased</span><span class="w"></span>
 <span class="w">    </span><span class="nt">count_start_date</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2020-06-01</span><span class="nv"> </span><span class="s">21:16:07&#39;</span><span class="w"></span>
 <span class="w">    </span><span class="nt">grid_size</span><span class="p">:</span><span class="w"></span>
@@ -310,8 +274,8 @@
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">221</span><span class="w"></span>
 <span class="w">    </span><span class="nt">particle_property_list</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_depth</span><span class="w"></span>
+<span class="w">    </span><span class="nt">update_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span><span class="w"></span>
 <span class="w">  </span><span class="nt">polystats1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">calculation_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span><span class="w"></span>
 <span class="w">    </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased</span><span class="w"></span>
 <span class="w">    </span><span class="nt">count_status_in_range</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">moving</span><span class="w"></span>
@@ -332,6 +296,7 @@
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000</span><span class="w"></span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
+<span class="w">    </span><span class="nt">update_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span><span class="w"></span>
 <span class="nt">reader</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader</span><span class="w"></span>
 <span class="w">  </span><span class="nt">dimension_map</span><span class="p">:</span><span class="w"></span>
@@ -393,7 +358,7 @@
           <a href="trajectory_modifiers.html" title="Previous document">Trajectory modifiers</a>
         </li>
         <li>
-          <a href="../how_to.html" title="Next document">How to notebooks</a>
+          <a href="../users_guide.html" title="Next document">Users guide</a>
           &rarr;
         </li>
     </ul>

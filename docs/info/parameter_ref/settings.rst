@@ -65,19 +65,18 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``duration`` :   ``<class 'float'>``   *<optional>*
-		- default: ``1e+300``
-
 	* ``max_run_duration`` :   ``<class 'float'>``   *<optional>*
 		Description: - Maximum duration in seconds of model run, this sets a maximum, useful in testing
 
 		- default: ``31536000000``
+		- units: ``sec``
 
 	* ``minimum_total_water_depth`` :   ``<class 'float'>``   *<optional>*
 		Description: - Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering
 
 		- default: ``0.25``
 		- min: ``0.0``
+		- units: ``m``
 
 	* ``open_boundary_type`` :   ``<class 'int'>``   *<optional>*
 		Description: - new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS
@@ -126,6 +125,7 @@ Parameters:
 
 		- default: ``None``
 		- min: ``0.01``
+		- units: ``sec``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``No user note``
@@ -145,6 +145,9 @@ Parameters:
 		- possible_values: ``[True, False]``
 
 	* ``z0`` :   ``<class 'float'>``   *<optional>*
+		Description: - Bottom roughness in meters, used for tolerance and log layer calcs.
+
 		- default: ``0.005``
 		- min: ``0.0001``
+		- units: ``m``
 

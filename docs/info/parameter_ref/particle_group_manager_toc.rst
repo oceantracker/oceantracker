@@ -1,6 +1,6 @@
-#############################
-particle_group_manager_class
-#############################
+#######################
+particle_group_manager
+#######################
 
 **Module:** oceantracker.particle_group_manager
 

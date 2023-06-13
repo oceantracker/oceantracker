@@ -13,16 +13,16 @@ shared_settings_defaults ={'user_note': PVC('No user note', str),
                 'root_output_dir':     PVC('root_output_dir', str, doc_str='base dir for all output files'),
                 'add_date_to_run_output_dir':  PVC(False, bool),
                 'output_file_base':    PVC('output_file_base', str,doc_str= 'The start/base of all output files and name of sub-dir where output will be written'),
-                'time_step': PVC(None, float, min=0.01,doc_str='Time step in seconds for all cases'),
+                'time_step': PVC(None, float, min=0.01, units='sec',doc_str='Time step in seconds for all cases'),
                 'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
                 'backtracking':        PVC(False, bool),
                 'run_as_depth_averaged': PVC(False, bool),  # turns 3D hindcast into a 2D one
                 'debug':               PVC(False, bool),
-                'minimum_total_water_depth': PVC(0.25, float, min=0.0, doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
+                'minimum_total_water_depth': PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
                 'compact_mode':        PVC(False, bool,doc_str='Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format'),  # discard dead/inactive particles from memory
                 'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
                 'write_grid':          PVC(True,  bool),
-                'max_run_duration':    PVC(max_timedelta_in_seconds, float,doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration
+                'max_run_duration':    PVC(max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration
                 'processors':          PVC(1, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
                 #'max_threads':   PVC(None, int, min=1,doc_str='maximum number of processors used for threading to process particles in parallel'),
                 'advanced_settings': { 'max_warnings':        PVC(50,    int, min=0),  # dont record more that this number of warnings, to keep caseInfo.json finite
@@ -43,9 +43,8 @@ case_settings_defaults ={
             'case_output_file_tag':     PVC(None, str,doc_str='insert this tag into output files name fore each case'), #todo make this only settable in a case, caselist params?
             'write_tracks':             PVC(True, bool),
             'particle_buffer_size':     PVC(None, int, min=1),
-            'z0':                       PVC(0.005, float, min=0.0001),  # default bottom roughness
+            'z0':                       PVC(0.005, float, units='m', doc_str='Bottom roughness in meters, used for tolerance and log layer calcs. ', min=0.0001),  # default bottom roughness
             'retain_culled_part_locations': PVC(False, bool, doc_str='When particle marked dead/culled keep its position value, ie dont set position to nan so it does not appear in plots etc after death'),
-            'duration':                 PVC(1.0 * 10 ** 300, float),
             'open_boundary_type' :  PVC(0, int, min=0, max=1,doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS '),
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
               }
@@ -108,40 +107,23 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
             # todo active count when culling?
             # todo why BC walk too long for large steps sizes?
             # todo cope wih empty relese groups, ie non released
-            # todo amimations ignoring release group argument?
             # todo no releases in particle buffer to small?
-            # todo check time_step default is hindcast time step
 
     #TODO TUTORIALS
-        #todo parameters tut, _class, _list etc
-        # todo release groups
-        # todo on fly statistics
         # todo Reader param and adding fields
         # todo resupension
         # todo random walk
-        # todo
     #TODO PARAMETERS
-         # todo allow user to give "class" instead of class_name ( not an insatnce) 
-
+        # todo check time_step default is hindcast time step
         # todo max time steps per file option?
-        # todo add CPC for check class parameters??
-        # todo add default class instance checking
         # todo full use of  'update_interval' for stats eves and some part prop
 
     # TODO DOCUMENTATION
-        # todo update docs and build docs for new flat param structure
         #todo  add doc string for improtant methods and classes
-        #todo hyperlinks to online docs where useful
-        # add units to doc
-    # TODO STRUCTURE
-        # todo use update_interval everywhere as parmateter fo periodic actions
-        # todo  move interpolate set up to the end, to enable record dtypes to be formed used to reduce numba params, eg for all particle props
-        #todo add run_dir option to all output reads
-        # remove writing to file or mp4, and show how to save it by example???
 
-    #TODO Features
-        #todo add time units attr={'units': 'seconds since 1970-01-01'}
-        # add description kwarg to all netcdf variables
+
+    # TODO STRUCTURE
+        # todo remove writing to file or mp4, and show how to save it by example???
         # todo  by default read all varaibles for plotting? or read on demand?
         #todo matlab ncdf reader to read release group info
         # add fraction to read to matlab code
@@ -149,9 +131,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # TODO SIMPLIFY
         #todo remove depth range stats and make depth range part of stats
         # add part property from field wwhich checks if field exists
-      #TODO MODELS
-        #todo design and make base class
-        # todo make template
+        #todo discard name param
+
 
     #TODO Nice to haves
         # todo remove leading/trailling blanks from string values/param names
@@ -165,20 +146,23 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo  add msegae logging to post processing
         # todo add read case info file with not found errors
         # todo get rid of info[points], just alter params points
-        # todo get rid of info[points], just alter params points
-        # todo along with parameter docstr add "units" and display in docs
 
 #TODO FASTER STARTUP
     #todo add timing of start up blocks to improve setup speed
     # todo line profile reader buffer fill to improve spped of copys, eg np.copyto()
 
+# TODO MODELS
+    # todo design and make base class
+    # todo make template
+
 #TODO PERFORMANCE
-    # todo Kernal RK steps
+
         # todo kernal forms of hori/vert walk
         # todo kernal form of water vel interpolator
         # todo kernal RK solver
 
 # TODO STRUCTURE
+    # todo hyperlinks to online docs where useful
     #todo much cleaner to  do residence times/stats for all polygon release groups given!
             #or better get user to define polygons like polygond statistcs, or merge with polygon stats
     # todo use update_interval everywhere as parmateter fo periodic actions
@@ -196,6 +180,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     #todo only have compact mode tracks, and add a convert at end if requested
 
 # TODO IMPROVEMENTS
+    # todo allow user to give "class" instead of class_name ( not an insatnce)
+    # todo add run_dir option to all output reads
     # todo rotate particle relese polygns to reduce searches for points in side
     # todo extend inside polygon to have list of cells fully inside plogon for faster serach
     # todo integerise all periodic evets to model time steps
@@ -208,9 +194,13 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # todo read geojson polygons
     # todo free run through statr/gaps/ends when no active particles
     # todo read-ahead async reader
+    # todo add CPC for check class parameters??
+    # todo add default class instance checking
+    #todo merge water depth range selection into all stats
 
 # TODO FUTURE
-    #todo shared reader
+    # todo Kernal RK steps
+    #todo aysc reader
     #todo FIELD group to manage readers/interp in multi-reader future
         # todo  move reader opertions to feild group mangager to allow for future with multiple readers
         # todo attach reader/interp to each  feild instance to

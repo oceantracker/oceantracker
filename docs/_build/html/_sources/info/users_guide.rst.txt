@@ -3,7 +3,7 @@ Users guide
 ###################
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
 
     installing.rst
     how_to.rst
@@ -12,4 +12,3 @@ Users guide
     how_to/D_output_files.rst
     change_log.rst
     future_dev.rst
-    how_to.rst

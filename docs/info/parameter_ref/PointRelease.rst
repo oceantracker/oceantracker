@@ -71,7 +71,7 @@ Parameters:
 
 		- default: ``0.0``
 		- min: ``0.0``
-		- units: ``s``
+		- units: ``sec``
 
 	* ``release_radius`` :   ``<class 'float'>``   *<optional>*
 		Description: - Particles are released from random locations in circle of given radius around each point.

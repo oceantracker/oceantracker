@@ -1,6 +1,6 @@
-#################
-dispersion_class
-#################
+###########
+dispersion
+###########
 
 **Module:** oceantracker.dispersion
 

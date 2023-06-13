@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Parameter details &#8212; OceanTracker Beta 0.3 documentation</title>
+    <title>Parameter details &#8212; OceanTracker Beta 0.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -64,7 +64,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 </ul>
 </li>
 </ul>
@@ -101,42 +100,46 @@
   <section id="parameter-details">
 <h1>Parameter details<a class="headerlink" href="#parameter-details" title="Permalink to this heading">¶</a></h1>
 <p>Links to details of parameter default values for settings and classes, acceptable values etc.</p>
-<p>Top level settings</p>
+<section id="top-level-settings">
+<h2>Top level settings<a class="headerlink" href="#top-level-settings" title="Permalink to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
 </ul>
 </div>
+</section>
 <section id="core-class-roles">
-<h2>Core “_class” roles<a class="headerlink" href="#core-class-roles" title="Permalink to this heading">¶</a></h2>
+<h2>Core “class” roles<a class="headerlink" href="#core-class-roles" title="Permalink to this heading">¶</a></h2>
+<p>Only one core class per role. These have singular role names.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="dispersion_toc.html">dispersion_class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="field_group_manager_toc.html">field_group_manager_class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="interpolator_toc.html">interpolator_class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="particle_group_manager_toc.html">particle_group_manager_class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reader_toc.html">reader_class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="resuspension_toc.html">resuspension_class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="solver_toc.html">solver_class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tracks_writer_toc.html">tracks_writer_class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dispersion_toc.html">dispersion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="field_group_manager_toc.html">field_group_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interpolator_toc.html">interpolator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="particle_group_manager_toc.html">particle_group_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reader_toc.html">reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resuspension_toc.html">resuspension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver_toc.html">solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tracks_writer_toc.html">tracks_writer</a></li>
 </ul>
 </div>
-<section id="class-dict-roles">
-<h3>class “_dict”  roles<a class="headerlink" href="#class-dict-roles" title="Permalink to this heading">¶</a></h3>
+<section id="multiple-classes-for-each-role">
+<h3>Multiple classes for each role<a class="headerlink" href="#multiple-classes-for-each-role" title="Permalink to this heading">¶</a></h3>
+<p>Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="event_loggers_toc.html">event_loggers_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fields_toc.html">fields_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="particle_concentrations_toc.html">particle_concentrations_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="particle_properties_toc.html">particle_properties_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="particle_statistics_toc.html">particle_statistics_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="release_groups_toc.html">release_groups_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="status_modifiers_toc.html">status_modifiers_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="time_varying_info_toc.html">time_varying_info_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trajectory_modifiers_toc.html">trajectory_modifiers_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="velocity_modifiers_toc.html">velocity_modifiers_dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="event_loggers_toc.html">event_loggers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fields_toc.html">fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="particle_concentrations_toc.html">particle_concentrations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="particle_properties_toc.html">particle_properties</a></li>
+<li class="toctree-l1"><a class="reference internal" href="particle_statistics_toc.html">particle_statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release_groups_toc.html">release_groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="status_modifiers_toc.html">status_modifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="time_varying_info_toc.html">time_varying_info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory_modifiers_toc.html">trajectory_modifiers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="velocity_modifiers_toc.html">velocity_modifiers</a></li>
 </ul>
 </div>
 </section>

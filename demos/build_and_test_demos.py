@@ -77,12 +77,12 @@ p3['release_groups']= {
                     }
 
 p3['particle_statistics'] = {'gridstats1': {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                      'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
+                      'update_interval': 1800, 'particle_property_list': ['water_depth'],
                    'count_start_date': '2020-06-01 21:16:07',
                       'grid_size': [220, 221]},
                 'polystats1' : {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                         'count_status_in_range' : ['moving','moving'],
-                      'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
+                      'update_interval': 1800, 'particle_property_list': ['water_depth'],
                        'polygon_list':[ {'points':poly_points}]}
                      }
 
@@ -97,11 +97,11 @@ p4 = deepcopy(p3)
 p4['junk']='h'
 p4['particle_statistics'] = {}
 p4['particle_statistics']['age_grid']=   {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
-             'calculation_interval': 1800, 'particle_property_list': ['water_depth'],
+             'update_interval': 1800, 'particle_property_list': ['water_depth'],
              'grid_size': [220, 221],
              'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.}
 p4['particle_statistics']['age_poly'] =          {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
-             'calculation_interval': 1800, 'particle_property_list': ['water_depth', 'water_velocity'],
+             'update_interval': 1800, 'particle_property_list': ['water_depth', 'water_velocity'],
              'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.,
              'polygon_list': [{'points': poly_points} ] }
 
@@ -214,7 +214,7 @@ p10['release_groups']= {
             'pulse_size': 100, 'release_interval': 12 * 3600}
         }
 p10['particle_statistics']={'residentpoly': {'class_name': 'oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon',
-                  'name_of_polygon_release_group':'near_shore', 'calculation_interval': 1800}}
+                  'name_of_polygon_release_group':'near_shore', 'update_interval': 1800}}
 
 
 params.append(p10)
@@ -269,7 +269,7 @@ s56['velocity_modifiers']={'terminal_velocity':
                            }
 s56['particle_statistics']= {'grid1':
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                      'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
+                      'update_interval': 3600, 'particle_property_list': ['water_depth'],
                       'grid_size': [120, 121]}}
 
 
@@ -329,7 +329,7 @@ s61 = deepcopy(schsim_base_params)
 s61.update({'max_run_duration': 15*24*3600.,'output_file_base': 'demo61_concentration_test'})
 s61['write_tracks']= False
 s61['particle_concentrations']={'outfall_conc':{'class_name':'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
-                                                          'case_output_file_tag': 'siteA','calculation_interval': 1800}}
+                                                          'case_output_file_tag': 'siteA','update_interval': 1800}}
 s61['particle_properties']['total_water_depth']={'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'}
 
 for rg in s61['release_groups'].values():

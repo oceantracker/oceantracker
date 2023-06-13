@@ -49,7 +49,7 @@ def get_base_params():
                                                ],
                                            'particle_statistics': [
                                                {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
-                                                'calculation_interval': 600, 'particle_property_list': ['DNAdecay','water_depth'],
+                                                'update_interval': 600, 'particle_property_list': ['DNAdecay','water_depth'],
                                                  #'release_group_centered_grids': True,
                                                  'grid_center': None,
                                                  'grid_span': [10000, 10000],

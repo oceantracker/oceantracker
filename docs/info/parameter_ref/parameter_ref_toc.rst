@@ -4,7 +4,10 @@ Parameter details
 
 Links to details of parameter default values for settings and classes, acceptable values etc.
 
+
 Top level settings
+___________________
+
 
 .. toctree::
 	:maxdepth: 1
@@ -12,9 +15,10 @@ Top level settings
 	settings.rst
 
 
-Core "_class" roles
-____________________
+Core "class" roles
+___________________
 
+Only one core class per role. These have singular role names.
 
 .. toctree::
 	:maxdepth: 1
@@ -29,9 +33,10 @@ ____________________
 	tracks_writer_toc.rst
 
 
-class "_dict"  roles
-=====================
+Multiple classes for each role
+===============================
 
+Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.
 
 .. toctree::
 	:maxdepth: 1

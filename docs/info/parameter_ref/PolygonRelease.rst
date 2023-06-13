@@ -70,7 +70,7 @@ Parameters:
 
 		- default: ``0.0``
 		- min: ``0.0``
-		- units: ``s``
+		- units: ``sec``
 
 	* ``release_start_date`` :   ``iso8601date``   *<optional>*
 		Description: - Must be an ISO date as string eg. "2017-01-01T00:30:00"

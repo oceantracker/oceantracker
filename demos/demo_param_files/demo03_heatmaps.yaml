@@ -12,7 +12,6 @@ particle_properties:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
 particle_statistics:
   gridstats1:
-    calculation_interval: 1800
     class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
     count_start_date: '2020-06-01 21:16:07'
     grid_size:
@@ -20,8 +19,8 @@ particle_statistics:
     - 221
     particle_property_list:
     - water_depth
+    update_interval: 1800
   polystats1:
-    calculation_interval: 1800
     class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
     count_status_in_range:
     - moving
@@ -42,6 +41,7 @@ particle_statistics:
         - 5489000
       - - 1597682.1237
         - 5489972.7479
+    update_interval: 1800
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:

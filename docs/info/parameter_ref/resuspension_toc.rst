@@ -1,6 +1,6 @@
-###################
-resuspension_class
-###################
+#############
+resuspension
+#############
 
 **Module:** oceantracker.resuspension
 

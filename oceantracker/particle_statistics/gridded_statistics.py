@@ -18,7 +18,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
                                  'grid_center':         PLC([], [float, int], fixed_len=2),
                                  'grid_span': PLC([], [float, int], fixed_len=2),
                                  'role_output_file_tag' :    PVC('stats_gridded_time',str),
-                                 'calculation_interval':PVC(3600., float,doc_str=' time in sec, between calculating statistics'),
                                  })
         self.grid = {}
 

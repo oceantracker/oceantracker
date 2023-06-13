@@ -16,10 +16,6 @@ ParticleConcentrations2D
 Parameters:
 ************
 
-	* ``calculation_interval`` :   ``<class 'float'>``   *<optional>*
-		- default: ``1``
-		- min: ``1``
-
 	* ``class_name`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
 
@@ -56,6 +52,10 @@ Parameters:
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``_concentrations_``
+
+	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
+		- default: ``1``
+		- min: ``1``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Output files &#8212; OceanTracker Beta 0.3 documentation</title>
+    <title>Output files &#8212; OceanTracker Beta 0.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -16,7 +16,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Running using Param. Dict." href="E_run_using_parameter_dictionaries.html" />
+    <link rel="next" title="Running using param. dict." href="E_run_using_parameter_dictionaries.html" />
     <link rel="prev" title="Release Groups" href="C_release_groups.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -58,13 +58,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 </ul>
 </li>
 </ul>
@@ -76,7 +75,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="../how_to.html">How to notebooks</a><ul>
       <li>Previous: <a href="C_release_groups.html" title="previous chapter">Release Groups</a></li>
-      <li>Next: <a href="E_run_using_parameter_dictionaries.html" title="next chapter">Running using Param. Dict.</a></li>
+      <li>Next: <a href="E_run_using_parameter_dictionaries.html" title="next chapter">Running using param. dict.</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -137,8 +136,11 @@ during the run</p></li>
 below for code example on reading the tracks</p></li>
 <li><p>**_grid_outline.json** are the boundaries of hydrodynamic model’s
 domain and islands, useful in plotting</p></li>
-<li><p>**_grid.nc** a net cdf of the hydo-model’s grid and other
+<li><p>**_grid.nc** a netcdf of the hydo-model’s grid and other
 information, useful in plotting and analysis</p></li>
+<li><p>**_events.nc** a netcdf output from events classes, which only
+writes output when events occur, eg. a particle entering or exiting
+given polygons.</p></li>
 </ul>
 <p>Below list the files after running the minimal example.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># show a list of output files after running  minimal_example</span>
@@ -175,7 +177,7 @@ information, useful in plotting and analysis</p></li>
           <a href="C_release_groups.html" title="Previous document">Release Groups</a>
         </li>
         <li>
-          <a href="E_run_using_parameter_dictionaries.html" title="Next document">Running using Param. Dict.</a>
+          <a href="E_run_using_parameter_dictionaries.html" title="Next document">Running using param. dict.</a>
           &rarr;
         </li>
     </ul>

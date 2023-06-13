@@ -50,7 +50,7 @@ requires it). Polygon statistics show effect of each point or polygon
 release, on the given statistics polygons. A special case of a polygon
 statistic, is the “residence_time” class, which can be used to calculate
 the fraction of particles from each release group remaining within each
-statistics polygon at each ‘calculation_interval’ as one way to estimate
+statistics polygon at each ‘update_interval’ as one way to estimate
 particle residence time for each release group.
 
 Particle property statistics

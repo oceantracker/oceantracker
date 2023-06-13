@@ -76,7 +76,7 @@
     "particle_statistics": {
         "gridstats1": {
             "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
-            "calculation_interval": 1800,
+            "update_interval": 1800,
             "particle_property_list": [
                 "water_depth"
             ],
@@ -92,7 +92,7 @@
                 "moving",
                 "moving"
             ],
-            "calculation_interval": 1800,
+            "update_interval": 1800,
             "particle_property_list": [
                 "water_depth"
             ],

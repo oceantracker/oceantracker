@@ -1,6 +1,6 @@
-###################
-interpolator_class
-###################
+#############
+interpolator
+#############
 
 **Module:** oceantracker.interpolator
 

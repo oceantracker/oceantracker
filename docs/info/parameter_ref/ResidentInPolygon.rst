@@ -16,9 +16,6 @@ ResidentInPolygon
 Parameters:
 ************
 
-	* ``calculation_interval`` :   ``<class 'float'>``   *<optional>*
-		- default: ``86400.0``
-
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
@@ -65,6 +62,12 @@ Parameters:
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``residence``
+
+	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
+		Description: - Time in seconds between calculating statistics
+
+		- default: ``3600.0``
+		- units: ``sec``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

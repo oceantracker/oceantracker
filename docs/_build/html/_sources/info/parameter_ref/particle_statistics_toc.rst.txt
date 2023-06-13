@@ -1,6 +1,6 @@
-#########################
-particle_statistics_dict
-#########################
+####################
+particle_statistics
+####################
 
 **Module:** oceantracker.particle_statistics
 

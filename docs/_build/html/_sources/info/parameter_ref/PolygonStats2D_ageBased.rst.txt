@@ -19,11 +19,6 @@ Parameters:
 	* ``age_bin_size`` :   ``<class 'float'>``   *<optional>*
 		- default: ``86400.0``
 
-	* ``calculation_interval`` :   ``<class 'float'>``   *<optional>*
-		Description: - time in sec, between calculating statistics
-
-		- default: ``3600.0``
-
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
 
@@ -81,6 +76,12 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_polygon_age``
+
+	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
+		Description: - Time in seconds between calculating statistics
+
+		- default: ``3600.0``
+		- units: ``sec``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

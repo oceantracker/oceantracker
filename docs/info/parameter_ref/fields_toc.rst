@@ -1,6 +1,6 @@
-############
-fields_dict
-############
+#######
+fields
+#######
 
 **Module:** oceantracker.fields
 

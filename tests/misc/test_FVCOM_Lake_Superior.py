@@ -46,7 +46,7 @@ params={'shared_params' :{'output_file_base' : output_file_base,'root_output_dir
         'fields' :[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}],
         'particle_statistics':[
                   {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                      'calculation_interval': 72000,   'grid_size': [320, 321],'grid_span':[ 250000,250000],'grid_center':points[0]}]
+                      'update_interval': 72000,   'grid_size': [320, 321],'grid_span':[ 250000,250000],'grid_center':points[0]}]
                           }
 }
 

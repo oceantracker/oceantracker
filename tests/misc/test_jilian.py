@@ -32,7 +32,7 @@ if __name__ == '__main__':
                                    'critical_friction_velocity': 0.00}],
                                 'particle_statistics' : [{
                                  'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                                 'calculation_interval': 3600, 'particle_property_list': ['water_depth'],
+                                 'update_interval': 3600, 'particle_property_list': ['water_depth'],
                                 'grid_center': x0[0],'grid_span': [25000.,25000.],
                                  'grid_size': [120, 121]}],
          'fields' : [{'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocity'}]

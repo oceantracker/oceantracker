@@ -22,7 +22,7 @@ copyright = '2022, R. Vennell'
 author = 'R. Vennell'
 
 # The full version, including alpha/beta/rc tags
-release = 'Beta 0.3'
+release = 'Beta 0.4'
 
 
 # -- General configuration ---------------------------------------------------

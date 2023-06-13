@@ -32,7 +32,7 @@ def set_params(args, x0, duration_sec= 5. * 24 * 3600):
             'dispersion': {'A_H': 1.0, 'A_V': 0.001},
             'particle_properties':[{'name' :'eDNA', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24}],
             'particle_statistics': [{                'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                'calculation_interval': 1800, 'particle_property_list': ['eDNA'],
+                'update_interval': 1800, 'particle_property_list': ['eDNA'],
                 'release_group_centered_grids': True,
                 'grid_span': [25000., 25000.],
                 'grid_size': [150, 151]}]

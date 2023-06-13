@@ -1,6 +1,6 @@
-##########################
-trajectory_modifiers_dict
-##########################
+#####################
+trajectory_modifiers
+#####################
 
 **Module:** oceantracker.trajectory_modifiers
 

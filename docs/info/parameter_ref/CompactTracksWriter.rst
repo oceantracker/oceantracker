@@ -52,7 +52,7 @@ Parameters:
 		- default: ``tracks_compact``
 
 	* ``time_steps_per_per_file`` :   ``<class 'int'>``   *<optional>*
-		Description: - Split track output into files with given number of time steps
+		Description: - Split track output into files with given number of time integer steps
 
 		- default: ``None``
 		- min: ``1``
@@ -72,11 +72,11 @@ Parameters:
 		- can_be_empty_list: ``True``
 
 	* ``update_interval`` :   ``<class 'int'>``   *<optional>*
-		Description: - the time in seconds between writes (will be rounded to model time step)
+		Description: - the time in model seconds between writes (will be rounded to model time step)
 
 		- default: ``None``
 		- min: ``1``
-		- units: ``s``
+		- units: ``sec``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
