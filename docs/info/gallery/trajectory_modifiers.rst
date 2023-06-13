@@ -21,19 +21,6 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
 .. raw:: html
 
    <details>
-   <summary> code </summary>
-
-.. literalinclude:: ../../../demos/demo_code/demo06_reefstranding.py
-    :language: python
-    :caption:
-
-.. raw:: html
-
-   </details>
-
-.. raw:: html
-
-   <details>
    <summary> json parameters </summary>
 
 .. literalinclude:: ../../../demos/demo_param_files/demo06_reefstranding.json
@@ -79,19 +66,6 @@ Vertical slice showing one example of a falling particle and resuspension, with 
 .. raw:: html
 
    <details>
-   <summary> code </summary>
-
-.. literalinclude:: ../../../demos/demo_code/demo58_bottomBounce.py
-    :language: python
-    :caption:
-
-.. raw:: html
-
-   </details>
-
-.. raw:: html
-
-   <details>
    <summary> json parameters </summary>
 
 .. literalinclude:: ../../../demos/demo_param_files/demo58_bottomBounce.json
@@ -130,20 +104,6 @@ Particles with splitting in two every 6 hours and a 5% chance of dying every 6 h
 
 * class: ``trajectory_modifiers.split_particles.SplitParticles``
 * class: ``trajectory_modifiers.cull_particles.CullParticles``
-
-.. raw:: html
-
-   <details>
-   <summary> code </summary>
-
-.. literalinclude:: ../../../demos/demo_code/demo08_particle_splitting.py
-    :language: python
-    :caption:
-
-.. raw:: html
-
-   </details>
-
 
 .. raw:: html
 

@@ -30,8 +30,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+
     if args.param_file is None:
-        sys.exit('Must speci param fiel parme eg  find parameter file ' + args.param_file)
+        sys.exit('Must give param file name eg  find parameter file, got ' + args.param_file)
+
     if not path.isfile(path.normpath(args.param_file)):
         sys.exit('Cannot find parameter file ' + args.param_file)
 
@@ -48,7 +50,9 @@ if __name__ == '__main__':
 
     if type(params) is list:
         # do fewer cases in debugging
-        n_case = min([args.cases, len(params)])
+        n_case = len(params)
+        if args.cases is not None: n_case = min([args.cases, len(params)])
+
         if args.cases:  params = params[:min(1,n_case)]
         for p in params:
             p = tweak_params(p, args)

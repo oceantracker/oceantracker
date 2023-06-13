@@ -13,7 +13,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # set up info/attributes
         super().__init__()
         #todo add depth range for count
-        self.add_default_params({ 'calculation_interval':       PVC(24*60*60.,float),
+        self.add_default_params({ 'update_interval':       PVC(60*60.,float, doc_str='Time in seconds between calculating statistics', units='sec'),
                                   'count_start_date': PVC(None, 'iso8601date',doc_str= 'Start particle counting from this date'),
                                   'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this date'),
                                   'role_output_file_tag' :           PVC('stats_base',str),

@@ -23,19 +23,6 @@ Decaying particle property used to size and colour  particles. ``decay_time_scal
 .. raw:: html
 
    <details>
-   <summary> code </summary>
-
-.. literalinclude:: ../../../demos/demo_code/demo60_SCHISM_3D_decaying_particle.py
-    :language: python
-    :caption:
-
-.. raw:: html
-
-   </details>
-
-.. raw:: html
-
-   <details>
    <summary> json parameters </summary>
 
 .. literalinclude:: ../../../demos/demo_param_files/demo60_SCHISM_3D_decaying_particle.json
@@ -72,20 +59,6 @@ Particles with additional inside polygon  property, with optional logging of pol
 
 * class: ``particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D``
 * class: ``event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit``
-
-
-.. raw:: html
-
-   <details>
-   <summary> code </summary>
-
-.. literalinclude:: ../../../demos/demo_code/demo07_inside_polygon_events.py
-    :language: python
-    :caption:
-
-.. raw:: html
-
-   </details>
 
 .. raw:: html
 
@@ -132,18 +105,6 @@ Particles coloured by their status property. Status can be one of following stri
 
 ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving']``
 
-.. raw:: html
-
-   <details>
-   <summary> code </summary>
-
-.. literalinclude:: ../../../demos/demo_code/demo56_SCHISM_3D_resupend_crtitical_friction_vel.py
-    :language: python
-    :caption:
-
-.. raw:: html
-
-   </details>
 
 
 .. raw:: html

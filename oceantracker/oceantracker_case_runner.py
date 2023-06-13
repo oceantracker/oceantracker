@@ -316,7 +316,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         #clip times to maximum duration in shared and case params
         duration = abs(time_end - time_start)
-        duration = min(duration, si.settings['duration'], si.settings['max_run_duration'])
+        duration = min(duration, si.settings['max_run_duration'])
         time_end = time_start + duration* si.model_direction
 
         # note results

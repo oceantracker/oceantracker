@@ -322,7 +322,7 @@ class Solver(ParameterBaseClass):
         # update and write stats
         si= self.shared_info
         for name, i in si.classes['particle_statistics'].items():
-            if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['calculation_interval']:
+            if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['update_interval']:
                 i.start_update_timer()
                 i.update(time_sec)
                 i.stop_update_timer()
@@ -331,7 +331,7 @@ class Solver(ParameterBaseClass):
         # update triangle concentrations
         si = self.shared_info
         for name, i in si.classes['particle_concentrations'].items():
-            if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['calculation_interval']:
+            if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['update_interval']:
                 i.start_update_timer()
                 i.update(time_sec)
                 i.stop_update_timer()

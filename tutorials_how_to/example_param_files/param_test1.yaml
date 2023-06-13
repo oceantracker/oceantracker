@@ -1,7 +1,10 @@
 output_file_base: param_test1
-particle_release_groups_dict:
+reader:
+  file_mask: demoHindcastSchism*.nc
+  input_dir: ..\demos\demo_hindcast
+release_groups:
   my_polygon_release:
-    class_name: oceantracker.release_groups.polygon_release.PolygonRelease
+    class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
     points:
     - - 1597682.1237
       - 5489972.7479
@@ -25,14 +28,11 @@ particle_release_groups_dict:
       - 5486200
     pulse_size: 10
     release_interval: 3600
-reader_class:
-  file_mask: demoHindcastSchism*.nc
-  input_dir: ..\demos\demo_hindcast
-resuspension_class:
+resuspension:
   critical_friction_velocity: 0.005
 root_output_dir: output
 time_step: 120
-velocity_modifiers_dict:
+velocity_modifiers:
   fall_velocity:
     class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
     mean: -0.001

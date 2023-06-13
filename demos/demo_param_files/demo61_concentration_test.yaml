@@ -44,9 +44,9 @@ max_run_duration: 1296000.0
 output_file_base: demo61_concentration_test
 particle_concentrations:
   outfall_conc:
-    calculation_interval: 1800
     case_output_file_tag: siteA
     class_name: oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D
+    update_interval: 1800
 particle_properties:
   age_decay:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay

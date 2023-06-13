@@ -9,9 +9,12 @@ __________________
 Version 0.4 Major upgrade
 _________________________
 
+Major upgrade to simply use and parameter in repose to user input. This has breaking changes, happy to help with transition. Tried to inclide a all chnages whic affect use od parameters i this upgrade
+
 Known breaking changes- ask for help if needed to transition
 ___________________________________________________________
-#.  new flatter paramter structure
+
+#. new flatter paramter structure
 #. solver sub-stepping replaced by time_step in seconds param
 #. writer output step count replaced by update_interval time for writing
 
@@ -20,6 +23,7 @@ ___________________________________________________________
 New features
 --------------------
 
+#. "helper class" to build parameters without using dictionaries, by using keyword arguments of two methods of helper class.
 #. Automatically determine hindcast file type, if reader class_name param not given
 #. Much faster start up with improved grid outline builder
 #. FVCOM and ROMS readers working
@@ -28,6 +32,8 @@ Internal changes
 _________________
 
 #. reader uses ring buffer based on hindcast step mod buffer size,  needed for shared reader development
+#. only use compact mode track file format, python and matlab code will still read/convert track data to rectangular output.
+
 
 Version 0.3.03.000 2023-01-03
 _____________________________________

@@ -2,11 +2,11 @@
     "output_file_base": "param_test1",
     "root_output_dir": "output",
     "time_step": 120,
-    "reader_class": {
+    "reader": {
         "input_dir": "..\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism*.nc"
     },
-    "particle_release_groups_dict": {
+    "release_groups": {
         "my_release_point": {
             "points": [
                 [
@@ -53,10 +53,10 @@
             "pulse_size": 20
         }
     },
-    "resuspension_class": {
+    "resuspension": {
         "critical_friction_velocity": 0.005
     },
-    "velocity_modifiers_dict": {
+    "velocity_modifiers": {
         "fall_velocity": {
             "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
             "mean": -0.001,

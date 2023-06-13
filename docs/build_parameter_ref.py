@@ -110,7 +110,7 @@ class RSTfileBuilder(object):
 
             if type(item) == PVC:
 
-                if item.info['obsolete'] is not None: continue
+                if item.info['obsolete'] is not None: continue # dont write obsolete params
                 self.add_lines('* ``' + key + '`` :   ``' + str(item.info['type']) + '`` '
                                + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
 
@@ -119,7 +119,7 @@ class RSTfileBuilder(object):
                     self.add_lines()
 
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
-                  # dont write obsolete params
+
                 for k, v in item.info.items():
                     if k not in ['type', 'default_value', 'is_required', 'doc_str'] and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
@@ -243,29 +243,30 @@ def build_param_ref():
     sp.add_heading('Top level settings/parameters', level=2)
     sp.write_param_dict_defaults(settings_dict)
 
-    page.add_lines('Top level settings')
+    page.add_heading('Top level settings', level=2)
     page.add_new_toc_to_page('Settings', maxdepth=1)
     page.add_toc_link('Settings',sp)
 
 
     # core classes
-    page.add_heading('Core "_class" roles',level=2)
+    page.add_heading('Core "class" roles',level=2)
+    page.add_lines('Only one core class per role. These have singular role names.')
     page.add_new_toc_to_page('core', maxdepth=1)
     for key in sorted(common_info.core_classes.keys()):
         #if key in ['run_params'] or  type(common_info.core_classes[key])==list: continue
 
-        toc = make_class_sub_pages(key, link_tag='_class')
+        toc = make_class_sub_pages(key)
         page.add_toc_link('core', toc)
 
     page.write()
 
-    page.add_heading('class "_dict"  roles',level=1)
-
+    page.add_heading('Multiple classes for each role',level=1)
+    page.add_lines('Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.')
     page.add_new_toc_to_page('class_dicts', maxdepth=1, sort_body=True)
 
     page.add_new_toc_to_page('user', maxdepth=1)
     for key in sorted(common_info.class_dicts.keys()):
-        toc = make_class_sub_pages(key,link_tag='_dict')
+        toc = make_class_sub_pages(key)
         page.add_toc_link('user', toc)
 
     # write toc page at end
