@@ -215,17 +215,6 @@ class Solver(ParameterBaseClass):
             # write tracks file
             tracks_writer.write_all_time_varying_prop_and_data()
 
-    def _dev_kernal_solver(self, time_sec, is_moving):
-        si=self.shared_info
-        pgm = si.classes['particle_group_manager']
-        interp = si.classes['interpolator']
-        time_step = si.solver_info['model_time_step'] * si.model_direction
-        vel_field = si.classes['fields']['water_velocity'].data
-
-        triangle_kernnal_solver.RKsolver(time_sec, vel_field,
-                 interp.grid_as_struct, pgm.part_prop_as_struct, interp.step_info,
-                  self.kernal_solver_info,
-                time_step, self.params['RK_order'],is_moving)
 
     def integration_step(self, time_sec, is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles

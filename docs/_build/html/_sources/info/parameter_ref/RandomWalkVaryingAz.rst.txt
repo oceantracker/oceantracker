@@ -10,8 +10,6 @@ RandomWalkVaryingAZ
 
 **Inheritance:** _BaseTrajectoryModifer> RandomWalk> RandomWalkVaryingAZ
 
-**Default internal name:** ``"random_walk"``
-
 
 Parameters:
 ************

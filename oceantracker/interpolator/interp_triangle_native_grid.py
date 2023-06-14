@@ -105,29 +105,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                         )
         self.step_info= numpy_util.numpy_structure_from_dict(step_info_dict) # class to use inside numba functions
 
-        # point at particle prop block
-        part_prop_as_structure = si.classes['particle_group_manager'].part_prop_as_struct
-
-        # types for signatures
-        part_prop_type = typeof(part_prop_as_structure)
-        grid_type= typeof(self.grid_as_struct)
-        step_info_type = typeof(self.step_info)
-        x_type = typeof(part_prop_as_structure['x'])
-
-        # same signature for both walk functions
-        sig_walk = [x_type,grid_type , part_prop_type, nbt.int32[:],step_info_type ]
-
-        # define walk function, water velocity eval interpolator function
-        sig_vel = [x_type, nbt.float32[:, :, :, :], grid_type, part_prop_type, nbt.int32[:], step_info_type]
-        if si.is_3D_run:
-            self.walk_function = numba_util.njitter(tri_interp_util.combined_cell_and_depth_walk, sig_walk)
-
-        else:
-            self.walk_function = numba_util.njitter(tri_interp_util.BCwalk_with_move_backs,
-                                                            sig_walk, parallel=False)
-        pass
-
-        #todo put 2d vel eval value here to as??
 
     def setup_interp_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
@@ -308,13 +285,10 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # nt give but not needed in 2D
         si= self.shared_info
         info = self.info
-        wi = info['walk_info']
-        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
-        grid_struct= self.grid_as_struct
         st = self.step_info
 
         # used 2D or 3D walk chosen above
-        self.walk_function(xq, grid_struct, part_prop_struct, active, st)
+        self._do_walk(xq, active)
 
         #retry any too long wallks
         part_prop = si.classes['particle_properties']
@@ -328,7 +302,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             st['triangle_walks_retried'] += sel.size
             new_cell  = self.initial_cell_guess(xq[sel,:])
             part_prop['n_cell'].set_values(new_cell, sel)
-            self.horizontal_walk_func(xq,grid_struct, part_prop_struct, sel, st)
+
+            self._do_walk(xq, sel)
 
             # recheck for additional failures
             sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_particle_subset_buffer())
@@ -346,6 +321,33 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 si.msg_logger.msg(' x_old =' + str(part_prop['x_last_good'].data[sel[:3], :].tolist()),warning=True,tabs=2)
                 # kill particles
                 part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
+
+    def _do_walk(self, xq, active):
+        si= self.shared_info
+        info = self.info
+        wi = info['walk_info']
+        part_prop = si.classes['particle_properties']
+        x_last_good = part_prop['x_last_good'].data
+        n_cell = part_prop['n_cell'].data
+        status = part_prop['status'].data
+        bc_cords = part_prop['bc_cords'].data
+
+        grid_struct= self.grid_as_struct
+        st = self.step_info
+
+        # used 2D or 3D walk chosen above
+        tri_interp_util.BCwalk_with_move_backs(xq, grid_struct,
+                                               x_last_good, n_cell, status, bc_cords,
+                                               active, st)
+
+        if si.is_3D_run:
+            nz_cell = part_prop['nz_cell'].data
+            z_fraction = part_prop['z_fraction'].data
+            z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
+            tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, grid_struct,
+                                                                          n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
+                                                                          active, st)
+
 
     #@function_profiler(__name__)
     def initial_cell_guess(self, xq):

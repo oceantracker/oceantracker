@@ -223,7 +223,7 @@ class OceanTracker():
             if type(item) is tuple:
                 # check item not a tuple
                 ml.msg(f'Top level setting or class must be "key" : value pairs, got a tuple for key= "{key}", value= "{str(item)}"', fatal_error=True,
-                               hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead ')
+                               hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead')
 
             elif k in common_info.shared_settings_defaults.keys():
                 if add_shared_settings:

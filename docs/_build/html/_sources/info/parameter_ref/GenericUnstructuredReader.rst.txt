@@ -116,6 +116,8 @@ Parameters:
 		- default: ``1970-01-01``
 
 	* ``max_numb_files_to_load`` :   ``<class 'int'>``   *<optional>*
+		Description: - Only read no more than this number of hindcast files, useful when setting up to speed run
+
 		- default: ``10000000``
 		- min: ``1``
 

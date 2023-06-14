@@ -1,14 +1,14 @@
-##########################
-GenericUnstructuredReader
-##########################
+##################
+SCHISMSreaderNCDF
+##################
 
-**Description:** Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names
+**Description:** Reads SCHISM netCDF output files
 
-**Class:** oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+**Class:** oceantracker.reader.schism_reader.SCHISMSreaderNCDF
 
-**File:** oceantracker/reader/generic_unstructured_reader.py
+**File:** oceantracker/reader/schism_reader.py
 
-**Inheritance:** _BaseReader> GenericUnstructuredReader
+**Inheritance:** _BaseReader> GenericUnstructuredReader> SCHISMSreaderNCDF
 
 
 Parameters:
@@ -30,21 +30,6 @@ Parameters:
 		- possible_values: ``[True, False]``
 
 	* ``dimension_map``: nested parameter dictionary
-		* ``node`` :   ``<class 'str'>`` **<isrequired>**
-			- default: ``node``
-
-		* ``time`` :   ``<class 'str'>`` **<isrequired>**
-			- default: ``time``
-
-		* ``vector2Ddim`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-
-		* ``vector3Ddim`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-
-		* ``z`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-
 	* ``field_variables``: nested parameter dictionary
 		* ``bottom_stress`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
@@ -53,19 +38,19 @@ Parameters:
 			- default: ``None``
 
 		* ``tide`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
+			- default: ``elev``
 
 		* ``water_depth`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
+			- default: ``depth``
 
 		* ``water_temperature`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
 
-		* ``water_velocity``:**<isrequired>**
-			- a list containing type:  ``[<class 'str'>, None]``
-			- default list : ``['u', 'v', None]``
+		* ``water_velocity``:  *<optional>*
+			- a list containing type:  ``[<class 'str'>]``
+			- default list : ``[]``
 			- can_be_empty_list: ``True``
-			- fixed_len: ``3``
+			- fixed_len: ``2``
 
 		* ``wind_stress`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
@@ -86,28 +71,8 @@ Parameters:
 		- default: ``None``
 
 	* ``grid_variables``: nested parameter dictionary
-		* ``bottom_cell_index`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-
-		* ``is_dry_cell`` :   ``<class 'numpy.int8'>``   *<optional>*
-			Description: - Time variable flag of when cell is dry, 1= is dry cell
-
-			- default: ``None``
-
-		* ``time`` :   ``<class 'str'>`` **<isrequired>**
-			- default: ``time``
-
-		* ``triangles`` :   ``<class 'str'>`` **<isrequired>**
-			- default: ``None``
-
-		* ``x``:  *<optional>*
-			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['x', 'y']``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``2``
-
-		* ``zlevel`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
+	* ``hgrid_file_name`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
@@ -121,12 +86,7 @@ Parameters:
 		- default: ``10000000``
 		- min: ``1``
 
-	* ``one_based_indices`` :   ``<class 'bool'>``   *<optional>*
-		Description: - indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python
-
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
+	* ``one_based_indices``: nested parameter dictionary
 	* ``required_file_dimensions``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``
 		- default list : ``[]``

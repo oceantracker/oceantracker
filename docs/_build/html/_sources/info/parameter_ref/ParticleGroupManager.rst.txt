@@ -19,12 +19,12 @@ Parameters:
 
 		- default: ``None``
 
-	* ``max_age`` :   ``<class 'float'>``   *<optional>*
-		- default: ``100000000000.0``
-		- min: ``0.0``
-
 	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``particle_group_manager``
+
+	* ``particle_buffer_chunk_size`` :   ``<class 'int'>``   *<optional>*
+		- default: ``200000``
+		- min: ``10``
 
 	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``

@@ -14,7 +14,8 @@ class ParticleGroupManager(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # requir+ed in children to get parent defaults
-        self.add_default_params( { 'name': PVC('particle_group_manager', str) , 'max_age': PVC(10.0E10, float,min=0.)})
+        self.add_default_params( { 'name': PVC('particle_group_manager', str) ,
+                                   'particle_buffer_chunk_size': PVC(200000, int,min=10)})
 
         # set up pointer dict and lists
         si = self.shared_info
@@ -63,15 +64,6 @@ class ParticleGroupManager(ParameterBaseClass):
         # as numpy dtype structured array
         si = self.shared_info
 
-        part_prop = si.classes['particle_properties']
-        pp ={}
-        for name,i in part_prop.items():
-           pp[name] = i.data
-        self.part_prop_as_struct = numpy_util.numpy_structure_from_dict(pp)
-
-        # point property.data at new memory strcture
-        for name, i in part_prop.items():
-            i.data = self.part_prop_as_struct[name]
 
     #@function_profiler(__name__)
     def release_particles(self, time_sec):
@@ -129,6 +121,7 @@ class ParticleGroupManager(ParameterBaseClass):
         smax = self.particles_in_buffer + x0.shape[0]
 
         if smax >= si.particle_buffer_size:
+            #self._expand_particle_buffers(smax)
             self.screen_msg += '; Out of particle buffer'
             si.msg_logger.msg('Ran out of particle buffer- no more releases, increase parameter "particle_buffer_size", size=' \
                                + str(si.particle_buffer_size) +' at ' + time_util.seconds_to_isostr(t), warning=True)
@@ -171,6 +164,13 @@ class ParticleGroupManager(ParameterBaseClass):
         self.particles_released  += num_released # total released
         self.particles_in_buffer += num_released # number in particle buffer
         return new_buffer_indices
+
+    def _expand_particle_buffers(self,num_particles):
+        si = self.shared_info
+        # get number of chunks required rounded up
+        n_chunks = int(np.ceil(num_particles/self.params['particle_buffer_chunk_size']))
+        for key, i in si.classes['particle']:
+            pass
 
     def add_time_varying_info(self,name, **kwargs):
         # property for group of particles, ie not properties of individual particles, eg time, number released
@@ -341,7 +341,6 @@ class ParticleGroupManager(ParameterBaseClass):
         for m in range(status_counts.size): status_counts[m] = 0
         for n in range(status.shape[0]):
             status_counts[status[n]-128] += 1
-
 
     def screen_info(self):
         si = self.shared_info

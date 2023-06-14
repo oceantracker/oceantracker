@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def numpy_structure_from_dict(d, retain=True):
+def numpy_structure_from_dict(d):
     # return a numpy sturcture with fields give by dict keys and copy of  from dictionary
 
     # used to pass many arguments to numba functions efficiently as attributes of one class variable
@@ -18,7 +18,6 @@ def numpy_structure_from_dict(d, retain=True):
                 dtype.append((key, type(val)))
 
     # check if too big for numpy indexing limit
-
     S = np.zeros((1,),dtype=dtype)[0]
 
     #copy dictionary data and point dict at structure's data

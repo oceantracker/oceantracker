@@ -34,7 +34,7 @@ Only one core class per role. These have singular role names.
 
 
 Multiple classes for each role
-===============================
+_______________________________
 
 Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.
 
