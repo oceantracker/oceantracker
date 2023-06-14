@@ -3,7 +3,7 @@ from oceantracker import common_info_default_param_dict_templates as common_info
 from oceantracker.util.module_importing_util  import import_module_from_string
 from oceantracker.util.parameter_checking import merge_params_with_defaults
 
-def make_class_instance_from_params(params,msg_logger, class_type_name=None,
+def make_class_instance_from_params(name, params,msg_logger, class_type_name=None,
                                      crumbs='', merge_params=True):
     # make a class instance  dynamically,  get instance of class from string eg oceantracker.solver.Solver
     # assumes class_name param exists
@@ -20,7 +20,7 @@ def make_class_instance_from_params(params,msg_logger, class_type_name=None,
                             fatal_error=True, hint= 'given params are = ' + str(params), exit_now=True)
 
     i = import_module_from_string(params['class_name'], msg_logger,crumbs = crumbs + ' > importing module')
-
+    i.info['name'] = name
     i.info['class_type'] = class_type_name
 
     if merge_params:

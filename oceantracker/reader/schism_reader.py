@@ -10,7 +10,7 @@ from oceantracker.util.triangle_utilities_code import split_quad_cells
 
 #todo add optional standard feilds by list of internal names, using a stanard feild maping maping
 #todo a way to map al stanard feilds but supress reading them unless requested?
-class SCHSIMreaderNCDF(GenericUnstructuredReader):
+class SCHISMSreaderNCDF(GenericUnstructuredReader):
     # loads a standard SCHISM netcdf output file with nodal data
     # variable names can be tweaked via maps in shared_params, if non-standard names used
 

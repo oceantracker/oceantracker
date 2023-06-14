@@ -10,8 +10,6 @@ GriddedStats2D_timeBased
 
 **Inheritance:** _BaseParticleLocationStats> GriddedStats2D_timeBased
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************
@@ -57,11 +55,6 @@ Parameters:
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
-
-		- default: ``None``
 
 	* ``particle_property_list``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``

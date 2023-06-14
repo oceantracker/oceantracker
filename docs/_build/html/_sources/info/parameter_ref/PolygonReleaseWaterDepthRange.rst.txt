@@ -10,8 +10,6 @@ PolygonReleaseWaterDepthRange
 
 **Inheritance:** PointRelease> PolygonRelease> PolygonReleaseWaterDepthRange
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************

@@ -10,8 +10,6 @@ InsidePolygonsNonOverlapping2D
 
 **Inheritance:** _BasePropertyInfo> ParticleProperty> InsidePolygonsNonOverlapping2D
 
-**Default internal name:** ``"inside_polygons_non_overlapping"``
-
 
 Parameters:
 ************

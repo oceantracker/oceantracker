@@ -10,8 +10,6 @@ Solver
 
 **Inheritance:** Solver
 
-**Default internal name:** ``"solver"``
-
 
 Parameters:
 ************

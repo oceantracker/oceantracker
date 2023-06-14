@@ -10,8 +10,6 @@ VelocityModiferBase
 
 **Inheritance:** VelocityModiferBase
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************

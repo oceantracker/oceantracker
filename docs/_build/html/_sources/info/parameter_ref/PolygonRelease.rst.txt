@@ -10,8 +10,6 @@ PolygonRelease
 
 **Inheritance:** PointRelease> PolygonRelease
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************

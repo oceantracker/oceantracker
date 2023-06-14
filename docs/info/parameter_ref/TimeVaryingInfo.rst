@@ -10,8 +10,6 @@ TimeVaryingInfo
 
 **Inheritance:** _BasePropertyInfo> TimeVaryingInfo
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************

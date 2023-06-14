@@ -10,8 +10,6 @@ ParticleGroupManager
 
 **Inheritance:** ParticleGroupManager
 
-**Default internal name:** ``"particle_group_manager"``
-
 
 Parameters:
 ************

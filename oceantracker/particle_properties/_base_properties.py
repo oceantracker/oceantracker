@@ -123,7 +123,7 @@ class ParticleProperty(_BasePropertyInfo):
         # if out is None, given result returns a view of new variable
 
         if self.is_vector():
-            raise Exception('compare_all_to_a_value: particle property ' + self.params['name'] +'>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
+            raise Exception('compare_all_to_a_value: particle property ' + self.info['name'] +'>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
 
         # to search only those in buffer use used_buffer()
         data = self.used_buffer()
@@ -137,7 +137,7 @@ class ParticleProperty(_BasePropertyInfo):
         # if out is None, given result returns a view of new variable
 
         if self.is_vector():
-            raise Exception('find_subset_where: particle property ' + self.params['name'] + '>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
+            raise Exception('find_subset_where: particle property ' + self.info['name'] + '>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
 
         return particle_comparisons_util.prop_subset_compared_to_value(active, self.used_buffer(), test, value, out)
 

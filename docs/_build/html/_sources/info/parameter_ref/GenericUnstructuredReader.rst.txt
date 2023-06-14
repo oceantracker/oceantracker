@@ -10,8 +10,6 @@ GenericUnstructuredReader
 
 **Inheritance:** _BaseReader> GenericUnstructuredReader
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************
@@ -121,11 +119,6 @@ Parameters:
 		- default: ``10000000``
 		- min: ``1``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
-
-		- default: ``None``
-
 	* ``one_based_indices`` :   ``<class 'bool'>``   *<optional>*
 		Description: - indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python
 
@@ -160,11 +153,8 @@ Parameters:
 		- default: ``None``
 		- min: ``-12``
 		- max: ``12``
+		- units: ``hours``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-
-	* ``water_density`` :   ``<class 'int'>``   *<optional>*
-		- default: ``48``
-		- min: ``2``
 

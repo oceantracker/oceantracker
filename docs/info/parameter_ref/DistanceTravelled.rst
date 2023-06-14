@@ -10,8 +10,6 @@ DistanceTravelled
 
 **Inheritance:** _BasePropertyInfo> ParticleProperty> DistanceTravelled
 
-**Default internal name:** ``"distance_travelled"``
-
 
 Parameters:
 ************

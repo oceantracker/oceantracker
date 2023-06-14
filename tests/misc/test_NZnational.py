@@ -54,7 +54,7 @@ if __name__ == '__main__':
     params={ 'shared_params': {'output_file_base': output_file_base,
 
                             'root_output_dir': root_output_dir},   'input_dir': root_input_dir,
-        'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+        'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                       'file_mask': 'NZ*.nc',
                       'depth_average': args.depthaverage,
                         'field_variables_to_depth_average': ['water_velocity'],

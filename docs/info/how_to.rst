@@ -6,7 +6,7 @@ The below show a web view of ipython notebooks which are in the folder "oceantra
 
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     how_to/A_minimal_example.rst
     how_to/B_runningOT_and_parameters.rst

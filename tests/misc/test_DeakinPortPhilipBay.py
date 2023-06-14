@@ -20,7 +20,7 @@ def set_params(args, x0, duration_sec= 5. * 24 * 3600):
 
     params = {'output_file_base': 'PPBtest','time_step': 1800,
               'root_output_dir': 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay',
-              'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF', 'input_dir': 'F:\\Hindcasts\Deakin_EricT\\PPB_Hydro_netCDF',
+              'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF', 'input_dir': 'F:\\Hindcasts\Deakin_EricT\\PPB_Hydro_netCDF',
                          'file_mask': 'schout_*.nc',
                          'cords_in_lat_long': True,
                          # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations

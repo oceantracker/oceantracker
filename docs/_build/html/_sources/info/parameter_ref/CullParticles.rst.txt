@@ -10,8 +10,6 @@ CullParticles
 
 **Inheritance:** _BaseTrajectoryModifier> CullParticles
 
-**Default internal name:** ``"ParticleKill"``
-
 
 Parameters:
 ************

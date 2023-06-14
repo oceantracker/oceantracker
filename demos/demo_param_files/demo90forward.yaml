@@ -8,7 +8,7 @@ dispersion:
   A_V: 0.0
 max_run_duration: 172800.0
 output_file_base: demo90forward
-particle_properties:
+'particle_properties ':
   Oxygen:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0

@@ -41,6 +41,7 @@
         "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
+                "ppoint": 1,
                 "points": [
                     [
                         1594500,
@@ -87,7 +88,7 @@
                 "release_interval": 10800
             }
         },
-        "particle_properties": {
+        "particle_properties ": {
             "Oxygen": {
                 "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                 "decay_time_scale": 86400.0,
@@ -148,6 +149,7 @@
         "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
+                "ppoint": 1,
                 "points": [
                     [
                         1594500,
@@ -194,7 +196,7 @@
                 "release_interval": 10800
             }
         },
-        "particle_properties": {
+        "particle_properties ": {
             "Oxygen": {
                 "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                 "decay_time_scale": 86400.0,
@@ -254,6 +256,7 @@
         "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
+                "ppoint": 1,
                 "points": [
                     [
                         1594500,
@@ -300,7 +303,7 @@
                 "release_interval": 10800
             }
         },
-        "particle_properties": {
+        "particle_properties ": {
             "Oxygen": {
                 "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                 "decay_time_scale": 86400.0,
@@ -360,6 +363,7 @@
         "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
+                "ppoint": 1,
                 "points": [
                     [
                         1594500,
@@ -406,7 +410,7 @@
                 "release_interval": 10800
             }
         },
-        "particle_properties": {
+        "particle_properties ": {
             "Oxygen": {
                 "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                 "decay_time_scale": 86400.0,
@@ -466,6 +470,7 @@
         "release_groups": {
             "point1": {
                 "allow_release_in_dry_cells": true,
+                "ppoint": 1,
                 "points": [
                     [
                         1594500,
@@ -512,7 +517,7 @@
                 "release_interval": 10800
             }
         },
-        "particle_properties": {
+        "particle_properties ": {
             "Oxygen": {
                 "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                 "decay_time_scale": 86400.0,

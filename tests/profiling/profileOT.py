@@ -60,7 +60,7 @@ def get_params(datasource=1):
          'max_threads' : 5,
             'screen_output_time_interval':6*time_step, 'compact_mode': True,
          'duration': 6 *24*3600,  # 10 days
-         'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+         'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': input_dir,
                     'file_mask': file_mask,
                     'field_variables': {'water_temperature': 'temp'}

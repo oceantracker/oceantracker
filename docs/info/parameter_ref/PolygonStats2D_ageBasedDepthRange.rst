@@ -10,8 +10,6 @@ PolygonStats2D_ageBasedDepthRange
 
 **Inheritance:** _BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased> _CorePolygonMethods> PolygonStats2D_ageBased> WaterDepthRangeStats> PolygonStats2D_ageBasedDepthRange
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************
@@ -60,11 +58,6 @@ Parameters:
 
 	* ``min_depth`` :   ``<class 'float'>``   *<optional>*
 		- default: ``-1000000000.0``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
-
-		- default: ``None``
 
 	* ``particle_property_list``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``

@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     params={ 'shared_params': {'output_file_base': 'jiliantest',
                                 'root_output_dir': 'F:\\OceanTrackerOuput\\Vims\\Jilian'},
-            'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+            'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                           'file_mask': 'schout_*.nc','input_dir': 'F:\\Hindcasts\\Hindcast_samples_tests\\VIMS\\Particle_ChesBay_Jilian_small',
                           'depth_average': args.depthaverage,
                           'field_variables_to_depth_average': ['water_velocity'],

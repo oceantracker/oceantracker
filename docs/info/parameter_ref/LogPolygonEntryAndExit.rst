@@ -10,8 +10,6 @@ LogPolygonEntryAndExit
 
 **Inheritance:** _BaseEventLogger> LogPolygonEntryAndExit
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************
@@ -22,11 +20,6 @@ Parameters:
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: - Class name as string A.B.C, used to import this class from python path
-
-		- default: ``None``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
 
 		- default: ``None``
 

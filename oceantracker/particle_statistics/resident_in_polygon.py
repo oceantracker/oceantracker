@@ -37,7 +37,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                   '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ', fatal_error=True)
 
         self.release_group_to_count = rg
-        self.info['release_group_name'] = rg.params['name']
+        self.info['release_group_name'] = rg.info['name']
         self.info['release_group_ID_to_count'] = rg.info['instanceID']
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances

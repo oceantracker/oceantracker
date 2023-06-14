@@ -10,8 +10,6 @@ FieldGroupManager
 
 **Inheritance:** FieldGroupManager
 
-**Default internal name:** ``"field_group_manager"``
-
 
 Parameters:
 ************

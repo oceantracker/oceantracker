@@ -10,8 +10,6 @@ TerminalVelocity
 
 **Inheritance:** VelocityModiferBase> TerminalVelocity
 
-**Default internal name:** ``"terminal_velocity"``
-
 
 Parameters:
 ************

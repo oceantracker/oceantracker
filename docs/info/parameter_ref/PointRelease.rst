@@ -10,8 +10,6 @@ PointRelease
 
 **Inheritance:** PointRelease
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************
@@ -38,11 +36,6 @@ Parameters:
 
 		- default: ``None``
 		- min: ``1.0``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
-
-		- default: ``None``
 
 	* ``points`` :   ``array`` **<isrequired>**
 		Description: - A N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array

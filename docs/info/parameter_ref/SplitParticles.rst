@@ -10,8 +10,6 @@ SplitParticles
 
 **Inheritance:** _BaseTrajectoryModifier> SplitParticles
 
-**Default internal name:** ``"particle_splitting"``
-
 
 Parameters:
 ************

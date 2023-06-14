@@ -33,7 +33,7 @@ class ParameterBaseClass(object):
                    }
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
-                                 'name':  PVC(None, str, doc_str='The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code'),
+                                 #'name':  PVC(None, str, doc_str='The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code'),
                                  'user_note': PVC(None, str),
                                  'requires_3D': PVC(False, bool)
                                  })
@@ -71,22 +71,22 @@ class ParameterBaseClass(object):
 
         for name in required_grid_var_list:
             if name not in grid:
-               si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name']
+               si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.info['name']
                                 + ' requires grid variable  "' + name + '"' + ' to work', fatal_error=True)
 
         for name in required_fields_list:
             if name not in si.classes['fields']:
-                si.msg_logger.msg('     class ' + self.params['class_name'] + ', "' + self.params['name']
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', "' + self.info['name']
                                 + '" requires field  "' + name + '"' + ' to work, add to reader["field_variables"], or add to fields param class list', fatal_error=True)
 
         for name in required_props_list:
             if name not in si.classes['particle_properties']:
-                si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.params['name']
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.info['name']
                                 + '" requires particle property  "' + name + '"'
                                 + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', fatal_error=True)
 
         if requires3D and not si.is_3D_run:
-                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', fatal_error=True)
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.info['name'] + ' can only be used with 3D hindcast ', fatal_error=True)
 
     def remove_default_params(self, name_list):
         # used to get rid if paramters of parent class which are not used by a child class

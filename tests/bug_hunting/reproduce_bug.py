@@ -217,7 +217,7 @@ params = {
         "processors": 1,
     },
     "reader": {
-        "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
+        "class_name": "oceantracker.reader.schism_reader.SCHISMSreaderNCDF",
         "depth_average": False,
         "file_mask": "NZfinite*.nc",
         "input_dir": input_dir,

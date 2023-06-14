@@ -10,8 +10,6 @@ SettleInPolygon
 
 **Inheritance:** _BaseTrajectoryModifier> SettleInPolygon
 
-**Default internal name:** ``"settle_in_polygon"``
-
 
 Parameters:
 ************

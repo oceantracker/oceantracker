@@ -10,8 +10,6 @@ VerticalGradient
 
 **Inheritance:** _BaseField> UserFieldBase> VerticalGradient
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************

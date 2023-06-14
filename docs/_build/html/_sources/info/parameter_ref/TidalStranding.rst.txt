@@ -10,8 +10,6 @@ TidalStranding
 
 **Inheritance:** _BaseStatusModifer> TidalStranding
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************

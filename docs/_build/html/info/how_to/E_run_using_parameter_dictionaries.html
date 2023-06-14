@@ -58,8 +58,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -401,8 +401,9 @@ behavior, due to shared memory space, fix by reloading the kernel</p></li>
 Oceantracker cases in parallel, without a work around given in a
 later “how to”.</p></li>
 </ul>
+</section>
 <section id="run-with-code-built-params">
-<h3>Run with code built params.<a class="headerlink" href="#run-with-code-built-params" title="Permalink to this heading">¶</a></h3>
+<h2>Run with code built params.<a class="headerlink" href="#run-with-code-built-params" title="Permalink to this heading">¶</a></h2>
 <p>Is line below!</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># run oceantracker using param dict built in cells above</span>
 <span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
@@ -49570,7 +49571,7 @@ YXRhAAAAAQAAAABMYXZmNTguNDUuMTAw
 </video><img alt="info/how_to/E_run_using_parameter_dictionaries_files%5CE_run_using_parameter_dictionaries_9_1.png" src="info/how_to/E_run_using_parameter_dictionaries_files%5CE_run_using_parameter_dictionaries_9_1.png" />
 </section>
 <section id="run-by-reading-param-file">
-<h3>Run by reading param. file<a class="headerlink" href="#run-by-reading-param-file" title="Permalink to this heading">¶</a></h3>
+<h2>Run by reading param. file<a class="headerlink" href="#run-by-reading-param-file" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
 <span class="kn">from</span> <span class="nn">oceantracker.util</span> <span class="kn">import</span> <span class="n">yaml_util</span>
 
@@ -49643,7 +49644,6 @@ P000: --------------------------------------------------------------------------
 P000:   -  Triangle walk summary: Of  1,009,564 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
 startup:     &gt;&gt;&gt; Note: run summary with case in file names   &quot;param_test1_runInfo.json&quot;</pre>
 </section>
-</section>
 <section id="run-from-command-line">
 <h2>Run from command line<a class="headerlink" href="#run-from-command-line" title="Permalink to this heading">¶</a></h2>
 <p>Run without coding from command lin bu using a parameter file pre-built
@@ -49655,9 +49655,8 @@ activated environment.</p>
 <p>eg. run “run_oceantracker.py” script in the oceantracker/oceantracker
 directory with command</p>
 <p><code class="docutils literal notranslate"><span class="pre">python</span>&#160; <span class="pre">..\\oceantracker\\run_oceantracker.py</span> <span class="pre">.\\example_param_files\\param_test1.json</span></code></p>
-</section>
 <section id="options-when-running-at-command-line">
-<h2>Options when running at command line<a class="headerlink" href="#options-when-running-at-command-line" title="Permalink to this heading">¶</a></h2>
+<h3>Options when running at command line<a class="headerlink" href="#options-when-running-at-command-line" title="Permalink to this heading">¶</a></h3>
 <p>These allow</p>
 <ul class="simple">
 <li><p>redefining the input and output dirs given within parameter file,
@@ -49694,6 +49693,7 @@ testing</p></li>
                         <span class="n">checks</span> <span class="n">Numba</span> <span class="n">array</span> <span class="n">bounds</span>
 </pre></div>
 </div>
+</section>
 </section>
 </section>
 

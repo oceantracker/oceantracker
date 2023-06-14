@@ -10,8 +10,6 @@ RandomWalk
 
 **Inheritance:** _BaseTrajectoryModifer> RandomWalk
 
-**Default internal name:** ``"random_walk"``
-
 
 Parameters:
 ************

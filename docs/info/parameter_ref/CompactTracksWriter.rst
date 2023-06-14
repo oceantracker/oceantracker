@@ -10,8 +10,6 @@ CompactTracksWriter
 
 **Inheritance:** _BaseWriter> CompactTracksWriter
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************
@@ -32,11 +30,6 @@ Parameters:
 
 		- default: ``False``
 		- possible_values: ``[True, False]``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
-
-		- default: ``None``
 
 	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``

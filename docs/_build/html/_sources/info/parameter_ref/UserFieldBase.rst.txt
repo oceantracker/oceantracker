@@ -10,8 +10,6 @@ UserFieldBase
 
 **Inheritance:** _BaseField> UserFieldBase
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************
@@ -28,11 +26,6 @@ Parameters:
 	* ``is_time_varying`` :   ``<class 'bool'>`` **<isrequired>**
 		- default: ``True``
 		- possible_values: ``[True, False]``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
-
-		- default: ``None``
 
 	* ``num_components`` :   ``<class 'int'>`` **<isrequired>**
 		- default: ``None``

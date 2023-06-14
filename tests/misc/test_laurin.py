@@ -484,7 +484,7 @@ if __name__ == '__main__':
             'compact_mode': True,
             'time_step' : 10*60,
         },
-        'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+        'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                    'file_mask': 'schout_*.nc', 'input_dir': input_dir,
                    'hgrid_file_name': path.join(input_dir, 'hgrid.gr3'),
                    # fields to track at particle locations

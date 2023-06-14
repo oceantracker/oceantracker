@@ -266,7 +266,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             release_info = i.info['release_info']
 
             if release_info['release_times'].size == 0:
-                si.msg_logger.msg('Release group= ' + str(n + 1) + ', name= ' + i.params['name'] + ',  no release times in range of hindcast and given release duration', warning=True)
+                si.msg_logger.msg('Release group= ' + str(n + 1) + ', name= ' + i.info['name'] + ',  no release times in range of hindcast and given release duration', warning=True)
                 continue
             else:
                 first_release_time.append(release_info['first_release_time'])
@@ -390,7 +390,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             i = si.create_class_dict_instance('fields', 'user', params, crumbs='Adding "fields" from user params')
             i.initial_setup()
             # now add custom prop based on  this field
-            pgm.create_particle_property(i.params['name'], 'from_fields', dict(vector_dim=i.get_number_components(), time_varying=i.is_time_varying(),
+            pgm.create_particle_property(i.info['name'], 'from_fields', dict(vector_dim=i.get_number_components(), time_varying=i.is_time_varying(),
                                                              write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
 
             # if not time varying can update once at start from other non-time varying fields

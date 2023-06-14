@@ -38,7 +38,7 @@ class VerticalGradient(UserFieldBase):
         grid= si.classes['reader'].grid
 
         _calc_field_vert_grad(fields[self.params['name_of_field']].data,grid['zlevel'],
-                                    grid['bottom_cell_index'], si.z0, fields[self.params['name']].data)
+                                    grid['bottom_cell_index'], si.z0, fields[self.info['name']].data)
 @njit
 def _calc_field_vert_grad(feild4D,zlevel,bottom_cell_index,z0,gradient_field):
 

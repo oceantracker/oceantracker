@@ -10,8 +10,6 @@ TotalWaterDepth
 
 **Inheritance:** _BasePropertyInfo> ParticleProperty> TotalWaterDepth
 
-**Default internal name:** ``"total_water_depth"``
-
 
 Parameters:
 ************

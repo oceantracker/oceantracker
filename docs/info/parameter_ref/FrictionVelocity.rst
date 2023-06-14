@@ -10,8 +10,6 @@ FrictionVelocity
 
 **Inheritance:** _BaseField> UserFieldBase> FrictionVelocity
 
-**Default internal name:** ``"friction_velocity"``
-
 
 Parameters:
 ************

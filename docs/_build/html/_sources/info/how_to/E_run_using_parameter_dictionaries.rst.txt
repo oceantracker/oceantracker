@@ -324,7 +324,7 @@ the way notebooks are implemented can sometimes result in issues:
    later “how to”.
 
 Run with code built params.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 Is line below!
 
@@ -49512,7 +49512,7 @@ Is line below!
 
 
 Run by reading param. file
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 .. code:: ipython3
 
@@ -49610,7 +49610,7 @@ directory with command
 ``python  ..\\oceantracker\\run_oceantracker.py .\\example_param_files\\param_test1.json``
 
 Options when running at command line
-------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These allow
 

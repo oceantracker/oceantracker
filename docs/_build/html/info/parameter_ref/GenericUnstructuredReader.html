@@ -107,7 +107,6 @@
 <p><strong>Class:</strong> oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader</p>
 <p><strong>File:</strong> oceantracker/reader/generic_unstructured_reader.py</p>
 <p><strong>Inheritance:</strong> _BaseReader&gt; GenericUnstructuredReader</p>
-<p><strong>Default internal name:</strong> <code class="docutils literal notranslate"><span class="pre">&quot;not</span> <span class="pre">given</span> <span class="pre">in</span> <span class="pre">defaults&quot;</span></code></p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
@@ -336,14 +335,6 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name “water_velocity” would refers to a particle property or field used within the code</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">one_based_indices</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: - indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
@@ -400,6 +391,7 @@
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">-12</span></code></p></li>
 <li><p>max: <code class="docutils literal notranslate"><span class="pre">12</span></code></p></li>
+<li><p>units: <code class="docutils literal notranslate"><span class="pre">hours</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -407,14 +399,6 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">water_density</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">48</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
 </ul>
 </dd>
 </dl>

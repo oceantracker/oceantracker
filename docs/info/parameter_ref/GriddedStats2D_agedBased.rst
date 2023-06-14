@@ -10,8 +10,6 @@ GriddedStats2D_agedBased
 
 **Inheritance:** _BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************
@@ -66,11 +64,6 @@ Parameters:
 
 	* ``min_age_to_bin`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
-
-		- default: ``None``
 
 	* ``particle_property_list``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``

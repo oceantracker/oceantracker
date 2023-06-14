@@ -10,8 +10,6 @@ ParticleProperty
 
 **Inheritance:** _BasePropertyInfo> ParticleProperty
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************

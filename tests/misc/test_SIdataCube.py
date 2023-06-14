@@ -44,7 +44,7 @@ if __name__ == '__main__':
     params={ 'shared_params': {'output_file_base': 'SIdataCubetest',
 
                                 'root_output_dir': 'F:\\OceanTrackerOuput\\OceanNum'},
-            'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+            'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                           'file_mask': 'schout_*.nc', 'input_dir': 'F:\\Hindcasts\\OceanNumSouthlandCube\\2010\\01',
                           'depth_average': args.depthaverage,
                        'field_variables_to_depth_average': ['water_velocity'],

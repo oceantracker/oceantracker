@@ -10,7 +10,7 @@ reader
 
 	GenericUnstructuredReader.rst
 	ROMsNativeReader.rst
-	SCHSIMreaderNCDF.rst
+	SCHISMSreaderNCDF.rst
 	unstructured_FVCOM.rst
 
 **Role:** 

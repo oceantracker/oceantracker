@@ -10,8 +10,6 @@ SCHSIMreaderNCDF
 
 **Inheritance:** _BaseReader> GenericUnstructuredReader> SCHSIMreaderNCDF
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************
@@ -85,11 +83,6 @@ Parameters:
 	* ``max_numb_files_to_load`` :   ``<class 'int'>``   *<optional>*
 		- default: ``10000000``
 		- min: ``1``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: - The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code
-
-		- default: ``None``
 
 	* ``one_based_indices``: nested parameter dictionary
 	* ``required_file_dimensions``:  *<optional>*

@@ -10,8 +10,6 @@ AgeDecay
 
 **Inheritance:** _BasePropertyInfo> ParticleProperty> AgeDecay
 
-**Default internal name:** ``"age_decay"``
-
 
 Parameters:
 ************

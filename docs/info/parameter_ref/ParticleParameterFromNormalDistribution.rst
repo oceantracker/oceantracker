@@ -10,8 +10,6 @@ ParticleParameterFromNormalDistribution
 
 **Inheritance:** _BasePropertyInfo> ParticleProperty> ParticleParameterFromNormalDistribution
 
-**Default internal name:** ``"not given in defaults"``
-
 
 Parameters:
 ************

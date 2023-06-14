@@ -10,8 +10,6 @@ BasicResuspension
 
 **Inheritance:** _BaseResuspension> BasicResuspension
 
-**Default internal name:** ``"BasicResuspension"``
-
 
 Parameters:
 ************

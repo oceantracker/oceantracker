@@ -31,7 +31,7 @@ class ParticleGroupManager(ParameterBaseClass):
         nDim = 3 if si.hydro_model_is3D else  2
 
         #  time dependent core  properties
-        self.add_time_varying_info(name = 'time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
+        self.add_time_varying_info('time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
         #todo put core properteis in a numpy dtype block
         # core particle props. , write at each required time step
         self.create_particle_property('x','manual_update',dict(vector_dim=nDim))  # particle location
@@ -172,18 +172,18 @@ class ParticleGroupManager(ParameterBaseClass):
         self.particles_in_buffer += num_released # number in particle buffer
         return new_buffer_indices
 
-    def add_time_varying_info(self,**kwargs):
+    def add_time_varying_info(self,name, **kwargs):
         # property for group of particles, ie not properties of individual particles, eg time, number released
         # **karwgs must have at least name
         params = kwargs
         params['class_name'] = 'oceantracker.particle_properties._base_properties.TimeVaryingInfo'
         si = self.shared_info
-        i = si.create_class_dict_instance(params['name'],'time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
+        i = si.create_class_dict_instance(name,'time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
         i.initial_setup()
 
         if si.write_tracks and i.params['write']:
             w = si.classes['tracks_writer']
-            w.create_variable_to_write(i.params['name'], 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
+            w.create_variable_to_write(name, 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
 
     def create_particle_property(self, name, prop_group, prop_params, crumbs=''):
         si = self.shared_info
@@ -222,7 +222,7 @@ class ParticleGroupManager(ParameterBaseClass):
             if name in w.params['turn_off_write_particle_properties_list']: i.params['write'] = False
             if name in w.params['turn_on_write_particle_properties_list']:  i.params['write'] = True
             if i.params['write']:
-                w.create_variable_to_write(i.params['name'], is_time_varying=i.params['time_varying'],
+                w.create_variable_to_write(name, is_time_varying=i.params['time_varying'],
                                            is_part_prop=True,
                                            vector_dim=i.params['vector_dim'],
                                            attributes={'description': i.params['description']},
