@@ -46,10 +46,10 @@ class SharedInfoClass(object):
         crumbs += f' >>> adding_class type >> {class_type}  (name=  {name} instance #{instanceID: 1d})'
 
         # make instance  and merge params
-        i = make_class_instance_from_params(name, params, self.msg_logger, crumbs= 'create_class_dict_instance> ' + name)
+        i = make_class_instance_from_params(name, params, self.msg_logger, crumbs= f'create_class_dict_instance> "{class_type}" > "{name}"')
 
         if class_type not in common_info.class_dicts.keys() :
-            ml.msg('add_to_class_list: name is not a known class list,class_type=' + class_type , exception = True, crumbs = crumbs)
+            ml.msg(f'Class type = "{class_type}": name is not a known class_type=' + class_type , exception = True, crumbs = crumbs)
 
         # now add to class lists and interators
 

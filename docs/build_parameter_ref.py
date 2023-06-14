@@ -256,7 +256,7 @@ def build_param_ref():
 
     page.write()
 
-    page.add_heading('Multiple classes for each role',level=1)
+    page.add_heading('Multiple classes for each role',level=2)
     page.add_lines('Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.')
     page.add_new_toc_to_page('class_dicts', maxdepth=1, sort_body=True)
 

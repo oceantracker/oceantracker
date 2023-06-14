@@ -9,12 +9,12 @@ __________________
 Version 0.4 Major upgrade
 _________________________
 
-Major upgrade to simply use and parameter in repose to user input. This has breaking changes, happy to help with transition. Tried to inclide a all chnages whic affect use od parameters i this upgrade
+Major upgrade to simplify use and parameter in repose to user input. This has breaking changes, happy to help with transition. Tried to include all changes which affect use of parameters in this upgrade
 
 Known breaking changes- ask for help if needed to transition
-___________________________________________________________
+______________________________________________________________
 
-#. new flatter paramter structure
+#. new flatter parameter structure
 #. solver sub-stepping replaced by time_step in seconds param
 #. writer output step count replaced by update_interval time for writing
 
@@ -23,9 +23,11 @@ ___________________________________________________________
 New features
 --------------------
 
+#. tutorials/how to notebooks to help with getting started.
 #. "helper class" to build parameters without using dictionaries, by using keyword arguments of two methods of helper class.
-#. Automatically determine hindcast file type, if reader class_name param not given
+#. "spell checker" for param name errors with suggestions
 #. Much faster start up with improved grid outline builder
+#. Automatically determine hindcast file type, if reader class_name param not given
 #. FVCOM and ROMS readers working
 
 Internal changes
