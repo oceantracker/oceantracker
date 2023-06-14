@@ -96,30 +96,25 @@ particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search
                  }
 # default reader classes used by auto dection of file type
 
-default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                  'fvcom': 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
                  'roms': 'oceantracker.reader.ROMS_reader.OMsNativeReader'}
 
 # TODO LIST
 # todo for version 0.40.01
     #TODO BUGS
-            # todo no file found graceful exit
+            # todo no hindcast file found graceful exit
             # todo active count when culling?
             # todo why BC walk too long for large steps sizes?
             # todo cope wih empty relese groups, ie non released
             # todo no releases in particle buffer to small?
 
-    #TODO TUTORIALS
-        # todo Reader param and adding fields
-        # todo resupension
-        # todo random walk
+
     #TODO PARAMETERS
         # todo check time_step default is hindcast time step
-        # todo max time steps per file option?
-        # todo full use of  'update_interval' for stats eves and some part prop
+
 
     # TODO DOCUMENTATION
-        #todo  add doc string for improtant methods and classes
 
 
     # TODO STRUCTURE
@@ -127,25 +122,26 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
         # todo  by default read all varaibles for plotting? or read on demand?
         #todo matlab ncdf reader to read release group info
         # add fraction to read to matlab code
+        # todo get rid of particle prop dtype
+        # todo add self expanding particle buffer
+        # todo free run if no particles
+        # todo get rid of particle estimates
 
     # TODO SIMPLIFY
-        #todo remove depth range stats and make depth range part of stats
-        # add part property from field wwhich checks if field exists
-        #todo discard name param
 
 
     #TODO Nice to haves
-        # todo remove leading/trailling blanks from string values/param names
-        # todo allow numpy arrays in "array" type
-        # todo allow isostr, datetime, np.dateime64 for dates
+        # todo get rid of info[points], just alter params points
         # todo field type reader, derived from reader feild ,  or custom
         # todo simplfy run in depth average mode and depth averaing fields, swap to explict depth aver tags feild names??
         # todo check time_step default is hindcast time step
         # todo read write polygons from geo-jsons, release groups poly stats
         # todo add units to Parameter check and show in user docs
-        # todo  add msegae logging to post processing
+        # todo add message logging to post processing
         # todo add read case info file with not found errors
-        # todo get rid of info[points], just alter params points
+        # todo  add doc string for improtant methods and classes
+        # todo max time steps per file option?
+        # todo remove blanks from class papam keys
 
 #TODO FASTER STARTUP
     #todo add timing of start up blocks to improve setup speed
@@ -155,8 +151,11 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # todo design and make base class
     # todo make template
 
-#TODO PERFORMANCE
+# TODO TUTORIALS
+    # todo Reader param and adding fields
+    # todo resupension
 
+#TODO PERFORMANCE
         # todo kernal forms of hori/vert walk
         # todo kernal form of water vel interpolator
         # todo kernal RK solver
@@ -164,7 +163,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
 # TODO STRUCTURE
     # todo hyperlinks to online docs where useful
     #todo much cleaner to  do residence times/stats for all polygon release groups given!
-            #or better get user to define polygons like polygond statistcs, or merge with polygon stats
+            #todo or better get user to define polygons like polygon statistcs, or merge with polygon stats
     # todo use update_interval everywhere as parmateter fo periodic actions
     # todo revert to index zero for all IDs and data loading
     # todo show defauls on param eros?
@@ -178,8 +177,13 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     # todo enable on the fly depth avering of fieds if running depth avearged,
     #  currently disabled in base reader.setup_reader_fields
     #todo only have compact mode tracks, and add a convert at end if requested
+    # todo remove depth range stats and make depth range part of stats
+    # todo add part property from field wwhich checks if field exists
+    # todo retain on the fly depth averaging?
 
 # TODO IMPROVEMENTS
+    # todo allow numpy arrays in "array" type
+    # todo allow isostr, datetime, np.dateime64 for dates
     # todo allow user to give "class" instead of class_name ( not an insatnce)
     # todo add run_dir option to all output reads
     # todo rotate particle relese polygns to reduce searches for points in side
@@ -190,13 +194,15 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF'
     #  todo and add "show_dead_particles" option to tracks plotting
     #todo plot routines using message logger
     #todo merge residence time into polygon stats?
-    #todo add varainc cacl got on fly stats partivle prop, by adding sum of squares heatmap/ploygon
+    #todo add variance calc to on fly stats particle prop, by adding sum of squares heatmap/ploygon
     # todo read geojson polygons
     # todo free run through statr/gaps/ends when no active particles
     # todo read-ahead async reader
     # todo add CPC for check class parameters??
     # todo add default class instance checking
     #todo merge water depth range selection into all stats
+    # more consisted crumb use for all message logger errors to aid debug
+    #todo merge demo plots back into demos
 
 # TODO FUTURE
     # todo Kernal RK steps

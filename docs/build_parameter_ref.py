@@ -206,10 +206,6 @@ def make_class_sub_pages(class_type, link_tag=''):
             p.add_lines('**Inheritance:** ' + parents + c.__name__)
             p.add_lines()
 
-            internal_name = instance.default_params['name'].get_default() if instance.default_params['name'].get_default() is not None else 'not given in defaults'
-            p.add_lines('**Default internal name:** ``"' + internal_name.strip() + '"``' )
-            p.add_lines()
-
             # get all defaults and wrte to yaml
             #instance.merge_with_class_defaults({},{})
             #write_YAML(name+'.yaml',instance.params)

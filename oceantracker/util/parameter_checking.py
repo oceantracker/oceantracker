@@ -1,7 +1,7 @@
 from copy import deepcopy, copy
 import numpy as np
 from oceantracker.util import time_util
-
+import difflib
 
 
 crumb_seperator= ' >> '
@@ -27,7 +27,9 @@ def  merge_params_with_defaults(params, default_params, msg_logger, crumbs= '', 
     if check_for_unknown_keys:
         for key in list(params.keys()):
            if  key not in default_params :
-               msg_logger.msg('non-standard parameter:' + crumbs + crumb_seperator + key, warning=True)
+               msg_logger.msg('non-standard parameter:' + crumbs + crumb_seperator + key,
+                            hint=f'Closest matches to "{key}" = {difflib.get_close_matches(key, list(default_params.keys()),cutoff=0.4 )} ?? ',  warning=True)
+
 
     for key, item in default_params.items():
         parent_crumb = crumbs + crumb_seperator + key

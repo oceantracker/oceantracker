@@ -54,7 +54,7 @@ if __name__ == '__main__':
     params={ 'shared_params': {'output_file_base': 'soundstest',
                             'root_output_dir': 'F:\\OceanTrackerOuput\\Sounds\\test',
                                'max_run_duration': 30*24*3600.},
-        'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+        'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                       'file_mask': 'schism_marl201701*.nc', 'input_dir': 'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2017',
                       'depth_average': args.depthaverage,
                         'field_variables_to_depth_average': ['water_velocity'],

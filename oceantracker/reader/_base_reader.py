@@ -12,6 +12,7 @@ from oceantracker.util import  cord_transforms
 from oceantracker.reader.util import shared_reader_memory_util
 from oceantracker.util.profiling_util import function_profiler
 
+
 from oceantracker.reader.util import reader_util
 
 class _BaseReader(ParameterBaseClass):
@@ -21,16 +22,15 @@ class _BaseReader(ParameterBaseClass):
         self.add_default_params({'input_dir': PVC(None, str, is_required=True),
                                  'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
                                  'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
-                                 'time_zone': PVC(None, int, min=-12, max=12,doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
+                                 'time_zone': PVC(None, int, min=-12, max=12, units='hours', doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
                                  'cords_in_lat_long': PVC(False, bool),
                                  'time_buffer_size': PVC(48, int, min=2),
                                  'required_file_variables' :PLC([], [str]),
                                  'required_file_dimensions': PLC([], [str]),
-                                 'water_density': PVC(48, int, min=2),
+                                 #'water_density': PVC(48, int, min=2),
                                  'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
                                  'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
-                                 'EPSG_transform_code' : PVC(None, int, min=0,
-                                                   doc_str='Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)'),
+                                 'EPSG_transform_code' : PVC(None, int, min=0, doc_str='Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)'),
                                  'grid_variables': {'time': PVC('time', str, is_required=True),
                                                     'x': PLC(['x', 'y'], [str], fixed_len=2),
                                                     'zlevel': PVC(None, str),
@@ -49,7 +49,7 @@ class _BaseReader(ParameterBaseClass):
                                                    'vector2Ddim': PVC(None, str), 'vector3Ddim': PVC(None, str)},
                                  'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
                                  'search_sub_dirs': PVC(True, bool),
-                                 'max_numb_files_to_load': PVC(10 ** 7, int, min=1)
+                                 'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
                                  })  # list of normal required dimensions
 
         # store instances of shared memory classes for variables shared between processes
@@ -120,20 +120,22 @@ class _BaseReader(ParameterBaseClass):
         self.setup_reader_fields(nc)
         nc.close()
 
-    def get_list_of_files_and_hindcast_times(self):
+    def get_list_of_files_and_hindcast_times(self, msg_logger):
         # get time sorted list of files matching mask
 
         input_dir= self.params['input_dir']
 
+        if not path.isdir(input_dir):
+            msg_logger.msg(f'Reader cannot find "input_dir"  = {input_dir}', fatal_error=True, exit_now=True)
+
+
         if self.params['search_sub_dirs']:
-            # search hindcast sub dirs
-            file_names = []
-            for root, dirs, files in walk(input_dir):
-                # add matching files in root folder to list
-                new_files = glob(path.join(root, self.params['file_mask']))
-                if len(new_files) > 0: file_names += new_files
+            file_names = glob(path.normpath(path.join(input_dir, self.params['file_mask'])), recursive=True)
         else:
             file_names = glob(path.normpath(path.join(input_dir, self.params['file_mask'])))
+
+        if len(file_names) ==0:
+            msg_logger.msg(f'Reader cannot find any files in "{input_dir}" matching mask "{self.params["file_mask"]}"', fatal_error=True, exit_now=True)
 
         fi = {'names': file_names, 'n_time_steps': [], 'time_start': [], 'time_end': []}
         for n, fn in enumerate(file_names):
@@ -173,16 +175,16 @@ class _BaseReader(ParameterBaseClass):
 
         return fi
 
-    def get_hindcast_files_info(self):
+    def get_hindcast_files_info(self, msg_logger):
         # read through files to get start and finish times of each file
         # create a time sorted list of files given by file mask in file_info dictionary
         # note this is only called once by OceantrackRunner to form file info list,
         # which is then passed to  OceanTrackerCaseRunner
-        msg_logger = self.msg_logger
+
         # build a dummy non-initialise reader to get some methods and full params
         # add defaults from template, ie get reader class_name default, no warnings, but get these below
         # check cals name
-        fi = self.get_list_of_files_and_hindcast_times()
+        fi = self.get_list_of_files_and_hindcast_times(msg_logger)
 
         # checks on hindcast using first hindcast file
         nc = NetCDFhandler(fi['names'][0], 'r')
@@ -327,8 +329,7 @@ class _BaseReader(ParameterBaseClass):
         # if depth averaging reduce to at most a 2D buffer
         if depth_averaging :  n_total_comp = min(2, n_total_comp)
 
-        params = {'name': name,
-                  'class_name': 'oceantracker.fields._base_field._BaseField' ,#'oceantracker.fields.reader_field.ReaderField',
+        params = {'class_name': 'oceantracker.fields._base_field._BaseField' ,#'oceantracker.fields.reader_field.ReaderField',
              'is_time_varying':  is_time_varying,
              'num_components' : n_total_comp,
              'is3D' :  False if var_info['requires_depth_averaging'] else is3D_in_file

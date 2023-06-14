@@ -160,7 +160,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         grid = self.grid
         field_instance = si.classes['fields']['water_velocity']
         part_prop = si.classes['particle_properties']
-        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
         st = self.step_info
@@ -180,7 +179,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                n_cell, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
                                                active)
         else:
-
             self._interp_field2D(field_instance, n_cell, bc_cords, output, active)
 
     #@function_profiler(__name__)
@@ -192,7 +190,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         si = self.shared_info
         grid = self.grid
         part_prop = si.classes['particle_properties']
-        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
 
@@ -215,7 +212,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # in place evaluation of field interpolation
         si = self.shared_info
         part_prop = si.classes['particle_properties']
-        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
         grid = self.grid
         triangles = grid['triangles']
         st = self.step_info
@@ -242,7 +238,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # in place evaluation of field interpolation
         si = self.shared_info
         part_prop = si.classes['particle_properties']
-        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
         grid = self.grid
         triangles = grid['triangles']
         st = self.step_info
@@ -270,8 +265,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         reader = si.classes['reader']
 
         part_prop = si.classes['particle_properties']
-
-        part_prop_struct = si.classes['particle_group_manager'].part_prop_as_struct
         grid = self.grid
         st = self.step_info
 

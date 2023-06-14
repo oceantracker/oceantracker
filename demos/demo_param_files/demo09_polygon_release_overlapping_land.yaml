@@ -3,7 +3,7 @@ backtracking: true
 dispersion:
   A_H: 0.1
 output_file_base: demo09_polygon_release_overlapping_land
-particle_properties:
+'particle_properties ':
   Oxygen:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0

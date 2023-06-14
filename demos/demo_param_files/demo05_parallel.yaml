@@ -7,7 +7,7 @@
   dispersion:
     A_H: 0.1
   output_file_base: demo05_parallel
-  particle_properties:
+  'particle_properties ':
     Oxygen:
       class_name: oceantracker.particle_properties.age_decay.AgeDecay
       decay_time_scale: 86400.0
@@ -45,6 +45,7 @@
         - 5483000
       - - 1598000
         - 5486100
+      ppoint: 1
       pulse_size: 10
       release_interval: 10800
     poly1:
@@ -79,7 +80,7 @@
   dispersion:
     A_H: 0.1
   output_file_base: demo05_parallel
-  particle_properties:
+  'particle_properties ':
     Oxygen:
       class_name: oceantracker.particle_properties.age_decay.AgeDecay
       decay_time_scale: 86400.0
@@ -117,6 +118,7 @@
         - 5483000
       - - 1598000
         - 5486100
+      ppoint: 1
       pulse_size: 10
       release_interval: 10800
     poly1:
@@ -150,7 +152,7 @@
   dispersion:
     A_H: 0.1
   output_file_base: demo05_parallel
-  particle_properties:
+  'particle_properties ':
     Oxygen:
       class_name: oceantracker.particle_properties.age_decay.AgeDecay
       decay_time_scale: 86400.0
@@ -188,6 +190,7 @@
         - 5483000
       - - 1598000
         - 5486100
+      ppoint: 1
       pulse_size: 10
       release_interval: 10800
     poly1:
@@ -221,7 +224,7 @@
   dispersion:
     A_H: 0.1
   output_file_base: demo05_parallel
-  particle_properties:
+  'particle_properties ':
     Oxygen:
       class_name: oceantracker.particle_properties.age_decay.AgeDecay
       decay_time_scale: 86400.0
@@ -259,6 +262,7 @@
         - 5483000
       - - 1598000
         - 5486100
+      ppoint: 1
       pulse_size: 10
       release_interval: 10800
     poly1:
@@ -292,7 +296,7 @@
   dispersion:
     A_H: 0.1
   output_file_base: demo05_parallel
-  particle_properties:
+  'particle_properties ':
     Oxygen:
       class_name: oceantracker.particle_properties.age_decay.AgeDecay
       decay_time_scale: 86400.0
@@ -330,6 +334,7 @@
         - 5483000
       - - 1598000
         - 5486100
+      ppoint: 1
       pulse_size: 10
       release_interval: 10800
     poly1:

@@ -79,7 +79,7 @@ class PointRelease(ParameterBaseClass):
         # now check if start in range
         n_groups_so_far =len(si.classes['release_groups'])
         if not hindcast_start <= time_start <= hindcast_end:
-            si.msg_logger.msg('Release group= ' + str(n_groups_so_far + 1) + ', name= ' + self.params['name'] + ',  parameter release_start_time is ' +
+            si.msg_logger.msg('Release group= ' + str(n_groups_so_far + 1) + ', name= ' + self.info['name'] + ',  parameter release_start_time is ' +
                                     time_util.seconds_to_isostr(time_start)
                               + '  is outside hindcast range ' + time_util.seconds_to_isostr(hindcast_start)
                                     + ' to ' + time_util.seconds_to_isostr(hindcast_end), warning=True)

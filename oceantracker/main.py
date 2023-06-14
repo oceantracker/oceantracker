@@ -25,7 +25,7 @@ import shutil
 from time import perf_counter
 from copy import  copy
 import numpy as np
-
+import difflib
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import basic_util , get_versions_computer_info
 from oceantracker.util import json_util ,yaml_util
@@ -197,6 +197,11 @@ class OceanTracker():
            'class_dicts': deepcopy(common_info.class_dicts),
            }
 
+        known_keys= list(common_info.shared_settings_defaults.keys())\
+                            + list(common_info.case_settings_defaults.keys()) \
+                            + list(common_info.class_dicts.keys()) \
+                            +list(common_info.core_classes.keys())
+
         # check for compulsory classes
         # check require classes are given
         if 'reader' not in params or params['reader'] is None:
@@ -210,7 +215,10 @@ class OceanTracker():
 
         # split and check for unknown keys
         for key, item in params.items():
-            k = key
+            k = copy(key)
+            if len(k) != len(k.strip()):
+                ml.msg(f'Removing leading or trailing blanks from top level "{key}"', warning=True)
+                k = key.strip() # remove leading/trailing blanks
 
             if type(item) is tuple:
                 # check item not a tuple
@@ -233,7 +241,9 @@ class OceanTracker():
                 w['class_dicts'][k] = item
 
             else:
-                ml.msg('Unknown top level parameter "' + key +'"', warning=True)
+
+                ml.msg('Unknown top level parameter "' + key +'"', warning=True,
+                       hint=f'Closest matches  to "{k}"  ={difflib.get_close_matches(k,known_keys,cutoff=0.4)} ?? ')
 
 
 
@@ -253,18 +263,16 @@ class OceanTracker():
         reader_params =  working_params['core_classes']['reader']
 
         if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
-            ml.msg('Reader requires settings, "input_dir" and "file_mask" to read the hindcast',fatal_error=True, exit_now=True )
+            ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',fatal_error=True, exit_now=True )
 
         if 'class_name' not in  reader_params:
             # infer class name from netcdf files if possible
             reader_params= check_hydro_model.check_fileformat(reader_params, ml)
 
+        reader = make_class_instance_from_params('reader', reader_params, ml,  class_type_name='reader')
+        ml.exit_if_prior_errors() # class name missing or missing requied variables
 
-        reader = make_class_instance_from_params(reader_params, ml,  class_type_name='reader')
-        ml.exit_if_prior_errors() # class name missing or missimg requied variables
-
-        #todo check hindacst dir exists??
-        working_params['file_info'] ,working_params['hindcast_is3D'] = reader.get_hindcast_files_info() # get file lists
+        working_params['file_info'] ,working_params['hindcast_is3D'] = reader.get_hindcast_files_info(ml) # get file lists
 
         ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
 

@@ -38,7 +38,7 @@ demo_base_params={'output_file_base' : None,
     'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_index': True},
     'release_groups': {'mypoints1':{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}
                                 },
-    'particle_properties': {
+    'particle_properties ': {
                         'Oxygen': { 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24,'initial_value' : 20.},
                         'distance_travelled':   {'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'},
                             }
@@ -54,7 +54,7 @@ params.append(p1)
 # demo 2 track animation
 p2= deepcopy(demo_base_params)
 p2['release_groups']={
-    'point1':{'allow_release_in_dry_cells': True,
+    'point1':{'allow_release_in_dry_cells': True,'ppoint':1,
             'points': [[1594500, 5483000], [1598000, 5486100]], 'pulse_size': 10, 'release_interval': 3 * 3600},
     'poly1':{'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease','name':'userA',
             'points': deepcopy(poly_points),
@@ -224,7 +224,7 @@ params.append(p10)
 # case 50 schism basic
 schsim_base_params=\
 {'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,
- 'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHSIMreaderNCDF',
+ 'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': 'demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',
                      'field_variables':{'water_temperature':'temp'}

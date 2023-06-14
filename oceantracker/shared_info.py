@@ -24,14 +24,14 @@ class SharedInfoClass(object):
                    crumbs='Adding core class type=' + name,
                    exception = True)
         # make instance  and merge params
-        i = make_class_instance_from_params(params, ml, class_type_name=name,
+        i = make_class_instance_from_params(name, params, ml, class_type_name=name,
                                             crumbs=crumbs + ' adding core class, type =  ' + name)
 
-        i.info['name'] = name
+
 
         if i.params['requires_3D'] and not self.is_3D_run :
                 # dont add a 3D class if i not a 3D run
-                self.msg_logger.msg(' Not using add core class,' + i.params['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
+                self.msg_logger.msg(' Not using add core class,' + i.info['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
         else:
             self.classes[name] = i
         return i
@@ -46,35 +46,28 @@ class SharedInfoClass(object):
         crumbs += f' >>> adding_class type >> {class_type}  (name=  {name} instance #{instanceID: 1d})'
 
         # make instance  and merge params
-        i = make_class_instance_from_params(params, self.msg_logger, crumbs='user fields')
+        i = make_class_instance_from_params(name, params, self.msg_logger, crumbs= 'create_class_dict_instance> ' + name)
 
         if class_type not in common_info.class_dicts.keys() :
             ml.msg('add_to_class_list: name is not a known class list,class_type=' + class_type , exception = True, crumbs = crumbs)
 
         # now add to class lists and interators
+
         i.info['group'] = group
 
         # needed for release group identification info etc, zero based
         i.info['instanceID'] =  instanceID
-        if name is None:
-            #todo this will go as names become compulsory
-            if 'name' not in i.params or i.params['name'] is None:
-                name = f"instanceID{ i.info['instanceID']:04d}"
-            else:
-                name = i.params['name']
 
-        i.params['name'] = name #todo this wil be redunent
-        i.info['name'] = name
         i.info['class_type'] = class_type
 
         if name in self.classes[class_type]:
-            ml.msg('Class type"' + class_type + '" already has a class with name = "' + i.params['name']
+            ml.msg('Class type"' + class_type + '" already has a class with name = "' + i.info['name']
                          + '", "name" parameter must be unique',
                          crumbs =   crumbs,  fatal_error=True)
 
         if i.params['requires_3D'] and not self.is_3D_run:
                 # dont add a 3D class if i not a 3D run
-                self.msg_logger.msg(' Not using user  class,' + i.params['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
+                self.msg_logger.msg(' Not using user  class,' + i.info['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
         else:
             self.classes[class_type][name] = i
         return i
