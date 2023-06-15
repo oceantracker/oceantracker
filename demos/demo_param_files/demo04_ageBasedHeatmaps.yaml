@@ -1,9 +1,12 @@
 add_date_to_run_output_dir: false
+debug: true
 dispersion:
   A_H: 0.1
 duration: 259200
 junk: h
 output_file_base: demo04_ageBasedHeatmaps
+particle_group_manager:
+  particle_buffer_chunk_size: 20000
 'particle_properties ':
   Oxygen:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
@@ -64,7 +67,7 @@ reader:
     x:
     - east
     - north
-  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15

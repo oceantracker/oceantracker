@@ -27,12 +27,12 @@ class SplitParticles(_BaseTrajectoryModifier):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         if self.params['split_status_equal_to'] is None:
-            eligible_to_split = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags[self.params['split_status_greater_than']], out=self.get_particle_index_buffer())
+            eligible_to_split = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags[self.params['split_status_greater_than']], out=self.get_partID_buffer('B1'))
         else:
-            eligible_to_split = part_prop['status'].compare_all_to_a_value('eq',si.particle_status_flags[self.params['split_status_equal_to']], out=self.get_particle_index_buffer())
+            eligible_to_split = part_prop['status'].compare_all_to_a_value('eq',si.particle_status_flags[self.params['split_status_equal_to']], out=self.get_partID_buffer('B1'))
 
         # split those eligible_to_split with given probability
-        split = particle_comparisons_util.random_selection(eligible_to_split, self.params['probability_of_splitting'], self.get_particle_subset_buffer())
+        split = particle_comparisons_util.random_selection(eligible_to_split, self.params['probability_of_splitting'], self.get_partID_subset_buffer('B1'))
 
         return split
 

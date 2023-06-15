@@ -32,6 +32,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
        # used to create boolean of those to count
         info['time_last_stats_recorded'] = si.time_of_nominal_first_occurrence
 
+        self.check_part_prop_list()
 
         if params['count_start_date'] is None:
             info['start_time'] = si.solver_info['model_start_time']
@@ -42,6 +43,28 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             info['end_time'] = si.solver_info['model_end_time']
         else:
             info['end_time'] = time_util.isostr_to_seconds(params['count_end_date'])
+
+    def check_part_prop_list(self):
+        si = self.shared_info
+        part_prop = si.classes['particle_properties']
+        pgm = si.classes['particle_group_manager']
+        names=[]
+        for name in self.params['particle_property_list']:
+
+            if not pgm.is_particle_property(name,crumbs=f'Particle Statistic "{self.info["name"]}" >'):
+                continue
+
+            if part_prop[name].is_vector():
+                si.msg_logger.msg('On the fly statistical Binning of vector particle property  "' + name + '" not yet implemented', warning=True)
+
+            elif part_prop[name].get_dtype() != np.float64:
+                si.msg_logger.msg(f'On the fly statistics can currently only track float64 particle properties, ignoring property  "{name}", of type "{str(part_prop[name].get_dtype())}"',
+                                  warning=True)
+            else:
+                names.append(name)
+
+        # set params to reduced list
+        self.params['particle_property_list'] = names
 
     def set_up_spatial_bins(self): basic_util.nopass()
 
@@ -63,16 +86,23 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # other output common to all types of stats
         nc.create_a_variable('num_released', ['time_dim'], np.int64, description='total number released')
 
-    def  set_up_part_prop_lists(self):
+    def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
         si=self.shared_info
         part_prop = si.classes['particle_properties']
         self.prop_list, self.sum_prop_list = [],[]
-
+        # todo put this in numba uti;, for other classes to use
+        names=[]
         for key, prop in self.sum_binned_part_prop.items():
             if part_prop[key].is_vector():
                 si.msg_logger.msg('On the fly statistical Binning of vector particle property  "' + key + '" not yet implemented', warning=True)
+
+            elif part_prop[key].get_dtype() != np.float64:
+                si.msg_logger.msg(f'On the fly statistics  can currently only track float64 particle properties, ignoring property  "{key}", of type "{str(part_prop[key].get_dtype())}"',
+                                  warning=True)
+
             else:
+                names.append(names)
                 self.prop_list.append(part_prop[key].data) # must used dataptr here
                 self.sum_prop_list.append(self.sum_binned_part_prop[key][:])
 
@@ -89,7 +119,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             # otherwise use types of arrays
             self.prop_list = NumbaList(self.prop_list)
             self.sum_prop_list = NumbaList(self.sum_prop_list)
-
+        pass
     def select_particles_to_count(self, out):
         # select  those> 0 or equal given value to count in stats
 
@@ -133,7 +163,13 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.record_time_stats_last_recorded(time_sec)
 
         # any overloaded selection of particles given in child classes
-        sel = self.select_particles_to_count(self.get_particle_index_buffer())
+        sel = self.select_particles_to_count(self.get_partID_buffer('B1'))
+
+        #update prop list data, as buffer may have expnaded
+        #todo do this only when expansion occurs??
+        part_prop = self.shared_info.classes['particle_properties']
+        for n, name in enumerate(self.sum_binned_part_prop.keys()):
+            self.prop_list[n]= part_prop[name].data
 
         self.do_counts(time_sec,sel)
 

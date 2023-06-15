@@ -6,16 +6,17 @@ from oceantracker.util import time_util
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.common_info_default_param_dict_templates import particle_info
-from oceantracker.util import numpy_util
+from oceantracker.util import numpy_util, debug_util
 # holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
-
+import sys, gc
+import difflib
 class ParticleGroupManager(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes
         super().__init__()  # requir+ed in children to get parent defaults
         self.add_default_params( { 'name': PVC('particle_group_manager', str) ,
-                                   'particle_buffer_chunk_size': PVC(200000, int,min=10)})
+                                   'particle_buffer_chunk_size': PVC(500_000, int, min=1)})
 
         # set up pointer dict and lists
         si = self.shared_info
@@ -30,10 +31,11 @@ class ParticleGroupManager(ParameterBaseClass):
         self.particles_in_buffer = 0
         self.particles_released = 0
         nDim = 3 if si.hydro_model_is3D else  2
+        info['current_particle_buffer_size'] = self.params['particle_buffer_chunk_size']
 
         #  time dependent core  properties
         self.add_time_varying_info('time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
-        #todo put core properteis in a numpy dtype block
+
         # core particle props. , write at each required time step
         self.create_particle_property('x','manual_update',dict(vector_dim=nDim))  # particle location
         self.create_particle_property('particle_velocity','manual_update',dict(vector_dim=nDim))
@@ -78,7 +80,7 @@ class ParticleGroupManager(ParameterBaseClass):
             for n in range(num_pulses):
                 x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
                 new_index = self.release_a_particle_group_pulse(time_sec, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
-                new_buffer_indices = np.concatenate((new_buffer_indices,new_index),dtype=np.int32)
+                new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
                 ri['index_of_next_release'] += 1
 
         # for all new particles update cell and bc cords for new particles all at same time
@@ -103,9 +105,9 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # flag if any bad initial locations
         if si.settings['open_boundary_type'] > 0:
-            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['outside_open_boundary'], out=self.get_particle_index_buffer())
+            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['outside_open_boundary'], out=self.get_partID_buffer('B1'))
         else:
-            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
 
         if bad.shape[0] > 0:
             si.msg_logger.msg(str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain',warning=True)
@@ -120,18 +122,14 @@ class ParticleGroupManager(ParameterBaseClass):
 
         smax = self.particles_in_buffer + x0.shape[0]
 
-        if smax >= si.particle_buffer_size:
-            #self._expand_particle_buffers(smax)
-            self.screen_msg += '; Out of particle buffer'
-            si.msg_logger.msg('Ran out of particle buffer- no more releases, increase parameter "particle_buffer_size", size=' \
-                               + str(si.particle_buffer_size) +' at ' + time_util.seconds_to_isostr(t), warning=True)
-            return  np.full((0,),0)# return if no more space
+        if smax >= self.info['current_particle_buffer_size']:
+            self._expand_particle_buffers(smax)
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index
         new_buffer_indices= np.arange(self.particles_in_buffer, smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
         num_released = new_buffer_indices.shape[0]
 
-        # before doing manual up dates, ensure initial values are set for
+        # before doing manual updates, ensure initial values are set for
         # manually updated particle prop, so their initial value is correct,
         # as in compact mode cant rely on initial value set at array creation, due to re use of buffer
         # important for prop, for which initial values is meaning full, eg polygon events writer, where initial -1 means in no polygon
@@ -167,10 +165,22 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def _expand_particle_buffers(self,num_particles):
         si = self.shared_info
+        info = self.info
         # get number of chunks required rounded up
-        n_chunks = int(np.ceil(num_particles/self.params['particle_buffer_chunk_size']))
-        for key, i in si.classes['particle']:
-            pass
+        n_chunks = max(1,int(np.ceil(num_particles/self.params['particle_buffer_chunk_size'])))
+        info['current_particle_buffer_size']  = n_chunks*self.params['particle_buffer_chunk_size']
+        num_in_buffer = self.particles_in_buffer
+        #print('xxy',num_particles,n_chunks,num_in_buffer,info['current_particle_buffer_size'])
+        # copy property data
+        for key, i in si.classes['particle_properties'].items():
+            #debug_util.print_referers(i.data,tag=key)
+            s= list(i.data.shape)
+            s[0] = info['current_particle_buffer_size']
+            new_data = np.zeros(s, dtype=i.data.dtype) # the new buffer
+            np.copyto(new_data[:num_in_buffer, ...], i.data[:num_in_buffer, ...])
+            i.data = new_data
+
+        si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 
     def add_time_varying_info(self,name, **kwargs):
         # property for group of particles, ie not properties of individual particles, eg time, number released
@@ -262,14 +272,14 @@ class ParticleGroupManager(ParameterBaseClass):
 
             if p.params['maximum_age'] is not None:
 
-                in_group = part_prop['IDrelease_group'].compare_all_to_a_value('eq', n, out=self.get_particle_index_buffer())
+                in_group = part_prop['IDrelease_group'].compare_all_to_a_value('eq', n, out=self.get_partID_buffer('B1'))
 
                 if in_group.shape[0] > 0:
 
                     if si.backtracking:
-                        sel = part_prop['age'].find_subset_where(in_group, 'lt', -abs(p.params['maximum_age']), out=self.get_particle_subset_buffer())
+                        sel = part_prop['age'].find_subset_where(in_group, 'lt', -abs(p.params['maximum_age']), out=self.get_partID_subset_buffer('B1'))
                     else:
-                        sel = part_prop['age'].find_subset_where(in_group, 'gt', abs(p.params['maximum_age']), out=self.get_particle_subset_buffer())
+                        sel = part_prop['age'].find_subset_where(in_group, 'gt', abs(p.params['maximum_age']), out=self.get_partID_subset_buffer('B1'))
 
                     part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
                     if not si.retain_culled_part_locations:
@@ -281,16 +291,14 @@ class ParticleGroupManager(ParameterBaseClass):
         part_prop = si.classes['particle_properties']
 
 
-        ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+        ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
         num_active = ID_alive.shape[0]
         nDead = self.particles_in_buffer - num_active
 
-        # kill if fraction of buffer are dead or > 15% active particles are, only if buffer at least 25% full
-        if nDead > 0 and self.particles_in_buffer > 0.25*si.particle_buffer_size:
-            if  nDead >= 0.15*num_active  or self.particles_in_buffer > 0.9*si.particle_buffer_size:
+        # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
+        if nDead > 100_000 and nDead >= 0.20*self.particles_in_buffer:
                 # if too many dead then delete from memory
-                si.msg_logger.msg('removing dead ' + str(nDead)
-                                        +' particles from memory, as more than 15% are dead or buffer 90% full', tabs=3)
+                si.msg_logger.msg(f'removing dead {nDead:,3d} particles from memory, as more than 20% are dead', tabs=3)
 
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():
@@ -318,6 +326,16 @@ class ParticleGroupManager(ParameterBaseClass):
     # below return  info about particle group
     #__________________________________
 
+    def is_particle_property(self,name, crumbs=''):
+        si = self.shared_info
+        #todo have self.particle_properties??
+        if name not in si.classes['particle_properties']:
+            si.msg_logger.msg(f'"{name}" is not a particle property',crumbs=crumbs,
+                    hint=f'Closest matches to "{name}" = {difflib.get_close_matches(name, list(si.classes["particle_properties"].keys()), cutoff=0.4)} ?? ',
+                              warning=True)
+            return False
+        else:
+            return True
     def status_counts(self):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
@@ -350,45 +368,11 @@ class ParticleGroupManager(ParameterBaseClass):
         s += ' S:%05.0f' % counts['stranded_by_tide'] + ' B:%05.0f' % counts['on_bottom'] + ' D:%03.0f' % counts['dead']
         s += ' O:%02.0f' % counts['outside_open_boundary'] + ' N:%01.0f' % counts['bad_cord']
         s += ' Buffer:%4.0f' %  self.particles_in_buffer
-        s += '-%3.0f%%' % (100. * self.particles_in_buffer / si.particle_buffer_size)
+        s += '-%3.0f%%' % (100. * self.particles_in_buffer / si.classes['particle_group_manager'].info['current_particle_buffer_size'])
         s += self.screen_msg
         return s
 
 
-    def  create_particle_prop_memory_block(self):
-        # todo create_particle_prop_memory_block is development work
-        si=self.shared_info
-
-        # get all names sizes and dtypes of all particle properties
-        array_types=[]
-        for name,prop in si.classes['particle_properties'].items():
-
-            if prop.params['vector_dim'] > 1:
-                s = (prop.params['vector_dim'],)
-            else:
-                s = (1,)
-
-            # third matrix dim, so far only used recording vertical cell at each node  3D for 2 time steps
-            if prop.params['prop_dim3'] > 0 and prop.params['prop_dim3'] > 1:
-                s += (prop.params['prop_dim3'],)
-
-            array_types.append((name,prop.params['dtype'],s  ))
-
-        # make array of sub arrays with all properties stored next to each other in memory
-        #todo this is in development
-        #self.particle_prop_memory_block = np.full((si.particle_buffer_size,),0,dtype=array_types)
-
-        # make pointer from each variable to its named block/sub array
-        for name, prop in si.classes['particle_properties'].items():
-            prop.data=self.particle_prop_memory_block[name]
-
-            # make pointer to data without any trailing unit dimension to be compatible with numba particle operations on 1D  vectors
-            if prop.data.size > 1 and prop.data.shape[-1] == 1:
-                prop.data = prop.data.reshape(prop.data.shape[:-1])
-
-            prop.data[:] = prop.params['initial_value']
-
-        si.particle_prop_memory_block= self.particle_prop_memory_block
 
 
 

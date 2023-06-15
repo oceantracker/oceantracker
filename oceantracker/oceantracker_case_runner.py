@@ -89,9 +89,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         if si.hydro_model_is3D:
             si.classes['resuspension'].initial_setup()
 
-        # todo set up memory for all defined particle properties
-        # todo memory packing is being developed and evaluated for speed
-        #si.classes['particle_group_manager'].create_particle_prop_memory_block()
+
 
         # check particle properties have other particle properties, fields and other compatibles they require
         self._do_run_integrity_checks()
@@ -234,7 +232,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # make core classes, eg. field group
         for name, params in case_params['core_classes'].items():
-            si.add_core_class(name, params, crumbs= ' Making all core class ' + name )
+            i = si.add_core_class(name, params, crumbs= ' Making all core class ' + name )
 
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags
 
@@ -284,7 +282,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
     def _initialize_solver_core_classes_and_release_groups(self):
         # initialise all classes, order is important!
-        # short cuts
+        # shortcuts
 
         si = self.shared_info
         reader= si.classes['reader']
@@ -343,17 +341,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.solver_info['model_timedelta'] =time_util.seconds_to_pretty_duration_string(si.model_time_step)
         si.solver_info['model_duration_timedelta'] = time_util.seconds_to_pretty_duration_string(si.solver_info['model_duration'] )
 
-
         # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
         si.time_of_nominal_first_occurrence = si.model_direction * 1.0E36
         # todo get rid of time_of_nominal_first_occurrence
-
-
-        # find particle buffer size required by all releases, with 3% safety margin
-        if si.settings['particle_buffer_size'] is None:
-            si.settings['particle_buffer_size'] =int(max(100, estimated_total_particles*1.03))
-
-        si.particle_buffer_size = si.settings['particle_buffer_size']
 
         if si.write_tracks:
             si.classes['tracks_writer'].initial_setup()
@@ -364,6 +354,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for name in ['field_group_manager','particle_group_manager', 'interpolator', 'solver'] : # order may matter?
             si.classes[name].initial_setup()
         si.msg_logger.progress_marker('initial set up of core classes', start_time=t0)
+
+
+
 
         # do final setp which may depend on settingd from intitial st up
         t0= perf_counter()

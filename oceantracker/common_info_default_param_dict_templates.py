@@ -183,6 +183,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
 
 # TODO IMPROVEMENTS
     # todo allow numpy arrays in "array" type
+    #todo smart way to tell class_dict item does not belong to that type, without class name
     # todo allow isostr, datetime, np.dateime64 for dates
     # todo allow user to give "class" instead of class_name ( not an insatnce)
     # todo add run_dir option to all output reads

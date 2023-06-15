@@ -9,6 +9,7 @@ class CompactTracksWriter(_BaseWriter):
         super().__init__()  # required in children to get parent defaultsults
 
         self.add_default_params({'NCDF_time_chunk': PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file'),
+                                 'NCDF_particle_chunk': PVC(100_000, int, min=1000, doc_str=' number of particles per time chunk in the netcdf file'),
                                  'convert': PVC(False, bool, doc_str='convert compact tracks file to rectangular for at end of the run'),
                                  'retain_compact_files': PVC(False, bool,
                                                              doc_str='keep  compact tracks files after conversion to rectangular format'),
@@ -38,7 +39,6 @@ class CompactTracksWriter(_BaseWriter):
                                  description=None, attributes=None, dtype=None):
         # creates a variable to write with given shape, normally shape[0]= None as unlimited
         si=self.shared_info
-
         dimList=[]
         if is_time_varying and not is_part_prop: dimList.append('time_dim')
         if is_time_varying and is_part_prop:dimList.append('time_particle_dim')
@@ -53,9 +53,9 @@ class CompactTracksWriter(_BaseWriter):
             if dim == 'time_dim':
                 chunks.append(self.params['NCDF_time_chunk'])
             elif dim == 'time_particle_dim':
-                chunks.append(self.params['NCDF_time_chunk']*si.particle_buffer_size)
+                chunks.append(self.params['NCDF_time_chunk']*self.params['NCDF_particle_chunk'])
             elif dim == 'particle_dim':
-                chunks.append(si.particle_buffer_size)
+                chunks.append(self.params['NCDF_particle_chunk'])
             else:
                 chunks.append(self.info['file_builder']['dimensions'][dim]['size'])
 
@@ -68,7 +68,7 @@ class CompactTracksWriter(_BaseWriter):
         nc = self.nc
         si = self.shared_info
         nWrite = self.time_steps_written_to_current_file
-        self.sel_alive = si.classes['particle_properties']['status'].compare_all_to_a_value('gt', si.particle_status_flags['dead'], out= self.get_particle_index_buffer())
+        self.sel_alive = si.classes['particle_properties']['status'].compare_all_to_a_value('gt', si.particle_status_flags['dead'], out= self.get_partID_buffer('B1'))
 
         n_file = self.info['time_particle_steps_written']
         self.file_index = [n_file, n_file + self.sel_alive.shape[0]]

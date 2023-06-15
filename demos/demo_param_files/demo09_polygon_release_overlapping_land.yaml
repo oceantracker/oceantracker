@@ -1,5 +1,6 @@
 add_date_to_run_output_dir: false
 backtracking: true
+debug: true
 dispersion:
   A_H: 0.1
 output_file_base: demo09_polygon_release_overlapping_land
@@ -28,7 +29,7 @@ reader:
     x:
     - east
     - north
-  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
   search_sub_dirs: true
   time_buffer_size: 15
