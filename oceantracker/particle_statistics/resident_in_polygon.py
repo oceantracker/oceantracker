@@ -75,7 +75,6 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         params = self.params
         self.check_class_required_fields_prop_etc()
 
-
     def set_up_binned_variables(self, nc):
         si = self.shared_info
         if not self.params['write']: return

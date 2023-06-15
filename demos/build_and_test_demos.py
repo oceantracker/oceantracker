@@ -24,6 +24,7 @@ poly_points_large=[[1597682.1237, 5489972.7479],
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
    'time_step' : 900,
+    'debug': True,
     'reader': {"class_name": 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 'input_dir': 'demo_hindcast',
                 'file_mask': 'demoHindcast2D*.nc',
@@ -80,12 +81,13 @@ p3['particle_statistics'] = {'gridstats1': {'class_name': 'oceantracker.particle
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
                    'count_start_date': '2020-06-01 21:16:07',
                       'grid_size': [220, 221]},
-                'polystats1' : {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
+            'polystats1' : {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                         'count_status_in_range' : ['moving','moving'],
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
-                       'polygon_list':[ {'points':poly_points}]}
-                     }
+                       'polygon_list':[ {'points':poly_points}]},
 
+            }
+p3['particle_group_manager']= {'particle_buffer_chunk_size': 20000} # test buffer expansion
 p3.update({ 'write_tracks': False,  'duration': 3 * 24 * 3600  })
 
 p3.update({'output_file_base' :'demo03_heatmaps' })

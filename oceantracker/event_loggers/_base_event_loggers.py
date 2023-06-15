@@ -24,16 +24,9 @@ class _BaseEventLogger(ParameterBaseClass):
 
     def initial_setup(self):
         si = self.shared_info
-        buffer_size= si.particle_buffer_size
-
-        # boolean buffer partile prop to recorded history of event having started (must be prop to be managed in compact mode)
+        # boolean buffer particle prop to recorded history of event having started (must be prop to be managed in compact mode)
         particle = si.classes['particle_group_manager']
         particle.create_particle_property('event_has_started_boolean','manual_update',dict(initial_value=False, dtype=bool, write=False))
-
-        # place to record which particles where events has just started or
-        # just end based on changes in event_has_started_boolean to know which events to write
-        self.event_has_started_IDbuffer = np.full((buffer_size,), -1, np.int32)
-        self.event_has_ended_IDbuffer   = np.full((buffer_size,), -1, np.int32)
 
         self.time_steps_written = 0
 
@@ -48,8 +41,8 @@ class _BaseEventLogger(ParameterBaseClass):
         IDs_event_began, IDs_event_ended = self._find_particles_where_event_has_started_or_ended_numba(
                                                         event_has_started_boolean,
                                                         event_is_happening_boolean,
-                                                        self.event_has_started_IDbuffer,
-                                                        self.event_has_ended_IDbuffer)
+                                                        self.get_partID_buffer('event_has_started'),
+                                                        self.get_partID_buffer('event_has_ended'))
         return  IDs_event_began, IDs_event_ended
 
     def set_up_output_file(self,addition_prop_to_write = None):

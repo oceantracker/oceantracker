@@ -2,9 +2,10 @@
     "output_file_base": "demo01_plot_tracks",
     "add_date_to_run_output_dir": false,
     "time_step": 600,
+    "debug": true,
     "reader": {
         "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
-        "input_dir": "E:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcast2D*.nc",
         "search_sub_dirs": true,
         "dimension_map": {

@@ -34,11 +34,11 @@ class CullParticles(_BaseTrajectoryModifier):
 
         if self.params['cull_status_equal_to'] is None:
             #  cull fraction of those active with status high enough
-            eligible_to_cull = part_prop['status'].compare_all_to_a_value('gt',si.particle_status_flags[self.params['cull_status_greater_than']], out=self.get_particle_index_buffer())
+            eligible_to_cull = part_prop['status'].compare_all_to_a_value('gt',si.particle_status_flags[self.params['cull_status_greater_than']], out=self.get_partID_buffer('B1'))
         else:
-            eligible_to_cull = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags[self.params['cull_status_equal_to']], out=self.get_particle_index_buffer())
+            eligible_to_cull = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags[self.params['cull_status_equal_to']], out=self.get_partID_buffer('B1'))
 
-        culled = particle_comparisons_util.random_selection(eligible_to_cull, self.params['probability_of_culling'], self.get_particle_subset_buffer())
+        culled = particle_comparisons_util.random_selection(eligible_to_cull, self.params['probability_of_culling'], self.get_partID_subset_buffer('B1'))
 
         return culled
 

@@ -64,7 +64,7 @@ reader:
   - salt
   - water_temperature
   file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
 release_groups:
   P1:
     points:

@@ -48,7 +48,6 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x'])
 
-
     def set_up_binned_variables(self,nc):
         si = self.shared_info
         if not self.params['write']: return

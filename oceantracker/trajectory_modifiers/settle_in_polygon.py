@@ -48,7 +48,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         part_prop = si.classes['particle_properties']
 
         # find those inside and freeze, only if they haven't been recently frozen
-        those_inside = self.polygon.inside_indices(part_prop['x'].used_buffer(), out= self.get_particle_index_buffer(), active=active)
+        those_inside = self.polygon.inside_indices(part_prop['x'].used_buffer(), out= self.get_partID_buffer('B1'), active=active)
         if those_inside.shape[0] > 0:
 
             not_frozen = part_prop['status'].find_subset_where(those_inside, 'eq', si.particle_status_flags['moving'])
@@ -59,7 +59,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
             part_prop['time_of_settlement'].set_values(time_sec, settling)
 
         # now look at all those frozen
-        frozen = part_prop['status'].compare_all_to_a_value( 'eq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+        frozen = part_prop['status'].compare_all_to_a_value( 'eq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
         time_settled = np.abs(time_sec - part_prop['time_of_settlement'].get_values(frozen)) # abs works even if backtracking
         release =  frozen[ time_settled > self.params['settlement_duration'] ]
         part_prop['status'].set_values(si.particle_status_flags['moving'], release)

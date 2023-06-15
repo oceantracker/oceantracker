@@ -1,4 +1,4 @@
-from  oceantracker.util import basic_util
+from  oceantracker.util import basic_util, debug_util
 import numpy as np
 import traceback
 from time import perf_counter
@@ -38,7 +38,7 @@ class ParameterBaseClass(object):
                                  'requires_3D': PVC(False, bool)
                                  })
 
-
+        self.partID_buffers={} # dict of int32 ID number buffers
     def intitial_setup(self):
         # setup done before other classes set
         pass
@@ -105,22 +105,30 @@ class ParameterBaseClass(object):
     # buffers are used to hold selections of particles, saving memory and time by reuse
     # use with care as returned view may refer to same buffer!!
 
-    def get_particle_index_buffer(self):
-        # return pointer to particle buffer of indcies
-        # set up if not already attribute of class
-        if not hasattr(self, 'particle_index_buffer_data'):
-            self.particle_index_buffer_data = np.full((self.shared_info.particle_buffer_size,), -127,dtype= np.int32)
+    def get_partID_buffer(self, name):
+        # creates, expands and provides access to particle ID number buffers of this class
+        # having these buffers aviods creating new memory every time
+        #  a selection of particle IDs is made, eg status == moving
+        # WARNING never refer directly to the partID_buffers, alawys use this method
+        #         to access buffer, as buffer size is dynamically changing
+        si = self.shared_info
+        current_particle_buffer_size = si.classes['particle_group_manager'].info['current_particle_buffer_size']
 
-        return self.particle_index_buffer_data[:]
+        if name not in self.partID_buffers:
+            # create a new ID buffer
+            self.partID_buffers[name] = np.full((current_particle_buffer_size,), -127, dtype=np.int32)
 
-    def get_particle_subset_buffer(self):
-        # return pointer to particle buffer of indcies
-        # set up if not already attribute of class
-        if not hasattr(self, 'particle_subset_buffer_data'):
-            self.particle_subset_buffer_data = np.full((self.shared_info.particle_buffer_size,), -127, dtype= np.int32)
+        elif self.partID_buffers[name].size < current_particle_buffer_size:
+            # particle buffer must have increased so enlarge ID buffer to match
+            new_index = np.zeros((current_particle_buffer_size,), dtype=np.int32)
+            np.copyto(new_index[:self.partID_buffers[name].size], self.partID_buffers[name])
+            self.partID_buffers[name] = new_index
 
-        return self.particle_subset_buffer_data[:]
+        return self.partID_buffers[name] # return, new, expanded or existing buffer
 
+    def get_partID_subset_buffer(self, name):
+        # wrapper to help ensure a subset ID buffer is not the same as main buffer
+        return self.get_partID_buffer(name +'_subset')
 
     def start_update_timer(self): self.update_timer_t0 = perf_counter()
 

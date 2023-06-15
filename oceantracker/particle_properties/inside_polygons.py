@@ -43,8 +43,8 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
 
         for n, poly in enumerate(self.polygons):
             # assumes non-overlapping polygons, ie so only inside one at a time, the first polygon it is inside
-            inside, out_side = poly.inside_indices(part_prop['x'].used_buffer(), active=to_search, out=self.get_particle_index_buffer(),
-                                                   also_return_indices_outside=True, out_outside=self.get_particle_subset_buffer())
+            inside, out_side = poly.inside_indices(part_prop['x'].used_buffer(), active=to_search, out=self.get_partID_buffer('B1'),
+                                                   also_return_indices_outside=True, out_outside=self.get_partID_subset_buffer('B1'))
             self.set_values(n, inside)
             to_search = out_side # on next polygon only search those not in precceding polygons
 

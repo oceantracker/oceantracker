@@ -34,7 +34,7 @@ class BasicResuspension(_BaseResuspension):
         # add required field and particle property for resuspension
         si.classes['field_group_manager'].create_field('friction_velocity', 'derived_from_reader_field',   {'class_name':self.params['friction_velocity_field_class_name']},
                                                        crumbs='initializing resuspension class ')
-        si.classes['particle_group_manager'].create_particle_property('friction_velocity','from_fields', {}, crumbs='initializing resuspension class ')
+        si.classes['particle_group_manager'].create_particle_property('friction_velocity','from_fields', {}, crumbs='initializing resuspension class friction velocity')
 
     from oceantracker.fields.friction_velocity import FrictionVelocity
     def select_particles_to_resupend(self, active):
@@ -42,10 +42,10 @@ class BasicResuspension(_BaseResuspension):
         # todo add comparison to  particles critical value from distribution, add new particle property to hold  individual critical values
         si = self.shared_info
         part_prop = si.classes['particle_properties']
-        on_bottom = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['on_bottom'], out = self.get_particle_index_buffer())
+        on_bottom = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['on_bottom'], out = self.get_partID_buffer('B1'))
 
         # compare to critical friction velocity
-        resupend = part_prop['friction_velocity'].find_subset_where(on_bottom, 'gteq',self.params['critical_friction_velocity'], out=self.get_particle_subset_buffer())
+        resupend = part_prop['friction_velocity'].find_subset_where(on_bottom, 'gteq',self.params['critical_friction_velocity'], out=self.get_partID_subset_buffer('B1'))
         return resupend
 
 

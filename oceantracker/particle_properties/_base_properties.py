@@ -70,7 +70,9 @@ class ParticleProperty(_BasePropertyInfo):
                                             possible_values=particle_info['known_prop_types']),
                                  })
     def initial_setup(self):
-        s=(self.shared_info.particle_buffer_size,)
+        si = self.shared_info
+        #s=(self.shared_info.particle_buffer_size,)
+        s = (si.classes['particle_group_manager'].info['current_particle_buffer_size'],)
         if self.params['vector_dim'] > 1:
             s += (self.params['vector_dim'],)
 

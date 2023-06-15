@@ -52,7 +52,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
     def select_particles_to_count(self):
         si= self.shared_info
         part_prop =  si.classes['particle_properties']
-        return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+        return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
 
     def write(self, time_sec):
         si = self.shared_info

@@ -55,6 +55,7 @@ Useful Features
 * Internal automation
     * Automatically interpolates user fields named by the user to the particle locations, and writes this particle property to the output file.
     * Splits quad cells into triangles on the fly
+    * automates management of particle property buffers, expanding as more are released, culling from computation when there are significant numbers of dead particles
     * Reads netcdf hydrodynamic model output detecting format at automatically determining whether 2D or 3D
     * Flexible reader with user configurable mapping  file variable names to consistent internal variable names.
     * Sorts all hindcast files found in a dir and its sub-dirs into time order, based on time variable in the file. Avoiding need to use file name structure to load files in date order.

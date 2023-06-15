@@ -245,8 +245,6 @@ class OceanTracker():
                 ml.msg('Unknown top level parameter "' + key +'"', warning=True,
                        hint=f'Closest matches  to "{k}"  ={difflib.get_close_matches(k,known_keys,cutoff=0.4)} ?? ')
 
-
-
         ml.exit_if_prior_errors('Errors in decomposing parameters')
         # merge settings params
         w['shared_settings'] = merge_params_with_defaults(w['shared_settings'],  common_info.shared_settings_defaults,

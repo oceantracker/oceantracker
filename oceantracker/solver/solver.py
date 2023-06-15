@@ -89,14 +89,13 @@ class Solver(ParameterBaseClass):
 
 
         pgm, fgm = si.classes['particle_group_manager'], si.classes['field_group_manager']
-        part_prop = si.classes['particle_properties']
         info['time_steps_completed'] = 0
 
         # get hindcast step range
         model_times = np.arange(info['model_start_time'], info['model_end_time'],
                                 info['model_time_step'] * si.model_direction)
 
-        # work out time steps between writing tracks to to screen
+        # work out time steps between writing tracks to screen
         write_tracks_time_step = si.settings['screen_output_time_interval']
         if write_tracks_time_step is None:
             nt_write_time_step_to_screen = 1
@@ -107,23 +106,16 @@ class Solver(ParameterBaseClass):
 
         # run forwards through model time variable, which for backtracking are backwards in time
         for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
+
             t0_step = perf_counter()
             time_sec = model_times[nt]
 
+            # release particles
+            new_particleIDs = pgm.release_particles(time_sec)
+
             fgm.fill_reader_buffers_if_needed(time_sec)
 
-            self.pre_step_bookkeeping(nt, time_sec)
-
-            # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
-            is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out=self.get_particle_index_buffer())
-
-            # update particle velocity modification
-            part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
-            for name, i in si.classes['velocity_modifiers'].items():
-                i.update(time_sec, is_moving)
-
-            # dispersion is done by random walk velocity modification prior to integration step
-            si.classes['dispersion'].update(time_sec, is_moving)
+            is_moving = self.pre_step_bookkeeping(nt, time_sec, new_particleIDs)
 
             #  Main integration step
             #--------------------------------------
@@ -156,7 +148,7 @@ class Solver(ParameterBaseClass):
         info['computation_ended'] = datetime.now()
         info['computation_duration'] = datetime.now() -computation_started
 
-    def pre_step_bookkeeping(self, nt,time_sec):
+    def pre_step_bookkeeping(self, nt,time_sec, new_particleIDs=None):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
@@ -168,10 +160,8 @@ class Solver(ParameterBaseClass):
         info['current_model_time_step'] = nt
         info['current_model_time'] = time_sec
 
-        # release particles
-        #todo remove setp interp from particle release as done just below??
-        new_particleIDs = pgm.release_particles(time_sec)
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
         self.info['total_alive_particles'] += alive.shape[0]
         
         # modify status
@@ -182,7 +172,7 @@ class Solver(ParameterBaseClass):
         if si.compact_mode: pgm.remove_dead_particles_from_memory()
 
         # some may now have status dead so update
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
 
         # trajectory modifiers,
         for name, i in si.classes['trajectory_modifiers'].items():
@@ -191,7 +181,7 @@ class Solver(ParameterBaseClass):
         if si.is_3D_run:
             si.classes['resuspension'].update(time_sec, alive)
 
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_particle_index_buffer())
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
 
         # setup_interp_time_step
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
@@ -205,17 +195,29 @@ class Solver(ParameterBaseClass):
         self._update_concentrations(time_sec)
         self._update_events(time_sec)
 
-
         # write tracks
         if si.write_tracks:
             tracks_writer = si.classes['tracks_writer']
             tracks_writer.open_file_if_needed()
-            tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
+            if new_particleIDs is not None:
+                tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
             # write tracks file
             tracks_writer.write_all_time_varying_prop_and_data()
 
+        # now modfy location after writing
+        # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
+        is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out=self.get_partID_buffer('B1'))
 
+        # update particle velocity modification
+        part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
+        for name, i in si.classes['velocity_modifiers'].items():
+            i.update(time_sec, is_moving)
+
+        # dispersion is done by random walk velocity modification prior to integration step
+        si.classes['dispersion'].update(time_sec, is_moving)
+
+        return is_moving
     def integration_step(self, time_sec, is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties

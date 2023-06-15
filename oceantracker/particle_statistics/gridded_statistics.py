@@ -44,8 +44,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
 
 
-
-
     def info_to_write_at_end(self):
         nc = self.nc
         stats_grid = self.grid
