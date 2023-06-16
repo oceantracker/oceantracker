@@ -21,7 +21,6 @@ class Solver(ParameterBaseClass):
 
         self.add_default_params({
                         'RK_order':                   PVC(4, int, possible_values=[1, 2, 4]),
-                        'name':                       PVC('solver',str),
                         'n_sub_steps': PVC(None, int, obsolete='use shared_parameter "time_step", run may not have required time step'),
                         'screen_output_step_count': PVC(None, int, obsolete='use shared_parameter "screen_output_time_interval" in seconds')
                             })
@@ -159,7 +158,6 @@ class Solver(ParameterBaseClass):
         info['current_model_date'] = time_util.seconds_to_datetime64(time_sec)
         info['current_model_time_step'] = nt
         info['current_model_time'] = time_sec
-
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
         self.info['total_alive_particles'] += alive.shape[0]

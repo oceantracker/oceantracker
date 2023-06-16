@@ -8,7 +8,7 @@ class DistanceTravelled(ParticleProperty):
 
     def __init__(self):
         super().__init__()
-        self.add_default_params({'name': PVC('distance_travelled', str), 'initial_value': PVC(0., float)})
+        self.add_default_params({'initial_value': PVC(0., float)})
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x', 'x_last_good'])

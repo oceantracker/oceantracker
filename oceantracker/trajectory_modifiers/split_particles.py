@@ -10,8 +10,7 @@ class SplitParticles(_BaseTrajectoryModifier):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'name': PVC('particle_splitting', str),
-                                 'splitting_interval': PVC(3600, float, min = 1),
+        self.add_default_params({'splitting_interval': PVC(3600, float, min = 1),
                                  'split_status_greater_than' : PVC('dead', str, possible_values=particle_info['status_flags'].keys()),
                                  'split_status_equal_to': PVC(None,  str, possible_values=particle_info['status_flags'].keys()),
                                  'probability_of_splitting': PVC(1.0, float, min=0., max=1.)

@@ -6,7 +6,7 @@ from oceantracker.util import time_util
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.common_info_default_param_dict_templates import particle_info
-from oceantracker.util import numpy_util, debug_util, spell_check_util
+from oceantracker.util import numpy_util,  spell_check_util
 
 
 # holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
@@ -16,8 +16,7 @@ class ParticleGroupManager(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # requir+ed in children to get parent defaults
-        self.add_default_params( { 'name': PVC('particle_group_manager', str) ,
-                                   'particle_buffer_chunk_size': PVC(500_000, int, min=1)})
+        self.add_default_params( { 'particle_buffer_chunk_size': PVC(500_000, int, min=1)})
 
         # set up pointer dict and lists
         si = self.shared_info
@@ -366,7 +365,7 @@ class ParticleGroupManager(ParameterBaseClass):
     def screen_info(self):
         si = self.shared_info
         counts =self.status_counts()
-        s =  f' Rel.:{self.particles_released:6,d}'
+        s =  f' Rel.:{self.particles_released:8,d}'
         s += ': Active:%05.0f' % counts['active'] + ' M:%05.0f' % counts['moving']
         s += ' S:%05.0f' % counts['stranded_by_tide'] + ' B:%05.0f' % counts['on_bottom'] + ' D:%03.0f' % counts['dead']
         s += ' O:%02.0f' % counts['outside_open_boundary'] + ' N:%01.0f' % counts['bad_cord']

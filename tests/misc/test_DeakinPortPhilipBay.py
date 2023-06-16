@@ -10,12 +10,10 @@ import argparse
 def set_params(args, x0, duration_sec= 5. * 24 * 3600):
 
 
-
-
     # set up one release group per release location to allow heat maps for each point
-    rg= []
-    for x in x0:
-       rg.append({'points': [x], 'pulse_size': 150, 'release_interval': 1800})
+    rg= {}
+    for n, x in enumerate( x0):
+       rg[f'P{n}']= {'points': [x], 'pulse_size': 150, 'release_interval': 1800}
 
 
     params = {'output_file_base': 'PPBtest','time_step': 1800,
@@ -26,17 +24,18 @@ def set_params(args, x0, duration_sec= 5. * 24 * 3600):
                          # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                          },
             'release_groups' :rg,
-            'duration': duration_sec,
+            'max_run_duration': duration_sec,
             'write_tracks': True,
             'tracks_writer': {'update_interval':3600},
             'dispersion': {'A_H': 1.0, 'A_V': 0.001},
-            'particle_properties':[{'name' :'eDNA', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24}],
-            'particle_statistics': [{                'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                'update_interval': 1800, 'particle_property_list': ['eDNA'],
-                'release_group_centered_grids': True,
-                'grid_span': [25000., 25000.],
-                'grid_size': [150, 151]}]
-
+            'particle_properties':{'eDNA': { 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24}
+                                   },
+            'particle_statistics': {'Gs1':{  'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+                                            'update_interval': 1800, 'particle_property_list': ['eDNA'],
+                                            'release_group_centered_grids': True,
+                                            'grid_span': [25000., 25000.],
+                                            'grid_size': [150, 151]}
+                                    }
               }
 
     if args.mode_debug: params['debug'] = True
@@ -63,7 +62,7 @@ if __name__ == '__main__':
     params['root_output_dir'] = 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay'
 
     if not args.norun:
-        run_info_file, has_errors = run(params)
+        caseInfoFile, has_errors = run(params)
     else:
         run_info_file = path.join(
             params['root_output_dir'],
@@ -76,7 +75,6 @@ if __name__ == '__main__':
         from oceantracker.post_processing.read_output_files import load_output_files
         from oceantracker.post_processing.plotting import plot_tracks, plot_statistics
 
-        caseInfoFile = load_output_files.get_case_info_file_from_run_file(run_info_file)
 
         ax = None
         ax=[ 217641,      404133,     5702747,     5815571]
@@ -88,13 +86,12 @@ if __name__ == '__main__':
 
         dx=25000
         #ax = [217641+dx, 404133-dx, 5702747+dx, 5815571-dx]
-        stats = load_output_files.load_stats_file(caseInfoFile,var_list=['eDNA'])
+        stats = load_output_files.load_stats_file(caseInfoFile,var_list=['eDNA'],name='Gs1')
 
         # heat map of particle counts
         plot_statistics.animate_heat_map(stats, title='Port Phillip Bay, time based particle count heatmaps, built on the fly',
-                                         logscale=False, release_group=2)
+                                         logscale=False, release_group='P1')
 
         # aminmate decaying particles
         plot_statistics.animate_heat_map(stats,var='eDNA', title='eDNA heatmaps, built on the fly, 1 day exp. decay',
-                                         logscale=False, release_group=2)
-
+                                         logscale=False, release_group='P1')

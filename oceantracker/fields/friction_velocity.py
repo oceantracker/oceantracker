@@ -7,8 +7,7 @@ import numpy as np
 class FrictionVelocity(UserFieldBase):
     def __init__(self):
         super().__init__()
-        self.add_default_params({'name': PVC('friction_velocity', str),
-                                 'is_time_varying': PVC(True,bool),
+        self.add_default_params({'is_time_varying': PVC(True,bool),
                                  'num_components': PVC(1, int),
                                  'is3D': PVC(False,bool)})
 

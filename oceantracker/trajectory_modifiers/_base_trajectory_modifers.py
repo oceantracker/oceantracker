@@ -9,7 +9,6 @@ class _BaseTrajectoryModifier(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'name': PVC(None, str)})
 
     # all particles checked to see if they need status changing
     def update(self, time_sec, active): pass

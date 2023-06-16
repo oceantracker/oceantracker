@@ -10,7 +10,7 @@ class _BaseTrajectoryModifer(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'name': PVC(None,str),'is3D': PVC(False,bool)})
+        self.add_default_params({'is3D': PVC(False,bool)})
 
     def initial_setup(self, **kwargs): pass
 

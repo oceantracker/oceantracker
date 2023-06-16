@@ -11,8 +11,7 @@ class CullParticles(_BaseTrajectoryModifier):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'name': PVC('ParticleKill', str),
-                                 'cull_interval': PVC( 24*3600, float, min=0),
+        self.add_default_params({ 'cull_interval': PVC( 24*3600, float, min=0),
                                  'cull_status_greater_than':PVC('dead',str,possible_values=particle_info['status_flags'].keys()),
                                  'cull_status_equal_to': PVC(None,str,possible_values=particle_info['status_flags'].keys()),
                                  'probability_of_culling' : PVC(0.1, float, min=0,max= 1.)

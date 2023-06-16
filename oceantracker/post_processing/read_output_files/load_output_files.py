@@ -139,7 +139,6 @@ def load_stats_file(case_info_file_name, name = None, var_list=[]):
     # load gridded or polygon stas file using runcase_info, the output of  load_runcase_info()
 
     case_info = read_case_info_file(case_info_file_name)
-    name = _get_class_dict_name(case_info, 'particle_statistics', name)  # check the name
     stat_nc_file_name = _get_class_dict_file_name(case_info, 'particle_statistics', name)
 
     d= read_ncdf_output_files.read_stats_file(stat_nc_file_name, var_list)
@@ -181,12 +180,12 @@ def _get_class_dict_name(caseinfo, class_dict, name= None):
         print('Post processing ,no name given loading "' + class_dict + '" named  "' + name + '"')
     if name not in c:
         raise ('Post processing error, "' + class_dict + '" does not have clas name  "' + name + '"')
-    return  name
+    return name
 
-def _get_class_dict_file_name(caseinfo, class_dict, name= None):
+def _get_class_dict_file_name(caseinfo, class_dict, name=None):
     # val is astring name of relese group ot integer
     o = caseinfo['output_files']
-    name =  _get_class_dict_name(caseinfo, class_dict, name= None)
+    name =  _get_class_dict_name(caseinfo, class_dict, name= name)
     return path.join(o['run_output_dir'],o[class_dict][name])
 
 # ubder dev

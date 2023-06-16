@@ -15,7 +15,7 @@ class BasicResuspension(_BaseResuspension):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'name': PVC('BasicResuspension',str),
+        self.add_default_params({
                 'critical_friction_velocity': PVC(0., float, min=0., doc_str='Critical friction velocity, u_* in m/s defined in terms of bottom stress (this param is not the same as near seabed velocity)'),
                 'friction_velocity_field_class_name': PVC('oceantracker.fields.friction_velocity.FrictionVelocity', str)
                                  })

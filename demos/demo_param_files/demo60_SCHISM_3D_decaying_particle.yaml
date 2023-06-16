@@ -8,7 +8,6 @@ particle_properties:
   age_decay:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 25714.28571428571
-    name: C
 reader:
   field_variables:
     water_temperature: temp

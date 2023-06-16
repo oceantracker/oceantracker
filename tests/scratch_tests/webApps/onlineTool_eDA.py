@@ -45,7 +45,7 @@ def get_base_params():
 
                                         'particle_properties': [
                                                {'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
-                                                'name': 'DNAdecay', 'initial_value': 1., 'decay_time_scale': 3*3600.}
+                                                 'initial_value': 1., 'decay_time_scale': 3*3600.}
                                                ],
                                            'particle_statistics': [
                                                {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',

@@ -77,7 +77,7 @@ p2= deepcopy(demo_base_params)
 p2['release_groups']={
     'point1':{'allow_release_in_dry_cells': True,'ppoint':1,
             'points': two_points, 'pulse_size': 10, 'release_interval': 3 * 3600},
-    'poly1':{'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease','name':'userA',
+    'poly1':{'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
             'points': deepcopy(poly_points),
             'pulse_size': 10, 'release_interval': 3 * 3600}
 }
@@ -108,7 +108,7 @@ p3['particle_statistics'] = {'gridstats1': {'class_name': 'oceantracker.particle
 
             }
 p3['particle_group_manager']= {'particle_buffer_chunk_size': 20000} # test buffer expansion
-p3.update({ 'write_tracks': False,  'duration': 3 * 24 * 3600  })
+p3.update({ 'write_tracks': False,  'max_run_duration': 3 * 24 * 3600  })
 
 p3.update({'output_file_base' :'demo03_heatmaps' })
 
@@ -233,7 +233,7 @@ p10.update({'output_file_base' :'demo10_polygon_residence_demo',  })
 
 p10['release_groups']= {
         'near_shore': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
-            'points': (np.asarray(poly_points) + np.asarray([[-3000.,-6500]])).tolist(),'name': 'near_shore',
+            'points': (np.asarray(poly_points) + np.asarray([[-3000.,-6500]])).tolist(),
             'pulse_size': 100, 'release_interval': 12 * 3600}
         }
 p10['particle_statistics']={'residentpoly': {'class_name': 'oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon',
@@ -342,7 +342,7 @@ s60['release_groups']={
                                                      'pulse_size': 1, 'release_interval': 2.5*60, 'maximum_age': .2*24*3600}
                         }
 s60['particle_properties']= {
-    'age_decay' :{'name': 'C', 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
+    'age_decay' :{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
                               'decay_time_scale':1*3600./0.14}}
 s60.pop('event_loggers')
 params.append(s60)
