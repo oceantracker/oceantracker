@@ -49,8 +49,6 @@ def run(params):
     case_info_files, has_errors = ot.run()
     return case_info_files, has_errors
 
-
-
 class OceanTracker():
     def __init__(self,params=None):
         self.params= param_template() if params is None else params
@@ -98,21 +96,27 @@ class OceanTracker():
         ml.msg(OTname +'- preliminary setup')
         self._check_python_version()
         t0 = perf_counter()
+        d0 = datetime.now()
 
         if type(params) == dict:
             # single case
-            case_info_files, has_errors =self._run_single(params)
+            case_info_files, num_errors, num_warnings =self._run_single(params)
 
         elif type(params) == list:
             #run list of cases in  parallel
-            case_info_files, has_errors = self._run_parallel(params)
+            case_info_files, num_errors, num_warnings = self._run_parallel(params)
         else:
             ml.msg('parameters must be a parameter dictionary, or a list parameter dictionaries, params is type = ' + str(type(params)),
                            crumbs='oceantracker.main.run(params',fatal_error=True, exit_now=True)
-
+        has_errors = num_errors > 0
         # final info output
         self._write_run_info_json(case_info_files, has_errors,t0)
         ml.show_all_warnings_and_errors()
+        ml.insert_screen_line()
+        ml.msg(f'Summary:  elapsed time =' + str(datetime.now() - d0),)
+
+        ml.msg(f'Cases have {num_errors:3d} errors and {num_warnings:3d} warnings, check above', tabs=3)
+        ml.msg(f'Setup has  {len(ml.errors_list):3d} errors and {len(ml.warnings_list):3d} warnings, check above', tabs=3)
         ml.close()
 
         return case_info_files, has_errors
@@ -133,8 +137,8 @@ class OceanTracker():
         o['run_log'],o['run_error_file']= ml.set_up_files(o['run_output_dir'],o['output_file_base'])
         ml.exit_if_prior_errors('errors in top level settings parameters')
         ot = OceanTrackerCaseRunner()
-        case_info_file, has_errors = ot.run(working_params)
-        return case_info_file, has_errors
+        case_info_file, num_errors, num_warnings = ot.run(working_params)
+        return case_info_file, num_errors, num_warnings
 
     def _run_parallel(self,user_given_params):
         # run list of case params
@@ -147,7 +151,7 @@ class OceanTracker():
         self._write_raw_user_params(user_given_params, w0)
 
         o = w0['output_files']
-        o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base'])
+        o['run_log'] = ml.set_up_files(o['run_output_dir'], o['output_file_base'])
 
         # get list working params, with setting merged with defaults
         working_params_list = []
@@ -166,6 +170,8 @@ class OceanTracker():
             working_params['file_info'] = w0['file_info']
             working_params_list.append(working_params)
 
+
+
         num_proc = working_params_list[0]['shared_settings']['processors']
         num_proc = min(num_proc, len(working_params_list))
         ml.progress_marker('oceantracker:multiProcessing: processors:' + str(num_proc))
@@ -176,11 +182,16 @@ class OceanTracker():
 
         ml.progress_marker('parallel pool complete')
 
-        # write run info json
+        # get case files and  error/warning counts
+        num_errors =0
+        num_warnings= 0
+        case_info_files =[]
+        for c in case_results:
+            case_info_files.append(c[0])
+            num_errors += c[1]
+            num_warnings += c[2]
 
-        case_info_files=[x[0] for x in case_results]
-        has_errors = [x[1] for x in case_results]
-        return case_info_files, has_errors
+        return case_info_files, num_errors, num_warnings
 
     @staticmethod
     def _run1_case(working_params):
@@ -191,8 +202,8 @@ class OceanTracker():
         from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
 
         ot = OceanTrackerCaseRunner()
-        caseInfo_file, case_error = ot.run(deepcopy(working_params))
-        return caseInfo_file, case_error
+        caseInfo_file, num_errors, num_warnings = ot.run(deepcopy(working_params))
+        return caseInfo_file, num_errors, num_warnings
 
     def _decompose_params(self, params, add_shared_settings=True):
         ml = self.msg_logger

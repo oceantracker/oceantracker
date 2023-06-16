@@ -169,7 +169,7 @@ class Solver(ParameterBaseClass):
             i.update(time_sec, alive)
 
         pgm.kill_old_particles(time_sec) # todo convert to status modifier
-        if si.compact_mode: pgm.remove_dead_particles_from_memory()
+        pgm.remove_dead_particles_from_memory()
 
         # some may now have status dead so update
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))

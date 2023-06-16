@@ -20,7 +20,9 @@ class MessageLogger(object):
         self.screen_tag = screen_tag
         self.max_warnings = max_warnings
         self.fatal_error_count = 0
-        self.warnings_and_errors=[]
+        self.warnings_list=[]
+        self.errors_list=[]
+        self.notes_list = []
         self.log_file = None
         self.error_warning_count = 0
 
@@ -89,12 +91,14 @@ class MessageLogger(object):
                 self.log_file.write(l + '\n')
 
             # keeplist ond warnings errors etc to print at end
-            if fatal_error or warning or note:
-                if self.error_warning_count <= self.max_warnings:
-                    self.warnings_and_errors.append(l)
+            if fatal_error:
+                    self.errors_list.append(l)
 
-        # mange whether to exit now or not:
-        if fatal_error: self.fatal_error_count += 1
+            if warning :
+                if len(self.warnings_list) <= self.max_warnings:
+                    self.warnings_list.append(l)
+            if note:
+                self.notes_list.append(l)
 
         # todo add traceback to message?
         if exit_now:
@@ -118,16 +122,13 @@ class MessageLogger(object):
 
         self.msg('- ' + msg, tabs=tabs + 1)
 
-    def show_all_warnings_and_errors(self,error=None):
-        for l in self.warnings_and_errors:
-            print(self.screen_tag + ' ' + l)
-            if self.log_file is not None:
-                self.log_file.write(l + '\n')
-        if error is not None:
-            self.msg(str(error))
-            self.msg(traceback.format_exc())
+    def show_all_warnings_and_errors(self):
 
-
+        for t in [self.notes_list, self.warnings_list, self.errors_list]:
+            for l in t:
+                print(self.screen_tag + ' ' + l)
+                if self.log_file is not None:
+                    self.log_file.write(l + '\n')
 
     def write_error_log_file(self, e=None):
 
@@ -135,8 +136,11 @@ class MessageLogger(object):
 
         with open(path.normpath(self.error_file_name),'w') as f:
             f.write('_____ Known warnings and Errors ________________________________\n')
-            for l in self.warnings_and_errors:
-                f.write(l + '\n')
+            for t in [self.notes_list, self.warnings_list, self.errors_list]:
+                for l in t:
+                    print(self.screen_tag + ' ' + l)
+                    if self.log_file is not None:
+                        self.log_file.write(l + '\n')
 
 
             f.write('________Trace back_____________________________\n')

@@ -493,7 +493,6 @@ if __name__ == '__main__':
                    },
         'base_case_params': {
             'run_params': {
-                'particle_buffer_size': 120000,
                 'open_boundary_type': 1,
                 'block_dry_cells': True,
                 'duration': 7. * 24 * 3600,

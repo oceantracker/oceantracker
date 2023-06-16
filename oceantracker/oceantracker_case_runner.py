@@ -57,7 +57,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.write_output_files = si.settings['write_output_files']
         si.write_tracks = si.settings['write_tracks']
         si.retain_culled_part_locations = si.settings['retain_culled_part_locations']
-        si.compact_mode = si.settings['compact_mode']
 
         si.z0 = si.settings['z0']
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
@@ -119,17 +118,20 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
-            si.msg_logger.msg(f' Cae Funner graceful exit from case number [{si.processorID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
-            return None, True
+            si.msg_logger.msg(f' Case Funner graceful exit from case number [{si.processorID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+            return None, len(si.msg_logger.errors_list), len(si.msg_logger.warnings_list)
 
         except Exception as e:
-            si.msg_logger.show_all_warnings_and_errors(e)
+            si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
             si.msg_logger.msg(f' Unexpected error in case number [{si.processorID:2}] ', fatal_error=True,hint='check above or .err file')
-            return None, True
+
+            return None, len(si.msg_logger.errors_list), len(si.msg_logger.warnings_list)
 
         # reshow warnings
         si.msg_logger.show_all_warnings_and_errors()
+        self.close()  # close al classes
+
         si.msg_logger.insert_screen_line()
         si.msg_logger.progress_marker('Finished case number %3.0f, ' % si.processorID + ' '
                                       + si.output_files['output_file_base']
@@ -138,10 +140,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
         si.msg_logger.insert_screen_line()
 
-        self.close()  # close al classes
+
         si.msg_logger.close()
         case_info_file = path.join(si.run_output_dir,case_info_file)
-        return case_info_file, False
+        return case_info_file, len(si.msg_logger.errors_list), len(si.msg_logger.warnings_list)
 
     def _set_up_run(self):
         # builds shared_info class variable with data and classes initialized  ready for run
@@ -225,10 +227,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # params are full merged by oceantracker main and instance making tested, so m=no parm merge needed
         si = self.shared_info
         case_params= si.working_params
-
-        # change writer for compact mode
-        if si.settings['compact_mode']:
-            case_params['core_classes']['tracks_writer']['class_name']='oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter'
 
         # make core classes, eg. field group
         for name, params in case_params['core_classes'].items():
@@ -436,7 +434,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'particle_status_flags': si.particle_status_flags,
              'particle_release_group_info' : [],
              'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),
-             'warnings_errors': si.msg_logger.warnings_and_errors,
+             'errors': si.msg_logger.errors_list,
+             'warnings': si.msg_logger.warnings_list,
+             'notes': si.msg_logger.notes_list,
              'function_timers': {},
 
              'class_info': {}, }

@@ -147,6 +147,7 @@
             ]
         }
     },
+    "max_particles": 1000,
     "retain_culled_part_locations": true,
     "particle_buffer_size": 5000,
     "trajectory_modifiers": {
