@@ -6,10 +6,11 @@ from oceantracker.util import time_util
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.common_info_default_param_dict_templates import particle_info
-from oceantracker.util import numpy_util, debug_util
+from oceantracker.util import numpy_util, debug_util, spell_check_util
+
+
 # holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
 import sys, gc
-import difflib
 class ParticleGroupManager(ParameterBaseClass):
 
     def __init__(self):
@@ -327,15 +328,15 @@ class ParticleGroupManager(ParameterBaseClass):
     #__________________________________
 
     def is_particle_property(self,name, crumbs=''):
+        #todo make si.classes['particle_properties'] = self.particle_properties
         si = self.shared_info
-        #todo have self.particle_properties??
-        if name not in si.classes['particle_properties']:
-            si.msg_logger.msg(f'"{name}" is not a particle property',crumbs=crumbs,
-                    hint=f'Closest matches to "{name}" = {difflib.get_close_matches(name, list(si.classes["particle_properties"].keys()), cutoff=0.4)} ?? ',
-                              warning=True)
-            return False
+        if name in list( si.classes['particle_properties'].keys()):
+            return   True
         else:
-            return True
+            spell_check_util.spell_check(name,list( si.classes['particle_properties'].keys()),
+                                         si.msg_logger,
+                                         ' particle property, ignoring', crumbs = crumbs)
+            return False
     def status_counts(self):
         si = self.shared_info
         part_prop = si.classes['particle_properties']

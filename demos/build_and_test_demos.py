@@ -6,9 +6,12 @@ import numpy as np
 from oceantracker.util import json_util
 from oceantracker.util import yaml_util
 from copy import deepcopy
-from oceantracker.main import param_template
+from oceantracker.main import param_template, OceanTracker
 
 params =[]
+two_points= [[1594500, 5483000], [1598000, 5486100]]
+
+
 poly_points=[[1597682.1237, 5489972.7479],
                         [1598604.1667, 5490275.5488],
                         [1598886.4247, 5489464.0424],
@@ -20,6 +23,22 @@ poly_points_large=[[1597682.1237, 5489972.7479],
                         [1597917.3387, 5487000],
                         [1597300, 5487000],
                        [1597682.1237, 5489972.7479]]
+
+# demo zero tests help class
+ot = OceanTracker()
+
+ot.settings(output_file_base= 'demo00_helper_class_test' ,
+                            time_step= 600)
+ot.add_class( 'reader', input_dir='demo_hindcast',
+                        file_mask= 'demoHindcastSchism3D.nc')
+ot.add_class( 'release_groups',name='my_point1', points = two_points)
+ot.add_class( 'release_groups',name='my_point1', points = two_points)
+
+ot.add_class( 'dispersion',A_h =1)
+#ot.run()
+#exit(1)
+
+params.append(ot.params)
 
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
@@ -35,6 +54,7 @@ demo_base_params={'output_file_base' : None,
                 'time_buffer_size': 15,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
     'user_note':'test of notes',
+    'dispersion_miss-spelt': {'A_H': .1},
     'dispersion': {'A_H': .1},
     'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_index': True},
     'release_groups': {'mypoints1':{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}
@@ -56,7 +76,7 @@ params.append(p1)
 p2= deepcopy(demo_base_params)
 p2['release_groups']={
     'point1':{'allow_release_in_dry_cells': True,'ppoint':1,
-            'points': [[1594500, 5483000], [1598000, 5486100]], 'pulse_size': 10, 'release_interval': 3 * 3600},
+            'points': two_points, 'pulse_size': 10, 'release_interval': 3 * 3600},
     'poly1':{'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease','name':'userA',
             'points': deepcopy(poly_points),
             'pulse_size': 10, 'release_interval': 3 * 3600}
@@ -98,8 +118,8 @@ params.append(p3)
 p4 = deepcopy(p3)
 p4['junk']='h'
 p4['particle_statistics'] = {}
-p4['particle_statistics']['age_grid']=   {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
-             'update_interval': 1800, 'particle_property_list': ['water_depth'],
+p4['particle_statistics']['age_grid'] =  {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
+             'update_interval': 1800, 'particle_property_list': ['water_depth','water_depth_bad'],
              'grid_size': [220, 221],
              'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.}
 p4['particle_statistics']['age_poly'] =          {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
@@ -441,7 +461,8 @@ def build_demos(testrun=False):
             demo[0]['root_output_dir'] = 'output'  # wil put in cwd
         else:
             demo_name = demo['output_file_base']
-            demo['reader']['input_dir'] = input_dir
+            if demo['reader'] is not None:
+                demo['reader']['input_dir'] = input_dir
             demo['root_output_dir'] = 'output'  # wil put in cwd
 
         print('building> ', demo_name)

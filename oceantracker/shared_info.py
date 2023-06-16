@@ -3,6 +3,8 @@ from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.module_importing_util import import_module_from_string
 from oceantracker import common_info_default_param_dict_templates as common_info
 from oceantracker.util.parameter_checking import merge_params_with_defaults
+
+
 class SharedInfoClass(object):
     # allows working classes access to instances of other classes to use their methods
     def __init__(self):
@@ -14,20 +16,14 @@ class SharedInfoClass(object):
         for key in list(common_info.class_dicts.keys()):
             self.classes[key] = {}
 
-    def add_core_class(self, name, params, check_if_core_class=True, crumbs =''):
+    def add_core_class(self, name, params, crumbs =''):
 
         ml= self.msg_logger
+        crumb_base = f' >>> adding core class type >> "{name}" '
 
-        #todo make check if in common.shared_info_default_params
-        if name not in common_info.core_classes and check_if_core_class:
-            ml.msg('add_core_class, name is not a known core class, name=' + name,
-                   crumbs='Adding core class type=' + name,
-                   exception = True)
         # make instance  and merge params
         i = make_class_instance_from_params(name, params, ml, class_type_name=name,
-                                            crumbs=crumbs + ' adding core class, type =  ' + name)
-
-
+                                            crumbs=crumb_base + crumbs )
 
         if i.params['requires_3D'] and not self.is_3D_run :
                 # dont add a 3D class if i not a 3D run
@@ -43,13 +39,15 @@ class SharedInfoClass(object):
 
         instanceID = len(self.classes[class_type])
 
-        crumbs += f' >>> adding_class type >> {class_type}  (name=  {name} instance #{instanceID: 1d})'
+        crumb_base = f' >>> adding_class type >> "{class_type}"  (name=  "{name}" instance #{instanceID: 1d}), '
 
         # make instance  and merge params
-        i = make_class_instance_from_params(name, params, self.msg_logger, crumbs= f'create_class_dict_instance> "{class_type}" > "{name}"')
+        i = make_class_instance_from_params(name, params, self.msg_logger,
+                                            crumbs= crumb_base + crumbs)
 
         if class_type not in common_info.class_dicts.keys() :
-            ml.msg(f'Class type = "{class_type}": name is not a known class_type=' + class_type , exception = True, crumbs = crumbs)
+            ml.msg(f'Class type = "{class_type}": name is not a known class_type=' + class_type ,
+                   exception = True, crumbs =  crumb_base + crumbs)
 
         # now add to class lists and interators
 
@@ -63,11 +61,12 @@ class SharedInfoClass(object):
         if name in self.classes[class_type]:
             ml.msg('Class type"' + class_type + '" already has a class with name = "' + i.info['name']
                          + '", "name" parameter must be unique',
-                         crumbs =   crumbs,  fatal_error=True)
+                         crumbs =    crumb_base + crumbs,  fatal_error=True)
 
         if i.params['requires_3D'] and not self.is_3D_run:
                 # dont add a 3D class if i not a 3D run
-                self.msg_logger.msg(' Not using user  class,' + i.info['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
+                self.msg_logger.msg(' Not using user  class,' + i.info['name'] + ' as it can only be used with 3D hydro-models',
+                                    note=True, crumbs= crumb_base + crumbs)
         else:
             self.classes[class_type][name] = i
         return i

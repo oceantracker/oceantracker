@@ -232,7 +232,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # make core classes, eg. field group
         for name, params in case_params['core_classes'].items():
-            i = si.add_core_class(name, params, crumbs= ' Making all core class ' + name )
+            i = si.add_core_class(name, params, crumbs= f'core class "{name}" ')
 
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags
 
@@ -295,14 +295,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.hydro_model_is3D = si.classes['fields']['water_velocity'].is3D()
 
         if si.settings['time_step'] is None:
-            time_step = reader.info['hydro_model_time_step']
+            time_step = reader.info['file_info']['hydro_model_time_step']
             si.msg_logger.msg("No time step given, using hydro-model's time step =" + str(time_step) + 'sec', note=True)
         else:
             time_step =  si.settings['time_step']
             if time_step > reader.info['file_info']['hydro_model_time_step']:
                 time_step = reader.info['file_info']['hydro_model_time_step']
-                si.msg_logger.msg("Time step is greater than hydro-model's, this capability not yet available, using hydro-model's time step =" + str(time_step) + 'sec', warning=True)
-
+                si.msg_logger.msg("Time step is greater than hydro-model's, this capability not yet available, using hydro-model's time step = " + str(time_step) + ' sec', warning=True)
 
         si.solver_info['model_time_step'] = time_step
         si.model_time_step = time_step

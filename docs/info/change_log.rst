@@ -25,7 +25,7 @@ New features
 
 #. tutorials/how to notebooks to help with getting started.
 #. "helper class" to build parameters without using dictionaries, by using keyword arguments of two methods of helper class.
-#. "spell checker" for param name errors with suggestions
+#. "spell checker" for param names and particle property names with suggestions
 #. Much faster start up with improved grid outline builder
 #. Automatically determine hindcast file type, if reader class_name param not given
 #. FVCOM and ROMS readers working

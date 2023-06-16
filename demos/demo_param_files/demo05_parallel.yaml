@@ -7,6 +7,8 @@
   debug: true
   dispersion:
     A_H: 0.1
+  dispersion_miss-spelt:
+    A_H: 0.1
   output_file_base: demo05_parallel
   'particle_properties ':
     Oxygen:
@@ -81,6 +83,8 @@
   debug: true
   dispersion:
     A_H: 0.1
+  dispersion_miss-spelt:
+    A_H: 0.1
   output_file_base: demo05_parallel
   'particle_properties ':
     Oxygen:
@@ -153,6 +157,8 @@
   compact_mode: true
   debug: true
   dispersion:
+    A_H: 0.1
+  dispersion_miss-spelt:
     A_H: 0.1
   output_file_base: demo05_parallel
   'particle_properties ':
@@ -227,6 +233,8 @@
   debug: true
   dispersion:
     A_H: 0.1
+  dispersion_miss-spelt:
+    A_H: 0.1
   output_file_base: demo05_parallel
   'particle_properties ':
     Oxygen:
@@ -299,6 +307,8 @@
   compact_mode: true
   debug: true
   dispersion:
+    A_H: 0.1
+  dispersion_miss-spelt:
     A_H: 0.1
   output_file_base: demo05_parallel
   'particle_properties ':
