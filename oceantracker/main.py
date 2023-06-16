@@ -39,6 +39,8 @@ from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import check_hydro_model
 
+from oceantracker.util import  spell_check_util
+
 import traceback
 OTname = common_info.package_fancy_name
 
@@ -52,18 +54,16 @@ def run(params):
 class OceanTracker():
     def __init__(self,params=None):
         self.params= param_template() if params is None else params
-        self.msg_logger = MessageLogger('startup:')
+        self.msg_logger = MessageLogger('setup:')
 
     def settings(self, **kwargs):
-        ml = self.msg_logger
         for key in kwargs:
-            if key not in common_info.all_default_settings.keys():
-                ml.msg(f'setting "{key}" is not recognised, ignoring', warning=True,link=None)
-            else:
-                self.params[key]= kwargs[key]
+            self.params[key]= kwargs[key]
 
     def add_class(self, class_type, **kwargs):
         ml = self.msg_logger
+        known_classes = list(common_info.class_dicts.keys()) \
+                     + list(common_info.core_classes.keys())
         if class_type in common_info.core_classes:
             # single class
             self.params[class_type] = kwargs
@@ -71,10 +71,12 @@ class OceanTracker():
         elif class_type in common_info.class_dicts:
             # can have more than one classs
             if 'name' not in kwargs:
-                ml.msg(f'add_class_dict() : for class_type"{class_type}" must have a name parameter, eg. name=my_{class_type}1' ,
-                       fatal_error=True, hint= f'the can be more than one {"{class_type}"}, so each must have a unique name')
+                ml.msg(f'add_class_dict() : for class_type"{class_type}" must have a name parameter, eg. name=my_{class_type}1, ignoring this class' ,
+                       fatal_error=True,
+                       hint= f'the can be more than one {"{class_type}"}, so each must have a unique name')
+                return
             name =kwargs["name"]
-            if 'name' in self.params[class_type]:
+            if name in self.params[class_type]:
                 ml.msg(f'class type "{class_type}" already has a class named "{name}", igoring later versions', warning=True)
             else:
                 # add params to  class type of given name
@@ -83,7 +85,8 @@ class OceanTracker():
                     if key != 'name':
                         self.params[class_type][name][key] = kwargs[key]
         else:
-            ml.msg(f'class type "{class_type}" is not recognised ', fatal_error=True,link=None)
+            spell_check_util.spell_check(class_type, known_classes, ml, 'in add_class(), ignoring this class',
+                        crumbs=f'class type "{class_type}"')
 
     def run(self):
         # run oceantracker
@@ -109,6 +112,7 @@ class OceanTracker():
 
         # final info output
         self._write_run_info_json(case_info_files, has_errors,t0)
+        ml.show_all_warnings_and_errors()
         ml.close()
 
         return case_info_files, has_errors
@@ -197,21 +201,22 @@ class OceanTracker():
            'class_dicts': deepcopy(common_info.class_dicts),
            }
 
-        known_keys= list(common_info.shared_settings_defaults.keys())\
+        known_top_level_keys= list(common_info.shared_settings_defaults.keys())\
                             + list(common_info.case_settings_defaults.keys()) \
                             + list(common_info.class_dicts.keys()) \
                             +list(common_info.core_classes.keys())
 
         # check for compulsory classes
         # check require classes are given
-        if 'reader' not in params or params['reader'] is None:
-            ml.msg('Parameter "reader_class" or "reader" or  is required',
-                   hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values', fatal_error=True)
+        if len(params['reader']) < 2:
+            ml.msg('Parameter "reader" is required, got ' +str(params['reader']),
+                   hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
+                   fatal_error=True)
 
-        if 'release_groups' not in params or params['release_groups'] is None:
-            ml.msg('Parameter "release_groups_dict" or "release_groups" or  is required',
-                   hint=' add a least one named release group class to the "release_groups" key', fatal_error=True)
-
+        if len(params['release_groups']) < 1:
+            ml.msg('Parameter "release_groups" is required, with at least one named release group',
+                   hint=' add a least one named release group class to the "release_groups" key',
+                   fatal_error=True)
 
         # split and check for unknown keys
         for key, item in params.items():
@@ -226,8 +231,13 @@ class OceanTracker():
                                hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead')
 
             elif k in common_info.shared_settings_defaults.keys():
-                if add_shared_settings:
+
+                if key not in common_info.all_default_settings.keys():
+                    spell_check_util.spell_check(key, common_info.all_default_settings.keys(), ml,'ignoring this setting',
+                                crumbs=f'setting "{key}"')
+                else:
                     w['shared_settings'][k] = item
+
             elif k in common_info.case_settings_defaults.keys():
                     w['case_settings'][k] = item
             elif k in common_info.core_classes.keys():
@@ -241,9 +251,7 @@ class OceanTracker():
                 w['class_dicts'][k] = item
 
             else:
-
-                ml.msg('Unknown top level parameter "' + key +'"', warning=True,
-                       hint=f'Closest matches  to "{k}"  ={difflib.get_close_matches(k,known_keys,cutoff=0.4)} ?? ')
+                spell_check_util.spell_check(key,known_top_level_keys,ml,' top level parm./key, ignoring')
 
         ml.exit_if_prior_errors('Errors in decomposing parameters')
         # merge settings params
@@ -397,7 +405,7 @@ def param_template():
     d = {}
     for key in sorted(common_info.all_default_settings.keys()):
         if type(common_info.all_default_settings[key]) is dict:
-            d[key] = None
+            d[key] = {}
         else:
             d[key] = None
 

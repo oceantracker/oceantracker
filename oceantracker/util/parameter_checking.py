@@ -1,12 +1,12 @@
 from copy import deepcopy, copy
 import numpy as np
-from oceantracker.util import time_util
-import difflib
+from oceantracker.util import time_util, spell_check_util
+
 
 
 crumb_seperator= ' >> '
 
-def  merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',  check_for_unknown_keys=True):
+def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',  check_for_unknown_keys=True):
     # merge nested paramteres with defaults, returns a copy of params updated
     # if param key is in base case then use base case rather than value from ParamDictValueChecker.get_default()
     # default dict. items must be one of 3 types
@@ -27,9 +27,8 @@ def  merge_params_with_defaults(params, default_params, msg_logger, crumbs= '', 
     if check_for_unknown_keys:
         for key in list(params.keys()):
            if  key not in default_params :
-               msg_logger.msg('non-standard parameter:' + crumbs + crumb_seperator + key,
-                            hint=f'Closest matches to "{key}" = {difflib.get_close_matches(key, list(default_params.keys()),cutoff=0.4 )} ?? ',  warning=True)
-
+               spell_check_util.spell_check(key,default_params.keys(),msg_logger,'ignoring this param.',
+                           crumbs= crumbs + crumb_seperator + f'"{key}"')
 
     for key, item in default_params.items():
         parent_crumb = crumbs + crumb_seperator + key

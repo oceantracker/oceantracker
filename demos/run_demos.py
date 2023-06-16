@@ -67,12 +67,14 @@ if __name__ == "__main__":
         params = json_util.read_JSON(f[0])
         if type(params) is list:
             demo_name = params[0]['output_file_base']
-            params[0]['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')
+            if params[0]['reader'] is not None:
+                params[0]['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')
             output_folder = path.join(params[0]['root_output_dir'], params[0]['output_file_base'])
             params[0]['root_output_dir'] = 'output'
         else:
             demo_name = params['output_file_base']
-            params['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')
+            if params['reader'] is not None:
+                params['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')
             params['root_output_dir'] = 'output'
             output_folder = path.join(params['root_output_dir'], params['output_file_base'])
 
@@ -111,11 +113,11 @@ if __name__ == "__main__":
 
 
         # do plots
-        if n < 90:
+        if 0 < n < 90:
 
             getattr(make_demo_plots,demo_name)(case_info_file_name, plot_output_file)
 
-        else:
+        elif n> 0:
             ax_lims = [1591000, 1601500, 5478500, 5491000]
             # have run forwards now backwards from last location
             plt.clf()

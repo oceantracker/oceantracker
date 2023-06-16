@@ -32,6 +32,9 @@
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "user_note": "test of notes",
+    "dispersion_miss-spelt": {
+        "A_H": 0.1
+    },
     "dispersion": {
         "A_H": 0.1
     },

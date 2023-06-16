@@ -4,6 +4,8 @@ compact_mode: true
 debug: true
 dispersion:
   A_H: 0.1
+dispersion_miss-spelt:
+  A_H: 0.1
 event_loggers:
   in_out_poly:
     class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit

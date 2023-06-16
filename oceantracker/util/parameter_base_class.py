@@ -5,7 +5,7 @@ from time import perf_counter
 from oceantracker.shared_info import SharedInfoClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.util.module_importing_util import import_module_from_string
-
+from oceantracker.util import spell_check_util
 # parameter dictionaries are nested dictionaries or lists of dictionaries
 
 class ParameterBaseClass(object):
@@ -99,7 +99,6 @@ class ParameterBaseClass(object):
         # used to clear all defaults when not needed
         for key in name_list:
             self.default_params[key] ={}
-
 
     # below dynamical adds shared particle index buffers when first used within in a class instance
     # buffers are used to hold selections of particles, saving memory and time by reuse

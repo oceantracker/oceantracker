@@ -4,6 +4,8 @@ compact_mode: true
 debug: true
 dispersion:
   A_H: 0.1
+dispersion_miss-spelt:
+  A_H: 0.1
 output_file_base: demo10_polygon_residence_demo
 'particle_properties ':
   Oxygen:

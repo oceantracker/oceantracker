@@ -7,7 +7,6 @@ def make_class_instance_from_params(name, params,msg_logger, class_type_name=Non
                                      crumbs='', merge_params=True):
     # make a class instance  dynamically,  get instance of class from string eg oceantracker.solver.Solver
     # assumes class_name param exists
-    crumbs += ' merging and making instance'
     # add class sequence number, used for in class list
 
     # work out class name

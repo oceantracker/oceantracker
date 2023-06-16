@@ -2,6 +2,8 @@ add_date_to_run_output_dir: false
 debug: true
 dispersion:
   A_H: 0.1
+dispersion_miss-spelt:
+  A_H: 0.1
 duration: 259200
 junk: h
 output_file_base: demo04_ageBasedHeatmaps
@@ -25,6 +27,7 @@ particle_statistics:
     min_age_to_bin: 0.0
     particle_property_list:
     - water_depth
+    - water_depth_bad
     update_interval: 1800
   age_poly:
     age_bin_size: 3600.0
