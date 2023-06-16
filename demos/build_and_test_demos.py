@@ -191,6 +191,7 @@ params.append (p7)
 
 # demo 8, particle splitting animation
 p8 = deepcopy(p7)
+p8['max_particles'] = 10**3
 p8[ 'compact_mode'] =False
 p8.update({'retain_culled_part_locations' : True,'particle_buffer_size':  5000})
 

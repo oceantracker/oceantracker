@@ -153,7 +153,6 @@ if __name__ == '__main__':
     case = {
             'write_tracks':  False,
             'write_grid': False,
-            'particle_buffer_size': 500,
             'solver': {'n_sub_steps': 2},
             'interp2D': {
                 'class_name': 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'},

@@ -123,6 +123,8 @@ class ParticleGroupManager(ParameterBaseClass):
 
         smax = self.particles_in_buffer + x0.shape[0]
 
+        if smax > si.settings['max_particles']: return
+
         if smax >= self.info['current_particle_buffer_size']:
             self._expand_particle_buffers(smax)
 
@@ -364,7 +366,7 @@ class ParticleGroupManager(ParameterBaseClass):
     def screen_info(self):
         si = self.shared_info
         counts =self.status_counts()
-        s =  ' Rel.:%06.0f' % self.particles_released
+        s =  f' Rel.:{self.particles_released:6,d}'
         s += ': Active:%05.0f' % counts['active'] + ' M:%05.0f' % counts['moving']
         s += ' S:%05.0f' % counts['stranded_by_tide'] + ' B:%05.0f' % counts['on_bottom'] + ' D:%03.0f' % counts['dead']
         s += ' O:%02.0f' % counts['outside_open_boundary'] + ' N:%01.0f' % counts['bad_cord']

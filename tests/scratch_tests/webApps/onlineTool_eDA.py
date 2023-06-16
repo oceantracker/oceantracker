@@ -102,8 +102,6 @@ def region_setup_params(regionID, test_root_output_dir=None):
 
     max_part = int(region_info['max_release_points']*pulse_size* pg['release_duration']/pg['release_interval'] + 10)
 
-    si.run_params.update({'particle_buffer_size': max_part})
-
     case_params['particle_statistics'][0].update(s)
 
     region_info['axes'] = ax
