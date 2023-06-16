@@ -60,7 +60,6 @@
         },
         "poly1": {
             "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
-            "name": "userA",
             "points": [
                 [
                     1597682.1237,

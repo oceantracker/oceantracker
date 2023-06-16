@@ -477,13 +477,15 @@ if __name__ == '__main__':
     release_interval = 3600
 
     params = {
-        'shared_params': {
-            'output_file_base': 'Laurin_3d',
-            'debug': True,
-            'root_output_dir': output_dir,
-            'compact_mode': True,
-            'time_step' : 10*60,
-        },
+        'output_file_base': 'Laurin_3d',
+        'debug': True,
+        'root_output_dir': output_dir,
+        'time_step' : 10*60,
+        'open_boundary_type': 1,
+        'block_dry_cells': True,
+        'max_run_duration': 7. * 24 * 3600,
+        'write_tracks': True,
+
         'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                    'file_mask': 'schout_*.nc', 'input_dir': input_dir,
                    'hgrid_file_name': path.join(input_dir, 'hgrid.gr3'),
@@ -491,89 +493,71 @@ if __name__ == '__main__':
                    'field_variables': {'ECO_no3': 'ECO_no3', 'A_Z': 'diffusivity'},
                    'field_variables_to_depth_average': ['water_velocity']
                    },
-        'base_case_params': {
-            'run_params': {
-                'open_boundary_type': 1,
-                'block_dry_cells': True,
-                'duration': 7. * 24 * 3600,
-                'write_tracks': True
-            },
-            'tracks_writer': {
-                'output_step_count': 60
-            },
-            'solver': {
 
+        'tracks_writer': {
+                'output_step_count': 60
+                    },
+        'solver': {
                 'RK_order': 2,
                 },
-            'release_groups': [
-                {
-                    'points': x0,
-                    'pulse_size': pulse_size,
-                    'release_interval': release_interval
-                },
-                {
-                    'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
-                    'points': statistical_polygon_list[1]['points'],
-                    'pulse_size': 10*pulse_size,
+        'release_groups':  {'rg1':  {
+                                        'points': x0,
+                                        'pulse_size': pulse_size,
+                                        'release_interval': release_interval
+                                    },
+                'rg2' : {  'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
+                        'points': statistical_polygon_list[1]['points'],
+                            'pulse_size': 10*pulse_size,
                     'release_interval': release_interval
                 }
-            ],
-            'dispersion': {
+            },
+        'dispersion': {
                 'class_name': 'oceantracker.dispersion.random_walk.RandomWalk',
                 #'class_name': 'oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ',
                 'A_H': 0.2,
                 'A_V': 0.001
             },
-            'resuspension':  {'class_name': 'oceantracker.resuspension.resuspension.BasicResuspension', 'critical_friction_velocity': .01  },
+        'resuspension':  { 'critical_friction_velocity': .01  },
 
 
-            'particle_properties': [
-                {
-                    'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'
-                }
-            ],
-            'particle_concentrations': [
-                {
-                    'class_name': 'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
-                    'output_step_count': 60,
-                }
-            ],
-            'fields': [
+        'particle_properties': {
+            'total_waterdepth':  {'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth' }
+                                },
+        'particle_concentrations': {'c1':{'class_name': 'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
+                                            'output_step_count': 60,
+                                        }
+                                    },
+            'fields': { 'A_Z_vertical_gradient':
 
                 {
                     'class_name': 'oceantracker.fields.field_vertical_gradient.VerticalGradient',
                     'name_of_field': 'A_Z',
-                    'name': 'A_Z_vertical_gradient'
                 }
-            ],
+            },
 
-            'velocity_modifiers': [
-                {
-                    'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
-                    'mean': -0.00
-                }
-            ],
-            "particle_statistics": [
-                {
-                    "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
-                    "calculation_interval": 60,
-                    "count_status_in_range": ["moving","moving"],
-                    "polygon_list": statistical_polygon_list
-                },
-                {
-                    "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
-                    "calculation_interval": 60,
-                    "count_status_in_range": ["stranded_by_tide","stranded_by_tide"],
-                    "polygon_list": statistical_polygon_list
-                },
-                {
-                    "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
-                    "calculation_interval": 60,
-                    "count_status_in_range": ["on_bottom","on_bottom"],
-                    "polygon_list": statistical_polygon_list
-                }
-            ]
-        }
+            'velocity_modifiers': {'fal_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
+                                                    'mean': -0.00
+                                                }
+            },
+            "particle_statistics": {'P1': {
+                                            "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
+                                            "calculation_interval": 60,
+                                            "count_status_in_range": ["moving","moving"],
+                                            "polygon_list": statistical_polygon_list
+                                        },
+                                    'P2': {
+                                        "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
+                                        "calculation_interval": 60,
+                                        "count_status_in_range": ["stranded_by_tide","stranded_by_tide"],
+                                        "polygon_list": statistical_polygon_list
+                                    },
+                               'P3':     {
+                                        "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
+                                        "calculation_interval": 60,
+                                        "count_status_in_range": ["on_bottom","on_bottom"],
+                                        "polygon_list": statistical_polygon_list
+                                    }
+                            }
     }
 
     if args.mode_debug:

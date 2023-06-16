@@ -1,4 +1,4 @@
-from  oceantracker.util import basic_util, debug_util
+from  oceantracker.util import basic_util
 import numpy as np
 import traceback
 from time import perf_counter
@@ -33,8 +33,7 @@ class ParameterBaseClass(object):
                    }
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
-                                 #'name':  PVC(None, str, doc_str='The internal name, which is used to reference the instance of this class within the code, eg. the name "water_velocity" would refers to a particle property or field used within the code'),
-                                 'user_note': PVC(None, str),
+                                  'user_note': PVC(None, str),
                                  'requires_3D': PVC(False, bool)
                                  })
 

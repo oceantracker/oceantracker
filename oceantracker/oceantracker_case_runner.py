@@ -393,7 +393,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # add default classes, eg tidal stranding
         #todo this may be better else where
         if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.working_params['class_dicts']['status_modifiers']:
-            si.working_params['class_dicts']['status_modifiers']['tidal_stranding'] ={'name': 'tidal_stranding', 'class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'}
+            si.working_params['class_dicts']['status_modifiers']['tidal_stranding'] ={'class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'}
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for user_type in ['velocity_modifiers','trajectory_modifiers','status_modifiers',

@@ -10,8 +10,7 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
     # does not check if polygons overlap
     def __init__(self):
         super().__init__()
-        self.add_default_params({'name': PVC('inside_polygons_non_overlapping', str) ,
-                                 'initial_value': PVC(-1, int),
+        self.add_default_params({'initial_value': PVC(-1, int),
                                  'dtype':PVC(np.int32,type)})
 
         self.class_doc(description= 'Index of polygon a particle is inside',)

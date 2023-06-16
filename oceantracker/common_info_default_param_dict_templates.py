@@ -84,7 +84,7 @@ class_dicts={ # class dicts which replace lists
 
 
 default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
-                               'name': PVC(None, str),
+                'name': PVC(None, str),
                 'points': PVC([], 'array', list_contains_type=float, is_required=True,
                  doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
                                }

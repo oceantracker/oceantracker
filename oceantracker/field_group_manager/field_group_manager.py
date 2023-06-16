@@ -18,8 +18,6 @@ class FieldGroupManager(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'name': PVC('field_group_manager', str)})
-
         self.n_buffer = np.zeros((2, ), dtype=np.int32)
 
 

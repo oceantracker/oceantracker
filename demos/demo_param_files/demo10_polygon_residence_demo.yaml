@@ -44,7 +44,6 @@ reader:
 release_groups:
   near_shore:
     class_name: oceantracker.release_groups.polygon_release.PolygonRelease
-    name: near_shore
     points:
     - - 1594682.1237
       - 5483472.7479

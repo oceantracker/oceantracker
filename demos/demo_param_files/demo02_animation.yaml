@@ -49,7 +49,6 @@ release_groups:
     release_interval: 10800
   poly1:
     class_name: oceantracker.release_groups.polygon_release.PolygonRelease
-    name: userA
     points:
     - - 1597682.1237
       - 5489972.7479

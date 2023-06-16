@@ -75,7 +75,7 @@ class OceanTracker():
                 return
             name =kwargs["name"]
             if name in self.params[class_type]:
-                ml.msg(f'class type "{class_type}" already has a class named "{name}", igoring later versions', warning=True)
+                ml.msg(f'class type "{class_type}" already has a class named "{name}", ignoring later versions', warning=True)
             else:
                 # add params to  class type of given name
                 self.params[class_type][name]={} # add blank param dict
@@ -85,6 +85,8 @@ class OceanTracker():
         else:
             spell_check_util.spell_check(class_type, known_classes, ml, 'in add_class(), ignoring this class',
                         crumbs=f'class type "{class_type}"')
+
+        pass
 
     def run(self):
         # run oceantracker
@@ -113,10 +115,11 @@ class OceanTracker():
         self._write_run_info_json(case_info_files, has_errors,t0)
         ml.show_all_warnings_and_errors()
         ml.insert_screen_line()
-        ml.msg(f'Summary:  elapsed time =' + str(datetime.now() - d0),)
+        ml.msg(f'OceanTracker summary:  elapsed time =' + str(datetime.now() - d0),)
 
         ml.msg(f'Cases have {num_errors:3d} errors and {num_warnings:3d} warnings, check above', tabs=3)
         ml.msg(f'Setup has  {len(ml.errors_list):3d} errors and {len(ml.warnings_list):3d} warnings, check above', tabs=3)
+        ml.insert_screen_line()
         ml.close()
 
         return case_info_files, has_errors
@@ -224,7 +227,7 @@ class OceanTracker():
                    hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
                    fatal_error=True)
 
-        if len(params['release_groups']) < 1:
+        if 'release_groups' not in  params or len(params['release_groups']) < 1:
             ml.msg('Parameter "release_groups" is required, with at least one named release group',
                    hint=' add a least one named release group class to the "release_groups" key',
                    fatal_error=True)
