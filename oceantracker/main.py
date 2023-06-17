@@ -52,7 +52,7 @@ def run(params):
 class OceanTracker():
     def __init__(self,params=None):
         self.params= param_template() if params is None else params
-        self.msg_logger = MessageLogger('setup:')
+        self.msg_logger = MessageLogger('helper:')
 
     def settings(self, **kwargs):
         for key in kwargs:
@@ -91,6 +91,8 @@ class OceanTracker():
     def run(self):
         # run oceantracker
         params = self.params
+        # set up new messagelogger to allow reruns of helper method
+        self.msg_logger = MessageLogger('main:')
         ml =self.msg_logger
         ml.exit_if_prior_errors('parameters have errors')
 
@@ -118,7 +120,7 @@ class OceanTracker():
         ml.msg(f'OceanTracker summary:  elapsed time =' + str(datetime.now() - d0),)
 
         ml.msg(f'Cases have {num_errors:3d} errors and {num_warnings:3d} warnings, check above', tabs=3)
-        ml.msg(f'Setup has  {len(ml.errors_list):3d} errors and {len(ml.warnings_list):3d} warnings, check above', tabs=3)
+        ml.msg(f'Main has  {len(ml.errors_list):3d} errors and {len(ml.warnings_list):3d} warnings, check above', tabs=3)
         ml.insert_screen_line()
         ml.close()
 
@@ -152,7 +154,7 @@ class OceanTracker():
         # work out how many processors to use
         c =get_versions_computer_info.get_computer_info()
         if w0['shared_settings']['processors'] is None:
-            w0['shared_settings']['processors']  = max(c['CPUs_hardware']-2,1)
+            w0['shared_settings']['processors']  = max(c['CPUs_hardware']-1,1)
 
         ml.exit_if_prior_errors('first case parameter errors')
         w0 = self._get_hindcast_file_info(w0)

@@ -44,10 +44,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # set up message logging
         output_files = working_params['output_files']
-        si.msg_logger = MessageLogger('P%03.0f:' % si.processorID, si.settings['advanced_settings']['max_warnings'])
+        si.msg_logger = MessageLogger(f'C{si.processorID:03d}', si.settings['advanced_settings']['max_warnings'])
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
-
 
         # other useful shared values
         si.backtracking = si.settings['backtracking']
@@ -375,8 +374,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                                                  write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
         si.msg_logger.progress_marker('created particle properties derived from fields', start_time=t0)
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
-        for n, params in enumerate(si.working_params['class_dicts']['fields']):
-            i = si.create_class_dict_instance('fields', 'user', params, crumbs='Adding "fields" from user params')
+        for name, params in si.working_params['class_dicts']['fields'].items():
+            i = si.create_class_dict_instance(name,'fields', 'user', params, crumbs='Adding "fields" from user params')
             i.initial_setup()
             # now add custom prop based on  this field
             pgm.create_particle_property(i.info['name'], 'from_fields', dict(vector_dim=i.get_number_components(), time_varying=i.is_time_varying(),

@@ -495,7 +495,7 @@ if __name__ == '__main__':
                    },
 
         'tracks_writer': {
-                'output_step_count': 60
+                'write_time_interval': 3600
                     },
         'solver': {
                 'RK_order': 2,
@@ -535,25 +535,25 @@ if __name__ == '__main__':
                 }
             },
 
-            'velocity_modifiers': {'fal_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
+            'velocity_modifiers': {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
                                                     'mean': -0.00
                                                 }
             },
             "particle_statistics": {'P1': {
                                             "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
-                                            "calculation_interval": 60,
+                                            "update_interval": 60,
                                             "count_status_in_range": ["moving","moving"],
                                             "polygon_list": statistical_polygon_list
                                         },
                                     'P2': {
                                         "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
-                                        "calculation_interval": 60,
+                                        "update_interval": 60,
                                         "count_status_in_range": ["stranded_by_tide","stranded_by_tide"],
                                         "polygon_list": statistical_polygon_list
                                     },
                                'P3':     {
                                         "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
-                                        "calculation_interval": 60,
+                                        "update_interval": 60,
                                         "count_status_in_range": ["on_bottom","on_bottom"],
                                         "polygon_list": statistical_polygon_list
                                     }
