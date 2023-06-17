@@ -43,15 +43,6 @@ class PolygonRelease(PointRelease):
         info['number_released'] = 0
         info['pulse_count'] = 0
 
-    def estimated_total_number_released(self):
-        info = self.info
-        release_info = info['release_info']
-        if release_info['release_times'] is None:
-            return 0
-        else:
-            npart = self.params['pulse_size'] * release_info['release_times'].size
-
-            return int(npart)
 
     def get_release_location_candidates(self):
         si = self.shared_info

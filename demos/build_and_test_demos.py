@@ -377,19 +377,24 @@ params.append(p90)
 # test freewheeling when no particles
 p91= deepcopy(p2) # has two points
 p91.update({'output_file_base': 'demo91_free_running_gaps',
-                             'time_step' :900})
+                             'time_step' :900 ,'backtracking': False})
 p91['release_groups']={}
-p91['release_groups']['start_late'] ={'points':two_points,
+p91['release_groups']['r1'] ={'points':[two_points[1]],
                                       'max_age':6*3600,
                                       'release_interval':0,
                                       'pulse_size' : 1,
-                                      'release_start_date':'2020-06-02T12:00:00' # start 1 day in 2020-06-02T21:16:07
+                                      'release_start_date':'2020-06-02T00:00:00' # start 1 day in 2020-06-02T21:16:07
                                       }
-p91['release_groups']['start_later'] = deepcopy(p91['release_groups']['start_late'])
-p91['release_groups']['start_later']['release_start_date']='2020-06-03T12:00:00'
-p91['release_groups']['start_last'] = deepcopy(p91['release_groups']['start_late']) # overlaps with last
-p91['release_groups']['start_last']['release_start_date']='2020-06-03T15:00:00'
+# 2020-06-01T05:16:07 to 2020-06-06T03:16:07
+p91['release_groups']['r2'] = deepcopy(p91['release_groups']['r1'])
+p91['release_groups']['r2']['release_start_date']='2020-06-03T00:00:00'
 
+p91['release_groups']['r3'] = deepcopy(p91['release_groups']['r1']) # overlaps with last
+p91['release_groups']['r3']['release_start_date']='2020-06-04T00:00:00'
+
+p91['release_groups']['r4'] = deepcopy(p91['release_groups']['r1']) # overlaps with last
+p91['release_groups']['r4']['release_start_date']='2020-06-03T03:00:00'
+#p91['release_groups']['start_mid']['max_age']=2*3600
 params.append(p91)
 
 

@@ -93,7 +93,7 @@ class _BaseReader(ParameterBaseClass):
 
     def is_file_variable_time_varying(self,nc, var_name_in_file): return nc.is_var_dim(var_name_in_file, self.params['dimension_map']['time'])
 
-    def get_number_of_z_levels(self,nc): return nc.get_dim_size(self.params['dimension_map']['z'])
+    def get_number_of_z_levels(self,nc): return nc.dim_size(self.params['dimension_map']['z'])
 
     def is_hindcast3D(self, nc): nopass('must define method to test if hindcast is 3D')
 
@@ -275,7 +275,7 @@ class _BaseReader(ParameterBaseClass):
         for name, d in self.params['dimension_map'].items():
             if d is not None and not nc.is_dim(d):
                 msg_logger.msg('Cannot find dimension_map dimension "' + name + ' ", file dimension given is "' + d + '"',
-                               hint='Dimensions in hydro-model file = ' + str(nc.get_dims()),
+                               hint='Dimensions in hydro-model file = ' + str(nc.dims()),
                                fatal_error=True)
 
         # check variables are there

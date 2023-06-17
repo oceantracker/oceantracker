@@ -36,13 +36,13 @@ class unstructured_FVCOM(GenericUnstructuredReader):
         else:
             msg_logger.msg('No vertical velocity "ww" variable in FVCOM hydro-model files, assuming vertical_velocity=0', note=True)
 
-    def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.get_var_dims(var_name_in_file) for x in ['siglay','siglev'])
+    def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.all_var_dims(var_name_in_file) for x in ['siglay','siglev'])
 
-    def get_number_of_z_levels(self,nc):  return nc.get_dim_size('siglev')
+    def get_number_of_z_levels(self,nc):  return nc.dim_size('siglev')
 
     def get_num_vector_components_in_file_variable(self,nc,file_var_name): return 1 # no vector vararibles
 
-    def is_file_variable_time_varying(self, nc, var_name_in_file): return  'time' in nc.get_var_dims(var_name_in_file)
+    def is_file_variable_time_varying(self, nc, var_name_in_file): return  'time' in nc.all_var_dims(var_name_in_file)
 
 
     def build_grid(self, nc, grid):
@@ -153,12 +153,12 @@ class unstructured_FVCOM(GenericUnstructuredReader):
         data = np.flip(data, axis=2)
 
         # some variables at nodes, some at cell center ( eg u,v,w)
-        if 'nele' in nc.get_var_dims(var_name) :
+        if 'nele' in nc.all_var_dims(var_name) :
             # data is at cell center/element  move to nodes
             data = data_grid_transforms.get_node_layer_field_values(
                             data,grid['node_to_tri_map'],grid['tri_per_node'], grid['cell_center_weights'])
 
-        if  'siglay' in nc.get_var_dims(var_name):
+        if  'siglay' in nc.all_var_dims(var_name):
             # convert mid-layer values to values at layer boundaries, ie zlevels
             data =  data_grid_transforms.convert_layer_field_to_levels_from_depth_fractions_at_each_node(
                         data,grid['z_fractions_layer_center'],grid['z_fractions_layer_boundaries'])

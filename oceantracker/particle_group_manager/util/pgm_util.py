@@ -12,7 +12,7 @@ def _status_counts_and_kill_old_particles(age, status, IDrelease_group,max_age_f
 
     # loop over active buffer
     for n in range(num_in_buffer):
-        if status[n] >= status_frozen and age[n] > max_age_for_each_release_group[IDrelease_group[n]] :
+        if status[n] >= status_frozen and abs(age[n]) > max_age_for_each_release_group[IDrelease_group[n]] :
             status[n] =  status_dead
 
         # add to histogram of status values

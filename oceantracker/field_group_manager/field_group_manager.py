@@ -77,7 +77,11 @@ class FieldGroupManager(ParameterBaseClass):
         si =self. shared_info
         si.classes['interpolator'].update_dry_cells()
 
-
+    def get_hindcast_range(self):
+        si = self.shared_info
+        reader = si.classes['reader']
+        r = [reader.info['file_info']['first_time'],reader.info['file_info']['last_time']]
+        return np.asarray(r)
 
     def write_hydro_model_grids(self):
         si = self.shared_info

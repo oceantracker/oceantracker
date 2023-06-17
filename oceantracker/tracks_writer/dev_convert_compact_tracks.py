@@ -16,7 +16,7 @@ def convert_to_rectangular(file_name,time_chunk=24):
 
     # get list of time_part var and copy others to new file
     time_part_vars=[]
-    for name in nc_in.get_var_names():
+    for name in nc_in.all_var_names():
         if name not in ['write_step_index', 'time_step_range']:
             if  nc_in.is_var_dim(name, 'time_particle_dim'):
                 time_part_vars.append(name)
@@ -36,7 +36,7 @@ def convert_to_rectangular(file_name,time_chunk=24):
         nc_out.create_a_variable(name,dims, v.dtype, description=v.description, chunksizes=chunks)
 
     # now read time steps
-    for nt, b in enumerate(nc_in.get_var_data('time_step_range')):
+    for nt, b in enumerate(nc_in.var_data('time_step_range')):
             sel= np.arange(b[0], b[1])  # range for this time step
             rows = nc_in.read_a_variable('write_step_index', sel)
             cols= nc_in.read_a_variable('particle_ID',sel)
@@ -53,10 +53,10 @@ def convert_to_rectangular(file_name,time_chunk=24):
 def _read_compact_var_time_step(nc, var_name, sel,nt,  cols, out=None):
 
     if out is None:
-        s = nc.get_var_shape(var_name)
-        num_released = nc.get_global_attr('total_num_particles_released')
+        s = nc.var_shape(var_name)
+        num_released = nc.global_attr('total_num_particles_released')
         data= np.full((sel.size, num_released) + tuple(s[1:]),
-                      nc.get_var_fillValue(var_name), dtype=nc.get_var_dtype(var_name))
+                      nc.get_var_fillValue(var_name), dtype=nc.var_dtype(var_name))
     else:
         data = out
 

@@ -63,7 +63,8 @@ class _BaseWriter(ParameterBaseClass):
     def add_global_attribute(self, name, value):
         self.info['file_builder']['attributes' ][name] = value
 
-    def add_new_variable(self,name, dim_list,description=None, attributes=None, dtype=None, vector_dim=None, chunking=None):
+    def add_new_variable(self,name, dim_list,description=None, fill_value=None,
+                         attributes=None, dtype=None, vector_dim=None, chunking=None):
         # add a varaible builder to use on output file sequence, as may split time steps
         if dtype is bool: dtype = np.int8
         if dtype is None: dtype=np.float64
@@ -73,12 +74,13 @@ class _BaseWriter(ParameterBaseClass):
             dim_list.append(vn[vector_dim-2])
             chunking.append(vector_dim)
 
+
         var={'dim_list': dim_list,
              'description' :description if description is not None else 'no description given',
              'attributes': attributes if attributes is not None else {},
              'chunks' : chunking,
+             'fill_value': fill_value,
             'dtype' : np.int8  if dtype is bool else dtype}
-
 
         self.info['file_builder']['variables'][name] = var
 

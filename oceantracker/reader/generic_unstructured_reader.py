@@ -98,7 +98,7 @@ class GenericUnstructuredReader(_BaseReader):
 
     def read_time_sec_since_1970(self, nc, file_index=None):
         vname=self.params['grid_variables']['time']
-        if file_index is None : file_index = np.arange(nc.get_var_shape(vname)[0])
+        if file_index is None : file_index = np.arange(nc.var_shape(vname)[0])
 
         time = nc.read_a_variable(vname, sel=file_index)
 

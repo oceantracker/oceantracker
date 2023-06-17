@@ -88,7 +88,11 @@ default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
                  doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
                                }
 
-particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search_failed': -19, 'notReleased': -10,  'dead': -2,'outside_open_boundary': -1, 'frozen': 0,
+particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search_failed': -19,
+                                  'notReleased': -10,
+                                  'dead': -2,
+                                  'outside_open_boundary': -1,
+                                  'frozen': 0,
                                   'stranded_by_tide': 3,  'on_bottom': 6,  'moving': 10},
                  'known_prop_types': ['manual_update', 'from_fields','user']
                  }
@@ -202,8 +206,14 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
     #todo merge water depth range selection into all stats
     # more consisted crumb use for all message logger errors to aid debug
     #todo merge demo plots back into demos
-    #todo particle property, fill value is initial value, put in netcdf, compact reader than fills matrix
+    #todo particle property, fill value is fill value, not intial, value, put in netcdf, compact reader pyhton and matlab, than fills matrix
+            #status to have not released before cetaion, dead afet death  in compact reader,
             #  ensures statatus is not released when filling upper left of reytangular matrix
+    #todo say why no particles found, eg outside domain etc
+ #todo Simplify
+    # todo set up of tracks set up op of patricle params, no kwargs. based on prrop para, time varyinging,
+        #  nice to have tme varying write at end
+    #todo get rid of base tracks writer???
 
 # TODO FUTURE
     # todo Kernal RK steps

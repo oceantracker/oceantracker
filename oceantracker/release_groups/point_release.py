@@ -20,10 +20,10 @@ class PointRelease(ParameterBaseClass):
                                  'release_start_date': PVC(None, 'iso8601date', doc_str='Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
                                    # to do add ability to release on set dates/times 'release_dates': PLC([], 'iso8601date'),
                                  'release_duration': PVC(None, float,min=0.,
-                                                    doc_str='Time in seconds particles are released for after they start being released, ie releases stop this time after first release.' ),
-                                'release_end_date': PVC(None, 'iso8601date', doc_str='Date to stop releasing partices, ignored if release_duration give, must be an ISO date as string eg. "2017-01-01T00:30:00" '),
+                                                    doc_str='Time in seconds particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "release_end_date"' ),
+                                'release_end_date': PVC(None, 'iso8601date', doc_str='Date to stop releasing particles, ignored if release_duration give, must be an ISO date as string eg. "2017-01-01T00:30:00" '),
                                 'max_age': PVC(None,float,min=1.,
-                                                    doc_str='Particles older than this age in seconds are killed off and removed from computation.'),
+                                                    doc_str='Particles older than this age in seconds are culled,ie. status=dead, and removed from computation, very useful in reducing run time'),
                                  'user_release_groupID' : PVC(0,int, doc_str= 'User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.'),
                                  'user_release_group_name' : PVC(None,str,doc_str= 'User given name/label to attached to this release groups to make it easier to distinguish.'),
                                  'allow_release_in_dry_cells': PVC(False, bool,
@@ -64,8 +64,7 @@ class PointRelease(ParameterBaseClass):
         model_time_step = si.settings['time_step']
 
         self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,
-                                    'last_time_alive':None,
-                      'estimated_number_released' : 0}
+                                    'last_time_alive':None}
         # short cut
         release_info =self.info['release_info']
 
@@ -138,12 +137,6 @@ class PointRelease(ParameterBaseClass):
         # index of release the  times to be released next
         release_info['index_of_next_release'] =  0
 
-    def estimated_total_number_released(self):
-        info = self.info
-        release_info = info['release_info']
-        npart= self.params['pulse_size'] *  release_info['release_times'].size * info['points'].shape[0]
-        return int(npart)
-
     def release_locations(self):
         # set up full set of release locations inside  polygons
         si = self.shared_info
@@ -176,7 +169,6 @@ class PointRelease(ParameterBaseClass):
 
         if n_found < n_required:
             si.msg_logger.msg(f'Release group-"{self.info["name"]}", only found {n_found} of {n_required} required points inside domain after {self.params["max_cycles_to_find_release_points"]} cycles',
-
                               warning=True,
                            hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  max_cycles_to_find_release_points, current value = {self.params["max_cycles_to_find_release_points"]:3}' )
             n_required = n_found #

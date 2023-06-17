@@ -89,9 +89,13 @@ class Solver(ParameterBaseClass):
         info['time_steps_completed'] = 0
 
         # get hindcast step range
+        time_span = fgm.get_hindcast_range()
         #todo simplify by dropping need to find model end time
-        model_times = np.arange(info['model_start_time'], info['model_end_time'],
-                                info['model_time_step'] * si.model_direction)
+        model_times = info['model_start_time'] + si.model_direction*np.arange(0., abs(time_span[1]-time_span[0]),abs(info['model_time_step']))
+        # trim times to hindcast range
+        sel = np.logical_and(model_times >= time_span[0], model_times <=time_span[1])
+        model_times = model_times[ sel]
+
 
         # work out time steps between writing tracks to screen
         write_tracks_time_step = si.settings['screen_output_time_interval']

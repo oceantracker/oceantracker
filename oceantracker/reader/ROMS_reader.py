@@ -47,13 +47,13 @@ class ROMsNativeReader(GenericUnstructuredReader):
         # don't use name mappings for these variables
         self.clear_default_params(['dimension_map','grid_variables','one_based_indices'])
 
-    def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.get_var_dims(var_name_in_file) for x in ['s_w','s_rho'])
+    def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.all_var_dims(var_name_in_file) for x in ['s_w','s_rho'])
 
-    def get_number_of_z_levels(self,nc): return nc.get_dim_size('s_w')
+    def get_number_of_z_levels(self,nc): return nc.dim_size('s_w')
 
     def get_num_vector_components_in_file_variable(self,nc,file_var_name): return 1 # no vector vararibles
 
-    def is_file_variable_time_varying(self, nc, var_name_in_file): return  'ocean_time' in nc.get_var_dims(var_name_in_file)
+    def is_file_variable_time_varying(self, nc, var_name_in_file): return  'ocean_time' in nc.all_var_dims(var_name_in_file)
 
     def build_grid(self, nc, grid):
         # pre-read useful info
@@ -151,7 +151,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
         else:
             time_sec = nc.read_a_variable('ocean_time', sel=file_index)
 
-        base_date = nc.get_var_attr('ocean_time','units').split('since ')[-1]
+        base_date = nc.var_attr('ocean_time','units').split('since ')[-1]
         t0 = time_util.isostr_to_seconds(base_date)
 
         time_sec += t0
@@ -164,7 +164,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
         # reformat file variable into 4D time,node,depth, components  form
         grid = self.grid
         var_name = file_var_info['name_in_file']
-        data_dims= nc.get_var_dims(var_name)
+        data_dims= nc.all_var_dims(var_name)
         data = nc.read_a_variable(var_name, sel=file_index if is_time_varying else None).astype(np.float32)  # allow for time independent data
 
         # add dummy time dim if none
