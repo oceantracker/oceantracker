@@ -50,7 +50,7 @@ class Solver(ParameterBaseClass):
         # set up particle velocity working space for solver
         info['total_alive_particles'] = 0
 
-        # todo kernal solvnot working yet
+        # todo dev work kernal solvnot working yet
         # kernal working space as numpy structure
         val = np.zeros((3,), dtype=np.float64)
         self.kernal_solver_info = numpy_util.numpy_structure_from_dict(
@@ -79,18 +79,17 @@ class Solver(ParameterBaseClass):
     def solve(self):
         # solve for data in buffer
         si = self.shared_info
-
-        reader = si.classes['reader']
-        grid = reader.grid
-
+        ml = si.msg_logger
+        part_prop = si.classes['particle_properties']
         info = self.info # same as si.solver_info
-        computation_started = datetime.now()
 
+        computation_started = datetime.now()
 
         pgm, fgm = si.classes['particle_group_manager'], si.classes['field_group_manager']
         info['time_steps_completed'] = 0
 
         # get hindcast step range
+        #todo simplify by dropping need to find model end time
         model_times = np.arange(info['model_start_time'], info['model_end_time'],
                                 info['model_time_step'] * si.model_direction)
 
@@ -102,7 +101,7 @@ class Solver(ParameterBaseClass):
             nt_write_time_step_to_screen = max(1,int(write_tracks_time_step/si.solver_info['model_time_step']))
 
         t0_model = perf_counter()
-
+        free_wheeling =False
         # run forwards through model time variable, which for backtracking are backwards in time
         for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
 
@@ -110,11 +109,43 @@ class Solver(ParameterBaseClass):
             time_sec = model_times[nt]
 
             # release particles
-            new_particleIDs = pgm.release_particles(time_sec)
+            new_particleIDs  = pgm.release_particles(time_sec)
 
+            # count particles of each status and count number >= frozen status
+            num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
+            if num_alive == 0:
+                #freewheel until more are released or end of run/hindcast
+                if not free_wheeling:
+                    # at start note
+                    ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(time_sec)}, skipping time steps until more are released', note=True)
+                free_wheeling =True
+                continue
+
+            free_wheeling = False # has ended
+
+            # print progress to screen
+            if nt % nt_write_time_step_to_screen == 0:
+                self.screen_output(si.solver_info['time_steps_completed'], time_sec, t0_model, t0_step)
+
+            # alive partiles so do steps
+            info['total_alive_particles'] += num_alive
             fgm.fill_reader_buffers_if_needed(time_sec)
 
-            is_moving = self.pre_step_bookkeeping(nt, time_sec, new_particleIDs)
+
+            # do stats etc updates and write tracks
+            self.pre_step_bookkeeping(nt, time_sec, new_particleIDs)
+
+            # now modfy location after writing of moving particles
+            # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
+            is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out=self.get_partID_buffer('ID1'))
+
+            # update particle velocity modification
+            part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
+            for name, i in si.classes['velocity_modifiers'].items():
+                i.update(time_sec, is_moving)
+
+            # dispersion is done by random walk velocity modification prior to integration step
+            si.classes['dispersion'].update(time_sec, is_moving)
 
             #  Main integration step
             #--------------------------------------
@@ -127,9 +158,6 @@ class Solver(ParameterBaseClass):
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
 
-            # print progress to screen
-            if nt % nt_write_time_step_to_screen == 0:
-                self.screen_output(si.solver_info['time_steps_completed'] ,  time_sec, t0_model, t0_step)
 
             info['time_steps_completed'] += 1
 
@@ -147,7 +175,7 @@ class Solver(ParameterBaseClass):
         info['computation_ended'] = datetime.now()
         info['computation_duration'] = datetime.now() -computation_started
 
-    def pre_step_bookkeeping(self, nt,time_sec, new_particleIDs=None):
+    def pre_step_bookkeeping(self, nt,time_sec,new_particleIDs=None):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
@@ -159,18 +187,14 @@ class Solver(ParameterBaseClass):
         info['current_model_time_step'] = nt
         info['current_model_time'] = time_sec
 
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
-        self.info['total_alive_particles'] += alive.shape[0]
-        
-        # modify status
-        for name, i in si.classes['status_modifiers'].items():
-            i.update(time_sec, alive)
-
-        pgm.kill_old_particles(time_sec) # todo convert to status modifier
         pgm.remove_dead_particles_from_memory()
 
         # some may now have status dead so update
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
+
+        # modify status, eg tidal stranding
+        for name, i in si.classes['status_modifiers'].items():
+            i.update(time_sec, alive)
 
         # trajectory modifiers,
         for name, i in si.classes['trajectory_modifiers'].items():
@@ -179,7 +203,7 @@ class Solver(ParameterBaseClass):
         if si.is_3D_run:
             si.classes['resuspension'].update(time_sec, alive)
 
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
 
         # setup_interp_time_step
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
@@ -203,19 +227,7 @@ class Solver(ParameterBaseClass):
             # write tracks file
             tracks_writer.write_all_time_varying_prop_and_data()
 
-        # now modfy location after writing
-        # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
-        is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out=self.get_partID_buffer('B1'))
 
-        # update particle velocity modification
-        part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
-        for name, i in si.classes['velocity_modifiers'].items():
-            i.update(time_sec, is_moving)
-
-        # dispersion is done by random walk velocity modification prior to integration step
-        si.classes['dispersion'].update(time_sec, is_moving)
-
-        return is_moving
     def integration_step(self, time_sec, is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties

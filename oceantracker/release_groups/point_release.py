@@ -22,7 +22,7 @@ class PointRelease(ParameterBaseClass):
                                  'release_duration': PVC(None, float,min=0.,
                                                     doc_str='Time in seconds particles are released for after they start being released, ie releases stop this time after first release.' ),
                                 'release_end_date': PVC(None, 'iso8601date', doc_str='Date to stop releasing partices, ignored if release_duration give, must be an ISO date as string eg. "2017-01-01T00:30:00" '),
-                                'maximum_age': PVC(None,float,min=1.,
+                                'max_age': PVC(None,float,min=1.,
                                                     doc_str='Particles older than this age in seconds are killed off and removed from computation.'),
                                  'user_release_groupID' : PVC(0,int, doc_str= 'User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.'),
                                  'user_release_group_name' : PVC(None,str,doc_str= 'User given name/label to attached to this release groups to make it easier to distinguish.'),
@@ -123,7 +123,7 @@ class PointRelease(ParameterBaseClass):
         release_info['release_time_steps'] =  np.round(( release_info['release_times']- hindcast_start)/model_time_step).astype(np.int32)
 
         # find last time partiles alive
-        max_age = 1.0E30 if params['maximum_age'] is None else params['maximum_age']
+        max_age = 1.0E30 if params['max_age'] is None else params['max_age']
         release_info['last_time_alive'] =  release_info['release_times'][-1] + si.model_direction*max_age
         release_info['last_time_alive'] =  min(max(hindcast_start,release_info['last_time_alive']),hindcast_end) # trim to limits of hind cast
 

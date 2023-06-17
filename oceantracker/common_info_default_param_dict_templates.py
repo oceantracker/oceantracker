@@ -43,7 +43,6 @@ case_settings_defaults ={
             'case_output_file_tag':     PVC(None, str,doc_str='insert this tag into output files name fore each case'), #todo make this only settable in a case, caselist params?
             'write_tracks':             PVC(True, bool),
             'z0':                       PVC(0.005, float, units='m', doc_str='Bottom roughness in meters, used for tolerance and log layer calcs. ', min=0.0001),  # default bottom roughness
-            'retain_culled_part_locations': PVC(False, bool, doc_str='When particle marked dead/culled keep its position value, ie dont set position to nan so it does not appear in plots etc after death'),
             'open_boundary_type' :  PVC(0, int, min=0, max=1,doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS '),
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
               }
@@ -203,6 +202,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
     #todo merge water depth range selection into all stats
     # more consisted crumb use for all message logger errors to aid debug
     #todo merge demo plots back into demos
+    #todo particle property, fill value is initial value, put in netcdf, compact reader than fills matrix
+            #  ensures statatus is not released when filling upper left of reytangular matrix
 
 # TODO FUTURE
     # todo Kernal RK steps

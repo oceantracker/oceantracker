@@ -201,7 +201,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         if self.params['write']:
             self.info_to_write_at_end()
             nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
-            nc.write_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].particles_released)
+            nc.write_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])
 
             # add attributes mapping release index to release group name
             output_util.add_release_group_ID_info_to_netCDF(nc, si.classes['release_groups'] )

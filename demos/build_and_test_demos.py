@@ -85,7 +85,7 @@ p2['release_groups']={
 p2.update({'block_dry_cells': True,
         'tracks_writer':{'write_dry_cell_index': True,
                                                }})
-p2.update({'output_file_base' :'demo02_animation' ,'compact_mode': True,'time_step': 10*60})
+p2.update({'output_file_base' :'demo02_animation' ,'time_step': 10*60})
 params.append(p2)
 
 
@@ -192,8 +192,8 @@ params.append (p7)
 # demo 8, particle splitting animation
 p8 = deepcopy(p7)
 p8['max_particles'] = 10**3
-p8[ 'compact_mode'] =False
-p8.update({'retain_culled_part_locations' : True,'particle_buffer_size':  5000})
+
+p8.update({'particle_buffer_size':  5000})
 
 p8['release_groups']={
         'P1':{'points': [[1594500, 5483500],[1594500, 5483500+3000]], 'pulse_size': 1, 'release_interval': 0}
@@ -297,7 +297,7 @@ s56['particle_statistics']= {'grid1':
 
 
 s56['resuspension'] = {'critical_friction_velocity': .005}
-s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel', 'compact_mode': True})
+s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel'})
 s56['velocity_modifiers']= {'terminal_velocity':
                                 {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
                             }
@@ -336,10 +336,10 @@ params.append(s59)
 
 # decaying particles sized on c
 s60 = deepcopy(schsim_base_params)
-s60.update({'output_file_base' : 'demo60_SCHISM_3D_decaying_particle','compact_mode':True, 'time_step': 120})
+s60.update({'output_file_base' : 'demo60_SCHISM_3D_decaying_particle','time_step': 120})
 s60['release_groups']={
                 'P1':{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
-                                                     'pulse_size': 1, 'release_interval': 2.5*60, 'maximum_age': .2*24*3600}
+                                                     'pulse_size': 1, 'release_interval': 2.5*60, 'max_age': .2*24*3600}
                         }
 s60['particle_properties']= {
     'age_decay' :{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
@@ -373,6 +373,24 @@ p90['release_groups']= {
 p90['dispersion'].update({'A_H' : 0., 'A_V': 0.})
 
 params.append(p90)
+
+# test freewheeling when no particles
+p91= deepcopy(p2) # has two points
+p91.update({'output_file_base': 'demo91_free_running_gaps',
+                             'time_step' :900})
+p91['release_groups']={}
+p91['release_groups']['start_late'] ={'points':two_points,
+                                      'max_age':6*3600,
+                                      'release_interval':0,
+                                      'pulse_size' : 1,
+                                      'release_start_date':'2020-06-02T12:00:00' # start 1 day in 2020-06-02T21:16:07
+                                      }
+p91['release_groups']['start_later'] = deepcopy(p91['release_groups']['start_late'])
+p91['release_groups']['start_later']['release_start_date']='2020-06-03T12:00:00'
+p91['release_groups']['start_last'] = deepcopy(p91['release_groups']['start_late']) # overlaps with last
+p91['release_groups']['start_last']['release_start_date']='2020-06-03T15:00:00'
+
+params.append(p91)
 
 
 # demo 100 ROMS test

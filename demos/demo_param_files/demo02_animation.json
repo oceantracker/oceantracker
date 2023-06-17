@@ -101,6 +101,5 @@
         }
     },
     "block_dry_cells": true,
-    "compact_mode": true,
     "root_output_dir": "output"
 }

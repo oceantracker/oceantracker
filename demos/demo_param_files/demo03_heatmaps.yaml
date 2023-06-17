@@ -4,7 +4,7 @@ dispersion:
   A_H: 0.1
 dispersion_miss-spelt:
   A_H: 0.1
-duration: 259200
+max_run_duration: 259200
 output_file_base: demo03_heatmaps
 particle_group_manager:
   particle_buffer_chunk_size: 20000

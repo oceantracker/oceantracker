@@ -139,7 +139,7 @@
         "particle_buffer_chunk_size": 20000
     },
     "write_tracks": false,
-    "duration": 259200,
+    "max_run_duration": 259200,
     "junk": "h",
     "root_output_dir": "output"
 }

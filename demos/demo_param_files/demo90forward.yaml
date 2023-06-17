@@ -1,7 +1,6 @@
 add_date_to_run_output_dir: false
 backtracking: false
 block_dry_cells: true
-compact_mode: true
 debug: true
 dispersion:
   A_H: 0.0

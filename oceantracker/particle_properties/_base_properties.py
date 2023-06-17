@@ -105,7 +105,7 @@ class ParticleProperty(_BasePropertyInfo):
             particle_operations_util.set_value(self.data, values, active)
 
     def fill_buffer(self,value):
-        n_in_buffer = self.shared_info.classes['particle_group_manager'].particles_in_buffer
+        n_in_buffer = self.shared_info.classes['particle_group_manager'].info['particles_in_buffer']
         self.data[:n_in_buffer,...] = value
 
 
@@ -113,7 +113,7 @@ class ParticleProperty(_BasePropertyInfo):
         # get property values using indices sel
         return np.take(self.data,sel, axis=0)  # for integer index sel, take is faster than numpy fancy indexing and numba
 
-    def used_buffer(self): return self.data[:self.shared_info.classes['particle_group_manager'].particles_in_buffer, ...]
+    def used_buffer(self): return self.data[:self.shared_info.classes['particle_group_manager'].info['particles_in_buffer'], ...]
 
     def full_buffer(self):  return self.data
 

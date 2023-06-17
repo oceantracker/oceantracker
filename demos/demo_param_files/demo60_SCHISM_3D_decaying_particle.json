@@ -34,7 +34,7 @@
             ],
             "pulse_size": 1,
             "release_interval": 150.0,
-            "maximum_age": 17280.000000000004
+            "max_age": 17280.000000000004
         }
     },
     "particle_properties": {
@@ -43,6 +43,5 @@
             "decay_time_scale": 25714.28571428571
         }
     },
-    "compact_mode": true,
     "root_output_dir": "output"
 }

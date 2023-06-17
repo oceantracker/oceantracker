@@ -103,7 +103,6 @@
         }
     },
     "block_dry_cells": true,
-    "compact_mode": true,
     "trajectory_modifiers": {
         "settle_in+polygon": {
             "class_name": "oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon",

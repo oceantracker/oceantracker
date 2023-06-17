@@ -100,7 +100,7 @@ class CompactTracksWriter(_BaseWriter):
     def close(self):
         si = self.shared_info
         if si.write_tracks:
-            self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].particles_released)
+            self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
             super().close()
 

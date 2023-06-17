@@ -7,7 +7,7 @@ from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.util import numpy_util,  spell_check_util
-
+from  oceantracker.particle_group_manager.util import  pgm_util
 
 # holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
 import sys, gc
@@ -28,13 +28,16 @@ class ParticleGroupManager(ParameterBaseClass):
 
         info=self.info
         # is data 3D
-        self.particles_in_buffer = 0
-        self.particles_released = 0
+        info['particles_in_buffer'] = 0
+        info['particles_released'] = 0
+        info['num_alive'] = 0
         nDim = 3 if si.hydro_model_is3D else  2
         info['current_particle_buffer_size'] = self.params['particle_buffer_chunk_size']
 
         #  time dependent core  properties
         self.add_time_varying_info('time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
+        self.add_time_varying_info('num_part_released_so_far', description='number of particles released up to the given time',
+                                   dtype=np.int32)  # time has only one value at each time step
 
         # core particle props. , write at each required time step
         self.create_particle_property('x','manual_update',dict(vector_dim=nDim))  # particle location
@@ -65,6 +68,15 @@ class ParticleGroupManager(ParameterBaseClass):
         # make a single block of memory from all particle properties
         # as numpy dtype structured array
         si = self.shared_info
+        info = self.info
+
+        # set up array with max age for each release group, for use in killing old particles
+        rg = si.classes['release_groups']
+        info['max_age_for_each_release_group']= np.zeros((len(rg),), dtype=np.float64)
+        for n, i in enumerate(rg.values()):
+            info['max_age_for_each_release_group'][n] = np.inf if i.params['max_age'] is None else i.params['max_age']
+
+        pass
 
 
     #@function_profiler(__name__)
@@ -73,7 +85,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         new_buffer_indices = np.full((0,), 0, np.int32)
 
-        for g in si.classes['release_groups'].values():
+        for name, g in si.classes['release_groups'].items():
             ri = g.info['release_info']
             sel =  time_sec* si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
             num_pulses= np.count_nonzero(sel)
@@ -120,7 +132,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         info= self.info
 
-        smax = self.particles_in_buffer + x0.shape[0]
+        smax = info['particles_in_buffer'] + x0.shape[0]
 
         if smax > si.settings['max_particles']: return
 
@@ -128,7 +140,7 @@ class ParticleGroupManager(ParameterBaseClass):
             self._expand_particle_buffers(smax)
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index
-        new_buffer_indices= np.arange(self.particles_in_buffer, smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
+        new_buffer_indices= np.arange(info['particles_in_buffer'], smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
         num_released = new_buffer_indices.shape[0]
 
         # before doing manual updates, ensure initial values are set for
@@ -154,15 +166,15 @@ class ParticleGroupManager(ParameterBaseClass):
         # below two needed for reruns of same solver to prevent contamination by last run
         part_prop['time_released'].set_values(t, new_buffer_indices)  # time released for each particle, needed to calculate age
 
-        part_prop['ID'].set_values(self.particles_released + np.arange(num_released), new_buffer_indices)
+        part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
 
         part_prop['user_release_groupID'].set_values(user_release_groupID, new_buffer_indices)  # ID of release location
         part_prop['IDrelease_group'].set_values(IDrelease_group, new_buffer_indices)  # ID of release location
         part_prop['IDpulse'].set_values(IDpulse, new_buffer_indices)  # gives a unique release ID, so that each pulse can be tracked
 
         # set interp memory properties if present
-        self.particles_released  += num_released # total released
-        self.particles_in_buffer += num_released # number in particle buffer
+        info['particles_released'] += num_released # total released
+        info['particles_in_buffer'] += num_released # number in particle buffer
         return new_buffer_indices
 
     def _expand_particle_buffers(self,num_particles):
@@ -171,7 +183,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # get number of chunks required rounded up
         n_chunks = max(1,int(np.ceil(num_particles/self.params['particle_buffer_chunk_size'])))
         info['current_particle_buffer_size']  = n_chunks*self.params['particle_buffer_chunk_size']
-        num_in_buffer = self.particles_in_buffer
+        num_in_buffer = info['particles_in_buffer']
         #print('xxy',num_particles,n_chunks,num_in_buffer,info['current_particle_buffer_size'])
         # copy property data
         for key, i in si.classes['particle_properties'].items():
@@ -247,6 +259,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
         si = self.shared_info
         si.classes['time_varying_info']['time'].set_values(t)
+        si.classes['time_varying_info']['num_part_released_so_far'].set_values(self.info['particles_released'])
         part_prop =si.classes['particle_properties']
 
         self.screen_msg= ''
@@ -264,55 +277,45 @@ class ParticleGroupManager(ParameterBaseClass):
             if i.info['group'] == 'user':
                 i.update(active)
 
-
-    def kill_old_particles(self, t):
+    def status_counts_and_kill_old_particles(self, t,):
         # deactivate old particles for each release group
         si = self.shared_info
         part_prop = si.classes['particle_properties']
+        info = self.info
 
-        for n,p in enumerate(si.classes['release_groups'].values()):
-
-            if p.params['maximum_age'] is not None:
-
-                in_group = part_prop['IDrelease_group'].compare_all_to_a_value('eq', n, out=self.get_partID_buffer('B1'))
-
-                if in_group.shape[0] > 0:
-
-                    if si.backtracking:
-                        sel = part_prop['age'].find_subset_where(in_group, 'lt', -abs(p.params['maximum_age']), out=self.get_partID_subset_buffer('B1'))
-                    else:
-                        sel = part_prop['age'].find_subset_where(in_group, 'gt', abs(p.params['maximum_age']), out=self.get_partID_subset_buffer('B1'))
-
-                    part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
-                    if not si.retain_culled_part_locations:
-                        part_prop['x'].set_values(np.nan, sel)
+        num_alive =pgm_util._status_counts_and_kill_old_particles(part_prop['age'].data,
+                                    part_prop['status'].data,
+                                    part_prop['IDrelease_group'].data,
+                                    info['max_age_for_each_release_group'],
+                                    self.status_count_array,
+                                    info['particles_in_buffer'])
+        info['num_alive'] = num_alive
+        return num_alive
 
     def remove_dead_particles_from_memory(self):
         # in comapct mode, if too many   dead particles remove then from buffer
         si= self.shared_info
+        info = self.info
         part_prop = si.classes['particle_properties']
 
-
         ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
-        num_active = ID_alive.shape[0]
-        nDead = self.particles_in_buffer - num_active
+        num_alive = ID_alive.shape[0]
+        nDead = info['particles_in_buffer'] - num_alive
 
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
-        if nDead > 100_000 and nDead >= 0.20*self.particles_in_buffer:
+        if nDead > 100_000 and nDead >= 0.20*info['particles_in_buffer']:
                 # if too many dead then delete from memory
                 si.msg_logger.msg(f'removing dead {nDead:,3d} particles from memory, as more than 20% are dead', tabs=3)
 
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():
-                        pp.data[:num_active,...] = pp.get_values(ID_alive)
+                        pp.data[:num_alive,...] = pp.get_values(ID_alive)
 
                 # mark remaining not released to make inactive
-                notReleased = np.arange(num_active, si.particle_buffer_size)
+                notReleased = np.arange(num_alive, si.particle_buffer_size)
                 part_prop['status'].set_values(si.particle_status_flags['notReleased'], notReleased)
 
-                self.particles_in_buffer = num_active # record new number in buffer
-
-
+                info['particles_in_buffer'] = num_alive # record new number in buffer
 
     def get_release_group_userIDmaps(self):
         # make dict masp from userId and user_release_group_name to sequence number
@@ -342,7 +345,7 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         count_array = self.status_count_array
-        self._do_status_counts(part_prop['status'].used_buffer(), count_array)
+        pgm_util.do_status_counts(part_prop['status'].used_buffer(), count_array)
 
 
         # put numba counts back in dict with proper names
@@ -353,24 +356,19 @@ class ParticleGroupManager(ParameterBaseClass):
             counts['active'] += c
         return counts
 
-    @staticmethod
-    @njit
-    ##@njit(nbtypes.int32[:](nbtypes.int8[:],nbtypes.int32[:]))
-    def _do_status_counts(status, status_counts):
-        # do count into array of all possible status values -128 <= val <= 127
-        for m in range(status_counts.size): status_counts[m] = 0
-        for n in range(status.shape[0]):
-            status_counts[status[n]-128] += 1
 
     def screen_info(self):
         si = self.shared_info
-        counts =self.status_counts()
-        s =  f' Rel.:{self.particles_released:8,d}'
-        s += ': Active:%05.0f' % counts['active'] + ' M:%05.0f' % counts['moving']
-        s += ' S:%05.0f' % counts['stranded_by_tide'] + ' B:%05.0f' % counts['on_bottom'] + ' D:%03.0f' % counts['dead']
-        s += ' O:%02.0f' % counts['outside_open_boundary'] + ' N:%01.0f' % counts['bad_cord']
-        s += ' Buffer:%4.0f' %  self.particles_in_buffer
-        s += '-%3.0f%%' % (100. * self.particles_in_buffer / si.classes['particle_group_manager'].info['current_particle_buffer_size'])
+        sf= si.particle_status_flags
+        info = self.info
+        counts =self.status_count_array
+
+        s =  f' Rel.:{info["particles_released"]:8,d}: '
+        s += f'Active:{info["num_alive"]:05d} M:{counts[sf["moving"]-128]:05d} '
+        s += f'S:{counts[sf["stranded_by_tide"]-128]:05d}  B:{counts[sf["on_bottom"]-128]:05d} '
+        s += f'D:{counts[sf["dead"] - 128]:03d} O:{counts[sf["outside_open_boundary"] - 128]:02d} '
+        s += f'N:{counts[sf["bad_cord"] - 128]:03d} Buffer:{info["particles_in_buffer"]:04d} '
+        s += '-%3.0f%%' % (100. * info['particles_in_buffer'] / si.classes['particle_group_manager'].info['current_particle_buffer_size'])
         s += self.screen_msg
         return s
 

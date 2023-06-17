@@ -52,5 +52,4 @@ class CullParticles(_BaseTrajectoryModifier):
         culled = self.select_particles_to_cull(time_sec, active)
         part_prop['status'].set_values(si.particle_status_flags['dead'], culled)
 
-        if not si.retain_culled_part_locations:
-            part_prop['x'].set_values(np.nan, culled)
+        part_prop['x'].set_values(np.nan, culled)
