@@ -12,7 +12,7 @@ def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0,
     # get case_info.json file name from runInfo dict or json file name, can also set root_output_dir, if output moved to new location
     # ncase is one based
     if type(runInfo_fileName_or_runInfoDict) is str:
-       run_case_info = json_util.read_JSON(runInfo_fileName_or_runInfoDict)
+       case_info_file_name = json_util.read_JSON(runInfo_fileName_or_runInfoDict)
     else:
         run_case_info = runInfo_fileName_or_runInfoDict
 
@@ -22,8 +22,6 @@ def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0,
 
     if run_output_dir is None:
         run_output_dir = run_case_info['output_files']['run_output_dir']
-
-    case_info_file_name = run_case_info['output_files']['case_info'][ncase]
 
     try:
         case_info_file_name = path.join(run_output_dir, case_info_file_name)
