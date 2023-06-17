@@ -1,0 +1,73 @@
+add_date_to_run_output_dir: false
+block_dry_cells: true
+debug: true
+dispersion:
+  A_H: 0.1
+dispersion_miss-spelt:
+  A_H: 0.1
+output_file_base: demo91_free_running_gaps
+'particle_properties ':
+  Oxygen:
+    class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 86400.0
+    initial_value: 20.0
+  distance_travelled:
+    class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+reader:
+  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+  dimension_map:
+    node: nodes
+    time: time
+  field_variables:
+    tide: tide
+    water_depth: depth
+    water_velocity:
+    - east_vel
+    - north_vel
+  file_mask: demoHindcast2D*.nc
+  grid_variables:
+    time: time_sec
+    triangles: tri
+    x:
+    - east
+    - north
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  isodate_of_hindcast_time_zero: '2020-06-01'
+  search_sub_dirs: true
+  time_buffer_size: 15
+release_groups:
+  start_last:
+    max_age: 21600
+    points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+    pulse_size: 1
+    release_interval: 0
+    release_start_date: '2020-06-03T15:00:00'
+  start_late:
+    max_age: 21600
+    points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+    pulse_size: 1
+    release_interval: 0
+    release_start_date: '2020-06-02T12:00:00'
+  start_later:
+    max_age: 21600
+    points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+    pulse_size: 1
+    release_interval: 0
+    release_start_date: '2020-06-03T12:00:00'
+root_output_dir: output
+time_step: 900
+tracks_writer:
+  write_dry_cell_index: true
+user_note: test of notes

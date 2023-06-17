@@ -1,0 +1,48 @@
+add_date_to_run_output_dir: null
+advanced_settings: {}
+backtracking: null
+block_dry_cells: null
+case_output_file_tag: null
+debug: null
+dispersion:
+  A_h: 1
+event_loggers: {}
+field_group_manager: {}
+fields: {}
+interpolator: {}
+max_particles: null
+max_run_duration: null
+minimum_total_water_depth: null
+open_boundary_type: null
+output_file_base: demo00_helper_class_test
+particle_concentrations: {}
+particle_group_manager: {}
+particle_properties: {}
+particle_statistics: {}
+processors: null
+reader:
+  file_mask: demoHindcastSchism3D.nc
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+release_groups:
+  my_point1:
+    points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+resuspension: {}
+root_output_dir: output
+run_as_depth_averaged: null
+screen_output_time_interval: null
+solver: {}
+status_modifiers: {}
+time_step: 600
+time_varying_info: {}
+tracks_writer: {}
+trajectory_modifiers: {}
+user_note: null
+velocity_modifiers: {}
+write_grid: null
+write_output_files: null
+write_tracks: null
+z0: null
