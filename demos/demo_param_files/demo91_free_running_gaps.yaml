@@ -1,4 +1,5 @@
 add_date_to_run_output_dir: false
+backtracking: false
 block_dry_cells: true
 debug: true
 dispersion:
@@ -36,36 +37,38 @@ reader:
   search_sub_dirs: true
   time_buffer_size: 15
 release_groups:
-  start_last:
+  r1:
     max_age: 21600
     points:
-    - - 1594500
-      - 5483000
     - - 1598000
       - 5486100
     pulse_size: 1
     release_interval: 0
-    release_start_date: '2020-06-03T15:00:00'
-  start_late:
+    release_start_date: '2020-06-02T00:00:00'
+  r2:
     max_age: 21600
     points:
-    - - 1594500
-      - 5483000
     - - 1598000
       - 5486100
     pulse_size: 1
     release_interval: 0
-    release_start_date: '2020-06-02T12:00:00'
-  start_later:
+    release_start_date: '2020-06-03T00:00:00'
+  r3:
     max_age: 21600
     points:
-    - - 1594500
-      - 5483000
     - - 1598000
       - 5486100
     pulse_size: 1
     release_interval: 0
-    release_start_date: '2020-06-03T12:00:00'
+    release_start_date: '2020-06-04T00:00:00'
+  r4:
+    max_age: 21600
+    points:
+    - - 1598000
+      - 5486100
+    pulse_size: 1
+    release_interval: 0
+    release_start_date: '2020-06-03T03:00:00'
 root_output_dir: output
 time_step: 900
 tracks_writer:

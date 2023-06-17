@@ -200,8 +200,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # ------------------------------------------
 
 
-
-
     def _do_run_integrity_checks(self):
         si=self.shared_info
         grid = si.classes['reader'].grid
@@ -270,11 +268,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # guard against there being no release groups
             si.msg_logger.msg('No valid release groups, exiting' , fatal_error=True, exit_now=True)
 
-        t_first = np.min(np.asarray(first_release_time))
-        t_last  = np.max(np.asarray(last_time_alive))
+        # find first release, and last ime alive
+        t_first = np.min(np.asarray(first_release_time)*si.model_direction)*si.model_direction
+        t_last = np.max(np.asarray(last_time_alive) * si.model_direction) * si.model_direction
 
         # time range in forwards order
-        return t_first, t_last
+        return t_first,t_last
 
     def _initialize_solver_core_classes_and_release_groups(self):
         # initialise all classes, order is important!
@@ -317,17 +316,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.solver_info['model_end_time'] = time_end
         si.solver_info['model_duration'] = max(abs(time_end - time_start), si.model_time_step) # at least one time step
 
-        # estimate total particle released  to use as particle buffer size
-        # first need to clip particle releases times to fit within run duration, which may be shorter than the hindcast
-        estimated_total_particles = 0
-        for name, rg in si.classes['release_groups'].items():
-            ri = rg.info['release_info']
-            sel = np.logical_and( time_start * si.model_direction <=  ri['release_times']  * si.model_direction,
-                                    ri['release_times']  * si.model_direction<= time_end  * si.model_direction)
-            ri['release_times'] = ri['release_times'][sel]
-            ri['release_dates'] = time_util.seconds_to_datetime64(ri['release_times'])
-            estimated_total_particles += rg.estimated_total_number_released() # get number from clipped r
-
         si.msg_logger.progress_marker('set up release_groups', start_time=t0)
 
         # useful info
@@ -349,9 +337,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for name in ['field_group_manager','particle_group_manager', 'interpolator', 'solver'] : # order may matter?
             si.classes[name].initial_setup()
         si.msg_logger.progress_marker('initial set up of core classes', start_time=t0)
-
-
-
 
         # do final setp which may depend on settingd from intitial st up
         t0= perf_counter()

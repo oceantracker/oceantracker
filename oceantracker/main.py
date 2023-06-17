@@ -244,7 +244,7 @@ class OceanTracker():
         for key, item in params.items():
             k = copy(key)
             if len(k) != len(k.strip()):
-                ml.msg(f'Removing leading or trailing blanks from top level "{key}"', warning=True)
+                ml.msg(f'Removing leading or trailing blanks from top level parameter key "{key}"', warning=True)
                 k = key.strip() # remove leading/trailing blanks
 
             if type(item) is tuple:

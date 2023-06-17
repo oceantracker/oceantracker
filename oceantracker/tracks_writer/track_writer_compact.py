@@ -3,6 +3,8 @@ from os import  path
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.tracks_writer._base_tracks_writer import  _BaseWriter
 from oceantracker.tracks_writer.dev_convert_compact_tracks import convert_to_rectangular
+
+import oceantracker.common_info_default_param_dict_templates as common_info
 class CompactTracksWriter(_BaseWriter):
     def __init__(self):
         # set up info/attributes
@@ -35,8 +37,12 @@ class CompactTracksWriter(_BaseWriter):
 
         self.info['time_particle_steps_written'] = 0
 
+    def create_part_prop_to_write(self,name, instance):
+        #todo write wrapper for below for particle properties to be easier to use
+        pass
+
     def create_variable_to_write(self,name,is_time_varying, is_part_prop, vector_dim=None,
-                                 description=None, attributes=None, dtype=None):
+                                 description=None, attributes=None, dtype=None, fill_value=None):
         # creates a variable to write with given shape, normally shape[0]= None as unlimited
         si=self.shared_info
         dimList=[]
@@ -59,7 +65,9 @@ class CompactTracksWriter(_BaseWriter):
             else:
                 chunks.append(self.info['file_builder']['dimensions'][dim]['size'])
 
-        self.add_new_variable(name, dimList, description=description,
+
+
+        self.add_new_variable(name, dimList, description=description,fill_value=fill_value,
                               attributes=attributes, dtype=dtype, vector_dim=vector_dim, chunking=chunks)
 
     def pre_time_step_write_book_keeping(self):
@@ -102,6 +110,11 @@ class CompactTracksWriter(_BaseWriter):
         if si.write_tracks:
             self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
+
+            # write status values to file
+            for key, val in common_info.particle_info['status_flags'].items():
+                self.add_global_attribute('status_'+ key, int(val))
+
             super().close()
 
             if self.params['convert']:

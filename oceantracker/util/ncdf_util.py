@@ -37,16 +37,23 @@ class NetCDFhandler(object):
         if name not in self.file_handle.dimensions:
             self.file_handle.createDimension(name, dim_size)
 
-    def create_a_variable(self, name, dimList,dtype, description=None, attributes=None,  chunksizes=None, compressionLevel=0):
+    def create_a_variable(self, name, dimList,dtype, description=None, fill_value=None,
+                          attributes=None,  chunksizes=None, compressionLevel=0):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
         if dtype is None: dtype = np.float64  # double by default
-        fill_value =-127 if dtype in [np.uint8, np.int8,np.int16,np.int32,np.int64] else np.nan
+
+        if fill_value is None:
+            if dtype in [np.float64, np.float32]:
+                fill_value = np.nan
+            elif dtype==np.uint8:
+                fill_value = 0
+            else:
+                fill_value = -128
 
 
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compressionLevel > 0),
                                                 complevel=compressionLevel, fill_value=fill_value)
-
 
         # set attributes the hard way, must be easier way!
         if description is not None:
@@ -91,9 +98,9 @@ class NetCDFhandler(object):
 
         # check dims match as below write does not repect shape
         for n,dn in enumerate(dimList):
-            if self.get_dim_size(dn) != v.shape[n]:
+            if self.dim_size(dn) != v.shape[n]:
                 raise ValueError('Size of dimension ' + dn + '(=' +   str(v.shape[n]) + ')  for   variable ' +  name +
-                                 ' does not  size of defined dimension ' + dn + '(=' +   str(self.get_dim_size(dn)) + ')' )
+                                 ' does not  size of defined dimension ' + dn + '(=' +   str(self.dim_size(dn)) + ')' )
         v[:] = X[:]  # write X
 
     def write_part_of_first_dim_of_variable(self,name,data, sel):
@@ -115,41 +122,42 @@ class NetCDFhandler(object):
             a.append(self.is_var(n))
         return a
 
-    def are_all_vars(self, name_list):        return all(self.are_vars(name_list))
+    def are_all_vars(self, name_list):  return all(self.are_vars(name_list))
 
     # dimensions
-    def get_dims(self): return list(self.file_handle.dimensions.keys())
-    def get_dim_size(self,dim_name):  return self.file_handle.dimensions[dim_name].size
+    def dims(self): return list(self.file_handle.dimensions.keys())
+    def dim_size(self,dim_name):  return self.file_handle.dimensions[dim_name].size
 
     def is_dim(self,dim_name):return dim_name in self.file_handle.dimensions
 
-    def all_global_attr(self): return  self.file_handle.ncattrs()# Get all  attributes of the NetCDF file
-
-    def get_global_attr(self, attr_name): return getattr(self.file_handle, attr_name)
+    def all_global_attr(self): return  self.file_handle.ncattrs()
+    def global_attr(self, attr_name): return getattr(self.file_handle, attr_name)
 
     # variables
-    def get_var_data(self, name):   return self.file_handle.variables[name][:]
-
-    def get_var_names(self): return list(self.file_handle.variables.keys())
-    def get_var_dims(self,var):  return list(self.file_handle.variables[var].dimensions)
-
-    def get_var_shape(self, var):  return self.file_handle.variables[var].shape
-
+    def all_var_attr(self,var_name): return  self.file_handle[var_name].__dict__# Get all  attributes of the NetCDF file
     def is_var_attr(self, name, attr_name):  return hasattr(self.file_handle.variables[name], attr_name)
 
-    def get_var_attr(self, name, attr_name):
+    def var_data(self, name):   return self.file_handle.variables[name][:]
+
+    def all_var_names(self): return list(self.file_handle.variables.keys())
+    def all_var_dims(self,var):  return list(self.file_handle.variables[var].dimensions)
+
+    def var_shape(self, var):  return self.file_handle.variables[var].shape
+    def var_fill_value(self,var_name): return
+
+    def var_attr(self, name, attr_name):
         return getattr(self.file_handle.variables[name], attr_name)
 
-    def get_var_dtype(self,name):
+    def var_dtype(self,name):
         # to allow for netcd scaland fit of integers
         # get dtype by reading one  vaule
         dtype = self.file_handle.variables[name][0].dtype
         return dtype
 
-    def get_var_fillValue(self, name):  return self.file_handle.variables[name]._FillValue
+    def var_fill_value(self, name):  return self.file_handle.variables[name]._FillValue
 
     def is_var_dim(self, var_name, dim_name):
-        return dim_name in self.get_var_dims(var_name)
+        return dim_name in self.all_var_dims(var_name)
 
     def get_fh(self): return self.file_handle
 
@@ -160,7 +168,7 @@ class NetCDFhandler(object):
 
     def copy_global_attributes(self,nc_new):
         for name in self.all_global_attr():
-            nc_new.write_global_attribute(name, self.get_global_attr(name))
+            nc_new.write_global_attribute(name, self.global_attr(name))
 
     def copy_variable(self, nc_new, name):
         v = self.file_handle[name]

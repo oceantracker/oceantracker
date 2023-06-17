@@ -44,7 +44,7 @@ class ParticleGroupManager(ParameterBaseClass):
         self.create_particle_property('particle_velocity','manual_update',dict(vector_dim=nDim))
         self.create_particle_property('velocity_modifier','manual_update', dict(vector_dim=nDim))
 
-        self.create_particle_property('status','manual_update',dict( dtype=np.int8,   initial_value=si.particle_status_flags['notReleased']))
+        self.create_particle_property('status','manual_update',dict( dtype=np.int8,   fill_value=si.particle_status_flags['notReleased']))
         self.create_particle_property('age','manual_update',dict(  initial_value=0.))
 
         # parameters are set once and then don't change with time
@@ -87,14 +87,14 @@ class ParticleGroupManager(ParameterBaseClass):
 
         for name, g in si.classes['release_groups'].items():
             ri = g.info['release_info']
-            sel =  time_sec* si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
+            sel =  time_sec * si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
             num_pulses= np.count_nonzero(sel)
             for n in range(num_pulses):
                 x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
                 new_index = self.release_a_particle_group_pulse(time_sec, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
                 ri['index_of_next_release'] += 1
-
+            pass
         # for all new particles update cell and bc cords for new particles all at same time
         part_prop = si.classes['particle_properties']
 
@@ -248,6 +248,7 @@ class ParticleGroupManager(ParameterBaseClass):
             if i.params['write']:
                 w.create_variable_to_write(name, is_time_varying=i.params['time_varying'],
                                            is_part_prop=True,
+                                           fill_value= i.params['fill_value'],
                                            vector_dim=i.params['vector_dim'],
                                            attributes={'description': i.params['description']},
                                            dtype=i.params['dtype'])

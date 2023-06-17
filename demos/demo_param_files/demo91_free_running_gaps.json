@@ -42,12 +42,8 @@
         "write_dry_cell_index": true
     },
     "release_groups": {
-        "start_late": {
+        "r1": {
             "points": [
-                [
-                    1594500,
-                    5483000
-                ],
                 [
                     1598000,
                     5486100
@@ -56,14 +52,10 @@
             "max_age": 21600,
             "release_interval": 0,
             "pulse_size": 1,
-            "release_start_date": "2020-06-02T12:00:00"
+            "release_start_date": "2020-06-02T00:00:00"
         },
-        "start_later": {
+        "r2": {
             "points": [
-                [
-                    1594500,
-                    5483000
-                ],
                 [
                     1598000,
                     5486100
@@ -72,14 +64,10 @@
             "max_age": 21600,
             "release_interval": 0,
             "pulse_size": 1,
-            "release_start_date": "2020-06-03T12:00:00"
+            "release_start_date": "2020-06-03T00:00:00"
         },
-        "start_last": {
+        "r3": {
             "points": [
-                [
-                    1594500,
-                    5483000
-                ],
                 [
                     1598000,
                     5486100
@@ -88,7 +76,19 @@
             "max_age": 21600,
             "release_interval": 0,
             "pulse_size": 1,
-            "release_start_date": "2020-06-03T15:00:00"
+            "release_start_date": "2020-06-04T00:00:00"
+        },
+        "r4": {
+            "points": [
+                [
+                    1598000,
+                    5486100
+                ]
+            ],
+            "max_age": 21600,
+            "release_interval": 0,
+            "pulse_size": 1,
+            "release_start_date": "2020-06-03T03:00:00"
         }
     },
     "particle_properties ": {
@@ -102,5 +102,6 @@
         }
     },
     "block_dry_cells": true,
+    "backtracking": false,
     "root_output_dir": "output"
 }

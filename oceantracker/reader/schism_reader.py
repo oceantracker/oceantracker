@@ -28,7 +28,7 @@ class SCHISMSreaderNCDF(GenericUnstructuredReader):
 
     def is_hindcast3D(self, nc): return  nc.is_var('hvel')
 
-    def get_number_of_z_levels(self, nc):  return nc.get_dim_size('nSCHISM_vgrid_layers')
+    def get_number_of_z_levels(self, nc):  return nc.dim_size('nSCHISM_vgrid_layers')
 
     def is_var_in_file_3D(self, nc, var_name_in_file):  return nc.is_var_dim(var_name_in_file, 'nSCHISM_vgrid_layers')
 
@@ -93,7 +93,7 @@ class SCHISMSreaderNCDF(GenericUnstructuredReader):
     def read_time_sec_since_1970(self, nc, file_index=None):
         time = nc.read_a_variable('time', sel=file_index)
 
-        base_date=  [ int(float(x)) for x in nc.get_var_attr('time','base_date').split()]
+        base_date=  [ int(float(x)) for x in nc.var_attr('time','base_date').split()]
 
         d0= datetime(base_date[0], base_date[1], base_date[2], base_date[3], base_date[4])
         d0 = np.datetime64(d0).astype('datetime64[s]')
