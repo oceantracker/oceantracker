@@ -1,0 +1,67 @@
+{
+    "add_date_to_run_output_dir": null,
+    "advanced_settings": {
+        "max_warnings": 50,
+        "use_random_seed": false,
+        "numba_function_cache_size": 1024,
+        "multiprocessing_case_start_delay": null,
+        "profiler": "oceantracker"
+    },
+    "backtracking": null,
+    "block_dry_cells": null,
+    "case_output_file_tag": null,
+    "compact_mode": null,
+    "debug": null,
+    "max_run_duration": null,
+    "minimum_total_water_depth": null,
+    "open_boundary_type": null,
+    "output_file_base": "demo00_helper_class_test",
+    "particle_buffer_size": null,
+    "processors": null,
+    "retain_culled_part_locations": null,
+    "root_output_dir": null,
+    "run_as_depth_averaged": null,
+    "screen_output_time_interval": null,
+    "time_step": 600,
+    "user_note": null,
+    "write_grid": null,
+    "write_output_files": null,
+    "write_tracks": null,
+    "z0": null,
+    "dispersion": {
+        "A_h": 1
+    },
+    "field_group_manager": {},
+    "interpolator": {},
+    "particle_group_manager": {},
+    "reader": {
+        "input_dir": "demo_hindcast",
+        "file_mask": "demoHindcastSchism3D.nc"
+    },
+    "resuspension": {},
+    "solver": {},
+    "tracks_writer": {},
+    "event_loggers": {},
+    "fields": {},
+    "particle_concentrations": {},
+    "particle_properties": {},
+    "particle_statistics": {},
+    "release_groups": {
+        "my_point1": {
+            "points": [
+                [
+                    1594500,
+                    5483000
+                ],
+                [
+                    1598000,
+                    5486100
+                ]
+            ]
+        }
+    },
+    "status_modifiers": {},
+    "time_varying_info": {},
+    "trajectory_modifiers": {},
+    "velocity_modifiers": {}
+}
