@@ -148,6 +148,12 @@ class OceanTracker():
         ml = self.msg_logger
         params = deepcopy(user_given_params)
         w0 = self._decompose_params(params[0])
+
+        # work out how many processors to use
+        c =get_versions_computer_info.get_computer_info()
+        if w0['shared_settings']['processors'] is None:
+            w0['shared_settings']['processors']  = max(c['CPUs_hardware']-2,1)
+
         ml.exit_if_prior_errors('first case parameter errors')
         w0 = self._get_hindcast_file_info(w0)
         w0 = self._setup_output_folders(params, w0)
@@ -165,6 +171,8 @@ class OceanTracker():
             working_params = self._decompose_params(p, add_shared_settings=False)
             ml.exit_if_prior_errors('parameter errors case ' + tag)
             working_params['shared_settings'] = w0['shared_settings'] # used first cases shared settings
+            working_params['core_classes']['reader'] = w0['core_classes']['reader']
+            working_params['core_classes']['reader']['field_variables'].update(w0['core_classes']['reader']['field_variables'])
             working_params['processorID'] = n_case
 
             working_params['output_files'] = deepcopy(w0['output_files'])
@@ -172,8 +180,6 @@ class OceanTracker():
             working_params['hindcast_is3D'] = w0['hindcast_is3D']
             working_params['file_info'] = w0['file_info']
             working_params_list.append(working_params)
-
-
 
         num_proc = working_params_list[0]['shared_settings']['processors']
         num_proc = min(num_proc, len(working_params_list))
