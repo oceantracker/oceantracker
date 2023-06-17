@@ -62,7 +62,7 @@ def get_base_params():
 
     release_template={  'points': None, 'release_start_date': None, 'pulse_size': None,
                        'release_interval': 900., 'release_duration': 3600.,
-                       'maximum_age' : None,'release_radius' : 20,
+                       'max_age' : None,'release_radius' : 20,
                        'user_particle_property_parameters': { 'DNAdecay': {'initial_value' : 1.0}} }  # initial value may be + or - for detection/non-detection
     params['base_case_params']['release_groups'] =[release_template]
     return params

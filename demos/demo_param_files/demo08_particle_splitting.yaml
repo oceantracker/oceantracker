@@ -1,6 +1,5 @@
 add_date_to_run_output_dir: false
 block_dry_cells: true
-compact_mode: false
 debug: true
 dispersion:
   A_H: 0.1
@@ -89,7 +88,6 @@ release_groups:
       - 5486500
     pulse_size: 1
     release_interval: 0
-retain_culled_part_locations: true
 root_output_dir: output
 time_step: 600
 tracks_writer:

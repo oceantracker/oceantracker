@@ -61,6 +61,9 @@ Useful Features
     * Sorts all hindcast files found in a dir and its sub-dirs into time order, based on time variable in the file. Avoiding need to use file name structure to load files in date order.
     * Internal buffers for particle properties automatically expand as more particles are released needed.
 
+* Other
+    * If no particles active, will freerun until some are released, allows particles to be released for one season per year, with a max age, and run will skip between years
+
 Architecture
 ===============
 

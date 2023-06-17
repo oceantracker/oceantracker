@@ -4,8 +4,8 @@ dispersion:
   A_H: 0.1
 dispersion_miss-spelt:
   A_H: 0.1
-duration: 259200
 junk: h
+max_run_duration: 259200
 output_file_base: demo04_ageBasedHeatmaps
 particle_group_manager:
   particle_buffer_chunk_size: 20000

@@ -3,7 +3,6 @@
     multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_0
-  compact_mode: true
   debug: true
   dispersion:
     A_H: 0.1
@@ -78,7 +77,6 @@
     multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_1
-  compact_mode: true
   debug: true
   dispersion:
     A_H: 0.1
@@ -152,7 +150,6 @@
     multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_2
-  compact_mode: true
   debug: true
   dispersion:
     A_H: 0.1
@@ -226,7 +223,6 @@
     multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_3
-  compact_mode: true
   debug: true
   dispersion:
     A_H: 0.1
@@ -300,7 +296,6 @@
     multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   case_output_file_tag: test_case_tag_4
-  compact_mode: true
   debug: true
   dispersion:
     A_H: 0.1

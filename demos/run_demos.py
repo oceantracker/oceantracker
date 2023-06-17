@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 from oceantracker.util import json_util
 from oceantracker.util import time_util
-from oceantracker.post_processing.read_output_files import load_output_files
+
 from oceantracker import main
 from oceantracker.post_processing.plotting import plot_statistics,plot_tracks, plot_vertical_tracks, plot_utilities
 import make_demo_plots
@@ -117,33 +117,54 @@ if __name__ == "__main__":
 
             getattr(make_demo_plots,demo_name)(case_info_file_name, plot_output_file)
 
-        elif n> 0:
-            ax_lims = [1591000, 1601500, 5478500, 5491000]
-            # have run forwards now backwards from last location
-            plt.clf()
-            ax= plt.gca()
-            d90 = load_output_files.load_particle_track_vars(case_info_file_name)
-            plot_utilities.draw_base_map(d90['grid'], ax=ax, show_grid=True, axis_lims=ax_lims,
-                                         #title='Back tracking, forward=Green, back=Red', text1='start=Green dot, 1 day- 1 min time steps'
-                                         )
+        elif n> 0 :
+            if n==90:
+                ax_lims = [1591000, 1601500, 5478500, 5491000]
+                # have run forwards now backwards from last location
+                plt.clf()
+                ax= plt.gca()
+                d90 = load_output_files.load_particle_track_vars(case_info_file_name)
+                plot_utilities.draw_base_map(d90['grid'], ax=ax, show_grid=True, axis_lims=ax_lims,
+                                             #title='Back tracking, forward=Green, back=Red', text1='start=Green dot, 1 day- 1 min time steps'
+                                             )
 
-            ax.plot(d90['x'][:, :, 0], d90['x'][:, :, 1], color='g', linewidth=3)
-            ax.scatter(d90['x'][0, :, 0], d90['x'][0, :, 1], color='g', marker='o', s=20, zorder=9)
+                ax.plot(d90['x'][:, :, 0], d90['x'][:, :, 1], color='g', linewidth=3)
+                ax.scatter(d90['x'][0, :, 0], d90['x'][0, :, 1], color='g', marker='o', s=20, zorder=9)
 
-            # rerun backwards from end point of forwards run
-            start_date = str(time_util.seconds_to_datetime64(d90['time'][-1]))
+                # rerun backwards from end point of forwards run
+                start_date = str(time_util.seconds_to_datetime64(d90['time'][-1]))
 
-            params['output_file_base'] = 'Demo90backward'
-            params['backtracking'] = True
-            params['release_groups']['P1'].update({ 'points': d90['x'][-1, :, :], 'release_start_date': start_date})
+                params['output_file_base'] = 'Demo90backward'
+                params['backtracking'] = True
+                params['release_groups']['P1'].update({ 'points': d90['x'][-1, :, :], 'release_start_date': start_date})
 
-            print('backtracking start', start_date)
+                print('backtracking start', start_date)
 
-            caseInfoFile2, has_errors = main.run(params)
-            d2 = load_output_files.load_particle_track_vars(caseInfoFile2)
+                caseInfoFile2, has_errors = main.run(params)
+                d2 = load_output_files.load_particle_track_vars(caseInfoFile2)
 
-            ax.plot(d2['x'][:, :, 0], d2['x'][:, :, 1], color='y', linewidth=1,linestyle='dashed')
-            ax.scatter(d2['x'][0, :, 0], d2['x'][0, :, 1], color='y', marker='o', s=20, zorder=9)
-            ax.set_title('Test particle tracking forwards then backwards')
-            plt.gcf().tight_layout()
-            plot_utilities.show_output(plot_file_name= 'output\\'+ demo_name +'_and_backward_tracks.jpeg')
+                ax.plot(d2['x'][:, :, 0], d2['x'][:, :, 1], color='y', linewidth=1,linestyle='dashed')
+                ax.scatter(d2['x'][0, :, 0], d2['x'][0, :, 1], color='y', marker='o', s=20, zorder=9)
+                ax.set_title('Test particle tracking forwards then backwards')
+                plt.gcf().tight_layout()
+                plot_utilities.show_output(plot_file_name= 'output\\'+ demo_name +'_and_backward_tracks.jpeg')
+            elif n==91:
+
+                track_data = load_output_files.load_particle_track_vars(case_info_file_name)
+                t = track_data['time'].astype('datetime64[s]')
+                plt.plot(t)
+                plt.title('Free running between release groups')
+                plt.ylabel('Date')
+                plt.ylabel('Recorded time step')
+                plt.show()
+
+                plt.plot(t,track_data['num_part_released_so_far'] , label='released')
+                plt.plot(t,np.sum(track_data['status'] >= track_data['particle_status_flags']['frozen'], axis=1), label='alive')
+                plt.plot(t,np.sum(track_data['status']==track_data['particle_status_flags']['dead'],axis=1),label='dead')
+                plt.ylabel('Number of part.')
+                plt.ylabel('Recorded time step')
+                plt.legend()
+                plt.show()
+
+
+

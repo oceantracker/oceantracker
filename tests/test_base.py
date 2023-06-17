@@ -219,11 +219,11 @@ def base_param(is3D=False, isBackwards = False):
             'particle_group_manager' : {},
             'release_groups': [
                                         {'points': p0, 'pulse_size': 1, 'release_interval': 3600,'userRelease_groupID':5,
-                                          'maximum_age' : 7*24*3600, 'user_release_group_name': 'A group','z_range' :[-1,0],
+                                          'max_age' : 7*24*3600, 'user_release_group_name': 'A group','z_range' :[-1,0],
                                          },
                                        {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                                        'points': poly0, 'pulse_size': 1, 'release_interval': 3600,'userRelease_groupID':200,
-                                      'maximum_age' : 4*24*3600, 'user_release_group_name': 'B group',
+                                      'max_age' : 4*24*3600, 'user_release_group_name': 'B group',
                                         'z_range' :[-1,0],
                                             }
                                         ],

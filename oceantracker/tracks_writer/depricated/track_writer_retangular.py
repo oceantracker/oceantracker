@@ -20,7 +20,8 @@ class  RectangularTrackWriter(CompactTracksWriter):
         self.add_dimension('particle_dim', si.particle_buffer_size)
 
 
-    def create_variable_to_write(self,name,is_time_varying=True,is_part_prop = True, vector_dim=None, attributes=None, dtype=None):
+    def create_variable_to_write(self,name,is_time_varying=True,is_part_prop = True, vector_dim=None,
+                                 attributes=None, dtype=None, fill_value=None):
         # creates a variable to write with given shape, normally shape[0]= None as unlimited
         dimList=[]
         if is_time_varying:dimList.append('time_dim')
@@ -39,7 +40,7 @@ class  RectangularTrackWriter(CompactTracksWriter):
 
 
     def write_time_varying_particle_prop(self, name, data):
-        num_in_buffer = self.shared_info.classes['particle_group_manager'].particles_in_buffer
+        num_in_buffer = self.shared_info.classes['particle_group_manager'].info['particles_in_buffer']
         self.nc.file_handle.variables[name][self.time_steps_written_to_current_file, :num_in_buffer, ...] = data[:num_in_buffer, ...]
 
     def write_non_time_varying_particle_prop(self, prop_name, data, sel_particles):

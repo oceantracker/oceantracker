@@ -73,7 +73,6 @@
         }
     },
     "block_dry_cells": true,
-    "compact_mode": true,
     "max_run_duration": 172800.0,
     "backtracking": false,
     "root_output_dir": "output"

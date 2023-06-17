@@ -98,7 +98,8 @@ class MessageLogger(object):
                 if len(self.warnings_list) <= self.max_warnings:
                     self.warnings_list.append(l)
             if note:
-                self.notes_list.append(l)
+                if len(self.notes_list) <= self.max_warnings:
+                    self.notes_list.append(l)
 
         # todo add traceback to message?
         if exit_now:

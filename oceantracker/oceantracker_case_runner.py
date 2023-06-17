@@ -56,7 +56,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.write_output_files = si.settings['write_output_files']
         si.write_tracks = si.settings['write_tracks']
-        si.retain_culled_part_locations = si.settings['retain_culled_part_locations']
 
         si.z0 = si.settings['z0']
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
@@ -418,7 +417,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         info.update(dict(started=str(d0), ended=str(datetime.now()),
                          duration=str(datetime.now() - d0),
                          elapsed_time_sec=elapsed_time_sec,
-                         number_particles_released= pgm.particles_released))
+                         number_particles_released= pgm.info['particles_released']))
 
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'user_note': si.settings['user_note'],

@@ -176,7 +176,7 @@ class _BaseWriter(ParameterBaseClass):
         if si.write_tracks:
             nc = self.nc
             # write properties only written at end
-            self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].particles_released)
+            self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
 
             # add all global attributes

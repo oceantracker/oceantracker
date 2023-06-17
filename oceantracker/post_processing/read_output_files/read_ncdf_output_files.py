@@ -8,9 +8,9 @@ from oceantracker.util import json_util
 def read_particle_tracks_file(file_name, var_list=[], release_group= None, fraction_to_read=None):
     # release group is 1 based
     nc = NetCDFhandler(file_name, mode='r')
-    var_list = ['x', 'time','status', 'IDrelease_group', 'IDpulse', 'x0','dry_cell_index'] + var_list
+    var_list = ['x', 'time','status', 'IDrelease_group', 'IDpulse', 'x0','dry_cell_index','num_part_released_so_far'] + var_list
     # trim list to variables in the file
-    working_var_list=[]
+    working_var_list= []
     for var in var_list:
         if var not in nc.get_var_names():
             print('Warning: read_particle_tracks_file, particle property variable not in track file ' + var)

@@ -1,4 +1,3 @@
-compact_mode: true
 debug: true
 dispersion:
   A_H: 0.2
@@ -15,7 +14,7 @@ reader:
   input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
 release_groups:
   P1:
-    maximum_age: 17280.000000000004
+    max_age: 17280.000000000004
     points:
     - - 1594500
       - 5487000

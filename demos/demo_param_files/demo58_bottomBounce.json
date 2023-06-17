@@ -179,7 +179,6 @@
     "resuspension": {
         "critical_friction_velocity": 0.005
     },
-    "compact_mode": true,
     "backtracking": false,
     "root_output_dir": "output"
 }

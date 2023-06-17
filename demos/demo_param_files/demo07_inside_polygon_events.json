@@ -68,7 +68,6 @@
         }
     },
     "block_dry_cells": true,
-    "compact_mode": true,
     "particle_properties": {
         "age_decay": {
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",

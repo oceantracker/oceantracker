@@ -1,4 +1,3 @@
-compact_mode: true
 debug: true
 dispersion:
   A_H: 0.2
