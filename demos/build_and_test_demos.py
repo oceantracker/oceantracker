@@ -132,20 +132,18 @@ p4.update({'output_file_base' :'demo04_ageBasedHeatmaps' })
 params.append (p4)
 
 # demo 5 parallel
-c = deepcopy(p2)
+base_case = deepcopy(p2)
 
-c.update({'output_file_base' :'demo05_parallel',
+base_case.update({'output_file_base' :'demo05_parallel',
             'processors': 2,
            'advanced_settings':{ 'multiprocessing_case_start_delay' : 1.0}
           })
-c['release_groups'] =deepcopy(p2['release_groups'])
-p5=[]
+case_list=[]
 for n in range(5):
-    p= deepcopy(c)
-    p['case_output_file_tag']='test_case_tag_' + str(n)
-    p5.append(p)
 
-params.append(p5)
+    case_list.append({ 'release_groups': deepcopy(p2['release_groups'])})
+
+params.append([base_case,case_list])
 
 # track animation with settlement on reef polygon
 # demo 6
@@ -478,7 +476,7 @@ def build_demos(testrun=False):
 
     # make all JSONS
     for demo in params:
-        if demo is None: continue
+        if demo is None or type(demo)==tuple: continue
         if type(demo) is list:
             demo_name = demo[0]['output_file_base']
             demo[0]['reader']['input_dir'] = input_dir
