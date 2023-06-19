@@ -44,7 +44,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # set up message logging
         output_files = working_params['output_files']
-        si.msg_logger = MessageLogger(f'C{si.processorID:03d}', si.settings['advanced_settings']['max_warnings'])
+        si.msg_logger = MessageLogger(f'C{si.processorID:03d}', si.settings['max_warnings'])
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
 
@@ -67,7 +67,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         #set_num_threads(max(1, si.settings['max_threads']))
 
         # set up profiling
-        profiling_util.set_profile_mode(si.settings['advanced_settings']['profiler'])
+        profiling_util.set_profile_mode(si.settings['profiler'])
 
         case_info_file = None
         case_exception = None
@@ -90,17 +90,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # check particle properties have other particle properties, fields and other compatibles they require
         self._do_run_integrity_checks()
+        return_msgs = {'errors':si.msg_logger.errors_list,'warnings':si.msg_logger.warnings_list, 'notes': si.msg_logger.notes_list }
 
-       # except GracefulError as e:
-       #     si.msg_logger.msg('Case runner graceful exit >>  Parameters/setup has errors, see above', fatal_error= True)
-       #     return None, True
-
-      #  except Exception as e:
-     #       si.msg_logger.msg('Unexpected error  in case set up',fatal_error=True)
-       #     si.msg_logger.write_error_log_file(e)
-       #     return None, True
-
-        # try running case
         try:
             self._do_a_run()
             case_info = self._get_case_info(d0,t0)
@@ -117,14 +108,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
             si.msg_logger.msg(f' Case Funner graceful exit from case number [{si.processorID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
-            return None, len(si.msg_logger.errors_list), len(si.msg_logger.warnings_list)
+            return None, return_msgs
 
         except Exception as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
             si.msg_logger.msg(f' Unexpected error in case number [{si.processorID:2}] ', fatal_error=True,hint='check above or .err file')
 
-            return None, len(si.msg_logger.errors_list), len(si.msg_logger.warnings_list)
+            return  None, return_msgs
 
         # reshow warnings
         si.msg_logger.show_all_warnings_and_errors()
@@ -138,10 +129,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
         si.msg_logger.insert_screen_line()
 
-
         si.msg_logger.close()
         case_info_file = path.join(si.run_output_dir,case_info_file)
-        return case_info_file, len(si.msg_logger.errors_list), len(si.msg_logger.warnings_list)
+        return case_info_file,  return_msgs
 
     def _set_up_run(self):
         # builds shared_info class variable with data and classes initialized  ready for run
@@ -154,21 +144,21 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
         si.msg_logger.insert_screen_line()
 
-        if si.settings['advanced_settings']['use_random_seed']:
+        if si.settings['use_random_seed']:
             #todo this may not set numbas random seed!!
             np.random.seed(0)
             si.msg_logger.msg('Using numpy.random.seed(0), makes results reproducible (only use for testing developments give the same results!)',warning=True)
 
         # get short class names map
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
-        if si.settings['advanced_settings']['multiprocessing_case_start_delay'] is not None:
-            delay = si.settings['advanced_settings']['multiprocessing_case_start_delay'] * (si.processorID % si.settings['processors'])
+        if si.settings['multiprocessing_case_start_delay'] is not None:
+            delay = si.settings['multiprocessing_case_start_delay'] * (si.processorID % si.settings['processors'])
             si.msg_logger.progress_marker('Delaying start by  ' + str(delay) + ' sec')
             sleep(delay)
             si.msg_logger.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
 
         # not sure if buffer is to small, but make bigger to 512 as default,  Numba default is  128, may slow code due to recompilations from too small buffer??
-        environ['numba_function_cache_size'] = str(si.settings['advanced_settings']['numba_function_cache_size'])
+        environ['numba_function_cache_size'] = str(si.settings['numba_function_cache_size'])
 
         if si.settings['debug']:
             # makes it easier to debug, particularly  in pycharm

@@ -9,7 +9,7 @@ code_version = '0.4.00.011 2023-05-20'
 max_timedelta_in_seconds = 1000*365*24*3600
 
 # shared settings allpy to all parallel cases
-shared_settings_defaults ={'user_note': PVC('No user note', str),
+shared_settings_defaults ={
                 'root_output_dir':     PVC('root_output_dir', str, doc_str='base dir for all output files'),
                 'add_date_to_run_output_dir':  PVC(False, bool),
                 'output_file_base':    PVC('output_file_base', str,doc_str= 'The start/base of all output files and name of sub-dir where output will be written'),
@@ -25,14 +25,13 @@ shared_settings_defaults ={'user_note': PVC('No user note', str),
                 'max_particles': PVC(10**9, int, min=1,  doc_str='Maximum number of particles to release, useful in testing'),  # limit all cases to this number
                 'processors':          PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
                 #'max_threads':   PVC(None, int, min=1,doc_str='maximum number of processors used for threading to process particles in parallel'),
-                'advanced_settings': { 'max_warnings':        PVC(50,    int, min=0),  # dont record more that this number of warnings, to keep caseInfo.json finite
-                              'use_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
-                               'numba_function_cache_size' :  PVC(1024, int, min=128),
-                                'multiprocessing_case_start_delay': PVC(None, float, min=0.),  # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
-                                'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
+                'max_warnings':        PVC(50,    int, min=0),  # dont record more that this number of warnings, to keep caseInfo.json finite
+                'use_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
+                'numba_function_cache_size' :  PVC(1024, int, min=128),
+                'multiprocessing_case_start_delay': PVC(None, float, min=0.),  # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
+                 'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
                                                        doc_str='Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
-                                       }
-                    }     
+                 }
                      # params needed for later scatch_tests work
                      # 'list_paths_of_user_modules': PVC(None,list, contains = str), # todo not implemented yet
                      # shared reader memory params for later scatch_tests.
@@ -40,6 +39,7 @@ shared_settings_defaults ={'user_note': PVC('No user note', str),
                      # 'multiprocessing_start_method_spawn': PVC(True,  bool), # overide default of linux as fork
                      #'loops_over_hindcast':  PVC(0, int, min=0),  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
 case_settings_defaults ={
+            'user_note': PVC('No user note', str),
             'case_output_file_tag':     PVC(None, str,doc_str='insert this tag into output files name fore each case'), #todo make this only settable in a case, caselist params?
             'write_tracks':             PVC(True, bool),
             'z0':                       PVC(0.005, float, units='m', doc_str='Bottom roughness in meters, used for tolerance and log layer calcs. ', min=0.0001),  # default bottom roughness
@@ -214,6 +214,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
     # todo set up of tracks set up op of patricle params, no kwargs. based on prrop para, time varyinging,
         #  nice to have tme varying write at end
     #todo get rid of base tracks writer???
+    #todo conver LSC grid to S layer on read, using smallest number of layers, while keeping bootom log layer?
 
 # TODO FUTURE
     # todo Kernal RK steps

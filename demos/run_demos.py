@@ -12,7 +12,8 @@ import make_demo_plots
 import build_and_test_demos
 import numpy as np
 from oceantracker.post_processing.read_output_files import load_output_files
-
+from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file
+from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
     
 if __name__ == "__main__":
@@ -80,10 +81,9 @@ if __name__ == "__main__":
 
 
         if not args.skiprun:
-            case_info_file_name, has_errors = main.run(params)
+            case_info_file_name = main.run(params)
 
-            errors= any(has_errors) if type(has_errors) == list else has_errors
-            if errors:
+            if case_info_file_name is None:
                 print('Error during demo')
                 exit()
             if type(params) is list:  continue
@@ -113,7 +113,18 @@ if __name__ == "__main__":
 
 
         # do plots
-        if 0 < n < 90:
+        if n==3:
+            # time heat maps
+            stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'])
+            axis_lims = [1591000, 1601500, 5478500, 5491000]
+            animate_heat_map(stats_data, 'myP1', axis_lims=axis_lims,
+                             heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
+                             movie_file=plot_output_file + '.mp4' if plot_output_file is not None else None,
+                             fps=7)
+            plot_heat_map(stats_data, 'myP1', axis_lims=axis_lims, var='water_depth', heading='Water depth built on the fly, no tracks recorded',
+                          plot_file_name=plot_output_file + '_water_depth.jpeg' if plot_output_file is not None else None)
+
+        elif 0 < n < 90:
 
             getattr(make_demo_plots,demo_name)(case_info_file_name, plot_output_file)
 
