@@ -198,7 +198,7 @@ class OceanTracker():
         for n_case, p in enumerate(case_list_params):
             # decompose params but ignore share params , as they come from first case
             # overwrite shared params from first case
-            msg_tag = 'Parallel run case #' + str(n_case)
+            msg_tag = ' Building parallel run case #' + str(n_case)
 
             # remove reader if present in case, will get base case reader below
             if 'reader' in p :
@@ -238,12 +238,12 @@ class OceanTracker():
                 for name, item in working_bc['class_dicts'][role].items():
                     working_params['class_dicts'][role][name] = item
 
-                # add case list named classes
-                for name, item in p[key].items():
-                    if name in base_case_params_full[key]:
-                        ml.msg(f'The  class role "{key}", the named class "{name}" has been used in the base for case' , warning=True,
-                               hint= 'names should be unique, will ignore class in the base case', crumbs=msg_tag)
-                    working_params['class_dicts'][role][name] = item
+                # add case list named classes if role in p
+                for name, item in working_params['class_dicts'][role].items():
+                    if name in base_case_params_full[role]:
+                        ml.msg(f'For the  class role "{role}", the named class "{name}" has been used in the base for case' , warning=True,
+                                   hint= 'names should be unique, will ignore class in the base case', crumbs=msg_tag)
+                        working_params['class_dicts'][role][name] = item
 
             # check at least one release group from base or case params
             if len(working_params['class_dicts']['release_groups']) ==0:
