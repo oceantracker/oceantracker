@@ -16,8 +16,8 @@ def msg_str(msg,tabs=0):
     return m
 
 class MessageLogger(object):
-    def __init__(self,screen_tag,max_warnings = 50):
-        self.screen_tag = screen_tag
+    def __init__(self, screen_tag,max_warnings = 50):
+        self.screen_tag = screen_tag + ':'
         self.max_warnings = max_warnings
         self.fatal_error_count = 0
         self.warnings_list=[]
