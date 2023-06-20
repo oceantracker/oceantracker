@@ -83,7 +83,7 @@ def _read_compact_tracks(nc, var_list, release_groupID):
     last_recordedID = _get_last_alive(d['status'], nc.global_attr('status_notReleased'), nc.global_attr('status_dead'))
     rg = nc.read_a_variable('IDrelease_group')
 
-    # dont reprocess status, and dont process others, not needed in rectangular format
+    # don't reprocess status, and don't process others, not needed in rectangular format
     for v in ['status','particle_IDs' ,'write_step_index']:
         if v in var_list: var_list.remove(v)
 
@@ -141,7 +141,6 @@ def _get_last_alive(status,status_notReleased, status_dead):
             status[nrow, n] = status_dead  # mark dead
             nrow -= 1
 
-
         ID[n]= nrow # need to use as start of  range
     return ID
 
@@ -156,6 +155,7 @@ def _filIinDeadParticles(data, last_recordedID, missing_status):
 
 def read_stats_file(file_name, var_list=[]):
     # read stats files
+
     var_list = ['count'] + var_list  # make sure count is first, do to means
     nc = NetCDFhandler(file_name, mode='r')
     num_released = nc.global_attr('total_num_particles_released')

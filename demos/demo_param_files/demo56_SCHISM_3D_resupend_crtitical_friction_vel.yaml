@@ -53,7 +53,9 @@ particle_statistics:
     - 121
     particle_property_list:
     - water_depth
+    status_min: moving
     update_interval: 3600
+    z_min: -2
 reader:
   depth_average: false
   field_variables:

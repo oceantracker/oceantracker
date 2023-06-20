@@ -94,7 +94,10 @@ particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search
                                   'frozen': 0,
                                   'stranded_by_tide': 3,  'on_bottom': 6,  'moving': 10},
                  'known_prop_types': ['manual_update', 'from_fields','user']
+
                  }
+particle_info['status_keys_list']= list(particle_info['status_flags'].keys()) # possible values for checking user input
+
 # default reader classes used by auto dection of file type
 
 default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
