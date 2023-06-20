@@ -96,7 +96,6 @@ class Solver(ParameterBaseClass):
         sel = np.logical_and(model_times >= time_span[0], model_times <=time_span[1])
         model_times = model_times[ sel]
 
-
         # work out time steps between writing tracks to screen
         write_tracks_time_step = si.settings['screen_output_time_interval']
         if write_tracks_time_step is None:

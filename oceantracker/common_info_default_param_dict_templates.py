@@ -11,24 +11,23 @@ max_timedelta_in_seconds = 1000*365*24*3600
 # shared settings allpy to all parallel cases
 shared_settings_defaults ={
                 'root_output_dir':     PVC('root_output_dir', str, doc_str='base dir for all output files'),
-                'add_date_to_run_output_dir':  PVC(False, bool),
-                'output_file_base':    PVC('output_file_base', str,doc_str= 'The start/base of all output files and name of sub-dir where output will be written'),
+                'add_date_to_run_output_dir':  PVC(False, bool, doc_str='Append the date to the output dir. name to help in keeping output from different runs separate'),
+                'output_file_base':    PVC('output_file_base', str,doc_str= 'The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written'),
                 'time_step': PVC(None, float, min=0.01, units='sec',doc_str='Time step in seconds for all cases'),
                 'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
-                'backtracking':        PVC(False, bool),
-                'run_as_depth_averaged': PVC(False, bool),  # turns 3D hindcast into a 2D one
-                'debug':               PVC(False, bool),
+                'backtracking':        PVC(False, bool, doc_str='Run model backwards in time'),
+                'run_as_depth_averaged': PVC(False, bool,doc_str='in development; Force a run using 2D velocity  if available in files or  to allow 3D hydro-model to be depth averaged on the fly to run faster'),  # turns 3D hindcast into a 2D one
+                'debug':               PVC(False, bool,doc_str='Gives more useful numba code error messages'),
                 'minimum_total_water_depth': PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
                 'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
-                'write_grid':          PVC(True,  bool),
                 'max_run_duration':    PVC(max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration
                 'max_particles': PVC(10**9, int, min=1,  doc_str='Maximum number of particles to release, useful in testing'),  # limit all cases to this number
                 'processors':          PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
                 #'max_threads':   PVC(None, int, min=1,doc_str='maximum number of processors used for threading to process particles in parallel'),
-                'max_warnings':        PVC(50,    int, min=0),  # dont record more that this number of warnings, to keep caseInfo.json finite
+                'max_warnings':        PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps'),  # dont record more that this number of warnings, to keep caseInfo.json finite
                 'use_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
-                'numba_function_cache_size' :  PVC(1024, int, min=128),
-                'multiprocessing_case_start_delay': PVC(None, float, min=0.),  # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
+                'numba_function_cache_size' :  PVC(2048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB?'),
+                'multiprocessing_case_start_delay': PVC(None, float, min=0., doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file'),  # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
                  'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
                                                        doc_str='Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
                  }
@@ -39,9 +38,9 @@ shared_settings_defaults ={
                      # 'multiprocessing_start_method_spawn': PVC(True,  bool), # overide default of linux as fork
                      #'loops_over_hindcast':  PVC(0, int, min=0),  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
 case_settings_defaults ={
-            'user_note': PVC('No user note', str),
-            'case_output_file_tag':     PVC(None, str,doc_str='insert this tag into output files name fore each case'), #todo make this only settable in a case, caselist params?
-            'write_tracks':             PVC(True, bool),
+            'user_note': PVC('No user note', str,doc_str='Any run note to store in case info file'),
+            'case_output_file_tag':     PVC(None, str,doc_str='insert this tag into output files name for each case, for parallel runs this is set to C000, C001...'), #todo make this only settable in a case, caselist params?
+            'write_tracks':             PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes'),
             'z0':                       PVC(0.005, float, units='m', doc_str='Bottom roughness in meters, used for tolerance and log layer calcs. ', min=0.0001),  # default bottom roughness
             'open_boundary_type' :  PVC(0, int, min=0, max=1,doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS '),
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),

@@ -184,8 +184,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.insert_screen_line()
         si.msg_logger.progress_marker('Starting ' + si.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.solver_info['model_duration']))
 
-        #------------------------------------------
+        t0 = perf_counter()
         solver.initialize_run()
+        si.msg_logger.progress_marker('Initialized Solver Class', start_time=t0)
+
+        # ------------------------------------------
         solver.solve()
         # ------------------------------------------
 
@@ -268,7 +271,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def _initialize_solver_core_classes_and_release_groups(self):
         # initialise all classes, order is important!
         # shortcuts
-
+        t0 = perf_counter()
         si = self.shared_info
         reader= si.classes['reader']
         # start with setting up reader as it has info on whether 2D or 3D which  changes class options'
