@@ -154,23 +154,23 @@ class RSTfileBuilder(object):
                 self.add_lines()
 
 
-def make_class_sub_pages(class_type, link_tag=''):
+def make_class_sub_pages(class_role, link_tag=''):
     # make doc pages from defaults of all python in named dir
 
-    mod_name=package_util.get_package_name() + '.' + class_type
+    mod_name=package_util.get_package_name() + '.' + class_role
 
     mod = importlib.import_module( mod_name)
 
     package_dir= package_util.get_package_dir()
 
-    toc = RSTfileBuilder(class_type+'_toc', class_type + link_tag)
+    toc = RSTfileBuilder(class_role+'_toc', class_role + link_tag)
 
     toc.add_lines('**Module:** ' + package_util.package_relative_file_name(mod.__name__).strip())
     toc.add_lines()
 
-    toc.add_new_toc_to_page(class_type, maxdepth=1,sort_body=True)
+    toc.add_new_toc_to_page(class_role, maxdepth=1,sort_body=True)
     instance = None
-    for f in glob(path.join( package_dir,class_type,'*.py')):
+    for f in glob(path.join( package_dir,class_role,'*.py')):
 
         mod_str= path.splitext(f)[0].split(package_util.get_root_package_dir() +'\\')[-1].replace('\\','.')
         mod = importlib.import_module(mod_str)
@@ -215,7 +215,7 @@ def make_class_sub_pages(class_type, link_tag=''):
             p.add_params_from_dict(instance.default_params)
 
             p.write()
-            toc.add_toc_link(class_type,p)
+            toc.add_toc_link(class_role,p)
 
     # add role from last instance, as it derives from base class
     if instance is not None:
@@ -258,7 +258,7 @@ def build_param_ref():
 
     page.add_heading('Multiple classes for each role',level=2)
     page.add_lines('Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.')
-    page.add_new_toc_to_page('class_dicts', maxdepth=1, sort_body=True)
+    page.add_new_toc_to_page('role_dicts', maxdepth=1, sort_body=True)
 
     page.add_new_toc_to_page('user', maxdepth=1)
     for key in sorted(common_info.class_dicts.keys()):

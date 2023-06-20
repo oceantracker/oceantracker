@@ -40,11 +40,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.output_files = si.working_params['output_files']
         si.run_output_dir = si.output_files['run_output_dir']
         si.output_file_base = si.output_files['output_file_base']
-        si.processorID = working_params['processorID']
+        si.caseID = working_params['caseID']
 
         # set up message logging
         output_files = working_params['output_files']
-        si.msg_logger = MessageLogger(f'C{si.processorID:03d}', si.settings['max_warnings'])
+        si.msg_logger = MessageLogger(f'C{si.caseID:03d}', si.settings['max_warnings'])
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
 
@@ -98,7 +98,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             if si.settings['write_output_files']:
                 # write grid if first case
-                if si.processorID == 0:
+                if si.caseID == 0:
                     si.classes['field_group_manager'].write_hydro_model_grids()
 
                 case_info_file = si.output_file_base + '_caseInfo.json'
@@ -107,13 +107,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
-            si.msg_logger.msg(f' Case Funner graceful exit from case number [{si.processorID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+            si.msg_logger.msg(f' Case Funner graceful exit from case number [{si.caseID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
             return None, return_msgs
 
         except Exception as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
-            si.msg_logger.msg(f' Unexpected error in case number [{si.processorID:2}] ', fatal_error=True,hint='check above or .err file')
+            si.msg_logger.msg(f' Unexpected error in case number [{si.caseID:2}] ', fatal_error=True,hint='check above or .err file')
 
             return  None, return_msgs
 
@@ -122,7 +122,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         self.close()  # close al classes
 
         si.msg_logger.insert_screen_line()
-        si.msg_logger.progress_marker('Finished case number %3.0f, ' % si.processorID + ' '
+        si.msg_logger.progress_marker('Finished case number %3.0f, ' % si.caseID + ' '
                                       + si.output_files['output_file_base']
                                       + ' started: ' + str(d0)
                                       + ', ended: ' + str(datetime.now()))
@@ -139,7 +139,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si =self.shared_info
 
         si.msg_logger.insert_screen_line()
-        si.msg_logger.msg('Starting case number %3.0f, ' % si.processorID + ' '
+        si.msg_logger.msg('Starting case number %3.0f, ' % si.caseID + ' '
                                       + si.output_files['output_file_base']
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
         si.msg_logger.insert_screen_line()
@@ -152,7 +152,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # get short class names map
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
         if si.settings['multiprocessing_case_start_delay'] is not None:
-            delay = si.settings['multiprocessing_case_start_delay'] * (si.processorID % si.settings['processors'])
+            delay = si.settings['multiprocessing_case_start_delay'] * (si.caseID % si.settings['processors'])
             si.msg_logger.progress_marker('Delaying start by  ' + str(delay) + ' sec')
             sleep(delay)
             si.msg_logger.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
@@ -215,7 +215,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         case_params= si.working_params
 
         # make core classes, eg. field group
-        for name, params in case_params['core_classes'].items():
+        for name, params in case_params['core_roles'].items():
             i = si.add_core_class(name, params, crumbs= f'core class "{name}" ')
 
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags
@@ -293,7 +293,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # set up start time and duration based on particle releases
         t0 = perf_counter()
-        time_start, time_end = self._setup_particle_release_groups(si.working_params['class_dicts']['release_groups'])
+        time_start, time_end = self._setup_particle_release_groups(si.working_params['role_dicts']['release_groups'])
 
 
         #clip times to maximum duration in shared and case params
@@ -349,7 +349,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                                                  write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
         si.msg_logger.progress_marker('created particle properties derived from fields', start_time=t0)
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
-        for name, params in si.working_params['class_dicts']['fields'].items():
+        for name, params in si.working_params['role_dicts']['fields'].items():
             i = si.create_class_dict_instance(name,'fields', 'user', params, crumbs='Adding "fields" from user params')
             i.initial_setup()
             # now add custom prop based on  this field
@@ -360,18 +360,18 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if not i.is_time_varying(): i.update()
 
         # any custom particle properties added by user
-        for name, p in si.working_params['class_dicts']['particle_properties'].items():
+        for name, p in si.working_params['role_dicts']['particle_properties'].items():
             pgm.create_particle_property(name, 'user',p)
 
         # add default classes, eg tidal stranding
         #todo this may be better else where
-        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.working_params['class_dicts']['status_modifiers']:
-            si.working_params['class_dicts']['status_modifiers']['tidal_stranding'] ={'class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'}
+        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.working_params['role_dicts']['status_modifiers']:
+            si.working_params['role_dicts']['status_modifiers']['tidal_stranding'] ={'class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'}
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for user_type in ['velocity_modifiers','trajectory_modifiers','status_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
-            for name, params in si.working_params['class_dicts'][user_type].items():
+            for name, params in si.working_params['role_dicts'][user_type].items():
                 i = si.create_class_dict_instance(name,user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
 
@@ -396,7 +396,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'user_note': si.settings['user_note'],
              'output_files': si.output_files,
-             'processorID' : si.processorID,
+             'caseID' : si.caseID,
              'version_info': get_versions_computer_info.get_code_version(),
             'computer_info': get_versions_computer_info.get_computer_info(),
              'file_written': datetime.now().isoformat(),
@@ -405,33 +405,33 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'hindcast_info': r.info,
              'full_case_params': si.working_params,
              'particle_status_flags': si.particle_status_flags,
-             'particle_release_group_info' : [],
+             'release_groups' : {},
              'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),
              'errors': si.msg_logger.errors_list,
              'warnings': si.msg_logger.warnings_list,
              'notes': si.msg_logger.notes_list,
              'function_timers': {},
-
-             'class_info': {}, }
+             'class_roles_info': {}, }
 
         for key, i in si.classes.items():
 
             if type(i) == dict:
-                d['class_info'][key] = {}
+                d['class_roles_info'][key] = {}
                 d['output_files'][key] = {}
                 # interate over dict
                 for key2, i2 in i.items():
-                    d['class_info'][key][key2]= i2.info
+                    d['class_roles_info'][key][key2]= i2.info
                     d['output_files'][key][key2]= i2.info['output_file'] if 'output_file' in i2.info else None
 
             else:
-                d['class_info'][key] = i.info
+                d['class_roles_info'][key] = i.info
                 d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
 
+        # add basic reelse group info
         for key, item in si.classes['release_groups'].items():
-            rginfo=item.params
-            rginfo.update(item.info['release_info'])
-            d['particle_release_group_info'].append(rginfo)
+            rginfo={'points': item.params['points'],
+                    'is_polygon': hasattr(item,'polygon')}
+            d['release_groups'][key]= rginfo
 
         # sort function times into order
         keys= []

@@ -102,6 +102,6 @@
         }
     },
     "block_dry_cells": true,
-    "backtracking": false,
+    "backtracking": true,
     "root_output_dir": "output"
 }

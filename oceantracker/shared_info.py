@@ -22,7 +22,7 @@ class SharedInfoClass(object):
         crumb_base = f' >>> adding core class type >> "{name}" '
 
         # make instance  and merge params
-        i = make_class_instance_from_params(name, params, ml, class_type_name=name,
+        i = make_class_instance_from_params(name, params, ml, class_role_name=name,
                                             crumbs=crumb_base + crumbs )
 
         if i.params['requires_3D'] and not self.is_3D_run :
@@ -33,20 +33,20 @@ class SharedInfoClass(object):
         return i
 
 
-    def create_class_dict_instance(self,name,class_type, group, params,  crumbs=''):
+    def create_class_dict_instance(self,name,class_role, group, params,  crumbs=''):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         ml= self.msg_logger
 
-        instanceID = len(self.classes[class_type])
+        instanceID = len(self.classes[class_role])
 
-        crumb_base = f' >>> adding_class type >> "{class_type}"  (name=  "{name}" instance #{instanceID: 1d}), '
+        crumb_base = f' >>> adding_class type >> "{class_role}"  (name=  "{name}" instance #{instanceID: 1d}), '
 
         # make instance  and merge params
         i = make_class_instance_from_params(name, params, self.msg_logger,
                                             crumbs= crumb_base + crumbs)
 
-        if class_type not in common_info.class_dicts.keys() :
-            ml.msg(f'Class type = "{class_type}": name is not a known class_type=' + class_type ,
+        if class_role not in common_info.class_dicts.keys() :
+            ml.msg(f'Class type = "{class_role}": name is not a known class_role=' + class_role ,
                    exception = True, crumbs =  crumb_base + crumbs)
 
         # now add to class lists and interators
@@ -56,10 +56,10 @@ class SharedInfoClass(object):
         # needed for release group identification info etc, zero based
         i.info['instanceID'] =  instanceID
 
-        i.info['class_type'] = class_type
+        i.info['class_role'] = class_role
 
-        if name in self.classes[class_type]:
-            ml.msg('Class type"' + class_type + '" already has a class with name = "' + i.info['name']
+        if name in self.classes[class_role]:
+            ml.msg('Class type"' + class_role + '" already has a class with name = "' + i.info['name']
                          + '", "name" parameter must be unique',
                          crumbs =    crumb_base + crumbs,  fatal_error=True)
 
@@ -68,7 +68,7 @@ class SharedInfoClass(object):
                 self.msg_logger.msg(' Not using user  class,' + i.info['name'] + ' as it can only be used with 3D hydro-models',
                                     note=True, crumbs= crumb_base + crumbs)
         else:
-            self.classes[class_type][name] = i
+            self.classes[class_role][name] = i
         return i
 
     def all_class_instance_pointers_iterator(self):
