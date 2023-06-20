@@ -25,11 +25,11 @@ Parameters:
 	* ``dtype`` :   ``<class 'type'>``   *<optional>*
 		- default: ``<class 'numpy.int32'>``
 
+	* ``fill_value`` :   ``[<class 'int'>, <class 'float'>]``   *<optional>*
+		- default: ``None``
+
 	* ``initial_value`` :   ``<class 'int'>``   *<optional>*
 		- default: ``-1``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``inside_polygons_non_overlapping``
 
 	* ``polygon_list``:  *<optional>*
 

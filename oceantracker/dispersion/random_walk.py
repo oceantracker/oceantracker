@@ -35,10 +35,10 @@ class RandomWalk(_BaseTrajectoryModifer):
         self._add_random_walk_velocity_modifier(self.info['random_walk_velocity'], active, si.classes['particle_properties']['velocity_modifier'].data)
 
     @staticmethod
-    #@njit()
+    @njit()
     #@guvectorize([(float64[:],int32[:],float64[:,:])],' (m), (l)->(n,m)') #, does not work needs n on LHS
     # below signature does not increase  speed much?
-    @njit(nbtypes.void(nbtypes.float64[:],nbtypes.int32[:],nbtypes.float64[:,:]))
+    #@njit(nbtypes.void(nbtypes.float64[:],nbtypes.int32[:],nbtypes.float64[:,:]))
     def _add_random_walk_velocity_modifier(random_walk_velocity, active, velocity_modifier):
         for n in active:
             for m in range(velocity_modifier.shape[1]):

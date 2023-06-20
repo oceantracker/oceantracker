@@ -31,9 +31,6 @@ Parameters:
 		- default: ``dead``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``ParticleKill``
-
 	* ``probability_of_culling`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.1``
 		- min: ``0``

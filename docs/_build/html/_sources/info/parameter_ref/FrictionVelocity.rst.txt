@@ -27,9 +27,6 @@ Parameters:
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``friction_velocity``
-
 	* ``num_components`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 

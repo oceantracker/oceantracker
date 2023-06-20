@@ -1,5 +1,5 @@
 add_date_to_run_output_dir: false
-backtracking: false
+backtracking: true
 block_dry_cells: true
 debug: true
 dispersion:

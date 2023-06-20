@@ -19,9 +19,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``field_group_manager``
-
 	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``

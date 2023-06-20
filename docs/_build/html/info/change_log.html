@@ -105,6 +105,19 @@
 <section id="version-0-4-major-upgrade">
 <h2>Version 0.4 Major upgrade<a class="headerlink" href="#version-0-4-major-upgrade" title="Permalink to this heading">¶</a></h2>
 <p>Major upgrade to simplify use and parameter in repose to user input. This has breaking changes, happy to help with transition. Tried to include all changes which affect use of parameters in this upgrade</p>
+<section id="main-new-features">
+<h3>Main new features<a class="headerlink" href="#main-new-features" title="Permalink to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>tutorials/how to notebooks to help with getting started ( in draft form).</p></li>
+<li><p>“helper class” to build parameters without using dictionaries, using keyword arguments of two methods of helper class.</p></li>
+<li><p>“spell checker” for param names and particle property names with suggestions</p></li>
+<li><p>faster start up with improved grid outline builder</p></li>
+<li><p>automatically determine hindcast file type from variables in the file, if reader class_name param not given</p></li>
+<li><p>FVCOM and ROMS readers working</p></li>
+<li><p>optional vertical dispersion from model vertical eddy viscosity profile.</p></li>
+<li><p>If no particles active, will freerun until some are released, allows particles to be released for one season per year, with a max age, and run will skip between years</p></li>
+</ol>
+</section>
 </section>
 <section id="known-breaking-changes-ask-for-help-if-needed-to-transition">
 <h2>Known breaking changes- ask for help if needed to transition<a class="headerlink" href="#known-breaking-changes-ask-for-help-if-needed-to-transition" title="Permalink to this heading">¶</a></h2>
@@ -112,30 +125,19 @@
 <li><p>new flatter parameter structure</p></li>
 <li><p>solver sub-stepping replaced by time_step in seconds param</p></li>
 <li><p>writer output step count replaced by update_interval time for writing</p></li>
+<li><p>only use compact mode track file format, python and matlab code will still read/convert track data to rectangular output.</p></li>
 </ol>
-<section id="new-features">
-<h3>New features<a class="headerlink" href="#new-features" title="Permalink to this heading">¶</a></h3>
-<ol class="arabic simple">
-<li><p>tutorials/how to notebooks to help with getting started.</p></li>
-<li><p>“helper class” to build parameters without using dictionaries, by using keyword arguments of two methods of helper class.</p></li>
-<li><p>“spell checker” for param name errors with suggestions</p></li>
-<li><p>Much faster start up with improved grid outline builder</p></li>
-<li><p>Automatically determine hindcast file type, if reader class_name param not given</p></li>
-<li><p>FVCOM and ROMS readers working</p></li>
-</ol>
-</section>
 </section>
 <section id="internal-changes">
 <h2>Internal changes<a class="headerlink" href="#internal-changes" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>reader uses ring buffer based on hindcast step mod buffer size,  needed for shared reader development</p></li>
-<li><p>only use compact mode track file format, python and matlab code will still read/convert track data to rectangular output.</p></li>
 </ol>
 </section>
 <section id="version-0-3-03-000-2023-01-03">
 <h2>Version 0.3.03.000 2023-01-03<a class="headerlink" href="#version-0-3-03-000-2023-01-03" title="Permalink to this heading">¶</a></h2>
-<section id="id1">
-<h3>New features<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<section id="new-features">
+<h3>New features<a class="headerlink" href="#new-features" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>FVCOM reader built and passed tests so far</p></li>
 <li><p>ROMS reade started but not workng</p></li>
@@ -152,12 +154,12 @@
 </section>
 <section id="version-0-3-01-04-06-oct-04-2022">
 <h2>Version 0.3.01.04-06, Oct 04 2022<a class="headerlink" href="#version-0-3-01-04-06-oct-04-2022" title="Permalink to this heading">¶</a></h2>
-<section id="id2">
-<h3>New features<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<section id="id1">
+<h3>New features<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>#.?? internal rebuilt of buffered reader, as step towards using ring buffer needed for share reader</p>
 </section>
-<section id="id3">
-<h3>Changes<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<section id="id2">
+<h3>Changes<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>internal rebuilt of buffered reader, as step towards developing ring buffer for hindcast needed for share reader</p></li>
 <li><p>grid variable now attached to reader, ie si.grid is now si.classes[‘reader’].grid</p></li>
@@ -174,21 +176,21 @@
 </section>
 <section id="version-0-3-01-02-sept-13-2022">
 <h2>Version 0.3.01.02 Sept 13 2022<a class="headerlink" href="#version-0-3-01-02-sept-13-2022" title="Permalink to this heading">¶</a></h2>
-<section id="id4">
-<h3>New features<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<section id="id3">
+<h3>New features<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Added residence count particle statistic, counts number of particles still inside designated release polygon at given time inervals, . Can be used to find residence time with release polygon, eg residence time in an estuary. See new demo 10</p></li>
 </ol>
 </section>
-<section id="id5">
-<h3>Changes<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<section id="id4">
+<h3>Changes<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>in stats classes count_staus_equal_to and count_status_greater tha, replae by ‘count_status_in_range’ param, see github pages</p></li>
 <li><p>post proceesing plot_heat_maps module now names plot_statistics</p></li>
 </ol>
 </section>
-<section id="id6">
-<h3>Bug fixes<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<section id="id5">
+<h3>Bug fixes<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>??</p></li>
 </ol>
@@ -196,8 +198,8 @@
 </section>
 <section id="version-0-3-01-00-sept-6-2022">
 <h2>Version 0.3.01.00 Sept 6 2022<a class="headerlink" href="#version-0-3-01-00-sept-6-2022" title="Permalink to this heading">¶</a></h2>
-<section id="id7">
-<h3>New features<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<section id="id6">
+<h3>New features<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>3D water_velocity in bottom bin  now uses loglayer interpolation (as in schisim), by adjusting fraction of cell to make linear vertical interp behave like log layer interp</p></li>
 <li><dl class="simple">
@@ -212,8 +214,8 @@
 <li><p>Track animation colours dry cells, tracks_writer adds grid dry cell data to file, set tracks_writer param ‘write_dry_cell_index’ to false to stop writing dry cell data</p></li>
 </ol>
 </section>
-<section id="id8">
-<h3>Changes<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<section id="id7">
+<h3>Changes<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>class AddTerminalVelocity is now TerminalVelocity in module oceantracker.velocity_modifiers.terminal_velocity</p></li>
 <li><p>friction velocity is now a custom field (no longer a particle property), to do resuspension user must now add friction_velocity to custom field parameter list,eg ‘fields’ : [{‘class_name’: ‘oceantracker.fields.friction_velocity.FrictionVelocity’}],</p></li>
@@ -222,8 +224,8 @@
 <li><p>???</p></li>
 </ol>
 </section>
-<section id="id9">
-<h3>Bug fixes<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<section id="id8">
+<h3>Bug fixes<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>divide by zero in depth cell search when grid has zero vertical thickness</p></li>
 <li><p>fixed- could  not read uncommented hgrid.gr3 files  for open boundary data, can now read whether hgrid file is with or without trailing comments on lines giving</p></li>
@@ -232,21 +234,21 @@
 </section>
 <section id="version-0-3-00-23-30-7-22">
 <h2>Version 0.3.00.23 30/7/22<a class="headerlink" href="#version-0-3-00-23-30-7-22" title="Permalink to this heading">¶</a></h2>
-<section id="id10">
-<h3>New features<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<section id="id9">
+<h3>New features<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>added ability to split track output files into blocks with given number of time steps per file</p></li>
 <li><p>added individual timers to stats, events classes written to case info file</p></li>
 </ol>
 </section>
-<section id="id11">
-<h3>Changes<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<section id="id10">
+<h3>Changes<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>re ordered to ensue last time step is written to tracks files</p></li>
 </ol>
 </section>
-<section id="id12">
-<h3>Bug fixes<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<section id="id11">
+<h3>Bug fixes<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>??</p></li>
 </ol>
@@ -254,15 +256,15 @@
 </section>
 <section id="version-0-2-774-20-7-22">
 <h2>Version 0.2.774 20/7/22<a class="headerlink" href="#version-0-2-774-20-7-22" title="Permalink to this heading">¶</a></h2>
-<section id="id13">
-<h3>New features<a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
+<section id="id12">
+<h3>New features<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>polygon release only releases into wet cells, not just those inside domain</p></li>
 <li><p>added pages giving full most of default parameters for each class to doc</p></li>
 </ol>
 </section>
-<section id="id14">
-<h3>Changes<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<section id="id13">
+<h3>Changes<a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Restructured to move all core classes up one level and delete core dir</p></li>
 <li><dl class="simple">
@@ -277,8 +279,8 @@
 </li>
 </ol>
 </section>
-<section id="id15">
-<h3>Bug fixes<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h3>
+<section id="id14">
+<h3>Bug fixes<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>reintroduced a lost feature, that blocked movement of particles into dry cells</p></li>
 </ol>

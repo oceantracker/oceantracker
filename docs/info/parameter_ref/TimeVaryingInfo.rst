@@ -25,11 +25,11 @@ Parameters:
 	* ``dtype`` :   ``<class 'numpy.dtype'>``   *<optional>*
 		- default: ``<class 'numpy.float64'>``
 
+	* ``fill_value`` :   ``[<class 'int'>, <class 'float'>]``   *<optional>*
+		- default: ``None``
+
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``

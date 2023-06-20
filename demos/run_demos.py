@@ -12,7 +12,7 @@ import make_demo_plots
 import build_and_test_demos
 import numpy as np
 from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file
+from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, load_concentration_vars
 from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
     
@@ -94,7 +94,6 @@ if __name__ == "__main__":
         else:
             case_info_file_name =path.join('output', params['output_file_base'],params['output_file_base']+'_caseInfo.json')
 
-        caseInfo = load_output_files.read_case_info_file(case_info_file_name)
 
         anim= None
         fps=15
@@ -126,6 +125,27 @@ if __name__ == "__main__":
                              fps=7)
             plot_heat_map(stats_data, 'myP1', axis_lims=axis_lims, var='water_depth', heading='Water depth built on the fly, no tracks recorded',
                           plot_file_name=plot_output_file + '_water_depth.jpeg' if plot_output_file is not None else None)
+        elif n == 61:
+            #todo make conc plotting work
+            continue
+            from oceantracker.post_processing.plotting.plot_statistics import animate_concentrations
+
+            c = load_concentration_vars(case_info_file_name, var_list=['particle_concentration', 'C'])
+
+            axis_lims = [1591000, 1601500, 5478500, 5491000]
+
+            animate_concentrations(c, data_to_plot=c['particle_concentration'], logscale=True,
+                                   axis_lims=axis_lims, cmap='hot_r',
+                                   heading='SCHISIM-3D, 2D concentrations in triangles, shading',
+                                   movie_file=plot_output_file + '_shading.mp4' if plot_output_file is not None else None,
+                                   fps=7, interval=20,
+                                   vmin=0., vmax=1.0)
+            animate_concentrations(c, data_to_plot=c['particle_count'], logscale=True,
+                                   axis_lims=axis_lims, cmap='hot_r', shading=False, interval=200,
+                                   heading='SCHISIM-3D, 2D particle counts in triangles, noshading',
+                                   fps=7,
+                                   movie_file=plot_output_file + '_noshading.mp4' if plot_output_file is not None else None,
+                                   )
 
         elif 0 < n < 90:
 
@@ -154,7 +174,7 @@ if __name__ == "__main__":
 
                 print('backtracking start', start_date)
 
-                caseInfoFile2, has_errors = main.run(params)
+                caseInfoFile2 = main.run(params)
                 d2 = load_output_files.load_particle_track_vars(caseInfoFile2)
 
                 ax.plot(d2['x'][:, :, 0], d2['x'][:, :, 1], color='y', linewidth=1,linestyle='dashed')

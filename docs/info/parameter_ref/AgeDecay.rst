@@ -28,13 +28,13 @@ Parameters:
 	* ``dtype`` :   ``<class 'numpy.dtype'>``   *<optional>*
 		- default: ``<class 'numpy.float64'>``
 
+	* ``fill_value`` :   ``[<class 'int'>, <class 'float'>]``   *<optional>*
+		- default: ``None``
+
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
 		Description: - Particle property at the time of release
 
 		- default: ``1.0``
-
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``age_decay``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``

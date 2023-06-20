@@ -19,9 +19,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``settle_in_polygon``
-
 	* ``polygon``: nested parameter dictionary
 		* ``points`` :   ``array`` **<isrequired>**
 			- default: ``None``

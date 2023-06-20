@@ -14,6 +14,12 @@ CompactTracksWriter
 Parameters:
 ************
 
+	* ``NCDF_particle_chunk`` :   ``<class 'int'>``   *<optional>*
+		Description: - number of particles per time chunk in the netcdf file
+
+		- default: ``100000``
+		- min: ``1000``
+
 	* ``NCDF_time_chunk`` :   ``<class 'int'>``   *<optional>*
 		Description: - number of time steps per time chunk in the netcdf file
 

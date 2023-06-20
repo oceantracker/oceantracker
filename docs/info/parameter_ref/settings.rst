@@ -15,31 +15,6 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``advanced_settings``: nested parameter dictionary
-		* ``max_warnings`` :   ``<class 'int'>``   *<optional>*
-			- default: ``50``
-			- min: ``0``
-
-		* ``multiprocessing_case_start_delay`` :   ``<class 'float'>``   *<optional>*
-			- default: ``None``
-			- min: ``0.0``
-
-		* ``numba_function_cache_size`` :   ``<class 'int'>``   *<optional>*
-			- default: ``1024``
-			- min: ``128``
-
-		* ``profiler`` :   ``<class 'str'>``   *<optional>*
-			Description: - Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules
-
-			- default: ``oceantracker``
-			- possible_values: ``['none', 'oceantracker', 'cprofiler', 'line_profiler', 'scalene']``
-
-		* ``use_random_seed`` :   ``<class 'bool'>``   *<optional>*
-			Description: - Makes results reproducible, only use for testing developments give the same results!
-
-			- default: ``False``
-			- possible_values: ``[True, False]``
-
 	* ``backtracking`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
@@ -55,15 +30,15 @@ Parameters:
 
 		- default: ``None``
 
-	* ``compact_mode`` :   ``<class 'bool'>``   *<optional>*
-		Description: - Periodically discard dead particles from memory, eg. those too old to be be of interest, if used track output file also has a compact format
-
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``debug`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``
+
+	* ``max_particles`` :   ``<class 'int'>``   *<optional>*
+		Description: - Maximum number of particles to release, useful in testing
+
+		- default: ``1000000000``
+		- min: ``1``
 
 	* ``max_run_duration`` :   ``<class 'float'>``   *<optional>*
 		Description: - Maximum duration in seconds of model run, this sets a maximum, useful in testing
@@ -71,12 +46,24 @@ Parameters:
 		- default: ``31536000000``
 		- units: ``sec``
 
+	* ``max_warnings`` :   ``<class 'int'>``   *<optional>*
+		- default: ``50``
+		- min: ``0``
+
 	* ``minimum_total_water_depth`` :   ``<class 'float'>``   *<optional>*
 		Description: - Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering
 
 		- default: ``0.25``
 		- min: ``0.0``
 		- units: ``m``
+
+	* ``multiprocessing_case_start_delay`` :   ``<class 'float'>``   *<optional>*
+		- default: ``None``
+		- min: ``0.0``
+
+	* ``numba_function_cache_size`` :   ``<class 'int'>``   *<optional>*
+		- default: ``1024``
+		- min: ``128``
 
 	* ``open_boundary_type`` :   ``<class 'int'>``   *<optional>*
 		Description: - new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS
@@ -90,21 +77,17 @@ Parameters:
 
 		- default: ``output_file_base``
 
-	* ``particle_buffer_size`` :   ``<class 'int'>``   *<optional>*
-		- default: ``None``
-		- min: ``1``
-
 	* ``processors`` :   ``<class 'int'>``   *<optional>*
 		Description: - number of processors used, if > 1 then cases in the case_list run in parallel
 
-		- default: ``1``
+		- default: ``None``
 		- min: ``1``
 
-	* ``retain_culled_part_locations`` :   ``<class 'bool'>``   *<optional>*
-		Description: - When particle marked dead/culled keep its position value, ie dont set position to nan so it does not appear in plots etc after death
+	* ``profiler`` :   ``<class 'str'>``   *<optional>*
+		Description: - Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules
 
-		- default: ``False``
-		- possible_values: ``[True, False]``
+		- default: ``oceantracker``
+		- possible_values: ``['none', 'oceantracker', 'cprofiler', 'line_profiler', 'scalene']``
 
 	* ``root_output_dir`` :   ``<class 'str'>``   *<optional>*
 		Description: - base dir for all output files
@@ -126,6 +109,12 @@ Parameters:
 		- default: ``None``
 		- min: ``0.01``
 		- units: ``sec``
+
+	* ``use_random_seed`` :   ``<class 'bool'>``   *<optional>*
+		Description: - Makes results reproducible, only use for testing developments give the same results!
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``No user note``

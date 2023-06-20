@@ -125,6 +125,7 @@
 <li><p>Resuspension from the bottom based on critical friction velocity.</p></li>
 <li><p>Shoreline stranding/re-floating of particles by the tide based on dry cells.</p></li>
 <li><p>“InPolygon” particle property which notes which of a set of polygons they lies within. Useful for polygon based statistics and changing behaviour inside polygons.</p></li>
+<li><p>Split particles, to give two child particles at given frequency and probability</p></li>
 </ul>
 </dd>
 </dl>
@@ -163,10 +164,18 @@
 <dt>Internal automation</dt><dd><ul class="simple">
 <li><p>Automatically interpolates user fields named by the user to the particle locations, and writes this particle property to the output file.</p></li>
 <li><p>Splits quad cells into triangles on the fly</p></li>
+<li><p>automates management of particle property buffers, expanding as more are released, culling from computation when there are significant numbers of dead particles</p></li>
 <li><p>Reads netcdf hydrodynamic model output detecting format at automatically determining whether 2D or 3D</p></li>
 <li><p>Flexible reader with user configurable mapping  file variable names to consistent internal variable names.</p></li>
 <li><p>Sorts all hindcast files found in a dir and its sub-dirs into time order, based on time variable in the file. Avoiding need to use file name structure to load files in date order.</p></li>
 <li><p>Internal buffers for particle properties automatically expand as more particles are released needed.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Other</dt><dd><ul class="simple">
+<li><p>If no particles active, will freerun until some are released, allows particles to be released for one season per year, with a max age, and run will skip between years</p></li>
 </ul>
 </dd>
 </dl>

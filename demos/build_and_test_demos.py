@@ -330,6 +330,7 @@ s59 = deepcopy(s58)
 s59.update({'output_file_base' : 'demo59_crit_shear_resupension', 'backtracking': False})
 bc = s59
 bc['velocity_modifiers']['terminal_velocity']= {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002}
+#s59['release_groups']={ 'P1':{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],  'pulse_size':1}}
 params.append(s59)
 
 # decaying particles sized on c
@@ -375,7 +376,7 @@ params.append(p90)
 # test freewheeling when no particles
 p91= deepcopy(p2) # has two points
 p91.update({'output_file_base': 'demo91_free_running_gaps',
-                             'time_step' :900 ,'backtracking': False})
+                             'time_step' :900 ,'backtracking': True})
 p91['release_groups']={}
 p91['release_groups']['r1'] ={'points':[two_points[1]],
                                       'max_age':6*3600,

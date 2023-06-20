@@ -28,9 +28,6 @@ Parameters:
 
 		- default: ``0.0``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``terminal_velocity``
-
 	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``

@@ -19,12 +19,9 @@ Parameters:
 
 		- default: ``None``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``particle_group_manager``
-
 	* ``particle_buffer_chunk_size`` :   ``<class 'int'>``   *<optional>*
-		- default: ``200000``
-		- min: ``10``
+		- default: ``500000``
+		- min: ``1``
 
 	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``

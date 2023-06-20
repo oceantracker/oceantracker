@@ -53,6 +53,8 @@ The main files are:
    writes output when events occur, eg. a particle entering or exiting
    given polygons.
 
+Time variables in these file are in seconds since 1970-01-01
+
 Below list the files after running the minimal example.
 
 .. code:: ipython3

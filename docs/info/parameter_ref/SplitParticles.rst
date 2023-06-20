@@ -19,9 +19,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``particle_splitting``
-
 	* ``probability_of_splitting`` :   ``<class 'float'>``   *<optional>*
 		- default: ``1.0``
 		- min: ``0.0``

@@ -23,9 +23,6 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-
 	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``

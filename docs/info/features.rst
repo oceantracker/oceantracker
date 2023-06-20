@@ -31,6 +31,7 @@ Useful Features
     * Resuspension from the bottom based on critical friction velocity.
     * Shoreline stranding/re-floating of particles by the tide based on dry cells.
     * "InPolygon" particle property which notes which of a set of polygons they lies within. Useful for polygon based statistics and changing behaviour inside polygons.
+    * Split particles, to give two child particles at given frequency and probability
 
 * Particle release
     * add multiple "release_groups", particles release at same locations and times

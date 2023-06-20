@@ -27,9 +27,6 @@ Parameters:
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``name`` :   ``<class 'str'>`` **<isrequired>**
-		- default: ``None``
-
 	* ``name_of_field`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
 

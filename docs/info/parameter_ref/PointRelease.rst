@@ -25,17 +25,17 @@ Parameters:
 
 		- default: ``None``
 
+	* ``max_age`` :   ``<class 'float'>``   *<optional>*
+		Description: - Particles older than this age in seconds are culled,ie. status=dead, and removed from computation, very useful in reducing run time
+
+		- default: ``None``
+		- min: ``1.0``
+
 	* ``max_cycles_to_find_release_points`` :   ``<class 'int'>``   *<optional>*
 		Description: - Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc
 
 		- default: ``50``
 		- min: ``50``
-
-	* ``maximum_age`` :   ``<class 'float'>``   *<optional>*
-		Description: - Particles older than this age in seconds are killed off and removed from computation.
-
-		- default: ``None``
-		- min: ``1.0``
 
 	* ``points`` :   ``array`` **<isrequired>**
 		Description: - A N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array
@@ -49,13 +49,13 @@ Parameters:
 		- min: ``1``
 
 	* ``release_duration`` :   ``<class 'float'>``   *<optional>*
-		Description: - Time in seconds particles are released for after they start being released, ie releases stop this time after first release.
+		Description: - Time in seconds particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "release_end_date"
 
 		- default: ``None``
 		- min: ``0.0``
 
 	* ``release_end_date`` :   ``iso8601date``   *<optional>*
-		Description: - Date to stop releasing partices, ignored if release_duration give, must be an ISO date as string eg. "2017-01-01T00:30:00"
+		Description: - Date to stop releasing particles, ignored if release_duration give, must be an ISO date as string eg. "2017-01-01T00:30:00"
 
 		- default: ``None``
 

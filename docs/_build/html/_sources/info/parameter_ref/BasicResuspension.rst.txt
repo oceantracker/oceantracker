@@ -28,9 +28,6 @@ Parameters:
 	* ``friction_velocity_field_class_name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``oceantracker.fields.friction_velocity.FrictionVelocity``
 
-	* ``name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``BasicResuspension``
-
 	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
