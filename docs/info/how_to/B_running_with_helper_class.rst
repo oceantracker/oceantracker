@@ -102,6 +102,7 @@ The below extends the minimal_example, it adds:
 
     # build parameters using helper class
     from oceantracker.main import OceanTracker
+    
     ot = OceanTracker() # make an instance of the helper class
     
     # one or more settings can be set by calls to os.settings

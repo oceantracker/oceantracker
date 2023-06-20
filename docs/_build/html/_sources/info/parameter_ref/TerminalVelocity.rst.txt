@@ -15,7 +15,7 @@ Parameters:
 ************
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
-		Description: - Class name as string A.B.C, used to import this class from python path
+		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
 
@@ -24,7 +24,7 @@ Parameters:
 		- possible_values: ``[True, False]``
 
 	* ``mean`` :   ``<class 'float'>``   *<optional>*
-		Description: - Terminal velocity positive upwards, ie fall velocities ate negative
+		Description: Terminal velocity positive upwards, ie fall velocities ate negative
 
 		- default: ``0.0``
 
@@ -36,7 +36,7 @@ Parameters:
 		- default: ``None``
 
 	* ``variance`` :   ``<class 'float'>``   *<optional>*
-		Description: - variance of normal distribution of terminal velocity, used to give each particles its own terminal velocity from random normal distribution
+		Description: variance of normal distribution of terminal velocity, used to give each particles its own terminal velocity from random normal distribution
 
 		- default: ``None``
 		- min: ``0.0``

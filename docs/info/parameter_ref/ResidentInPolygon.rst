@@ -15,17 +15,17 @@ Parameters:
 ************
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
-		Description: - Class name as string A.B.C, used to import this class from python path
+		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
 
 	* ``count_end_date`` :   ``iso8601date``   *<optional>*
-		Description: - Stop particle counting from this date
+		Description: Stop particle counting from this date
 
 		- default: ``None``
 
 	* ``count_start_date`` :   ``iso8601date``   *<optional>*
-		Description: - Start particle counting from this date
+		Description: Start particle counting from this date
 
 		- default: ``None``
 
@@ -39,7 +39,7 @@ Parameters:
 		- max_length: ``2``
 
 	* ``name_of_polygon_release_group`` :   ``<class 'str'>`` **<isrequired>**
-		Description: - "name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time
+		Description: "name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time
 
 		- default: ``None``
 
@@ -57,7 +57,7 @@ Parameters:
 		- default: ``residence``
 
 	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
-		Description: - Time in seconds between calculating statistics
+		Description: Time in seconds between calculating statistics
 
 		- default: ``3600.0``
 		- units: ``sec``

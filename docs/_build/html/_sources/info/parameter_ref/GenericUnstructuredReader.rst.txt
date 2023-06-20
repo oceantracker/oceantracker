@@ -15,13 +15,13 @@ Parameters:
 ************
 
 	* ``EPSG_transform_code`` :   ``<class 'int'>``   *<optional>*
-		Description: - Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)
+		Description: Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)
 
 		- default: ``None``
 		- min: ``0``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
-		Description: - Class name as string A.B.C, used to import this class from python path
+		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
 
@@ -76,12 +76,12 @@ Parameters:
 		- can_be_empty_list: ``True``
 
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
-		Description: - Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names
+		Description: Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names
 
 		- default: ``None``
 
 	* ``grid_file`` :   ``<class 'str'>``   *<optional>*
-		Description: - File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file
+		Description: File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file
 
 		- default: ``None``
 
@@ -90,7 +90,7 @@ Parameters:
 			- default: ``None``
 
 		* ``is_dry_cell`` :   ``<class 'numpy.int8'>``   *<optional>*
-			Description: - Time variable flag of when cell is dry, 1= is dry cell
+			Description: Time variable flag of when cell is dry, 1= is dry cell
 
 			- default: ``None``
 
@@ -116,13 +116,13 @@ Parameters:
 		- default: ``1970-01-01``
 
 	* ``max_numb_files_to_load`` :   ``<class 'int'>``   *<optional>*
-		Description: - Only read no more than this number of hindcast files, useful when setting up to speed run
+		Description: Only read no more than this number of hindcast files, useful when setting up to speed run
 
 		- default: ``10000000``
 		- min: ``1``
 
 	* ``one_based_indices`` :   ``<class 'bool'>``   *<optional>*
-		Description: - indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python
+		Description: indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python
 
 		- default: ``False``
 		- possible_values: ``[True, False]``
@@ -150,7 +150,7 @@ Parameters:
 		- min: ``2``
 
 	* ``time_zone`` :   ``<class 'int'>``   *<optional>*
-		Description: - time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12
+		Description: time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12
 
 		- default: ``None``
 		- min: ``-12``

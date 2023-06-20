@@ -46,7 +46,6 @@ trajectory_modifiers: {}
 use_random_seed: null
 user_note: null
 velocity_modifiers: {}
-write_grid: null
 write_output_files: null
 write_tracks: null
 z0: null

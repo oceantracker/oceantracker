@@ -115,7 +115,7 @@ class RSTfileBuilder(object):
                                + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
 
                 if item.info['doc_str'] is not None:
-                    self.add_lines('Description: - ' + str(item.info['doc_str'].strip()), indent=indent+2)
+                    self.add_lines('Description: ' + str(item.info['doc_str'].strip()), indent=indent+2)
                     self.add_lines()
 
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)

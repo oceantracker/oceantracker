@@ -15,7 +15,7 @@ Parameters:
 ************
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
-		Description: - Class name as string A.B.C, used to import this class from python path
+		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
 

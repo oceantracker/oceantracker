@@ -15,7 +15,7 @@ Parameters:
 ************
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
-		Description: - Class name as string A.B.C, used to import this class from python path
+		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
 
@@ -32,7 +32,7 @@ Parameters:
 		- default: ``None``
 
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
-		Description: - Particle property at the time of release
+		Description: Particle property at the time of release
 
 		- default: ``1.0``
 
@@ -49,7 +49,7 @@ Parameters:
 		- possible_values: ``[True, False]``
 
 	* ``type`` :   ``<class 'str'>``   *<optional>*
-		Description: - particle property
+		Description: particle property
 
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``

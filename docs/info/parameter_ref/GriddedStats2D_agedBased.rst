@@ -18,17 +18,17 @@ Parameters:
 		- default: ``86400.0``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
-		Description: - Class name as string A.B.C, used to import this class from python path
+		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
 
 	* ``count_end_date`` :   ``iso8601date``   *<optional>*
-		Description: - Stop particle counting from this date
+		Description: Stop particle counting from this date
 
 		- default: ``None``
 
 	* ``count_start_date`` :   ``iso8601date``   *<optional>*
-		Description: - Start particle counting from this date
+		Description: Start particle counting from this date
 
 		- default: ``None``
 
@@ -83,7 +83,7 @@ Parameters:
 		- default: ``stats_gridded_age``
 
 	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
-		Description: - Time in seconds between calculating statistics
+		Description: Time in seconds between calculating statistics
 
 		- default: ``3600.0``
 		- units: ``sec``
