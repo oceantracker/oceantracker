@@ -170,6 +170,8 @@
             "particle_property_list": [
                 "water_depth"
             ],
+            "status_min": "moving",
+            "z_min": -2,
             "grid_size": [
                 120,
                 121

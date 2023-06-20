@@ -27,9 +27,6 @@ particle_statistics:
     update_interval: 1800
   polystats1:
     class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
-    count_status_in_range:
-    - moving
-    - moving
     particle_property_list:
     - water_depth
     polygon_list:

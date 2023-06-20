@@ -6,6 +6,8 @@ from os import  path
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from numba.typed import List as NumbaList
+from numba import  njit
+
 from oceantracker.util import time_util
 class _BaseParticleLocationStats(ParameterBaseClass):
 
@@ -17,10 +19,14 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                   'count_start_date': PVC(None, 'iso8601date',doc_str= 'Start particle counting from this date'),
                                   'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this date'),
                                   'role_output_file_tag' :           PVC('stats_base',str),
-                                  'write':                      PVC(True,bool),
-                                  'count_status_in_range' :  PLC(['frozen', 'moving'], [str], min_length=2, max_length=2,
-                                                                 doc_str=' Count only those particles with status which fall in the given range'),
-                                  'particle_property_list': PLC([], [str], make_list_unique=True)    })
+                                  'write':                      PVC(True,bool,doc_str='Write statistcs to disk'),
+                                  'status_min': PVC('frozen', [str], possible_values=particle_info['status_keys_list'],
+                                                                 doc_str=' Count only those particles with status >= to thsi value'),
+                                  'status_max': PVC('moving', [str], possible_values=particle_info['status_keys_list'],
+                                                    doc_str=' Count only those particles with status  <= to this value'),
+                                  'z_min': PVC(-1.0E32, float, doc_str=' Count only those particles with vertical positions >=  to this value'),
+                                  'z_max': PVC( 1.0E32, float,  doc_str=' Count only those particles with vertical positions <= to this value'),
+                                  'particle_property_list': PLC([], [str], make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for statics on water depth at particle locations inside the counted regions') })
         self.sum_binned_part_prop = {}
         self.info['output_file'] = None
         self.class_doc(role='Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
@@ -43,6 +49,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             info['end_time'] = si.solver_info['model_end_time']
         else:
             info['end_time'] = time_util.isostr_to_seconds(params['count_end_date'])
+
 
     def check_part_prop_list(self):
         si = self.shared_info
@@ -120,19 +127,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.prop_list = NumbaList(self.prop_list)
             self.sum_prop_list = NumbaList(self.sum_prop_list)
         pass
-    def select_particles_to_count(self, out):
-        # select  those> 0 or equal given value to count in stats
 
 
-
-        si = self.shared_info
-        part_prop = si.classes['particle_properties']
-
-        sel = part_prop['status'].find_those_in_range_of_values(
-                si.particle_status_flags[self.params['count_status_in_range'][0]],
-                si.particle_status_flags[self.params['count_status_in_range'][1]],
-                out=out)
-        return sel
 
     def is_time_to_count(self):
         si = self.shared_info
@@ -155,15 +151,48 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def record_time_stats_last_recorded(self, t):   self .info['time_last_stats_recorded'] = t
 
+    # overload this method to subset indicies in out of particles to count
+    def select_particles_to_count(self, out):
+        return out
+
+    @staticmethod
+    @njit
+    def sel_status_and_z(status, x, status_min, status_max, z_min, z_max, num_in_buffer, out):
+        n_found = 0
+        if x.shape[1] == 3:
+            # 3D selection
+            for n in range(num_in_buffer):
+                if status_min <= status[n] <= status_max and z_min <= x[n, 2] <= z_max:
+                    out[n_found] = n
+                    n_found += 1
+        else:
+            # 2D selection
+            for n in range(num_in_buffer):
+                if status_min <= status[n] <= status_max:
+                    out[n_found] = n
+                    n_found += 1
+
+        return out[:n_found]
+
     def update(self, time_sec):
         if not self.is_time_to_count(): return
+        si= self.shared_info
+        part_prop = si.classes['particle_properties']
+        params = self.params
 
         self.start_update_timer()
 
         self.record_time_stats_last_recorded(time_sec)
+        num_in_buffer = si.classes['particle_group_manager'].info['particles_in_buffer']
 
-        # any overloaded selection of particles given in child classes
-        sel = self.select_particles_to_count(self.get_partID_buffer('B1'))
+        # first select those to count based on status and z location
+        sel = self.sel_status_and_z(part_prop['status'].data, part_prop['x'].data,
+                                    si.particle_status_flags[params['status_min']], si.particle_status_flags[params['status_max']],
+                                    params['z_min'] , params['z_max'],
+                                    num_in_buffer,  self.get_partID_buffer('B1'))
+
+        # any overloaded sub-selection of particles given in child classes
+        sel = self.select_particles_to_count(sel)
 
         #update prop list data, as buffer may have expnaded
         #todo do this only when expansion occurs??

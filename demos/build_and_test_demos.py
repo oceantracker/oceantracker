@@ -102,7 +102,6 @@ p3['particle_statistics'] = {'gridstats1': {'class_name': 'oceantracker.particle
                    'count_start_date': '2020-06-01 21:16:07',
                       'grid_size': [220, 221]},
             'polystats1' : {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
-                        'count_status_in_range' : ['moving','moving'],
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
                        'polygon_list':[ {'points':poly_points}]},
 
@@ -290,7 +289,7 @@ s56['velocity_modifiers']={'terminal_velocity':
                            }
 s56['particle_statistics']= {'grid1':
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                      'update_interval': 3600, 'particle_property_list': ['water_depth'],
+                      'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min':'moving','z_min' :-2,
                       'grid_size': [120, 121]}}
 
 
