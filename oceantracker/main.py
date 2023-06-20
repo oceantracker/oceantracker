@@ -512,8 +512,7 @@ class OceanTracker():
                              'caseInfo_files':case_info_list
                              }
         json_util.write_JSON(path.join(o['run_output_dir'],o['runInfo_file']),  d)
-        ml.msg('run summary with case file names   "' + o['runInfo_file'] + '"',
-                       tabs=2, note=True)
+        ml.msg('run summary with case file names   "' + o['runInfo_file'] + '"',  tabs=2, note=True)
 
 def param_template():
     # return an empty parameter dictionary, with important class keys

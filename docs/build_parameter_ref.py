@@ -283,6 +283,7 @@ if __name__ == "__main__":
     dest = r'..\\docs\\info\\how_to'
     for f in glob('*.ipynb'):
         subprocess.run('jupyter nbconvert '+ f + '  --to rst')
+        subprocess.run('jupyter nbconvert ' + f + '  --to script')
         f_base = f.split('.')[0]
         print(f_base)
         f_base + '_files'
