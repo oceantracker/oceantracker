@@ -14,7 +14,7 @@ def import_module_from_string(s,msg_logger, crumbs=''):
         #module_object = __import__(ss[0]) # not working but faster option but less checks???
     except Exception as e:
         msg_logger.msg('Failed to find/load module given by string in or before __init__() "' + str(s) + '"',
-                          hint='Module names are case sensitive?, sytax error in module?, import error within module?',
+                          hint='Class name does not match any in pyhton path, Module names are case sensitive?, sytax error in module?, import error within module?',
                           fatal_error=True, exit_now=True, traceback_str = traceback.print_exc())
 
     # make instance

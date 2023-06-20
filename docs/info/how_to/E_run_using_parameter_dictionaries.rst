@@ -83,7 +83,7 @@ used, then set these using assignments. Reproducing the above in code…
                                                 'pulse_size': 10,                   # number of particles released each release_interval
                                                 }
     params['release_groups']['my_polygon_release'] = {
-                                                'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease', # use a polygon release
+                                                'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
                                                 'points':[   [1597682.1237, 5489972.7479],
                                                             [1598604.1667, 5490275.5488],
                                                             [1598886.4247, 5489464.0424],
@@ -130,7 +130,6 @@ used, then set these using assignments. Reproducing the above in code…
         "time_step": 120,
         "use_random_seed": null,
         "user_note": null,
-        "write_grid": null,
         "write_output_files": null,
         "write_tracks": null,
         "z0": null,
@@ -297,7 +296,6 @@ items
         class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
         mean: -0.001
         variance: 0.0002
-    write_grid: null
     write_output_files: null
     write_tracks: null
     z0: null
@@ -353,7 +351,41 @@ Is line below!
     main: OceanTracker- preliminary setup
     main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
     main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.008 sec
+    main:       -  sorted hyrdo-model files in time order,	  0.488 sec
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
+    C000: --------------------------------------------------------------------------
+    C000: Starting case number   0,  param_test1 at 2023-06-20T14:38:31.736050
+    C000: --------------------------------------------------------------------------
+    C000:       -  built node to triangles map,	  0.755 sec
+    C000:       -  built triangle adjacency matrix,	  0.334 sec
+    C000:       -  found boundary triangles,	  0.000 sec
+    C000:       -  built domain and island outlines,	  1.576 sec
+    C000:       -  calculated triangle areas,	  0.000 sec
+    C000:   Finished grid setup
+    
+
+.. parsed-literal::
+
+    Traceback (most recent call last):
+      File "e:\h_local_drive\particletracking\oceantracker\oceantracker\util\module_importing_util.py", line 13, in import_module_from_string
+        module_object = import_module(ss[0])
+      File "c:\ProgramData\miniconda3\envs\developer-oceantracker\lib\importlib\__init__.py", line 126, in import_module
+        return _bootstrap._gcd_import(name[level:], package, level)
+      File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+      File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+      File "<frozen importlib._bootstrap>", line 992, in _find_and_load_unlocked
+      File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+      File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+      File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+      File "<frozen importlib._bootstrap>", line 1004, in _find_and_load_unlocked
+    ModuleNotFoundError: No module named 'oceantracker.particle_release_groups'
+    
+
+.. parsed-literal::
+
+    C000: >>> Error: Failed to find/load module given by string in or before __init__() "oceantracker.particle_release_groups.polygon_release.PolygonRelease"
+    C000:       Hint: Module names are case sensitive?, sytax error in module?, import error within module?
     
 
 ::
@@ -361,9 +393,49 @@ Is line below!
 
     ---------------------------------------------------------------------------
 
-    PermissionError                           Traceback (most recent call last)
+    ModuleNotFoundError                       Traceback (most recent call last)
 
-    Cell In[13], line 4
+    File e:\h_local_drive\particletracking\oceantracker\oceantracker\util\module_importing_util.py:13, in import_module_from_string(s, msg_logger, crumbs)
+         12 ss = s.rsplit('.', 1)
+    ---> 13 module_object = import_module(ss[0])
+         14 #module_object = __import__(ss[0]) # not working but faster option but less checks???
+    
+
+    File c:\ProgramData\miniconda3\envs\developer-oceantracker\lib\importlib\__init__.py:126, in import_module(name, package)
+        125         level += 1
+    --> 126 return _bootstrap._gcd_import(name[level:], package, level)
+    
+
+    File <frozen importlib._bootstrap>:1050, in _gcd_import(name, package, level)
+    
+
+    File <frozen importlib._bootstrap>:1027, in _find_and_load(name, import_)
+    
+
+    File <frozen importlib._bootstrap>:992, in _find_and_load_unlocked(name, import_)
+    
+
+    File <frozen importlib._bootstrap>:241, in _call_with_frames_removed(f, *args, **kwds)
+    
+
+    File <frozen importlib._bootstrap>:1050, in _gcd_import(name, package, level)
+    
+
+    File <frozen importlib._bootstrap>:1027, in _find_and_load(name, import_)
+    
+
+    File <frozen importlib._bootstrap>:1004, in _find_and_load_unlocked(name, import_)
+    
+
+    ModuleNotFoundError: No module named 'oceantracker.particle_release_groups'
+
+    
+    During handling of the above exception, another exception occurred:
+    
+
+    GracefulError                             Traceback (most recent call last)
+
+    Cell In[5], line 4
           1 # run oceantracker using param dict built in cells above
           2 from oceantracker import main
     ----> 4 case_info_file_name = main.run(params)
@@ -376,53 +448,74 @@ Is line below!
          50     return case_info_files
     
 
-    File e:\h_local_drive\particletracking\oceantracker\oceantracker\main.py:110, in OceanTracker._run_single(self, user_given_params)
-        107 # keep oceantracker_case_runner out of main namespace
-        108 from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
-    --> 110 working_params = self._main_run_set_up(user_given_params)
-        112 # make instance of case runer and run it with decomposed working params
-        113 ot = OceanTrackerCaseRunner()
+    File e:\h_local_drive\particletracking\oceantracker\oceantracker\main.py:113, in OceanTracker._run_single(self, user_given_params)
+        111 # make instance of case runer and run it with decomposed working params
+        112 ot = OceanTrackerCaseRunner()
+    --> 113 case_info_file, case_msg = ot.run(working_params)
+        115 if case_info_file is None:
+        116     ml.msg('case_info_file is None, run may not have completed', fatal_error=True)
     
 
-    File e:\h_local_drive\particletracking\oceantracker\oceantracker\main.py:141, in OceanTracker._main_run_set_up(self, user_given_params, case_list_params, full_checks)
-        139 working_params = self._decompose_params(params, full_checks=full_checks)
-        140 working_params, reader_params = self._get_hindcast_file_info(working_params)
-    --> 141 working_params = self._setup_output_folders(params, working_params)
-        142 self._write_raw_user_params(working_params['output_files'],user_given_params, case_list=case_list_params)
-        144 o = working_params['output_files']
+    File e:\h_local_drive\particletracking\oceantracker\oceantracker\oceantracker_case_runner.py:79, in OceanTrackerCaseRunner.run(self, working_params)
+         77 self._make_core_class_instances()
+         78 si.solver_info = si.classes['solver'].info  # todo is this needed?? allows shortcut access from other classes
+    ---> 79 self._initialize_solver_core_classes_and_release_groups()
+         82 self._make_and_initialize_user_classes()
+         84 # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
     
 
-    File e:\h_local_drive\particletracking\oceantracker\oceantracker\main.py:412, in OceanTracker._setup_output_folders(self, user_given_params, working_params)
-        409     run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
-        411 # kill existing folder
-    --> 412 if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
-        414 try:
-        415     makedirs(run_output_dir)  # make  and clear out dir for output
+    File e:\h_local_drive\particletracking\oceantracker\oceantracker\oceantracker_case_runner.py:299, in OceanTrackerCaseRunner._initialize_solver_core_classes_and_release_groups(self)
+        297 # set up start time and duration based on particle releases
+        298 t0 = perf_counter()
+    --> 299 time_start, time_end = self._setup_particle_release_groups(si.working_params['role_dicts']['release_groups'])
+        302 #clip times to maximum duration in shared and case params
+        303 duration = abs(time_end - time_start)
     
 
-    File c:\ProgramData\miniconda3\envs\developer-oceantracker\lib\shutil.py:750, in rmtree(path, ignore_errors, onerror)
-        748     # can't continue even if onerror hook returns
-        749     return
-    --> 750 return _rmtree_unsafe(path, onerror)
+    File e:\h_local_drive\particletracking\oceantracker\oceantracker\oceantracker_case_runner.py:246, in OceanTrackerCaseRunner._setup_particle_release_groups(self, particle_release_groups_params_dict)
+        242 if 'class_name' not in pg_params: pg_params['class_name'] = 'oceantracker.release_groups.point_release.PointRelease'
+        244 # make instance and initialise
+    --> 246 i = si.create_class_dict_instance(name, 'release_groups', 'user', pg_params, crumbs='Adding release groups')
+        247 i.initial_setup()
+        249 # set up release times so duration of run known
     
 
-    File c:\ProgramData\miniconda3\envs\developer-oceantracker\lib\shutil.py:620, in _rmtree_unsafe(path, onerror)
-        618             os.unlink(fullname)
-        619         except OSError:
-    --> 620             onerror(os.unlink, fullname, sys.exc_info())
-        621 try:
-        622     os.rmdir(path)
+    File e:\h_local_drive\particletracking\oceantracker\oceantracker\shared_info.py:45, in SharedInfoClass.create_class_dict_instance(self, name, class_role, group, params, crumbs)
+         42 crumb_base = f' >>> adding_class type >> "{class_role}"  (name=  "{name}" instance #{instanceID: 1d}), '
+         44 # make instance  and merge params
+    ---> 45 i = make_class_instance_from_params(name, params, self.msg_logger,
+         46                                     crumbs= crumb_base + crumbs)
+         48 if class_role not in common_info.class_dicts.keys() :
+         49     ml.msg(f'Class type = "{class_role}": name is not a known class_role=' + class_role ,
+         50            exception = True, crumbs =  crumb_base + crumbs)
     
 
-    File c:\ProgramData\miniconda3\envs\developer-oceantracker\lib\shutil.py:618, in _rmtree_unsafe(path, onerror)
-        616 else:
-        617     try:
-    --> 618         os.unlink(fullname)
-        619     except OSError:
-        620         onerror(os.unlink, fullname, sys.exc_info())
+    File e:\h_local_drive\particletracking\oceantracker\oceantracker\util\parameter_util.py:21, in make_class_instance_from_params(name, params, msg_logger, class_role_name, crumbs, merge_params)
+         17     else:
+         18         msg_logger.msg('params for ' + crumbs + ' must contain class_name ' + str(class_role_name),
+         19                         fatal_error=True, hint= 'given params are = ' + str(params), exit_now=True)
+    ---> 21 i = import_module_from_string(params['class_name'], msg_logger,crumbs = crumbs + ' > importing module')
+         22 i.info['name'] = name
+         23 i.info['class_role'] = class_role_name
     
 
-    PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'e:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\output\\param_test1\\param_test1_caseLog_log.txt'
+    File e:\h_local_drive\particletracking\oceantracker\oceantracker\util\module_importing_util.py:16, in import_module_from_string(s, msg_logger, crumbs)
+         14     #module_object = __import__(ss[0]) # not working but faster option but less checks???
+         15 except Exception as e:
+    ---> 16     msg_logger.msg('Failed to find/load module given by string in or before __init__() "' + str(s) + '"',
+         17                       hint='Module names are case sensitive?, sytax error in module?, import error within module?',
+         18                       fatal_error=True, exit_now=True, traceback_str = traceback.print_exc())
+         20 # make instance
+         21 try:
+    
+
+    File e:\h_local_drive\particletracking\oceantracker\oceantracker\util\messgage_logger.py:106, in MessageLogger.msg(self, msg_text, warning, note, hint, tag, tabs, crumbs, link, fatal_error, exit_now, exception, traceback_str)
+        104 # todo add traceback to message?
+        105 if exit_now:
+    --> 106     raise GracefulError('Fatal error cannot continue')
+    
+
+    GracefulError:  Look at messages above or in .err file
 
 
 .. code:: ipython3
