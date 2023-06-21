@@ -107,7 +107,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
 # TODO LIST
 # todo for version 0.40.01
     #TODO BUGS
-        #todo error handling nad log file permission errors when reunning cells in note books
+        #todo error handling and log file permission errors when reunning cells in note books
 
     #TODO PARAMETERS
 
@@ -129,12 +129,15 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
         # todo add message logging to post processing
         # todo add read case info file with not found errors
         # todo  add doc string for improtant methods and classes
-        # todo max time steps per file option?
+        # todo aviod netcdf chunk size erors max time steps per file option?
         # todo remove blanks from class papam keys
 
+#TODO checks
+    #todo setup of using AZ profiles from hindcast
+    # todo note if using hindcast tiem step
+
 #TODO FASTER STARTUP
-    #todo add timing of start up blocks to improve setup speed
-    # todo line profile reader buffer fill to improve spped of copys, eg np.copyto()
+    # todo line profile reader buffer fill to improve speed of copys, eg np.copyto()
 
 # TODO MODELS
     # todo design and make base class
@@ -148,6 +151,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
         # todo kernal forms of hori/vert walk
         # todo kernal form of water vel interpolator
         # todo kernal RK solver
+        # todo fraction to read use ::10 form to only read load a fraction of track/timestats time steps? can this work in compact filesode?
 
 # TODO STRUCTURE
     # todo hyperlinks to online docs where useful

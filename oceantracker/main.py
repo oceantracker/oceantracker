@@ -63,10 +63,24 @@ class OceanTracker():
         for key in kwargs:
             self.params[key]= kwargs[key]
 
-    def add_class(self, class_role, **kwargs):
+    def add_class(self, class_role =None, **kwargs):
         ml = self.msg_logger
-        known_classes = list(common_info.class_dicts.keys()) \
+        known_class_roles = list(common_info.class_dicts.keys()) \
                      + list(common_info.core_classes.keys())
+        if class_role is None:
+            ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True)
+            return
+
+        if type(class_role) != str:
+            ml.msg(f'oceantracker.add_class, class_role must be a string', fatal_error=True,
+                   hint='Given type =' + str(type(class_role)))
+            return
+
+        if class_role not in known_class_roles:
+            ml.msg(f'oceantracker.add_class, class_role parameter is not recognised, value ="{class_role}"', fatal_error=True,
+                   hint= 'Must be one of-' +str(known_class_roles))
+            return
+
         if class_role in common_info.core_classes:
             # single class
             self.params[class_role] = kwargs
@@ -88,7 +102,7 @@ class OceanTracker():
                     if key != 'name':
                         self.params[class_role][name][key] = kwargs[key]
         else:
-            spell_check_util.spell_check(class_role, known_classes, ml, 'in add_class(), ignoring this class',
+            spell_check_util.spell_check(class_role, known_class_roles, ml, 'in add_class(), ignoring this class',
                         crumbs=f'class type "{class_role}"')
         pass
 
@@ -471,6 +485,7 @@ class OceanTracker():
                 ml.msg(common_info.package_fancy_name + ' is not yet compatible with Python 3.11, as not all imported packages have been updated, eg Numba')
 
             ml.exit_if_prior_errors()
+
 
 
     def _write_run_info_json(self, case_info_files, t0):
