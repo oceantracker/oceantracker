@@ -209,52 +209,44 @@ def base_param(is3D=False, isBackwards = False):
     p0 = [[0, 2000.], [0, 4000.], [0, 8000.], [0, 10000.]]
     poly0 = [[9000., 9000], [10000, 9000], [10000, 10000.]]
 
-
-    base_case={ 'run_params' :{'write_tracks': True,
-                               'duration':6.*24*3600,
-
-                                },
-
-            'solver' : { 'RK_order': 4, 'n_sub_steps': 9 }, # 5min steps to mact OT v01 paper
-            'particle_group_manager' : {},
-            'release_groups': [
-                                        {'points': p0, 'pulse_size': 1, 'release_interval': 3600,'userRelease_groupID':5,
-                                          'max_age' : 7*24*3600, 'user_release_group_name': 'A group','z_range' :[-1,0],
-                                         },
-                                       {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
-                                       'points': poly0, 'pulse_size': 1, 'release_interval': 3600,'userRelease_groupID':200,
-                                      'max_age' : 4*24*3600, 'user_release_group_name': 'B group',
-                                        'z_range' :[-1,0],
-                                            }
-                                        ],
-            'dispersion': {'A_H': 0.},
-
-            'particle_properties': [ {'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay'},
-                                       {'class_name' : 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'}
-                                                        ],
-            'trajectory_modifiers': [],
-            'velocity_modifiers' : []
-           }
-
     outputdir = 'output'
     input_dir =path.normpath(path.join(path.split(__file__)[0],'testData'))
 
-    params={  'shared_params': { 'debug': True,
-                                'root_output_dir': outputdir,
-                                  'output_file_base': 'test_particle',
-                                  'backtracking': isBackwards,
-                                  },
-              'reader': {'class_name':	"oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
+    params={ 'debug': True,
+            'root_output_dir': outputdir,
+            'output_file_base': 'test_particle',
+            'backtracking': isBackwards,
+           'write_tracks': True,
+            'time_step': 5*60,
+           'duration': 6. * 24 * 3600,
+            'reader': {'class_name':	"oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
                   'file_mask' : 'circFlow2D*.nc', 'input_dir': input_dir,
-                        'field_variables': {'water_velocity' : ['u','v'] },
+                        'field_variables': {'water_velocity' : ['u','v'],'water_depth': 'depth','tide': 'tide' },
                         'dimension_map': {'node': 'node', 'time': 'time'},
-                        'grid_variables': {'time': 'time', 'x': ['x','y'],'water_depth': 'depth',
-                                      'triangles': 'simplex','tide': 'tide',
+                        'grid_variables': {'time': 'time', 'x': ['x','y'],
+                                      'triangles': 'simplex',
                                        },
                          'time_buffer_size': 200,
                          'isodate_of_hindcast_time_zero': '2000-01-01'},
 
-                'base_case_params': base_case
+
+             'solver': {'RK_order': 4, 'n_sub_steps': 9},  # 5min steps to mact OT v01 paper
+             'particle_group_manager': {},
+             'release_groups': {'mypoint':
+                                    {'points': p0, 'pulse_size': 1, 'release_interval': 3600, 'userRelease_groupID': 5,
+                                    'max_age': 7 * 24 * 3600, 'user_release_group_name': 'A group', 'z_range': [-1, 0],
+                                    },
+                            'mypolygon':{'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
+                                        'points': poly0, 'pulse_size': 1, 'release_interval': 3600, 'userRelease_groupID': 200,
+                                            'max_age': 4 * 24 * 3600, 'user_release_group_name': 'B group',
+                                            'z_range': [-1, 0],
+                  }
+                                },
+             'dispersion': {'A_H': 0.},
+
+             'particle_properties': {'mydecay':{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay'},
+                                     'mydistance':{'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'}
+                                     },
     }
 
     if is3D:
@@ -264,16 +256,14 @@ def base_param(is3D=False, isBackwards = False):
         r['grid_variables'].update({'zlevel': 'zlevel'})
         r['dimension_map'].update({'z': 'zlevel'})
         r['file_mask'] = params['reader']['file_mask'].replace('2D', '3D')
-        base_case['dispersion'].update({'A_H': 0.,'A_V': 0.})
+        params['dispersion'].update({'A_H': 0.,'A_V': 0.})
         #base_case['velocity_modifiers'].append({'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0*0.001})
 
     return params
 
 
 def run_test(working_params):
-
-    runInfoFile, errflag= run(working_params)
-    caseInfoFile= load_output_files.get_case_info_file_from_run_file(runInfoFile)
+    caseInfoFile = run(working_params)
     return caseInfoFile
 
 if __name__ == '__main__':
@@ -284,6 +274,7 @@ if __name__ == '__main__':
     parser.add_argument('-test', nargs='?', const=0, type=int, default=1)
     parser.add_argument('--size', nargs='?', const=0, type=int, default=0)
     parser.add_argument('-scatch_tests', action='store_true')
+    parser.add_argument('-dev', action='store_true')
     args = parser.parse_args()
     args.parallel= False
 
@@ -303,8 +294,8 @@ if __name__ == '__main__':
             for is3D in [False, True]:
                 for isBackwards in[True, False ]:
                     params = base_param(is3D=is3D, isBackwards=isBackwards)
-                    params['shared_params']['max_run_duration']= 14 * 24 * 3600.
-                    params['base_case_params']['dispersion'].update( {'A_H': 0.,'A_V':0.0})
+                    params['max_run_duration']= 14 * 24 * 3600.
+                    params['dispersion'].update( {'A_H': 0.,'A_V':0.0})
                     if args.dev:
                         params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.scatch_tests.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
                         # params['base_case_params']['dispersion'].update({'A_V':0., 'A_H':0.})
