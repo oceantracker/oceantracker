@@ -22,7 +22,7 @@ Main new features
 #. FVCOM and ROMS readers working
 #. optional vertical dispersion from model vertical eddy viscosity profile.
 #. If no particles active, will freerun until some are released, allows particles to be released for one season per year, with a max age, and run will skip between years
-
+#. Only have conda install instructions
 
 Known breaking changes- ask for help if needed to transition
 ______________________________________________________________

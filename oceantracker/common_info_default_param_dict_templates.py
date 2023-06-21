@@ -107,29 +107,14 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
 # TODO LIST
 # todo for version 0.40.01
     #TODO BUGS
-            # todo no hindcast file found graceful exit
-            # todo active count when culling?
-            # todo why BC walk too long for large steps sizes?
-            # todo cope wih empty relese groups, ie non released
-            # todo no releases in particle buffer to small?
-
+        #todo error handling nad log file permission errors when reunning cells in note books
 
     #TODO PARAMETERS
-        # todo check time_step default is hindcast time step
-
 
     # TODO DOCUMENTATION
 
-
     # TODO STRUCTURE
         # todo remove writing to file or mp4, and show how to save it by example???
-        # todo  by default read all varaibles for plotting? or read on demand?
-        #todo matlab ncdf reader to read release group info
-        # add fraction to read to matlab code
-        # todo get rid of particle prop dtype
-        # todo add self expanding particle buffer
-        # todo free run if no particles
-        # todo get rid of particle estimates
 
     # TODO SIMPLIFY
 

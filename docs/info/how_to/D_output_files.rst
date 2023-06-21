@@ -152,7 +152,7 @@ Load data method
 Load data method, reads the netcdf, grid, and other information needed
 to plot into a dictionary. This is the recommended method for reading
 track output. It uses the case_info file to locate all these files
-associated with the case with the run.
+associated with the case run.
 
 .. code:: ipython3
 
