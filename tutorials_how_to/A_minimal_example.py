@@ -62,7 +62,7 @@ case_info_file_name = ot.run()
 from oceantracker.post_processing.read_output_files import  load_output_files
 
 # read particle track data into a dictionary using case_info_file_name
-tracks = load_output_files.load_particle_track_vars(case_info_file_name)
+tracks = load_output_files.load_track_data(case_info_file_name)
 print(tracks.keys()) # show what is in tracks dictionary holds
 
 from oceantracker.post_processing.plotting.plot_tracks import plot_tracks

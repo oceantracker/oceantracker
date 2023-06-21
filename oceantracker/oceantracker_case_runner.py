@@ -108,13 +108,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
             si.msg_logger.msg(f' Case Funner graceful exit from case number [{si.caseID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+            si.msg_logger.close()
             return None, return_msgs
 
         except Exception as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
             si.msg_logger.msg(f' Unexpected error in case number [{si.caseID:2}] ', fatal_error=True,hint='check above or .err file')
-
+            si.msg_logger.close()
             return  None, return_msgs
 
         # reshow warnings

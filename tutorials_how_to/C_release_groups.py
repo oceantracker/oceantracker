@@ -38,7 +38,6 @@
 
 
 # show example of release types with start and end times, 
-#  set up reading geojson/ shapely polygons and show example
 
 
 # 
