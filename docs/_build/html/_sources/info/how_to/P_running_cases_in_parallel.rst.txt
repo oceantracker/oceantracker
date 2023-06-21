@@ -34,22 +34,22 @@ statements, thus the below will not run when within a notebook in
 windows. Use in notebooks also frequently gives “file in use by another
 process” errors.
 
-This code is in file
-“oceantracker/tutorials_how_to/parallel_example.py”.
+To avoid this run parallel case as code in file
+“oceantracker/tutorials_how_to/P_running_cases_in_parallel.py”.
 
 .. code:: ipython3
 
-    # oceantracker parallel demo
-    # first build params used by all cases
-    # without required release groups
-    params_single={
+    # oceantracker parallel demo, run different release groups as parallel processes
+    from oceantracker import main
+    
+    # first build base case, params used for all cases
+    base_case={
         'output_file_base' :'param_test1',      # name used as base for output files
-        'root_output_dir':'output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
+        'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
         'time_step' : 120,  #  2 min time step as seconds  
-        'reader':{'input_dir': '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+        'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                         'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-                            },
-        'release_groups': {}   # empty release groups to add to below for each case                 
+            },
             }
     
     # define the required release  points
@@ -59,26 +59,23 @@ This code is in file
                 [1597917.3387, 5489000],
             ]
     
-    # build a list of params, with one release group fot each point
-    from copy import deepcopy
-    
-    params=[]
-    for p in points:
-        # build params for this case
-        case_params = deepcopy(params_single) # safer to work with a copy
-        
+    # build a list of params for each case, with one release group fot each point
+    case_list=[]
+    for n,p in enumerate(points):
+        case_param = main.param_template()
         # add one point as a release group to this case
-        case_params['release_groups']['mypoint1'] = {
-                                        'points':[p],  # needs to be 1, by 2 list for single 2D point
-                                        'release_interval': 3600,           # seconds between releasing particles
-                                        'pulse_size': 10,                   # number of particles released each release_interval
+        case_param['release_groups']['mypoint'+str(n)] = {  # better to give release group a unique name
+                                                'points':[p],  # needs to be 1, by 2 list for single 2D point
+                                                'release_interval': 3600,           # seconds between releasing particles
+                                                'pulse_size': 10,                   # number of particles released each release_interval
                                     }
-        params.append(case_params)  # add this case to the list 
+        case_list.append(case_param)  # add this case to the list
     
-    # below uses params to run the list of parallel cases
-    from oceantracker import main
     
-    # to run parallel in windows, must put run  call  inside the below block
+    
+    # to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
     if __name__ == '__main__':
     
-        main.run(params)
+        # run as parallel set of cases
+        #    by default uses one less than the number of physical processors at one time, use setting "processors"
+        main.run_parallel(base_case, case_list)

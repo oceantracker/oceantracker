@@ -4,7 +4,7 @@ Output files
 [This note-book is in oceantracker/tutorials_how_to/]
 
 After running OceanTacker, output files are in the files are the folder
-given by parameters .\\“root_output_dir”\\“output_file_base”
+given by parameters ./“root_output_dir”/“output_file_base”
 
 The main files are:
 
@@ -61,7 +61,7 @@ Below list the files after running the minimal example.
 
     # show a list of output files after running  minimal_example
     import glob
-    for f in glob.glob('.\\output\\minimal_example\\*'):
+    for f in glob.glob('output/minimal_example/*'):
         print(f) 
     
     
@@ -69,15 +69,15 @@ Below list the files after running the minimal example.
 
 .. parsed-literal::
 
-    .\output\minimal_example\minimal_example_caseInfo.json
-    .\output\minimal_example\minimal_example_caseLog_log.txt
-    .\output\minimal_example\minimal_example_grid.nc
-    .\output\minimal_example\minimal_example_grid_outline.json
-    .\output\minimal_example\minimal_example_log.txt
-    .\output\minimal_example\minimal_example_raw_user_params.json
-    .\output\minimal_example\minimal_example_runInfo.json
-    .\output\minimal_example\minimal_example_tracks.nc
-    .\output\minimal_example\users_params_minimal_example.json
+    output/minimal_example\minimal_example_caseInfo.json
+    output/minimal_example\minimal_example_caseLog_log.txt
+    output/minimal_example\minimal_example_grid.nc
+    output/minimal_example\minimal_example_grid_outline.json
+    output/minimal_example\minimal_example_log.txt
+    output/minimal_example\minimal_example_raw_user_params.json
+    output/minimal_example\minimal_example_runInfo.json
+    output/minimal_example\minimal_example_tracks_compact.nc
+    output/minimal_example\users_params_minimal_example.json
     
 
 Reading particle tracks

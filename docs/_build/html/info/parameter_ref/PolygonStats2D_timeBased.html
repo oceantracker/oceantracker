@@ -136,18 +136,6 @@
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">count_status_in_range</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Count only those particles with status which fall in the given range</p>
-<ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['frozen',</span> <span class="pre">'moving']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>min_length: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-<li><p>max_length: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">grid_size</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'int'&gt;]</span></code></p></li>
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">[100,</span> <span class="pre">99]</span></code></p></li>
@@ -158,7 +146,8 @@
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">particle_property_list</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">particle_property_list</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Create statistics for these named particle properties, list = [“water_depth”], for statics on water depth at particle locations inside the counted regions</p>
+<ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
@@ -189,6 +178,24 @@
 </dl>
 </li>
 <li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">status_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with status  &lt;= to this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">moving</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'frozen',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">status_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with status &gt;= to thsi value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">frozen</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'frozen',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">update_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Time in seconds between calculating statistics</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">3600.0</span></code></p></li>
@@ -205,9 +212,26 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">write</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">write</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Write statistcs to disk</p>
+<ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">z_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical positions &lt;= to this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1e+32</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">z_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical positions &gt;=  to this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">-1e+32</span></code></p></li>
 </ul>
 </dd>
 </dl>

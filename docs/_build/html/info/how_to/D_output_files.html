@@ -58,7 +58,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Output files</a></li>
@@ -103,7 +103,7 @@
 <h1>Output files<a class="headerlink" href="#output-files" title="Permalink to this heading">¶</a></h1>
 <p>[This note-book is in oceantracker/tutorials_how_to/]</p>
 <p>After running OceanTacker, output files are in the files are the folder
-given by parameters .\“root_output_dir”\“output_file_base”</p>
+given by parameters ./“root_output_dir”/“output_file_base”</p>
 <p>The main files are:</p>
 <ul class="simple">
 <li><p>**users_params_*.json**, a copy of the parameters as supplied by the
@@ -146,19 +146,19 @@ given polygons.</p></li>
 <p>Below list the files after running the minimal example.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># show a list of output files after running  minimal_example</span>
 <span class="kn">import</span> <span class="nn">glob</span>
-<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;.</span><span class="se">\\</span><span class="s1">output</span><span class="se">\\</span><span class="s1">minimal_example</span><span class="se">\\</span><span class="s1">*&#39;</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;output/minimal_example/*&#39;</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </pre></div>
 </div>
-<pre class="literal-block">.outputminimal_exampleminimal_example_caseInfo.json
-.outputminimal_exampleminimal_example_caseLog_log.txt
-.outputminimal_exampleminimal_example_grid.nc
-.outputminimal_exampleminimal_example_grid_outline.json
-.outputminimal_exampleminimal_example_log.txt
-.outputminimal_exampleminimal_example_raw_user_params.json
-.outputminimal_exampleminimal_example_runInfo.json
-.outputminimal_exampleminimal_example_tracks.nc
-.outputminimal_exampleusers_params_minimal_example.json</pre>
+<pre class="literal-block">output/minimal_exampleminimal_example_caseInfo.json
+output/minimal_exampleminimal_example_caseLog_log.txt
+output/minimal_exampleminimal_example_grid.nc
+output/minimal_exampleminimal_example_grid_outline.json
+output/minimal_exampleminimal_example_log.txt
+output/minimal_exampleminimal_example_raw_user_params.json
+output/minimal_exampleminimal_example_runInfo.json
+output/minimal_exampleminimal_example_tracks_compact.nc
+output/minimal_exampleusers_params_minimal_example.json</pre>
 <section id="reading-particle-tracks">
 <h2>Reading particle tracks<a class="headerlink" href="#reading-particle-tracks" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># example of reading tracks file</span>

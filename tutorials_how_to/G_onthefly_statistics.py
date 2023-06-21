@@ -80,63 +80,8 @@
 # * Plot the particle counts and pollutant as animated heatmap.
 # 
 
-# In[3]:
+# In[7]:
 
-# Polygon Statistics example.py run using dictionary of parameters
-#------------------------------------------------
-from oceantracker import main
-
-params = main.param_template()  # start with template
-params['output_file_base']='polygon_connectivity_map_example'  # name used as base for output files
-params['root_output_dir']='output'             #  output is put in dir   'root_output_dir'\\'output_file_base'
-params['time_step']= 600. #  10 min time step as seconds
-
-# ot.set_class, sets parameters for a named class
-params['reader']= { 'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                    'file_mask':  'demoHindcastSchism*.nc'}  # hindcast file mask
-
-# add one release locations
-params['release_groups']['my_release_point']={ # user must provide a name for group first
-                        'points': [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
-                        'release_interval': 900,           # seconds between releasing particles
-                        'pulse_size': 1000,                   # number of particles released each release_interval
-            }
-
-# add a gridded particle statistic
-params['particle_statistics']['my_polygon']= {
-                'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
-                'polygon_list': [{'points': [   [1597682.1237, 5489972.7479],# list of one or more polygons
-                                                [1598604.1667, 5490275.5488],
-                                                [1598886.4247, 5489464.0424],
-                                                [1597917.3387, 5489000],
-                                                [1597300, 5489000], [1597682.1237, 5489972.7479]
-                                                ]
-                                  }],
-                # the below settings are optional
-                'update_interval': 900, # time interval in sec, between doing particle statists counts
-                'status_min':'moving', # only count the particles which are moving
-                }
-
-
-# run oceantracker
-poly_case_info_file_name = main.run(params)
-
-
-# ## Read polygon/connectivity statistics
-#
-#
-
-# In[2]:
-
-
-#Read polygon stats and calculate connectivity matrix
-from oceantracker.post_processing.read_output_files import load_output_files
-
-poly_stats_data = load_output_files.load_stats_data(poly_case_info_file_name,'my_polygon')
-print('stats',poly_stats_data.keys())
-
-print('connectivity matrix shape', poly_stats_data['connectivity_matrix'].shape)
-poly_stats_data['connectivity_matrix']
 
 # Gridded Statistics example.py using class helper method
 #------------------------------------------------
@@ -148,7 +93,8 @@ ot = OceanTracker()
 # ot.settings method use to set basic settings
 ot.settings(output_file_base='heat_map_example', # name used as base for output files
             root_output_dir='output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
-            time_step= 600. #  10 min time step as seconds
+            time_step= 600., #  10 min time step as seconds
+            write_tracks = False # particle tracks not needed for on fly 
             )
 # ot.set_class, sets parameters for a named class
 ot.add_class('reader',input_dir= '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
@@ -196,7 +142,7 @@ case_info_file_name = ot.run()
 # 
 # To plot use, load_output_files.load_stats_data, which also loads grid etc for plotting
 
-# In[7]:
+# In[8]:
 
 
 # read stats files
@@ -234,9 +180,67 @@ plot_statistics.plot_heat_map(stats_data, var='a_pollutant',release_group= 'my_r
 # 
 #     # add polygon stats example with plotting
 
-# In[1]:
+# In[ ]:
 
 
+# Polygon Statistics example.py run using dictionary of parameters
+#------------------------------------------------
+from oceantracker import main
+
+params = main.param_template()  # start with template
+params['output_file_base']='polygon_connectivity_map_example'  # name used as base for output files
+params['root_output_dir']='output'             #  output is put in dir   'root_output_dir'\\'output_file_base'
+params['time_step']= 600. #  10 min time step as seconds
+params['write_tracks'] = False # particle tracks not needed for on fly 
+
+# ot.set_class, sets parameters for a named class
+params['reader']= { 'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                    'file_mask':  'demoHindcastSchism*.nc'}  # hindcast file mask
+
+# add one release locations 
+params['release_groups']['my_release_point']={ # user must provide a name for group first
+                        'points': [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
+                        'release_interval': 900,           # seconds between releasing particles
+                        'pulse_size': 1000,                   # number of particles released each release_interval
+            }
+
+# add a gridded particle statistic 
+params['particle_statistics']['my_polygon']= {
+                'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
+                'polygon_list': [{'points': [   [1597682.1237, 5489972.7479],# list of one or more polygons
+                                                [1598604.1667, 5490275.5488],
+                                                [1598886.4247, 5489464.0424],
+                                                [1597917.3387, 5489000],
+                                                [1597300, 5489000], [1597682.1237, 5489972.7479]
+                                                ]                                         
+                                  }],
+                # the below settings are optional
+                'update_interval': 900, # time interval in sec, between doing particle statists counts 
+                'status_min':'moving', # only count the particles which are moving 
+                }
+
+# run oceantracker
+poly_case_info_file_name = main.run(params)
+
+
+# ## Read polygon/connectivity statistics
+# 
+# 
+
+# In[ ]:
+
+
+#Read polygon stats and calculate connectivity matrix 
+from oceantracker.post_processing.read_output_files import load_output_files
+
+poly_stats_data = load_output_files.load_stats_data(poly_case_info_file_name,'my_polygon')
+print('stats',poly_stats_data.keys())
+
+import matplotlib.pyplot as plt
+plt.plot(poly_stats_data['date'], poly_stats_data['connectivity_matrix'][:,0,0])
+plt.title('Connectivity time series between release point and polygon')
+
+#print(poly_stats_data['date'])
 
 
 # ## Time verses Age statistics

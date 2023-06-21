@@ -109,19 +109,27 @@ terabyte of particle tracks after a run has completed. Ocean tracker can
 build some particle statistics on the fly, without recording any
 particle tracks. This results in more manageable data volumes and
 analysis.</p>
-<p>On-the-fly statistics recorded particle counts separately for each
-release group. It is also possible to subset the counts, ie only count
-particles which are stranded by the tide by designating a range of
-particle status values to count. Or, only count particles in a given
-vertical “z” range. Users can add multiple statistics, all calculated in
-from the same particles during the run. Eg. could add a particle
-statistic for each status type, for different depth ranges.</p>
+<p>On-the-fly statistics record particle counts separately for each release
+group. It is also possible to subset the counts, ie only count particles
+which are stranded by the tide by designating a range of particle status
+values to count. Or, only count particles in a given vertical “z” range.
+Users can add multiple statistics, all calculated in from the same
+particles during the run. Eg. could add a particle statistic for each
+status type, for different depth ranges.</p>
 <p>Statistics can be read, plotted or animated with OceanTrackers
 post-processing code, see below</p>
 <p>The available “particle_statistics” classes with their individual
 settings are at …. add link</p>
-<p>Currently there are two main classes of particle statistics, “gridded”
-and “polygon”.</p>
+<p>Currently there are two main classes of 2D particle statistics “gridded”
+which counts particles inside cells of a regular grid, and “polygon”
+which counts particles in a given list of polygons.</p>
+<p>The user can add many particle statistics classes, all based on the same
+particles. For both types it is possible to only count a subset of these
+particles, by setting a min. and/or max status to count, or setting a
+min. and/or max. “z”, the vertical location. So could add several
+statistics classes, each counting particles in different layers, or
+classes to separately count those moving and those on the bottom hoping
+to be re-suspended.</p>
 <section id="gridded-statistics">
 <h2>Gridded statistics<a class="headerlink" href="#gridded-statistics" title="Permalink to this heading">¶</a></h2>
 <p>These are heat maps of counts binned into cells of a regular grid. Along
@@ -158,6 +166,417 @@ grid cell or polygon.</p>
 property values and particle counts in each grid cell or polygon, for
 each release group.</p>
 </section>
+<section id="gridded-heat-map-example">
+<h2>Gridded/Heat map example<a class="headerlink" href="#gridded-heat-map-example" title="Permalink to this heading">¶</a></h2>
+<p>The below uses the helper class method to extends the minimal_example to
+add</p>
+<ul class="simple">
+<li><p>Decaying particle property, eg. breakdown of a pollutant</p></li>
+<li><p>Gridded time series of particle statistics as heat maps, which also
+builds a heat map of the pollutant</p></li>
+<li><p>Plot the particle counts and pollutant as animated heatmap.</p></li>
+</ul>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Gridded Statistics example.py using class helper method</span>
+<span class="c1">#------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">oceantracker.main</span> <span class="kn">import</span> <span class="n">OceanTracker</span>
+
+<span class="c1"># make instance of oceantracker to use to set parameters using code, then run</span>
+<span class="n">ot</span> <span class="o">=</span> <span class="n">OceanTracker</span><span class="p">()</span>
+
+<span class="c1"># ot.settings method use to set basic settings</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">output_file_base</span><span class="o">=</span><span class="s1">&#39;heat_map_example&#39;</span><span class="p">,</span> <span class="c1"># name used as base for output files</span>
+            <span class="n">root_output_dir</span><span class="o">=</span><span class="s1">&#39;output&#39;</span><span class="p">,</span>             <span class="c1">#  output is put in dir   &#39;root_output_dir&#39;\\&#39;output_file_base&#39;</span>
+            <span class="n">time_step</span><span class="o">=</span> <span class="mf">600.</span> <span class="c1">#  10 min time step as seconds</span>
+            <span class="p">)</span>
+<span class="c1"># ot.set_class, sets parameters for a named class</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;reader&#39;</span><span class="p">,</span><span class="n">input_dir</span><span class="o">=</span> <span class="s1">&#39;../demos/demo_hindcast&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
+                      <span class="n">file_mask</span><span class="o">=</span>  <span class="s1">&#39;demoHindcastSchism*.nc&#39;</span><span class="p">)</span>  <span class="c1"># hindcast file mask</span>
+
+<span class="c1"># add one release locations</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;release_groups&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;my_release_point&#39;</span><span class="p">,</span> <span class="c1"># user must provide a name for group first</span>
+                        <span class="n">points</span><span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="mi">1599000</span><span class="p">,</span> <span class="mi">5486200</span><span class="p">]],</span>       <span class="c1"># ust be 1 by N list pairs of release locations</span>
+                        <span class="n">release_interval</span><span class="o">=</span> <span class="mi">900</span><span class="p">,</span>           <span class="c1"># seconds between releasing particles</span>
+                        <span class="n">pulse_size</span><span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>                   <span class="c1"># number of particles released each release_interval</span>
+            <span class="p">)</span>
+
+<span class="c1"># add a decaying particle property</span>
+<span class="c1"># add and Age decay particle property, with exponential decay based on age, with time scale 1 hour</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;particle_properties&#39;</span><span class="p">,</span> <span class="c1"># add a new property to particle_properties role</span>
+            <span class="n">name</span> <span class="o">=</span><span class="s1">&#39;a_pollutant&#39;</span><span class="p">,</span> <span class="c1"># must have a user given name</span>
+            <span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;oceantracker.particle_properties.age_decay.AgeDecay&#39;</span><span class="p">,</span> <span class="c1">#  class_role is resuspension</span>
+            <span class="n">initial_value</span><span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="n">decay_time_scale</span> <span class="o">=</span> <span class="mf">3600.</span><span class="p">)</span> <span class="c1"># time scale of age decay ie decays initial_value* exp(-age/decay_time_scale)</span>
+
+<span class="c1"># add a gridded particle statistic</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;particle_statistics&#39;</span><span class="p">,</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;my_heatmap&#39;</span><span class="p">,</span>
+                <span class="n">class_name</span><span class="o">=</span> <span class="s1">&#39;oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased&#39;</span><span class="p">,</span>
+                <span class="c1"># the below settings are optional</span>
+                <span class="n">update_interval</span> <span class="o">=</span> <span class="mi">900</span><span class="p">,</span> <span class="c1"># time interval in sec, between doing particle statists counts</span>
+                <span class="n">particle_property_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a_pollutant&#39;</span><span class="p">],</span> <span class="c1"># request a heat map for the decaying part. prop. added above</span>
+                <span class="n">status_min</span> <span class="o">=</span><span class="s1">&#39;moving&#39;</span><span class="p">,</span> <span class="c1"># only count the particles which are moving</span>
+                <span class="n">z_mi</span> <span class="o">=-</span><span class="mf">2.</span><span class="p">,</span>  <span class="c1"># only count particles at locations above z=-2m</span>
+                <span class="n">grid_size</span><span class="o">=</span> <span class="p">[</span><span class="mi">120</span><span class="p">,</span> <span class="mi">121</span><span class="p">]</span>  <span class="c1"># number of east and north cells in the heat map</span>
+                <span class="p">)</span>
+
+
+<span class="c1"># run oceantracker</span>
+<span class="n">case_info_file_name</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<pre class="literal-block">main: --------------------------------------------------------------------------
+main: OceanTracker- preliminary setup
+main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+main:   - found hydro-model files of type SCHISIM
+main:       -  sorted hyrdo-model files in time order,        0.008 sec
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputheat_map_example
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;heat_map_example_raw_user_params.json&quot;
+C000: --------------------------------------------------------------------------
+C000: Starting case number   0,  heat_map_example at 2023-06-21T13:22:27.378051
+C000: --------------------------------------------------------------------------
+C000:       -  built node to triangles map,   0.000 sec
+C000:       -  built triangle adjacency matrix,       0.000 sec
+C000:       -  found boundary triangles,      0.000 sec
+C000:       -  built domain and island outlines,      0.642 sec
+C000:       -  calculated triangle areas,     0.000 sec
+C000:   Finished grid setup
+C000:       -  set up release_groups,         0.000 sec
+C000:       -  built barycentric-transform matrix,    0.000 sec
+C000:       -  initial set up of core classes,        0.015 sec
+C000:       -  final set up of core classes,          0.001 sec
+C000:       -  created particle properties derived from fields,       0.003 sec
+C000: &gt;&gt;&gt; Warning: &quot;z_mi&quot; is not recognised, ignoring this param.
+C000:       in:  &gt;&gt;&gt; adding_class type &gt;&gt; &quot;particle_statistics&quot;  (name=  &quot;my_heatmap&quot; instance # 0),  making class type particle_statistics  &gt;&gt; &quot;z_mi&quot;
+C000:       Hint: Closest matches to &quot;z_mi&quot; = ['z_min', 'z_max', 'status_min'] ??
+C000: &gt;&gt;&gt; Note: No open boundaries requested, as run_params[&quot;open_boundary_type&quot;] = 0
+C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params[&quot;open_boundary_type&quot;] = 1
+C000: --------------------------------------------------------------------------
+C000:   - Starting heat_map_example,  duration: 0 days 23 hrs 0 min 0 sec
+C000:       -  Initialized Solver Class,      0.000 sec
+C000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000 -  0% step time =  2.1 ms
+C000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023
+C000:       -  read  24 time steps in  0.0 sec
+C000:   - opening tracks output to : heat_map_example_tracks_compact.nc
+C000: 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   5,000: Active:05000 M:04758 S:00000  B:00242 D:000 O:00 N:000 Buffer:5000 -  1% step time =  1.5 ms
+C000: 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   9,000: Active:09000 M:08556 S:00000  B:00444 D:000 O:00 N:000 Buffer:9000 -  2% step time =  1.7 ms
+C000: 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  13,000: Active:13000 M:12297 S:00114  B:00589 D:000 O:00 N:000 Buffer:13000 -  3% step time =  1.5 ms
+C000: 17% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  17,000: Active:17000 M:16207 S:00114  B:00679 D:000 O:00 N:000 Buffer:17000 -  3% step time =  1.6 ms
+C000: 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  21,000: Active:21000 M:20157 S:00114  B:00729 D:000 O:00 N:000 Buffer:21000 -  4% step time =  1.6 ms
+C000: 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  25,000: Active:25000 M:24116 S:00114  B:00770 D:000 O:00 N:000 Buffer:25000 -  5% step time =  1.7 ms
+C000: 30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  29,000: Active:29000 M:27734 S:00114  B:01152 D:000 O:00 N:000 Buffer:29000 -  6% step time =  1.7 ms
+C000: 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  33,000: Active:33000 M:31499 S:00114  B:01387 D:000 O:00 N:000 Buffer:33000 -  7% step time =  1.7 ms
+C000: 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  37,000: Active:37000 M:35500 S:00000  B:01500 D:000 O:00 N:000 Buffer:37000 -  7% step time =  1.8 ms
+C000: 43% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  41,000: Active:41000 M:39291 S:00000  B:01709 D:000 O:00 N:000 Buffer:41000 -  8% step time =  1.7 ms
+C000: 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  45,000: Active:45000 M:42915 S:00000  B:02085 D:000 O:00 N:000 Buffer:45000 -  9% step time =  1.8 ms
+C000: 52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  49,000: Active:49000 M:46928 S:00000  B:02072 D:000 O:00 N:000 Buffer:49000 - 10% step time =  1.8 ms
+C000: 57% step 0078:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:  53,000: Active:53000 M:50991 S:00000  B:02009 D:000 O:00 N:000 Buffer:53000 - 11% step time =  1.8 ms
+C000: 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  57,000: Active:57000 M:54519 S:00364  B:02117 D:000 O:00 N:000 Buffer:57000 - 11% step time =  1.8 ms
+C000: 65% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  61,000: Active:61000 M:58413 S:00686  B:01901 D:000 O:00 N:000 Buffer:61000 - 12% step time =  1.9 ms
+C000: 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  65,000: Active:65000 M:62453 S:00685  B:01862 D:000 O:00 N:000 Buffer:65000 - 13% step time =  1.8 ms
+C000: 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  69,000: Active:69000 M:66369 S:00685  B:01946 D:000 O:00 N:000 Buffer:69000 - 14% step time =  1.9 ms
+C000: 78% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  73,000: Active:73000 M:70159 S:00685  B:02156 D:000 O:00 N:000 Buffer:73000 - 15% step time =  1.9 ms
+C000: 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  77,000: Active:77000 M:73869 S:00685  B:02446 D:000 O:00 N:000 Buffer:77000 - 15% step time =  1.9 ms
+C000: 87% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  81,000: Active:81000 M:77458 S:00685  B:02857 D:000 O:00 N:000 Buffer:81000 - 16% step time =  2.0 ms
+C000: 91% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  85,000: Active:85000 M:81399 S:00345  B:03256 D:000 O:00 N:000 Buffer:85000 - 17% step time =  2.0 ms
+C000: 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  89,000: Active:89000 M:85260 S:00000  B:03740 D:000 O:00 N:000 Buffer:89000 - 18% step time =  2.0 ms
+C000: 99% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:  91,000: Active:91000 M:86962 S:00000  B:04038 D:000 O:00 N:000 Buffer:91000 - 18% step time = 131.1 ms
+C000: &gt;&gt;&gt; Note: No open boundaries requested, as run_params[&quot;open_boundary_type&quot;] = 0
+C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params[&quot;open_boundary_type&quot;] = 1
+C000: &gt;&gt;&gt; Warning: &quot;z_mi&quot; is not recognised, ignoring this param.
+C000:       in:  &gt;&gt;&gt; adding_class type &gt;&gt; &quot;particle_statistics&quot;  (name=  &quot;my_heatmap&quot; instance # 0),  making class type particle_statistics  &gt;&gt; &quot;z_mi&quot;
+C000:       Hint: Closest matches to &quot;z_mi&quot; = ['z_min', 'z_max', 'status_min'] ??
+C000:   -  Triangle walk summary: Of  31,140,072 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
+C000: --------------------------------------------------------------------------
+C000:   - Finished case number   0,  heat_map_example started: 2023-06-21 13:22:27.377052, ended: 2023-06-21 13:22:36.541081
+C000:       Elapsed time =0:00:09.164029
+C000: --------------------------------------------------------------------------
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;heat_map_example_runInfo.json&quot;
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputheat_map_example
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;heat_map_example_raw_user_params.json&quot;
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;heat_map_example_runInfo.json&quot;
+main: --------------------------------------------------------------------------
+main: OceanTracker summary:  elapsed time =0:00:09.274063
+main:       Cases -   0 errors,   3 warnings,   2 notes, check above
+main:       Helper-   0 errors,   0 warnings,   0 notes, check above
+main:       Main  -   0 errors,   0 warnings,   3 notes, check above
+main: --------------------------------------------------------------------------</pre>
+<section id="read-and-plot-heat-maps">
+<h3>Read and plot heat maps<a class="headerlink" href="#read-and-plot-heat-maps" title="Permalink to this heading">¶</a></h3>
+<p>The statistics output from the above run is in file
+output:raw-latex:<cite>heat</cite>_map_example:raw-latex:<cite>heat</cite>_map_example_stats_gridded_time_my_heatmap.nc</p>
+<p>This netcdf file can be read and organized as a python dictionary by
+directly with read_ncdf_output_files.read_stats_file.</p>
+<p>To plot use, load_output_files.load_stats_data, which also loads grid
+etc for plotting</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read stats files</span>
+<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files</span> <span class="kn">import</span> <span class="n">read_ncdf_output_files</span><span class="p">,</span> <span class="n">load_output_files</span>
+<span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting</span> <span class="kn">import</span> <span class="n">plot_statistics</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
+
+<span class="c1"># basic read of net cdf</span>
+<span class="n">raw_stats</span> <span class="o">=</span> <span class="n">read_ncdf_output_files</span><span class="o">.</span><span class="n">read_stats_file</span><span class="p">(</span><span class="s1">&#39;output/heat_map_example/heat_map_example_stats_gridded_time_my_heatmap.nc&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;raw_stats&#39;</span><span class="p">,</span> <span class="n">raw_stats</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="c1"># better,  load netcdf plus grid and other data useful in plotting</span>
+<span class="c1"># uses case_info name returned from run above</span>
+<span class="n">stats_data</span> <span class="o">=</span> <span class="n">load_output_files</span><span class="o">.</span><span class="n">load_stats_data</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">,</span><span class="s1">&#39;my_heatmap&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;stats&#39;</span><span class="p">,</span><span class="n">stats_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="c1"># use stats_data variable to plot heat map at last time step, by default plots var= &quot;count&quot;</span>
+<span class="n">ax</span><span class="o">=</span> <span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5478500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">]</span>
+<span class="n">anim</span><span class="o">=</span> <span class="n">plot_statistics</span><span class="o">.</span><span class="n">animate_heat_map</span><span class="p">(</span><span class="n">stats_data</span><span class="p">,</span> <span class="n">release_group</span><span class="o">=</span><span class="s1">&#39;my_release_point&#39;</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                    <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Particle count heatmap built on the fly, no tracks recorded&#39;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">HTML</span><span class="p">(</span><span class="n">anim</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span><span class="c1"># this is slow to build!</span>
+
+<span class="c1"># animate the pollutant</span>
+<span class="n">anim</span><span class="o">=</span> <span class="n">plot_statistics</span><span class="o">.</span><span class="n">animate_heat_map</span><span class="p">(</span><span class="n">stats_data</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;a_pollutant&#39;</span><span class="p">,</span><span class="n">release_group</span><span class="o">=</span> <span class="s1">&#39;my_release_point&#39;</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                    <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Decaying particle property , a_pollutant built on the fly, no tracks recorded&#39;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">HTML</span><span class="p">(</span><span class="n">anim</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span><span class="c1"># this is slow to build!</span>
+
+
+<span class="c1"># static heat map</span>
+<span class="n">plot_statistics</span><span class="o">.</span><span class="n">plot_heat_map</span><span class="p">(</span><span class="n">stats_data</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;a_pollutant&#39;</span><span class="p">,</span><span class="n">release_group</span><span class="o">=</span> <span class="s1">&#39;my_release_point&#39;</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>  <span class="n">heading</span><span class="o">=</span><span class="s1">&#39;a_pollutant at last time step  depth built on the fly, no tracks recorded&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">raw_stats</span> <span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;total_num_particles_released&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID_my_release_point&#39;</span><span class="p">,</span> <span class="s1">&#39;dimensions&#39;</span><span class="p">,</span> <span class="s1">&#39;limits&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID&#39;</span><span class="p">,</span> <span class="s1">&#39;release_locations&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;number_released_each_release_group&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;grid_cell_area&#39;</span><span class="p">,</span> <span class="s1">&#39;number_of_release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;count_all_particles&#39;</span><span class="p">,</span> <span class="s1">&#39;is_polygon_release&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;num_released&#39;</span><span class="p">,</span> <span class="s1">&#39;release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;sum_a_pollutant&#39;</span><span class="p">,</span> <span class="s1">&#39;time_var&#39;</span><span class="p">,</span> <span class="s1">&#39;stats_type&#39;</span><span class="p">,</span> <span class="s1">&#39;a_pollutant&#39;</span><span class="p">])</span>
+<span class="n">stats</span> <span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;total_num_particles_released&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID_my_release_point&#39;</span><span class="p">,</span> <span class="s1">&#39;dimensions&#39;</span><span class="p">,</span> <span class="s1">&#39;limits&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID&#39;</span><span class="p">,</span> <span class="s1">&#39;release_locations&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;number_released_each_release_group&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;grid_cell_area&#39;</span><span class="p">,</span> <span class="s1">&#39;number_of_release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;count_all_particles&#39;</span><span class="p">,</span> <span class="s1">&#39;is_polygon_release&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;num_released&#39;</span><span class="p">,</span> <span class="s1">&#39;release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;sum_a_pollutant&#39;</span><span class="p">,</span> <span class="s1">&#39;time_var&#39;</span><span class="p">,</span> <span class="s1">&#39;stats_type&#39;</span><span class="p">,</span> <span class="s1">&#39;a_pollutant&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="s1">&#39;params&#39;</span><span class="p">,</span> <span class="s1">&#39;release_group_centered_grids&#39;</span><span class="p">,</span> <span class="s1">&#39;particle_status_flags&#39;</span><span class="p">,</span> <span class="s1">&#39;particle_release_groups&#39;</span><span class="p">,</span> <span class="s1">&#39;full_case_params&#39;</span><span class="p">,</span> <span class="s1">&#39;grid&#39;</span><span class="p">])</span>
+<span class="n">animate_heat_map</span><span class="o">&gt;</span> <span class="n">colour</span> <span class="n">axis</span> <span class="n">limits</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4028</span><span class="p">]</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4028</span><span class="p">]</span>
+</pre></div>
+</div>
+<img alt="info/how_to/G_onthefly_statistics_files%5CG_onthefly_statistics_4_1.png" src="info/how_to/G_onthefly_statistics_files%5CG_onthefly_statistics_4_1.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animate_heat_map</span><span class="o">&gt;</span> <span class="n">colour</span> <span class="n">axis</span> <span class="n">limits</span> <span class="p">[</span><span class="mf">1.4321606718741004e-07</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">]</span> <span class="p">[</span><span class="mf">1.4321606718741004e-07</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">]</span>
+</pre></div>
+</div>
+<img alt="info/how_to/G_onthefly_statistics_files%5CG_onthefly_statistics_4_3.png" src="info/how_to/G_onthefly_statistics_files%5CG_onthefly_statistics_4_3.png" />
+<img alt="info/how_to/G_onthefly_statistics_files%5CG_onthefly_statistics_4_4.png" src="info/how_to/G_onthefly_statistics_files%5CG_onthefly_statistics_4_4.png" />
+</section>
+</section>
+<section id="polygon-example">
+<h2>Polygon example<a class="headerlink" href="#polygon-example" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># add polygon stats example with plotting</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Polygon Statistics example.py run using dictionary of parameters</span>
+<span class="c1">#------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
+
+<span class="n">params</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">param_template</span><span class="p">()</span>  <span class="c1"># start with template</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;output_file_base&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;polygon_connectivity_map_example&#39;</span>  <span class="c1"># name used as base for output files</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;root_output_dir&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;output&#39;</span>             <span class="c1">#  output is put in dir   &#39;root_output_dir&#39;\\&#39;output_file_base&#39;</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;time_step&#39;</span><span class="p">]</span><span class="o">=</span> <span class="mf">600.</span> <span class="c1">#  10 min time step as seconds</span>
+
+<span class="c1"># ot.set_class, sets parameters for a named class</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;reader&#39;</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;input_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;../demos/demo_hindcast&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
+                    <span class="s1">&#39;file_mask&#39;</span><span class="p">:</span>  <span class="s1">&#39;demoHindcastSchism*.nc&#39;</span><span class="p">}</span>  <span class="c1"># hindcast file mask</span>
+
+<span class="c1"># add one release locations</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;release_groups&#39;</span><span class="p">][</span><span class="s1">&#39;my_release_point&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span> <span class="c1"># user must provide a name for group first</span>
+                        <span class="s1">&#39;points&#39;</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="mi">1599000</span><span class="p">,</span> <span class="mi">5486200</span><span class="p">]],</span>       <span class="c1"># ust be 1 by N list pairs of release locations</span>
+                        <span class="s1">&#39;release_interval&#39;</span><span class="p">:</span> <span class="mi">900</span><span class="p">,</span>           <span class="c1"># seconds between releasing particles</span>
+                        <span class="s1">&#39;pulse_size&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>                   <span class="c1"># number of particles released each release_interval</span>
+            <span class="p">}</span>
+
+<span class="c1"># add a gridded particle statistic</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;particle_statistics&#39;</span><span class="p">][</span><span class="s1">&#39;my_polygon&#39;</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;class_name&#39;</span><span class="p">:</span> <span class="s1">&#39;oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;polygon_list&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;points&#39;</span><span class="p">:</span> <span class="p">[</span>   <span class="p">[</span><span class="mf">1597682.1237</span><span class="p">,</span> <span class="mf">5489972.7479</span><span class="p">],</span><span class="c1"># list of one or more polygons</span>
+                                                <span class="p">[</span><span class="mf">1598604.1667</span><span class="p">,</span> <span class="mf">5490275.5488</span><span class="p">],</span>
+                                                <span class="p">[</span><span class="mf">1598886.4247</span><span class="p">,</span> <span class="mf">5489464.0424</span><span class="p">],</span>
+                                                <span class="p">[</span><span class="mf">1597917.3387</span><span class="p">,</span> <span class="mi">5489000</span><span class="p">],</span>
+                                                <span class="p">[</span><span class="mi">1597300</span><span class="p">,</span> <span class="mi">5489000</span><span class="p">],</span> <span class="p">[</span><span class="mf">1597682.1237</span><span class="p">,</span> <span class="mf">5489972.7479</span><span class="p">]</span>
+                                                <span class="p">]</span>
+                                  <span class="p">}],</span>
+                <span class="c1"># the below settings are optional</span>
+                <span class="s1">&#39;update_interval&#39;</span><span class="p">:</span> <span class="mi">900</span><span class="p">,</span> <span class="c1"># time interval in sec, between doing particle statists counts</span>
+                <span class="s1">&#39;status_min&#39;</span><span class="p">:</span><span class="s1">&#39;moving&#39;</span><span class="p">,</span> <span class="c1"># only count the particles which are moving</span>
+                <span class="p">}</span>
+
+
+<span class="c1"># run oceantracker</span>
+<span class="n">poly_case_info_file_name</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+<pre class="literal-block">main: --------------------------------------------------------------------------
+main: OceanTracker- preliminary setup
+main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+main:   - found hydro-model files of type SCHISIM
+main:       -  sorted hyrdo-model files in time order,        0.500 sec
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputpolygon_connectivity_map_example
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;polygon_connectivity_map_example_raw_user_params.json&quot;
+C000: --------------------------------------------------------------------------
+C000: Starting case number   0,  polygon_connectivity_map_example at 2023-06-21T14:34:46.313090
+C000: --------------------------------------------------------------------------
+C000:       -  built node to triangles map,   0.767 sec
+C000:       -  built triangle adjacency matrix,       0.335 sec
+C000:       -  found boundary triangles,      0.000 sec
+C000:       -  built domain and island outlines,      1.582 sec
+C000:       -  calculated triangle areas,     0.000 sec
+C000:   Finished grid setup
+C000:       -  set up release_groups,         0.002 sec
+C000:       -  built barycentric-transform matrix,    0.455 sec
+C000:       -  initial set up of core classes,        0.473 sec
+C000:       -  final set up of core classes,          0.001 sec
+C000:       -  created particle properties derived from fields,       0.003 sec
+C000: &gt;&gt;&gt; Note: No open boundaries requested, as run_params[&quot;open_boundary_type&quot;] = 0
+C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params[&quot;open_boundary_type&quot;] = 1
+C000: --------------------------------------------------------------------------
+C000:   - Starting polygon_connectivity_map_example,  duration: 0 days 23 hrs 0 min 0 sec
+C000:       -  Initialized Solver Class,      0.000 sec
+C000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000 -  0% step time = 6268.8 ms
+C000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023
+C000:       -  read  24 time steps in  0.5 sec
+C000:   - opening tracks output to : polygon_connectivity_map_example_tracks_compact.nc
+C000: 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   5,000: Active:05000 M:04732 S:00000  B:00268 D:000 O:00 N:000 Buffer:5000 -  1% step time =  1.5 ms
+C000: 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   9,000: Active:09000 M:08498 S:00003  B:00499 D:000 O:00 N:000 Buffer:9000 -  2% step time =  1.6 ms
+C000: 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  13,000: Active:13000 M:12264 S:00143  B:00593 D:000 O:00 N:000 Buffer:13000 -  3% step time =  1.5 ms
+C000: 17% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  17,000: Active:17000 M:16127 S:00141  B:00732 D:000 O:00 N:000 Buffer:17000 -  3% step time =  1.7 ms
+C000: 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  21,000: Active:21000 M:20138 S:00141  B:00721 D:000 O:00 N:000 Buffer:21000 -  4% step time =  1.6 ms
+C000: 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  25,000: Active:25000 M:24015 S:00141  B:00844 D:000 O:00 N:000 Buffer:25000 -  5% step time =  1.6 ms
+C000: 30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  29,000: Active:29000 M:27661 S:00141  B:01198 D:000 O:00 N:000 Buffer:29000 -  6% step time =  1.6 ms
+C000: 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  33,000: Active:33000 M:31503 S:00141  B:01356 D:000 O:00 N:000 Buffer:33000 -  7% step time =  1.6 ms
+C000: 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  37,000: Active:37000 M:35500 S:00002  B:01498 D:000 O:00 N:000 Buffer:37000 -  7% step time =  1.6 ms
+C000: 43% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  41,000: Active:41000 M:39186 S:00000  B:01814 D:000 O:00 N:000 Buffer:41000 -  8% step time =  1.8 ms
+C000: 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  45,000: Active:45000 M:43027 S:00000  B:01973 D:000 O:00 N:000 Buffer:45000 -  9% step time =  1.7 ms
+C000: 52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  49,000: Active:49000 M:46899 S:00000  B:02101 D:000 O:00 N:000 Buffer:49000 - 10% step time =  1.8 ms
+C000: 57% step 0078:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:  53,000: Active:53000 M:50999 S:00000  B:02001 D:000 O:00 N:000 Buffer:53000 - 11% step time =  1.7 ms
+C000: 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  57,000: Active:57000 M:54594 S:00360  B:02046 D:000 O:00 N:000 Buffer:57000 - 11% step time =  1.7 ms
+C000: 65% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  61,000: Active:61000 M:58495 S:00687  B:01818 D:000 O:00 N:000 Buffer:61000 - 12% step time =  1.7 ms
+C000: 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  65,000: Active:65000 M:62478 S:00687  B:01835 D:000 O:00 N:000 Buffer:65000 - 13% step time =  1.8 ms
+C000: 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  69,000: Active:69000 M:66424 S:00687  B:01889 D:000 O:00 N:000 Buffer:69000 - 14% step time =  1.8 ms
+C000: 78% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  73,000: Active:73000 M:70251 S:00687  B:02062 D:000 O:00 N:000 Buffer:73000 - 15% step time =  1.8 ms
+C000: 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  77,000: Active:77000 M:73804 S:00687  B:02509 D:000 O:00 N:000 Buffer:77000 - 15% step time =  1.8 ms
+C000: 87% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  81,000: Active:81000 M:77439 S:00687  B:02874 D:000 O:00 N:000 Buffer:81000 - 16% step time =  1.9 ms
+C000: 91% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  85,000: Active:85000 M:81337 S:00332  B:03331 D:000 O:00 N:000 Buffer:85000 - 17% step time =  1.8 ms
+C000: 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  89,000: Active:89000 M:85168 S:00000  B:03832 D:000 O:00 N:000 Buffer:89000 - 18% step time =  1.9 ms
+C000: 99% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:  91,000: Active:91000 M:86947 S:00000  B:04053 D:000 O:00 N:000 Buffer:91000 - 18% step time = 124.5 ms
+C000: &gt;&gt;&gt; Note: No open boundaries requested, as run_params[&quot;open_boundary_type&quot;] = 0
+C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params[&quot;open_boundary_type&quot;] = 1
+C000:   -  Triangle walk summary: Of  31,134,824 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
+C000: --------------------------------------------------------------------------
+C000:   - Finished case number   0,  polygon_connectivity_map_example started: 2023-06-21 14:34:46.310090, ended: 2023-06-21 14:35:11.421555
+C000:       Elapsed time =0:00:25.111465
+C000: --------------------------------------------------------------------------
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;polygon_connectivity_map_example_runInfo.json&quot;
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputpolygon_connectivity_map_example
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;polygon_connectivity_map_example_raw_user_params.json&quot;
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;polygon_connectivity_map_example_runInfo.json&quot;
+main: --------------------------------------------------------------------------
+main: OceanTracker summary:  elapsed time =0:00:25.708679
+main:       Cases -   0 errors,   0 warnings,   2 notes, check above
+main:       Helper-   0 errors,   0 warnings,   0 notes, check above
+main:       Main  -   0 errors,   0 warnings,   3 notes, check above
+main: --------------------------------------------------------------------------</pre>
+</section>
+<section id="read-polygon-connectivity-statistics">
+<h2>Read polygon/connectivity statistics<a class="headerlink" href="#read-polygon-connectivity-statistics" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Read polygon stats and calculate connectivity matrix</span>
+<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files</span> <span class="kn">import</span> <span class="n">load_output_files</span>
+
+<span class="n">poly_stats_data</span> <span class="o">=</span> <span class="n">load_output_files</span><span class="o">.</span><span class="n">load_stats_data</span><span class="p">(</span><span class="n">poly_case_info_file_name</span><span class="p">,</span><span class="s1">&#39;my_polygon&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;stats&#39;</span><span class="p">,</span><span class="n">poly_stats_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;connectivity matrix shape&#39;</span><span class="p">,</span> <span class="n">poly_stats_data</span><span class="p">[</span><span class="s1">&#39;connectivity_matrix&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">poly_stats_data</span><span class="p">[</span><span class="s1">&#39;connectivity_matrix&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;total_num_particles_released&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID_my_release_point&#39;</span><span class="p">,</span> <span class="s1">&#39;dimensions&#39;</span><span class="p">,</span> <span class="s1">&#39;limits&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID&#39;</span><span class="p">,</span> <span class="s1">&#39;release_locations&#39;</span><span class="p">,</span> <span class="s1">&#39;is_polygon_release&#39;</span><span class="p">,</span> <span class="s1">&#39;count_all_particles&#39;</span><span class="p">,</span> <span class="s1">&#39;num_released&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;number_of_release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;number_released_each_release_group&#39;</span><span class="p">,</span> <span class="s1">&#39;time_var&#39;</span><span class="p">,</span> <span class="s1">&#39;stats_type&#39;</span><span class="p">,</span> <span class="s1">&#39;connectivity_matrix&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="s1">&#39;params&#39;</span><span class="p">,</span> <span class="s1">&#39;release_group_centered_grids&#39;</span><span class="p">,</span> <span class="s1">&#39;polygon_list&#39;</span><span class="p">,</span> <span class="s1">&#39;particle_status_flags&#39;</span><span class="p">,</span> <span class="s1">&#39;particle_release_groups&#39;</span><span class="p">,</span> <span class="s1">&#39;full_case_params&#39;</span><span class="p">,</span> <span class="s1">&#39;grid&#39;</span><span class="p">])</span>
+<span class="n">connectivity</span> <span class="n">matrix</span> <span class="n">shape</span> <span class="p">(</span><span class="mi">69</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="o">...</span><span class="p">,</span>
+
+        <span class="p">[[</span><span class="mf">0.849</span>     <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.571</span>     <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.308</span>     <span class="p">]]],</span>
+
+
+       <span class="p">[[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="o">...</span><span class="p">,</span>
+
+        <span class="p">[[</span><span class="mf">0.4245</span>    <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.2855</span>    <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.154</span>     <span class="p">]]],</span>
+
+
+       <span class="p">[[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="o">...</span><span class="p">,</span>
+
+        <span class="p">[[</span><span class="mf">0.29195323</span><span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.19635488</span><span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.10591472</span><span class="p">]]],</span>
+
+
+       <span class="o">...</span><span class="p">,</span>
+
+
+       <span class="p">[[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="o">...</span><span class="p">,</span>
+
+        <span class="p">[[</span><span class="mf">0.0097463</span> <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.00655493</span><span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.00353576</span><span class="p">]]],</span>
+
+
+       <span class="p">[[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="o">...</span><span class="p">,</span>
+
+        <span class="p">[[</span><span class="mf">0.00963317</span><span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.00647884</span><span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.00349472</span><span class="p">]]],</span>
+
+
+       <span class="p">[[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.</span>        <span class="p">]],</span>
+
+        <span class="o">...</span><span class="p">,</span>
+
+        <span class="p">[[</span><span class="mf">0.00953408</span><span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.0064122</span> <span class="p">]],</span>
+
+        <span class="p">[[</span><span class="mf">0.00345877</span><span class="p">]]]])</span>
+</pre></div>
+</div>
+</section>
 <section id="time-verses-age-statistics">
 <h2>Time verses Age statistics<a class="headerlink" href="#time-verses-age-statistics" title="Permalink to this heading">¶</a></h2>
 <p>Both gridded and polygon statistics come in two types, “time” and “age”.</p>
@@ -173,24 +592,6 @@ arriving at a given grid cell or polygon, from each release group.
 Eg. counting how many larvae are old enough to settle in a polygon or
 grid cell from each potential source location.</p></li>
 </ul>
-</section>
-<section id="gridded-example">
-<h2>Gridded example<a class="headerlink" href="#gridded-example" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># add gridded stats example with plotting</span>
-</pre></div>
-</div>
-</section>
-<section id="polygon-example">
-<h2>Polygon example<a class="headerlink" href="#polygon-example" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># add polygon stats example with plotting</span>
-</pre></div>
-</div>
-</section>
-<section id="residence-time-statistic">
-<h2>Residence time statistic<a class="headerlink" href="#residence-time-statistic" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># add example</span>
-</pre></div>
-</div>
 </section>
 </section>
 

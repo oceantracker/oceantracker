@@ -19,9 +19,9 @@ or command line.
     # build a more complex dictionary of parameters using code
     params={
         'output_file_base' :'param_test1',      # name used as base for output files
-        'root_output_dir':'output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
+        'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
         'time_step' : 120,  #  2 min time step as seconds  
-        'reader':{'input_dir': '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+        'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                             'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
                             },
         # add  release locations from two points, 
@@ -54,8 +54,8 @@ or command line.
     
     # write params to build on for later examples
     from oceantracker.util import json_util, yaml_util
-    json_util.write_JSON('.\\example_param_files\\param_test1.json', params) 
-    yaml_util.write_YAML('.\\example_param_files\\param_test1.yaml', params)
+    json_util.write_JSON('./example_param_files/param_test1.json', params) 
+    yaml_util.write_YAML('./example_param_files/param_test1.yaml', params)
 
 Build param. dict. from template
 --------------------------------
@@ -71,9 +71,9 @@ used, then set these using assignments. Reproducing the above in code…
     params = main.param_template()  # get a copy of the template
     
     params['output_file_base'] ='param_test1'
-    params['root_output_dir']= 'output'             #  output is put in dir   'root_output_dir'\\'output_file_base'
+    params['root_output_dir']= 'output'             #  output is put in dir   'root_output_dir'/'output_file_base'
     params['time_step']= 120  #  2 min time step as seconds  
-    params['reader']['input_dir']= '..\\demos\\demo_hindcast'  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+    params['reader']['input_dir']= '../demos/demo_hindcast'  # folder to search for hindcast files, sub-dirs will, by default, also be searched
     params['reader']['file_mask']= 'demoHindcastSchism*.nc'    # the file mask of the hindcast files
     
     params['release_groups']['my_release_point'] = {
@@ -83,7 +83,7 @@ used, then set these using assignments. Reproducing the above in code…
                                                 'pulse_size': 10,                   # number of particles released each release_interval
                                                 }
     params['release_groups']['my_polygon_release'] = {
-                                                'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease', # use a polygon release
+                                                'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
                                                 'points':[   [1597682.1237, 5489972.7479],
                                                             [1598604.1667, 5490275.5488],
                                                             [1598886.4247, 5489464.0424],
@@ -130,7 +130,6 @@ used, then set these using assignments. Reproducing the above in code…
         "time_step": 120,
         "use_random_seed": null,
         "user_note": null,
-        "write_grid": null,
         "write_output_files": null,
         "write_tracks": null,
         "z0": null,
@@ -297,7 +296,6 @@ items
         class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
         mean: -0.001
         variance: 0.0002
-    write_grid: null
     write_output_files: null
     write_tracks: null
     z0: null
@@ -353,77 +351,75 @@ Is line below!
     main: OceanTracker- preliminary setup
     main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
     main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.008 sec
+    main:       -  sorted hyrdo-model files in time order,	  0.497 sec
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
+    C000: --------------------------------------------------------------------------
+    C000: Starting case number   0,  param_test1 at 2023-06-20T14:51:34.305038
+    C000: --------------------------------------------------------------------------
+    C000:       -  built node to triangles map,	  0.762 sec
+    C000:       -  built triangle adjacency matrix,	  0.339 sec
+    C000:       -  found boundary triangles,	  0.000 sec
+    C000:       -  built domain and island outlines,	  1.580 sec
+    C000:       -  calculated triangle areas,	  0.000 sec
+    C000:   Finished grid setup
+    C000:       -  set up release_groups,	  1.043 sec
+    C000:       -  built barycentric-transform matrix,	  0.455 sec
+    C000:       -  initial set up of core classes,	  0.472 sec
+    C000:       -  final set up of core classes,	  0.001 sec
+    C000:       -  created particle properties derived from fields,	  0.003 sec
+    C000: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
+    C000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
+    C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
+    C000: --------------------------------------------------------------------------
+    C000:   - Starting param_test1,  duration: 0 days 23 hrs 0 min 0 sec
+    C000:       -  Initialized Solver Class,	  0.000 sec
+    C000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:      40: Active:00040 M:00040 S:00000  B:00000 D:000 O:00 N:000 Buffer:0040 -  0% step time = 6971.4 ms
+    C000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
+    C000:       -  read  24 time steps in  0.5 sec
+    C000:   - opening tracks output to : param_test1_tracks_compact.nc
+    C000: 04% step 0030:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:      60: Active:00060 M:00055 S:00000  B:00005 D:000 O:00 N:000 Buffer:0060 -  0% step time =  0.5 ms
+    C000: 09% step 0060:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:     100: Active:00100 M:00088 S:00000  B:00012 D:000 O:00 N:000 Buffer:0100 -  0% step time =  0.8 ms
+    C000: 13% step 0090:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:     120: Active:00120 M:00102 S:00013  B:00005 D:000 O:00 N:000 Buffer:0120 -  0% step time =  0.6 ms
+    C000: 17% step 0120:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:     160: Active:00160 M:00137 S:00014  B:00009 D:000 O:00 N:000 Buffer:0160 -  0% step time =  0.8 ms
+    C000: 22% step 0150:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:     180: Active:00180 M:00146 S:00014  B:00020 D:000 O:00 N:000 Buffer:0180 -  0% step time =  0.6 ms
+    C000: 26% step 0180:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:     220: Active:00220 M:00189 S:00014  B:00017 D:000 O:00 N:000 Buffer:0220 -  0% step time =  0.9 ms
+    C000: 30% step 0210:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:     240: Active:00240 M:00191 S:00014  B:00035 D:000 O:00 N:000 Buffer:0240 -  0% step time =  0.6 ms
+    C000: 35% step 0240:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:     280: Active:00280 M:00223 S:00013  B:00044 D:000 O:00 N:000 Buffer:0280 -  0% step time =  0.9 ms
+    C000: 39% step 0270:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:     300: Active:00300 M:00235 S:00000  B:00065 D:000 O:00 N:000 Buffer:0300 -  0% step time =  0.5 ms
+    C000: 43% step 0300:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:     340: Active:00340 M:00254 S:00000  B:00086 D:000 O:00 N:000 Buffer:0340 -  0% step time =  0.8 ms
+    C000: 48% step 0330:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:     360: Active:00360 M:00235 S:00000  B:00125 D:000 O:00 N:000 Buffer:0360 -  0% step time =  0.5 ms
+    C000: 52% step 0360:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:     400: Active:00400 M:00253 S:00000  B:00147 D:000 O:00 N:000 Buffer:0400 -  0% step time =  0.7 ms
+    C000: 57% step 0390:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:     420: Active:00420 M:00296 S:00003  B:00121 D:000 O:00 N:000 Buffer:0420 -  0% step time =  0.5 ms
+    C000: 61% step 0420:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:     460: Active:00460 M:00327 S:00010  B:00123 D:000 O:00 N:000 Buffer:0460 -  0% step time =  0.7 ms
+    C000: 65% step 0450:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:     480: Active:00480 M:00294 S:00049  B:00137 D:000 O:00 N:000 Buffer:0480 -  0% step time =  0.6 ms
+    C000: 70% step 0480:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:     520: Active:00520 M:00309 S:00057  B:00154 D:000 O:00 N:000 Buffer:0520 -  0% step time =  0.8 ms
+    C000: 74% step 0510:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:     540: Active:00540 M:00222 S:00067  B:00251 D:000 O:00 N:000 Buffer:0540 -  0% step time =  0.6 ms
+    C000: 78% step 0540:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:     580: Active:00580 M:00335 S:00067  B:00178 D:000 O:00 N:000 Buffer:0580 -  0% step time =  1.0 ms
+    C000: 83% step 0570:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:     600: Active:00600 M:00336 S:00064  B:00200 D:000 O:00 N:000 Buffer:0600 -  0% step time =  0.6 ms
+    C000: 87% step 0600:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:     640: Active:00640 M:00373 S:00056  B:00211 D:000 O:00 N:000 Buffer:0640 -  0% step time =  0.8 ms
+    C000: 91% step 0630:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:     660: Active:00660 M:00370 S:00011  B:00279 D:000 O:00 N:000 Buffer:0660 -  0% step time =  0.5 ms
+    C000: 96% step 0660:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:     700: Active:00700 M:00367 S:00003  B:00330 D:000 O:00 N:000 Buffer:0700 -  0% step time =  0.7 ms
+    C000: 100% step 0689:H0022b22-23 Day +00 22:58 2017-01-01 23:28:00: Rel.:     700: Active:00700 M:00366 S:00000  B:00334 D:000 O:00 N:000 Buffer:0700 -  0% step time =  4.2 ms
+    C000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
+    C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
+    C000: >>> Warning: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
+    C000:   -  Triangle walk summary: Of  988,880 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
+    C000: --------------------------------------------------------------------------
+    C000:   - Finished case number   0,  param_test1 started: 2023-06-20 14:51:34.305038, ended: 2023-06-20 14:51:51.440771
+    C000:       Elapsed time =0:00:17.135733
+    C000: --------------------------------------------------------------------------
+    main:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
+    main:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
+    main: --------------------------------------------------------------------------
+    main: OceanTracker summary:  elapsed time =0:00:17.696096
+    main:       Cases -   0 errors,   1 warnings,   2 notes, check above
+    main:       Helper-   0 errors,   0 warnings,   0 notes, check above
+    main:       Main  -   0 errors,   0 warnings,   3 notes, check above
+    main: --------------------------------------------------------------------------
     
-
-::
-
-
-    ---------------------------------------------------------------------------
-
-    PermissionError                           Traceback (most recent call last)
-
-    Cell In[13], line 4
-          1 # run oceantracker using param dict built in cells above
-          2 from oceantracker import main
-    ----> 4 case_info_file_name = main.run(params)
-    
-
-    File e:\h_local_drive\particletracking\oceantracker\oceantracker\main.py:49, in run(params)
-         47 def run(params):
-         48     ot= OceanTracker()
-    ---> 49     case_info_files = ot._run_single(params)
-         50     return case_info_files
-    
-
-    File e:\h_local_drive\particletracking\oceantracker\oceantracker\main.py:110, in OceanTracker._run_single(self, user_given_params)
-        107 # keep oceantracker_case_runner out of main namespace
-        108 from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
-    --> 110 working_params = self._main_run_set_up(user_given_params)
-        112 # make instance of case runer and run it with decomposed working params
-        113 ot = OceanTrackerCaseRunner()
-    
-
-    File e:\h_local_drive\particletracking\oceantracker\oceantracker\main.py:141, in OceanTracker._main_run_set_up(self, user_given_params, case_list_params, full_checks)
-        139 working_params = self._decompose_params(params, full_checks=full_checks)
-        140 working_params, reader_params = self._get_hindcast_file_info(working_params)
-    --> 141 working_params = self._setup_output_folders(params, working_params)
-        142 self._write_raw_user_params(working_params['output_files'],user_given_params, case_list=case_list_params)
-        144 o = working_params['output_files']
-    
-
-    File e:\h_local_drive\particletracking\oceantracker\oceantracker\main.py:412, in OceanTracker._setup_output_folders(self, user_given_params, working_params)
-        409     run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
-        411 # kill existing folder
-    --> 412 if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
-        414 try:
-        415     makedirs(run_output_dir)  # make  and clear out dir for output
-    
-
-    File c:\ProgramData\miniconda3\envs\developer-oceantracker\lib\shutil.py:750, in rmtree(path, ignore_errors, onerror)
-        748     # can't continue even if onerror hook returns
-        749     return
-    --> 750 return _rmtree_unsafe(path, onerror)
-    
-
-    File c:\ProgramData\miniconda3\envs\developer-oceantracker\lib\shutil.py:620, in _rmtree_unsafe(path, onerror)
-        618             os.unlink(fullname)
-        619         except OSError:
-    --> 620             onerror(os.unlink, fullname, sys.exc_info())
-        621 try:
-        622     os.rmdir(path)
-    
-
-    File c:\ProgramData\miniconda3\envs\developer-oceantracker\lib\shutil.py:618, in _rmtree_unsafe(path, onerror)
-        616 else:
-        617     try:
-    --> 618         os.unlink(fullname)
-        619     except OSError:
-        620         onerror(os.unlink, fullname, sys.exc_info())
-    
-
-    PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'e:\\OneDrive - Cawthron\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\output\\param_test1\\param_test1_caseLog_log.txt'
-
 
 .. code:: ipython3
 
@@ -49542,7 +49538,7 @@ Run by reading param. file
     from oceantracker.util import yaml_util
     
     # read a json or yaml file  of parameters
-    params = yaml_util.read_YAML('.\\example_param_files\\param_test1.yaml')
+    params = yaml_util.read_YAML('./example_param_files/param_test1.yaml')
     
     case_info_file_name = main.run(params) 
     
@@ -49629,7 +49625,7 @@ activated environment.
 eg. run “run_oceantracker.py” script in the oceantracker/oceantracker
 directory with command
 
-``python  ..\\oceantracker\\run_oceantracker.py .\\example_param_files\\param_test1.json``
+``python  ../oceantracker/run_oceantracker.py ./example_param_files/param_test1.json``
 
 Options when running at command line
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49645,7 +49641,7 @@ the full arguments are below
 
 .. code:: ipython3
 
-    !python ..\\oceantracker\\run_oceantracker.py -h
+    !python ../oceantracker/run_oceantracker.py -h
 
 
 .. parsed-literal::
