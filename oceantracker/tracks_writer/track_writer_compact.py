@@ -95,7 +95,7 @@ class CompactTracksWriter(_BaseWriter):
         self.nc.file_handle.variables[name][self.time_steps_written_to_current_file, ...] = d.data[:]
 
     def write_non_time_varying_particle_prop(self, prop_name, data, released):
-        # this write prop like release ID as particles are release, so it works with both rectangular and compact writers
+        # this writes prop like release ID as particles are release, so it works with both rectangular and compact writers
         si = self.shared_info
         IDs= si.classes['particle_properties']['ID'].get_values(released)
         d= data[released, ...]

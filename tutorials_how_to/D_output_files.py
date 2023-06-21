@@ -5,7 +5,7 @@
 # 
 # [This note-book is in oceantracker/tutorials_how_to/]
 # 
-# After running OceanTacker, output files are in the files are the folder given by parameters .\\"root_output_dir"\\"output_file_base"
+# After running OceanTacker, output files are in the files are the folder given by parameters ./"root_output_dir"/"output_file_base"
 # 
 # The main files are:
 # 
@@ -51,7 +51,7 @@
 
 # show a list of output files after running  minimal_example
 import glob
-for f in glob.glob('.\\output\\minimal_example\\*'):
+for f in glob.glob('output/minimal_example/*'):
     print(f) 
 
 

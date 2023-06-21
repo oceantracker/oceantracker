@@ -59,7 +59,7 @@
 # 
 # 
 
-# In[1]:
+# In[3]:
 
 
 # build parameters using helper class
@@ -69,7 +69,7 @@ ot = OceanTracker() # make an instance of the helper class
 
 # one or more settings can be set by calls to os.settings
 ot.settings(output_file_base='param_test1',# name used as base for output files
-            root_output_dir='output' #  output is put in dir   'root_output_dir'\\'output_file_base'
+            root_output_dir='output' #  output is put in dir   'root_output_dir'/'output_file_base'
             )
 # ot.settings can be used more than once to add more settings
 ot.settings(time_step =120) #  2 min model time step as seconds  
@@ -78,7 +78,7 @@ ot.settings(time_step =120) #  2 min model time step as seconds
 # no class_name setting is required 
 # as will detect that it needs a a schism reader class
 ot.add_class('reader', #  class_role is reader
-            input_dir= '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+            input_dir= '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
             file_mask = 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
             )
 
@@ -113,9 +113,8 @@ ot.add_class('release_groups', #  class_role is release_group
             pulse_size = 20,                   # number of particles released each release_interval
             )    
 
-# alter default re-suspension class's default settings                                 
-ot.add_class('resuspension', #  class_role is resuspension
-             critical_friction_velocity = .005) # only re-suspend particles if friction vel. exceeds this value
+# alter default re-suspension class's default settings
+ot.add_class('resuspension', critical_friction_velocity = .005) # only re-suspend particles if friction vel. exceeds this value
 
 # add a class to modify the particle velocity           
 # velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model's 

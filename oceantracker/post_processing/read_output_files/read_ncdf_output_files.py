@@ -5,18 +5,22 @@ from numba import njit
 
 from oceantracker.util import json_util
 
-def read_particle_tracks_file(file_name, var_list=[], release_group= None, fraction_to_read=None):
+def read_particle_tracks_file(file_name, var_list=None, release_group= None, fraction_to_read=None):
     # release group is 1 based
     nc = NetCDFhandler(file_name, mode='r')
-    var_list = ['x', 'time','status', 'IDrelease_group', 'IDpulse', 'x0','dry_cell_index','num_part_released_so_far'] + var_list
-    # trim list to variables in the file
-    working_var_list= []
-    for var in var_list:
-        if var not in nc.all_var_names():
-            print('Warning: read_particle_tracks_file, particle property variable not in track file ' + var)
-        elif var not in working_var_list:
-            working_var_list.append(var)
 
+    if var_list is  None:
+        working_var_list = nc.all_var_names()
+    else:
+        # get list plus min data set
+        var_list = list(set(['x', 'time', 'status', 'IDrelease_group', 'IDpulse', 'x0', 'dry_cell_index', 'num_part_released_so_far'] + var_list))
+        # trim list to variables in the file
+        working_var_list= []
+        for var in var_list:
+            if var not in nc.all_var_names():
+                print('Warning: read_particle_tracks_file, particle property variable not in track file ' + var)
+            elif var not in working_var_list:
+                working_var_list.append(var)
 
     if nc.is_dim( 'time_particle_dim'):
         d=  _read_compact_tracks(nc,working_var_list,release_group)
@@ -66,9 +70,14 @@ def _read_rectangular_tracks(nc,var_list, release_group):
 
 def _read_compact_tracks(nc, var_list, release_groupID):
     # read compact file with stream of values  with given in timestep and particle ID in time_particle dimension
-    num_released = nc.global_attr('total_num_particles_released')
 
-    d = {'dimensions': {},'total_num_particles_released': num_released}
+
+    d = nc.global_attrs()# read all  global attibutes
+    d['dimensions'] =  nc.dims()
+
+    num_released = d['total_num_particles_released']
+
+
     particle_IDs = nc.read_a_variable('particle_ID') # this is time_particle particleID to allow unpacking
 
     time_steps_written= nc.global_attr('time_steps_written')
@@ -153,48 +162,43 @@ def _filIinDeadParticles(data, last_recordedID, missing_status):
         for nrow in range(n_last_write+1,data.shape[0]):
             data[nrow, n, ...] =  data[n_last_write, n, ...]
 
-def read_stats_file(file_name, var_list=[]):
+def read_stats_file(file_name):
     # read stats files
 
-    var_list = ['count'] + var_list  # make sure count is first, do to means
     nc = NetCDFhandler(file_name, mode='r')
-    num_released = nc.global_attr('total_num_particles_released')
-    d = {'total_num_particles_released': num_released,'limits' : {}}
-
+    d = nc.global_attrs()  # read all  global attibutes
+    d['dimensions'] = nc.dims()
+    d['limits']=  {}
     d.update(_get_release_group_map_and_points(nc))
 
-    if nc.is_var('time') :
-        var_list =  var_list +['time']
+    data = nc.read_variables()
+    d.update(data)
+
+    if 'time' in data:
         d['time_var'] = 'time'
     else:
-        var_list = var_list + ['age_bins']
         d['time_var'] = 'age_bins'
+
+    d.update(data)
 
     if nc.is_dim('polygon'):
         d['stats_type'] = 'polygon'
     else:
-        var_list = var_list + ['x', 'y']
         d['stats_type'] = 'grid'
 
     # read count first fot mean value calc
-    #todo why id count al particls not done here
-    d['count'] = nc.read_a_variable('count')
     d['limits']['count'] = {'min': np.nanmin(d['count']), 'max': np.nanmax(d['count'])}
 
-    var_list.remove('count')
-
-    for var in set(var_list):
-        if nc.is_var(var):
-            d[var]=  nc.read_a_variable(var)
-        elif nc.is_var('sum_'+ var) :
-            # check if summed version is in file and calc mean
-            d['sum_'+ var] = nc.read_a_variable('sum_'+ var)
+    # get mean values
+    new_data ={}
+    for var, vals in d.items():
+        if var.startswith('sum_'):
+            name = var.removeprefix('sum_')
             with np.errstate(divide='ignore', invalid='ignore'):
-                d[var] = d['sum_' + var]/d['count'] # calc mean
-                d['limits'][var] = {'min' : np.nanmin(d[var]), 'max': np.nanmax(d[var])}
+                new_data[name] = d[var]/d['count'] # calc mean
+                d['limits'][name] = {'min' : np.nanmin(d[var]), 'max': np.nanmax(d[var])}
 
-        else:
-            print('Warning reading stats file ' + file_name + ', cannot load variable' + var + ', is not in file ')
+    d.update(new_data)
     nc.close()
     return d
 
@@ -269,7 +273,7 @@ def _get_release_group_map_and_points(nc):
     # get a dict mapping release group index to names and the reverse
     m = {'release_groupID': {},'release_locations':{} }
     name_list=[]
-    for n, a  in enumerate(nc.all_global_attr()):
+    for n, a  in enumerate(nc.global_attr_names()):
         val = nc.global_attr(a)
         if a.startswith('release_groupID_'):
             name= a.split('release_groupID_')[-1]

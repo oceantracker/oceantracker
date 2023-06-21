@@ -28,7 +28,7 @@ def demo03_heatmaps(case_info_file_name, output_file=None):
     from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
 
-    stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'])
+    stats_data = load_stats_file(case_info_file_name)
     axis_lims = [1591000, 1601500, 5478500, 5491000]
     animate_heat_map(stats_data,'myP1', axis_lims=axis_lims,
                                     heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
@@ -44,7 +44,7 @@ def demo04_ageBasedHeatmaps(case_info_file_name,output_file=None):
 
 
 
-    stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'], name='age_grid')
+    stats_data = load_stats_file(case_info_file_name,name='age_grid')
     axis_lims = [1591000, 1601500, 5478500, 5491000]
     animate_heat_map(stats_data,'myP1', axis_lims=axis_lims,
                                     heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
