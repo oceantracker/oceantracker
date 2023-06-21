@@ -55,8 +55,7 @@ if __name__ == '__main__':
         # do plot
     if not args.noplots:
         track_data = load_output_files.load_track_data(case_info_file, var_list=['tide', 'water_depth'], fraction_to_read=.05)
-        m = load_output_files.load_stats_data(case_info_file,name= 'mygid')
-
+        m = load_output_files.load_stats_data(case_info_file, name= 'mygid')
 
         ax=[365000,    400000,     4080000,    4120000]
 
