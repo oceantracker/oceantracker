@@ -28,9 +28,9 @@ from oceantracker import main
 # first build base case, params used for all cases
 base_case={
     'output_file_base' :'param_test1',      # name used as base for output files
-    'root_output_dir':'output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
+    'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
     'time_step' : 120,  #  2 min time step as seconds  
-    'reader':{'input_dir': '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+    'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                     'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
         },
         }
