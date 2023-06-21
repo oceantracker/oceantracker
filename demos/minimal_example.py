@@ -30,10 +30,10 @@ case_info_file_name, has_errors = ot.run()
 # below is optional code for plotting
 #-------------------------------------
 from oceantracker.post_processing.plotting.plot_tracks import animate_particles, plot_tracks
-from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars
+from oceantracker.post_processing.read_output_files.load_output_files import load_track_data
 
 # read particle tracks for plotting
-track_data = load_particle_track_vars(case_info_file_name)
+track_data = load_track_data(case_info_file_name)
 
 # plot tracks
 anim = plot_tracks(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],

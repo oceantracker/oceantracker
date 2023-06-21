@@ -581,10 +581,10 @@ if __name__ == '__main__':
         caseInfoFile = load_output_files.get_case_info_file_from_run_file(
             run_info_file)
 
-        track_data = load_output_files.load_particle_track_vars(
+        track_data = load_output_files.load_track_data(
             caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.9
         )
-        m = load_output_files.load_stats_file(caseInfoFile, nsequence=0)
+        m = load_output_files.load_stats_data(caseInfoFile, nsequence=0)
 
         plot_tracks.animate_particles(
             track_data, axis_lims=ax,
@@ -621,7 +621,7 @@ if __name__ == '__main__':
 
     if not args.dovertical:
 
-        track_data = load_output_files.load_particle_track_vars(
+        track_data = load_output_files.load_track_data(
             caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.9
         )
 

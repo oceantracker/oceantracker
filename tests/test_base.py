@@ -24,7 +24,7 @@ from oceantracker.post_processing.plotting import plot_utilities, plot_tracks
 def plot_sample(runCaseInfo, num_to_plot=10 ** 3):
     # plot devation from circle
 
-    data = load_output_files.load_particle_track_vars(runCaseInfo, ['x', 'water_depth', 'time', 'x0', 'ID'])
+    data = load_output_files.load_track_data(runCaseInfo, ['x', 'water_depth', 'time', 'x0', 'ID'])
     grid= load_output_files.load_grid(runCaseInfo)
 
 
@@ -174,7 +174,7 @@ def polygon_anotation( poly,data):
 
 
 def time_check_plot(runCaseInfo):
-    data = load_output_files.load_particle_track_vars(runCaseInfo, ['time', 'age', 'ID'])
+    data = load_output_files.load_track_data(runCaseInfo, ['time', 'age', 'ID'])
     nx = data['age'].shape[1]
 
     sel = np.sort(np.random.default_rng().choice(nx, size=30, replace=False))
@@ -325,7 +325,7 @@ if __name__ == '__main__':
                         params['base_case_params']['release_groups'][0].update({'pulse_size': 10 ** 1})
 
                         runInfoFile = run_test(params)
-                        trackdata= load_output_files.load_particle_track_vars(runInfoFile)
+                        trackdata= load_output_files.load_track_data(runInfoFile)
                         plot_tracks.plot_tracks(trackdata)
 
 

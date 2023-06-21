@@ -61,8 +61,8 @@ if __name__ == '__main__':
     if not args.noplots:
         caseInfoFile = load_output_files.get_case_info_file_from_run_file(run_info_file)
 
-        track_data = load_output_files.load_particle_track_vars(caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.05)
-        m = load_output_files.load_stats_file(caseInfoFile, nsequence=0)
+        track_data = load_output_files.load_track_data(caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.05)
+        m = load_output_files.load_stats_data(caseInfoFile, nsequence=0)
         caseInfo = load_output_files.read_case_info_file(caseInfoFile)
         param_base = path.join(caseInfo['output_files']['root_output_dir'], 'jilian_rawparams')
         json_util.write_JSON('../misc/test_param_files/jilianTest.json', params)

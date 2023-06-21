@@ -9,14 +9,14 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo07_inside_polygon_events
 
 # below only required for plotting
-from oceantracker.post_processing.read_output_files.load_output_files import load_particle_track_vars, get_case_info_file_from_run_file, read_case_info_file
+from oceantracker.post_processing.read_output_files.load_output_files import load_track_data, get_case_info_file_from_run_file, read_case_info_file
 from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 from matplotlib import colors
 
 output_file= "output\demo07_inside_polygon_events"
 
 caseInfo = read_case_info_file(case_info_file_name)
-track_data = load_particle_track_vars(case_info_file_name, var_list=['event_polygon'])
+track_data = load_track_data(case_info_file_name, var_list=['event_polygon'])
 
 cmap = colors.ListedColormap(['b', 'm', 'y'])
 animate_particles(track_data, colour_using_data=track_data['event_polygon'],

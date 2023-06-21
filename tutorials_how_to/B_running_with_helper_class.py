@@ -59,7 +59,7 @@
 # 
 # 
 
-# In[3]:
+# In[1]:
 
 
 # build parameters using helper class
@@ -152,7 +152,7 @@ ot.add_class('velocity_modifiers',  #  class_role is velocity_modifiers
 # 
 # ## See all parameters
 
-# In[4]:
+# In[2]:
 
 
 # first see the parameters build using the helper class instance
@@ -170,7 +170,7 @@ print(json.dumps(ot.params, indent=4))
 
 # ## Start run using helper
 
-# In[2]:
+# In[3]:
 
 
 # now run oceantracker 
@@ -191,7 +191,7 @@ print('case file name=',case_info_file_name)
 # 
 # also see ... for more on plotting notebook
 
-# In[24]:
+# In[ ]:
 
 
 # plot animation of results

@@ -65,7 +65,7 @@ def _read_rectangular_tracks(nc,var_list, release_group):
             d[var] = nc.read_a_variable(var)
 
         d['dimensions'][var] = nc.all_var_dims(var)
-
+    d['date'] = d['time'].astype('datetime64[s]')
     return d
 
 def _read_compact_tracks(nc, var_list, release_groupID):
@@ -176,12 +176,13 @@ def read_stats_file(file_name):
 
     if 'time' in data:
         d['time_var'] = 'time'
+        d['date'] = d['time'].astype('datetime64[s]')
     else:
         d['time_var'] = 'age_bins'
 
     d.update(data)
 
-    if nc.is_dim('polygon'):
+    if nc.is_dim('polygon_dim'):
         d['stats_type'] = 'polygon'
     else:
         d['stats_type'] = 'grid'
@@ -197,6 +198,12 @@ def read_stats_file(file_name):
             with np.errstate(divide='ignore', invalid='ignore'):
                 new_data[name] = d[var]/d['count'] # calc mean
                 d['limits'][name] = {'min' : np.nanmin(d[var]), 'max': np.nanmax(d[var])}
+
+    # get
+    if d['stats_type'] == 'grid':
+        d['connectivity_matrix'] =d['connectivity_matrix'] = d['count'] / d['count_all_particles'][:, :, np.newaxis, np.newaxis]
+    else:
+        d['connectivity_matrix'] = d['count'] / d['count_all_particles'][:, :, np.newaxis]
 
     d.update(new_data)
     nc.close()

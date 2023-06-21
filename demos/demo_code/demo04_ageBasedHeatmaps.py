@@ -9,14 +9,14 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo04_ageBasedHeatmaps
 
 # below only required for plotting
-from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, get_case_info_file_from_run_file
+from oceantracker.post_processing.read_output_files.load_output_files import load_stats_data, get_case_info_file_from_run_file
 from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
 output_file= "output\demo04_ageBasedHeatmaps"
 
 
 
-stats_data = load_stats_file(case_info_file_name,name='age_grid')
+stats_data = load_stats_data(case_info_file_name,name='age_grid')
 axis_lims = [1591000, 1601500, 5478500, 5491000]
 animate_heat_map(stats_data,'myP1', axis_lims=axis_lims,
                                 heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',

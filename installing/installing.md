@@ -51,12 +51,10 @@ Note: In Windows may need to run conda prompt window as administrator to install
    
    Then install these packages
 
-        ``conda install -c conda-forge numba``
+      ``conda install -c anaconda numpy``
+      ``conda install -c conda-forge numba``
 
-        ``conda install -c conda-forge netcdf4``
-   
-        ``conda install -c anaconda numpy``
-   
+      ``conda install -c conda-forge netcdf4``
         
         ``conda install -c anaconda scipy``
 
@@ -68,15 +66,7 @@ Note: In Windows may need to run conda prompt window as administrator to install
 
         ``conda install -c conda-forge matplotlib``
 
-        ``conda install -c conda-forge python-dateutil``
-
-        ``conda install -c anaconda scipy``
-
-        ``conda install -c conda-forge geojson``
- 
-
-
-6. Make oceantracker package findable
+7. Make oceantracker package findable
    
    From root dir of oceantracker 
 

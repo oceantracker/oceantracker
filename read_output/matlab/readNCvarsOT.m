@@ -72,3 +72,7 @@ for  fn=  fieldnames(info.Dimensions)'
 end
 
 netcdf.close(ncid);
+
+if isfield(d,'time')
+    d.day= double(d.time)/24/3600. + datenum(1970,1,1);
+end

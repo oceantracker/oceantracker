@@ -70,7 +70,7 @@ grid= load_output_files.load_grid(case_info_file_name)
 
 #plot_utilities.display_grid(grid, ginput=6)
 
-track_data = load_output_files.load_particle_track_vars(case_info_file_name,fraction_to_read=.1)
+track_data = load_output_files.load_track_data(case_info_file_name,fraction_to_read=.1)
 
 animate_particles(track_data,  show_grid=True,axis_lims=None,
                   heading='FVCOM reader test',show_dry_cells=False,
@@ -80,7 +80,7 @@ animate_particles(track_data,  show_grid=True,axis_lims=None,
 plot_tracks(track_data)
 
 # heat maps from on the fly counts
-stats_data = load_output_files.load_stats_file(case_info_file_name)
+stats_data = load_output_files.load_stats_data(case_info_file_name)
 
 animate_heat_map(stats_data,  heading=output_file_base + ' particle count heat map',  vmax=100.,
                  movie_file=output_file_base + '_animation01.mp4',)

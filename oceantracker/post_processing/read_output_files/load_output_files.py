@@ -81,7 +81,7 @@ def read_case_info_file(case_info_file_name):
     case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
     return case_info
 
-def load_particle_track_vars(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1):
+def load_track_data(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1):
     # load one track file from squeuence of what may be split files
     # todo load split track files into  dictionary
 
@@ -131,7 +131,7 @@ def load_grid(case_info_file_name):
 
     return d
 
-def load_stats_file(case_info_file_name, name = None):
+def load_stats_data(case_info_file_name, name = None):
     # load gridded or polygon stas file using runcase_info, the output of  load_runcase_info()
 
     case_info = read_case_info_file(case_info_file_name)

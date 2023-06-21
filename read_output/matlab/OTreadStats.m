@@ -14,9 +14,8 @@ d = readNCvarsOT(filename,var_names_cell);
 for var = fieldnames(d.var_info)'
    v=var{1};
    if length(v) > 3 &&  strcmp(v(1:4),'sum_')
-     d.([v(5:end) '_mean' ]) = d.(v)./d.count;
+     d.([v(5:end) ]) = d.(v)./d.count;
    end
 end
-
-    
+d.connectivity = d.count./d.count_all_particles;
 

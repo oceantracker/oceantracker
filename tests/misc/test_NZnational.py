@@ -73,11 +73,11 @@ if __name__ == '__main__':
         ax=[1727860,     1823449,     5878821,     5957660] # Auck
 
         axBOP= [1856014.778854954,1978628.00674731, 5794851.51338963, 5889202.600050561]
-        track_data = load_output_files.load_particle_track_vars(caseInfoFile)
+        track_data = load_output_files.load_track_data(caseInfoFile)
         plot_tracks.animate_particles(track_data, axis_lims=ax, title='OceanNum NZ Schism test, fall velocity and critical friction  resuspension')
         plot_tracks.plot_path_in_vertical_section(track_data, title='OceanNum, fall velocity and critical friction  resuspension ')
 
-        stats_data = load_output_files.load_stats_file((caseInfoFile))
+        stats_data = load_output_files.load_stats_data((caseInfoFile))
         plot_statistics.animate_heat_map(stats_data, axis_lims=ax, title='OceanNum Schism, time based particle count heatmaps, built on the fly,  log scale', logscale=True)
 
         plot_statistics.plot_heat_map(stats_data, axis_lims=ax, var='water_depth', title='Water_depth, Time based Heat maps built on the fly, no tracks recorded')
