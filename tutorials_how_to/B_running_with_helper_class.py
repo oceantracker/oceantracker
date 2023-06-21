@@ -59,7 +59,7 @@
 # 
 # 
 
-# In[1]:
+# In[5]:
 
 
 # build parameters using helper class
@@ -152,7 +152,7 @@ ot.add_class('velocity_modifiers',  #  class_role is velocity_modifiers
 # 
 # ## See all parameters
 
-# In[2]:
+# In[6]:
 
 
 # first see the parameters build using the helper class instance
@@ -170,13 +170,13 @@ print(json.dumps(ot.params, indent=4))
 
 # ## Start run using helper
 
-# In[3]:
+# In[7]:
 
 
 # now run oceantracker 
 # as helper "ot" has set params above, simply run it
 
-case_info_file_name, has_errors = ot.run()
+case_info_file_name = ot.run()
 
 # output now in folder "root_output_dir"/"output_file_base"
 # in this example output is in directory  output/param_test1'
@@ -191,7 +191,7 @@ print('case file name=',case_info_file_name)
 # 
 # also see ... for more on plotting notebook
 
-# In[ ]:
+# In[8]:
 
 
 # plot animation of results
@@ -201,7 +201,7 @@ from oceantracker.post_processing.read_output_files import  load_output_files
 from IPython.display import HTML # show animation in note book
 
 # read particle track data into a dictionary using case_info_file_name
-tracks = load_output_files.load_particle_track_vars(case_info_file_name)
+tracks = load_output_files.load_track_data(case_info_file_name)
 
 ax= [1591000, 1601500, 5478500, 5491000]  # area to plot
 # animate particles

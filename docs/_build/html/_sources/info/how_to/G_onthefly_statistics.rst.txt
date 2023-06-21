@@ -113,7 +113,6 @@ add
                             release_interval= 900,           # seconds between releasing particles
                             pulse_size= 1000,                   # number of particles released each release_interval
                 )
-    
     # add a decaying particle property
     # add and Age decay particle property, with exponential decay based on age, with time scale 1 hour                             
     ot.add_class('particle_properties', # add a new property to particle_properties role
@@ -139,85 +138,26 @@ add
     case_info_file_name = ot.run()
 
 
-.. parsed-literal::
+::
 
-    main: --------------------------------------------------------------------------
-    main: OceanTracker- preliminary setup
-    main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
-    main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.008 sec
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\heat_map_example
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "heat_map_example_raw_user_params.json"
-    C000: --------------------------------------------------------------------------
-    C000: Starting case number   0,  heat_map_example at 2023-06-21T17:05:04.209221
-    C000: --------------------------------------------------------------------------
-    C000:       -  built node to triangles map,	  0.000 sec
-    C000:       -  built triangle adjacency matrix,	  0.000 sec
-    C000:       -  found boundary triangles,	  0.000 sec
-    C000:       -  built domain and island outlines,	  0.630 sec
-    C000:       -  calculated triangle areas,	  0.000 sec
-    C000:   Finished grid setup
-    C000:       -  set up release_groups,	  0.000 sec
-    C000:       -  built barycentric-transform matrix,	  0.000 sec
-    C000:       -  initial set up of core classes,	  0.021 sec
-    C000:       -  final set up of core classes,	  0.001 sec
-    C000:       -  created particle properties derived from fields,	  0.004 sec
-    C000: >>> Warning: "z_mi" is not recognised, ignoring this param.
-    C000:       in:  >>> adding_class type >> "particle_statistics"  (name=  "my_heatmap" instance # 0),  making class type particle_statistics  >> "z_mi"
-    C000:       Hint: Closest matches to "z_mi" = ['z_min', 'z_max', 'status_min'] ?? 
-    C000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
-    C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
-    C000: --------------------------------------------------------------------------
-    C000:   - Starting heat_map_example,  duration: 0 days 23 hrs 0 min 0 sec
-    C000:       -  Initialized Solver Class,	  0.000 sec
-    C000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000 -  0% step time = 299.6 ms
-    C000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
-    C000:       -  read  24 time steps in  0.0 sec
-    C000:   - opening tracks output to : heat_map_example_tracks_compact.nc
-    C000: 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   5,000: Active:05000 M:04740 S:00000  B:00260 D:000 O:00 N:000 Buffer:5000 -  1% step time =  1.5 ms
-    C000: 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   9,000: Active:09000 M:08528 S:00003  B:00469 D:000 O:00 N:000 Buffer:9000 -  2% step time =  1.5 ms
-    C000: 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  13,000: Active:13000 M:12281 S:00142  B:00577 D:000 O:00 N:000 Buffer:13000 -  3% step time =  1.6 ms
-    C000: 17% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  17,000: Active:17000 M:16196 S:00142  B:00662 D:000 O:00 N:000 Buffer:17000 -  3% step time =  1.5 ms
-    C000: 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  21,000: Active:21000 M:20141 S:00142  B:00717 D:000 O:00 N:000 Buffer:21000 -  4% step time =  1.6 ms
-    C000: 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  25,000: Active:25000 M:24054 S:00142  B:00804 D:000 O:00 N:000 Buffer:25000 -  5% step time =  1.7 ms
-    C000: 30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  29,000: Active:29000 M:27693 S:00142  B:01165 D:000 O:00 N:000 Buffer:29000 -  6% step time =  1.6 ms
-    C000: 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  33,000: Active:33000 M:31532 S:00142  B:01326 D:000 O:00 N:000 Buffer:33000 -  7% step time =  1.7 ms
-    C000: 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  37,000: Active:37000 M:35474 S:00003  B:01523 D:000 O:00 N:000 Buffer:37000 -  7% step time =  1.8 ms
-    C000: 43% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  41,000: Active:41000 M:39211 S:00000  B:01789 D:000 O:00 N:000 Buffer:41000 -  8% step time =  1.8 ms
-    C000: 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  45,000: Active:45000 M:42964 S:00000  B:02036 D:000 O:00 N:000 Buffer:45000 -  9% step time =  1.8 ms
-    C000: 52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  49,000: Active:49000 M:46891 S:00000  B:02109 D:000 O:00 N:000 Buffer:49000 - 10% step time =  1.8 ms
-    C000: 57% step 0078:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:  53,000: Active:53000 M:50853 S:00000  B:02147 D:000 O:00 N:000 Buffer:53000 - 11% step time =  1.8 ms
-    C000: 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  57,000: Active:57000 M:54491 S:00359  B:02150 D:000 O:00 N:000 Buffer:57000 - 11% step time =  1.8 ms
-    C000: 65% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  61,000: Active:61000 M:58363 S:00678  B:01959 D:000 O:00 N:000 Buffer:61000 - 12% step time =  1.8 ms
-    C000: 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  65,000: Active:65000 M:62520 S:00678  B:01802 D:000 O:00 N:000 Buffer:65000 - 13% step time =  1.9 ms
-    C000: 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  69,000: Active:69000 M:66407 S:00678  B:01915 D:000 O:00 N:000 Buffer:69000 - 14% step time =  1.9 ms
-    C000: 78% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  73,000: Active:73000 M:70242 S:00678  B:02080 D:000 O:00 N:000 Buffer:73000 - 15% step time =  1.9 ms
-    C000: 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  77,000: Active:77000 M:73916 S:00678  B:02406 D:000 O:00 N:000 Buffer:77000 - 15% step time =  1.9 ms
-    C000: 87% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  81,000: Active:81000 M:77515 S:00678  B:02807 D:000 O:00 N:000 Buffer:81000 - 16% step time =  1.9 ms
-    C000: 91% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  85,000: Active:85000 M:81299 S:00340  B:03361 D:000 O:00 N:000 Buffer:85000 - 17% step time =  1.9 ms
-    C000: 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  89,000: Active:89000 M:85100 S:00000  B:03900 D:000 O:00 N:000 Buffer:89000 - 18% step time =  1.9 ms
-    C000: 99% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:  91,000: Active:91000 M:86882 S:00000  B:04118 D:000 O:00 N:000 Buffer:91000 - 18% step time = 131.4 ms
-    C000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
-    C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
-    C000: >>> Warning: "z_mi" is not recognised, ignoring this param.
-    C000:       in:  >>> adding_class type >> "particle_statistics"  (name=  "my_heatmap" instance # 0),  making class type particle_statistics  >> "z_mi"
-    C000:       Hint: Closest matches to "z_mi" = ['z_min', 'z_max', 'status_min'] ?? 
-    C000:   -  Triangle walk summary: Of  31,133,288 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
-    C000: --------------------------------------------------------------------------
-    C000:   - Finished case number   0,  heat_map_example started: 2023-06-21 17:05:04.209221, ended: 2023-06-21 17:05:14.628164
-    C000:       Elapsed time =0:00:10.418943
-    C000: --------------------------------------------------------------------------
-    main:     >>> Note: run summary with case file names   "heat_map_example_runInfo.json"
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\heat_map_example
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "heat_map_example_raw_user_params.json"
-    main:     >>> Note: run summary with case file names   "heat_map_example_runInfo.json"
-    main: --------------------------------------------------------------------------
-    main: OceanTracker summary:  elapsed time =0:00:10.531973
-    main:       Cases -   0 errors,   3 warnings,   2 notes, check above
-    main:       Helper-   0 errors,   0 warnings,   0 notes, check above
-    main:       Main  -   0 errors,   0 warnings,   3 notes, check above
-    main: --------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+
+    AttributeError                            Traceback (most recent call last)
+
+    Cell In[1], line 46
+         33 ot.add_class('particle_statistics', 
+         34                 name = 'my_heatmap',
+         35                 class_name= 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+       (...)
+         41                 grid_size= [120, 121]  # number of east and north cells in the heat map
+         42                 )
+         45 # run oceantracker
+    ---> 46 case_info_file_name = ot.run()
     
+
+    AttributeError: 'OceanTracker' object has no attribute 'run'
+
 
 Read and plot heat maps
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -283,6 +223,10 @@ etc for plotting
 .. image:: G_onthefly_statistics_files%5CG_onthefly_statistics_4_3.png
 
 
+
+.. image:: G_onthefly_statistics_files%5CG_onthefly_statistics_4_4.png
+
+
 Polygon example
 ---------------
 
@@ -338,21 +282,21 @@ Polygon example
     main: OceanTracker- preliminary setup
     main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
     main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.497 sec
+    main:       -  sorted hyrdo-model files in time order,	  0.007 sec
     main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\polygon_connectivity_map_example
     main:     >>> Note: to help with debugging, parameters as given by user  are in "polygon_connectivity_map_example_raw_user_params.json"
     C000: --------------------------------------------------------------------------
-    C000: Starting case number   0,  polygon_connectivity_map_example at 2023-06-21T16:57:14.090697
+    C000: Starting case number   0,  polygon_connectivity_map_example at 2023-06-21T17:05:37.609665
     C000: --------------------------------------------------------------------------
-    C000:       -  built node to triangles map,	  0.771 sec
-    C000:       -  built triangle adjacency matrix,	  0.341 sec
+    C000:       -  built node to triangles map,	  0.000 sec
+    C000:       -  built triangle adjacency matrix,	  0.000 sec
     C000:       -  found boundary triangles,	  0.000 sec
-    C000:       -  built domain and island outlines,	  1.583 sec
+    C000:       -  built domain and island outlines,	  0.632 sec
     C000:       -  calculated triangle areas,	  0.000 sec
     C000:   Finished grid setup
-    C000:       -  set up release_groups,	  0.002 sec
-    C000:       -  built barycentric-transform matrix,	  0.456 sec
-    C000:       -  initial set up of core classes,	  0.472 sec
+    C000:       -  set up release_groups,	  0.000 sec
+    C000:       -  built barycentric-transform matrix,	  0.000 sec
+    C000:       -  initial set up of core classes,	  0.016 sec
     C000:       -  final set up of core classes,	  0.001 sec
     C000:       -  created particle properties derived from fields,	  0.003 sec
     C000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
@@ -360,46 +304,46 @@ Polygon example
     C000: --------------------------------------------------------------------------
     C000:   - Starting polygon_connectivity_map_example,  duration: 0 days 23 hrs 0 min 0 sec
     C000:       -  Initialized Solver Class,	  0.000 sec
-    C000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000 -  0% step time = 6152.3 ms
+    C000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000 -  0% step time =  2.2 ms
     C000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
-    C000:       -  read  24 time steps in  0.6 sec
+    C000:       -  read  24 time steps in  0.0 sec
     C000:   - opening tracks output to : polygon_connectivity_map_example_tracks_compact.nc
-    C000: 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   5,000: Active:05000 M:04756 S:00000  B:00244 D:000 O:00 N:000 Buffer:5000 -  1% step time =  1.5 ms
-    C000: 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   9,000: Active:09000 M:08498 S:00004  B:00498 D:000 O:00 N:000 Buffer:9000 -  2% step time =  1.5 ms
-    C000: 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  13,000: Active:13000 M:12257 S:00145  B:00598 D:000 O:00 N:000 Buffer:13000 -  3% step time =  1.7 ms
-    C000: 17% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  17,000: Active:17000 M:16143 S:00145  B:00712 D:000 O:00 N:000 Buffer:17000 -  3% step time =  1.5 ms
-    C000: 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  21,000: Active:21000 M:20120 S:00145  B:00735 D:000 O:00 N:000 Buffer:21000 -  4% step time =  1.7 ms
-    C000: 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  25,000: Active:25000 M:24034 S:00145  B:00821 D:000 O:00 N:000 Buffer:25000 -  5% step time =  1.6 ms
-    C000: 30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  29,000: Active:29000 M:27703 S:00145  B:01152 D:000 O:00 N:000 Buffer:29000 -  6% step time =  1.7 ms
-    C000: 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  33,000: Active:33000 M:31490 S:00145  B:01365 D:000 O:00 N:000 Buffer:33000 -  7% step time =  1.7 ms
-    C000: 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  37,000: Active:37000 M:35517 S:00003  B:01480 D:000 O:00 N:000 Buffer:37000 -  7% step time =  1.7 ms
-    C000: 43% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  41,000: Active:41000 M:39274 S:00000  B:01726 D:000 O:00 N:000 Buffer:41000 -  8% step time =  1.7 ms
-    C000: 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  45,000: Active:45000 M:42989 S:00000  B:02011 D:000 O:00 N:000 Buffer:45000 -  9% step time =  1.7 ms
-    C000: 52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  49,000: Active:49000 M:46957 S:00000  B:02043 D:000 O:00 N:000 Buffer:49000 - 10% step time =  1.7 ms
-    C000: 57% step 0078:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:  53,000: Active:53000 M:50973 S:00000  B:02027 D:000 O:00 N:000 Buffer:53000 - 11% step time =  1.8 ms
-    C000: 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  57,000: Active:57000 M:54577 S:00390  B:02033 D:000 O:00 N:000 Buffer:57000 - 11% step time =  1.8 ms
-    C000: 65% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  61,000: Active:61000 M:58243 S:00732  B:02025 D:000 O:00 N:000 Buffer:61000 - 12% step time =  1.8 ms
-    C000: 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  65,000: Active:65000 M:62385 S:00732  B:01883 D:000 O:00 N:000 Buffer:65000 - 13% step time =  1.8 ms
-    C000: 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  69,000: Active:69000 M:66360 S:00732  B:01908 D:000 O:00 N:000 Buffer:69000 - 14% step time =  1.8 ms
-    C000: 78% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  73,000: Active:73000 M:70151 S:00732  B:02117 D:000 O:00 N:000 Buffer:73000 - 15% step time =  1.9 ms
-    C000: 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  77,000: Active:77000 M:73699 S:00732  B:02569 D:000 O:00 N:000 Buffer:77000 - 15% step time =  1.8 ms
-    C000: 87% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  81,000: Active:81000 M:77497 S:00732  B:02771 D:000 O:00 N:000 Buffer:81000 - 16% step time =  1.8 ms
-    C000: 91% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  85,000: Active:85000 M:81260 S:00369  B:03371 D:000 O:00 N:000 Buffer:85000 - 17% step time =  1.9 ms
-    C000: 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  89,000: Active:89000 M:85063 S:00000  B:03937 D:000 O:00 N:000 Buffer:89000 - 18% step time =  1.9 ms
-    C000: 99% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:  91,000: Active:91000 M:86830 S:00000  B:04170 D:000 O:00 N:000 Buffer:91000 - 18% step time = 125.5 ms
+    C000: 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   5,000: Active:05000 M:04769 S:00000  B:00231 D:000 O:00 N:000 Buffer:5000 -  1% step time =  1.5 ms
+    C000: 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   9,000: Active:09000 M:08527 S:00001  B:00472 D:000 O:00 N:000 Buffer:9000 -  2% step time =  1.5 ms
+    C000: 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  13,000: Active:13000 M:12234 S:00137  B:00629 D:000 O:00 N:000 Buffer:13000 -  3% step time =  1.7 ms
+    C000: 17% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  17,000: Active:17000 M:16185 S:00137  B:00678 D:000 O:00 N:000 Buffer:17000 -  3% step time =  1.6 ms
+    C000: 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  21,000: Active:21000 M:20106 S:00137  B:00757 D:000 O:00 N:000 Buffer:21000 -  4% step time =  1.6 ms
+    C000: 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  25,000: Active:25000 M:24027 S:00137  B:00836 D:000 O:00 N:000 Buffer:25000 -  5% step time =  1.6 ms
+    C000: 30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  29,000: Active:29000 M:27698 S:00137  B:01165 D:000 O:00 N:000 Buffer:29000 -  6% step time =  1.7 ms
+    C000: 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  33,000: Active:33000 M:31466 S:00137  B:01397 D:000 O:00 N:000 Buffer:33000 -  7% step time =  1.7 ms
+    C000: 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  37,000: Active:37000 M:35538 S:00001  B:01461 D:000 O:00 N:000 Buffer:37000 -  7% step time =  1.8 ms
+    C000: 43% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  41,000: Active:41000 M:39256 S:00000  B:01744 D:000 O:00 N:000 Buffer:41000 -  8% step time =  1.8 ms
+    C000: 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  45,000: Active:45000 M:42987 S:00000  B:02013 D:000 O:00 N:000 Buffer:45000 -  9% step time =  1.8 ms
+    C000: 52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  49,000: Active:49000 M:46934 S:00000  B:02066 D:000 O:00 N:000 Buffer:49000 - 10% step time =  1.8 ms
+    C000: 57% step 0078:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:  53,000: Active:53000 M:50865 S:00000  B:02135 D:000 O:00 N:000 Buffer:53000 - 11% step time =  1.8 ms
+    C000: 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  57,000: Active:57000 M:54566 S:00389  B:02045 D:000 O:00 N:000 Buffer:57000 - 11% step time =  1.8 ms
+    C000: 65% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  61,000: Active:61000 M:58430 S:00708  B:01862 D:000 O:00 N:000 Buffer:61000 - 12% step time =  1.8 ms
+    C000: 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  65,000: Active:65000 M:62521 S:00706  B:01773 D:000 O:00 N:000 Buffer:65000 - 13% step time =  1.8 ms
+    C000: 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  69,000: Active:69000 M:66368 S:00706  B:01926 D:000 O:00 N:000 Buffer:69000 - 14% step time =  1.8 ms
+    C000: 78% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  73,000: Active:73000 M:70090 S:00706  B:02204 D:000 O:00 N:000 Buffer:73000 - 15% step time =  1.8 ms
+    C000: 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  77,000: Active:77000 M:73799 S:00706  B:02495 D:000 O:00 N:000 Buffer:77000 - 15% step time =  1.9 ms
+    C000: 87% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  81,000: Active:81000 M:77447 S:00706  B:02847 D:000 O:00 N:000 Buffer:81000 - 16% step time =  1.9 ms
+    C000: 91% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  85,000: Active:85000 M:81374 S:00368  B:03258 D:000 O:00 N:000 Buffer:85000 - 17% step time =  1.9 ms
+    C000: 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  89,000: Active:89000 M:85175 S:00000  B:03825 D:000 O:00 N:000 Buffer:89000 - 18% step time =  1.9 ms
+    C000: 99% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:  91,000: Active:91000 M:87051 S:00000  B:03949 D:000 O:00 N:000 Buffer:91000 - 18% step time = 126.2 ms
     C000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
     C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
-    C000:   -  Triangle walk summary: Of  31,121,160 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
+    C000:   -  Triangle walk summary: Of  31,132,960 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
     C000: --------------------------------------------------------------------------
-    C000:   - Finished case number   0,  polygon_connectivity_map_example started: 2023-06-21 16:57:14.088417, ended: 2023-06-21 16:57:39.285801
-    C000:       Elapsed time =0:00:25.197384
+    C000:   - Finished case number   0,  polygon_connectivity_map_example started: 2023-06-21 17:05:37.608665, ended: 2023-06-21 17:05:48.162064
+    C000:       Elapsed time =0:00:10.553399
     C000: --------------------------------------------------------------------------
     main:     >>> Note: run summary with case file names   "polygon_connectivity_map_example_runInfo.json"
     main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\polygon_connectivity_map_example
     main:     >>> Note: to help with debugging, parameters as given by user  are in "polygon_connectivity_map_example_raw_user_params.json"
     main:     >>> Note: run summary with case file names   "polygon_connectivity_map_example_runInfo.json"
     main: --------------------------------------------------------------------------
-    main: OceanTracker summary:  elapsed time =0:00:25.807328
+    main: OceanTracker summary:  elapsed time =0:00:10.665271
     main:       Cases -   0 errors,   0 warnings,   2 notes, check above
     main:       Helper-   0 errors,   0 warnings,   0 notes, check above
     main:       Main  -   0 errors,   0 warnings,   3 notes, check above
@@ -427,33 +371,18 @@ Read polygon/connectivity statistics
 .. parsed-literal::
 
     stats dict_keys(['total_num_particles_released', 'release_groupID_my_release_point', 'dimensions', 'limits', 'release_groupID', 'release_locations', 'count_all_particles', 'num_released', 'release_points', 'number_of_release_points', 'count', 'is_polygon_release', 'number_released_each_release_group', 'time', 'time_var', 'date', 'stats_type', 'connectivity_matrix', 'info', 'params', 'release_group_centered_grids', 'polygon_list', 'particle_status_flags', 'particle_release_groups', 'full_case_params', 'grid'])
-    ['2017-01-01T00:30:00' '2017-01-01T00:50:00' '2017-01-01T01:10:00'
-     '2017-01-01T01:30:00' '2017-01-01T01:50:00' '2017-01-01T02:10:00'
-     '2017-01-01T02:30:00' '2017-01-01T02:50:00' '2017-01-01T03:10:00'
-     '2017-01-01T03:30:00' '2017-01-01T03:50:00' '2017-01-01T04:10:00'
-     '2017-01-01T04:30:00' '2017-01-01T04:50:00' '2017-01-01T05:10:00'
-     '2017-01-01T05:30:00' '2017-01-01T05:50:00' '2017-01-01T06:10:00'
-     '2017-01-01T06:30:00' '2017-01-01T06:50:00' '2017-01-01T07:10:00'
-     '2017-01-01T07:30:00' '2017-01-01T07:50:00' '2017-01-01T08:10:00'
-     '2017-01-01T08:30:00' '2017-01-01T08:50:00' '2017-01-01T09:10:00'
-     '2017-01-01T09:30:00' '2017-01-01T09:50:00' '2017-01-01T10:10:00'
-     '2017-01-01T10:30:00' '2017-01-01T10:50:00' '2017-01-01T11:10:00'
-     '2017-01-01T11:30:00' '2017-01-01T11:50:00' '2017-01-01T12:10:00'
-     '2017-01-01T12:30:00' '2017-01-01T12:50:00' '2017-01-01T13:10:00'
-     '2017-01-01T13:30:00' '2017-01-01T13:50:00' '2017-01-01T14:10:00'
-     '2017-01-01T14:30:00' '2017-01-01T14:50:00' '2017-01-01T15:10:00'
-     '2017-01-01T15:30:00' '2017-01-01T15:50:00' '2017-01-01T16:10:00'
-     '2017-01-01T16:30:00' '2017-01-01T16:50:00' '2017-01-01T17:10:00'
-     '2017-01-01T17:30:00' '2017-01-01T17:50:00' '2017-01-01T18:10:00'
-     '2017-01-01T18:30:00' '2017-01-01T18:50:00' '2017-01-01T19:10:00'
-     '2017-01-01T19:30:00' '2017-01-01T19:50:00' '2017-01-01T20:10:00'
-     '2017-01-01T20:30:00' '2017-01-01T20:50:00' '2017-01-01T21:10:00'
-     '2017-01-01T21:30:00' '2017-01-01T21:50:00' '2017-01-01T22:10:00'
-     '2017-01-01T22:30:00' '2017-01-01T22:50:00' '2017-01-01T23:10:00']
     
 
 
-.. image:: G_onthefly_statistics_files%5CG_onthefly_statistics_8_1.png
+
+.. parsed-literal::
+
+    Text(0.5, 1.0, 'Connectivity time series between release point and polygon')
+
+
+
+
+.. image:: G_onthefly_statistics_files%5CG_onthefly_statistics_8_2.png
 
 
 Time verses Age statistics

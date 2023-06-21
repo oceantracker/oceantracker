@@ -161,7 +161,73 @@ output/minimal_exampleminimal_example_tracks_compact.nc
 output/minimal_exampleusers_params_minimal_example.json</pre>
 <section id="reading-particle-tracks">
 <h2>Reading particle tracks<a class="headerlink" href="#reading-particle-tracks" title="Permalink to this heading">¶</a></h2>
+<p>The below shows how to read the netcdf particle track output file into a
+python dictionary. The track file has a record of each of the particle
+properties, plus other useful information. The netcdf tracks file has a
+compact format, the below code reads this file into rectangular numpy [
+time, particle] arrays. Key variables are :</p>
+<ul>
+<li><p>tracks[‘x’]- the particle locations as a rectangular array of
+position vectors. With dimensions [ time, particle, vector
+component]. So that the 2D location is</p>
+<p><code class="docutils literal notranslate"><span class="pre">x,</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">tracks['x'][:,:,0],</span> <span class="pre">tracks['x'][:,:,1]</span></code></p>
+</li>
+</ul>
+<p>and for a 3D model the vertical position is z= tracks[‘x’][:,:,2]</p>
+<ul class="simple">
+<li><p>tracks[‘time’] - array of time in seconds since 1970-1-1</p></li>
+<li><p>tracks[‘date’] - array of dates as numpy datetime64[s]</p></li>
+<li><p>tracks[‘status’] - the numerical codes of particle status, eg moving,
+dead etc as [ time, particle] array. The values of these status codes
+are also in the dictionary, eg tracks[‘status_stranded_by_tide’] = 3.</p></li>
+<li><p>tracks[‘age’] - time series of each particles age, ie time since
+release in seconds.</p></li>
+<li><p>tracks[‘IDrelease_group’] and tracks[‘IDpulse’] - id’s of which
+release group particles where released from and which pulse within
+that group. These are based indices and arrays of size particle, the
+total number of particles released during the run.</p></li>
+</ul>
+<p>The index within the “particle” dimension, is the individual particleID,
+ordered from first to last release across the entire model run.</p>
+<p>Note: For very large track files reading may fail, eg where variables
+exceed the 2-4Gb numpy array limit in Windows. To avoid this rerun using
+the tracks_writer setting “time_steps_per_per_file” to split the track
+file into files with given number of time steps. Key variables in the
+dictionary are:</p>
+<p>The below also shows how read the hydrodynamic grid.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># example of reading tracks file</span>
+
+<span class="c1"># read netcdf into dictionary</span>
+<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files</span> <span class="kn">import</span> <span class="n">read_ncdf_output_files</span>
+
+<span class="n">tracks</span> <span class="o">=</span><span class="n">read_ncdf_output_files</span><span class="o">.</span><span class="n">read_particle_tracks_file</span><span class="p">(</span><span class="s1">&#39;output/minimal_example\minimal_example_tracks_compact.nc&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Track data&#39;</span><span class="p">,</span> <span class="n">tracks</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="c1"># read the hydro-dynamic grid file, useful in plotting</span>
+<span class="n">grid</span> <span class="o">=</span><span class="n">read_ncdf_output_files</span><span class="o">.</span><span class="n">read_grid_file</span><span class="p">(</span><span class="s1">&#39;output/minimal_example\minimal_example_grid.nc&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Grid data&#39;</span><span class="p">,</span><span class="n">grid</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Track</span> <span class="n">data</span> <span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;file_created&#39;</span><span class="p">,</span> <span class="s1">&#39;total_num_particles_released&#39;</span><span class="p">,</span> <span class="s1">&#39;time_steps_written&#39;</span><span class="p">,</span> <span class="s1">&#39;status_unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;status_bad_cord&#39;</span><span class="p">,</span> <span class="s1">&#39;status_cell_search_failed&#39;</span><span class="p">,</span> <span class="s1">&#39;status_notReleased&#39;</span><span class="p">,</span> <span class="s1">&#39;status_dead&#39;</span><span class="p">,</span> <span class="s1">&#39;status_outside_open_boundary&#39;</span><span class="p">,</span> <span class="s1">&#39;status_frozen&#39;</span><span class="p">,</span> <span class="s1">&#39;status_stranded_by_tide&#39;</span><span class="p">,</span> <span class="s1">&#39;status_on_bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;status_moving&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID_my_release_point&#39;</span><span class="p">,</span> <span class="s1">&#39;dimensions&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;tide&#39;</span><span class="p">,</span> <span class="s1">&#39;particles_written_per_time_step&#39;</span><span class="p">,</span> <span class="s1">&#39;IDpulse&#39;</span><span class="p">,</span> <span class="s1">&#39;friction_velocity&#39;</span><span class="p">,</span> <span class="s1">&#39;is_polygon_release&#39;</span><span class="p">,</span> <span class="s1">&#39;dry_cell_index&#39;</span><span class="p">,</span> <span class="s1">&#39;IDrelease_group&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;time_step_range&#39;</span><span class="p">,</span> <span class="s1">&#39;particle_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;time_released&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;user_release_groupID&#39;</span><span class="p">,</span> <span class="s1">&#39;num_part_released_so_far&#39;</span><span class="p">,</span> <span class="s1">&#39;x0&#39;</span><span class="p">,</span> <span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;x_last_good&#39;</span><span class="p">,</span> <span class="s1">&#39;number_of_release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;water_depth&#39;</span><span class="p">,</span> <span class="s1">&#39;release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID&#39;</span><span class="p">,</span> <span class="s1">&#39;release_locations&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">])</span>
+<span class="n">Grid</span> <span class="n">data</span> <span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;triangles&#39;</span><span class="p">,</span> <span class="s1">&#39;triangle_area&#39;</span><span class="p">,</span> <span class="s1">&#39;adjacency&#39;</span><span class="p">,</span> <span class="s1">&#39;node_type&#39;</span><span class="p">,</span> <span class="s1">&#39;is_boundary_triangle&#39;</span><span class="p">,</span> <span class="s1">&#39;water_depth&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="load-data-method">
+<h2>Load data method<a class="headerlink" href="#load-data-method" title="Permalink to this heading">¶</a></h2>
+<p>Load data method, reads the netcdf, grid, and other information needed
+to plot into a dictionary. This is the recommended method for reading
+track output. It uses the case_info file to locate all these files
+associated with the case with the run.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># load netcdf with grid and other useful info for plotting</span>
+<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files</span> <span class="kn">import</span> <span class="n">load_output_files</span>
+
+<span class="n">tracks_plot</span> <span class="o">=</span><span class="n">load_output_files</span><span class="o">.</span><span class="n">load_track_data</span><span class="p">(</span><span class="s1">&#39;output/minimal_example\minimal_example_caseInfo.json&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;tracks_plot data&#39;</span><span class="p">,</span> <span class="n">tracks_plot</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tracks_plot</span> <span class="n">data</span> <span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;file_created&#39;</span><span class="p">,</span> <span class="s1">&#39;total_num_particles_released&#39;</span><span class="p">,</span> <span class="s1">&#39;time_steps_written&#39;</span><span class="p">,</span> <span class="s1">&#39;status_unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;status_bad_cord&#39;</span><span class="p">,</span> <span class="s1">&#39;status_cell_search_failed&#39;</span><span class="p">,</span> <span class="s1">&#39;status_notReleased&#39;</span><span class="p">,</span> <span class="s1">&#39;status_dead&#39;</span><span class="p">,</span> <span class="s1">&#39;status_outside_open_boundary&#39;</span><span class="p">,</span> <span class="s1">&#39;status_frozen&#39;</span><span class="p">,</span> <span class="s1">&#39;status_stranded_by_tide&#39;</span><span class="p">,</span> <span class="s1">&#39;status_on_bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;status_moving&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID_my_release_point&#39;</span><span class="p">,</span> <span class="s1">&#39;dimensions&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;tide&#39;</span><span class="p">,</span> <span class="s1">&#39;particles_written_per_time_step&#39;</span><span class="p">,</span> <span class="s1">&#39;IDpulse&#39;</span><span class="p">,</span> <span class="s1">&#39;friction_velocity&#39;</span><span class="p">,</span> <span class="s1">&#39;is_polygon_release&#39;</span><span class="p">,</span> <span class="s1">&#39;dry_cell_index&#39;</span><span class="p">,</span> <span class="s1">&#39;IDrelease_group&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;time_step_range&#39;</span><span class="p">,</span> <span class="s1">&#39;particle_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;time_released&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;user_release_groupID&#39;</span><span class="p">,</span> <span class="s1">&#39;num_part_released_so_far&#39;</span><span class="p">,</span> <span class="s1">&#39;x0&#39;</span><span class="p">,</span> <span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;x_last_good&#39;</span><span class="p">,</span> <span class="s1">&#39;number_of_release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;water_depth&#39;</span><span class="p">,</span> <span class="s1">&#39;release_points&#39;</span><span class="p">,</span> <span class="s1">&#39;release_groupID&#39;</span><span class="p">,</span> <span class="s1">&#39;release_locations&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;grid&#39;</span><span class="p">,</span> <span class="s1">&#39;particle_status_flags&#39;</span><span class="p">,</span> <span class="s1">&#39;particle_release_groups&#39;</span><span class="p">,</span> <span class="s1">&#39;full_case_params&#39;</span><span class="p">,</span> <span class="s1">&#39;axis_lim&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>

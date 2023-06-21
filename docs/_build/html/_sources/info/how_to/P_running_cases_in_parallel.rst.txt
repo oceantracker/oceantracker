@@ -30,7 +30,7 @@ The below example runs a separate release group as its own parallel
 
 To run in parallel on windows requires run to be within a if **name** ==
 ‘**main**’ block. iPython note books ignores if **name** == ‘**main**’
-statements, thus the below will not run when within a notebook in
+statements, thus the below may not run when within a notebook in
 windows. Use in notebooks also frequently gives “file in use by another
 process” errors.
 
@@ -79,3 +79,27 @@ To avoid this run parallel case as code in file
         # run as parallel set of cases
         #    by default uses one less than the number of physical processors at one time, use setting "processors"
         main.run_parallel(base_case, case_list)
+
+
+.. parsed-literal::
+
+    main: --------------------------------------------------------------------------
+    main: OceanTracker- preliminary setup
+    main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+    main:   - found hydro-model files of type SCHISIM
+    main:       -  sorted hyrdo-model files in time order,	  0.007 sec
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
+    main:   -  oceantracker:multiProcessing: processors:4
+    main:   - parallel pool complete
+    main:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
+    main:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
+    main: --------------------------------------------------------------------------
+    main: OceanTracker summary:  elapsed time =0:00:16.945569
+    main:       Cases -   0 errors,   0 warnings,   8 notes, check above
+    main:       Helper-   0 errors,   0 warnings,   0 notes, check above
+    main:       Main  -   0 errors,   0 warnings,   3 notes, check above
+    main: --------------------------------------------------------------------------
+    

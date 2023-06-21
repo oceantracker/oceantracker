@@ -1,0 +1,35 @@
+base_case_params:
+  fields:
+  - class_name: oceantracker.fields.friction_velocity.FrictionVelocity
+  particle_statistics:
+  - class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
+    grid_center: &id001
+    - 439094.44415005075
+    - 5265627.962025132
+    - -10
+    grid_size:
+    - 320
+    - 321
+    grid_span:
+    - 250000
+    - 250000
+    update_interval: 72000
+  release_groups:
+  - points:
+    - *id001
+    pulse_size: 250
+    release_interval: 7200
+  run_params:
+    user_note: test of notes
+  trajectory_modifiers:
+  - class_name: oceantracker.resuspension.BasicResuspension
+    critical_friction_velocity: 0.0
+reader:
+  class_name: oceantracker.reader.FVCOM_reader.unstructured_FVCOM
+  file_mask: nos.lsofs.fields.n000*.nc
+  input_dir: F:\Hindcasts\colaborations\LakeSuperior\historical_sample
+  search_sub_dirs: true
+shared_params:
+  output_file_base: FVCOM_Lake_Superior_test
+  root_output_dir: output
+  time_step: 1200

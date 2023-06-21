@@ -14,7 +14,7 @@
 # 
 # 
 
-# In[1]:
+# In[2]:
 
 
 # build a more complex dictionary of parameters using code
@@ -34,7 +34,7 @@ params={
                                 'release_interval': 3600,           # seconds between releasing particles
                                 'pulse_size': 10,                   # number of particles released each release_interval
                                 },
-            'my_polygon_release': {'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease', # use a polygon release
+            'my_polygon_release': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
                                     'points':[   [1597682.1237, 5489972.7479],
                                                     [1598604.1667, 5490275.5488],
                                                     [1598886.4247, 5489464.0424],
@@ -65,7 +65,7 @@ yaml_util.write_YAML('./example_param_files/param_test1.yaml', params)
 # 
 # 
 
-# In[1]:
+# In[3]:
 
 
 from oceantracker import main
@@ -103,7 +103,7 @@ params['velocity_modifiers']['my_fall_velocity']= {   # here a fall velocity wit
                                                     }
 
 
-# In[3]:
+# In[4]:
 
 
 # show the full template as json
@@ -115,7 +115,7 @@ print( json.dumps(params, indent=4))
 # 
 #   yaml format has no brackets/braces and relies on tab indenting to nest items
 
-# In[4]:
+# In[5]:
 
 
 # show the full template in yaml format
@@ -149,7 +149,7 @@ print( yaml.dump(params))
 # 
 # Is line below!
 
-# In[2]:
+# In[6]:
 
 
 # run oceantracker using param dict built in cells above
@@ -159,7 +159,7 @@ case_info_file_name = main.run(params)
 # case_info file is the name of a json file useful in plotting results 
 
 
-# In[ ]:
+# In[7]:
 
 
 # plot animation of results
@@ -169,7 +169,7 @@ from oceantracker.post_processing.read_output_files import  load_output_files
 from IPython.display import HTML # show animation in note book
 
 # read particle track data into a dictionary using case_info_file_name
-tracks = load_output_files.load_particle_track_vars(case_info_file_name)
+tracks = load_output_files.load_track_data(case_info_file_name)
 
 ax= [1591000, 1601500, 5478500, 5491000]  # area to plot
 # animate particles
@@ -182,18 +182,6 @@ HTML(anim.to_html5_video())
 
 # ## Run by reading param. file
 # 
-
-# In[ ]:
-
-
-from oceantracker import main
-from oceantracker.util import yaml_util
-
-# read a json or yaml file  of parameters
-params = yaml_util.read_YAML('./example_param_files/param_test1.yaml')
-
-case_info_file_name = main.run(params) 
-
 
 # ## Run from command line 
 # 
@@ -216,7 +204,7 @@ case_info_file_name = main.run(params)
 # 
 # the full arguments are below
 
-# In[1]:
+# In[9]:
 
 
 get_ipython().system('python ../oceantracker/run_oceantracker.py -h')

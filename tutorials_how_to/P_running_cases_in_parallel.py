@@ -15,11 +15,11 @@
 # 
 # The below example runs a separate release group as its own parallel "case". 
 # 
-# To run in parallel on windows requires  run to be within a if __name__ == '__main__' block.  iPython note books ignores if __name__ == '__main__' statements, thus the below will not run when within a notebook in windows.  Use in notebooks also frequently gives "file in use by another process" errors.
+# To run in parallel on windows requires  run to be within a if __name__ == '__main__' block.  iPython note books ignores if __name__ == '__main__' statements, thus the below may not run when within a notebook in windows.  Use in notebooks also frequently gives "file in use by another process" errors.
 # 
 # To avoid  this run parallel case as code in file  "oceantracker/tutorials_how_to/P_running_cases_in_parallel.py".
 
-# In[1]:
+# In[2]:
 
 
 # oceantracker parallel demo, run different release groups as parallel processes

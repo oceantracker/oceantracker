@@ -92,26 +92,32 @@ class OceanTracker():
                         crumbs=f'class type "{class_role}"')
         pass
 
-    def run(self):
-        # helper method to rub single case of oceantracker
-        params = self.params
-        case_info_file = self._run_single(params)
-        return case_info_file
-
     #  other, non helper methods
     def _run_single(self, user_given_params):
         self.helper_msg_logger = self.msg_logger  # keep references to write message at end as runs has main message logger
 
         ml = self.msg_logger
-        # keep oceantracker_case_runner out of main namespace
-        from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
 
         working_params = self._main_run_set_up(user_given_params)
+        # try catch is needed in notebooks to ensure mesage loger file is close,
+        # which allows rerunning in notebook without  permission file errors
+        try:
+            # keep oceantracker_case_runner out of main namespace
+            from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
+            # make instance of case runer and run it with decomposed working params
+            ot = OceanTrackerCaseRunner()
+            case_info_file, case_msg = ot.run(working_params)
 
-        # make instance of case runer and run it with decomposed working params
-        ot = OceanTrackerCaseRunner()
-        case_info_file, case_msg = ot.run(working_params)
+        except Exception as e:
+            # ensure message loggers are closed
+            if hasattr(self,'msg_logger') and  self.msg_logger is not None:
+                self.msg_logger.close()
+            if hasattr(self, 'helper_msg_logger') and self.helper_msg_logger is not None:
+                self.helper_msg_logger.close()
+            print(str(e))
+            return None
 
+        # check is case ran
         if case_info_file is None:
             ml.msg('case_info_file is None, run may not have completed', fatal_error=True)
 

@@ -124,7 +124,7 @@ result in errors.</p>
 “case”.</p>
 <p>To run in parallel on windows requires run to be within a if <strong>name</strong> ==
 ‘<strong>main</strong>’ block. iPython note books ignores if <strong>name</strong> == ‘<strong>main</strong>’
-statements, thus the below will not run when within a notebook in
+statements, thus the below may not run when within a notebook in
 windows. Use in notebooks also frequently gives “file in use by another
 process” errors.</p>
 <p>To avoid this run parallel case as code in file
@@ -171,6 +171,25 @@ process” errors.</p>
     <span class="n">main</span><span class="o">.</span><span class="n">run_parallel</span><span class="p">(</span><span class="n">base_case</span><span class="p">,</span> <span class="n">case_list</span><span class="p">)</span>
 </pre></div>
 </div>
+<pre class="literal-block">main: --------------------------------------------------------------------------
+main: OceanTracker- preliminary setup
+main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+main:   - found hydro-model files of type SCHISIM
+main:       -  sorted hyrdo-model files in time order,        0.007 sec
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;param_test1_raw_user_params.json&quot;
+main:   -  oceantracker:multiProcessing: processors:4
+main:   - parallel pool complete
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;param_test1_raw_user_params.json&quot;
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
+main: --------------------------------------------------------------------------
+main: OceanTracker summary:  elapsed time =0:00:16.945569
+main:       Cases -   0 errors,   0 warnings,   8 notes, check above
+main:       Helper-   0 errors,   0 warnings,   0 notes, check above
+main:       Main  -   0 errors,   0 warnings,   3 notes, check above
+main: --------------------------------------------------------------------------</pre>
 </section>
 </section>
 

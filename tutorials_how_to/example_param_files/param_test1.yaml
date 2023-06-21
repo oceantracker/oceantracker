@@ -1,10 +1,10 @@
 output_file_base: param_test1
 reader:
   file_mask: demoHindcastSchism*.nc
-  input_dir: ..\demos\demo_hindcast
+  input_dir: ../demos/demo_hindcast
 release_groups:
   my_polygon_release:
-    class_name: oceantracker.particle_release_groups.polygon_release.PolygonRelease
+    class_name: oceantracker.release_groups.polygon_release.PolygonRelease
     points:
     - - 1597682.1237
       - 5489972.7479

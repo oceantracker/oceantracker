@@ -83,9 +83,91 @@ Below list the files after running the minimal example.
 Reading particle tracks
 -----------------------
 
+The below shows how to read the netcdf particle track output file into a
+python dictionary. The track file has a record of each of the particle
+properties, plus other useful information. The netcdf tracks file has a
+compact format, the below code reads this file into rectangular numpy [
+time, particle] arrays. Key variables are :
+
+-  tracks[‘x’]- the particle locations as a rectangular array of
+   position vectors. With dimensions [ time, particle, vector
+   component]. So that the 2D location is
+
+   ``x, y = tracks['x'][:,:,0], tracks['x'][:,:,1]``
+
+and for a 3D model the vertical position is z= tracks[‘x’][:,:,2]
+
+-  tracks[‘time’] - array of time in seconds since 1970-1-1
+
+-  tracks[‘date’] - array of dates as numpy datetime64[s]
+
+-  tracks[‘status’] - the numerical codes of particle status, eg moving,
+   dead etc as [ time, particle] array. The values of these status codes
+   are also in the dictionary, eg tracks[‘status_stranded_by_tide’] = 3.
+
+-  tracks[‘age’] - time series of each particles age, ie time since
+   release in seconds.
+
+-  tracks[‘IDrelease_group’] and tracks[‘IDpulse’] - id’s of which
+   release group particles where released from and which pulse within
+   that group. These are based indices and arrays of size particle, the
+   total number of particles released during the run.
+
+The index within the “particle” dimension, is the individual particleID,
+ordered from first to last release across the entire model run.
+
+Note: For very large track files reading may fail, eg where variables
+exceed the 2-4Gb numpy array limit in Windows. To avoid this rerun using
+the tracks_writer setting “time_steps_per_per_file” to split the track
+file into files with given number of time steps. Key variables in the
+dictionary are:
+
+The below also shows how read the hydrodynamic grid.
+
 .. code:: ipython3
 
     # example of reading tracks file
+    
+    # read netcdf into dictionary
+    from oceantracker.post_processing.read_output_files import read_ncdf_output_files
+    
+    tracks =read_ncdf_output_files.read_particle_tracks_file('output/minimal_example\minimal_example_tracks_compact.nc')
+    print('Track data', tracks.keys())
+    
+    # read the hydro-dynamic grid file, useful in plotting
+    grid =read_ncdf_output_files.read_grid_file('output/minimal_example\minimal_example_grid.nc')
+    print('Grid data',grid.keys())
+    
 
+
+.. parsed-literal::
+
+    Track data dict_keys(['file_created', 'total_num_particles_released', 'time_steps_written', 'status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_frozen', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'release_groupID_my_release_point', 'dimensions', 'status', 'tide', 'particles_written_per_time_step', 'IDpulse', 'friction_velocity', 'is_polygon_release', 'dry_cell_index', 'IDrelease_group', 'age', 'time_step_range', 'particle_ID', 'time_released', 'time', 'user_release_groupID', 'num_part_released_so_far', 'x0', 'ID', 'x', 'x_last_good', 'number_of_release_points', 'water_depth', 'release_points', 'release_groupID', 'release_locations', 'z'])
+    Grid data dict_keys(['x', 'triangles', 'triangle_area', 'adjacency', 'node_type', 'is_boundary_triangle', 'water_depth'])
+    
+
+Load data method
+----------------
+
+Load data method, reads the netcdf, grid, and other information needed
+to plot into a dictionary. This is the recommended method for reading
+track output. It uses the case_info file to locate all these files
+associated with the case with the run.
+
+.. code:: ipython3
+
+    # load netcdf with grid and other useful info for plotting
+    from oceantracker.post_processing.read_output_files import load_output_files
+    
+    tracks_plot =load_output_files.load_track_data('output/minimal_example\minimal_example_caseInfo.json')
+    
+    print('tracks_plot data', tracks_plot.keys())
+    
+
+
+.. parsed-literal::
+
+    tracks_plot data dict_keys(['file_created', 'total_num_particles_released', 'time_steps_written', 'status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_frozen', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'release_groupID_my_release_point', 'dimensions', 'status', 'tide', 'particles_written_per_time_step', 'IDpulse', 'friction_velocity', 'is_polygon_release', 'dry_cell_index', 'IDrelease_group', 'age', 'time_step_range', 'particle_ID', 'time_released', 'time', 'user_release_groupID', 'num_part_released_so_far', 'x0', 'ID', 'x', 'x_last_good', 'number_of_release_points', 'water_depth', 'release_points', 'release_groupID', 'release_locations', 'z', 'grid', 'particle_status_flags', 'particle_release_groups', 'full_case_params', 'axis_lim'])
+    
 
 

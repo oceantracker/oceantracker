@@ -80,7 +80,7 @@
 # * Plot the particle counts and pollutant as animated heatmap.
 # 
 
-# In[7]:
+# In[1]:
 
 
 # Gridded Statistics example.py using class helper method
@@ -106,7 +106,6 @@ ot.add_class('release_groups', name='my_release_point', # user must provide a na
                         release_interval= 900,           # seconds between releasing particles
                         pulse_size= 1000,                   # number of particles released each release_interval
             )
-
 # add a decaying particle property
 # add and Age decay particle property, with exponential decay based on age, with time scale 1 hour                             
 ot.add_class('particle_properties', # add a new property to particle_properties role
@@ -142,7 +141,7 @@ case_info_file_name = ot.run()
 # 
 # To plot use, load_output_files.load_stats_data, which also loads grid etc for plotting
 
-# In[8]:
+# In[ ]:
 
 
 # read stats files
