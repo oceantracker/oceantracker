@@ -1,5 +1,5 @@
 # build full parm ref from dict and classes defaults
-from os import path, mkdir
+from os import path, mkdir, listdir
 from glob import  glob
 import inspect
 import importlib
@@ -278,9 +278,9 @@ if __name__ == "__main__":
     import shutil
     from glob import  glob
 
-    chdir(r'..\\tutorials_how_to')
+    chdir(r'../tutorials_how_to')
     print('h')
-    dest = r'..\\docs\\info\\how_to'
+    dest = r'../docs/info/how_to'
     for f in glob('*.ipynb'):
         subprocess.run('jupyter nbconvert '+ f + '  --to rst')
         subprocess.run('jupyter nbconvert ' + f + '  --to script')
