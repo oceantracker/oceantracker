@@ -92,6 +92,10 @@ class OceanTracker():
                         crumbs=f'class type "{class_role}"')
         pass
 
+    def run(self):
+        case_info_file = self._run_single(self.params)
+        return case_info_file
+
     #  other, non helper methods
     def _run_single(self, user_given_params):
         self.helper_msg_logger = self.msg_logger  # keep references to write message at end as runs has main message logger

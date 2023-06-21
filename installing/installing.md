@@ -26,7 +26,9 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
 
 4. Either: Make conda  environment from given file
 
-This method is stongly recommended as it ensures version compatibilty. 
+This method is strongly recommended as it ensures version compatibility. This conda link is useful. 
+
+https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
 
 Note: In Windows may need to run conda prompt window as administrator to install packages.
 
@@ -52,19 +54,20 @@ Note: In Windows may need to run conda prompt window as administrator to install
    Then install these packages
 
       ``conda install -c anaconda numpy``
+
       ``conda install -c conda-forge numba``
 
       ``conda install -c conda-forge netcdf4``
         
-        ``conda install -c anaconda scipy``
+      ``conda install -c anaconda scipy``
 
-        ``conda install -c conda-forge pyproj``
+      ``conda install -c conda-forge pyproj``
 
-        ``conda install -c anaconda pyyaml``
+      ``conda install -c anaconda pyyaml``
 
-        ``conda install -c anaconda psutil``
+      ``conda install -c anaconda psutil``
 
-        ``conda install -c conda-forge matplotlib``
+       ``conda install -c conda-forge matplotlib``
 
 7. Make oceantracker package findable
    
