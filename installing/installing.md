@@ -38,7 +38,7 @@ Note: In Windows may need to run conda prompt window as administrator to install
     
    Activate new environment
 
-        ``conda activate oceantracker``
+      ``conda activate oceantracker``
 
     
 5. Or : Manually build Conda environment
@@ -67,7 +67,11 @@ Note: In Windows may need to run conda prompt window as administrator to install
 
       ``conda install -c anaconda psutil``
 
-       ``conda install -c conda-forge matplotlib``
+      ``conda install -c conda-forge matplotlib``
+
+    Activate new environment
+
+        ``conda activate oceantracker`
 
 7. Make oceantracker package findable
    
