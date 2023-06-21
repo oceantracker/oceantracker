@@ -74,9 +74,12 @@ class NetCDFhandler(object):
                 data = self.file_handle.variables[name][..., sel]  # selection from last dimension
         return np.array(data)
 
-    def read_variables(self, name_list,output=None):
-        # read a list of variables into a dictionary, if output is a dictioary its add to that one
+    def read_variables(self, var_list=None, required_var=[], output=None):
+        # read a list of variables into a dictionary, if output is a dictionary its add to that one
         if output is None:  output={}
+        if var_list is None:  var_list =self.all_var_names()
+
+        name_list = list(set(var_list+required_var))
         for name in name_list:
             output[name]=self.read_a_variable(name)
         return output
@@ -125,13 +128,21 @@ class NetCDFhandler(object):
     def are_all_vars(self, name_list):  return all(self.are_vars(name_list))
 
     # dimensions
-    def dims(self): return list(self.file_handle.dimensions.keys())
+    def dim_list(self): return list(self.file_handle.dimensions.keys())
+
+    def dims(self):
+        out= {}
+        for dim_name, val in  self.file_handle.dimensions.items():
+            out[dim_name] =  self.file_handle.dimensions[dim_name].size
+        return out
+
     def dim_size(self,dim_name):  return self.file_handle.dimensions[dim_name].size
 
     def is_dim(self,dim_name):return dim_name in self.file_handle.dimensions
 
-    def all_global_attr(self): return  self.file_handle.ncattrs()
+    def global_attr_names(self): return  self.file_handle.ncattrs()
     def global_attr(self, attr_name): return getattr(self.file_handle, attr_name)
+    def global_attrs(self):  return self.file_handle.__dict__
 
     # variables
     def all_var_attr(self,var_name): return  self.file_handle[var_name].__dict__# Get all  attributes of the NetCDF file
@@ -167,7 +178,7 @@ class NetCDFhandler(object):
         return value
 
     def copy_global_attributes(self,nc_new):
-        for name in self.all_global_attr():
+        for name in self.global_attr_names():
             nc_new.write_global_attribute(name, self.global_attr(name))
 
     def copy_variable(self, nc_new, name):

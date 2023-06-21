@@ -33,7 +33,7 @@ ot.settings(output_file_base='minimal_example', # name used as base for output f
             time_step= 120. #  2 min time step as seconds
             )
 # ot.set_class, sets parameters for a named class
-ot.add_class('reader',input_dir= '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+ot.add_class('reader',input_dir= '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                       file_mask=  'demoHindcastSchism*.nc')  # hindcast file mask
 # add  release locations from two points,
 #               (ie locations where particles are released at the same times and locations)

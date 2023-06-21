@@ -275,7 +275,7 @@ class _BaseReader(ParameterBaseClass):
         for name, d in self.params['dimension_map'].items():
             if d is not None and not nc.is_dim(d):
                 msg_logger.msg('Cannot find dimension_map dimension "' + name + ' ", file dimension given is "' + d + '"',
-                               hint='Dimensions in hydro-model file = ' + str(nc.dims()),
+                               hint='Dimensions in hydro-model file = ' + str(nc.dim_list()),
                                fatal_error=True)
 
         # check variables are there

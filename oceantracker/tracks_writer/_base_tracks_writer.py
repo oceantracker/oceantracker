@@ -49,6 +49,7 @@ class _BaseWriter(ParameterBaseClass):
             nt_step = 1
         else:
             nt_step = int(np.round(params['update_interval']/si.model_time_step))
+
         self.info['output_step_count'] = min(nt_step,1)
 
         if params['write_dry_cell_index']:

@@ -20,9 +20,9 @@
 # build a more complex dictionary of parameters using code
 params={
     'output_file_base' :'param_test1',      # name used as base for output files
-    'root_output_dir':'output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
+    'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
     'time_step' : 120,  #  2 min time step as seconds  
-    'reader':{'input_dir': '..\\demos\\demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+    'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                         'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
                         },
     # add  release locations from two points, 
@@ -55,8 +55,8 @@ params={
 
 # write params to build on for later examples
 from oceantracker.util import json_util, yaml_util
-json_util.write_JSON('.\\example_param_files\\param_test1.json', params) 
-yaml_util.write_YAML('.\\example_param_files\\param_test1.yaml', params)
+json_util.write_JSON('./example_param_files/param_test1.json', params) 
+yaml_util.write_YAML('./example_param_files/param_test1.yaml', params)
 
 
 # ## Build param. dict. from template
@@ -65,7 +65,7 @@ yaml_util.write_YAML('.\\example_param_files\\param_test1.yaml', params)
 # 
 # 
 
-# In[2]:
+# In[1]:
 
 
 from oceantracker import main
@@ -74,9 +74,9 @@ from oceantracker import main
 params = main.param_template()  # get a copy of the template
 
 params['output_file_base'] ='param_test1'
-params['root_output_dir']= 'output'             #  output is put in dir   'root_output_dir'\\'output_file_base'
+params['root_output_dir']= 'output'             #  output is put in dir   'root_output_dir'/'output_file_base'
 params['time_step']= 120  #  2 min time step as seconds  
-params['reader']['input_dir']= '..\\demos\\demo_hindcast'  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+params['reader']['input_dir']= '../demos/demo_hindcast'  # folder to search for hindcast files, sub-dirs will, by default, also be searched
 params['reader']['file_mask']= 'demoHindcastSchism*.nc'    # the file mask of the hindcast files
 
 params['release_groups']['my_release_point'] = {
@@ -149,7 +149,7 @@ print( yaml.dump(params))
 # 
 # Is line below!
 
-# In[5]:
+# In[2]:
 
 
 # run oceantracker using param dict built in cells above
@@ -190,7 +190,7 @@ from oceantracker import main
 from oceantracker.util import yaml_util
 
 # read a json or yaml file  of parameters
-params = yaml_util.read_YAML('.\\example_param_files\\param_test1.yaml')
+params = yaml_util.read_YAML('./example_param_files/param_test1.yaml')
 
 case_info_file_name = main.run(params) 
 
@@ -205,7 +205,7 @@ case_info_file_name = main.run(params)
 # 
 # eg. run "run_oceantracker.py" script in the oceantracker/oceantracker directory with command
 # 
-# ``python  ..\\oceantracker\\run_oceantracker.py .\\example_param_files\\param_test1.json``
+# ``python  ../oceantracker/run_oceantracker.py ./example_param_files/param_test1.json``
 
 # ### Options when running at command line
 # 
@@ -216,8 +216,8 @@ case_info_file_name = main.run(params)
 # 
 # the full arguments are below
 
-# In[ ]:
+# In[1]:
 
 
-get_ipython().system('python ..\\\\oceantracker\\\\run_oceantracker.py -h')
+get_ipython().system('python ../oceantracker/run_oceantracker.py -h')
 

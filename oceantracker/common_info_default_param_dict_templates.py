@@ -217,6 +217,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
         #  nice to have tme varying write at end
     #todo get rid of base tracks writer???
     #todo conver LSC grid to S layer on read, using smallest number of layers, while keeping bootom log layer?
+    #todo tidy up particle concentrations
 
 # TODO FUTURE
     # todo Kernal RK steps

@@ -34,12 +34,12 @@ statements, thus the below will not run when within a notebook in
 windows. Use in notebooks also frequently gives “file in use by another
 process” errors.
 
-This code is in file
-“oceantracker/tutorials_how_to/parallel_example.py”.
+To avoid this run parallel case as code in file
+“oceantracker/tutorials_how_to/P_running_cases_in_parallel.py”.
 
 .. code:: ipython3
 
-    # oceantracker parallel demo, runn diferent relese groups on parallell
+    # oceantracker parallel demo, run different release groups as parallel processes
     from oceantracker import main
     
     # first build base case, params used for all cases

@@ -32,15 +32,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``count_status_in_range``:  *<optional>*
-		Description: - Count only those particles with status which fall in the given range
-
-		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``['frozen', 'moving']``
-		- can_be_empty_list: ``True``
-		- min_length: ``2``
-		- max_length: ``2``
-
 	* ``grid_center``:  *<optional>*
 		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
 		- default list : ``[]``
@@ -66,6 +57,8 @@ Parameters:
 		- default: ``0.0``
 
 	* ``particle_property_list``:  *<optional>*
+		Description: - Create statistics for these named particle properties, list = ["water_depth"], for statics on water depth at particle locations inside the counted regions
+
 		- a list containing type:  ``[<class 'str'>]``
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
@@ -82,6 +75,18 @@ Parameters:
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_gridded_age``
 
+	* ``status_max`` :   ``[<class 'str'>]``   *<optional>*
+		Description: Count only those particles with status  <= to this value
+
+		- default: ``moving``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving']``
+
+	* ``status_min`` :   ``[<class 'str'>]``   *<optional>*
+		Description: Count only those particles with status >= to thsi value
+
+		- default: ``frozen``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving']``
+
 	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: Time in seconds between calculating statistics
 
@@ -92,6 +97,18 @@ Parameters:
 		- default: ``None``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
+		Description: Write statistcs to disk
+
 		- default: ``True``
 		- possible_values: ``[True, False]``
+
+	* ``z_max`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical positions <= to this value
+
+		- default: ``1e+32``
+
+	* ``z_min`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical positions >=  to this value
+
+		- default: ``-1e+32``
 

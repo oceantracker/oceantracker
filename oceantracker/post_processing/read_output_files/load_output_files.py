@@ -84,8 +84,6 @@ def read_case_info_file(case_info_file_name):
 def load_particle_track_vars(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1):
     # load one track file from squeuence of what may be split files
     # todo load split track files into  dictionary
-    if var_list is None: var_list=[]
-    var_list = list(set(var_list+['time', 'x','status'])) # default vars
 
     case_info = read_case_info_file(case_info_file_name)
 
@@ -133,13 +131,13 @@ def load_grid(case_info_file_name):
 
     return d
 
-def load_stats_file(case_info_file_name, name = None, var_list=[]):
+def load_stats_file(case_info_file_name, name = None):
     # load gridded or polygon stas file using runcase_info, the output of  load_runcase_info()
 
     case_info = read_case_info_file(case_info_file_name)
     name = _get_role_dict_name(case_info, 'particle_statistics', name)
     stat_nc_file_name = _get_role_dict_file_name(case_info, 'particle_statistics', name)
-    d= read_ncdf_output_files.read_stats_file(stat_nc_file_name, var_list)
+    d= read_ncdf_output_files.read_stats_file(stat_nc_file_name)
 
 
     d['info']= case_info['class_roles_info']['particle_statistics'][name]
