@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # do plot
     if not args.noplots:
         caseInfoFile = load_output_files.get_case_info_file_from_run_file(run_info_file)
-        track_data = load_output_files.load_particle_track_vars(caseInfoFile, fraction_to_read=0.99)
+        track_data = load_output_files.load_track_data(caseInfoFile, fraction_to_read=0.99)
 
         plot_tracks.plot_tracks(track_data)
         #plot_utilities.display_grid(caseInfoFile, ginput=10)

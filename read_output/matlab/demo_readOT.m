@@ -64,7 +64,7 @@ title('Particle heat map release group 1, , log scale')
 
 figure(4)
 n = 1;
-pcolor(x,y,squeeze(s.water_depth_mean(end,n,:,:)))
+pcolor(x,y,squeeze(s.water_depth(end,n,:,:)))
 shading interp
 colorbar
 title('Water depth heat map at parctile locations at last time step, release group 1')
@@ -81,9 +81,9 @@ p = OTreadStats([output_dir,poly_stats.output_file]);
 % calc connectity betwen each release group and this polygon, number 1 as a
 % time series
 
-connectivty = p.count./p.count_all_particles;
+
 figure(5)
-plot(p.time/24/3600,connectivty(:,1))
+plot(p.day,p.connectivity(:,1))
 datetick
 title('Connectivty betwen release group 1s two points and the polygon of release group 2')
 xlabel('time')

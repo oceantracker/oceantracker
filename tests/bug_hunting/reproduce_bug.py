@@ -376,7 +376,7 @@ plt.colorbar()
 case = load_output_files.get_case_info_file_from_run_file(path_to_output, ncase = 2)
 
 # deposition in the model duration
-stats_data = load_output_files.load_stats_file(case, var_list=['age_decay'], nsequence=0)
+stats_data = load_output_files.load_stats_data(case, var_list=['age_decay'], nsequence=0)
 
 # %%
 # shit unit masses present at time step at cell on bottom

@@ -12,7 +12,7 @@ import make_demo_plots
 import build_and_test_demos
 import numpy as np
 from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.post_processing.read_output_files.load_output_files import load_stats_file, load_concentration_vars
+from oceantracker.post_processing.read_output_files.load_output_files import load_stats_data, load_concentration_vars
 from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
     
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         if  args.noplot : continue
 
         if args.testing:
-            #tracks=load_output_files.load_particle_track_vars(case_info_file_name)
+            #tracks=load_output_files.load_track_data(case_info_file_name)
             #from oceantracker.post_processing.plotting.plot_utilities import display_grid
             #display_grid(tracks['grid'],ginput=3)
             pass
@@ -117,7 +117,9 @@ if __name__ == "__main__":
         # do plots
         if n==3:
             # time heat maps
-            stats_data = load_stats_file(case_info_file_name, var_list=['water_depth'])
+            poly_stats_data = load_stats_data(case_info_file_name, name='polystats1')
+
+            stats_data = load_stats_data(case_info_file_name, name='gridstats1')
             axis_lims = [1591000, 1601500, 5478500, 5491000]
             animate_heat_map(stats_data, 'myP1', axis_lims=axis_lims,
                              heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
@@ -125,6 +127,7 @@ if __name__ == "__main__":
                              fps=7)
             plot_heat_map(stats_data, 'myP1', axis_lims=axis_lims, var='water_depth', heading='Water depth built on the fly, no tracks recorded',
                           plot_file_name=plot_output_file + '_water_depth.jpeg' if plot_output_file is not None else None)
+
         elif n == 61:
             #todo make conc plotting work
             continue
@@ -157,7 +160,7 @@ if __name__ == "__main__":
                 # have run forwards now backwards from last location
                 plt.clf()
                 ax= plt.gca()
-                d90 = load_output_files.load_particle_track_vars(case_info_file_name)
+                d90 = load_output_files.load_track_data(case_info_file_name)
                 plot_utilities.draw_base_map(d90['grid'], ax=ax, show_grid=True, axis_lims=ax_lims,
                                              #title='Back tracking, forward=Green, back=Red', text1='start=Green dot, 1 day- 1 min time steps'
                                              )
@@ -175,7 +178,7 @@ if __name__ == "__main__":
                 print('backtracking start', start_date)
 
                 caseInfoFile2 = main.run(params)
-                d2 = load_output_files.load_particle_track_vars(caseInfoFile2)
+                d2 = load_output_files.load_track_data(caseInfoFile2)
 
                 ax.plot(d2['x'][:, :, 0], d2['x'][:, :, 1], color='y', linewidth=1,linestyle='dashed')
                 ax.scatter(d2['x'][0, :, 0], d2['x'][0, :, 1], color='y', marker='o', s=20, zorder=9)
@@ -184,7 +187,7 @@ if __name__ == "__main__":
                 plot_utilities.show_output(plot_file_name= 'output\\'+ demo_name +'_and_backward_tracks.jpeg')
             elif n==91:
 
-                track_data = load_output_files.load_particle_track_vars(case_info_file_name)
+                track_data = load_output_files.load_track_data(case_info_file_name)
                 t = track_data['time'].astype('datetime64[s]')
                 plt.plot(t)
                 plt.title('Free running between release groups')

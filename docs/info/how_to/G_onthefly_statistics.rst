@@ -238,7 +238,7 @@ etc for plotting
     from IPython.display import HTML
     
     # basic read of net cdf
-    raw_stats = read_ncdf_output_files.read_stats_file('output\heat_map_example\heat_map_example_stats_gridded_time_my_heatmap.nc')
+    raw_stats = read_ncdf_output_files.read_stats_file('output/heat_map_example/heat_map_example_stats_gridded_time_my_heatmap.nc')
     print('raw_stats', raw_stats.keys())
     
     # better,  load netcdf plus grid and other data useful in plotting 
@@ -292,6 +292,240 @@ Polygon example
 ::
 
    # add polygon stats example with plotting
+
+.. code:: ipython3
+
+    # Polygon Statistics example.py run using dictionary of parameters
+    #------------------------------------------------
+    from oceantracker import main
+    
+    params = main.param_template()  # start with template
+    params['output_file_base']='polygon_connectivity_map_example'  # name used as base for output files
+    params['root_output_dir']='output'             #  output is put in dir   'root_output_dir'\\'output_file_base'
+    params['time_step']= 600. #  10 min time step as seconds
+    
+    # ot.set_class, sets parameters for a named class
+    params['reader']= { 'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                        'file_mask':  'demoHindcastSchism*.nc'}  # hindcast file mask
+    
+    # add one release locations 
+    params['release_groups']['my_release_point']={ # user must provide a name for group first
+                            'points': [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
+                            'release_interval': 900,           # seconds between releasing particles
+                            'pulse_size': 1000,                   # number of particles released each release_interval
+                }
+    
+    # add a gridded particle statistic 
+    params['particle_statistics']['my_polygon']= {
+                    'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
+                    'polygon_list': [{'points': [   [1597682.1237, 5489972.7479],# list of one or more polygons
+                                                    [1598604.1667, 5490275.5488],
+                                                    [1598886.4247, 5489464.0424],
+                                                    [1597917.3387, 5489000],
+                                                    [1597300, 5489000], [1597682.1237, 5489972.7479]
+                                                    ]                                         
+                                      }],
+                    # the below settings are optional
+                    'update_interval': 900, # time interval in sec, between doing particle statists counts 
+                    'status_min':'moving', # only count the particles which are moving 
+                    }
+    
+    
+    # run oceantracker
+    poly_case_info_file_name = main.run(params)
+
+
+.. parsed-literal::
+
+    main: --------------------------------------------------------------------------
+    main: OceanTracker- preliminary setup
+    main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+    main:   - found hydro-model files of type SCHISIM
+    main:       -  sorted hyrdo-model files in time order,	  0.500 sec
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\polygon_connectivity_map_example
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "polygon_connectivity_map_example_raw_user_params.json"
+    C000: --------------------------------------------------------------------------
+    C000: Starting case number   0,  polygon_connectivity_map_example at 2023-06-21T14:34:46.313090
+    C000: --------------------------------------------------------------------------
+    C000:       -  built node to triangles map,	  0.767 sec
+    C000:       -  built triangle adjacency matrix,	  0.335 sec
+    C000:       -  found boundary triangles,	  0.000 sec
+    C000:       -  built domain and island outlines,	  1.582 sec
+    C000:       -  calculated triangle areas,	  0.000 sec
+    C000:   Finished grid setup
+    C000:       -  set up release_groups,	  0.002 sec
+    C000:       -  built barycentric-transform matrix,	  0.455 sec
+    C000:       -  initial set up of core classes,	  0.473 sec
+    C000:       -  final set up of core classes,	  0.001 sec
+    C000:       -  created particle properties derived from fields,	  0.003 sec
+    C000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
+    C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
+    C000: --------------------------------------------------------------------------
+    C000:   - Starting polygon_connectivity_map_example,  duration: 0 days 23 hrs 0 min 0 sec
+    C000:       -  Initialized Solver Class,	  0.000 sec
+    C000: 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000 -  0% step time = 6268.8 ms
+    C000:   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
+    C000:       -  read  24 time steps in  0.5 sec
+    C000:   - opening tracks output to : polygon_connectivity_map_example_tracks_compact.nc
+    C000: 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   5,000: Active:05000 M:04732 S:00000  B:00268 D:000 O:00 N:000 Buffer:5000 -  1% step time =  1.5 ms
+    C000: 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   9,000: Active:09000 M:08498 S:00003  B:00499 D:000 O:00 N:000 Buffer:9000 -  2% step time =  1.6 ms
+    C000: 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  13,000: Active:13000 M:12264 S:00143  B:00593 D:000 O:00 N:000 Buffer:13000 -  3% step time =  1.5 ms
+    C000: 17% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  17,000: Active:17000 M:16127 S:00141  B:00732 D:000 O:00 N:000 Buffer:17000 -  3% step time =  1.7 ms
+    C000: 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  21,000: Active:21000 M:20138 S:00141  B:00721 D:000 O:00 N:000 Buffer:21000 -  4% step time =  1.6 ms
+    C000: 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  25,000: Active:25000 M:24015 S:00141  B:00844 D:000 O:00 N:000 Buffer:25000 -  5% step time =  1.6 ms
+    C000: 30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  29,000: Active:29000 M:27661 S:00141  B:01198 D:000 O:00 N:000 Buffer:29000 -  6% step time =  1.6 ms
+    C000: 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  33,000: Active:33000 M:31503 S:00141  B:01356 D:000 O:00 N:000 Buffer:33000 -  7% step time =  1.6 ms
+    C000: 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  37,000: Active:37000 M:35500 S:00002  B:01498 D:000 O:00 N:000 Buffer:37000 -  7% step time =  1.6 ms
+    C000: 43% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  41,000: Active:41000 M:39186 S:00000  B:01814 D:000 O:00 N:000 Buffer:41000 -  8% step time =  1.8 ms
+    C000: 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  45,000: Active:45000 M:43027 S:00000  B:01973 D:000 O:00 N:000 Buffer:45000 -  9% step time =  1.7 ms
+    C000: 52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  49,000: Active:49000 M:46899 S:00000  B:02101 D:000 O:00 N:000 Buffer:49000 - 10% step time =  1.8 ms
+    C000: 57% step 0078:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:  53,000: Active:53000 M:50999 S:00000  B:02001 D:000 O:00 N:000 Buffer:53000 - 11% step time =  1.7 ms
+    C000: 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  57,000: Active:57000 M:54594 S:00360  B:02046 D:000 O:00 N:000 Buffer:57000 - 11% step time =  1.7 ms
+    C000: 65% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  61,000: Active:61000 M:58495 S:00687  B:01818 D:000 O:00 N:000 Buffer:61000 - 12% step time =  1.7 ms
+    C000: 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  65,000: Active:65000 M:62478 S:00687  B:01835 D:000 O:00 N:000 Buffer:65000 - 13% step time =  1.8 ms
+    C000: 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  69,000: Active:69000 M:66424 S:00687  B:01889 D:000 O:00 N:000 Buffer:69000 - 14% step time =  1.8 ms
+    C000: 78% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  73,000: Active:73000 M:70251 S:00687  B:02062 D:000 O:00 N:000 Buffer:73000 - 15% step time =  1.8 ms
+    C000: 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  77,000: Active:77000 M:73804 S:00687  B:02509 D:000 O:00 N:000 Buffer:77000 - 15% step time =  1.8 ms
+    C000: 87% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  81,000: Active:81000 M:77439 S:00687  B:02874 D:000 O:00 N:000 Buffer:81000 - 16% step time =  1.9 ms
+    C000: 91% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  85,000: Active:85000 M:81337 S:00332  B:03331 D:000 O:00 N:000 Buffer:85000 - 17% step time =  1.8 ms
+    C000: 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  89,000: Active:89000 M:85168 S:00000  B:03832 D:000 O:00 N:000 Buffer:89000 - 18% step time =  1.9 ms
+    C000: 99% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:  91,000: Active:91000 M:86947 S:00000  B:04053 D:000 O:00 N:000 Buffer:91000 - 18% step time = 124.5 ms
+    C000: >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
+    C000:       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
+    C000:   -  Triangle walk summary: Of  31,134,824 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
+    C000: --------------------------------------------------------------------------
+    C000:   - Finished case number   0,  polygon_connectivity_map_example started: 2023-06-21 14:34:46.310090, ended: 2023-06-21 14:35:11.421555
+    C000:       Elapsed time =0:00:25.111465
+    C000: --------------------------------------------------------------------------
+    main:     >>> Note: run summary with case file names   "polygon_connectivity_map_example_runInfo.json"
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\polygon_connectivity_map_example
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "polygon_connectivity_map_example_raw_user_params.json"
+    main:     >>> Note: run summary with case file names   "polygon_connectivity_map_example_runInfo.json"
+    main: --------------------------------------------------------------------------
+    main: OceanTracker summary:  elapsed time =0:00:25.708679
+    main:       Cases -   0 errors,   0 warnings,   2 notes, check above
+    main:       Helper-   0 errors,   0 warnings,   0 notes, check above
+    main:       Main  -   0 errors,   0 warnings,   3 notes, check above
+    main: --------------------------------------------------------------------------
+    
+
+Read polygon/connectivity statistics
+------------------------------------
+
+.. code:: ipython3
+
+    #Read polygon stats and calculate connectivity matrix 
+    from oceantracker.post_processing.read_output_files import load_output_files
+    
+    poly_stats_data = load_output_files.load_stats_data(poly_case_info_file_name,'my_polygon')
+    print('stats',poly_stats_data.keys())
+    
+    print('connectivity matrix shape', poly_stats_data['connectivity_matrix'].shape)
+    poly_stats_data['connectivity_matrix']
+
+
+.. parsed-literal::
+
+    stats dict_keys(['total_num_particles_released', 'release_groupID_my_release_point', 'dimensions', 'limits', 'release_groupID', 'release_locations', 'is_polygon_release', 'count_all_particles', 'num_released', 'count', 'number_of_release_points', 'release_points', 'time', 'number_released_each_release_group', 'time_var', 'stats_type', 'connectivity_matrix', 'info', 'params', 'release_group_centered_grids', 'polygon_list', 'particle_status_flags', 'particle_release_groups', 'full_case_params', 'grid'])
+    connectivity matrix shape (69, 69, 1, 1)
+    
+
+
+
+.. parsed-literal::
+
+    array([[[[0.        ]],
+    
+            [[0.        ]],
+    
+            [[0.        ]],
+    
+            ...,
+    
+            [[0.849     ]],
+    
+            [[0.571     ]],
+    
+            [[0.308     ]]],
+    
+    
+           [[[0.        ]],
+    
+            [[0.        ]],
+    
+            [[0.        ]],
+    
+            ...,
+    
+            [[0.4245    ]],
+    
+            [[0.2855    ]],
+    
+            [[0.154     ]]],
+    
+    
+           [[[0.        ]],
+    
+            [[0.        ]],
+    
+            [[0.        ]],
+    
+            ...,
+    
+            [[0.29195323]],
+    
+            [[0.19635488]],
+    
+            [[0.10591472]]],
+    
+    
+           ...,
+    
+    
+           [[[0.        ]],
+    
+            [[0.        ]],
+    
+            [[0.        ]],
+    
+            ...,
+    
+            [[0.0097463 ]],
+    
+            [[0.00655493]],
+    
+            [[0.00353576]]],
+    
+    
+           [[[0.        ]],
+    
+            [[0.        ]],
+    
+            [[0.        ]],
+    
+            ...,
+    
+            [[0.00963317]],
+    
+            [[0.00647884]],
+    
+            [[0.00349472]]],
+    
+    
+           [[[0.        ]],
+    
+            [[0.        ]],
+    
+            [[0.        ]],
+    
+            ...,
+    
+            [[0.00953408]],
+    
+            [[0.0064122 ]],
+    
+            [[0.00345877]]]])
+
 
 
 Time verses Age statistics

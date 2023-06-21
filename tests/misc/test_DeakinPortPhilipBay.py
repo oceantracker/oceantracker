@@ -79,14 +79,14 @@ if __name__ == '__main__':
         ax = None
         ax=[ 217641,      404133,     5702747,     5815571]
 
-        track_data = load_output_files.load_particle_track_vars(
+        track_data = load_output_files.load_track_data(
             caseInfoFile, var_list=['tide', 'water_depth','eDNA'], fraction_to_read=.02)
 
         plot_tracks.animate_particles(track_data, axis_lims=ax, title='Port Phillip Bay Schism test',show_dry_cells = False)
 
         dx=25000
         #ax = [217641+dx, 404133-dx, 5702747+dx, 5815571-dx]
-        stats = load_output_files.load_stats_file(caseInfoFile,var_list=['eDNA'],name='Gs1')
+        stats = load_output_files.load_stats_data(caseInfoFile,var_list=['eDNA'],name='Gs1')
 
         # heat map of particle counts
         plot_statistics.animate_heat_map(stats, title='Port Phillip Bay, time based particle count heatmaps, built on the fly',
