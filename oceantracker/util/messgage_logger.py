@@ -111,7 +111,7 @@ class MessageLogger(object):
         if self.has_fatal_errors():
             raise GracefulError('Fatal error cannot continue >>> ' +msg if msg is not None else '', hint='Check above or run.err file for errors')
 
-    def insert_screen_line(self):
+    def print_line(self):
         self.msg('--------------------------------------------------------------------------')
 
     def progress_marker(self, msg, tabs=0, start_time=None):

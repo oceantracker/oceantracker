@@ -15,6 +15,8 @@ from oceantracker.post_processing.read_output_files import load_output_files
 from oceantracker.post_processing.read_output_files.load_output_files import load_stats_data, load_concentration_vars
 from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
+two_points= [[1594500, 5483000], [1598000, 5486100]]
+
     
 if __name__ == "__main__":
     # run demos from build json files
@@ -79,8 +81,24 @@ if __name__ == "__main__":
             params['root_output_dir'] = 'output'
             output_folder = path.join(params['root_output_dir'], params['output_file_base'])
 
+        if n==0:
+            # demo zero tests help class
+            from oceantracker.main import OceanTracker
+            ot = OceanTracker()
 
-        if not args.skiprun:
+            ot.settings(output_file_base='demo00_helper_class_test',
+                        time_step=600)
+            ot.add_class('reader', input_dir='demo_hindcast',
+                         file_mask='demoHindcastSchism3D.nc')
+            ot.add_class('release_groups', name='my_point1', points=two_points)
+            ot.add_class('release_groups', name='my_point1', points=two_points)
+
+            ot.add_class('dispersion', A_h=1)
+            ot.run()
+
+            continue
+
+        elif not args.skiprun:
             if type(params) == list:
                 case_info_file_name = main.run_parallel(params[0], params[1])
             else:
@@ -112,6 +130,7 @@ if __name__ == "__main__":
             pass
 
         plot_output_file = output_file_base if args.save_plot else None
+
 
 
         # do plots

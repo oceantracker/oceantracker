@@ -122,13 +122,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.show_all_warnings_and_errors()
         self.close()  # close al classes
 
-        si.msg_logger.insert_screen_line()
+        si.msg_logger.print_line()
         si.msg_logger.progress_marker('Finished case number %3.0f, ' % si.caseID + ' '
                                       + si.output_files['output_file_base']
                                       + ' started: ' + str(d0)
                                       + ', ended: ' + str(datetime.now()))
         si.msg_logger.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
-        si.msg_logger.insert_screen_line()
+        si.msg_logger.print_line()
 
         si.msg_logger.close()
         case_info_file = path.join(si.run_output_dir,case_info_file)
@@ -139,11 +139,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # from single run case_runner_params
         si =self.shared_info
 
-        si.msg_logger.insert_screen_line()
+        si.msg_logger.print_line()
         si.msg_logger.msg('Starting case number %3.0f, ' % si.caseID + ' '
                                       + si.output_files['output_file_base']
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
-        si.msg_logger.insert_screen_line()
+        si.msg_logger.print_line()
 
         if si.settings['use_random_seed']:
             #todo this may not set numbas random seed!!
@@ -182,7 +182,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
         # fill and process buffer until there is less than 2 steps
-        si.msg_logger.insert_screen_line()
+        si.msg_logger.print_line()
         si.msg_logger.progress_marker('Starting ' + si.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.solver_info['model_duration']))
 
         t0 = perf_counter()
