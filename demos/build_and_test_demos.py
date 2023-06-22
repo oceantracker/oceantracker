@@ -25,21 +25,9 @@ poly_points_large=[[1597682.1237, 5489972.7479],
                         [1597300, 5487000],
                        [1597682.1237, 5489972.7479]]
 
-# demo zero tests help class
-ot = OceanTracker()
 
-ot.settings(output_file_base= 'demo00_helper_class_test' ,
-                            time_step= 600)
-ot.add_class( 'reader', input_dir='demo_hindcast',
-                        file_mask= 'demoHindcastSchism3D.nc')
-ot.add_class( 'release_groups',name='my_point1', points = two_points)
-ot.add_class( 'release_groups',name='my_point1', points = two_points)
-
-ot.add_class( 'dispersion',A_h =1)
 #ot.run()
 #exit(1)
-
-params.append(ot.params)
 
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,

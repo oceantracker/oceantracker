@@ -1,0 +1,11 @@
+    >>> Note: run summary with case file names   "demo00_helper_class_test_runInfo.json"
+    >>> Note: output is in dir= E:\H_Local_drive\ParticleTracking\oceantracker\demos\root_output_dir\demo00_helper_class_test
+    >>> Note: to help with debugging, parameters as given by user  are in "demo00_helper_class_test_raw_user_params.json"
+    >>> Note: run summary with case file names   "demo00_helper_class_test_runInfo.json"
+>>> Warning: class type "release_groups" already has a class named "my_point1", ignoring later versions
+--------------------------------------------------------------------------
+OceanTracker summary:  elapsed time =0:00:12.345025
+      Cases -   0 errors,   3 warnings,   2 notes, check above
+      Helper-   0 errors,   1 warnings,   0 notes, check above
+      Main  -   0 errors,   0 warnings,   3 notes, check above
+--------------------------------------------------------------------------

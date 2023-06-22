@@ -152,7 +152,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
         # todo kernal form of water vel interpolator
         # todo kernal RK solver
         # todo fraction to read use ::10 form to only read load a fraction of track/timestats time steps? can this work in compact filesode?
-
+        # todo indepth look at circle test results
 # TODO STRUCTURE
     # todo hyperlinks to online docs where useful
     #todo much cleaner to  do residence times/stats for all polygon release groups given!
@@ -169,14 +169,14 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
     # todo compact model only with self expanding buffer??
     # todo enable on the fly depth avering of fieds if running depth avearged,
     #  currently disabled in base reader.setup_reader_fields
-    #todo only have compact mode tracks, and add a convert at end if requested
+    # todo only have compact mode tracks, and add a convert at end if requested
     # todo remove depth range stats and make depth range part of stats
     # todo add part property from field wwhich checks if field exists
     # todo retain on the fly depth averaging?
 
 # TODO IMPROVEMENTS
     # todo allow numpy arrays in "array" type
-    #todo smart way to tell class_dict item does not belong to that type, without class name
+    # todo smart way to tell class_dict item does not belong to that type, without class name
     # todo allow isostr, datetime, np.dateime64 for dates
     # todo allow user to give "class" instead of class_name ( not an insatnce)
     # todo add run_dir option to all output reads
