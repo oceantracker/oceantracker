@@ -38,19 +38,19 @@ from oceantracker import common_info_default_param_dict_templates as common_info
 from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import check_hydro_model
-
+from oceantracker.util.package_util import get_all_classes
 from oceantracker.util import  spell_check_util
 
 import traceback
 OTname = common_info.package_fancy_name
 
 def run(params):
-    ot= OceanTracker()
+    ot= _OceanTrackerRunner()
     case_info_files = ot._run_single(params)
     return case_info_files
 
 def run_parallel(base_case_params, case_list_params=[{}]):
-    ot= OceanTracker()
+    ot= _OceanTrackerRunner()
     case_info_files  = ot._run_parallel(base_case_params, case_list_params)
     return case_info_files
 
@@ -58,6 +58,9 @@ class OceanTracker():
     def __init__(self,params=None):
         self.params= param_template() if params is None else params
         self.msg_logger = MessageLogger('helper')
+        self.msg_logger.print_line()
+        self.msg_logger.msg('Starting OceanTracker helper class')
+
     # helper methods
     def settings(self, **kwargs):
         for key in kwargs:
@@ -107,12 +110,23 @@ class OceanTracker():
         pass
 
     def run(self):
-        case_info_file = self._run_single(self.params)
+        self.msg_logger.progress_marker('Starting run using helper class')
+        ot= _OceanTrackerRunner()
+        # todo pritn helper mesasge here at end??
+        ot.helper_msg_logger = self.msg_logger  # used to print helper messages at end and write to file
+
+        case_info_file = ot._run_single(self.params)
+        ot.close()
+        self.msg_logger.close()
+
         return case_info_file
+
+class _OceanTrackerRunner(object):
+    def __init__(self):
+        self.msg_logger = MessageLogger('main')
 
     #  other, non helper methods
     def _run_single(self, user_given_params):
-        self.helper_msg_logger = self.msg_logger  # keep references to write message at end as runs has main message logger
 
         ml = self.msg_logger
 
@@ -128,10 +142,7 @@ class OceanTracker():
 
         except Exception as e:
             # ensure message loggers are closed
-            if hasattr(self,'msg_logger') and  self.msg_logger is not None:
-                self.msg_logger.close()
-            if hasattr(self, 'helper_msg_logger') and self.helper_msg_logger is not None:
-                self.helper_msg_logger.close()
+
             print(str(e))
             return None
 
@@ -148,7 +159,7 @@ class OceanTracker():
         self.msg_logger = MessageLogger('main')
         ml =self.msg_logger
 
-        ml.insert_screen_line()
+        ml.print_line()
         ml.msg(OTname +'- preliminary setup')
         self._check_python_version()
 
@@ -178,20 +189,23 @@ class OceanTracker():
         ml.show_all_warnings_and_errors()
 
         # rewite any help class error/warnings
-        ml_helper = self.helper_msg_logger
-        for l in ml_helper.errors_list:
-            ml.msg(l)
-        for l in ml_helper.warnings_list:
-            ml.msg(l)
+        if hasattr(self,'helper_msg_logger'):
+            ml_helper = self.helper_msg_logger
+            for l in ml_helper.errors_list:
+                ml.msg(l)
 
-        ml.insert_screen_line()
+            for l in ml_helper.warnings_list:
+                ml.msg(l)
+
+        ml.print_line()
         ml.msg(f'OceanTracker summary:  elapsed time =' + str(datetime.now() - self.start_date),)
 
         ml.msg(f'Cases - {num_case_errors:3d} errors, {num_case_warnings:3d} warnings, {num_case_notes:3d} notes, check above', tabs=3)
-        ml.msg(f'Helper- {len(ml_helper.errors_list):3d} errors, {len(ml_helper.warnings_list):3d} warnings, {len(ml_helper.notes_list):3d} notes, check above', tabs=3)
+        if hasattr(self, 'helper_msg_logger'):
+            ml.msg(f'Helper- {len(ml_helper.errors_list):3d} errors, {len(ml_helper.warnings_list):3d} warnings, {len(ml_helper.notes_list):3d} notes, check above', tabs=3)
         ml.msg(f'Main  - {len(ml.errors_list):3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes, check above', tabs=3)
 
-        ml.insert_screen_line()
+        ml.print_line()
         ml.close()
 
     def _run_parallel(self,base_case_params, case_list_params):
@@ -538,6 +552,9 @@ class OceanTracker():
                              }
         json_util.write_JSON(path.join(o['run_output_dir'],o['runInfo_file']),  d)
         ml.msg('run summary with case file names   "' + o['runInfo_file'] + '"',  tabs=2, note=True)
+
+    def close(self):
+        pass
 
 def param_template():
     # return an empty parameter dictionary, with important class keys

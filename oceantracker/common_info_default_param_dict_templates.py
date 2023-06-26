@@ -8,6 +8,9 @@ code_version = '0.4.00.011 2023-05-20'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 
+docs_base_url= 'https://oceantracker.github.io/oceantracker/_build/html/'
+docs_url  = docs_base_url + 'info'
+
 # shared settings allpy to all parallel cases
 shared_settings_defaults ={
                 'root_output_dir':     PVC('root_output_dir', str, doc_str='base dir for all output files'),

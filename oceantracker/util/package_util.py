@@ -9,6 +9,33 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 
 from oceantracker.common_info_default_param_dict_templates import package_fancy_name
 
+
+import inspect
+import importlib
+import pkgutil
+
+import os
+import importlib
+import inspect
+
+def get_all_classes(module_name):
+    module = importlib.import_module(module_name)
+    classes = []
+
+    for loader, name, is_pkg in pkgutil.walk_packages(module.__path__):
+        if is_pkg:
+            sub_module = f"{module_name}.{name}"
+            classes.extend(get_all_classes(sub_module))
+        else:
+            sub_module = importlib.import_module(f"{module_name}.{name}")
+            sub_module_classes = inspect.getmembers(sub_module, inspect.isclass)
+            classes.extend(sub_module_classes)
+
+    return classes
+
+
+
+
 # def get package name
 def get_package_name():
     return __package__.split('.')[0]
