@@ -1,18 +1,18 @@
 --------------------------------------------------------------------------
-Starting case number   0,  demo00_helper_class_test at 2023-06-27T07:35:32.798830
+Starting case number   0,  demo00_helper_class_test at 2023-06-27T10:12:50.695267
 --------------------------------------------------------------------------
 >>> Warning: "A_h" is not recognised, ignoring this param.
       in:  >>> adding core class type >> "dispersion" core class "dispersion"  >> "A_h"
       Hint: Closest matches to "A_h" = ['A_V', 'A_H'] ?? 
-      -  built node to triangles map,	  0.621 sec
-      -  built triangle adjacency matrix,	  0.278 sec
+      -  built node to triangles map,	  0.753 sec
+      -  built triangle adjacency matrix,	  0.314 sec
       -  found boundary triangles,	  0.000 sec
-      -  built domain and island outlines,	  1.350 sec
+      -  built domain and island outlines,	  1.540 sec
       -  calculated triangle areas,	  0.000 sec
   Finished grid setup
       -  set up release_groups,	  0.002 sec
-      -  built barycentric-transform matrix,	  0.451 sec
-      -  initial set up of core classes,	  0.467 sec
+      -  built barycentric-transform matrix,	  0.504 sec
+      -  initial set up of core classes,	  0.521 sec
       -  final set up of core classes,	  0.001 sec
       -  created particle properties derived from fields,	  0.003 sec
 >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
@@ -20,7 +20,7 @@ Starting case number   0,  demo00_helper_class_test at 2023-06-27T07:35:32.79883
 --------------------------------------------------------------------------
   - Starting demo00_helper_class_test,  duration: 0 days 23 hrs 0 min 0 sec
       -  Initialized Solver Class,	  0.000 sec
-00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time = 5341.6 ms
+00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time = 6200.2 ms
   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 48 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
       -  read  24 time steps in  0.5 sec
   - opening tracks output to : demo00_helper_class_test_tracks_compact.nc
@@ -29,15 +29,15 @@ Starting case number   0,  demo00_helper_class_test at 2023-06-27T07:35:32.79883
 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 17% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
-26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
-30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
+26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:       2: Active:00002 M:00001 S:00000  B:00001 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
+30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:       2: Active:00002 M:00001 S:00000  B:00001 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
-39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:       2: Active:00002 M:00001 S:00000  B:00001 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
+39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 43% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
-48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:       2: Active:00002 M:00001 S:00000  B:00001 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
-52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:       2: Active:00002 M:00001 S:00000  B:00001 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
+48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
+52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 57% step 0078:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
-61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
+61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:       2: Active:00002 M:00001 S:00000  B:00001 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 65% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
@@ -46,14 +46,14 @@ Starting case number   0,  demo00_helper_class_test at 2023-06-27T07:35:32.79883
 87% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 91% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:       2: Active:00002 M:00002 S:00000  B:00000 D:000 O:00 N:000 Buffer:0002 -  0% step time =  0.2 ms
-99% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:       2: Active:00002 M:00001 S:00000  B:00001 D:000 O:00 N:000 Buffer:0002 -  0% step time =  3.2 ms
+99% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:       2: Active:00002 M:00001 S:00000  B:00001 D:000 O:00 N:000 Buffer:0002 -  0% step time =  3.3 ms
 >>> Note: No open boundaries requested, as run_params["open_boundary_type"] = 0
       Hint: Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1
 >>> Warning: "A_h" is not recognised, ignoring this param.
       in:  >>> adding core class type >> "dispersion" core class "dispersion"  >> "A_h"
       Hint: Closest matches to "A_h" = ['A_V', 'A_H'] ?? 
-  -  Triangle walk summary: Of   1,350 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
+  -  Triangle walk summary: Of   1,306 particles located  0, walks were too long and were retried,  of these  0 failed after retrying and were discarded
 --------------------------------------------------------------------------
-  - Finished case number   0,  demo00_helper_class_test started: 2023-06-27 07:35:32.797831, ended: 2023-06-27 07:35:44.862874
-      Elapsed time =0:00:12.065043
+  - Finished case number   0,  demo00_helper_class_test started: 2023-06-27 10:12:50.692267, ended: 2023-06-27 10:13:04.537177
+      Elapsed time =0:00:13.844910
 --------------------------------------------------------------------------
