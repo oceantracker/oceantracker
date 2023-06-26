@@ -4,7 +4,7 @@ ParticleConcentrations2D
 
 **Description:** 
 
-**Class:** oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D
+**class_name:** oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D
 
 **File:** oceantracker/particle_concentrations/particle_concentrations.py
 

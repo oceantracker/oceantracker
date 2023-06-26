@@ -4,7 +4,7 @@ ParticleGroupManager
 
 **Description:** 
 
-**Class:** oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager
+**class_name:** oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager
 
 **File:** oceantracker/particle_group_manager/particle_group_manager.py
 

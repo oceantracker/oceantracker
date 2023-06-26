@@ -4,7 +4,7 @@ GenericUnstructuredReader
 
 **Description:** Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names
 
-**Class:** oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+**class_name:** oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
 
 **File:** oceantracker/reader/generic_unstructured_reader.py
 

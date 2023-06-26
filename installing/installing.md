@@ -4,7 +4,7 @@ ________________________________________
 
 To ensure python/ module compatibility, recommendation is to build a conda virtual environment with the given environment.yml file
 
-
+Due to version dependencies of modules outside oceantracker, it curently only works with python 3.10, bur not yet 3.11
 
 1. Install 
     
@@ -26,9 +26,11 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
 
 4. Either: Make conda  environment from given file
 
-This method is strongly recommended as it ensures version compatibility. This conda link is useful. 
+This method is strongly recommended as it ensures  version compatibility amongst python modules. This conda link is useful. 
 
 https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
+
+First open a conda prompt window,  or in liunx a ordinary command window. 
 
 Note: In Windows may need to run conda prompt window as administrator to install packages.
 
@@ -71,7 +73,7 @@ Note: In Windows may need to run conda prompt window as administrator to install
 
     Activate new environment
 
-        ``conda activate oceantracker`
+        ``conda activate oceantracker``
 
 7. Make oceantracker package findable
    

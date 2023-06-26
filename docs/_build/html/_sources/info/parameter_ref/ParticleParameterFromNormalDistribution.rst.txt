@@ -4,7 +4,7 @@ ParticleParameterFromNormalDistribution
 
 **Description:** 
 
-**Class:** oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution
+**class_name:** oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution
 
 **File:** oceantracker/particle_properties/particle_parameter_from_normal_distribution.py
 

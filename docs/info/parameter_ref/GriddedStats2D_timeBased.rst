@@ -4,7 +4,7 @@ GriddedStats2D_timeBased
 
 **Description:** 
 
-**Class:** oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
+**class_name:** oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
 
 **File:** oceantracker/particle_statistics/gridded_statistics.py
 

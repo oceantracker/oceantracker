@@ -4,7 +4,7 @@ FieldGroupManager
 
 **Description:** 
 
-**Class:** oceantracker.field_group_manager.field_group_manager.FieldGroupManager
+**class_name:** oceantracker.field_group_manager.field_group_manager.FieldGroupManager
 
 **File:** oceantracker/field_group_manager/field_group_manager.py
 

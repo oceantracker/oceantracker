@@ -4,7 +4,7 @@ CompactTracksWriter
 
 **Description:** 
 
-**Class:** oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter
+**class_name:** oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter
 
 **File:** oceantracker/tracks_writer/track_writer_compact.py
 

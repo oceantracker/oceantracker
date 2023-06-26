@@ -4,7 +4,7 @@ TerminalVelocity
 
 **Description:** 
 
-**Class:** oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
+**class_name:** oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
 
 **File:** oceantracker/velocity_modifiers/terminal_velocity.py
 

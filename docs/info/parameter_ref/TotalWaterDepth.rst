@@ -4,7 +4,7 @@ TotalWaterDepth
 
 **Description:** 
 
-**Class:** oceantracker.particle_properties.total_water_depth.TotalWaterDepth
+**class_name:** oceantracker.particle_properties.total_water_depth.TotalWaterDepth
 
 **File:** oceantracker/particle_properties/total_water_depth.py
 

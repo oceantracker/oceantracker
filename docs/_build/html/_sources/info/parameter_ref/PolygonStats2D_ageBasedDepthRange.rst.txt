@@ -4,7 +4,7 @@ PolygonStats2D_ageBasedDepthRange
 
 **Description:** 
 
-**Class:** oceantracker.particle_statistics.statisics_in_water_depth_range.PolygonStats2D_ageBasedDepthRange
+**class_name:** oceantracker.particle_statistics.statisics_in_water_depth_range.PolygonStats2D_ageBasedDepthRange
 
 **File:** oceantracker/particle_statistics/statisics_in_water_depth_range.py
 

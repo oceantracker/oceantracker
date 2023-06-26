@@ -4,7 +4,7 @@ TidalStranding
 
 **Description:** 
 
-**Class:** oceantracker.status_modifiers.tidal_stranding.TidalStranding
+**class_name:** oceantracker.status_modifiers.tidal_stranding.TidalStranding
 
 **File:** oceantracker/status_modifiers/tidal_stranding.py
 

@@ -4,7 +4,7 @@ WaterDepthRangeStats
 
 **Description:** 
 
-**Class:** oceantracker.particle_statistics.statisics_in_water_depth_range.WaterDepthRangeStats
+**class_name:** oceantracker.particle_statistics.statisics_in_water_depth_range.WaterDepthRangeStats
 
 **File:** oceantracker/particle_statistics/statisics_in_water_depth_range.py
 

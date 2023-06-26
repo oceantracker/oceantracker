@@ -4,7 +4,7 @@ ROMsNativeReader
 
 **Description:** Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names
 
-**Class:** oceantracker.reader.ROMS_reader.ROMsNativeReader
+**class_name:** oceantracker.reader.ROMS_reader.ROMsNativeReader
 
 **File:** oceantracker/reader/ROMS_reader.py
 

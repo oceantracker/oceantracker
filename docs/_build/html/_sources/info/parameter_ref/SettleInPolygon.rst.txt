@@ -4,7 +4,7 @@ SettleInPolygon
 
 **Description:** 
 
-**Class:** oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon
+**class_name:** oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon
 
 **File:** oceantracker/trajectory_modifiers/settle_in_polygon.py
 

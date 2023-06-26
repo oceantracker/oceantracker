@@ -4,7 +4,7 @@ SCHISMSreaderNCDF
 
 **Description:** Reads SCHISM netCDF output files
 
-**Class:** oceantracker.reader.schism_reader.SCHISMSreaderNCDF
+**class_name:** oceantracker.reader.schism_reader.SCHISMSreaderNCDF
 
 **File:** oceantracker/reader/schism_reader.py
 

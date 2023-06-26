@@ -4,7 +4,7 @@ ParticleProperty
 
 **Description:** 
 
-**Class:** oceantracker.particle_properties._base_properties.ParticleProperty
+**class_name:** oceantracker.particle_properties._base_properties.ParticleProperty
 
 **File:** oceantracker/particle_properties/_base_properties.py
 

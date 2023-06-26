@@ -4,7 +4,7 @@ LogPolygonEntryAndExit
 
 **Description:** 
 
-**Class:** oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
+**class_name:** oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
 
 **File:** oceantracker/event_loggers/log_polygon_entry_and_exit.py
 

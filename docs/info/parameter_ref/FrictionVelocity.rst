@@ -4,7 +4,7 @@ FrictionVelocity
 
 **Description:** 
 
-**Class:** oceantracker.fields.friction_velocity.FrictionVelocity
+**class_name:** oceantracker.fields.friction_velocity.FrictionVelocity
 
 **File:** oceantracker/fields/friction_velocity.py
 

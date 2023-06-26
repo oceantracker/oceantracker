@@ -4,7 +4,7 @@ BasicResuspension
 
 **Description:** 
 
-**Class:** oceantracker.resuspension.resuspension.BasicResuspension
+**class_name:** oceantracker.resuspension.resuspension.BasicResuspension
 
 **File:** oceantracker/resuspension/resuspension.py
 

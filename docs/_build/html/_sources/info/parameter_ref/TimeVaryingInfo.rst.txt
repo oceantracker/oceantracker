@@ -4,7 +4,7 @@ TimeVaryingInfo
 
 **Description:** 
 
-**Class:** oceantracker.particle_properties._base_properties.TimeVaryingInfo
+**class_name:** oceantracker.particle_properties._base_properties.TimeVaryingInfo
 
 **File:** oceantracker/particle_properties/_base_properties.py
 

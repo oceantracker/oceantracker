@@ -4,7 +4,7 @@ InsidePolygonsNonOverlapping2D
 
 **Description:** Index of polygon a particle is inside
 
-**Class:** oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D
+**class_name:** oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D
 
 **File:** oceantracker/particle_properties/inside_polygons.py
 

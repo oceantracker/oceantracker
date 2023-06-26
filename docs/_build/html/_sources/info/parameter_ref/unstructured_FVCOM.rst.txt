@@ -4,7 +4,7 @@ unstructured_FVCOM
 
 **Description:** Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names
 
-**Class:** oceantracker.reader.FVCOM_reader.unstructured_FVCOM
+**class_name:** oceantracker.reader.FVCOM_reader.unstructured_FVCOM
 
 **File:** oceantracker/reader/FVCOM_reader.py
 

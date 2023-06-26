@@ -4,7 +4,7 @@ PointRelease
 
 **Description:** Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.
 
-**Class:** oceantracker.release_groups.point_release.PointRelease
+**class_name:** oceantracker.release_groups.point_release.PointRelease
 
 **File:** oceantracker/release_groups/point_release.py
 

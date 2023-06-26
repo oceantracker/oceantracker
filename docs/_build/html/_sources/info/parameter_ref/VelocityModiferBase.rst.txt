@@ -4,7 +4,7 @@ VelocityModiferBase
 
 **Description:** 
 
-**Class:** oceantracker.velocity_modifiers._base_velocity_modifer.VelocityModiferBase
+**class_name:** oceantracker.velocity_modifiers._base_velocity_modifer.VelocityModiferBase
 
 **File:** oceantracker/velocity_modifiers/_base_velocity_modifer.py
 

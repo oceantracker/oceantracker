@@ -4,7 +4,7 @@ PolygonRelease
 
 **Description:** Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.
 
-**Class:** oceantracker.release_groups.polygon_release.PolygonRelease
+**class_name:** oceantracker.release_groups.polygon_release.PolygonRelease
 
 **File:** oceantracker/release_groups/polygon_release.py
 

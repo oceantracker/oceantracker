@@ -4,7 +4,7 @@ VerticalGradient
 
 **Description:** Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"
 
-**Class:** oceantracker.fields.field_vertical_gradient.VerticalGradient
+**class_name:** oceantracker.fields.field_vertical_gradient.VerticalGradient
 
 **File:** oceantracker/fields/field_vertical_gradient.py
 

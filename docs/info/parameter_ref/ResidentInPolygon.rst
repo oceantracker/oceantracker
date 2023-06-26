@@ -4,7 +4,7 @@ ResidentInPolygon
 
 **Description:** 
 
-**Class:** oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
+**class_name:** oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
 
 **File:** oceantracker/particle_statistics/resident_in_polygon.py
 

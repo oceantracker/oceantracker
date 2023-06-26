@@ -4,7 +4,7 @@ CullParticles
 
 **Description:** 
 
-**Class:** oceantracker.trajectory_modifiers.cull_particles.CullParticles
+**class_name:** oceantracker.trajectory_modifiers.cull_particles.CullParticles
 
 **File:** oceantracker/trajectory_modifiers/cull_particles.py
 

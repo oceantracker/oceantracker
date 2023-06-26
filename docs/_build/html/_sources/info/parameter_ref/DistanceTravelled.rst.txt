@@ -4,7 +4,7 @@ DistanceTravelled
 
 **Description:** 
 
-**Class:** oceantracker.particle_properties.distance_travelled.DistanceTravelled
+**class_name:** oceantracker.particle_properties.distance_travelled.DistanceTravelled
 
 **File:** oceantracker/particle_properties/distance_travelled.py
 

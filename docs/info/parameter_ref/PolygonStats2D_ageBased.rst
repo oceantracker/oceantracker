@@ -4,7 +4,7 @@ PolygonStats2D_ageBased
 
 **Description:** 
 
-**Class:** oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased
+**class_name:** oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased
 
 **File:** oceantracker/particle_statistics/polygon_statistics.py
 

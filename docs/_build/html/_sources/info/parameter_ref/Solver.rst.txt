@@ -4,7 +4,7 @@ Solver
 
 **Description:** 
 
-**Class:** oceantracker.solver.solver.Solver
+**class_name:** oceantracker.solver.solver.Solver
 
 **File:** oceantracker/solver/solver.py
 

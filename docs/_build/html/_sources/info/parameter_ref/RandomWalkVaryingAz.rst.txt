@@ -4,7 +4,7 @@ RandomWalkVaryingAZ
 
 **Description:** 
 
-**Class:** oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ
+**class_name:** oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ
 
 **File:** oceantracker/dispersion/random_walk_varyingAz.py
 

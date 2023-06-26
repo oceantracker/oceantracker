@@ -60,14 +60,15 @@ or command line.
 Build param. dict. from template
 --------------------------------
 
-Use a provided template, which pre-defines most top level that can be
-used, then set these using assignments. Reproducing the above in code…
+Use a provided template, which pre-defines most top level parameters
+that can be used, then set required parameters using assignments.
+Reproducing the above in code…
 
 .. code:: ipython3
 
     from oceantracker import main
     
-    # repeat above using a template
+    # repeat above using a template and set dict keys values by assignments
     params = main.param_template()  # get a copy of the template
     
     params['output_file_base'] ='param_test1'

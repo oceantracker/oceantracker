@@ -4,7 +4,7 @@ RandomWalk
 
 **Description:** 
 
-**Class:** oceantracker.dispersion.random_walk.RandomWalk
+**class_name:** oceantracker.dispersion.random_walk.RandomWalk
 
 **File:** oceantracker/dispersion/random_walk.py
 

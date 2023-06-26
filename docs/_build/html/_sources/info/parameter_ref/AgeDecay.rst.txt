@@ -4,7 +4,7 @@ AgeDecay
 
 **Description:** Exponentially decaying particle property based on age.
 
-**Class:** oceantracker.particle_properties.age_decay.AgeDecay
+**class_name:** oceantracker.particle_properties.age_decay.AgeDecay
 
 **File:** oceantracker/particle_properties/age_decay.py
 

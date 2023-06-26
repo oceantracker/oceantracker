@@ -4,7 +4,7 @@ SplitParticles
 
 **Description:** 
 
-**Class:** oceantracker.trajectory_modifiers.split_particles.SplitParticles
+**class_name:** oceantracker.trajectory_modifiers.split_particles.SplitParticles
 
 **File:** oceantracker/trajectory_modifiers/split_particles.py
 

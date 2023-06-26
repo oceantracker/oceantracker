@@ -155,11 +155,12 @@ or command line.</p>
 </section>
 <section id="build-param-dict-from-template">
 <h2>Build param. dict. from template<a class="headerlink" href="#build-param-dict-from-template" title="Permalink to this heading">¶</a></h2>
-<p>Use a provided template, which pre-defines most top level that can be
-used, then set these using assignments. Reproducing the above in code…</p>
+<p>Use a provided template, which pre-defines most top level parameters
+that can be used, then set required parameters using assignments.
+Reproducing the above in code…</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
 
-<span class="c1"># repeat above using a template</span>
+<span class="c1"># repeat above using a template and set dict keys values by assignments</span>
 <span class="n">params</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">param_template</span><span class="p">()</span>  <span class="c1"># get a copy of the template</span>
 
 <span class="n">params</span><span class="p">[</span><span class="s1">&#39;output_file_base&#39;</span><span class="p">]</span> <span class="o">=</span><span class="s1">&#39;param_test1&#39;</span>

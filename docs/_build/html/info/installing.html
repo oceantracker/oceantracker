@@ -102,6 +102,7 @@
 <section id="build-oceantracker-conda-environment">
 <h2>Build oceantracker conda environment<a class="headerlink" href="#build-oceantracker-conda-environment" title="Permalink to this heading">¶</a></h2>
 <p>To ensure python/ module compatibility, recommendation is to build a conda virtual environment with the given environment.yml file</p>
+<p>Due to version dependencies of modules outside oceantracker, it curently only works with python 3.10, bur not yet 3.11</p>
 <ol class="arabic">
 <li><p>Install</p>
 <blockquote>
@@ -127,8 +128,9 @@
 </li>
 <li><p>Either: Make conda  environment from given file</p></li>
 </ol>
-<p>This method is strongly recommended as it ensures version compatibility. This conda link is useful.</p>
+<p>This method is strongly recommended as it ensures  version compatibility amongst python modules. This conda link is useful.</p>
 <p><a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html</a></p>
+<p>First open a conda prompt window,  or in liunx a ordinary command window.</p>
 <p>Note: In Windows may need to run conda prompt window as administrator to install packages.</p>
 <blockquote>
 <div><p>From root dir of oceantracker package run</p>
@@ -166,7 +168,7 @@
 </div></blockquote>
 <p>Activate new environment</p>
 <blockquote>
-<div><p><a href="#id1"><span class="problematic" id="id2">``</span></a>conda activate oceantracker`</p>
+<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
 </div></blockquote>
 </div></blockquote>
 </li>

@@ -4,7 +4,7 @@ UserFieldBase
 
 **Description:** 
 
-**Class:** oceantracker.fields._base_field.UserFieldBase
+**class_name:** oceantracker.fields._base_field.UserFieldBase
 
 **File:** oceantracker/fields/_base_field.py
 

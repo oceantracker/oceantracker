@@ -4,7 +4,7 @@ GriddedStats2D_agedBased
 
 **Description:** 
 
-**Class:** oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased
+**class_name:** oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased
 
 **File:** oceantracker/particle_statistics/gridded_statistics.py
 

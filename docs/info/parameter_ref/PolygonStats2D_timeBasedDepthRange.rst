@@ -4,7 +4,7 @@ PolygonStats2D_timeBasedDepthRange
 
 **Description:** 
 
-**Class:** oceantracker.particle_statistics.statisics_in_water_depth_range.PolygonStats2D_timeBasedDepthRange
+**class_name:** oceantracker.particle_statistics.statisics_in_water_depth_range.PolygonStats2D_timeBasedDepthRange
 
 **File:** oceantracker/particle_statistics/statisics_in_water_depth_range.py
 
