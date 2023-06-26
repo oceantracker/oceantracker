@@ -1,9 +1,7 @@
-import matplotlib.pyplot as plt
 #import matplotlib.patches as patches
 #from matplotlib import gridspec
 from numba import njit, types as nbtypes
 #from  matplotlib import nxutils
-from matplotlib import path
 import numpy as np
 import time
 import copy
@@ -204,7 +202,7 @@ def set_up_list_of_polygon_instances(polygon_list):
     return polygons, msg
 
 if __name__ == '__main__':
-
+    import matplotlib.pyplot as plt
     N=10**4
 
 

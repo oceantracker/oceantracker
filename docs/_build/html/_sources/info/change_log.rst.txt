@@ -23,6 +23,7 @@ Main new features
 #. optional vertical dispersion from model vertical eddy viscosity profile.
 #. If no particles active, will freerun until some are released, allows particles to be released for one season per year, with a max age, and run will skip between years
 #. Only have conda install instructions
+#. resuspension is core role which is always added to 3D runs (with critical fic. vel=0, by default), no longer need to add as trajectory modifier nor add a friction vel field
 
 Known breaking changes- ask for help if needed to transition
 ______________________________________________________________
@@ -31,7 +32,7 @@ ______________________________________________________________
 #. solver sub-stepping replaced by time_step in seconds param
 #. writer output step count replaced by update_interval time for writing
 #. only use compact mode track file format, python and matlab code will still read/convert track data to rectangular output.
-
+#. adding a resuspension trajectory modifier, or friction vel. field
 
 Internal changes
 _________________

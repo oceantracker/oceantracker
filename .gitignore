@@ -7,3 +7,4 @@ venv
 /oceantracker.egg-info/
 /tutorials_how_to/output/
 /tests/misc/output/
+/demos/root_output_dir/

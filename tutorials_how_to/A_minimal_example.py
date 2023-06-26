@@ -20,7 +20,7 @@
 # In[1]:
 
 
-# minimal_example.py useing class helper method
+# minimal_example.py using class helper method
 #------------------------------------------------
 from oceantracker.main import OceanTracker
 
@@ -49,13 +49,14 @@ case_info_file_name = ot.run()
 
 # output now in folder output/minimal_example
 # case_info_file_name the name a json file with useful info for post processing, eg output file names
+print(case_info_file_name)
 
 
 # ## Read and plot output
 # 
 #   A first basic plot of particle tracks
 
-# In[2]:
+# In[ ]:
 
 
 # read output files
@@ -84,7 +85,7 @@ plot_tracks(tracks, axis_lims=ax)
 # By default particles are blocked from moving from a wet cell to a dry cell and will not be released if the release location lies within a dry cell. 
 #   
 
-# In[3]:
+# In[ ]:
 
 
 from matplotlib import pyplot as plt

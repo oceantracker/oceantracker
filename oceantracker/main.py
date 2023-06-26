@@ -43,6 +43,7 @@ from oceantracker.util import  spell_check_util
 
 import traceback
 OTname = common_info.package_fancy_name
+help_url_base = 'https://oceantracker.github.io/oceantracker/_build/html/info/'
 
 def run(params):
     ot= _OceanTrackerRunner()

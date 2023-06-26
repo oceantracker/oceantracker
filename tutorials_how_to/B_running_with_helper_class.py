@@ -23,13 +23,13 @@
 #   
 #  These are set with one or more calls to helper method, ot.setting(...), where ... are keyword arguments.  eg "time_step", the model time step in seconds is set using,  time_step= 1800.
 # 
-#   There are default values for most settings. A full set of settings and their defaults is at ....
+#   There are default values for most settings. A full set of settings and their defaults is at [all settings](https://oceantracker.github.io/oceantracker/_build/html/info/parameter_ref/settings.html)
 # 
 #   2. Class role parameters 
 #       
 #   Classes add specific tasks to the computational pipeline, eg. how to release particles, write output, particle suspension etc. These are added using helper method ot.add_class(class_role, ....).  The first argument is a "class_role". Each class has its own specific settings, which are set using keyword arguments of helper method. Eg. ot.add_class('reader', input_dir= 'my_hindcast_dir',  ....) adds a reader class and tells is it which folder contains the hindcast files.
 #   
-#   A full set of classes and their default settings is at ....
+#   A full set of classes and their default settings is at [parameter_ref](https://oceantracker.github.io/oceantracker/_build/html/info/parameter_ref/parameter_ref_toc.html)
 # 
 #   Normally there must be a keyword argument "class_name" setting. This is used to import the required class into the computational pipeline, with its specific settings. This "class_name" is a string, used to import the class at setup (so is the same as that used to import any python class within a module).
 #   
@@ -59,7 +59,7 @@
 # 
 # 
 
-# In[5]:
+# In[1]:
 
 
 # build parameters using helper class
@@ -152,7 +152,7 @@ ot.add_class('velocity_modifiers',  #  class_role is velocity_modifiers
 # 
 # ## See all parameters
 
-# In[6]:
+# In[2]:
 
 
 # first see the parameters build using the helper class instance
@@ -170,7 +170,7 @@ print(json.dumps(ot.params, indent=4))
 
 # ## Start run using helper
 
-# In[7]:
+# In[3]:
 
 
 # now run oceantracker 
@@ -181,9 +181,8 @@ case_info_file_name = ot.run()
 # output now in folder "root_output_dir"/"output_file_base"
 # in this example output is in directory  output/param_test1'
 
-# case_info_file_name the name 
-# a json file with useful for post processing, 
-# eg holds output file names to assist in reading data
+# case_info_file_name the name of a json file with useful for post processing, 
+# eg holds output file names to assist in reading and plotting data
 print('case file name=',case_info_file_name)
 
 
@@ -191,7 +190,7 @@ print('case file name=',case_info_file_name)
 # 
 # also see ... for more on plotting notebook
 
-# In[8]:
+# In[4]:
 
 
 # plot animation of results
