@@ -61,7 +61,7 @@ yaml_util.write_YAML('./example_param_files/param_test1.yaml', params)
 
 # ## Build param. dict. from template
 # 
-# Use a provided template, which pre-defines most top level that can be used, then set these using assignments. Reproducing the above in code...
+# Use a provided template, which pre-defines most top level parameters that can be used, then set required parameters using assignments. Reproducing the above in code...
 # 
 # 
 
@@ -70,7 +70,7 @@ yaml_util.write_YAML('./example_param_files/param_test1.yaml', params)
 
 from oceantracker import main
 
-# repeat above using a template
+# repeat above using a template and set dict keys values by assignments
 params = main.param_template()  # get a copy of the template
 
 params['output_file_base'] ='param_test1'

@@ -4,7 +4,7 @@
     >>> Note: run summary with case file names   "demo00_helper_class_test_runInfo.json"
 >>> Warning: class type "release_groups" already has a class named "my_point1", ignoring later versions
 --------------------------------------------------------------------------
-OceanTracker summary:  elapsed time =0:00:14.013209
+OceanTracker summary:  elapsed time =0:00:13.996581
       Cases -   0 errors,   3 warnings,   2 notes, check above
       Helper-   0 errors,   1 warnings,   0 notes, check above
       Main  -   0 errors,   0 warnings,   3 notes, check above

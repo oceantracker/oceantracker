@@ -190,7 +190,7 @@ def make_class_sub_pages(class_role, link_tag=''):
 
             p.add_lines('**Description:** ' + (instance.docs['description'] if instance.docs['description'] is not None else '' ) )
             p.add_lines()
-            p.add_lines('**Class:** ' + c.__module__ + '.' + c.__name__)
+            p.add_lines('**class_name:** ' + c.__module__ + '.' + c.__name__)
             p.add_lines()
 
             p.add_lines('**File:** ' + package_util.package_relative_file_name(mod.__file__))

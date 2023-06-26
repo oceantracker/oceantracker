@@ -1,12 +1,14 @@
 from os import path, remove
 import traceback
 from time import  perf_counter
-
+from oceantracker.common_info_default_param_dict_templates import docs_base_url
 class GracefulError(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
         msg= 'Error >> ' + message + '\n hint= ' + hint if hint is not None else ' Look at messages above or in .err file'
         super(GracefulError, self).__init__(msg)
+
+
 
 def msg_str(msg,tabs=0):
     tab = '  '
@@ -25,6 +27,16 @@ class MessageLogger(object):
         self.notes_list = []
         self.log_file = None
         self.error_warning_count = 0
+
+        # build links lookup
+        link_map= [['parameter_ref_toc', 'info/parameter_ref/parameter_ref_toc.html'],
+                   ['release_groups', 'info/parameter_ref/release_groups_toc.html'],
+                   ['howto_release_groups', 'info/how_to/C_release_groups.html']
+                    ]
+        self.links={}
+        for l in link_map:
+            self.links[l[0]]= docs_base_url + l[1]
+
 
     def set_up_files(self,run_output_dir,output_file_base):
 
@@ -81,8 +93,7 @@ class MessageLogger(object):
         if hint is not None:
             m.append(msg_str('Hint: ' + hint, tabs + 3))
         if link is not None:
-            #todo make this work
-            m.append(msg_str('see user documentation: ' + link, tabs + 3))
+            m.append(msg_str('see user documentation: ' + self.links[link], tabs + 3))
 
         # write message lines
         for l in m:

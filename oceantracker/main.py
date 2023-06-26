@@ -366,7 +366,7 @@ class _OceanTrackerRunner(object):
             if  'release_groups' not in  params or len(params['release_groups']) < 1:
                 ml.msg('Parameter "release_groups" is required, with at least one named release group',
                        hint=' add a least one named release group class to the "release_groups" key',
-                       fatal_error=True,crumbs=crumbs)
+                       fatal_error=True,crumbs=crumbs, link='howto_release_groups')
 
         # split and check for unknown keys
         for key, item in params.items():
@@ -402,6 +402,7 @@ class _OceanTrackerRunner(object):
 
             else:
                 spell_check_util.spell_check(key,known_top_level_keys,ml,' top level parm./key, ignoring')
+                ml.msg('', link='parameter_ref_toc')
 
         ml.exit_if_prior_errors('Errors in decomposing parameters')
         # merge settings params
@@ -426,7 +427,7 @@ class _OceanTrackerRunner(object):
             reader_params= check_hydro_model.check_fileformat(reader_params, ml)
 
         reader = make_class_instance_from_params('reader', reader_params, ml,  class_role_name='reader')
-        ml.exit_if_prior_errors() # class name missing or missing requied variables
+        ml.exit_if_prior_errors() # class name missing or missing required variables
 
         working_params['file_info'] ,working_params['hindcast_is3D'] = reader.get_hindcast_files_info(ml) # get file lists
 
@@ -558,7 +559,7 @@ class _OceanTrackerRunner(object):
         pass
 
 def param_template():
-    # return an empty parameter dictionary, with important class keys
+    # return an empty parameter dictionary
 
     d = {}
     for key in sorted(common_info.all_default_settings.keys()):
