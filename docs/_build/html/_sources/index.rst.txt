@@ -50,10 +50,6 @@ Features
 * Shoreline stranding of particles by the tide and resuspension from the bottom
 * 2D and 3D particle tracking, with option to run 3D as 2D
 
-.. note::
-
-   Particle tracking is currently set up for generic unstructured grids and SCHISM netcdf output. Will be expanding use to other grids and output formats.
-   Particle tracking in structured grids is also being added, eg. ROMS
 
 ====================
 Architecture

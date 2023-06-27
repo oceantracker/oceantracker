@@ -122,7 +122,7 @@ ot.add_class('particle_statistics',
                 update_interval = 900, # time interval in sec, between doing particle statists counts 
                 particle_property_list = ['a_pollutant'], # request a heat map for the decaying part. prop. added above
                 status_min ='moving', # only count the particles which are moving 
-                z_mi =-2.,  # only count particles at locations above z=-2m
+                z_min =-2.,  # only count particles at locations above z=-2m
                 grid_size= [120, 121]  # number of east and north cells in the heat map
                 )
 
@@ -141,7 +141,7 @@ case_info_file_name = ot.run()
 # 
 # To plot use, load_output_files.load_stats_data, which also loads grid etc for plotting
 
-# In[ ]:
+# In[2]:
 
 
 # read stats files
@@ -179,7 +179,7 @@ plot_statistics.plot_heat_map(stats_data, var='a_pollutant',release_group= 'my_r
 # 
 #     # add polygon stats example with plotting
 
-# In[ ]:
+# In[3]:
 
 
 # Polygon Statistics example.py run using dictionary of parameters
@@ -226,7 +226,7 @@ poly_case_info_file_name = main.run(params)
 # 
 # 
 
-# In[ ]:
+# In[4]:
 
 
 #Read polygon stats and calculate connectivity matrix 
