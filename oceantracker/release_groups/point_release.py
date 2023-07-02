@@ -32,7 +32,7 @@ class PointRelease(ParameterBaseClass):
                                   #Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}
                                 'max_cycles_to_find_release_points': PVC(50, int, min=50, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
 
-                                'user_particle_property_parameters':{}, #  dictionary of items with keys of particle_properties,
+                                'added_particle_properties':{}, #  dictionary of items with keys of particle_properties,
                                                                             # each a dictionary of parameters for that property
                                                                             # eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}}
                                  })

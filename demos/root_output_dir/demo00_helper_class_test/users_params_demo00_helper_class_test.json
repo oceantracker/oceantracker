@@ -41,20 +41,7 @@
     "particle_concentrations": {},
     "particle_properties": {},
     "particle_statistics": {},
-    "release_groups": {
-        "my_point1": {
-            "points": [
-                [
-                    1594500,
-                    5483000
-                ],
-                [
-                    1598000,
-                    5486100
-                ]
-            ]
-        }
-    },
+    "release_groups": {},
     "status_modifiers": {},
     "time_varying_info": {},
     "trajectory_modifiers": {},
