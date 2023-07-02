@@ -58,19 +58,23 @@ def run_parallel(base_case_params, case_list_params=[{}]):
 class OceanTracker():
     def __init__(self,params=None):
         self.params= param_template() if params is None else params
+        self.case_list=[]
+
         self.msg_logger = MessageLogger('helper')
         self.msg_logger.print_line()
         self.msg_logger.msg('Starting OceanTracker helper class')
 
     # helper methods
-    def settings(self, **kwargs):
-        for key in kwargs:
-            self.params[key]= kwargs[key]
+    def settings(self,case=None, **kwargs):
 
-    def add_class(self, class_role =None, **kwargs):
+        # work out if to add to base params or case list params
+        p = self._check_case(case, f'adding settings "{str(kwargs.keys())}"')
+        for key in kwargs:
+            p[key]= kwargs[key]
+
+    def add_class(self, class_role =None,case=None, **kwargs):
         ml = self.msg_logger
-        known_class_roles = list(common_info.class_dicts.keys()) \
-                     + list(common_info.core_classes.keys())
+        known_class_roles = list(common_info.class_dicts.keys()) + list(common_info.core_classes.keys())
         if class_role is None:
             ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True)
             return
@@ -90,7 +94,7 @@ class OceanTracker():
             self.params[class_role] = kwargs
 
         elif class_role in common_info.class_dicts:
-            # can have more than one classs
+            # can have more than one class
             if 'name' not in kwargs:
                 ml.msg(f'add_class_dict() : for class_role"{class_role}" must have a name parameter, eg. name=my_{class_role}1, ignoring this class' ,
                        fatal_error=True,
@@ -100,23 +104,49 @@ class OceanTracker():
             if name in self.params[class_role]:
                 ml.msg(f'class type "{class_role}" already has a class named "{name}", ignoring later versions', warning=True)
             else:
-                # add params to  class type of given name
-                self.params[class_role][name]={} # add blank param dict
+                # add params to  class type of given name and case
+                p = self._check_case( case, f'adding class "{name}"') # find if added to base case or case list # case
+
+                p[class_role][name]={} # add blank param dict
                 for key in kwargs:
                     if key != 'name':
-                        self.params[class_role][name][key] = kwargs[key]
+                        p[class_role][name][key] = kwargs[key]
         else:
             spell_check_util.spell_check(class_role, known_class_roles, ml, 'in add_class(), ignoring this class',
                         crumbs=f'class type "{class_role}"')
         pass
 
+    def _check_case(self,case, crumbs):
+        # check and make space for case
+        ml = self.msg_logger
+
+        # no case number given add to ordinary params
+        if case is None: return self.params
+
+        if type(case) != int or case < 0:
+            ml.msg(f'Parallel case number nust be a interger >0, got case # "{str(case)}"', fatal_error=True, crumbs=crumbs)
+            return
+
+        # expand case list to fit case if needed
+        if len(self.case_list) < case+1 :
+            for n in range(len(self.case_list), case+1):
+                self.case_list.append(deepcopy(param_template()))
+
+        return self.case_list[case]
+
     def run(self):
         self.msg_logger.progress_marker('Starting run using helper class')
         ot= _OceanTrackerRunner()
-        # todo pritn helper mesasge here at end??
+        # todo print helper message here at end??
         ot.helper_msg_logger = self.msg_logger  # used to print helper messages at end and write to file
 
-        case_info_file = ot._run_single(self.params)
+        if len(self.case_list) == 0:
+            # no case list
+            case_info_file = ot._run_single(self.params)
+        else:
+            # run // case list with params as base case defaults for each run
+            case_info_file = ot._run_parallel(self.params, self.case_list)
+
         ot.close()
         self.msg_logger.close()
 

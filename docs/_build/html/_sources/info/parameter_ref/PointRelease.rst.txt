@@ -14,6 +14,7 @@ PointRelease
 Parameters:
 ************
 
+	* ``added_particle_properties``: nested parameter dictionary
 	* ``allow_release_in_dry_cells`` :   ``<class 'bool'>``   *<optional>*
 		Description: Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.
 
@@ -84,7 +85,6 @@ Parameters:
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``user_particle_property_parameters``: nested parameter dictionary
 	* ``user_release_groupID`` :   ``<class 'int'>``   *<optional>*
 		Description: User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.
 

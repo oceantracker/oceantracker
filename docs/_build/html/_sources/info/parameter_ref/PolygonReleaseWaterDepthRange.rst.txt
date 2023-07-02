@@ -14,6 +14,7 @@ PolygonReleaseWaterDepthRange
 Parameters:
 ************
 
+	* ``added_particle_properties``: nested parameter dictionary
 	* ``allow_release_in_dry_cells`` :   ``<class 'bool'>``   *<optional>*
 		Description: Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.
 
@@ -88,7 +89,6 @@ Parameters:
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``user_particle_property_parameters``: nested parameter dictionary
 	* ``user_polygonID`` :   ``<class 'int'>``   *<optional>*
 		- default: ``0``
 		- min: ``0``

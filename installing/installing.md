@@ -8,7 +8,7 @@ Due to version dependencies of modules outside oceantracker, it curently only wo
 
 1. Install 
     
-    anaconda or miniconda and git if not already available
+    Install/update anaconda or miniconda and git if not already available
 
 
 1. Change dir to where oceantracker files will be stored , eg. within

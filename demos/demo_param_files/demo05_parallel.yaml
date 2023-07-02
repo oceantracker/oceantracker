@@ -15,6 +15,10 @@
       initial_value: 20.0
     distance_travelled:
       class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+    my_constant_prop:
+      class_name: oceantracker.particle_properties.constant_part_prop.ConstantParticleProperty
+      value: 100
+      variance: 10.0
   processors: 2
   reader:
     class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader

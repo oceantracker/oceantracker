@@ -14,7 +14,7 @@
 # 
 # 
 
-# In[2]:
+# In[1]:
 
 
 # build a more complex dictionary of parameters using code
@@ -65,7 +65,7 @@ yaml_util.write_YAML('./example_param_files/param_test1.yaml', params)
 # 
 # 
 
-# In[3]:
+# In[2]:
 
 
 from oceantracker import main
@@ -103,7 +103,7 @@ params['velocity_modifiers']['my_fall_velocity']= {   # here a fall velocity wit
                                                     }
 
 
-# In[4]:
+# In[3]:
 
 
 # show the full template as json
@@ -115,7 +115,7 @@ print( json.dumps(params, indent=4))
 # 
 #   yaml format has no brackets/braces and relies on tab indenting to nest items
 
-# In[5]:
+# In[4]:
 
 
 # show the full template in yaml format
@@ -149,7 +149,7 @@ print( yaml.dump(params))
 # 
 # Is line below!
 
-# In[6]:
+# In[5]:
 
 
 # run oceantracker using param dict built in cells above
@@ -159,7 +159,7 @@ case_info_file_name = main.run(params)
 # case_info file is the name of a json file useful in plotting results 
 
 
-# In[7]:
+# In[6]:
 
 
 # plot animation of results
@@ -204,7 +204,7 @@ HTML(anim.to_html5_video())
 # 
 # the full arguments are below
 
-# In[9]:
+# In[7]:
 
 
 get_ipython().system('python ../oceantracker/run_oceantracker.py -h')

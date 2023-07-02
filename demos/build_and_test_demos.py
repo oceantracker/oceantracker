@@ -51,9 +51,11 @@ demo_base_params={'output_file_base' : None,
     'particle_properties ': {
                         'Oxygen': { 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24,'initial_value' : 20.},
                         'distance_travelled':   {'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'},
+                        'my_constant_prop':   {'class_name': 'oceantracker.particle_properties.constant_part_prop.ConstantParticleProperty',
+                                               'value' :100, 'variance': 10.},
                             }
     }
-
+from oceantracker.particle_properties.constant_part_prop import ConstantParticleProperty
 p1= deepcopy(demo_base_params)
 p1.update({'tracks_writer':{'time_steps_per_per_file':700}}
                                 )

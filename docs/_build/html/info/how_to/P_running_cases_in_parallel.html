@@ -102,19 +102,20 @@
   <section id="run-in-parallel">
 <h1>Run in parallel<a class="headerlink" href="#run-in-parallel" title="Permalink to this heading">¶</a></h1>
 <p>[This note-book is in oceantracker/tutorials_how_to/]</p>
-<p>Running in parallel can be done using the “run with parameters”
-approach, not the helper class method. Simply build a list of “cases”
-parameters, then pass this list, eg. main.run(case_list). The output
-files for each case will be tagged with a processor number. The number
-of active cases is be limited to be one less than the number of physical
-processes available. For large runs, memory to store the hindcast for
-each case may cause an error. To work around this, reduce the number of
-processors with the setting “processors”.</p>
+<p>Running in parallel can be done using the “run with parameter dict.”
+approach, or the helper class method. Both build a base_case, which is
+the parameter defaults for each case, plus a list of “cases” parameters
+specific to each parallel case. The output files for each case will be
+tagged with a case number, 0-n. The number of computationally active
+cases is be limited to be one less than the number of physical processes
+available. For large runs, memory to store the hindcast for each case
+may cause an error. To work around this, reduce the number of processors
+with the setting “processors”.</p>
 <p>The cases can be different, eg. have different release groups etc. A
 small number of settings must be the same for all cases, eg. setting
 “root_output_folder” must be the same for all cases. These settings will
-be taken from the first case. Warnings are given if trying to use
-different values of these settings than that given in the first case.</p>
+be taken from the base case. Warnings are given if trying to use
+different values within case parameters.</p>
 <p>Is is strongly recommend to run parallel cases from within a python
 script, rather than notebooks which have limitations in Windows and may
 result in errors.</p>
@@ -122,13 +123,16 @@ result in errors.</p>
 <h2>Example parallel release groups<a class="headerlink" href="#example-parallel-release-groups" title="Permalink to this heading">¶</a></h2>
 <p>The below example runs a separate release group as its own parallel
 “case”.</p>
-<p>To run in parallel on windows requires run to be within a if <strong>name</strong> ==
-‘<strong>main</strong>’ block. iPython note books ignores if <strong>name</strong> == ‘<strong>main</strong>’
-statements, thus the below may not run when within a notebook in
-windows. Use in notebooks also frequently gives “file in use by another
-process” errors.</p>
-<p>To avoid this run parallel case as code in file
+<p>To run in parallel on windows requires the run to be within a if
+<strong>name</strong> == ‘<strong>main</strong>’ block. iPython note books ignores if <strong>name</strong> ==
+‘<strong>main</strong>’ statements, thus the below may not run when within a notebook
+in windows. Use in notebooks also frequently gives “file in use by
+another process” errors.</p>
+<p>To avoid this run parallel case as a script, eg. code in file
 “oceantracker/tutorials_how_to/P_running_cases_in_parallel.py”.</p>
+</section>
+<section id="run-parallel-using-param-dicts">
+<h2>Run parallel using param. dicts.<a class="headerlink" href="#run-parallel-using-param-dicts" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># oceantracker parallel demo, run different release groups as parallel processes</span>
 <span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
 
@@ -186,6 +190,71 @@ main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user
 main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
 main: --------------------------------------------------------------------------
 main: OceanTracker summary:  elapsed time =0:00:16.945569
+main:       Cases -   0 errors,   0 warnings,   8 notes, check above
+main:       Helper-   0 errors,   0 warnings,   0 notes, check above
+main:       Main  -   0 errors,   0 warnings,   3 notes, check above
+main: --------------------------------------------------------------------------</pre>
+</section>
+<section id="run-parallel-with-helper-class">
+<h2>Run parallel with helper class<a class="headerlink" href="#run-parallel-with-helper-class" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># run in parallel using helper class method</span>
+<span class="kn">from</span> <span class="nn">oceantracker.main</span> <span class="kn">import</span> <span class="n">OceanTracker</span>
+
+<span class="n">ot</span> <span class="o">=</span> <span class="n">OceanTracker</span><span class="p">()</span>
+<span class="c1"># setup base case</span>
+<span class="c1"># by default settings and classes are added to base case</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">output_file_base</span><span class="o">=</span> <span class="s1">&#39;param_test1&#39;</span><span class="p">,</span>      <span class="c1"># name used as base for output files</span>
+    <span class="n">root_output_dir</span><span class="o">=</span><span class="s1">&#39;output&#39;</span><span class="p">,</span>             <span class="c1">#  output is put in dir   &#39;root_output_dir&#39;/&#39;output_file_base&#39;</span>
+    <span class="n">time_step</span> <span class="o">=</span> <span class="mi">120</span><span class="p">,</span>  <span class="c1">#  2 min time step as seconds</span>
+    <span class="p">)</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;reader&#39;</span><span class="p">,</span>
+            <span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;../demos/demo_hindcast&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
+            <span class="n">file_mask</span><span class="o">=</span> <span class="s1">&#39;demoHindcastSchism*.nc&#39;</span><span class="p">,</span>    <span class="c1"># the file mask of the hindcast files</span>
+            <span class="p">)</span>
+
+<span class="c1"># now put a release group with one point into case list</span>
+<span class="c1"># define the required release  points</span>
+<span class="n">points</span> <span class="o">=</span> <span class="p">[</span>  <span class="p">[</span><span class="mf">1597682.1237</span><span class="p">,</span> <span class="mf">5489972.7479</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">1598604.1667</span><span class="p">,</span> <span class="mf">5490275.5488</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">1598886.4247</span><span class="p">,</span> <span class="mf">5489464.0424</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">1597917.3387</span><span class="p">,</span> <span class="mi">5489000</span><span class="p">],</span>
+        <span class="p">]</span>
+
+<span class="c1"># build a list of params for each case, with one release group fot each point</span>
+<span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+    <span class="c1"># add a release group with one point to case &quot;n</span>
+    <span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;release_groups&#39;</span><span class="p">,</span>
+                <span class="n">name</span> <span class="o">=</span><span class="s1">&#39;mypoint&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
+                <span class="n">points</span><span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">],</span>  <span class="c1"># needs to be 1, by 2 list for single 2D point</span>
+                <span class="n">release_interval</span><span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>           <span class="c1"># seconds between releasing particles</span>
+                <span class="n">pulse_size</span><span class="o">=</span> <span class="mi">10</span><span class="p">,</span>                   <span class="c1"># number of particles released each release_interval</span>
+                <span class="n">case</span><span class="o">=</span><span class="n">n</span><span class="p">)</span> <span class="c1"># this adds release group to the nth case to run in //</span>
+
+<span class="c1"># to run parallel in windows, must put run  call  inside the below &quot;if __name__ == &#39;__main__&#39;:&quot; block</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># base case and case_list exist as attributes ot.params and ot.case_list</span>
+    <span class="c1"># run as parallel set of cases</span>
+    <span class="n">ot</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<pre class="literal-block">helper: --------------------------------------------------------------------------
+helper: Starting OceanTracker helper class
+helper:   - Starting run using helper class
+main: --------------------------------------------------------------------------
+main: OceanTracker- preliminary setup
+main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+main:   - found hydro-model files of type SCHISIM
+main:       -  sorted hyrdo-model files in time order,        0.175 sec
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;param_test1_raw_user_params.json&quot;
+main:   -  oceantracker:multiProcessing: processors:4
+main:   - parallel pool complete
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;param_test1_raw_user_params.json&quot;
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
+main: --------------------------------------------------------------------------
+main: OceanTracker summary:  elapsed time =0:00:16.812942
 main:       Cases -   0 errors,   0 warnings,   8 notes, check above
 main:       Helper-   0 errors,   0 warnings,   0 notes, check above
 main:       Main  -   0 errors,   0 warnings,   3 notes, check above

@@ -5,27 +5,9 @@ Future development
 
 Future additions
 ===================
-#. add status_modifier list of classes, to hold tidal stranding, kill old particles etc
-#. more post step bookkeeping to pre step bookkeeping to eliminate 2 costly update_cell
-#. find a numba container suitable for passing all fields and part prop as a group by name, to allow assess to all and reduce arguments needed
-#. velocity interpolator which tweaks flows parallel to faces with adjacent dry cell or land bounday? after random walk velocity is added?
-#. Fuse looping for field interpolation for particle properties to reduce RAM-CPU memory traffic
-    * kernal version of interpolate fields
-    * fuse velocity interpolation and euler step
-    * Update field derived particle properties as a group with kernel interpolator
-#. make error trapping reponse  more consistent, eg some errors return no info
-#. Fuse Runge-kutta steps loops to reduce RAM-CPU memory traffic
-    * kernal versions of BC walk and vertical walk
-    * fuse BC walk and velocity interpolation using kernals
-#. Reader memory shared between parallel cases
-#. support for structured grids, eg. ROMS
-#. option for particle tracking to work natively in lat/log cords
-#. RK45 solver to allow adaptive time stepping to improve accuracy for those particles where flows are rapidly varying in time or space.
-#. Read release points/polygons from file, eg shape files, csv
-#. system to check data types match those required when used in numba signatures
+
 
 #. Shared/asynchronous reader to speed solution and save total memory, changes required:
-    * reader buffer as ring buffer on global hindcast time step
     * set up shared grid and reader field memory in parent and child model runs
     * set up  control variables as shared memory and child and parent responses to reader buffer changes
     * spawn asynchronous model runs, based on parent readers time steps in the buffer
@@ -42,12 +24,29 @@ Future additions
     * dry cell index evaluation at current time step is part of reader as method?, not field group manager
     * share_reader_memory flag move from reader to shared_params
 
+#. velocity interpolator which tweaks flows parallel to faces with adjacent dry cell or land boundary? after random walk velocity is added?
+#. Fuse looping for field interpolation for particle properties to reduce RAM-CPU memory traffic
+    * kernal version of interpolate fields
+    * fuse velocity interpolation and euler step
+    * Update field derived particle properties as a group with kernel interpolator
+#. make error trapping reponse  more consistent, eg some errors return no info
+#. Fuse Runge-kutta steps loops to reduce RAM-CPU memory traffic
+    * kernal versions of BC walk and vertical walk
+    * fuse BC walk and velocity interpolation using kernals
+
+#. option for particle tracking to work natively in lat/log cords for global scale models
+#. Read release points/polygons from file, eg shape files, csv
 
 
 Possible additions
 ===================
 
-* merge numerical solver and random walk by moving to numerical solution as a stochastic ODE?
+#. find a numba container suitable for passing all fields and part prop as a group by name, to allow assess to all and reduce arguments needed
+
+#. merge numerical solver and random walk by moving to numerical solution as a stochastic ODE?
+
+#. RK45 solver to allow adaptive time stepping to improve accuracy for those particles where flows are rapidly varying in time or space.
+
 
 
 

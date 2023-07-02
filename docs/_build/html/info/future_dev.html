@@ -100,37 +100,8 @@
 <section id="future-additions">
 <h2>Future additions<a class="headerlink" href="#future-additions" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
-<li><p>add status_modifier list of classes, to hold tidal stranding, kill old particles etc</p></li>
-<li><p>more post step bookkeeping to pre step bookkeeping to eliminate 2 costly update_cell</p></li>
-<li><p>find a numba container suitable for passing all fields and part prop as a group by name, to allow assess to all and reduce arguments needed</p></li>
-<li><p>velocity interpolator which tweaks flows parallel to faces with adjacent dry cell or land bounday? after random walk velocity is added?</p></li>
-<li><dl class="simple">
-<dt>Fuse looping for field interpolation for particle properties to reduce RAM-CPU memory traffic</dt><dd><ul class="simple">
-<li><p>kernal version of interpolate fields</p></li>
-<li><p>fuse velocity interpolation and euler step</p></li>
-<li><p>Update field derived particle properties as a group with kernel interpolator</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><p>make error trapping reponse  more consistent, eg some errors return no info</p></li>
-<li><dl class="simple">
-<dt>Fuse Runge-kutta steps loops to reduce RAM-CPU memory traffic</dt><dd><ul class="simple">
-<li><p>kernal versions of BC walk and vertical walk</p></li>
-<li><p>fuse BC walk and velocity interpolation using kernals</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><p>Reader memory shared between parallel cases</p></li>
-<li><p>support for structured grids, eg. ROMS</p></li>
-<li><p>option for particle tracking to work natively in lat/log cords</p></li>
-<li><p>RK45 solver to allow adaptive time stepping to improve accuracy for those particles where flows are rapidly varying in time or space.</p></li>
-<li><p>Read release points/polygons from file, eg shape files, csv</p></li>
-<li><p>system to check data types match those required when used in numba signatures</p></li>
 <li><dl class="simple">
 <dt>Shared/asynchronous reader to speed solution and save total memory, changes required:</dt><dd><ul class="simple">
-<li><p>reader buffer as ring buffer on global hindcast time step</p></li>
 <li><p>set up shared grid and reader field memory in parent and child model runs</p></li>
 <li><p>set up  control variables as shared memory and child and parent responses to reader buffer changes</p></li>
 <li><p>spawn asynchronous model runs, based on parent readers time steps in the buffer</p></li>
@@ -154,13 +125,36 @@
 </dd>
 </dl>
 </li>
+<li><p>velocity interpolator which tweaks flows parallel to faces with adjacent dry cell or land boundary? after random walk velocity is added?</p></li>
+<li><dl class="simple">
+<dt>Fuse looping for field interpolation for particle properties to reduce RAM-CPU memory traffic</dt><dd><ul class="simple">
+<li><p>kernal version of interpolate fields</p></li>
+<li><p>fuse velocity interpolation and euler step</p></li>
+<li><p>Update field derived particle properties as a group with kernel interpolator</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>make error trapping reponse  more consistent, eg some errors return no info</p></li>
+<li><dl class="simple">
+<dt>Fuse Runge-kutta steps loops to reduce RAM-CPU memory traffic</dt><dd><ul class="simple">
+<li><p>kernal versions of BC walk and vertical walk</p></li>
+<li><p>fuse BC walk and velocity interpolation using kernals</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>option for particle tracking to work natively in lat/log cords for global scale models</p></li>
+<li><p>Read release points/polygons from file, eg shape files, csv</p></li>
 </ol>
 </section>
 <section id="possible-additions">
 <h2>Possible additions<a class="headerlink" href="#possible-additions" title="Permalink to this heading">¶</a></h2>
-<ul class="simple">
+<ol class="arabic simple">
+<li><p>find a numba container suitable for passing all fields and part prop as a group by name, to allow assess to all and reduce arguments needed</p></li>
 <li><p>merge numerical solver and random walk by moving to numerical solution as a stochastic ODE?</p></li>
-</ul>
+<li><p>RK45 solver to allow adaptive time stepping to improve accuracy for those particles where flows are rapidly varying in time or space.</p></li>
+</ol>
 </section>
 <section id="minor-features-fixes">
 <h2>Minor features/fixes<a class="headerlink" href="#minor-features-fixes" title="Permalink to this heading">¶</a></h2>

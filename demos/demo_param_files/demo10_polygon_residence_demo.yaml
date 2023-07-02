@@ -13,6 +13,10 @@ output_file_base: demo10_polygon_residence_demo
     initial_value: 20.0
   distance_travelled:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+  my_constant_prop:
+    class_name: oceantracker.particle_properties.constant_part_prop.ConstantParticleProperty
+    value: 100
+    variance: 10.0
 particle_statistics:
   residentpoly:
     class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
