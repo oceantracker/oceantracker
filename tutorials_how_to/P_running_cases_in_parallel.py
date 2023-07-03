@@ -5,11 +5,13 @@
 # 
 # [This note-book is in oceantracker/tutorials_how_to/]
 # 
-# Running in parallel can be done using the "run with parameter dict." approach, or the helper class method.   Both build a base_case, which is the parameter defaults for each case, plus a list of  "cases" parameters specific to each parallel case. The output files for each case will be tagged with a case number, 0-n. The number of computationally active cases is be limited to be one less than the number of physical processes available.  For large runs, memory to store the hindcast for each case may cause an error. To work around this, reduce the number of processors with the setting "processors". 
+# Running in parallel can be done using the "run with parameter dict." approach, or the helper class method.   Both build a base_case, which is the parameter defaults for each case, plus a list of  "cases" parameters specific to each parallel case. The output files for each case will be tagged with a case number, 0-n. The number of computationally active cases is be limited to be one less than the number of physical processes available.   
 # 
 # The cases can be different, eg. have different release groups etc. A small number of settings must be the same for all cases, eg. setting "root_output_folder" must be the same for all cases. These settings will be taken from the base case.  Warnings are given if trying to use different values within case parameters. 
 # 
 # Is is strongly recommend to run parallel cases from within a python script, rather than notebooks which have limitations in Windows and may result in errors.
+# 
+# Note: For large runs, memory to store the hindcast for each case may cause an error. To work around this, reduce the  size of the hindcast buffer, ("reader" class parameter "time_buffer_size"), or reduce the number of processors (setting "processors").
 # 
 # ## Example parallel release groups
 # 
@@ -29,7 +31,7 @@ from oceantracker import main
 
 # first build base case, params used for all cases
 base_case={
-    'output_file_base' :'param_test1',      # name used as base for output files
+    'output_file_base' :'parallel_test1',      # name used as base for output files
     'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
     'time_step' : 120,  #  2 min time step as seconds  
     'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
@@ -68,7 +70,7 @@ if __name__ == '__main__':
 
 # ## Run parallel with helper class
 
-# In[2]:
+# In[3]:
 
 
 # run in parallel using helper class method
@@ -77,7 +79,7 @@ from oceantracker.main import OceanTracker
 ot = OceanTracker()
 # setup base case
 # by default settings and classes are added to base case
-ot.settings(output_file_base= 'param_test1',      # name used as base for output files
+ot.settings(output_file_base= 'parallel_test2',      # name used as base for output files
     root_output_dir='output',             #  output is put in dir   'root_output_dir'/'output_file_base'
     time_step = 120,  #  2 min time step as seconds  
     )
@@ -96,7 +98,7 @@ points = [  [1597682.1237, 5489972.7479],
 
 # build a list of params for each case, with one release group fot each point
 for n, p in enumerate(points):
-    # add a release group with one point to case "n
+    # add a release group with one point to case "n"
     ot.add_class('release_groups',
                 name ='mypoint'+str(n),
                 points= [p],  # needs to be 1, by 2 list for single 2D point

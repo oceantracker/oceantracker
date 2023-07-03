@@ -54,7 +54,7 @@ class MessageLogger(object):
         return  log_file_name, error_file_name
     #todo add abilty to return excecption/traceback?
     def msg(self, msg_text, warning=False, note=False,
-            hint=None, tag=None, tabs=0, crumbs=None,link=None,
+            hint=None, tag=None, tabs=0, crumbs=None, link=None,
             fatal_error=False, exit_now=False, exception = None, traceback_str=None):
 
         if exception is not None:
@@ -97,14 +97,14 @@ class MessageLogger(object):
 
         # write message lines
         for l in m:
-            print(self.screen_tag + ' ' + l)
+            ll = self.screen_tag + ' ' + l
+            print(ll)
             if self.log_file is not None:
-                self.log_file.write(l + '\n')
+                self.log_file.write(ll + '\n')
 
             # keeplist ond warnings errors etc to print at end
             if fatal_error:
                     self.errors_list.append(l)
-
             if warning :
                 if len(self.warnings_list) <= self.max_warnings:
                     self.warnings_list.append(l)

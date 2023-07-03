@@ -38,7 +38,8 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 
 # ________ Barycentric triangle walk________
 @njit()
-def BCwalk_with_move_backs(xq, grid,
+def BCwalk_with_move_backs(xq,
+                           adjacency, bc_transform,dry_cell_index,
                            x_last_good, n_cell,status,bc_cords,
                            active, step_info):
     # Barycentric walk across triangles to find cells
@@ -64,7 +65,7 @@ def BCwalk_with_move_backs(xq, grid,
 
         while n_steps < step_info['max_triangle_walk_steps']:
             # update barcentric cords of xq
-            n_min, n_max = _get_single_BC_cord_numba(xq[n, :], grid['bc_transform'][n_tri, :, :], bc)
+            n_min, n_max = _get_single_BC_cord_numba(xq[n, :], bc_transform[n_tri, :, :], bc)
 
             if bc[n_min] > -step_info['bc_walk_tol'] and bc[n_max] < 1. + step_info['bc_walk_tol']:
                 # are now inside triangle, leave particle status as is
@@ -72,7 +73,7 @@ def BCwalk_with_move_backs(xq, grid,
 
             n_steps += 1
             # move to neighbour triangle at face with smallest bc then test bc cord again
-            next_tri = grid['adjacency'][n_tri, n_min]  # n_min is the face num in  tri to move across
+            next_tri = adjacency[n_tri, n_min]  # n_min is the face num in  tri to move across
 
             if next_tri < 0:
                 # if no new adjacent triangle, then are trying to exit domain at a boundary triangle,
@@ -88,7 +89,7 @@ def BCwalk_with_move_backs(xq, grid,
 
             # check for dry cell
             if step_info['block_dry_cells']:  # is faster split into 2 ifs, not sure why
-                if grid['dry_cell_index'][next_tri] > 128:
+                if dry_cell_index[next_tri] > 128:
                     # treats dry cell like a lateral boundary,  move back and keep triangle the same
                     move_back = True
                     break
@@ -229,7 +230,8 @@ def _eval_z_at_nz_cell( tf,nb, nz_cell, z_level_at_nodes,  nz_bottom_nodes, BCco
 
 
 @njit()
-def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, grid,
+def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
+                                                  triangles,zlevel,bottom_cell_index, z0,
                                                   n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
                                                   active, step_info):
     # find the zlayer for each node of cell containing each particle and at two time slices of hindcast  between nz_bottom and number of z levels
@@ -239,21 +241,21 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, grid,
     # vertical walk to search for a particle's layer in the grid, nz_cell
 
     nb = step_info['nb']
-    top_cell_range = grid['zlevel'].shape[2] -1
-    top_nz_cell = grid['zlevel'].shape[2] - 2
+    top_cell_range = zlevel.shape[2] -1
+    top_nz_cell = zlevel.shape[2] - 2
 
     for nn in prange(active.size): # loop over active particles
         n = active[nn]
 
-        nodes = grid['triangles'][n_cell[n], :]  # nodes for the particle's cell
-        bottom_nz_nodes = grid['bottom_cell_index'][nodes]
+        nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
+        bottom_nz_nodes = bottom_cell_index[nodes]
         bottom_nz_cell = np.min(bottom_nz_nodes)  # cell at bottom is smallest of those in triangle
 
         # preserve status if stranded by tide
         if status[n] == status_stranded_by_tide:
             nz_cell[n] = bottom_nz_cell
             # update nodes above and below
-            z_below = _eval_z_at_nz_cell(step_info['fractional_time_steps'], step_info['nb'], bottom_nz_cell, grid['zlevel'], bottom_nz_nodes, bc_cords[n, :], nodes)
+            z_below = _eval_z_at_nz_cell(step_info['fractional_time_steps'], step_info['nb'], bottom_nz_cell, zlevel, bottom_nz_nodes, bc_cords[n, :], nodes)
             xq[n, 2] = z_below
             z_fraction[n] = 0.0
             continue
@@ -267,7 +269,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, grid,
 
         # find zlevel above and below  current vertical cell
         nz = nz_cell[n]
-        z_below = _eval_z_at_nz_cell(step_info['fractional_time_steps'], nb, nz, grid['zlevel'],bottom_nz_nodes,bc_cords[n, :], nodes)
+        z_below = _eval_z_at_nz_cell(step_info['fractional_time_steps'], nb, nz,zlevel,bottom_nz_nodes,bc_cords[n, :], nodes)
         #print('zz1 ',n_cell[n],status[n],    nz, z_below, zq, bottom_nz_cell, BCcord[n,:])
         if zq > 5:
             pass
@@ -275,7 +277,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, grid,
             # search upwards, do nothing if z_above > zq[n] > z_below, ie current nodes are correct
             for nz in range(nz, top_cell_range):
                 n_vertical_steps += 1
-                z_above = _eval_z_at_nz_cell(step_info['fractional_time_steps'], nb, nz + 1,  grid['zlevel'], bottom_nz_nodes, bc_cords[n, :], nodes)
+                z_above = _eval_z_at_nz_cell(step_info['fractional_time_steps'], nb, nz + 1,  zlevel, bottom_nz_nodes, bc_cords[n, :], nodes)
                 if zq <= z_above:
                     break
             if zq > z_above:
@@ -286,7 +288,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, grid,
             # search downwards
             #todo put in range form above?
             z_above  = z_below
-            z_below = _eval_z_at_nz_cell(step_info['fractional_time_steps'], nb, nz - 1, grid['zlevel'], bottom_nz_nodes, bc_cords[n, :], nodes)
+            z_below = _eval_z_at_nz_cell(step_info['fractional_time_steps'], nb, nz - 1, zlevel, bottom_nz_nodes, bc_cords[n, :], nodes)
             while zq < z_below:
                 #print('down ', nz, z_below, zq, z_above)
                 if nz <= bottom_nz_cell:
@@ -295,13 +297,13 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, grid,
                     break  # found cell
                 nz -= 1
                 z_above = z_below  # retain for dz calc.
-                z_below = _eval_z_at_nz_cell(step_info['fractional_time_steps'], nb, nz, grid['zlevel'], bottom_nz_nodes, bc_cords[n, :], nodes)
+                z_below = _eval_z_at_nz_cell(step_info['fractional_time_steps'], nb, nz, zlevel, bottom_nz_nodes, bc_cords[n, :], nodes)
                 n_vertical_steps += 1
 
         # nz now holds required cell
         dz = z_above - z_below
         # get z linear z_fraction
-        if dz < grid['z0']:
+        if dz < z0:
             z_fraction[n] = 0.0
         else:
             z_fraction[n] = (zq - z_below) / dz
@@ -312,16 +314,16 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, grid,
         if nz == bottom_nz_cell:
             z_bot = z_below
             # set status if on the bottom set status
-            if zq < z_bot + grid['z0']:
+            if zq < z_bot + z0:
                 status[n] = status_on_bottom
                 zq = z_bot
 
             # get z_fraction for log layer
-            if dz < grid['z0']:
+            if dz < z0:
                 z_fraction_bottom_layer[n] = 0.0
             else:
                 # adjust z fraction so that linear interp acts like log layer
-                z0p = grid['z0'] / dz
+                z0p = z0 / dz
                 z_fraction_bottom_layer[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
 
         # record new depth cell

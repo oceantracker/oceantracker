@@ -23,7 +23,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         super().__init__()  # required
 
 
-    def run(self, working_params):
+    def run_case(self, working_params):
         si=self.shared_info
         si.reset()  # clear out classes from class instance of SharedInfo if running series of mains
         d0 = datetime.now()
@@ -85,7 +85,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.classes['dispersion'].initial_setup()
         if si.hydro_model_is3D:
             si.classes['resuspension'].initial_setup()
-
 
 
         # check particle properties have other particle properties, fields and other compatibles they require

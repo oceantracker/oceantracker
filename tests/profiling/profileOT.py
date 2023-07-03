@@ -58,39 +58,38 @@ def get_params(datasource=1):
         {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': True,
          'time_step': time_step,
          'max_threads' : 5,
-            'screen_output_time_interval':6*time_step,
-         'duration': 6 *24*3600,  # 10 days
+        'screen_output_time_interval':6*time_step,
+         'max_run_duration': 6 *24*3600,  # 10 days
          'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': input_dir,
                     'file_mask': file_mask,
                     'field_variables': {'water_temperature': 'temp'}
                     },
-       'write_tracks': False,
-                              'dispersion': {'A_H': .2, 'A_V': 0.001},
-                              'release_groups': [{'points': points,
-                                                           'pulse_size': pulse_size, 'release_interval': release_interval,
-                                                           'allow_release_in_dry_cells': True},
-                                                          {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
-                                                           'points': poly_points,
-                                                           'pulse_size': pulse_size, 'release_interval': release_interval}
-                                                          ],
-                              'particle_properties': [{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
-                                                       'decay_time_scale': 1. * 3600 * 24}],
-                              'event_loggers': [{'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
+        'write_tracks': False,
+        'dispersion': {'A_H': .2, 'A_V': 0.001},
+        'release_groups': {'p1':{'points': points,
+                                'pulse_size': pulse_size, 'release_interval': release_interval,
+                                'allow_release_in_dry_cells': True},
+                           'p12': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
+                                     'points': poly_points,
+                                      'pulse_size': pulse_size, 'release_interval': release_interval}
+                                                 },
+                            'particle_properties': {'decay1':{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
+                                                       'decay_time_scale': 1. * 3600 * 24}},
+            'event_loggers': {'event1': {'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
                                                  'particle_prop_to_write_list': ['ID', 'x', 'IDrelease_group', 'status', 'age'],
                                                  'polygon_list': [{'user_polygon_name': 'A', 'points': (np.asarray(poly_points) + np.asarray([-5000, 0])).tolist()},                                                                                                                ]
-                                                 }],
-                                'particle_statistics' : [
-                                        {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
+                                                 }},
+            'particle_statistics' : { 'statas1':  {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'grid_size': [220, 221],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},
-                                        {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
+                                        'statas2':  {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.,
                                          'polygon_list': [{'points': poly_points}]}
-    ]
-                              }
+                                                        }
+                                                         }
 
 
     return params
@@ -109,7 +108,7 @@ def run(profiler_name, params):
     ri = read_JSON(run_info_file)
     d = path.join(profile_dir, profiler_name, params['output_file_base'], platform.processor().replace(' ', '_').replace(',', '_'))
     makedirs(d, exist_ok=True)
-    fnn = path.join(d, results_file + '_CodeVer_' + ri['code_version_info']['version'].replace(' ', '_').replace(',', '_'))
+    fnn = path.join(d, results_file + '_CodeVer_' + ri['version_info']['version'].replace(' ', '_').replace(',', '_'))
 
     # copy case file
     ci = read_JSON(case_info_file)
@@ -153,6 +152,7 @@ if __name__ == '__main__':
 
         with open(fnn + '.html', mode='w') as f:
             f.write(profiler.output_html(timeline=False))
+        print('written Pyinstrument html')
 
     elif args.profiler == 2:
         #params['profiler'] = 'none'

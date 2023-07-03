@@ -58,22 +58,6 @@ class Solver(ParameterBaseClass):
                 v1 =val.copy(),v2 =val.copy(),v3 =val.copy(),v4 =val.copy(),
                 v=val.copy()
                 ))  # barycentric coords
-        if False:
-            # wrap kernal solver with signature
-            interp = si.classes['interpolator']
-            pgm = si.classes['particle_group_manager']
-            sig =[  nbt.float64,
-                    nbt.float32[:, :, :, :],
-                    from_dtype(interp.grid_as_struct.dtype),
-                   from_dtype(pgm.part_prop_as_struct.dtype),
-                   from_dtype(interp.step_info.dtype),
-                   from_dtype(self.kernal_solver_info.dtype),
-                   nbt.float64,
-                   typeof(self.params['RK_order']),
-                   nbt.float32[:]]
-            #'(nestedarray(float64, (947, 3)), Tuple(float32, slice<a:b>))
-
-            self.kernal_solver_fun = njitter(triangle_kernnal_solver.RKsolver, sig)
 
     #@profile
     def solve(self):
@@ -105,10 +89,10 @@ class Solver(ParameterBaseClass):
 
         t0_model = perf_counter()
         free_wheeling =False
-        self.t0_step = perf_counter()
+
         # run forwards through model time variable, which for backtracking are backwards in time
         for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
-
+            t0_step = perf_counter()
 
             time_sec = model_times[nt]
 
@@ -127,9 +111,7 @@ class Solver(ParameterBaseClass):
 
             free_wheeling = False # has ended
 
-            # print progress to screen
-            if nt % nt_write_time_step_to_screen == 0:
-                self.screen_output(si.solver_info['time_steps_completed'], time_sec, t0_model)
+
 
             # alive partiles so do steps
             info['total_alive_particles'] += num_alive
@@ -157,6 +139,9 @@ class Solver(ParameterBaseClass):
             #self.kernal_solver(time_sec, is_moving)
             #--------------------------------------
 
+            # print progress to screen
+            if nt % nt_write_time_step_to_screen == 0:
+                self.screen_output(si.solver_info['time_steps_completed'], time_sec, t0_model, t0_step)
 
             t2 = time_sec + info['model_time_step'] * si.model_direction
 
@@ -170,7 +155,7 @@ class Solver(ParameterBaseClass):
         # write out props etc at last step
         if nt > 0:# if more than on set completed
             self.pre_step_bookkeeping(nt, t2)
-            self.screen_output(si.solver_info['time_steps_completed'], t2, t0_model)
+            self.screen_output(si.solver_info['time_steps_completed'], t2, t0_model,t0_step)
 
         info['model_end_time'] = t2
         info['model_end_date'] = t2.astype('datetime64[s]')
@@ -301,7 +286,7 @@ class Solver(ParameterBaseClass):
 
         #print('xxx', x2[:10, :] - x1[:10, :],v[:10,:])
 
-    def screen_output(self, nt, time_sec,t0_model):
+    def screen_output(self, nt, time_sec,t0_model, t0_step):
 
         si= self.shared_info
         interp_info= si.classes["interpolator"].step_info #todo more than one reader?
@@ -320,9 +305,9 @@ class Solver(ParameterBaseClass):
         if elapsed_time > 300.:
             s += ' remaining: ' + time_util.seconds_to_hours_mins_string(abs(remaining_time)) +','
 
-        s += f' step time = { (perf_counter() - self.t0_step) * 1000:4.1f} ms'
+        s += f' step time = { (perf_counter() - t0_step) * 1000:4.1f} ms'
         si.msg_logger.msg(s)
-        self.t0_step = perf_counter() # start for next step
+
 
     def _update_stats(self,time_sec):
         # update and write stats
