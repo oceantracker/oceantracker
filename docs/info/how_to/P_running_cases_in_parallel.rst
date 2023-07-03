@@ -9,9 +9,7 @@ the parameter defaults for each case, plus a list of “cases” parameters
 specific to each parallel case. The output files for each case will be
 tagged with a case number, 0-n. The number of computationally active
 cases is be limited to be one less than the number of physical processes
-available. For large runs, memory to store the hindcast for each case
-may cause an error. To work around this, reduce the number of processors
-with the setting “processors”.
+available.
 
 The cases can be different, eg. have different release groups etc. A
 small number of settings must be the same for all cases, eg. setting
@@ -22,6 +20,11 @@ different values within case parameters.
 Is is strongly recommend to run parallel cases from within a python
 script, rather than notebooks which have limitations in Windows and may
 result in errors.
+
+Note: For large runs, memory to store the hindcast for each case may
+cause an error. To work around this, reduce the size of the hindcast
+buffer, (“reader” class parameter “time_buffer_size”), or reduce the
+number of processors (setting “processors”).
 
 Example parallel release groups
 -------------------------------
@@ -48,7 +51,7 @@ Run parallel using param. dicts.
     
     # first build base case, params used for all cases
     base_case={
-        'output_file_base' :'param_test1',      # name used as base for output files
+        'output_file_base' :'parallel_test1',      # name used as base for output files
         'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
         'time_step' : 120,  #  2 min time step as seconds  
         'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
@@ -91,17 +94,17 @@ Run parallel using param. dicts.
     main: OceanTracker- preliminary setup
     main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
     main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.007 sec
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
+    main:       -  sorted hyrdo-model files in time order,	  0.009 sec
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test1
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test1_raw_user_params.json"
     main:   -  oceantracker:multiProcessing: processors:4
     main:   - parallel pool complete
-    main:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
-    main:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
+    main:     >>> Note: run summary with case file names   "parallel_test1_runInfo.json"
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test1
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test1_raw_user_params.json"
+    main:     >>> Note: run summary with case file names   "parallel_test1_runInfo.json"
     main: --------------------------------------------------------------------------
-    main: OceanTracker summary:  elapsed time =0:00:16.945569
+    main: OceanTracker summary:  elapsed time =0:00:16.484425
     main:       Cases -   0 errors,   0 warnings,   8 notes, check above
     main:       Helper-   0 errors,   0 warnings,   0 notes, check above
     main:       Main  -   0 errors,   0 warnings,   3 notes, check above
@@ -119,7 +122,7 @@ Run parallel with helper class
     ot = OceanTracker()
     # setup base case
     # by default settings and classes are added to base case
-    ot.settings(output_file_base= 'param_test1',      # name used as base for output files
+    ot.settings(output_file_base= 'parallel_test2',      # name used as base for output files
         root_output_dir='output',             #  output is put in dir   'root_output_dir'/'output_file_base'
         time_step = 120,  #  2 min time step as seconds  
         )
@@ -138,7 +141,7 @@ Run parallel with helper class
     
     # build a list of params for each case, with one release group fot each point
     for n, p in enumerate(points):
-        # add a release group with one point to case "n
+        # add a release group with one point to case "n"
         ot.add_class('release_groups',
                     name ='mypoint'+str(n),
                     points= [p],  # needs to be 1, by 2 list for single 2D point
@@ -162,17 +165,17 @@ Run parallel with helper class
     main: OceanTracker- preliminary setup
     main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
     main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.175 sec
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
+    main:       -  sorted hyrdo-model files in time order,	  0.007 sec
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test2
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test2_raw_user_params.json"
     main:   -  oceantracker:multiProcessing: processors:4
     main:   - parallel pool complete
-    main:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
-    main:     >>> Note: run summary with case file names   "param_test1_runInfo.json"
+    main:     >>> Note: run summary with case file names   "parallel_test2_runInfo.json"
+    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test2
+    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test2_raw_user_params.json"
+    main:     >>> Note: run summary with case file names   "parallel_test2_runInfo.json"
     main: --------------------------------------------------------------------------
-    main: OceanTracker summary:  elapsed time =0:00:16.812942
+    main: OceanTracker summary:  elapsed time =0:00:16.423857
     main:       Cases -   0 errors,   0 warnings,   8 notes, check above
     main:       Helper-   0 errors,   0 warnings,   0 notes, check above
     main:       Main  -   0 errors,   0 warnings,   3 notes, check above

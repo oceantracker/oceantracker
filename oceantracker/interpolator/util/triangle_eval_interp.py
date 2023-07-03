@@ -152,13 +152,13 @@ def eval_water_velocity_3D(nb,fractional_time_steps, V_out, V_data,
                 pass
 
 @njit
-def update_dry_cell_index( grid, step_info):
+def update_dry_cell_index(is_dry_cell,dry_cell_index, step_info):
     # up date 0-255 dry cell index, used to determine if cell dry at this time
     # uses  reader buffer locations and time step fractions within step info structure
-    for n in range(grid['dry_cell_index'].size):
-        val  = step_info['fractional_time_steps'][1]*grid['is_dry_cell'][step_info['nb'][0], n]
-        val += step_info['fractional_time_steps'][0]*grid['is_dry_cell'][step_info['nb'][1], n]
-        grid['dry_cell_index'][n]  = int(255.*val)
+    for n in range(dry_cell_index.size):
+        val  = step_info['fractional_time_steps'][1]*is_dry_cell[step_info['nb'][0], n]
+        val += step_info['fractional_time_steps'][0]*is_dry_cell[step_info['nb'][1], n]
+        dry_cell_index[n]  = int(255.*val)
 
 # below are development ideas
 #_______________________________________________

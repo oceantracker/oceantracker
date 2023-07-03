@@ -124,11 +124,12 @@ class OceanTracker():
         if case is None: return self.params
 
         if type(case) != int or case < 0:
-            ml.msg(f'Parallel case number nust be a interger >0, got case # "{str(case)}"', fatal_error=True, crumbs=crumbs)
+            ml.msg(f'Parallel case number nust be a integer >0, got case # "{str(case)}"', fatal_error=True, crumbs=crumbs)
             return
 
         # expand case list to fit case if needed
         if len(self.case_list) < case+1 :
+            ml.progress_marker(f'Adding parallel case number # "{str(case)}"')
             for n in range(len(self.case_list), case+1):
                 self.case_list.append(deepcopy(param_template()))
 
@@ -168,8 +169,8 @@ class _OceanTrackerRunner(object):
             # keep oceantracker_case_runner out of main namespace
             from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
             # make instance of case runer and run it with decomposed working params
-            ot = OceanTrackerCaseRunner()
-            case_info_file, case_msg = ot.run(working_params)
+            ot_case_runner = OceanTrackerCaseRunner()
+            case_info_file, case_msg = ot_case_runner.run_case(working_params)
 
         except Exception as e:
             # ensure message loggers are closed
@@ -369,7 +370,7 @@ class _OceanTrackerRunner(object):
         from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
 
         ot = OceanTrackerCaseRunner()
-        caseInfo_file, return_msgs= ot.run(deepcopy(working_params))
+        caseInfo_file, return_msgs= ot.run_case(deepcopy(working_params))
         return caseInfo_file, return_msgs
 
     def _decompose_params(self, params, full_checks=True, crumbs=None):
@@ -412,11 +413,7 @@ class _OceanTrackerRunner(object):
 
             elif k in common_info.shared_settings_defaults.keys():
 
-                if key not in common_info.all_default_settings.keys():
-                    spell_check_util.spell_check(key, common_info.all_default_settings.keys(), ml,'ignoring this setting',
-                                crumbs=crumbs + f' setting "{key}"')
-                else:
-                    w['shared_settings'][k] = item
+                w['shared_settings'][k] = item
 
             elif k in common_info.case_settings_defaults.keys():
                     w['case_settings'][k] = item
@@ -592,11 +589,9 @@ def param_template():
     # return an empty parameter dictionary
 
     d = {}
-    for key in sorted(common_info.all_default_settings.keys()):
-        if type(common_info.all_default_settings[key]) is dict:
-            d[key] = {}
-        else:
-            d[key] = None
+    all_settings=list(common_info.shared_settings_defaults.keys())+ list(common_info.case_settings_defaults.keys())
+    for key in all_settings:
+        d[key] = None
 
     for key in sorted(common_info.core_classes.keys()):
         d[key] = {}

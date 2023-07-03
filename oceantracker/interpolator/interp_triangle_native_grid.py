@@ -7,9 +7,7 @@ from oceantracker.interpolator._base_interp import _BaseInterp
 from oceantracker.util import basic_util
 from oceantracker.util.profiling_util import function_profiler
 from time import perf_counter
-from oceantracker.util import numba_util
 from oceantracker.util import numpy_util
-from numba import typeof, types as nbt, from_dtype
 
 from oceantracker.interpolator.util import triangle_interpolator_util as tri_interp_util ,  triangle_eval_interp
 
@@ -75,8 +73,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         #todo z0, move this where grid is built?
         grid['z0'] = si.settings['z0']
-
-        self.grid_as_struct = numpy_util.numpy_structure_from_dict(grid)
 
         # build cell walk info
         step_info_dict = dict( is_3D_run = si.is_3D_run,
@@ -297,6 +293,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if sel.size > 0:
             wf = {'x0':part_prop['x_last_good'].get_values(sel),
                   'xq':part_prop['x'].get_values(sel) }
+            wi = info['walk_info']
             wi['walk_failures']['retries'].append(wf)
 
             st['triangle_walks_retried'] += sel.size
@@ -331,12 +328,12 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         n_cell = part_prop['n_cell'].data
         status = part_prop['status'].data
         bc_cords = part_prop['bc_cords'].data
-
-        grid_struct= self.grid_as_struct
+        grid = self.grid
         st = self.step_info
 
         # used 2D or 3D walk chosen above
-        tri_interp_util.BCwalk_with_move_backs(xq, grid_struct,
+        tri_interp_util.BCwalk_with_move_backs(xq,
+                                               grid['adjacency'], grid['bc_transform'], grid['dry_cell_index'],
                                                x_last_good, n_cell, status, bc_cords,
                                                active, st)
 
@@ -344,7 +341,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             nz_cell = part_prop['nz_cell'].data
             z_fraction = part_prop['z_fraction'].data
             z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
-            tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq, grid_struct,
+            tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
+                                                                          grid['triangles'],grid['zlevel'],grid['bottom_cell_index'], si.z0,
                                                                           n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
                                                                           active, st)
 
@@ -385,7 +383,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def update_dry_cells(self):
         # update 0-255 dry cell index
-        triangle_eval_interp.update_dry_cell_index(self.grid_as_struct,self.step_info)
+        grid= self.grid
+        triangle_eval_interp.update_dry_cell_index(grid['is_dry_cell'],grid['dry_cell_index'],self.step_info)
 
     def close(self):
         si=self.shared_info

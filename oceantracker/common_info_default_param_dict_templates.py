@@ -4,7 +4,7 @@ package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
 
-code_version = '0.4.00.011 2023-05-20'
+code_version = '0.4.01.000 2023-07-03'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 
@@ -48,9 +48,6 @@ case_settings_defaults ={
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
               }
 
-all_default_settings = shared_settings_defaults
-all_default_settings.update(case_settings_defaults)
-#'release_groups': 'oceantracker.release_groups.point_release.PointRelease',
 
 core_classes= { 'reader': {},
    'solver': {'class_name': 'oceantracker.solver.solver.Solver'},

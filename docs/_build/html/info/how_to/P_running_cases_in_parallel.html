@@ -108,9 +108,7 @@ the parameter defaults for each case, plus a list of “cases” parameters
 specific to each parallel case. The output files for each case will be
 tagged with a case number, 0-n. The number of computationally active
 cases is be limited to be one less than the number of physical processes
-available. For large runs, memory to store the hindcast for each case
-may cause an error. To work around this, reduce the number of processors
-with the setting “processors”.</p>
+available.</p>
 <p>The cases can be different, eg. have different release groups etc. A
 small number of settings must be the same for all cases, eg. setting
 “root_output_folder” must be the same for all cases. These settings will
@@ -119,6 +117,10 @@ different values within case parameters.</p>
 <p>Is is strongly recommend to run parallel cases from within a python
 script, rather than notebooks which have limitations in Windows and may
 result in errors.</p>
+<p>Note: For large runs, memory to store the hindcast for each case may
+cause an error. To work around this, reduce the size of the hindcast
+buffer, (“reader” class parameter “time_buffer_size”), or reduce the
+number of processors (setting “processors”).</p>
 <section id="example-parallel-release-groups">
 <h2>Example parallel release groups<a class="headerlink" href="#example-parallel-release-groups" title="Permalink to this heading">¶</a></h2>
 <p>The below example runs a separate release group as its own parallel
@@ -138,7 +140,7 @@ another process” errors.</p>
 
 <span class="c1"># first build base case, params used for all cases</span>
 <span class="n">base_case</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;output_file_base&#39;</span> <span class="p">:</span><span class="s1">&#39;param_test1&#39;</span><span class="p">,</span>      <span class="c1"># name used as base for output files</span>
+    <span class="s1">&#39;output_file_base&#39;</span> <span class="p">:</span><span class="s1">&#39;parallel_test1&#39;</span><span class="p">,</span>      <span class="c1"># name used as base for output files</span>
     <span class="s1">&#39;root_output_dir&#39;</span><span class="p">:</span><span class="s1">&#39;output&#39;</span><span class="p">,</span>             <span class="c1">#  output is put in dir   &#39;root_output_dir&#39;/&#39;output_file_base&#39;</span>
     <span class="s1">&#39;time_step&#39;</span> <span class="p">:</span> <span class="mi">120</span><span class="p">,</span>  <span class="c1">#  2 min time step as seconds</span>
     <span class="s1">&#39;reader&#39;</span><span class="p">:{</span><span class="s1">&#39;input_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;../demos/demo_hindcast&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
@@ -179,17 +181,17 @@ another process” errors.</p>
 main: OceanTracker- preliminary setup
 main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
 main:   - found hydro-model files of type SCHISIM
-main:       -  sorted hyrdo-model files in time order,        0.007 sec
-main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1
-main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;param_test1_raw_user_params.json&quot;
+main:       -  sorted hyrdo-model files in time order,        0.009 sec
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test1
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test1_raw_user_params.json&quot;
 main:   -  oceantracker:multiProcessing: processors:4
 main:   - parallel pool complete
-main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
-main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1
-main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;param_test1_raw_user_params.json&quot;
-main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test1_runInfo.json&quot;
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test1
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test1_raw_user_params.json&quot;
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test1_runInfo.json&quot;
 main: --------------------------------------------------------------------------
-main: OceanTracker summary:  elapsed time =0:00:16.945569
+main: OceanTracker summary:  elapsed time =0:00:16.484425
 main:       Cases -   0 errors,   0 warnings,   8 notes, check above
 main:       Helper-   0 errors,   0 warnings,   0 notes, check above
 main:       Main  -   0 errors,   0 warnings,   3 notes, check above
@@ -203,7 +205,7 @@ main: --------------------------------------------------------------------------
 <span class="n">ot</span> <span class="o">=</span> <span class="n">OceanTracker</span><span class="p">()</span>
 <span class="c1"># setup base case</span>
 <span class="c1"># by default settings and classes are added to base case</span>
-<span class="n">ot</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">output_file_base</span><span class="o">=</span> <span class="s1">&#39;param_test1&#39;</span><span class="p">,</span>      <span class="c1"># name used as base for output files</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">output_file_base</span><span class="o">=</span> <span class="s1">&#39;parallel_test2&#39;</span><span class="p">,</span>      <span class="c1"># name used as base for output files</span>
     <span class="n">root_output_dir</span><span class="o">=</span><span class="s1">&#39;output&#39;</span><span class="p">,</span>             <span class="c1">#  output is put in dir   &#39;root_output_dir&#39;/&#39;output_file_base&#39;</span>
     <span class="n">time_step</span> <span class="o">=</span> <span class="mi">120</span><span class="p">,</span>  <span class="c1">#  2 min time step as seconds</span>
     <span class="p">)</span>
@@ -222,7 +224,7 @@ main: --------------------------------------------------------------------------
 
 <span class="c1"># build a list of params for each case, with one release group fot each point</span>
 <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
-    <span class="c1"># add a release group with one point to case &quot;n</span>
+    <span class="c1"># add a release group with one point to case &quot;n&quot;</span>
     <span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;release_groups&#39;</span><span class="p">,</span>
                 <span class="n">name</span> <span class="o">=</span><span class="s1">&#39;mypoint&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
                 <span class="n">points</span><span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">],</span>  <span class="c1"># needs to be 1, by 2 list for single 2D point</span>
@@ -244,17 +246,17 @@ main: --------------------------------------------------------------------------
 main: OceanTracker- preliminary setup
 main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
 main:   - found hydro-model files of type SCHISIM
-main:       -  sorted hyrdo-model files in time order,        0.175 sec
-main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1
-main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;param_test1_raw_user_params.json&quot;
+main:       -  sorted hyrdo-model files in time order,        0.007 sec
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test2
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test2_raw_user_params.json&quot;
 main:   -  oceantracker:multiProcessing: processors:4
 main:   - parallel pool complete
-main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
-main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1
-main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;param_test1_raw_user_params.json&quot;
-main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_test1_runInfo.json&quot;
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test2_runInfo.json&quot;
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test2
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test2_raw_user_params.json&quot;
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test2_runInfo.json&quot;
 main: --------------------------------------------------------------------------
-main: OceanTracker summary:  elapsed time =0:00:16.812942
+main: OceanTracker summary:  elapsed time =0:00:16.423857
 main:       Cases -   0 errors,   0 warnings,   8 notes, check above
 main:       Helper-   0 errors,   0 warnings,   0 notes, check above
 main:       Main  -   0 errors,   0 warnings,   3 notes, check above
