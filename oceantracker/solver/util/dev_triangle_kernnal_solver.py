@@ -13,7 +13,7 @@ def RKsolver(time_sec,vel_field, grid, part_prop, interp_step_info, ksi, time_st
     #   v = (v1 + 2.0 * (v2 + v3) + v4) /6
     #  x2 = x1 +  v*dt
 
-    st= interp_step_info
+
     velocity_modifier = part_prop['velocity_modifier']
     n_dims = part_prop['x'].shape[1]
 

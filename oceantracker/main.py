@@ -192,7 +192,7 @@ class _OceanTrackerRunner(object):
         ml =self.msg_logger
 
         ml.print_line()
-        ml.msg(OTname +'- preliminary setup')
+        ml.msg(f' {OTname} version {common_info.code_version} - preliminary setup')
         self._check_python_version()
 
         ml.exit_if_prior_errors('parameters have errors')
