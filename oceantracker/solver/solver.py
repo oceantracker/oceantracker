@@ -289,11 +289,11 @@ class Solver(ParameterBaseClass):
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
         si= self.shared_info
-        interp_info= si.classes["interpolator"].step_info #todo more than one reader?
+        interp_info= si.classes["interpolator"].info #todo more than one reader?
 
         fraction_done= abs((time_sec - si.solver_info['model_start_time']) / si.solver_info['model_duration'])
         s = f'{100* fraction_done:02.0f}%'
-        s += f' step {nt:04d}:H{interp_info["current_hydro_model_step"]:04d}b{interp_info["nb"][0]:02d}-{interp_info["nb"][1]:02d}'
+        s += f' step {nt:04d}:H{interp_info["current_hydro_model_step"]:04d}b{interp_info["current_buffer_steps"][0]:02d}-{interp_info["current_buffer_steps"][1]:02d}'
         t = abs(time_sec - si.solver_info['model_start_time'])
         s += ' Day ' + ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)

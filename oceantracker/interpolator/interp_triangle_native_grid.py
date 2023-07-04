@@ -55,8 +55,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             p.create_particle_property('z_fraction','manual_update',dict(   write=False, dtype=np.float32, initial_value=0.))
             p.create_particle_property('z_fraction_bottom_layer','manual_update', dict( write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
-        # set up place for walk info failures
-        self.info['walk_info'] = {'walk_failures': {'retries': [],'full_failures':[]}}
+
 
         # attach a reader to this interpolator
         self.reader = si.classes['reader']
@@ -70,51 +69,57 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         grid = self.grid
         fi = reader.info['file_info']
         bi = reader.info['buffer_info']
+        info = self.info
+        info['current_hydro_model_step']= 0
+        info['current_fractional_time_steps']= np.zeros((2,), dtype=np.float64)
+        info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
 
-        #todo z0, move this where grid is built?
-        grid['z0'] = si.settings['z0']
+        # set up place for walk info failures
+        info['tri_walk_full_failures'] = []
 
-        # build cell walk info
-        step_info_dict = dict( is_3D_run = si.is_3D_run,
-                        max_triangle_walk_steps =  self.params[ 'max_search_steps'],
-                        open_boundary_type= si.settings['open_boundary_type'],
-                        block_dry_cells=si.settings['block_dry_cells'],
-                        bc_walk_tol=self.params[ 'bc_walk_tol'],
-                        particles_located_by_walking=0,
-                        number_of_triangles_walked=0,
-                        longest_triangle_walk= 0,
-                        nans_encountered_triangle_walk=0,
-                        triangle_walks_retried=0,
-                        particles_killed_after_triangle_walk_retry_failed=0,
-                        total_vertical_steps_walked=0,
-                        longest_vertical_walk=0,
-                        nb = np.zeros((2,),dtype=np.int32),
-                        fractional_time_steps=np.zeros((2,),dtype=np.float64),
-                        # information needed to work out location in reader buffer
-                        hindcast_first_time=fi['first_time'],
-                        hindcast_last_time=fi['last_time'],
-                        n_time_steps_in_hindcast= fi['n_time_steps_in_hindcast'],
-                        time_buffer_size =  bi['buffer_size'],
-                        model_direction= int(si.model_direction),
-                        current_hydro_model_step= 0,
-                        hydro_model_time_step =reader.info['file_info']['hydro_model_time_step']
-                        )
-        self.step_info= numpy_util.numpy_structure_from_dict(step_info_dict) # class to use inside numba functions
-
+        # set up walk count vector and map to info
+        self.walk_counts=np.zeros((8,),dtype=np.int64)
+        wc = self.walk_counts
+        info.update(dict(   particles_located_by_walking = wc[0:1],
+                            number_of_triangles_walked = wc[1:2],
+                            longest_triangle_walk = wc[2:3],
+                            nans_encountered_triangle_walk = wc[3:4],
+                            triangle_walks_retried = wc[4:5],
+                            particles_killed_after_triangle_walk_retry_failed = wc[5:6],
+                            total_vertical_steps_walked = wc[6:7],
+                            longest_vertical_walk = wc[7:8])
+                            )
 
     def setup_interp_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
+        si = self.shared_info
         info = self.info
         reader = self.reader
+        fi = reader.info['file_info']
+        bi = reader.info['buffer_info']
         grid = reader.grid
-        st = self.step_info
+
 
         # set buffer index from this time and next inside stepinfo
-        tri_interp_util.set_hindcast_buffer_steps(time_sec,st)
+        # get next two buffer time steps around the given time in reader ring buffer
+        # plus global time step locations and time ftactions od timre step
+        # put results in interpolators step info numpy structure
+        hindcast_fraction = (time_sec - fi['first_time']) / (fi['last_time']- fi['first_time'])
+        info['current_hydro_model_step'] = int((fi['n_time_steps_in_hindcast'] - 1) * hindcast_fraction)  # global hindcast time step
 
-        time_hindcast = grid['time'][st['nb'][0]]
-        tri_interp_util.set_time_fractions(time_sec, time_hindcast, st)
+        # ring buffer locations of surounding steps
+        info['current_buffer_steps'][0] = info['current_hydro_model_step'] %  bi['buffer_size']
+        info['current_buffer_steps'][1] = (info['current_hydro_model_step'] + int(si.model_direction)) %  bi['buffer_size']
+
+        time_hindcast = grid['time'][  info['current_buffer_steps'][0]]
+
+        # sets the fraction of time step that current time is between
+        # surrounding hindcast time steps
+        # abs makes it work when backtracking
+        s = abs(time_sec - time_hindcast) / fi['hydro_model_time_step']
+        info['current_fractional_time_steps'][0] = s
+        info['current_fractional_time_steps'][1] = 1.0 - s
 
         # find cell for xq, node list and weight for interp at calls
         self.find_cell(xq, active)
@@ -135,9 +140,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         part_prop = si.classes['particle_properties']
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
-        st = self.step_info
-        nb = st['nb']
-        fractional_time_steps = st['fractional_time_steps']
+        info = self.info
+        nb = info['current_buffer_steps']
+        fractional_time_steps = info['current_fractional_time_steps']
 
         if field_instance.is3D():
             nz_cell = part_prop['nz_cell'].data
@@ -187,9 +192,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         part_prop = si.classes['particle_properties']
         grid = self.grid
         triangles = grid['triangles']
-        st = self.step_info
-        nb = st['nb']
-        fractional_time_steps = st['fractional_time_steps']
+        info = self.info
+        nb = info['current_buffer_steps']
+        fractional_time_steps = info['current_fractional_time_steps']
 
         if field_instance.is_time_varying():
             triangle_eval_interp.time_dependent_2Dfield(nb, fractional_time_steps,basic_util.atLeast_Nby1(output),
@@ -210,17 +215,14 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # particle_prop_name
         # in place evaluation of field interpolation
         si = self.shared_info
-        part_prop = si.classes['particle_properties']
         grid = self.grid
         triangles = grid['triangles']
-        st = self.step_info
+        info = self.info
 
         if field_instance.is_time_varying():
-            st = self.step_info
-            nb = st['nb']
-            fractional_time_steps = st['fractional_time_steps']
-            triangle_eval_interp.time_dependent_3Dfield(nb ,fractional_time_steps, field_instance.data,
-                           triangles,bottom_cell_index,
+            triangle_eval_interp.time_dependent_3Dfield(info['current_buffer_steps'], info['current_fractional_time_steps'],
+                                                    field_instance.data,
+                           triangles, bottom_cell_index,
                            n_cell, bc_cords, nz_cell, z_fraction,
                            basic_util.atLeast_Nby1(output), active)
         else:
@@ -239,7 +241,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         part_prop = si.classes['particle_properties']
         grid = self.grid
-        st = self.step_info
 
         # is no output name give particle property for output is same as hindcast fieldName
         if output is None:
@@ -281,7 +282,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # nt give but not needed in 2D
         si= self.shared_info
         info = self.info
-        st = self.step_info
 
         # used 2D or 3D walk chosen above
         self._do_walk(xq, active)
@@ -291,12 +291,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_partID_subset_buffer('B1'))
         if sel.size > 0:
-            wf = {'x0':part_prop['x_last_good'].get_values(sel),
-                  'xq':part_prop['x'].get_values(sel) }
-            wi = info['walk_info']
-            wi['walk_failures']['retries'].append(wf)
-
-            st['triangle_walks_retried'] += sel.size
+            info['triangle_walks_retried'] += sel.size
             new_cell  = self.initial_cell_guess(xq[sel,:])
             part_prop['n_cell'].set_values(new_cell, sel)
 
@@ -308,8 +303,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 wf = {'x0': part_prop['x_last_good'].get_values(sel),
                       'xq': part_prop['x'].get_values(sel)}
 
-                wi['walk_failures']['full_failures'].append(wf)
-                st['particles_killed_after_triangle_walk_retry_failed'] += sel.size # total failed walks
+                info['tri_walk_full_failures'].append(wf)
+                info['particles_killed_after_triangle_walk_retry_failed'] += sel.size # total failed walks
                 si.msg_logger.msg('walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles',warning=True,tabs=0,
                                   hint='Try decreasing time step or increasing interpolator parameter "max_search_steps", current value =' + str(self.params['max_search_steps']))
                 # make notes for log file enabling follow up
@@ -322,20 +317,22 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def _do_walk(self, xq, active):
         si= self.shared_info
         info = self.info
-        wi = info['walk_info']
         part_prop = si.classes['particle_properties']
         x_last_good = part_prop['x_last_good'].data
         n_cell = part_prop['n_cell'].data
         status = part_prop['status'].data
         bc_cords = part_prop['bc_cords'].data
         grid = self.grid
-        st = self.step_info
+        params = self.params
 
         # used 2D or 3D walk chosen above
-        tri_interp_util.BCwalk_with_move_backs(xq,
-                                               grid['adjacency'], grid['bc_transform'], grid['dry_cell_index'],
-                                               x_last_good, n_cell, status, bc_cords,
-                                               active, st)
+        tri_interp_util.BCwalk_with_move_backs(
+                           xq,
+                           grid['adjacency'], grid['bc_transform'], grid['dry_cell_index'],
+                           x_last_good, n_cell, status, bc_cords,
+                           self.walk_counts,
+                           params['max_search_steps'], params['bc_walk_tol'], si.settings['open_boundary_type'],si.settings['block_dry_cells'],
+                           active)
 
         if si.is_3D_run:
             nz_cell = part_prop['nz_cell'].data
@@ -344,7 +341,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                                                           grid['triangles'],grid['zlevel'],grid['bottom_cell_index'], si.z0,
                                                                           n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
-                                                                          active, st)
+                                                                          info['current_buffer_steps'],info['current_fractional_time_steps'],
+                                                                          self.walk_counts,
+                                                                          active)
 
 
     #@function_profiler(__name__)
@@ -384,33 +383,35 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def update_dry_cells(self):
         # update 0-255 dry cell index
         grid= self.grid
-        triangle_eval_interp.update_dry_cell_index(grid['is_dry_cell'],grid['dry_cell_index'],self.step_info)
-
+        info= self.info
+        triangle_eval_interp.update_dry_cell_index(grid['is_dry_cell'], grid['dry_cell_index'],
+                                                   info['current_buffer_steps'], info['current_fractional_time_steps'])
     def close(self):
         si=self.shared_info
         info = self.info
         # transfer walk / step info from to class attributes to write in case_info file
 
-        w = info['walk_info']
-        for name in self.step_info.dtype.names:
-            w[name] = self.step_info[name]
+        # convert mapped array counts to int
+        for key in info.keys():
+            if isinstance(info[key], np.ndarray) and info[key].size==1:
+                info[key] = int(info[key])
 
-        w['average_number_of_triangles_walked']= w['number_of_triangles_walked']/max(1,w['particles_located_by_walking'])
+        info['average_number_of_triangles_walked']= info['number_of_triangles_walked']/max(1,info['particles_located_by_walking'])
         if si.is_3D_run:
-            w['average_vertical_walk_steps'] = w['total_vertical_steps_walked'] / max(1, w['particles_located_by_walking'])
+            info['average_vertical_walk_steps'] = info['total_vertical_steps_walked'] / max(1, info['particles_located_by_walking'])
 
-        f = f" Triangle walk summary: Of  {w['particles_located_by_walking']:6,d} particles located "
-        f += f" {w['triangle_walks_retried']:1d}, walks were too long and were retried, "
-        f += f" of these  {w['particles_killed_after_triangle_walk_retry_failed']:1d} failed after retrying and were discarded"
+        f = f" Triangle walk summary: Of  {info['particles_located_by_walking']:6,d} particles located "
+        f += f" {info['triangle_walks_retried']:1d}, walks were too long and were retried, "
+        f += f" of these  {info['particles_killed_after_triangle_walk_retry_failed']:1d} failed after retrying and were discarded"
         si.msg_logger.progress_marker(f)
 
-        if w['triangle_walks_retried'] > 100:
-            si.msg_logger.msg(f" Of {w['particles_located_by_walking']:3d} particles located {w['triangle_walks_retried']:3d}, were to long and restated from initial guess",
+        if info['triangle_walks_retried'] > 100:
+            si.msg_logger.msg(f" Of {info['particles_located_by_walking']:3d} particles located {info['triangle_walks_retried']:3d}, were to long and restated from initial guess",
                               crumbs='Interpolator calls, InterpTriangularNativeGrid_Slayer_and_LSCgrid',
                               hint= f"This number of retries can be reduced by decreasing the time step.")
 
-        if w['particles_killed_after_triangle_walk_retry_failed'] > 0:
-            si.msg_logger.msg(f" Of {w['particles_located_by_walking']:3d} particles located {w['particles_killed_after_triangle_walk_retry_failed']:3d}, failed to find cell",
+        if info['particles_killed_after_triangle_walk_retry_failed'] > 0:
+            si.msg_logger.msg(f" Of {info['particles_located_by_walking']:3d} particles located {info['particles_killed_after_triangle_walk_retry_failed']:3d}, failed to find cell",
                               crumbs='Interpolator calls, InterpTriangularNativeGrid_Slayer_and_LSCgrid',
                               hint= f"Try increasing interpolator parameter 'max_search_steps', current value ={self.params['max_search_steps']:3d}")
 
