@@ -65,6 +65,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
          #   si.settings['max_threads']= si.computer_info['CPUs_hardware'] - 2
 
         #set_num_threads(max(1, si.settings['max_threads']))
+        #set_num_threads(5)
 
         # set up profiling
         profiling_util.set_profile_mode(si.settings['profiler'])
@@ -83,7 +84,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
         si.classes['dispersion'].initial_setup()
-        if si.hydro_model_is3D:
+        if si.is_3D_run:
             si.classes['resuspension'].initial_setup()
 
 
@@ -219,6 +220,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # make core classes, eg. field group
         for name, params in case_params['core_roles'].items():
+            if name == 'resuspension' and not si.is_3D_run : continue # dont add resupension in 2D
             i = si.add_core_class(name, params, crumbs= f'core class "{name}" ')
 
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags

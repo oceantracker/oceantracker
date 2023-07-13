@@ -276,7 +276,7 @@ s56['release_groups']={
                                     'pulse_size': 10, 'release_interval':  3600}
             }
 s56['velocity_modifiers']={'terminal_velocity':
-       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
+       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.001}
                            }
 s56['particle_statistics']= {'grid1':
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
@@ -287,7 +287,7 @@ s56['particle_statistics']= {'grid1':
 s56['resuspension'] = {'critical_friction_velocity': .005}
 s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel'})
 s56['velocity_modifiers']= {'terminal_velocity':
-                                {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.001}
+                                {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.001}
                             }
 params.append (s56)
 
@@ -307,7 +307,7 @@ s58.update({'output_file_base' : 'demo58_bottomBounce', 'backtracking': False})
 s58['dispersion'].update({'A_H': 0.1, 'A_V': .005})
 bc = s58
 
-bc['velocity_modifiers']={'terminal_velocity':{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002,'variance': 0.0002}}
+bc['velocity_modifiers']={'terminal_velocity':{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002,'variance': 0.0002}}
 pg1= bc['release_groups']['P1']
 pg1.update({'pulse_size':10,'release_interval':0, 'points': [[1593000., 5484000.+2000, -1]] }) # 1 release only
 bc['release_groups']['P11']= pg1 # only point release
@@ -319,7 +319,7 @@ params.append(s58)
 s59 = deepcopy(s58)
 s59.update({'output_file_base' : 'demo59_crit_shear_resupension', 'backtracking': False})
 bc = s59
-bc['velocity_modifiers']['terminal_velocity']= {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.002}
+bc['velocity_modifiers']['terminal_velocity']= {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002}
 #s59['release_groups']={ 'P1':{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],  'pulse_size':1}}
 params.append(s59)
 

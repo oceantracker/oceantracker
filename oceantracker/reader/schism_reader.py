@@ -45,7 +45,7 @@ class SCHISMSreaderNCDF(GenericUnstructuredReader):
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         # read in place
-        zlevel_buffer[buffer_index,:] = nc.read_a_variable('zcor', sel=file_index).astype(np.float32)
+        zlevel_buffer[buffer_index,...] = nc.read_a_variable('zcor', sel=file_index).astype(np.float32)
 
     def read_dry_cell_data(self,nc,file_index, is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry

@@ -37,7 +37,7 @@ if __name__ == '__main__':
              'tracks_writer': {'output_step_count': 3},
              'release_groups': {'mypoints': {'points': x0, 'pulse_size': 10, 'release_interval': 600}},
              'dispersion': {'A_H': 1.0, 'A_V': 0.001},
-             'velocity_modifiers': {'myfal_vel': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': -0.000}},
+             'velocity_modifiers': {'myfal_vel': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.000}},
              'particle_statistics':{'mygrid':{
                  'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                  'update_interval': 3600, 'particle_property_list': ['water_depth'],

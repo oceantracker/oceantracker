@@ -107,4 +107,3 @@ def get_time_dependent_triangle_water_depth_from_total_water_depth_at_nodes(tota
             for v in range(3):
                 out[nt,m] += total_water_depth_at_nodes[nt, triangles[m,v]] / 3.0  # todo use simple average, but better way?
 
-

@@ -29,7 +29,7 @@ class _BaseField(ParameterBaseClass):
                                             grid['nz'] if self.params['is3D'] else 1,
                                             self.params['num_components'] if self.params['num_components'] is not None else 1])
 
-        self.data = np.full(buffer_shape, 0, dtype=np.float32)  # all fields are float 32
+        self.data = np.full(buffer_shape, 0, dtype=np.float32, order='c')  # all fields are float 32
 
     def is_time_varying(self): return self.data.shape[0] > 1
     def is3D(self): return  self.data.shape[2] > 1

@@ -63,6 +63,7 @@ def get_params(datasource=1):
          'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': input_dir,
                     'file_mask': file_mask,
+                    #'time_buffer_size': 3,
                     'field_variables': {'water_temperature': 'temp'}
                     },
         'write_tracks': False,

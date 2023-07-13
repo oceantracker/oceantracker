@@ -52,7 +52,7 @@ class TimeVaryingInfo(_BasePropertyInfo):
         s=(1,)
         if self.params['vector_dim'] > 1:
             s += (self.params['vector_dim'],)
-        self.data = self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype())
+        self.data = self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype(),order='c')
 
 
     def update(self): pass # manual update by default
@@ -83,7 +83,7 @@ class ParticleProperty(_BasePropertyInfo):
 
         self.info['array_size'] = s
         # set up data buffer
-        self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype())
+        self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype(), order='c')
 
     def initial_value_at_birth(self, new_part_IDs):
         # need to set at birth, as in compact mode particle buffer changes,
