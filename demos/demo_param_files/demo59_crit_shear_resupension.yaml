@@ -103,4 +103,4 @@ time_step: 120
 velocity_modifiers:
   terminal_velocity:
     class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
-    mean: -0.002
+    value: -0.002

@@ -9,7 +9,7 @@ class _BaseResuspension(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'requires_3D': PVC(True, bool)}) # must be 3D
+        self.add_default_params({}) # must be 3D
 
     # all particles checked to see if they need status changing
     def update(self, time_sec, active): pass

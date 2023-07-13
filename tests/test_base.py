@@ -257,7 +257,6 @@ def base_param(is3D=False, isBackwards = False):
         r['dimension_map'].update({'z': 'zlevel'})
         r['file_mask'] = params['reader']['file_mask'].replace('2D', '3D')
         params['dispersion'].update({'A_H': 0.,'A_V': 0.})
-        #base_case['velocity_modifiers'].append({'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0*0.001})
 
     return params
 

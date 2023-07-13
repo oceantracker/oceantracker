@@ -536,7 +536,7 @@ if __name__ == '__main__':
             },
 
             'velocity_modifiers': {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
-                                                    'mean': -0.00
+                                                    'value': -0.00
                                                 }
             },
             "particle_statistics": {'P1': {

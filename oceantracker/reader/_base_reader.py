@@ -24,7 +24,7 @@ class _BaseReader(ParameterBaseClass):
                                  'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
                                  'time_zone': PVC(None, int, min=-12, max=12, units='hours', doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
                                  'cords_in_lat_long': PVC(False, bool),
-                                 'time_buffer_size': PVC(48, int, min=2),
+                                 'time_buffer_size': PVC(24, int, min=2),
                                  'required_file_variables' :PLC([], [str]),
                                  'required_file_dimensions': PLC([], [str]),
                                  #'water_density': PVC(48, int, min=2),
@@ -428,7 +428,6 @@ class _BaseReader(ParameterBaseClass):
         si.msg_logger.progress_marker(f' read {total_read:3d} time steps in  {perf_counter() - t0:3.1f} sec', tabs=2)
         # record useful info/diagnostics
         bi['n_filled'] = total_read
-
 
     def assemble_field_components(self,nc, field, buffer_index=None, file_index=None):
         # read scalar fields / join together the components which make vector from component list

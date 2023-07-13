@@ -59,8 +59,9 @@ class GenericUnstructuredReader(_BaseReader):
         # set up zlevel
         if self.is_hindcast3D(nc) and not si.settings['run_as_depth_averaged']:
             s = [self.params['time_buffer_size'], grid['x'].shape[0], self.get_number_of_z_levels(nc)]
-            grid['zlevel'] = np.full(s, 0., dtype=np.float32)
+            grid['zlevel'] = np.full(s, 0., dtype=np.float32, order='c')
             grid['nz'] = grid['zlevel'].shape[2]
+
         else:
             grid['zlevel'] = None
             grid['nz'] = 1 # note if 3D
@@ -141,7 +142,7 @@ class GenericUnstructuredReader(_BaseReader):
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         # read in place
-        zlevel_buffer[buffer_index,:] = nc.read_a_variable(self.params['grid_variables']['zlevel'], sel=file_index).astype(np.float32)
+        zlevel_buffer[buffer_index,...] = nc.read_a_variable(self.params['grid_variables']['zlevel'], sel=file_index).astype(np.float32)
 
     def read_bottom_cell_index_as_int32(self, nc):
         # Slayer grid, bottom cell index = zero

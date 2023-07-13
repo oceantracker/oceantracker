@@ -24,14 +24,8 @@ class SharedInfoClass(object):
         # make instance  and merge params
         i = make_class_instance_from_params(name, params, ml, class_role_name=name,
                                             crumbs=crumb_base + crumbs )
-
-        if i.params['requires_3D'] and not self.is_3D_run :
-                # dont add a 3D class if i not a 3D run
-                self.msg_logger.msg(' Not using add core class,' + i.info['name'] + ' as it can only be used with 3D hydro-models', note=True, crumbs=crumbs + ' adding core class')
-        else:
-            self.classes[name] = i
+        self.classes[name] = i
         return i
-
 
     def create_class_dict_instance(self,name,class_role, group, params,  crumbs=''):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
@@ -63,10 +57,6 @@ class SharedInfoClass(object):
                          + '", "name" parameter must be unique',
                          crumbs =    crumb_base + crumbs,  fatal_error=True)
 
-        if i.params['requires_3D'] and not self.is_3D_run:
-                # dont add a 3D class if i not a 3D run
-                self.msg_logger.msg(' Not using user  class,' + i.info['name'] + ' as it can only be used with 3D hydro-models',
-                                    note=True, crumbs= crumb_base + crumbs)
         else:
             self.classes[class_role][name] = i
         return i

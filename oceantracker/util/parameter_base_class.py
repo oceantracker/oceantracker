@@ -34,7 +34,6 @@ class ParameterBaseClass(object):
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
                                   'user_note': PVC(None, str),
-                                 'requires_3D': PVC(False, bool)
                                  })
 
         self.partID_buffers={} # dict of int32 ID number buffers

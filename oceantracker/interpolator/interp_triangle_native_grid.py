@@ -56,7 +56,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             p.create_particle_property('z_fraction_bottom_layer','manual_update', dict( write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
 
-
         # attach a reader to this interpolator
         self.reader = si.classes['reader']
 
@@ -89,6 +88,17 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                             total_vertical_steps_walked = wc[6:7],
                             longest_vertical_walk = wc[7:8])
                             )
+
+        # location of each vertex
+        grid['x_vertex'] = np.stack((grid['x'][grid['triangles'], 0], grid['x'][grid['triangles'], 1]), axis=2)
+
+        # build triangle walk array of structures
+        grid['tri_walk_AOS'] =numpy_util.numpy_array_of_structures_from_dict(
+                                     dict(bc_transform= grid['bc_transform'],
+                                        adjacency=  grid['adjacency']),
+                                        )
+
+
 
     def setup_interp_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
@@ -328,7 +338,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # used 2D or 3D walk chosen above
         tri_interp_util.BCwalk_with_move_backs(
                            xq,
-                           grid['adjacency'], grid['bc_transform'], grid['dry_cell_index'],
+                           grid['tri_walk_AOS'], grid['dry_cell_index'],
                            x_last_good, n_cell, status, bc_cords,
                            self.walk_counts,
                            params['max_search_steps'], params['bc_walk_tol'], si.settings['open_boundary_type'],si.settings['block_dry_cells'],
@@ -339,11 +349,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             z_fraction = part_prop['z_fraction'].data
             z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
             tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
-                                                                          grid['triangles'],grid['zlevel'],grid['bottom_cell_index'], si.z0,
-                                                                          n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
-                                                                          info['current_buffer_steps'],info['current_fractional_time_steps'],
-                                                                          self.walk_counts,
-                                                                          active)
+                                            grid['triangles'],grid['zlevel'],grid['bottom_cell_index'], si.z0,
+                                            n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
+                                            info['current_buffer_steps'],info['current_fractional_time_steps'],
+                                            self.walk_counts,
+                                            active)
 
 
     #@function_profiler(__name__)

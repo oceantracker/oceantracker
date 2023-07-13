@@ -55,7 +55,7 @@ class NetCDFhandler(object):
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compressionLevel > 0),
                                                 complevel=compressionLevel, fill_value=fill_value)
 
-        # set attributes the hard way, must be easier way!
+        # set attributes the hard way, must be an easier way!
         if description is not None:
             setattr(self.file_handle.variables[name], 'description', self._sanitize_attribute(description))
 
@@ -77,11 +77,11 @@ class NetCDFhandler(object):
     def read_variables(self, var_list=None, required_var=[], output=None):
         # read a list of variables into a dictionary, if output is a dictionary its add to that one
         if output is None:  output={}
-        if var_list is None:  var_list =self.all_var_names()
+        if var_list is None:  var_list = self.all_var_names()
 
         name_list = list(set(var_list+required_var))
         for name in name_list:
-            output[name]=self.read_a_variable(name)
+            output[name] = self.read_a_variable(name)
         return output
 
     def write_a_new_variable(self, name, X, dimList, description=None, attributes=None,dtype=None, chunksizes=None, compressionLevel=0):
