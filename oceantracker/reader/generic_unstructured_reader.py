@@ -7,7 +7,7 @@ from oceantracker.reader.util import reader_util, shared_reader_memory_util
 from datetime import datetime
 from time import  perf_counter
 from oceantracker.util import json_util, ncdf_util
-from os import  path
+from os import path
 
 class GenericUnstructuredReader(_BaseReader):
 
