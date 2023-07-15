@@ -349,7 +349,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             z_fraction = part_prop['z_fraction'].data
             z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
             tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
-                                            grid['triangles'],grid['zlevel'],grid['bottom_cell_index'], si.z0,
+                                            #grid['triangles'],grid['zlevel'],grid['bottom_cell_index'],
+                                            grid['triangles'], grid['zlevel_vertex'], grid['bottom_cell_index'],
+                                            si.z0,
                                             n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
                                             info['current_buffer_steps'],info['current_fractional_time_steps'],
                                             self.walk_counts,

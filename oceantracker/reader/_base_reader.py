@@ -64,8 +64,6 @@ class _BaseReader(ParameterBaseClass):
         nc.close()
 
 
-
-
     def read_nodal_x_as_float64(self, nc): nopass('reader method: read_x is required')
     def read_bottom_cell_index_as_int32(self, nc):nopass('reader method: read_bottom_cell_index_as_int32 is required for 3D hindcasts')
 

@@ -89,6 +89,7 @@ class Solver(ParameterBaseClass):
 
         t0_model = perf_counter()
         free_wheeling =False
+        fgm.fill_reader_buffers_if_needed(model_times[0]) # initial buffer fill
 
         # run forwards through model time variable, which for backtracking are backwards in time
         for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
@@ -110,10 +111,7 @@ class Solver(ParameterBaseClass):
                 continue
 
             free_wheeling = False # has ended
-
-
-
-            # alive partiles so do steps
+           # alive partiles so do steps
             info['total_alive_particles'] += num_alive
             fgm.fill_reader_buffers_if_needed(time_sec)
 
@@ -146,8 +144,6 @@ class Solver(ParameterBaseClass):
             t2 = time_sec + info['model_time_step'] * si.model_direction
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
-
-
             info['time_steps_completed'] += 1
 
             if abs(t2 - info['model_start_time']) > info['model_duration']:  break

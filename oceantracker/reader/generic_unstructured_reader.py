@@ -31,12 +31,6 @@ class GenericUnstructuredReader(_BaseReader):
         grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles_as_int32(nc)
         grid['quad_cells_to_split'] = np.flatnonzero(grid['quad_cells_to_split']) # make as list of indcies for calculations
 
-
-        if self.is_hindcast3D(nc):
-            grid['bottom_cell_index'] = self.read_bottom_cell_index_as_int32(nc)
-            # below are used in cell find and 3D interp evaluation
-            grid['bottom_cell_index_at_triangle_nodes'] = grid['bottom_cell_index'][grid['triangles']]
-
         # find model outline, make adjacency matrix etc
 
         grid = self._add_grid_attributes(grid)
@@ -58,9 +52,21 @@ class GenericUnstructuredReader(_BaseReader):
 
         # set up zlevel
         if self.is_hindcast3D(nc) and not si.settings['run_as_depth_averaged']:
+            grid['bottom_cell_index'] = self.read_bottom_cell_index_as_int32(nc)
             s = [self.params['time_buffer_size'], grid['x'].shape[0], self.get_number_of_z_levels(nc)]
-            grid['zlevel'] = np.full(s, 0., dtype=np.float32, order='c')
+            grid['zlevel'] = np.zeros(s,  dtype=np.float32, order='c')
             grid['nz'] = grid['zlevel'].shape[2]
+
+            #todo dev zlevel by triangles
+            s = [self.params['time_buffer_size'],grid['triangles'].shape[0], self.get_number_of_z_levels(nc), 3]
+            grid['zlevel_vertex'] = np.zeros(s, dtype=np.float32, order='c')
+            #struct_type = [('zlevel_vertex', 'f8', ( self.get_number_of_z_levels(nc),3)), ('triangles', 'i4',  (3,)),
+            #            ('bottom_cell_triangle', 'i2',(3,)),('nz_bottom', 'i2') ]
+            #grid['vert_walk_struct'] = np.zeros((self.params['time_buffer_size'],grid['triangles'].shape[0]),dtype=struct_type)
+            #grid['vert_walk_struct']['triangles'] = grid['triangles'] # copy of vertex nodes
+            #bottom_cell_triangle = grid['bottom_cell_index'][grid['triangles']] # bottom cell at each vertex
+            #grid['vert_walk_struct']['bottom_cell_triangle'] =  bottom_cell_triangle
+            #grid['vert_walk_struct']['nz_bottom'] = np.min(bottom_cell_triangle,axis=1) # deepest vertex bottom cell, is bottom cell index
 
         else:
             grid['zlevel'] = None
@@ -131,6 +137,9 @@ class GenericUnstructuredReader(_BaseReader):
         if grid['zlevel'] is not None:
             # read zlevel inplace to save memory?
             self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
+
+            # unpack zlevles at each triangles vertex
+            reader_util.zlevel_node_to_vertex(grid['zlevel'], grid['triangles'], grid['zlevel_vertex'])
 
         self.read_dry_cell_data(nc, file_index, grid['is_dry_cell'],buffer_index)
 

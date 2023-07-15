@@ -83,8 +83,8 @@
     },
     "caseID": 0,
     "version_info": {
-        "version": "0.4.01.000 2023-07-03",
-        "git_revision": "a659288942e2c38c1bfda3b682e306ef7e1b9bbd",
+        "version": "0.4.01.003 2023-07-14",
+        "git_revision": "36c8a018825e2e4ef151125cf6971d6f30ae320d",
         "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]",
         "python_major_version": 3,
         "python_minor_version": 10,
@@ -99,21 +99,21 @@
         "CPUs_logical": 64,
         "Freq_Mhz": 3.693
     },
-    "file_written": "2023-07-03T16:18:57.373381",
+    "file_written": "2023-07-16T10:02:44.384848",
     "run_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2023-07-03T16:04:27.482299",
+        "model_run_started": "2023-07-16T09:49:27.458131",
         "date_of_time_zero": [
             "1970-01-01T00:00:00"
         ],
         "time_zone": null,
         "backtracking": false,
-        "started": "2023-07-03 16:03:28.175505",
-        "ended": "2023-07-03 16:18:57.315367",
-        "duration": "0:15:29.139862",
-        "elapsed_time_sec": 929.1307938999962,
+        "started": "2023-07-16 09:48:40.166194",
+        "ended": "2023-07-16 10:02:44.330844",
+        "duration": "0:14:04.164650",
+        "elapsed_time_sec": 844.15775329998,
         "number_particles_released": 507500
     },
     "solver_info": {
@@ -136,18 +136,24 @@
         "current_model_time_step": 1728,
         "current_model_time": 1199666100.0,
         "model_run_duration": 518700.0,
-        "computation_started": "2023-07-03T16:04:27.483299",
-        "computation_ended": "2023-07-03T16:18:57.315367",
-        "computation_duration": "0:14:29.832068"
+        "computation_started": "2023-07-16T09:49:27.458131",
+        "computation_ended": "2023-07-16T10:02:44.330844",
+        "computation_duration": "0:13:16.872713"
     },
     "hindcast_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
         "buffer_info": {
-            "n_filled": 48,
-            "buffer_size": 48,
+            "n_filled": 24,
+            "buffer_size": 24,
             "time_steps_in_buffer": [
+                276,
+                277,
+                278,
+                279,
+                280,
+                281,
                 282,
                 283,
                 284,
@@ -165,40 +171,10 @@
                 296,
                 297,
                 298,
-                299,
-                300,
-                301,
-                302,
-                303,
-                304,
-                305,
-                306,
-                307,
-                308,
-                309,
-                310,
-                311,
-                312,
-                313,
-                314,
-                315,
-                316,
-                317,
-                318,
-                319,
-                320,
-                321,
-                322,
-                323,
-                324,
-                325,
-                326,
-                327,
-                328,
-                329
+                299
             ],
             "buffer_available": 0,
-            "nt_buffer0": 282
+            "nt_buffer0": 276
         },
         "name": "reader",
         "class_role": "reader",
@@ -531,11 +507,10 @@
                     "bottom_stress": null
                 },
                 "user_note": null,
-                "requires_3D": false,
                 "grid_file": null,
                 "time_zone": null,
                 "cords_in_lat_long": false,
-                "time_buffer_size": 48,
+                "time_buffer_size": 24,
                 "required_file_variables": [],
                 "required_file_dimensions": [],
                 "field_variables_to_depth_average": [],
@@ -551,33 +526,28 @@
             "solver": {
                 "class_name": "oceantracker.solver.solver.Solver",
                 "user_note": null,
-                "requires_3D": false,
                 "RK_order": 4,
                 "n_sub_steps": null,
                 "screen_output_step_count": null
             },
             "field_group_manager": {
                 "class_name": "oceantracker.field_group_manager.field_group_manager.FieldGroupManager",
-                "user_note": null,
-                "requires_3D": false
+                "user_note": null
             },
             "interpolator": {
                 "class_name": "oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid",
                 "user_note": null,
-                "requires_3D": false,
                 "bc_walk_tol": 1e-05,
                 "max_search_steps": 500
             },
             "particle_group_manager": {
                 "class_name": "oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager",
                 "user_note": null,
-                "requires_3D": false,
                 "particle_buffer_chunk_size": 500000
             },
             "tracks_writer": {
                 "class_name": "oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter",
                 "user_note": null,
-                "requires_3D": false,
                 "role_output_file_tag": "tracks_compact",
                 "update_interval": null,
                 "output_step_count": null,
@@ -599,13 +569,11 @@
                 "A_H": 0.2,
                 "A_V": 0.001,
                 "user_note": null,
-                "requires_3D": false,
                 "is3D": false
             },
             "resuspension": {
                 "class_name": "oceantracker.resuspension.resuspension.BasicResuspension",
                 "user_note": null,
-                "requires_3D": true,
                 "critical_friction_velocity": 0.0,
                 "friction_velocity_field_class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
             }
@@ -650,7 +618,6 @@
                     "allow_release_in_dry_cells": true,
                     "class_name": "oceantracker.release_groups.point_release.PointRelease",
                     "user_note": null,
-                    "requires_3D": false,
                     "release_radius": 0.0,
                     "release_start_date": null,
                     "release_duration": null,
@@ -693,7 +660,6 @@
                     "pulse_size": 500,
                     "release_interval": 3600.0,
                     "user_note": null,
-                    "requires_3D": false,
                     "release_start_date": null,
                     "release_duration": null,
                     "release_end_date": null,
@@ -717,7 +683,6 @@
                     "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
                     "decay_time_scale": 86400.0,
                     "user_note": null,
-                    "requires_3D": false,
                     "description": null,
                     "time_varying": true,
                     "write": true,
@@ -733,8 +698,7 @@
             "status_modifiers": {
                 "tidal_stranding": {
                     "class_name": "oceantracker.status_modifiers.tidal_stranding.TidalStranding",
-                    "user_note": null,
-                    "requires_3D": false
+                    "user_note": null
                 }
             },
             "velocity_modifiers": {},
@@ -754,7 +718,6 @@
                     "max_age_to_bin": 259200.0,
                     "age_bin_size": 3600.0,
                     "user_note": null,
-                    "requires_3D": false,
                     "count_start_date": null,
                     "count_end_date": null,
                     "role_output_file_tag": "stats_gridded_age",
@@ -813,7 +776,6 @@
                         }
                     ],
                     "user_note": null,
-                    "requires_3D": false,
                     "count_start_date": null,
                     "count_end_date": null,
                     "role_output_file_tag": "stats_polygon_age",
@@ -878,7 +840,6 @@
                         }
                     ],
                     "user_note": null,
-                    "requires_3D": false,
                     "role_output_file_tag": "inside_polygon_events",
                     "write": true,
                     "chunk_size": 5000
@@ -5928,7 +5889,7 @@
                 "group": "from_reader_field",
                 "instanceID": 0,
                 "shape_in_file": [
-                    48,
+                    24,
                     149233,
                     38,
                     1
@@ -5954,7 +5915,7 @@
                 "group": "from_reader_field",
                 "instanceID": 1,
                 "shape_in_file": [
-                    48,
+                    24,
                     149233,
                     38,
                     3
@@ -6010,7 +5971,7 @@
                 "group": "from_reader_field",
                 "instanceID": 3,
                 "shape_in_file": [
-                    48,
+                    24,
                     149233,
                     1,
                     1
@@ -6036,7 +5997,7 @@
                 "group": "derived_from_reader_field",
                 "instanceID": 4,
                 "shape_in_file": [
-                    48,
+                    24,
                     149233,
                     1,
                     1
@@ -6404,9 +6365,9 @@
         "trajectory_modifiers": {},
         "particle_statistics": {
             "statas1": {
-                "time_spent_updating": 5.432831400044961,
+                "time_spent_updating": 8.367273200041382,
                 "update_calls": 98,
-                "time_first_update_call": 2.2819655000057537,
+                "time_first_update_call": 3.7565427999943495,
                 "output_file": "Sounds_stats_gridded_age_statas1.nc",
                 "name": "statas1",
                 "class_role": "particle_statistics",
@@ -6418,9 +6379,9 @@
                 "type": "gridded"
             },
             "statas2": {
-                "time_spent_updating": 4.296056299877819,
+                "time_spent_updating": 4.10233389979112,
                 "update_calls": 98,
-                "time_first_update_call": 1.876402900001267,
+                "time_first_update_call": 1.7831254999910016,
                 "output_file": "Sounds_stats_polygon_age_statas2.nc",
                 "name": "statas2",
                 "class_role": "particle_statistics",
@@ -6436,21 +6397,21 @@
         "particle_concentrations": {},
         "event_loggers": {
             "event1": {
-                "time_spent_updating": 16.084116799742333,
+                "time_spent_updating": 11.622648299176944,
                 "update_calls": 3460,
-                "time_first_update_call": 0.6622311999963131,
+                "time_first_update_call": 0.6421316999767441,
                 "name": "event1",
                 "class_role": "event_loggers",
                 "group": "user",
                 "instanceID": 0,
                 "prop_to_write": [
                     "IDpulse",
-                    "user_release_groupID",
-                    "status",
-                    "ID",
                     "age",
-                    "event_polygon",
                     "IDrelease_group",
+                    "ID",
+                    "event_polygon",
+                    "status",
+                    "user_release_groupID",
                     "x"
                 ],
                 "output_file": "Sounds_inside_polygon_events_event1.nc"
@@ -6481,9 +6442,15 @@
             "update_calls": 0,
             "time_first_update_call": 0.0,
             "buffer_info": {
-                "n_filled": 48,
-                "buffer_size": 48,
+                "n_filled": 24,
+                "buffer_size": 24,
                 "time_steps_in_buffer": [
+                    276,
+                    277,
+                    278,
+                    279,
+                    280,
+                    281,
                     282,
                     283,
                     284,
@@ -6501,40 +6468,10 @@
                     296,
                     297,
                     298,
-                    299,
-                    300,
-                    301,
-                    302,
-                    303,
-                    304,
-                    305,
-                    306,
-                    307,
-                    308,
-                    309,
-                    310,
-                    311,
-                    312,
-                    313,
-                    314,
-                    315,
-                    316,
-                    317,
-                    318,
-                    319,
-                    320,
-                    321,
-                    322,
-                    323,
-                    324,
-                    325,
-                    326,
-                    327,
-                    328,
-                    329
+                    299
                 ],
                 "buffer_available": 0,
-                "nt_buffer0": 282
+                "nt_buffer0": 276
             },
             "name": "reader",
             "class_role": "reader",
@@ -6833,9 +6770,9 @@
             "current_model_time_step": 1728,
             "current_model_time": 1199666100.0,
             "model_run_duration": 518700.0,
-            "computation_started": "2023-07-03T16:04:27.483299",
-            "computation_ended": "2023-07-03T16:18:57.315367",
-            "computation_duration": "0:14:29.832068"
+            "computation_started": "2023-07-16T09:49:27.458131",
+            "computation_ended": "2023-07-16T10:02:44.330844",
+            "computation_duration": "0:13:16.872713"
         },
         "field_group_manager": {
             "time_spent_updating": 0.0,
@@ -6854,12 +6791,40 @@
             ],
             "name": "interpolator",
             "class_role": "interpolator",
-            "walk_info": {
-                "walk_failures": {
-                    "retries": [],
-                    "full_failures": []
-                }
-            }
+            "current_hydro_model_step": 288,
+            "current_fractional_time_steps": [
+                0.16666666666666666,
+                0.8333333333333334
+            ],
+            "current_buffer_steps": [
+                0,
+                1
+            ],
+            "tri_walk_full_failures": [],
+            "particles_located_by_walking": [
+                2098700288
+            ],
+            "number_of_triangles_walked": [
+                51857506
+            ],
+            "longest_triangle_walk": [
+                5
+            ],
+            "nans_encountered_triangle_walk": [
+                0
+            ],
+            "triangle_walks_retried": [
+                0
+            ],
+            "particles_killed_after_triangle_walk_retry_failed": [
+                0
+            ],
+            "total_vertical_steps_walked": [
+                120228948
+            ],
+            "longest_vertical_walk": [
+                13
+            ]
         },
         "particle_group_manager": {
             "time_spent_updating": 0.0,
@@ -6917,12 +6882,12 @@
             ]
         },
         "resuspension": {
-            "time_spent_updating": 9.47439410003426,
+            "time_spent_updating": 5.408135900681373,
             "update_calls": 1730,
-            "time_first_update_call": 7.9736573999980465,
+            "time_first_update_call": 3.9158585999975912,
             "name": "resuspension",
             "class_role": "resuspension",
-            "number_resupended": 18148945,
+            "number_resupended": 18000350,
             "resuspension_factor": 3.3023260726609305,
             "min_resuspension_jump": 0.0
         }

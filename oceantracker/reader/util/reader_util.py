@@ -107,3 +107,12 @@ def get_time_dependent_triangle_water_depth_from_total_water_depth_at_nodes(tota
             for v in range(3):
                 out[nt,m] += total_water_depth_at_nodes[nt, triangles[m,v]] / 3.0  # todo use simple average, but better way?
 
+@njit()
+def zlevel_node_to_vertex(zlevel, triangles, zlevel_vertex):
+    # get zlevel at triangle vertices
+    for nt in range(zlevel.shape[0]):
+        for ntri in range(triangles.shape[0]):
+            for nz in range(zlevel.shape[2]):
+                for m in range(3):
+                    zlevel_vertex[nt, ntri, nz, m] = zlevel[nt, triangles[ntri,m],  nz]
+
