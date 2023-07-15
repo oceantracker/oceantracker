@@ -320,7 +320,7 @@ s59 = deepcopy(s58)
 s59.update({'output_file_base' : 'demo59_crit_shear_resupension', 'backtracking': False})
 bc = s59
 bc['velocity_modifiers']['terminal_velocity']= {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002}
-#s59['release_groups']={ 'P1':{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],  'pulse_size':1}}
+s59['release_groups']={ 'P1':{'points': [[1594500, 5486000, -1]],  'pulse_size':1, 'release_interval':0}}
 params.append(s59)
 
 # decaying particles sized on c

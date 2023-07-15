@@ -17,7 +17,7 @@ status_bad_cord = int(particle_info['status_flags']['bad_cord'])
 status_cell_search_failed = int(particle_info['status_flags']['cell_search_failed'])
 
 #below is called by another numba function which will work out signature on first call
-@njit()
+@njit(inline='always')
 def _get_single_BC_cord_numba(x, BCtransform, bc):
     # get BC cord of x for one triangle from DT transform matrix inverse, see scipy.spatial.Delaunay
     # also return index smallest BC for walk and largest
@@ -274,21 +274,18 @@ def get_BC_transform_matrix(points, simplices):
 
     return Tinvs
 
-
-@njit()
-def _eval_z_at_nz_cell(tf, nb, nz_cell, z_level_at_nodes, nz_bottom_nodes, BCcord, nodes):
+@njit(inline='always')
+def _eval_z_at_nz_cell(tf, nz_cell, zlevel1, zlevel2, nz_bottom_nodes, nz_top_cell, BCcord):
     # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
     z = 0.
-    nz_levels = z_level_at_nodes.shape[2] - 1
     for m in range(3):
-        nz = min(max(nz_cell, nz_bottom_nodes[m]), nz_levels)  # move up to bottom, so not out of range
-        z += z_level_at_nodes[nb[0], nodes[m], nz] * BCcord[m] * tf[1] \
-             + z_level_at_nodes[nb[1], nodes[m], nz] * BCcord[m] * tf[0]
+        nz = max(min(nz_cell, nz_top_cell+1), nz_bottom_nodes[m]) # move up to bottom, so not out of range
+        z += BCcord[m] * (zlevel1[nz, m] *  tf[1] + zlevel2[nz, m] * tf[0])
     return z
 
 @njit()
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
-                                                  triangles, zlevel, bottom_cell_index, z0,
+                                                  triangles, zlevel_vertex, bottom_cell_index, z0,
                                                   n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
                                                   current_buffer_steps, current_fractional_time_steps,
                                                   walk_counts,
@@ -299,27 +296,31 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
     # nz_with_bottom must be time independent
     # vertical walk to search for a particle's layer in the grid, nz_cell
 
-    top_cell_range = zlevel.shape[2] - 1
-    top_nz_cell = zlevel.shape[2] - 2
+    nz_top_cell = zlevel_vertex.shape[2] - 2
+    zlevel1 = zlevel_vertex[current_buffer_steps[0], ...]
+    zlevel2 = zlevel_vertex[current_buffer_steps[1], ...]
 
     for nn in prange(active.size):  # loop over active particles
         n = active[nn]
+        bc = bc_cords[n, :]
+        nc = n_cell[n]
 
-        nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
+        nodes = triangles[nc, :]  # nodes for the particle's cell
         bottom_nz_nodes = bottom_cell_index[nodes]
         bottom_nz_cell = np.min(bottom_nz_nodes)  # cell at bottom is smallest of those in triangle
+        zl1 = zlevel1[nc,...]
+        zl2 = zlevel2[nc, ...]
 
         # preserve status if stranded by tide
         if status[n] == status_stranded_by_tide:
             nz_cell[n] = bottom_nz_cell
             # update nodes above and below
-            z_below = _eval_z_at_nz_cell(current_fractional_time_steps, current_buffer_steps, bottom_nz_cell, zlevel, bottom_nz_nodes, bc_cords[n, :], nodes)
+            z_below = _eval_z_at_nz_cell(current_fractional_time_steps, bottom_nz_cell, zl1, zl2, bottom_nz_nodes,nz_top_cell, bc)
             xq[n, 2] = z_below
             z_fraction[n] = 0.0
             continue
 
         n_vertical_steps = 0
-
         zq = xq[n, 2]
 
         # make any already on bottom active, may be flagged on bottom if found on bottom, below
@@ -327,36 +328,37 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
 
         # find zlevel above and below  current vertical cell
         nz = nz_cell[n]
-        z_below = _eval_z_at_nz_cell(current_fractional_time_steps, current_buffer_steps, nz, zlevel, bottom_nz_nodes, bc_cords[n, :], nodes)
-        # print('zz1 ',n_cell[n],status[n],    nz, z_below, zq, bottom_nz_cell, BCcord[n,:])
-        if zq > 5:
-            pass
-        if zq >= z_below:
-            # search upwards, do nothing if z_above > zq[n] > z_below, ie current nodes are correct
-            for nz in range(nz, top_cell_range):
-                n_vertical_steps += 1
-                z_above = _eval_z_at_nz_cell(current_fractional_time_steps, current_buffer_steps, nz + 1, zlevel, bottom_nz_nodes, bc_cords[n, :], nodes)
-                if zq <= z_above:
-                    break
-            if zq > z_above:
-                zq = z_above  # clip to free surface height
-                nz = top_nz_cell
+        z_below = _eval_z_at_nz_cell(current_fractional_time_steps, nz, zl1, zl2, bottom_nz_nodes,nz_top_cell, bc)
 
-        else:
-            # search downwards
-            # todo put in range form above?
-            z_above = z_below
-            z_below = _eval_z_at_nz_cell(current_fractional_time_steps, current_buffer_steps, nz - 1, zlevel, bottom_nz_nodes, bc_cords[n, :], nodes)
-            while zq < z_below:
-                # print('down ', nz, z_below, zq, z_above)
-                if nz <= bottom_nz_cell:
-                    if zq < z_below:
-                        zq = z_below  # clip to bottom depth
-                    break  # found cell
-                nz -= 1
-                z_above = z_below  # retain for dz calc.
-                z_below = _eval_z_at_nz_cell(current_fractional_time_steps, current_buffer_steps, nz, zlevel, bottom_nz_nodes, bc_cords[n, :], nodes)
+        if zq >= z_below:
+             # search upwards, do nothing if z_above > zq[n] > z_below, ie current nodes are correct
+            z_above = _eval_z_at_nz_cell(current_fractional_time_steps, nz + 1, zl1, zl2, bottom_nz_nodes,nz_top_cell, bc)
+
+            while zq > z_above and nz < nz_top_cell:
+                nz += 1
                 n_vertical_steps += 1
+                z_below = z_above
+                z_above = _eval_z_at_nz_cell(current_fractional_time_steps, nz + 1, zl1, zl2, bottom_nz_nodes, nz_top_cell, bc)
+            # clip to free surface height
+            if zq > z_above:
+                zq = z_above
+                nz = nz_top_cell
+        else:
+            # search downwards, move down
+            nz = max(nz - 1, bottom_nz_cell) # take one step down to start
+            z_above = z_below
+            z_below = _eval_z_at_nz_cell(current_fractional_time_steps, nz, zl1, zl2, bottom_nz_nodes,nz_top_cell, bc)
+
+            while zq < z_below and nz > bottom_nz_cell:
+                nz -= 1
+                n_vertical_steps += 1
+                z_above = z_below  # retain for dz calc.
+                z_below = _eval_z_at_nz_cell(current_fractional_time_steps, nz, zl1, zl2, bottom_nz_nodes,nz_top_cell, bc)
+
+            # clip to bottom
+            if zq < z_below:
+                zq = z_below
+                nz = bottom_nz_cell
 
         # nz now holds required cell
         dz = z_above - z_below
@@ -368,13 +370,11 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
 
         # extra work if in bottom cell
         z_fraction_bottom_layer[n] = -999.  # flag as not in bottom layer, will become >= 0 if in layer
-
         if nz == bottom_nz_cell:
-            z_bot = z_below
             # set status if on the bottom set status
-            if zq < z_bot + z0:
+            if zq < z_below + z0:
                 status[n] = status_on_bottom
-                zq = z_bot
+                zq = z_below
 
             # get z_fraction for log layer
             if dz < z0:
@@ -387,26 +387,23 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
         # record new depth cell
         nz_cell[n] = nz
         xq[n, 2] = zq
-        # print('xq new ', xq[n,:])
-        # print('zz2 ',status[n],  nz,z_below,zq , z_above, z_fraction[n], z_fraction_bottom_layer[n] ,dz)
-        # record number of vertical search steps made for this particle
         # step count stats, tidal stranded particles are not counted
         walk_counts[6] += n_vertical_steps
         walk_counts[7] = max(walk_counts[7], n_vertical_steps)  # record max number of steps
 
-    # Below is numpy version of numba BC cord code, now only used as check
+# Below is numpy version of numba BC cord code, now only used as check
 #________________________________________________
-    def get_cell_cords_check(self,x,n_cell):
-        # barycentric cords, only for use with non-improved scipy and KDtree for al time steps
-        # numba code does this faster
-        si = self.shared_info
-        grid = si.classes['reader'].grid
+def get_cell_cords_check(self,x,n_cell):
+    # barycentric cords, only for use with non-improved scipy and KDtree for al time steps
+    # numba code does this faster
+    si = self.shared_info
+    grid = si.classes['reader'].grid
 
-        TT = np.take(grid['bc_transform'], n_cell, axis=0,)
-        b = np.full((x.shape[0],3), np.nan, order='C')
-        b[:,:2] = np.einsum('ijk,ik->ij', TT[:, :2], x[:, :2] - TT[:, 2], order='C')  # Einstein summation
-        b[:,2] = 1. - b[:,:2].sum(axis=1)
-        return b
+    TT = np.take(grid['bc_transform'], n_cell, axis=0,)
+    b = np.full((x.shape[0],3), np.nan, order='C')
+    b[:,:2] = np.einsum('ijk,ik->ij', TT[:, :2], x[:, :2] - TT[:, 2], order='C')  # Einstein summation
+    b[:,2] = 1. - b[:,:2].sum(axis=1)
+    return b
 
 #________ old versions
 
