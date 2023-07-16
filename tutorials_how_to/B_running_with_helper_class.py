@@ -122,7 +122,7 @@ ot.add_class('resuspension', critical_friction_velocity = .005) # only re-suspen
 ot.add_class('velocity_modifiers',  #  class_role is velocity_modifiers
              name ='my_fall_velocity',
             class_name = 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
-            mean= -0.001, # mean terminal vel < 0 for falling
+            value= -0.001, # mean terminal vel < 0 for falling
             # optionally variance can also be use to give each particles its own fall velocity 
             )
 
