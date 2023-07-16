@@ -42,10 +42,6 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``residence``
 

@@ -55,7 +55,7 @@ if __name__ == '__main__':
            }
 
     if not args.depthaverage:
-        params['velocity_modifiers']= {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'mean': 0.000}}
+        params['velocity_modifiers']= {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': 0.000}}
         params['resuspension']={'critical_friction_velocity': 0.025}
     if args.mode_debug: params['debug'] = True
 

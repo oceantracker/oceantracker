@@ -31,16 +31,9 @@ Parameters:
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 
-	* ``mean`` :   ``<class 'float'>`` **<isrequired>**
-		- default: ``0.0``
-
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
-
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
 
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
@@ -58,6 +51,9 @@ Parameters:
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+
+	* ``value`` :   ``<class 'float'>`` **<isrequired>**
+		- default: ``0.0``
 
 	* ``variance`` :   ``<class 'float'>`` **<isrequired>**
 		- default: ``0.0``

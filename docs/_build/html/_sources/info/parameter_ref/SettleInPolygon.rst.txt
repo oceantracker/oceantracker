@@ -26,10 +26,6 @@ Parameters:
 	* ``probability_of_settlement`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``settlement_duration`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 		- min: ``0.0``

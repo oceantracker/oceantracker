@@ -23,17 +23,13 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``mean`` :   ``<class 'float'>``   *<optional>*
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
+
+	* ``value`` :   ``<class 'float'>``   *<optional>*
 		Description: Terminal velocity positive upwards, ie fall velocities ate negative
 
 		- default: ``0.0``
-
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
-		- possible_values: ``[True, False]``
-
-	* ``user_note`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
 
 	* ``variance`` :   ``<class 'float'>``   *<optional>*
 		Description: variance of normal distribution of terminal velocity, used to give each particles its own terminal velocity from random normal distribution

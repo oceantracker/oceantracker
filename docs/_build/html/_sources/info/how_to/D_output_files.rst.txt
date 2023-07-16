@@ -142,7 +142,7 @@ The below also shows how read the hydrodynamic grid.
 
 .. parsed-literal::
 
-    Track data dict_keys(['file_created', 'total_num_particles_released', 'time_steps_written', 'status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_frozen', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'release_groupID_my_release_point', 'dimensions', 'status', 'tide', 'particles_written_per_time_step', 'IDpulse', 'friction_velocity', 'is_polygon_release', 'dry_cell_index', 'IDrelease_group', 'age', 'time_step_range', 'particle_ID', 'time_released', 'time', 'user_release_groupID', 'num_part_released_so_far', 'x0', 'ID', 'x', 'x_last_good', 'number_of_release_points', 'water_depth', 'release_points', 'release_groupID', 'release_locations', 'z'])
+    Track data dict_keys(['file_created', 'total_num_particles_released', 'time_steps_written', 'status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_frozen', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'release_groupID_my_release_point', 'dimensions', 'status', 'time', 'ID', 'number_of_release_points', 'x0', 'water_depth', 'user_release_groupID', 'particles_written_per_time_step', 'x_last_good', 'friction_velocity', 'dry_cell_index', 'particle_ID', 'is_polygon_release', 'time_step_range', 'tide', 'num_part_released_so_far', 'x', 'time_released', 'IDpulse', 'release_points', 'IDrelease_group', 'age', 'release_groupID', 'release_locations', 'z'])
     Grid data dict_keys(['x', 'triangles', 'triangle_area', 'adjacency', 'node_type', 'is_boundary_triangle', 'water_depth'])
     
 
@@ -167,7 +167,7 @@ associated with the case run.
 
 .. parsed-literal::
 
-    tracks_plot data dict_keys(['file_created', 'total_num_particles_released', 'time_steps_written', 'status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_frozen', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'release_groupID_my_release_point', 'dimensions', 'status', 'tide', 'particles_written_per_time_step', 'IDpulse', 'friction_velocity', 'is_polygon_release', 'dry_cell_index', 'IDrelease_group', 'age', 'time_step_range', 'particle_ID', 'time_released', 'time', 'user_release_groupID', 'num_part_released_so_far', 'x0', 'ID', 'x', 'x_last_good', 'number_of_release_points', 'water_depth', 'release_points', 'release_groupID', 'release_locations', 'z', 'grid', 'particle_status_flags', 'particle_release_groups', 'full_case_params', 'axis_lim'])
+    tracks_plot data dict_keys(['file_created', 'total_num_particles_released', 'time_steps_written', 'status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_frozen', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'release_groupID_my_release_point', 'dimensions', 'status', 'time', 'ID', 'number_of_release_points', 'x0', 'water_depth', 'user_release_groupID', 'particles_written_per_time_step', 'x_last_good', 'friction_velocity', 'dry_cell_index', 'particle_ID', 'is_polygon_release', 'time_step_range', 'tide', 'num_part_released_so_far', 'x', 'time_released', 'IDpulse', 'release_points', 'IDrelease_group', 'age', 'release_groupID', 'release_locations', 'z', 'grid', 'particle_status_flags', 'particle_release_groups', 'full_case_params', 'axis_lim'])
     
 
 

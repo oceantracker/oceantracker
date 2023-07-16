@@ -142,7 +142,7 @@ or command line.</p>
     <span class="c1"># velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model&#39;s</span>
     <span class="s1">&#39;velocity_modifiers&#39;</span> <span class="p">:</span> <span class="p">{</span>   <span class="c1"># here a fall velocity with given mean and variance is added to the computation</span>
                                 <span class="s1">&#39;fall_velocity&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;class_name&#39;</span> <span class="p">:</span> <span class="s1">&#39;oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity&#39;</span><span class="p">,</span>
-                                                    <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">,</span><span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">0.0002</span><span class="p">}</span>
+                                                    <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">,</span><span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">0.0002</span><span class="p">}</span>
                                 <span class="p">},</span>
         <span class="p">}</span>
 
@@ -187,9 +187,9 @@ Reproducing the above in code…</p>
                                             <span class="p">}</span>
 <span class="n">params</span><span class="p">[</span><span class="s1">&#39;resuspension&#39;</span><span class="p">][</span><span class="s1">&#39;critical_friction_velocity&#39;</span><span class="p">]</span><span class="o">=</span> <span class="mf">.005</span>
 
-<span class="n">params</span><span class="p">[</span><span class="s1">&#39;velocity_modifiers&#39;</span><span class="p">][</span><span class="s1">&#39;my_fall_velocity&#39;</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span>   <span class="c1"># here a fall velocity with given mean and variance is added to the computation</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;velocity_modifiers&#39;</span><span class="p">][</span><span class="s1">&#39;my_fall_velocity&#39;</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span>   <span class="c1"># here a fall velocity with given value and variance is added to the computation</span>
                                                     <span class="s1">&#39;class_name&#39;</span> <span class="p">:</span> <span class="s1">&#39;oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity&#39;</span><span class="p">,</span>
-                                                     <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">,</span><span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">0.0002</span>
+                                                     <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">,</span><span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">0.0002</span>
                                                     <span class="p">}</span>
 </pre></div>
 </div>

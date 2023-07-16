@@ -84,7 +84,7 @@ for f in glob.glob('output/minimal_example/*'):
 # 
 # The below also shows how read the hydrodynamic grid. 
 
-# In[6]:
+# In[2]:
 
 
 # example of reading tracks file
@@ -104,7 +104,7 @@ print('Grid data',grid.keys())
 # 
 # Load data method, reads the netcdf, grid, and other  information needed to plot into a dictionary. This is the  recommended method for reading track output.  It uses the case_info file to locate all these files associated with the case run.
 
-# In[8]:
+# In[3]:
 
 
 # load netcdf with grid and other useful info for plotting

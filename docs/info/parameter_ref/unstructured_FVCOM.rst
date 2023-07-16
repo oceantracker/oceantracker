@@ -94,16 +94,12 @@ Parameters:
 		- default list : ``['Times', 'nv', 'u', 'v', 'h']``
 		- can_be_empty_list: ``True``
 
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``search_sub_dirs`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
 	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
-		- default: ``48``
+		- default: ``24``
 		- min: ``2``
 
 	* ``time_zone`` :   ``<class 'int'>``   *<optional>*

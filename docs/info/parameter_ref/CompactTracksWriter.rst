@@ -37,10 +37,6 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``retain_compact_files`` :   ``<class 'bool'>``   *<optional>*
 		Description: keep  compact tracks files after conversion to rectangular format
 

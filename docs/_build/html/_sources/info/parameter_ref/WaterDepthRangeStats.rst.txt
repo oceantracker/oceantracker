@@ -25,10 +25,6 @@ Parameters:
 	* ``min_depth`` :   ``<class 'float'>``   *<optional>*
 		- default: ``-1000000000.0``
 
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

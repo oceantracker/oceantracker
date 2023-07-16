@@ -62,10 +62,6 @@ Parameters:
 
 polygon_list: still working on display  of lists of dict, eg nested polygon list 
 
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_polygon_age_depth_range``
 

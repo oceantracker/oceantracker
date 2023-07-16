@@ -74,10 +74,6 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_gridded_age_depth_range``
 

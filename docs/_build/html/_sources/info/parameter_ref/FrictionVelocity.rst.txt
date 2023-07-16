@@ -30,10 +30,6 @@ Parameters:
 	* ``num_components`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

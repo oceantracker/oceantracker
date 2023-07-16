@@ -24,10 +24,6 @@ Parameters:
 		- min: ``0.0``
 		- max: ``1.0``
 
-	* ``requires_3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``split_status_equal_to`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``

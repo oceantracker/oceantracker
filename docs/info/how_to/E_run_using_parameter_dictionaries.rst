@@ -48,7 +48,7 @@ or command line.
         # velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model's 
         'velocity_modifiers' : {   # here a fall velocity with given mean and variance is added to the computation 
                                     'fall_velocity': {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
-                                                        'mean': -0.001,'variance': 0.0002}
+                                                        'value': -0.001,'variance': 0.0002}
                                     },                      
             }
     
@@ -95,9 +95,9 @@ Reproducing the above in code…
                                                 }   
     params['resuspension']['critical_friction_velocity']= .005
     
-    params['velocity_modifiers']['my_fall_velocity']= {   # here a fall velocity with given mean and variance is added to the computation 
+    params['velocity_modifiers']['my_fall_velocity']= {   # here a fall velocity with given value and variance is added to the computation 
                                                         'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
-                                                         'mean': -0.001,'variance': 0.0002
+                                                         'value': -0.001,'variance': 0.0002
                                                         }
 
 .. code:: ipython3
