@@ -4,6 +4,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from oceantracker.util import time_util
 from os import path, walk
 from glob import glob
+from pathlib import Path as pathlib_Path
 from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from oceantracker.util.basic_util import nopass
@@ -128,7 +129,9 @@ class _BaseReader(ParameterBaseClass):
 
 
         if self.params['search_sub_dirs']:
-            file_names = glob(path.normpath(path.join(input_dir, self.params['file_mask'])), recursive=True)
+            file_names=[]
+            for fn in pathlib_Path(input_dir).rglob( self.params['file_mask']):
+                file_names.append(path.abspath(fn))
         else:
             file_names = glob(path.normpath(path.join(input_dir, self.params['file_mask'])))
 

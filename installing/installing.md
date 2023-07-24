@@ -4,7 +4,7 @@ ________________________________________
 
 To ensure python/ module compatibility, recommendation is to build a conda virtual environment with the given environment.yml file
 
-Due to version dependencies of modules outside oceantracker, it curently only works with python 3.10, bur not yet 3.11
+Due to version dependencies of modules outside oceantracker, it curently only works with python 3.10, bur not yet 3.11 and numpy < 1.24 
 
 1. Install 
     
@@ -47,7 +47,7 @@ Note: In Windows may need to run conda prompt window as administrator to install
 
         ``conda create -n oceantracker python=3.10`` 
 
-    Note: Must use python version 3.10 (not 3.11 yet) and NumPy versions 1.21–1.24
+    Note: Must use python version 3.10 (not 3.11 yet) and NumPy versions 1.21–1.23
 
     Activate new environment
 
@@ -55,7 +55,7 @@ Note: In Windows may need to run conda prompt window as administrator to install
    
    Then install these packages
 
-      ``conda install -c anaconda numpy``
+      ``conda install -c anacondanumpy``
 
       ``conda install -c conda-forge numba``
 
@@ -71,9 +71,7 @@ Note: In Windows may need to run conda prompt window as administrator to install
 
       ``conda install -c conda-forge matplotlib``
 
-    Activate new environment
 
-        ``conda activate oceantracker``
 
 7. Make oceantracker package findable
    
