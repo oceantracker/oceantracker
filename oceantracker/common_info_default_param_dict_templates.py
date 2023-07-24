@@ -4,7 +4,7 @@ package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
 
-code_version = '0.4.01.003 2023-07-14'
+code_version = '0.4.01.004 2023-07-14'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 
@@ -29,7 +29,7 @@ shared_settings_defaults ={
                 'max_warnings':        PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps'),  # dont record more that this number of warnings, to keep caseInfo.json finite
                 'use_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
                 'numba_function_cache_size' :  PVC(2048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB?'),
-                'multiprocessing_case_start_delay': PVC(None, float, min=0., doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file'),  # which lareg numbers of case, sometimes locks up at start al reading same file, so ad delay
+                'multiprocessing_case_start_delay': PVC(None, float, min=0., doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file'),  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
                  'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
                                                        doc_str='Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
                  }
@@ -141,10 +141,11 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
 # TODO MODELS
     # todo design and make base class
     # todo make template
+    # todo add get time and date as methods, plus other useful basics, get particles in the bufferS
 
 # TODO TUTORIALS
     # todo Reader param and adding fields
-    # todo resupension
+    # todo dispersion resupension
 
 #TODO PERFORMANCE
         # todo kernal forms of hori/vert walk

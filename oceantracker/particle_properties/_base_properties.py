@@ -24,10 +24,10 @@ class _BasePropertyInfo(ParameterBaseClass):
 
         self.class_doc(role='Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
 
-    def initial_setup(self, **kwargs): pass
+    def initial_setup(self, **kwargs): pass # stuff done after on creation of property
+    def final_setup(self, **kwargs): pass  # stuff done after intiail setup of all classes/properties
 
     def initial_value_at_birth(self, released_IDs):  pass
-
 
     def update(self,t,active): pass
 
@@ -65,9 +65,9 @@ class ParticleProperty(_BasePropertyInfo):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
-        self.add_default_params({'write': PVC(True, bool),
+        self.add_default_params({'write': PVC(True, bool, doc_str='Write particle property to tracks or event files file'),
                                  'type': PVC('user', str,
-                                            doc_str='particle property',
+                                            doc_str='type of particle property, used to manage how to update particle property',
                                             possible_values=particle_info['known_prop_types']),
                                  })
     def initial_setup(self):

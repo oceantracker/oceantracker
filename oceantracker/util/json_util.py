@@ -75,7 +75,6 @@ class MyEncoder(json.JSONEncoder):
                 # make single numpy int values
                 return int(obj)
 
-
             # date/time strings
             elif isinstance(obj, (datetime, date)):
                 return obj.isoformat()
@@ -85,9 +84,6 @@ class MyEncoder(json.JSONEncoder):
 
             elif type(obj) == np.datetime64:
                 return str(obj)
-
-            elif isinstance(obj, (np.bool_,np.bool)):
-                return bool(obj)
 
             elif type(obj) == np.timedelta64:
                 return str(obj.astype(timedelta)) # timedelta has better formating
