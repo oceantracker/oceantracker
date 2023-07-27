@@ -2,11 +2,11 @@ import numpy as np
 from numba import njit,prange, types as nbt, typeof, from_dtype
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.common_info_default_param_dict_templates import particle_info
-# record varaible to hold walk info/couts
+# record variable to hold walk info/counts
 # to reduce number of args required in numba functions and be morr readable
 
 # globals
-# todo make numpy stucture
+# todo make numpy structure?
 status_moving = int(particle_info['status_flags']['moving'])
 status_on_bottom = int(particle_info['status_flags']['on_bottom'])
 status_stranded_by_tide = int(particle_info['status_flags']['stranded_by_tide'])
@@ -20,7 +20,7 @@ status_cell_search_failed = int(particle_info['status_flags']['cell_search_faile
 @njit(inline='always')
 def _get_single_BC_cord_numba(x, BCtransform, bc):
     # get BC cord of x for one triangle from DT transform matrix inverse, see scipy.spatial.Delaunay
-    # also return index smallest BC for walk and largest
+    # also return index the smallest BC for walk and largest
     # returns n_min the index of smallest bc used to choose next triangle
     # bc is (3,) pre-allocated working scale, used to return BC's
 

@@ -15,10 +15,6 @@ particle_group_manager:
     initial_value: 20.0
   distance_travelled:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-  my_constant_prop:
-    class_name: oceantracker.particle_properties.constant_part_prop.ConstantParticleProperty
-    value: 100
-    variance: 10.0
 particle_statistics:
   gridstats1:
     class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased

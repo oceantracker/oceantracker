@@ -77,7 +77,6 @@ def _read_compact_tracks(nc, var_list, release_groupID):
 
     num_released = d['total_num_particles_released']
 
-
     particle_IDs = nc.read_a_variable('particle_ID') # this is time_particle particleID to allow unpacking
 
     time_steps_written= nc.global_attr('time_steps_written')

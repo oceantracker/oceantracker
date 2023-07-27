@@ -66,15 +66,14 @@ def _read_compact_var_time_step(nc, var_name, sel,nt,  cols, out=None):
 
     return  data
 
-
     _filIinDeadParticles(d['status'], 'status', d['status'], -127) # do status last as needed to work on others
 
 
     return d
 
-#@njit
+@njit
 def _insertMatrixValues(x,col,values):
-    for n in range(values.shape[0]):
+    for n in range(col.shape[0]):
         x[col[n],...] = values[n]
 
 @njit

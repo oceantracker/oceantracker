@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.particle_properties._base_properties import ParticleProperty
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.particle_properties import particle_operations_util
+from oceantracker.particle_properties.util import particle_operations_util
 
 
 class DistanceTravelled(ParticleProperty):

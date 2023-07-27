@@ -18,7 +18,7 @@ def get_params(datasource=1):
     calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
-        input_dir =  'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\'
+        input_dir =  r'G:\Hindcasts_large'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = 'F:\\OceanTrackerOuput\\OceanTrackerProfiling'
 

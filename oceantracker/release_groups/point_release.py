@@ -31,10 +31,6 @@ class PointRelease(ParameterBaseClass):
                                  'z_range': PLC([],[float, int], min_length=2, doc_str='z range = [zmin, zmax] to randomly release in 3D, overrides any given release z value'),
                                   #Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}
                                 'max_cycles_to_find_release_points': PVC(50, int, min=50, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
-
-                                'added_particle_properties':{}, #  dictionary of items with keys of particle_properties,
-                                                                            # each a dictionary of parameters for that property
-                                                                            # eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}}
                                  })
         self.class_doc(description= 'Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.')
 

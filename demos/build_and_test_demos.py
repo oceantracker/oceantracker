@@ -51,11 +51,10 @@ demo_base_params={'output_file_base' : None,
     'particle_properties ': {
                         'Oxygen': { 'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay', 'decay_time_scale': 1. * 3600 * 24,'initial_value' : 20.},
                         'distance_travelled':   {'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'},
-                        'my_constant_prop':   {'class_name': 'oceantracker.particle_properties.constant_part_prop.ConstantParticleProperty',
-                                               'value' :100, 'variance': 10.},
+
                             }
     }
-from oceantracker.particle_properties.constant_part_prop import ConstantParticleProperty
+
 p1= deepcopy(demo_base_params)
 p1.update({'tracks_writer':{'time_steps_per_per_file':700}}
                                 )
@@ -72,9 +71,11 @@ p2['release_groups']={
             'points': deepcopy(poly_points),
             'pulse_size': 10, 'release_interval': 3 * 3600}
 }
+p2['particle_properties'] = {'my_constant_prop': {'class_name': 'oceantracker.particle_properties.load_carrying.ParticleLoad',
+                     'initial_value': 100, 'variance': 10.}}
 
 p2.update({'block_dry_cells': True,
-        'tracks_writer':{'write_dry_cell_index': True,
+        'tracks_writer':{'write_dry_cell_index': True, 'convert': True,
                                                }})
 p2.update({'output_file_base' :'demo02_animation' ,'time_step': 10*60})
 params.append(p2)
