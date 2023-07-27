@@ -2,21 +2,31 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from glob import  glob
 from os import path
 from oceantracker.common_info_default_param_dict_templates import default_reader
+from pathlib import Path as pathlib_Path
+
+def get_hydro_file_list(input_dir,file_mask, msg_logger):
+    # get a list of hydrofile list
+
+    if not path.isdir(input_dir):
+        msg_logger.msg(f'Reader cannot find "input_dir"  = {input_dir}', fatal_error=True, exit_now=True)
+
+    msg_logger.progress_marker(f'Searching for  hydro-files in "{input_dir}" matching mask "{file_mask}"')
+    file_list = []
+    for fn in pathlib_Path(input_dir).rglob( file_mask):
+        file_list.append(path.abspath(fn))
+
+    msg_logger.progress_marker(f'Found {len(file_list)} files', tabs =2)
+
+    if len(file_list) == 0:
+        msg_logger.msg(f'Reader cannot find any files in "{input_dir}" matching mask "{file_mask}"', fatal_error=True, exit_now=True)
+
+    return file_list
+
 # check imput files exist and work out what type of file
 
-def check_fileformat(reader_params, msg_logger):
+def check_fileformat(reader_params,file_names, msg_logger):
     input_dir =path.normpath(reader_params['input_dir'])
 
-    #first check if folder exists
-    if not path.isdir(input_dir):
-        msg_logger.msg('Cannot find hydro-model file directory= "' + str(input_dir)+ '"', fatal_error=True,exit_now=True,
-                       hint='check reader parameter "input_dir"')
-
-    file_mask = reader_params['file_mask']
-    file_names = glob(path.normpath(path.join(input_dir,file_mask)))
-    if len(file_names)==0:
-        msg_logger.msg('No hydro-model files found in input_dir, or its sub-dir whih matching file mask = ' + str(file_mask),
-                       fatal_error=True, exit_now=True,  hint='check reader parameter "file_mask"')
 
     # open first file to deterime format
     if 'class_name' not in reader_params or (reader_params['class_name'] is None and reader_params['class_instance'] is None):

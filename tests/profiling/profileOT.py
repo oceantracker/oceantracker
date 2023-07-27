@@ -18,7 +18,7 @@ def get_params(datasource=1):
     calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
-        input_dir =  r'G:\Hindcasts_large'
+        input_dir =  r'G:\Hindcasts_large\MalbroughSounds_10year_benPhD'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = 'F:\\OceanTrackerOuput\\OceanTrackerProfiling'
 
@@ -60,8 +60,7 @@ def get_params(datasource=1):
          'max_threads' : 5,
         'screen_output_time_interval':6*time_step,
          'max_run_duration': 6 *24*3600,  # 10 days
-         'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
-                    'input_dir': input_dir,
+         'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,
                     #'time_buffer_size': 3,
                     'field_variables': {'water_temperature': 'temp'}

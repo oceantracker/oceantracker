@@ -117,13 +117,13 @@ ot.add_class('release_groups', #  class_role is release_group
 ot.add_class('resuspension', critical_friction_velocity = .005) # only re-suspend particles if friction vel. exceeds this value
 
 # add a class to modify the particle velocity           
-# velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model's 
-# here a fall velocity with given  value is added to the computation 
+# velocity_modifiers are a set of velocities added to  water velocity given in the hydrodynamic model's 
+# here a fall velocity with a given  value is added to the computation 
 ot.add_class('velocity_modifiers',  #  class_role is velocity_modifiers
              name ='my_fall_velocity',
             class_name = 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
             value= -0.001, # mean terminal vel < 0 for falling
-            # optionally variance can also be use to give each particles its own fall velocity 
+            # optionally variance can also be use to give each particle its own fall velocity 
             )
 
 
@@ -181,8 +181,8 @@ case_info_file_name = ot.run()
 # output now in folder "root_output_dir"/"output_file_base"
 # in this example output is in directory  output/param_test1'
 
-# case_info_file_name the name of a json file with useful for post processing, 
-# eg holds output file names to assist in reading and plotting data
+# case_info_file_name is the name of a json file with useful for post processing, 
+# eg it holds output file names to assist in reading and plotting data
 print('case file name=',case_info_file_name)
 
 

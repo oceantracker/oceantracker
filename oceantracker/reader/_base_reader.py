@@ -4,7 +4,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from oceantracker.util import time_util
 from os import path, walk
 from glob import glob
-from pathlib import Path as pathlib_Path
+
 from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from oceantracker.util.basic_util import nopass
@@ -21,7 +21,7 @@ class _BaseReader(ParameterBaseClass):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({'input_dir': PVC(None, str, is_required=True),
-                                 'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names'),
+                                 'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
                                  'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
                                  'time_zone': PVC(None, int, min=-12, max=12, units='hours', doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
                                  'cords_in_lat_long': PVC(False, bool),
@@ -45,11 +45,9 @@ class _BaseReader(ParameterBaseClass):
                                                      'wind_stress': PVC(None, str),
                                                      'bottom_stress': PVC(None, str),
                                                      },
-
                                  'dimension_map': {'time': PVC('time', str, is_required=True), 'node': PVC('node', str), 'z': PVC(None, str),
                                                    'vector2Ddim': PVC(None, str), 'vector3Ddim': PVC(None, str)},
                                  'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
-                                 'search_sub_dirs': PVC(True, bool),
                                  'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
                                  })  # list of normal required dimensions
 
@@ -119,28 +117,11 @@ class _BaseReader(ParameterBaseClass):
         self.setup_reader_fields(nc)
         nc.close()
 
-    def get_list_of_files_and_hindcast_times(self, msg_logger):
+    def sort_files_by_time(self,file_list, msg_logger):
         # get time sorted list of files matching mask
 
-        input_dir= self.params['input_dir']
-
-        if not path.isdir(input_dir):
-            msg_logger.msg(f'Reader cannot find "input_dir"  = {input_dir}', fatal_error=True, exit_now=True)
-
-        msg_logger.progress_marker(f'Searching for  hydro-files in "{input_dir}" matching mask "{self.params["file_mask"]}"')
-        if self.params['search_sub_dirs']:
-            file_names=[]
-            for fn in pathlib_Path(input_dir).rglob( self.params['file_mask']):
-                file_names.append(path.abspath(fn))
-        else:
-            file_names = glob(path.normpath(path.join(input_dir, self.params['file_mask'])))
-
-        msg_logger.progress_marker(f'Found {len(file_names)} files', tabs =2)
-        if len(file_names) ==0:
-            msg_logger.msg(f'Reader cannot find any files in "{input_dir}" matching mask "{self.params["file_mask"]}"', fatal_error=True, exit_now=True)
-
-        fi = {'names': file_names, 'n_time_steps': [], 'time_start': [], 'time_end': []}
-        for n, fn in enumerate(file_names):
+        fi = {'names': file_list, 'n_time_steps': [], 'time_start': [], 'time_end': []}
+        for n, fn in enumerate(file_list):
             # get first/second/last time from each file,
             nc = NetCDFhandler(fn, 'r')
             time = self.read_time_sec_since_1970(nc)
@@ -152,7 +133,7 @@ class _BaseReader(ParameterBaseClass):
 
         # check some files found
         if len(fi['names']) == 0:
-            self.msg_logger.msg('reader: cannot find any files matching mask "' + self.params['file_mask']
+            msg_logger.msg('reader: cannot find any files matching mask "' + self.params['file_mask']
                            + '"  in input_dir : "' + self.params['input_dir'] + '"', fatal_error=True)
 
         # convert file info to numpy arrays for sorting
@@ -177,7 +158,7 @@ class _BaseReader(ParameterBaseClass):
 
         return fi
 
-    def get_hindcast_files_info(self, msg_logger):
+    def get_hindcast_files_info(self, file_list, msg_logger):
         # read through files to get start and finish times of each file
         # create a time sorted list of files given by file mask in file_info dictionary
         # note this is only called once by OceantrackRunner to form file info list,
@@ -186,7 +167,7 @@ class _BaseReader(ParameterBaseClass):
         # build a dummy non-initialise reader to get some methods and full params
         # add defaults from template, ie get reader class_name default, no warnings, but get these below
         # check cals name
-        fi = self.get_list_of_files_and_hindcast_times(msg_logger)
+        fi = self.sort_files_by_time(file_list, msg_logger)
 
         # checks on hindcast using first hindcast file
         nc = NetCDFhandler(fi['names'][0], 'r')
