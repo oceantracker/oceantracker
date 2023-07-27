@@ -24,7 +24,7 @@ def get_params(datasource=1):
 
     elif datasource==2:
         output_file_base= 'Sounds'
-        input_dir =  '/hpcfreenas/hindcast/MarlbroughSounds_hindcast_10years_BenPhd_2019ver/2008'
+        input_dir =  '/hpcfreenas/hindcast/MarlbroughSounds_hindcast_10years_BenPhd_2019ver/'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = '/hpcfreenas/ross/oceanTrackerOutput/profiling/'
 
