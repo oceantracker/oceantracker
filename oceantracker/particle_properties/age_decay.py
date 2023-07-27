@@ -14,7 +14,7 @@ class AgeDecay(ParticleProperty):
 
 
 
-    def initial_value_at_birth(self, release_group_name,new_part_IDs):
+    def initial_value_at_birth(self, new_part_IDs):
         self.set_values(self.params['initial_value'], new_part_IDs) # sets this properties values
 
     def update(self,active):
