@@ -108,6 +108,7 @@ if __name__ == "__main__":
                 print('Error during demo')
                 exit()
             if type(params) is list:  continue
+
         # no plotting // cases
         else:
             case_info_file_name =path.join('output', params['output_file_base'],params['output_file_base']+'_caseInfo.json')

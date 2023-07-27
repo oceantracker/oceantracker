@@ -24,8 +24,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                                                  doc_str=' Count only those particles with status >= to thsi value'),
                                   'status_max': PVC('moving', [str], possible_values=particle_info['status_keys_list'],
                                                     doc_str=' Count only those particles with status  <= to this value'),
-                                  'z_min': PVC(-1.0E32, float, doc_str=' Count only those particles with vertical positions >=  to this value'),
-                                  'z_max': PVC( 1.0E32, float,  doc_str=' Count only those particles with vertical positions <= to this value'),
+                                  'z_min': PVC(-1.0E32, float, doc_str=' Count only those particles with vertical position >=  to this value'),
+                                  'z_max': PVC( 1.0E32, float,  doc_str=' Count only those particles with vertical position <= to this value'),
                                   'particle_property_list': PLC([], [str], make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for statics on water depth at particle locations inside the counted regions') })
         self.sum_binned_part_prop = {}
         self.info['output_file'] = None

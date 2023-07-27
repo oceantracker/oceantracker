@@ -3,13 +3,10 @@ from time import perf_counter
 import numpy as np
 from oceantracker.util import time_util
 from datetime import datetime
-from numba import types as nbt ,from_dtype,typeof
-from oceantracker.util.numba_util import njitter
-from oceantracker.particle_properties import particle_operations_util
+from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.solver.util import solver_util ,dev_triangle_kernnal_solver
-from oceantracker.util.profiling_util import function_profiler
+from oceantracker.solver.util import solver_util
 from oceantracker.util import numpy_util
 
 class Solver(ParameterBaseClass):

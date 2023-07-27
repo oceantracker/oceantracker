@@ -55,10 +55,6 @@ particle_properties:
     initial_value: 20.0
   distance_travelled:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
-  my_constant_prop:
-    class_name: oceantracker.particle_properties.constant_part_prop.ConstantParticleProperty
-    value: 100
-    variance: 10.0
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -93,5 +89,6 @@ release_groups:
 root_output_dir: output
 time_step: 600
 tracks_writer:
+  convert: true
   write_dry_cell_index: true
 user_note: test of notes

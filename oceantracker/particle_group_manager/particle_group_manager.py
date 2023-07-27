@@ -1,16 +1,12 @@
 import numpy as np
-from numba import njit
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.particle_properties import particle_operations_util
-from oceantracker.util import time_util
-from oceantracker.util.profiling_util import function_profiler
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
+from oceantracker.particle_properties.util import particle_operations_util
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
-from oceantracker.util import numpy_util,  spell_check_util
+from oceantracker.util import spell_check_util
 from  oceantracker.particle_group_manager.util import  pgm_util
 
 # holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
-import sys, gc
 class ParticleGroupManager(ParameterBaseClass):
 
     def __init__(self):

@@ -12,7 +12,7 @@ class CompactTracksWriter(_BaseWriter):
 
         self.add_default_params({'NCDF_time_chunk': PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file'),
                                  'NCDF_particle_chunk': PVC(100_000, int, min=1000, doc_str=' number of particles per time chunk in the netcdf file'),
-                                 'convert': PVC(False, bool, doc_str='convert compact tracks file to rectangular for at end of the run'),
+                                 #'convert': PVC(False, bool, doc_str='convert compact tracks file to rectangular for at end of the run'),
                                  'retain_compact_files': PVC(False, bool,
                                                              doc_str='keep  compact tracks files after conversion to rectangular format'),
                                  'role_output_file_tag': PVC('tracks_compact', str)
@@ -116,13 +116,14 @@ class CompactTracksWriter(_BaseWriter):
                 self.add_global_attribute('status_'+ key, int(val))
 
             super().close()
-
+            '''
             if self.params['convert']:
                 # convert output files to rectangular format
                 for fn in self.info['output_file']:
                     convert_to_rectangular(path.join(si.run_output_dir, fn),
                                            time_chunk=self.params['NCDF_time_chunk'])
                 pass
+            '''
 
 
 

@@ -127,7 +127,7 @@ class _BaseReader(ParameterBaseClass):
         if not path.isdir(input_dir):
             msg_logger.msg(f'Reader cannot find "input_dir"  = {input_dir}', fatal_error=True, exit_now=True)
 
-
+        msg_logger.progress_marker(f'Searching for  hydro-files in "{input_dir}" matching mask "{self.params["file_mask"]}"')
         if self.params['search_sub_dirs']:
             file_names=[]
             for fn in pathlib_Path(input_dir).rglob( self.params['file_mask']):
@@ -135,6 +135,7 @@ class _BaseReader(ParameterBaseClass):
         else:
             file_names = glob(path.normpath(path.join(input_dir, self.params['file_mask'])))
 
+        msg_logger.progress_marker(f'Found {len(file_names)} files', tabs =2)
         if len(file_names) ==0:
             msg_logger.msg(f'Reader cannot find any files in "{input_dir}" matching mask "{self.params["file_mask"]}"', fatal_error=True, exit_now=True)
 

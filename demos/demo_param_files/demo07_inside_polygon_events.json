@@ -39,7 +39,8 @@
         "A_H": 0.1
     },
     "tracks_writer": {
-        "write_dry_cell_index": true
+        "write_dry_cell_index": true,
+        "convert": true
     },
     "release_groups": {
         "P1": {
@@ -65,20 +66,15 @@
         },
         "distance_travelled": {
             "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
-        },
-        "my_constant_prop": {
-            "class_name": "oceantracker.particle_properties.constant_part_prop.ConstantParticleProperty",
-            "value": 100,
-            "variance": 10.0
         }
     },
-    "block_dry_cells": true,
     "particle_properties": {
         "age_decay": {
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
     },
+    "block_dry_cells": true,
     "event_loggers": {
         "in_out_poly": {
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
