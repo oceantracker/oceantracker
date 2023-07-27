@@ -40,12 +40,13 @@ Parameters:
 		- default: ``1``
 		- min: ``1``
 
+	* ``release_group_parameters``: nested parameter dictionary
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
 	* ``type`` :   ``<class 'str'>``   *<optional>*
-		Description: particle property
+		Description: type of particle property, used to manage how to update particle property
 
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
@@ -62,6 +63,8 @@ Parameters:
 		- min: ``1``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
+		Description: Write particle property to tracks or event files file
+
 		- default: ``True``
 		- possible_values: ``[True, False]``
 

@@ -21,9 +21,59 @@
 # 
 # To avoid  this run parallel case as a script, eg. code in file  "oceantracker/tutorials_how_to/P_running_cases_in_parallel.py".
 # 
-# ## Run parallel using param. dicts.
+# 
+
+# ## Run parallel with helper class
 
 # In[2]:
+
+
+# run in parallel using helper class method
+from oceantracker.main import OceanTracker
+
+ot = OceanTracker()
+# setup base case
+# by default settings and classes are added to base case
+ot.settings(output_file_base= 'parallel_test2',      # name used as base for output files
+    root_output_dir='output',             #  output is put in dir   'root_output_dir'/'output_file_base'
+    time_step = 120,  #  2 min time step as seconds  
+    )
+
+ot.add_class('reader',
+            input_dir='../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+            file_mask= 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
+            )
+
+# now put a release group with one point into case list
+# define the required release  points
+points = [  [1597682.1237, 5489972.7479],
+            [1598604.1667, 5490275.5488],
+            [1598886.4247, 5489464.0424],
+            [1597917.3387, 5489000],
+        ]
+
+# build a list of params for each case, with one release group fot each point
+for n, p in enumerate(points):
+    # add a release group with one point to case "n"
+    ot.add_class('release_groups',
+                name ='mypoint'+str(n),
+                points= [p],  # needs to be 1, by 2 list for single 2D point
+                release_interval= 3600,           # seconds between releasing particles
+                pulse_size= 10,                   # number of particles released each release_interval
+                case=n) # this adds release group to the nth case to run in //
+
+# to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
+if __name__ == '__main__':
+    # base case and case_list exist as attributes ot.params and ot.case_list
+    # run as parallel set of cases
+    ot.run()
+
+
+# 
+
+# ## Run parallel using param. dicts.
+
+# In[ ]:
 
 
 # oceantracker parallel demo, run different release groups as parallel processes
@@ -35,7 +85,7 @@ base_case={
     'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
     'time_step' : 120,  #  2 min time step as seconds  
     'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                    'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
+                'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
         },
         }
 
@@ -66,49 +116,4 @@ if __name__ == '__main__':
     # run as parallel set of cases
     #    by default uses one less than the number of physical processors at one time, use setting "processors"
     main.run_parallel(base_case, case_list)
-
-
-# ## Run parallel with helper class
-
-# In[3]:
-
-
-# run in parallel using helper class method
-from oceantracker.main import OceanTracker
-
-ot = OceanTracker()
-# setup base case
-# by default settings and classes are added to base case
-ot.settings(output_file_base= 'parallel_test2',      # name used as base for output files
-    root_output_dir='output',             #  output is put in dir   'root_output_dir'/'output_file_base'
-    time_step = 120,  #  2 min time step as seconds  
-    )
-ot.add_class('reader',
-            input_dir='../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-            file_mask= 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-            )
-
-# now put a release group with one point into case list
-# define the required release  points
-points = [  [1597682.1237, 5489972.7479],
-            [1598604.1667, 5490275.5488],
-            [1598886.4247, 5489464.0424],
-            [1597917.3387, 5489000],
-        ]
-
-# build a list of params for each case, with one release group fot each point
-for n, p in enumerate(points):
-    # add a release group with one point to case "n"
-    ot.add_class('release_groups',
-                name ='mypoint'+str(n),
-                points= [p],  # needs to be 1, by 2 list for single 2D point
-                release_interval= 3600,           # seconds between releasing particles
-                pulse_size= 10,                   # number of particles released each release_interval
-                case=n) # this adds release group to the nth case to run in //
-
-# to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
-if __name__ == '__main__':
-    # base case and case_list exist as attributes ot.params and ot.case_list
-    # run as parallel set of cases
-    ot.run()
 

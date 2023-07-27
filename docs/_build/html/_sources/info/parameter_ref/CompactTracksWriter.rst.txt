@@ -31,12 +31,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``convert`` :   ``<class 'bool'>``   *<optional>*
-		Description: convert compact tracks file to rectangular for at end of the run
-
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``retain_compact_files`` :   ``<class 'bool'>``   *<optional>*
 		Description: keep  compact tracks files after conversion to rectangular format
 

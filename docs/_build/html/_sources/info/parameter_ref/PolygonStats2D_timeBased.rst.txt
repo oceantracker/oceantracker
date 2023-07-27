@@ -78,12 +78,12 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 		- possible_values: ``[True, False]``
 
 	* ``z_max`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical positions <= to this value
+		Description: Count only those particles with vertical position <= to this value
 
 		- default: ``1e+32``
 
 	* ``z_min`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical positions >=  to this value
+		Description: Count only those particles with vertical position >=  to this value
 
 		- default: ``-1e+32``
 

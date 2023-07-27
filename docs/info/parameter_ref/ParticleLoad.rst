@@ -1,14 +1,14 @@
-##################
-DistanceTravelled
-##################
+#############
+ParticleLoad
+#############
 
-**Description:** 
+**Description:** Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass
 
-**class_name:** oceantracker.particle_properties.distance_travelled.DistanceTravelled
+**class_name:** oceantracker.particle_properties.load_carrying.ParticleLoad
 
-**File:** oceantracker/particle_properties/distance_travelled.py
+**File:** oceantracker/particle_properties/load_carrying.py
 
-**Inheritance:** _BasePropertyInfo> ParticleProperty> DistanceTravelled
+**Inheritance:** _BasePropertyInfo> ParticleProperty> ParticleLoad
 
 
 Parameters:
@@ -29,7 +29,9 @@ Parameters:
 		- default: ``None``
 
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
-		- default: ``0.0``
+		Description: Value of the particle property when it is released
+
+		- default: ``1.0``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``

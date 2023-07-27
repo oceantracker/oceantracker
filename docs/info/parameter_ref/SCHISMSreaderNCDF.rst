@@ -61,7 +61,7 @@ Parameters:
 		- can_be_empty_list: ``True``
 
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
-		Description: Mask for file names, eg "scout*.nc", is joined with "input_dir" to give full file names
+		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern
 
 		- default: ``None``
 
@@ -96,10 +96,6 @@ Parameters:
 		- a list containing type:  ``[<class 'str'>]``
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
-
-	* ``search_sub_dirs`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
-		- possible_values: ``[True, False]``
 
 	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
 		- default: ``24``

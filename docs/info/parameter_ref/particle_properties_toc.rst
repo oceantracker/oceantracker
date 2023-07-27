@@ -9,9 +9,9 @@ particle_properties
 	:maxdepth: 1
 
 	AgeDecay.rst
-	ConstantParticleProperty.rst
 	DistanceTravelled.rst
 	InsidePolygonsNonOverlapping2D.rst
+	ParticleLoad.rst
 	ParticleParameterFromNormalDistribution.rst
 	ParticleProperty.rst
 	TimeVaryingInfo.rst

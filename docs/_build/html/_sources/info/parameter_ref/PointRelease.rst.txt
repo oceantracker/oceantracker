@@ -14,7 +14,6 @@ PointRelease
 Parameters:
 ************
 
-	* ``added_particle_properties``: nested parameter dictionary
 	* ``allow_release_in_dry_cells`` :   ``<class 'bool'>``   *<optional>*
 		Description: Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.
 

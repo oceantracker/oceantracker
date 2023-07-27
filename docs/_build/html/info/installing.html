@@ -102,7 +102,7 @@
 <section id="build-oceantracker-conda-environment">
 <h2>Build oceantracker conda environment<a class="headerlink" href="#build-oceantracker-conda-environment" title="Permalink to this heading">¶</a></h2>
 <p>To ensure python/ module compatibility, recommendation is to build a conda virtual environment with the given environment.yml file</p>
-<p>Due to version dependencies of modules outside oceantracker, it curently only works with python 3.10, bur not yet 3.11</p>
+<p>Due to version dependencies of modules outside oceantracker, it curently only works with python 3.10, bur not yet 3.11 and numpy &lt; 1.24</p>
 <ol class="arabic">
 <li><p>Install</p>
 <blockquote>
@@ -148,7 +148,7 @@
 <div><blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">oceantracker</span> <span class="pre">python=3.10</span></code></p>
 </div></blockquote>
-<p>Note: Must use python version 3.10 (not 3.11 yet) and NumPy versions 1.21–1.24</p>
+<p>Note: Must use python version 3.10 (not 3.11 yet) and NumPy versions 1.21–1.23</p>
 <p>Activate new environment</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
@@ -156,8 +156,7 @@
 </div></blockquote>
 <p>Then install these packages</p>
 <blockquote>
-<div><blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">numpy</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anacondanumpy</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">numba</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">netcdf4</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">scipy</span></code></p>
@@ -165,11 +164,6 @@
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">pyyaml</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">psutil</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">matplotlib</span></code></p>
-</div></blockquote>
-<p>Activate new environment</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
-</div></blockquote>
 </div></blockquote>
 </li>
 </ol>

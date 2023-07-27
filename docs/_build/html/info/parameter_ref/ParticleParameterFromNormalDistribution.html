@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="ParticleProperty" href="ParticleProperty.html" />
-    <link rel="prev" title="InsidePolygonsNonOverlapping2D" href="InsidePolygonsNonOverlapping2D.html" />
+    <link rel="prev" title="ParticleLoad" href="ParticleLoad.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -75,7 +75,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="particle_properties_toc.html">particle_properties</a><ul>
-      <li>Previous: <a href="InsidePolygonsNonOverlapping2D.html" title="previous chapter">InsidePolygonsNonOverlapping2D</a></li>
+      <li>Previous: <a href="ParticleLoad.html" title="previous chapter">ParticleLoad</a></li>
       <li>Next: <a href="ParticleProperty.html" title="next chapter">ParticleProperty</a></li>
   </ul></li>
   </ul></li>
@@ -155,6 +155,7 @@
 </dd>
 </dl>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">release_group_parameters</span></code>: nested parameter dictionary</p></li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">time_varying</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
@@ -164,7 +165,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">type</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: particle property</p>
+<dt><code class="docutils literal notranslate"><span class="pre">type</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: type of particle property, used to manage how to update particle property</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">user</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['manual_update',</span> <span class="pre">'from_fields',</span> <span class="pre">'user']</span></code></p></li>
@@ -211,7 +212,8 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">write</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">write</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Write particle property to tracks or event files file</p>
+<ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
@@ -231,7 +233,7 @@
     <ul>
         <li>
           &larr;
-          <a href="InsidePolygonsNonOverlapping2D.html" title="Previous document">InsidePolygonsNonOverlapping2D</a>
+          <a href="ParticleLoad.html" title="Previous document">ParticleLoad</a>
         </li>
         <li>
           <a href="ParticleProperty.html" title="Next document">ParticleProperty</a>

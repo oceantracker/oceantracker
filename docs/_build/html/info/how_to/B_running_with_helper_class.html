@@ -237,13 +237,13 @@ a critical value.</p></li>
 <span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;resuspension&#39;</span><span class="p">,</span> <span class="n">critical_friction_velocity</span> <span class="o">=</span> <span class="mf">.005</span><span class="p">)</span> <span class="c1"># only re-suspend particles if friction vel. exceeds this value</span>
 
 <span class="c1"># add a class to modify the particle velocity</span>
-<span class="c1"># velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model&#39;s</span>
-<span class="c1"># here a fall velocity with given  value is added to the computation</span>
+<span class="c1"># velocity_modifiers are a set of velocities added to  water velocity given in the hydrodynamic model&#39;s</span>
+<span class="c1"># here a fall velocity with a given  value is added to the computation</span>
 <span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;velocity_modifiers&#39;</span><span class="p">,</span>  <span class="c1">#  class_role is velocity_modifiers</span>
              <span class="n">name</span> <span class="o">=</span><span class="s1">&#39;my_fall_velocity&#39;</span><span class="p">,</span>
             <span class="n">class_name</span> <span class="o">=</span> <span class="s1">&#39;oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity&#39;</span><span class="p">,</span>
             <span class="n">value</span><span class="o">=</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">,</span> <span class="c1"># mean terminal vel &lt; 0 for falling</span>
-            <span class="c1"># optionally variance can also be use to give each particles its own fall velocity</span>
+            <span class="c1"># optionally variance can also be use to give each particle its own fall velocity</span>
             <span class="p">)</span>
 </pre></div>
 </div>
@@ -409,8 +409,8 @@ the way notebooks are implemented can sometimes result in issues.</p>
 <span class="c1"># output now in folder &quot;root_output_dir&quot;/&quot;output_file_base&quot;</span>
 <span class="c1"># in this example output is in directory  output/param_test1&#39;</span>
 
-<span class="c1"># case_info_file_name the name of a json file with useful for post processing,</span>
-<span class="c1"># eg holds output file names to assist in reading and plotting data</span>
+<span class="c1"># case_info_file_name is the name of a json file with useful for post processing,</span>
+<span class="c1"># eg it holds output file names to assist in reading and plotting data</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;case file name=&#39;</span><span class="p">,</span><span class="n">case_info_file_name</span><span class="p">)</span>
 </pre></div>
 </div>

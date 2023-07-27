@@ -37,7 +37,7 @@ from oceantracker import common_info_default_param_dict_templates as common_info
 
 from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
-from oceantracker.reader.util import check_hydro_model
+from oceantracker.reader.util import get_hydro_model_info
 from oceantracker.util.package_util import get_all_classes
 from oceantracker.util import  spell_check_util
 
@@ -439,7 +439,6 @@ class _OceanTrackerRunner(object):
                                                           ml, crumbs='merging settings and checking against defaults')
         return w
 
-
     def _get_hindcast_file_info(self, working_params ):
         # created a dict which can be used to build a reader
         t0= perf_counter()
@@ -449,14 +448,16 @@ class _OceanTrackerRunner(object):
         if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
             ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',fatal_error=True, exit_now=True )
 
+        file_list = get_hydro_model_info.get_hydro_file_list(reader_params['input_dir'],reader_params['file_mask'], ml)
+
         if 'class_name' not in reader_params:
             # infer class name from netcdf files if possible
-            reader_params= check_hydro_model.check_fileformat(reader_params, ml)
+            reader_params= get_hydro_model_info.check_fileformat(reader_params,file_list, ml)
 
         reader = make_class_instance_from_params('reader', reader_params, ml,  class_role_name='reader')
         ml.exit_if_prior_errors() # class name missing or missing required variables
 
-        working_params['file_info'] ,working_params['hindcast_is3D'] = reader.get_hindcast_files_info(ml) # get file lists
+        working_params['file_info'] ,working_params['hindcast_is3D'] = reader.get_hindcast_files_info(file_list, ml) # get file lists
 
         ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
 

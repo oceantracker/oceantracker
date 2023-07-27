@@ -41,76 +41,6 @@ another process” errors.
 To avoid this run parallel case as a script, eg. code in file
 “oceantracker/tutorials_how_to/P_running_cases_in_parallel.py”.
 
-Run parallel using param. dicts.
---------------------------------
-
-.. code:: ipython3
-
-    # oceantracker parallel demo, run different release groups as parallel processes
-    from oceantracker import main
-    
-    # first build base case, params used for all cases
-    base_case={
-        'output_file_base' :'parallel_test1',      # name used as base for output files
-        'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
-        'time_step' : 120,  #  2 min time step as seconds  
-        'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                        'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-            },
-            }
-    
-    # define the required release  points
-    points = [  [1597682.1237, 5489972.7479],
-                [1598604.1667, 5490275.5488],
-                [1598886.4247, 5489464.0424],
-                [1597917.3387, 5489000],
-            ]
-    
-    # build a list of params for each case, with one release group fot each point
-    case_list=[]
-    for n,p in enumerate(points):
-        case_param = main.param_template()
-        # add one point as a release group to this case
-        case_param['release_groups']['mypoint'+str(n)] = {  # better to give release group a unique name
-                                                'points':[p],  # needs to be 1, by 2 list for single 2D point
-                                                'release_interval': 3600,           # seconds between releasing particles
-                                                'pulse_size': 10,                   # number of particles released each release_interval
-                                    }
-        case_list.append(case_param)  # add this case to the list
-    
-    
-    
-    # to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
-    if __name__ == '__main__':
-    
-        # run as parallel set of cases
-        #    by default uses one less than the number of physical processors at one time, use setting "processors"
-        main.run_parallel(base_case, case_list)
-
-
-.. parsed-literal::
-
-    main: --------------------------------------------------------------------------
-    main: OceanTracker- preliminary setup
-    main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
-    main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.009 sec
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test1
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test1_raw_user_params.json"
-    main:   -  oceantracker:multiProcessing: processors:4
-    main:   - parallel pool complete
-    main:     >>> Note: run summary with case file names   "parallel_test1_runInfo.json"
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test1
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test1_raw_user_params.json"
-    main:     >>> Note: run summary with case file names   "parallel_test1_runInfo.json"
-    main: --------------------------------------------------------------------------
-    main: OceanTracker summary:  elapsed time =0:00:16.484425
-    main:       Cases -   0 errors,   0 warnings,   8 notes, check above
-    main:       Helper-   0 errors,   0 warnings,   0 notes, check above
-    main:       Main  -   0 errors,   0 warnings,   3 notes, check above
-    main: --------------------------------------------------------------------------
-    
-
 Run parallel with helper class
 ------------------------------
 
@@ -126,6 +56,7 @@ Run parallel with helper class
         root_output_dir='output',             #  output is put in dir   'root_output_dir'/'output_file_base'
         time_step = 120,  #  2 min time step as seconds  
         )
+    
     ot.add_class('reader',
                 input_dir='../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                 file_mask= 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
@@ -160,12 +91,16 @@ Run parallel with helper class
 
     helper: --------------------------------------------------------------------------
     helper: Starting OceanTracker helper class
+    helper:   - Adding parallel case number # "0"
+    helper:   - Adding parallel case number # "1"
+    helper:   - Adding parallel case number # "2"
+    helper:   - Adding parallel case number # "3"
     helper:   - Starting run using helper class
     main: --------------------------------------------------------------------------
-    main: OceanTracker- preliminary setup
-    main:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+    main:  OceanTracker version 0.4.01.004 2023-07-14 - preliminary setup
+    main:      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
     main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.007 sec
+    main:       -  sorted hyrdo-model files in time order,	  0.009 sec
     main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test2
     main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test2_raw_user_params.json"
     main:   -  oceantracker:multiProcessing: processors:4
@@ -175,9 +110,57 @@ Run parallel with helper class
     main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test2_raw_user_params.json"
     main:     >>> Note: run summary with case file names   "parallel_test2_runInfo.json"
     main: --------------------------------------------------------------------------
-    main: OceanTracker summary:  elapsed time =0:00:16.423857
+    main: OceanTracker summary:  elapsed time =0:00:17.630557
     main:       Cases -   0 errors,   0 warnings,   8 notes, check above
     main:       Helper-   0 errors,   0 warnings,   0 notes, check above
     main:       Main  -   0 errors,   0 warnings,   3 notes, check above
     main: --------------------------------------------------------------------------
     
+
+
+
+Run parallel using param. dicts.
+--------------------------------
+
+.. code:: ipython3
+
+    # oceantracker parallel demo, run different release groups as parallel processes
+    from oceantracker import main
+    
+    # first build base case, params used for all cases
+    base_case={
+        'output_file_base' :'parallel_test1',      # name used as base for output files
+        'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
+        'time_step' : 120,  #  2 min time step as seconds  
+        'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                    'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
+            },
+            }
+    
+    # define the required release  points
+    points = [  [1597682.1237, 5489972.7479],
+                [1598604.1667, 5490275.5488],
+                [1598886.4247, 5489464.0424],
+                [1597917.3387, 5489000],
+            ]
+    
+    # build a list of params for each case, with one release group fot each point
+    case_list=[]
+    for n,p in enumerate(points):
+        case_param = main.param_template()
+        # add one point as a release group to this case
+        case_param['release_groups']['mypoint'+str(n)] = {  # better to give release group a unique name
+                                                'points':[p],  # needs to be 1, by 2 list for single 2D point
+                                                'release_interval': 3600,           # seconds between releasing particles
+                                                'pulse_size': 10,                   # number of particles released each release_interval
+                                    }
+        case_list.append(case_param)  # add this case to the list
+    
+    
+    
+    # to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
+    if __name__ == '__main__':
+    
+        # run as parallel set of cases
+        #    by default uses one less than the number of physical processors at one time, use setting "processors"
+        main.run_parallel(base_case, case_list)
