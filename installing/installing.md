@@ -4,7 +4,7 @@ ________________________________________
 
 To ensure python/ module compatibility, recommendation is to build a conda virtual environment with the given environment.yml file
 
-Due to version dependencies of modules outside oceantracker, it curently only works with python 3.10, bur not yet 3.11 and numpy < 1.24 
+Due to version dependencies of modules outside oceantracker, it curently only works with python 3.10 and numpy < 1.24, and not yet python 3.11 
 
 1. Install 
     

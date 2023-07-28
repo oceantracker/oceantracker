@@ -70,7 +70,11 @@ def read_case_info_file(case_info_file_name):
     # load runInfo and given case case_infofiles into dict
     # runcase_info is used as input for all particle_plot methods
 
-    case_info = json_util.read_JSON(case_info_file_name)
+    if type(case_info_file_name) == list:
+        print('Warning: case_info_file is a list from a parallel run, loading first case, ie case_info_file[0], if another case required use read_case_info_file(case_info_file[n]) ')
+        case_info = json_util.read_JSON(case_info_file_name[0])
+    else:
+        case_info = json_util.read_JSON(case_info_file_name)
 
     # make case info output dir consistent with given file name
     case_info['output_files']['run_output_dir'] = path.dirname(case_info_file_name)
