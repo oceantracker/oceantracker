@@ -16,7 +16,7 @@ class _BaseEventLogger(ParameterBaseClass):
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('event_logger',str),
                                  'write': PVC(True,bool),
-                                 'chunk_size' : PVC(5000, int, min= 1),
+                                 'chunk_size' : PVC(500_000, int, min= 1),
                                  'particle_prop_to_write_list': PLC([ 'ID','x','IDpulse', 'IDrelease_group', 'user_release_groupID', 'status', 'age'],[str])})
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['event_has_started_boolean'])
@@ -62,7 +62,7 @@ class _BaseEventLogger(ParameterBaseClass):
 
         self.nc.add_dimension('event_dim', dim_size=None) # open dim
 
-        chunk = si.particle_buffer_size if params['chunk_size'] is None else params['chunk_size']
+        chunk = params['chunk_size']
 
         vec_dims= ['oneD','twoD','threeD' ]
         for n, d in enumerate(vec_dims): self.nc.add_dimension(d, dim_size=n + 1)
