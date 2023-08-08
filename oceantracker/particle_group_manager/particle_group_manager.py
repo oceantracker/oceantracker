@@ -302,14 +302,14 @@ class ParticleGroupManager(ParameterBaseClass):
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
         if nDead > 100_000 and nDead >= 0.20*info['particles_in_buffer']:
                 # if too many dead then delete from memory
-                si.msg_logger.msg(f'removing dead {nDead:3d} particles from memory, as more than 20% are dead', tabs=3)
+                si.msg_logger.msg(f'removing dead {nDead:,} particles from memory, as more than 20% are dead', tabs=3)
 
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():
                         pp.data[:num_alive,...] = pp.get_values(ID_alive)
 
                 # mark remaining not released to make inactive
-                notReleased = np.arange(num_alive, si.particle_buffer_size)
+                notReleased = np.arange(num_alive, info['current_particle_buffer_size'])
                 part_prop['status'].set_values(si.particle_status_flags['notReleased'], notReleased)
 
                 info['particles_in_buffer'] = num_alive # record new number in buffer
