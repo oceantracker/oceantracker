@@ -173,7 +173,13 @@ another process” errors.</p>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="c1"># base case and case_list exist as attributes ot.params and ot.case_list</span>
     <span class="c1"># run as parallel set of cases</span>
-    <span class="n">ot</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">case_info_files</span><span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+
+    <span class="c1"># NOTE for parallel runs case_info_files is a list, one for each case run</span>
+    <span class="c1"># so to load track files use</span>
+    <span class="c1"># tracks = load_output_files.load_track_data(case_info_files[n])</span>
+    <span class="c1">#   where n is the case number 0,1,2...</span>
 </pre></div>
 </div>
 <pre class="literal-block">helper: --------------------------------------------------------------------------
@@ -244,9 +250,33 @@ main: --------------------------------------------------------------------------
 
     <span class="c1"># run as parallel set of cases</span>
     <span class="c1">#    by default uses one less than the number of physical processors at one time, use setting &quot;processors&quot;</span>
-    <span class="n">main</span><span class="o">.</span><span class="n">run_parallel</span><span class="p">(</span><span class="n">base_case</span><span class="p">,</span> <span class="n">case_list</span><span class="p">)</span>
+    <span class="n">case_info_files</span><span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">run_parallel</span><span class="p">(</span><span class="n">base_case</span><span class="p">,</span> <span class="n">case_list</span><span class="p">)</span>
+
+    <span class="c1"># NOTE for parallel runs case_info_files is a list, one for each case run</span>
+    <span class="c1"># so to load track files use</span>
+    <span class="c1"># tracks = load_output_files.load_track_data(case_info_files[n])</span>
+    <span class="c1">#   where n is the case number 0,1,2...</span>
 </pre></div>
 </div>
+<pre class="literal-block">main: --------------------------------------------------------------------------
+main:  OceanTracker version 0.4.01.004 2023-07-14 - preliminary setup
+main:      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
+main:   - found hydro-model files of type SCHISIM
+main:       -  sorted hyrdo-model files in time order,        0.007 sec
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test1
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test1_raw_user_params.json&quot;
+main:   -  oceantracker:multiProcessing: processors:4
+main:   - parallel pool complete
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test1_runInfo.json&quot;
+main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test1
+main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test1_raw_user_params.json&quot;
+main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test1_runInfo.json&quot;
+main: --------------------------------------------------------------------------
+main: OceanTracker summary:  elapsed time =0:00:17.336455
+main:       Cases -   0 errors,   0 warnings,   8 notes, check above
+main:       Helper-   0 errors,   0 warnings,   0 notes, check above
+main:       Main  -   0 errors,   0 warnings,   3 notes, check above
+main: --------------------------------------------------------------------------</pre>
 </section>
 </section>
 

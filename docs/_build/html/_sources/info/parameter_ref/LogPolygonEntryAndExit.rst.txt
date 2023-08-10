@@ -15,7 +15,7 @@ Parameters:
 ************
 
 	* ``chunk_size`` :   ``<class 'int'>``   *<optional>*
-		- default: ``5000``
+		- default: ``500000``
 		- min: ``1``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*

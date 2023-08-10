@@ -152,6 +152,13 @@ p6['trajectory_modifiers']= {'settle_in+polygon':
              'probability_of_settlement': .1,
              'settlement_duration': 3.*3600}}
 p6.update({'output_file_base' :'demo06_reefstranding' ,'backtracking': True})
+p6['particle_statistics'] = {
+                    'polystats1' : {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
+                    'update_interval': 1800, 'particle_property_list': ['water_depth'],
+                'use_release_group_polygons': True,
+                    'polygon_list':[ {'points':poly_points}]},
+
+            }
 params.append (p6)
 
 

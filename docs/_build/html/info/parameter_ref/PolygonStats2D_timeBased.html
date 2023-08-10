@@ -156,7 +156,11 @@
 </dd>
 </dl>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">polygon_list</span></code>:<strong>&lt;isrequired&gt;</strong></p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">polygon_list</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - List of dict with polygon cords and optional nmmes, min is  {“points”: [[2.,3.],….]}</p>
+</dd>
+</dl>
+</li>
 </ul>
 </div></blockquote>
 <p>polygon_list: still working on display  of lists of dict, eg nested polygon list</p>
@@ -192,6 +196,15 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">3600.0</span></code></p></li>
 <li><p>units: <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">use_release_group_polygons</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Omit polygon_list param,and use all polygon release polygons as statistics/counting polygons, useful for building polygon to polygon connectivity matrix.</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>

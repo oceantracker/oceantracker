@@ -53,14 +53,15 @@ Polygon statistics
 These particle counts can be used to calculate the connectivity between
 each release group and a user given list of “statistics” polygons. Also,
 used to estimate the influence of each release group on a particle
-property with each given statistics polygon. The statistics polygons are
-not the same as those used in a polygon release (they can be if the user
-requires it). Polygon statistics show effect of each point or polygon
-release, on the given statistics polygons. A special case of a polygon
-statistic, is the “residence_time” class, which can be used to calculate
-the fraction of particles from each release group remaining within each
-statistics polygon at each ‘update_interval’ as one way to estimate
-particle residence time for each release group.
+property with each given statistics polygon. Polygon statistics count
+the particles from each point or polygon release within each statistics
+polygons. The statistics polygons are are completely independent of the
+polygons that might be used in any polygon release (they can be the same
+if the user gives both the same point coordinates). A special case of a
+polygon statistic, is the “residence_time” class, which can be used to
+calculate the fraction of particles from each release group remaining
+within each statistics polygon at each ‘update_interval’ as one way to
+estimate particle residence time for each release group.
 
 Particle property statistics
 ----------------------------

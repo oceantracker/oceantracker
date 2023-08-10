@@ -49,7 +49,9 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 
-	* ``polygon_list``:**<isrequired>**
+	* ``polygon_list``:  *<optional>*
+		Description: - List of dict with polygon cords and optional nmmes, min is  {"points": [[2.,3.],....]}
+
 
 polygon_list: still working on display  of lists of dict, eg nested polygon list 
 
@@ -73,6 +75,12 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 
 		- default: ``3600.0``
 		- units: ``sec``
+
+	* ``use_release_group_polygons`` :   ``<class 'bool'>``   *<optional>*
+		Description: Omit polygon_list param,and use all polygon release polygons as statistics/counting polygons, useful for building polygon to polygon connectivity matrix.
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

@@ -113,7 +113,6 @@ if __name__ == "__main__":
         else:
             case_info_file_name =path.join('output', params['output_file_base'],params['output_file_base']+'_caseInfo.json')
 
-
         anim= None
         fps=15
 
