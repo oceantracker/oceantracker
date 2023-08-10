@@ -19,6 +19,27 @@ particle_properties:
     initial_value: 20.0
   distance_travelled:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+particle_statistics:
+  polystats1:
+    class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
+    particle_property_list:
+    - water_depth
+    polygon_list:
+    - points:
+      - - 1597682.1237
+        - 5489972.7479
+      - - 1598604.1667
+        - 5490275.5488
+      - - 1598886.4247
+        - 5489464.0424
+      - - 1597917.3387
+        - 5489000
+      - - 1597300
+        - 5489000
+      - - 1597682.1237
+        - 5489972.7479
+    update_interval: 1800
+    use_release_group_polygons: true
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:

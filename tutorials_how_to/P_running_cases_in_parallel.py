@@ -66,14 +66,20 @@ for n, p in enumerate(points):
 if __name__ == '__main__':
     # base case and case_list exist as attributes ot.params and ot.case_list
     # run as parallel set of cases
-    ot.run()
+    case_info_files= ot.run()
+
+        
+    # NOTE for parallel runs case_info_files is a list, one for each case run
+    # so to load track files use    
+    # tracks = load_output_files.load_track_data(case_info_files[n])
+    #   where n is the case number 0,1,2...
 
 
 # 
 
 # ## Run parallel using param. dicts.
 
-# In[ ]:
+# In[3]:
 
 
 # oceantracker parallel demo, run different release groups as parallel processes
@@ -115,5 +121,11 @@ if __name__ == '__main__':
 
     # run as parallel set of cases
     #    by default uses one less than the number of physical processors at one time, use setting "processors"
-    main.run_parallel(base_case, case_list)
+    case_info_files= main.run_parallel(base_case, case_list)
+    
+    # NOTE for parallel runs case_info_files is a list, one for each case run
+    # so to load track files use    
+    # tracks = load_output_files.load_track_data(case_info_files[n])
+    #   where n is the case number 0,1,2...
+    
 
