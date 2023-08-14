@@ -29,6 +29,26 @@ Parameters:
 
 		- default: ``None``
 
+	* ``max_water_depth`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths less than this value
+
+		- default: ``None``
+
+	* ``max_z`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position <= to this value
+
+		- default: ``None``
+
+	* ``min_water_depth`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths greater than this value
+
+		- default: ``None``
+
+	* ``min_z`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position >=  to this value
+
+		- default: ``None``
+
 	* ``name_of_polygon_release_group`` :   ``<class 'str'>`` **<isrequired>**
 		Description: "name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time
 
@@ -71,16 +91,6 @@ Parameters:
 
 		- default: ``True``
 		- possible_values: ``[True, False]``
-
-	* ``z_max`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position <= to this value
-
-		- default: ``1e+32``
-
-	* ``z_min`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position >=  to this value
-
-		- default: ``-1e+32``
 
 	* ``z_range``:  *<optional>*
 		Description: - z range = [zmin, zmax] count particles in this z range in 3D

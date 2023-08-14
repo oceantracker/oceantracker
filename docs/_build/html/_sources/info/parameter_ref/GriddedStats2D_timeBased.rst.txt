@@ -47,6 +47,26 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- fixed_len: ``2``
 
+	* ``max_water_depth`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths less than this value
+
+		- default: ``None``
+
+	* ``max_z`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position <= to this value
+
+		- default: ``None``
+
+	* ``min_water_depth`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths greater than this value
+
+		- default: ``None``
+
+	* ``min_z`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position >=  to this value
+
+		- default: ``None``
+
 	* ``particle_property_list``:  *<optional>*
 		Description: - Create statistics for these named particle properties, list = ["water_depth"], for statics on water depth at particle locations inside the counted regions
 
@@ -88,14 +108,4 @@ Parameters:
 
 		- default: ``True``
 		- possible_values: ``[True, False]``
-
-	* ``z_max`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position <= to this value
-
-		- default: ``1e+32``
-
-	* ``z_min`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position >=  to this value
-
-		- default: ``-1e+32``
 

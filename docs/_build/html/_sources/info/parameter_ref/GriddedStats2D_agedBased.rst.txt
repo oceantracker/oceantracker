@@ -53,8 +53,28 @@ Parameters:
 	* ``max_age_to_bin`` :   ``<class 'float'>``   *<optional>*
 		- default: ``2592000.0``
 
+	* ``max_water_depth`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths less than this value
+
+		- default: ``None``
+
+	* ``max_z`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position <= to this value
+
+		- default: ``None``
+
 	* ``min_age_to_bin`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
+
+	* ``min_water_depth`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths greater than this value
+
+		- default: ``None``
+
+	* ``min_z`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position >=  to this value
+
+		- default: ``None``
 
 	* ``particle_property_list``:  *<optional>*
 		Description: - Create statistics for these named particle properties, list = ["water_depth"], for statics on water depth at particle locations inside the counted regions
@@ -97,14 +117,4 @@ Parameters:
 
 		- default: ``True``
 		- possible_values: ``[True, False]``
-
-	* ``z_max`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position <= to this value
-
-		- default: ``1e+32``
-
-	* ``z_min`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position >=  to this value
-
-		- default: ``-1e+32``
 

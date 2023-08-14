@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="WaterDepthRangeStats" href="WaterDepthRangeStats.html" />
-    <link rel="prev" title="PolygonStats2D_timeBasedDepthRange" href="PolygonStats2D_timeBasedDepthRange.html" />
+    <link rel="next" title="release_groups" href="release_groups_toc.html" />
+    <link rel="prev" title="PolygonStats2D_timeBased" href="PolygonStats2D_timeBased.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -75,8 +75,8 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="particle_statistics_toc.html">particle_statistics</a><ul>
-      <li>Previous: <a href="PolygonStats2D_timeBasedDepthRange.html" title="previous chapter">PolygonStats2D_timeBasedDepthRange</a></li>
-      <li>Next: <a href="WaterDepthRangeStats.html" title="next chapter">WaterDepthRangeStats</a></li>
+      <li>Previous: <a href="PolygonStats2D_timeBased.html" title="previous chapter">PolygonStats2D_timeBased</a></li>
+      <li>Next: <a href="release_groups_toc.html" title="next chapter">release_groups</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -129,6 +129,38 @@
 </li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">count_start_date</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Start particle counting from this date</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">max_water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles in water depths less than this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">max_z</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &lt;= to this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">min_water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles in water depths greater than this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">min_z</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &gt;=  to this value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
@@ -204,22 +236,6 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">z_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &lt;= to this value</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">1e+32</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">z_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &gt;=  to this value</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">-1e+32</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">z_range</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - z range = [zmin, zmax] count particles in this z range in 3D</p>
 <ul class="simple">
@@ -244,10 +260,10 @@
     <ul>
         <li>
           &larr;
-          <a href="PolygonStats2D_timeBasedDepthRange.html" title="Previous document">PolygonStats2D_timeBasedDepthRange</a>
+          <a href="PolygonStats2D_timeBased.html" title="Previous document">PolygonStats2D_timeBased</a>
         </li>
         <li>
-          <a href="WaterDepthRangeStats.html" title="Next document">WaterDepthRangeStats</a>
+          <a href="release_groups_toc.html" title="Next document">release_groups</a>
           &rarr;
         </li>
     </ul>

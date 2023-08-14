@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="PolygonStats2D_timeBasedDepthRange" href="PolygonStats2D_timeBasedDepthRange.html" />
-    <link rel="prev" title="PolygonStats2D_ageBasedDepthRange" href="PolygonStats2D_ageBasedDepthRange.html" />
+    <link rel="next" title="ResidentInPolygon" href="ResidentInPolygon.html" />
+    <link rel="prev" title="PolygonStats2D_ageBased" href="PolygonStats2D_ageBased.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -75,8 +75,8 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="particle_statistics_toc.html">particle_statistics</a><ul>
-      <li>Previous: <a href="PolygonStats2D_ageBasedDepthRange.html" title="previous chapter">PolygonStats2D_ageBasedDepthRange</a></li>
-      <li>Next: <a href="PolygonStats2D_timeBasedDepthRange.html" title="next chapter">PolygonStats2D_timeBasedDepthRange</a></li>
+      <li>Previous: <a href="PolygonStats2D_ageBased.html" title="previous chapter">PolygonStats2D_ageBased</a></li>
+      <li>Next: <a href="ResidentInPolygon.html" title="next chapter">ResidentInPolygon</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -145,6 +145,38 @@
 </dd>
 </dl>
 </li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">max_water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles in water depths less than this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">max_z</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &lt;= to this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">min_water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles in water depths greater than this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">min_z</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &gt;=  to this value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">particle_property_list</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Create statistics for these named particle properties, list = [“water_depth”], for statics on water depth at particle locations inside the counted regions</p>
 <ul class="simple">
@@ -201,7 +233,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">use_release_group_polygons</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Omit polygon_list param,and use all polygon release polygons as statistics/counting polygons, useful for building polygon to polygon connectivity matrix.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">use_release_group_polygons</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Omit polygon_list param and use all polygon release polygons as statistics/counting polygons, useful for building release group polygon to polygon connectivity matrix.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
@@ -225,22 +257,6 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">z_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &lt;= to this value</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">1e+32</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">z_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &gt;=  to this value</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">-1e+32</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
 </ul>
 </div></blockquote>
 </section>
@@ -254,10 +270,10 @@
     <ul>
         <li>
           &larr;
-          <a href="PolygonStats2D_ageBasedDepthRange.html" title="Previous document">PolygonStats2D_ageBasedDepthRange</a>
+          <a href="PolygonStats2D_ageBased.html" title="Previous document">PolygonStats2D_ageBased</a>
         </li>
         <li>
-          <a href="PolygonStats2D_timeBasedDepthRange.html" title="Next document">PolygonStats2D_timeBasedDepthRange</a>
+          <a href="ResidentInPolygon.html" title="Next document">ResidentInPolygon</a>
           &rarr;
         </li>
     </ul>
