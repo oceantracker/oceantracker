@@ -48,7 +48,7 @@ class ConnectToSharedMemArray():
         self.sm.unlink()
 
 
-def shared_mem_from_dict_of_arrays(d):
+def shared_mem_builder_from_dict_of_arrays(d):
     sm_dic = {}
 
     for name, a in d.items():

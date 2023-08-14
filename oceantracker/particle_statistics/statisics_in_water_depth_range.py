@@ -24,12 +24,12 @@ class WaterDepthRangeStats(ParameterBaseClass):
         part_prop= self.shared_info.classes['particle_properties']
 
 
-        sel= self.select_depth_rangeGT(part_prop['status'].used_buffer(),   part_prop['water_depth'].used_buffer(), self.params['min_depth'], self.params['max_water_depth'], out)
+        sel= self.select_depth_range_statusGT(part_prop['status'].used_buffer(),   part_prop['water_depth'].used_buffer(), self.params['min_depth'], self.params['max_water_depth'], out)
         return sel
 
     @staticmethod
     @njit
-    def select_depth_range_statusGT(status, depth,min_depth,max_depth, out):
+    def select_depth_range_status(status, depth,min_depth,max_depth, out):
         nfound = 0
         for n in range(status.shape[0]):
            if  min_depth < depth[n] < max_depth:
@@ -38,16 +38,6 @@ class WaterDepthRangeStats(ParameterBaseClass):
 
         return out[:nfound]
 
-    @staticmethod
-    @njit
-    def select_depth_range_statusEQ(status,required_status, depth,min_depth,max_depth, out):
-        nfound = 0
-        for n in range(status.shape[0]):
-           if status[n] == required_status and min_depth < depth[n] < max_depth:
-                out[nfound] = n
-                nfound += 1
-
-        return out[:nfound]
 
 class GriddedStats2D_timeBasedDepthRange(WaterDepthRangeStats, gridded_statistics.GriddedStats2D_timeBased):
     def __init__(self):
