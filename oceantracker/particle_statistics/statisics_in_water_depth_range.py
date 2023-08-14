@@ -24,7 +24,7 @@ class WaterDepthRangeStats(ParameterBaseClass):
         part_prop= self.shared_info.classes['particle_properties']
 
 
-        sel= self.select_depth_range_statusGT(part_prop['status'].used_buffer(),   part_prop['water_depth'].used_buffer(), self.params['min_depth'], self.params['max_water_depth'], out)
+        sel= self.select_depth_range_status(part_prop['status'].used_buffer(),   part_prop['water_depth'].used_buffer(), self.params['min_depth'], self.params['max_water_depth'], out)
         return sel
 
     @staticmethod
