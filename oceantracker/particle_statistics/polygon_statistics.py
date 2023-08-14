@@ -12,11 +12,10 @@ class _CorePolygonMethods(ParameterBaseClass):
         # set up info/attributes
         self.add_default_params({'polygon_list': PLC([], [dict], default_value= default_polygon_dict_params,doc_str='List of dict with polygon cords and optional nmmes, min is  {"points": [[2.,3.],....]}',
                                                      can_be_empty_list=True),
-                                 'use_release_group_polygons': PVC(False, bool,doc_str = 'Omit polygon_list param,and use all polygon release polygons as statistics/counting polygons, useful for building polygon to polygon connectivity matrix.'),
+                                 'use_release_group_polygons': PVC(False, bool,doc_str = 'Omit polygon_list param and use all polygon release polygons as statistics/counting polygons, useful for building release group polygon to polygon connectivity matrix.'),
                                  })
 
         self.remove_default_params(['grid_center','release_group_centered_grids', 'grid_span' ])
-
         self.file_tag = 'polygon_stats'
 
     def initial_setup(self, **kwargs):
@@ -30,12 +29,13 @@ class _CorePolygonMethods(ParameterBaseClass):
                 if i.info['release_type'] == 'polygon':
                     params['polygon_list'].append({'name': name, 'points':i.params['points']})
             if len(params['polygon_list']) == 0:
-                si.msg_logger.msg('There are no polygon releases to use for statistic polygons, must have at least one polygon release defined to use the use_release_group_polygons param',
+                si.msg_logger.msg('There are no polygon releases to use as statistic polygons',
+                                  hint='must have at least one polygon release defined to use the use_release_group_polygons parameter, or use statistics polygon_list parameter',
                                   crumbs=f'Polygon statistic "{i.info["name"]}" ', fatal_error=True, exit_now=True)
 
         if len(params['polygon_list'])==0:
-            si.msg_logger.msg('Must have polygon with at least one polygon list dictionary ',
-                              crumbs= f'Polygon statistic "{i.info["name"]}" ', fatal_error=True, exit_now=True)
+            si.msg_logger.msg('Must have polygon_list parameter  with at least one polygon dictionary',
+                              crumbs= f'Polygon statistic "{i.info["name"]}" ', fatal_error=True, exit_now=True,hint= 'eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
 
         # do standard stats initialize
         super().initial_setup()  # set up using regular grid for  stats
