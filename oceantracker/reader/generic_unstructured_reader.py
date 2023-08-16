@@ -162,7 +162,7 @@ class GenericUnstructuredReader(_BaseReader):
     def _add_grid_attributes(self, grid):
         # build adjacency etc from triangulation
         msg_logger = self.msg_logger
-
+        msg_logger.progress_marker('Starting grid setup')
         t0 = perf_counter()
         grid['node_to_tri_map'],grid['tri_per_node'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
         msg_logger.progress_marker('built node to triangles map', start_time=t0)
@@ -190,7 +190,7 @@ class GenericUnstructuredReader(_BaseReader):
         t0 = perf_counter()
         grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
         msg_logger.progress_marker('calculated triangle areas', start_time=t0)
-        msg_logger.msg('Finished grid setup', tabs=1)
+        msg_logger.progress_marker('Finished grid setup')
         return grid
 
 

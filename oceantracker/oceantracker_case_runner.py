@@ -76,6 +76,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         #try:
         self._set_up_run()
         self._make_core_class_instances()
+        self._do_pre_processing()
         si.solver_info = si.classes['solver'].info  # todo is this needed?? allows shortcut access from other classes
         self._initialize_solver_core_classes_and_release_groups()
 
@@ -225,7 +226,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.particle_status_flags= si.classes['particle_group_manager'].status_flags
 
+    def _do_pre_processing(self):
+        # do pre-processing, eg read polygons from files
+        si = self.shared_info
 
+        case_params = si.working_params
+        for name, params in case_params['role_dicts']['pre_processing'].items():
+            i = si.create_class_dict_instance(name, 'pre_processing', 'user', params, crumbs='Adding "fields" from user params')
+            i.initial_setup()
 
     def _setup_particle_release_groups(self, particle_release_groups_params_dict):
         # particle_release groups setup and instances,

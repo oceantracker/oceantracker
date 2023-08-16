@@ -20,6 +20,11 @@
       initial_value: 20.0
     distance_travelled:
       class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+  pre_processing:
+    my_polygons:
+      class_name: oceantracker.pre_processing.read_geomerty.ReadCoordinates
+      file_name: demo_hindcast/test.geojson
+      type: polygon
   processors: 2
   reader:
     class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
@@ -74,7 +79,6 @@
   root_output_dir: output
   time_step: 600
   tracks_writer:
-    convert: true
     write_dry_cell_index: true
   user_note: test of notes
 - - release_groups:
