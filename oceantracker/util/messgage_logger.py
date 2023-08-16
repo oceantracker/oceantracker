@@ -126,13 +126,13 @@ class MessageLogger(object):
         self.msg('--------------------------------------------------------------------------')
 
     def progress_marker(self, msg, tabs=0, start_time=None):
-
+        tabs= tabs+1
         # add completion time if start given
         if start_time is not None:
             msg = f' {msg},\t  {perf_counter()-start_time:1.3f} sec'
             tabs += 2
 
-        self.msg('- ' + msg, tabs=tabs + 1)
+        self.msg('- ' + msg, tabs=tabs)
 
     def show_all_warnings_and_errors(self):
 

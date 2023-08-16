@@ -54,6 +54,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         info['status_range'] = np.asarray([si.particle_status_flags[params['status_min']], si.particle_status_flags[params['status_max']]])
 
+        #set particle depth and water depth limits for counting particles
         f = 1.0E32
         info['z_range'] = np.asarray([-f, f])
         if params['min_z'] is not None:  info['z_range'][0] = params['min_z']

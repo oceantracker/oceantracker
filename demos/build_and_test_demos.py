@@ -45,6 +45,9 @@ demo_base_params={'output_file_base' : None,
     'user_note':'test of notes',
     'dispersion_miss-spelt': {'A_H': .1},
     'dispersion': {'A_H': .1},
+    'pre_processing':{'my_polygons':{'class_name': 'oceantracker.pre_processing.read_geomerty.ReadCoordinates',
+                                     'file_name':'demo_hindcast/test.geojson',
+                                     'type':'polygon'}},
     'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_index': True},
     'release_groups': {'mypoints1':{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}
                                 },
@@ -75,7 +78,7 @@ p2['particle_properties'] = {'my_constant_prop': {'class_name': 'oceantracker.pa
                      'initial_value': 100, 'variance': 10.}}
 
 p2.update({'block_dry_cells': True,
-        'tracks_writer':{'write_dry_cell_index': True, 'convert': True,
+        'tracks_writer':{'write_dry_cell_index': True,
                                                }})
 p2.update({'output_file_base' :'demo02_animation' ,'time_step': 10*60})
 params.append(p2)

@@ -13,6 +13,11 @@ output_file_base: demo09_polygon_release_overlapping_land
     initial_value: 20.0
   distance_travelled:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+pre_processing:
+  my_polygons:
+    class_name: oceantracker.pre_processing.read_geomerty.ReadCoordinates
+    file_name: demo_hindcast/test.geojson
+    type: polygon
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:

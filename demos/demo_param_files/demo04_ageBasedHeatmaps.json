@@ -38,6 +38,13 @@
     "dispersion": {
         "A_H": 0.1
     },
+    "pre_processing": {
+        "my_polygons": {
+            "class_name": "oceantracker.pre_processing.read_geomerty.ReadCoordinates",
+            "file_name": "demo_hindcast/test.geojson",
+            "type": "polygon"
+        }
+    },
     "tracks_writer": {
         "turn_on_write_particle_properties_list": [
             "n_cell"

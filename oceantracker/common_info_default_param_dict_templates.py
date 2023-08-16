@@ -62,6 +62,7 @@ reader_classes={'reader':{}} # in future wil have primary , secondary and acliar
 
 #'release_groups': 'oceantracker.release_groups.point_release.PointRelease',}
 class_dicts={ # class dicts which replace lists
+            'pre_processing': {},
             'release_groups': {},
             'fields': {},  # user fields calculated from other fields  on reading
             'particle_properties': {},  # user added particle properties, eg DistanceTraveled

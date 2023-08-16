@@ -39,9 +39,15 @@
         "A_H": 0.0,
         "A_V": 0.0
     },
+    "pre_processing": {
+        "my_polygons": {
+            "class_name": "oceantracker.pre_processing.read_geomerty.ReadCoordinates",
+            "file_name": "demo_hindcast/test.geojson",
+            "type": "polygon"
+        }
+    },
     "tracks_writer": {
-        "write_dry_cell_index": true,
-        "convert": true
+        "write_dry_cell_index": true
     },
     "release_groups": {
         "P1": {
