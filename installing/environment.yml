@@ -1,4 +1,4 @@
-name: oceantracker
+pycondaname: oceantracker
 channels:
   - conda-forge
   - anaconda
@@ -16,3 +16,4 @@ dependencies:
   - setuptools=65.6.3
   - yaml=0.2.5
   - psutil=5.9.0
+  - fiona=1.9.1

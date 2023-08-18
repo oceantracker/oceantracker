@@ -3,12 +3,13 @@ from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.module_importing_util import import_module_from_string
 from oceantracker import common_info_default_param_dict_templates as common_info
 from oceantracker.util.parameter_checking import merge_params_with_defaults
-
+from time import  perf_counter
 
 class SharedInfoClass(object):
     # allows working classes access to instances of other classes to use their methods
     def __init__(self):
         self.reset()
+        self.block_timers={}
 
     def reset(self):
         self.classes = {}
@@ -78,3 +79,9 @@ class SharedInfoClass(object):
 
         return p
 
+    def block_timer(self,name,t0):
+        b = self.block_timers
+        if name not in b:
+            b[name] = dict(time=0.,calls=0)
+        b[name]['time'] += perf_counter()-t0
+        b[name]['calls'] += 1

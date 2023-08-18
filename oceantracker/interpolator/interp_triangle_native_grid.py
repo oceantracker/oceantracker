@@ -326,6 +326,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def _do_walk(self, xq, active):
         si= self.shared_info
+        t0= perf_counter()
         info = self.info
         part_prop = si.classes['particle_properties']
         x_last_good = part_prop['x_last_good'].data
@@ -343,8 +344,10 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                            self.walk_counts,
                            params['max_search_steps'], params['bc_walk_tol'], si.settings['open_boundary_type'],si.settings['block_dry_cells'],
                            active)
+        si.block_timer('Find cell, horizontal walk', t0)
 
         if si.is_3D_run:
+            t0 = perf_counter()
             nz_cell = part_prop['nz_cell'].data
             z_fraction = part_prop['z_fraction'].data
             z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
@@ -356,12 +359,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                             info['current_buffer_steps'],info['current_fractional_time_steps'],
                                             self.walk_counts,
                                             active)
-
+            si.block_timer('Find cell, vertical walk', t0)
 
     #@function_profiler(__name__)
     def initial_cell_guess(self, xq):
         # find nearest cell
         si=self.shared_info
+        t0 = perf_counter()
         grid = si.classes['reader'].grid
 
          # find nearest node
@@ -373,7 +377,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                      grid['node_to_tri_map'], grid['tri_per_node'],  grid['bc_transform'], self.params['bc_walk_tol'])
         # if x is nan dist is infinite
         n_cell[~np.isfinite(dist)] = -1
-
+        si.block_timer('Initial cell guess', t0)
         return n_cell
 
     def are_points_inside_domain(self, xq):
