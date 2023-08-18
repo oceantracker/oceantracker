@@ -261,7 +261,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             release_info = i.info['release_info']
 
             if release_info['release_times'].size == 0:
-                si.msg_logger.msg('Release group= ' + str(n + 1) + ', name= ' + i.info['name'] + ',  no release times in range of hindcast and given release duration', warning=True)
+                si.msg_logger.msg(f'Release group= {name} no release times in range of hindcast and given release duration', warning=True,crumbs='Setting up release groups')
                 continue
             else:
                 first_release_time.append(release_info['first_release_time'])
@@ -351,6 +351,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def _make_and_initialize_user_classes(self):
         # complete build of particle by adding reade, custom properties and modifiers
         si= self.shared_info
+
         pgm = si.classes['particle_group_manager']
 
         # create prop particle properties derived from fields loaded from reader on the fly
@@ -410,9 +411,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         d = {'user_note': si.settings['user_note'],
              'output_files': si.output_files,
              'caseID' : si.caseID,
+             'block_timings': [],
              'version_info': get_versions_computer_info.get_code_version(),
             'computer_info': get_versions_computer_info.get_computer_info(),
-             'file_written': datetime.now().isoformat(),
+            'file_written': datetime.now().isoformat(),
              'run_info' : info,
              'solver_info' : si.solver_info,
              'hindcast_info': r.info,
@@ -440,7 +442,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 d['class_roles_info'][key] = i.info
                 d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
 
-        # add basic reelse group info
+        # add basic release group info
         for key, item in si.classes['release_groups'].items():
             rginfo={'points': item.params['points'],
                     'is_polygon': hasattr(item,'polygon')}
@@ -458,8 +460,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # add in reverse timing order
         for n in np.argsort(np.asarray(times))[::-1]:
             d['function_timers'][keys[n]]= profiling_util.func_timings[keys[n]]
-        return d
 
+        # block timings in time order
+        b = si.block_timers
+        times = np.asarray( [item['time'] for key, item in b.items()])
+        order = np.argsort(times)[::-1]
+        for key in [list(b.keys())[i] for i in order]:
+            l = f' {100*b[key]["time"]/elapsed_time_sec:5.1f}% {key} : calls {b[key]["calls"]:4d}, {time_util.seconds_to_pretty_duration_string(b[key]["time"])}'
+            d['block_timings'].append(l)
+        d['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
+        return d
 
     def close(self):
         # close all instances, eg their files if not close etc

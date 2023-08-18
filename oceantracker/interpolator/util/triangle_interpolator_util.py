@@ -275,6 +275,104 @@ def get_BC_transform_matrix(points, simplices):
     return Tinvs
 
 @njit(inline='always')
+def _eval_z_at_nz_cell_v2(tf, nz3, zlevel1, zlevel2, BCcord, zout):
+    # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
+    for nz_inc in range(2):
+        zout[nz_inc] = 0.
+        for m in range(3):
+            nz = nz3[m] + nz_inc # move up to bottom, so not out of range
+            zout[nz_inc] += BCcord[m] * (zlevel1[nz, m] *  tf[1] + zlevel2[nz, m] * tf[0])
+
+
+@njit()
+def get_depth_cell_time_varying_Slayer_or_LSCgrid_v2(xq,
+                                                  triangles, zlevel_vertex, bottom_cell_index, z0,
+                                                  n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
+                                                  current_buffer_steps, current_fractional_time_steps,
+                                                  walk_counts,
+                                                  active):
+    # find the zlayer for each node of cell containing each particle and at two time slices of hindcast  between nz_bottom and number of z levels
+    # LSC grid means must track vertical nodes for each particle
+    # nz_with_bottom is the lowest cell in grid, is 0 for slayer vertical grids, but may be > 0 for LSC grids
+    # nz_with_bottom must be time independent
+    # vertical walk to search for a particle's layer in the grid, nz_cell
+
+    nz_top_cell = zlevel_vertex.shape[2] - 2
+    zlevel1 = zlevel_vertex[current_buffer_steps[0], ...]
+    zlevel2 = zlevel_vertex[current_buffer_steps[1], ...]
+    nz3= np.zeros((3,),dtype=np.int32)
+    z_out = np.zeros((2,), dtype=np.float64)
+
+    for nn in prange(active.size):  # loop over active particles
+        n = active[nn]
+        bc = bc_cords[n, :]
+        nc = n_cell[n]
+
+        nodes = triangles[nc, :]  # nodes for the particle's cell
+        bottom_nz_nodes = bottom_cell_index[nodes]
+        bottom_nz_cell = np.min(bottom_nz_nodes)  # cell at bottom is smallest of those in triangle
+        zl1 = zlevel1[nc,...]
+        zl2 = zlevel2[nc, ...]
+
+        # preserve status if stranded by tide
+        if status[n] == status_stranded_by_tide:
+            nz_cell[n] = bottom_nz_cell
+            # update nodes above and below
+            _eval_z_at_nz_cell(current_fractional_time_steps, bottom_nz_nodes, zl1, zl2, bc,z_out)
+            xq[n, 2] = z_out[0]
+            z_fraction[n] = 0.0
+            continue
+
+        # make any already on bottom active, may be flagged on bottom if found on bottom, below
+        if status[n] == status_on_bottom: status[n] = status_moving
+        zq = xq[n, 2]
+
+        # walk up from bottom on each vertex
+        n_vertical_steps = 0
+        for m in range(3):
+            for nz in range(bottom_nz_nodes[m], zlevel_vertex.shape[2]-1):
+                nz3[m] = nz
+                if zl1[nz+1,m] > xq[n,2]: break
+
+        nz = np.min(nz3) # only from first time step
+
+        _eval_z_at_nz_cell(current_fractional_time_steps, nz3, zl1, zl2, bc, z_out)
+
+        zq = min(zq, z_out[1])  # clip to surface
+        zq = max(zq, z_out[0]) # clip to bottom
+
+        # nz now holds required cell
+        dz = z_out[1] - z_out[0]
+        # get z linear z_fraction
+        if dz < z0:
+            z_fraction[n] = 0.0
+        else:
+            z_fraction[n] = (zq - z_out[0]) / dz
+
+        # extra work if in bottom cell
+        z_fraction_bottom_layer[n] = -999.  # flag as not in bottom layer, will become >= 0 if in layer
+        if nz == bottom_nz_cell:
+            # set status if on the bottom set status
+            if zq < z_out[0] + z0:
+                status[n] = status_on_bottom
+                zq = z_out[0]
+
+            # get z_fraction for log layer
+            if dz < z0:
+                z_fraction_bottom_layer[n] = 0.0
+            else:
+                # adjust z fraction so that linear interp acts like log layer
+                z0p = z0 / dz
+                z_fraction_bottom_layer[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
+
+        # record new depth cell
+        nz_cell[n] = nz
+        xq[n, 2] = zq
+        # step count stats, tidal stranded particles are not counted
+        walk_counts[6] += n_vertical_steps
+        walk_counts[7] = max(walk_counts[7], n_vertical_steps)  # record max number of steps
+
+@njit(inline='always')
 def _eval_z_at_nz_cell(tf, nz_cell, zlevel1, zlevel2, nz_bottom_nodes, nz_top_cell, BCcord):
     # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
     z = 0.

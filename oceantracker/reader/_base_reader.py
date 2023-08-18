@@ -20,48 +20,41 @@ class _BaseReader(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
-        self.add_default_params({'input_dir': PVC(None, str, is_required=True),
-                                 'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-                                 'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
-                                 'time_zone': PVC(None, int, min=-12, max=12, units='hours', doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
-                                 'cords_in_lat_long': PVC(False, bool),
-                                 'time_buffer_size': PVC(24, int, min=2),
-                                 'required_file_variables' :PLC([], [str]),
-                                 'required_file_dimensions': PLC([], [str]),
-                                 #'water_density': PVC(48, int, min=2),
-                                 'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
-                                 'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
-                                 'EPSG_transform_code' : PVC(None, int, min=0, doc_str='Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)'),
-                                 'grid_variables': {'time': PVC('time', str, is_required=True),
-                                                    'x': PLC(['x', 'y'], [str], fixed_len=2),
-                                                    'zlevel': PVC(None, str),
-                                                    'bottom_cell_index': PVC(None, str),
-                                                    'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-                                 'field_variables': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3,is_required=True),
-                                                     'water_depth': PVC(None, str),
-                                                     'tide': PVC(None, str),
-                                                     'water_temperature': PVC(None, str),
-                                                     'salinity': PVC(None, str),
-                                                     'wind_stress': PVC(None, str),
-                                                     'bottom_stress': PVC(None, str),
+        self.add_default_params({
+            'input_dir': PVC(None, str, is_required=True),
+            'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
+            'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
+            'time_zone': PVC(None, int, min=-12, max=12, units='hours', doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
+            'cords_in_lat_long': PVC(False, bool),
+            'time_buffer_size': PVC(24, int, min=2),
+            'required_file_variables' :PLC([], [str]),
+            'required_file_dimensions': PLC([], [str]),
+             #'water_density': PVC(48, int, min=2),
+            'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
+            'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
+            'EPSG_transform_code' : PVC(None, int, min=0, doc_str='Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)'),
+            'grid_variables': {'time': PVC('time', str, is_required=True),
+                            'x': PLC(['x', 'y'], [str], fixed_len=2),
+                            'zlevel': PVC(None, str),
+                            'bottom_cell_index': PVC(None, str),
+                            'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
+            'field_variables': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3,is_required=True),
+                                'water_depth': PVC(None, str),
+                                'tide': PVC(None, str),
+                                'water_temperature': PVC(None, str),
+                                'salinity': PVC(None, str),
+                                'wind_stress': PVC(None, str),
+                                'bottom_stress': PVC(None, str),
                                                      },
-                                 'dimension_map': {'time': PVC('time', str, is_required=True), 'node': PVC('node', str), 'z': PVC(None, str),
-                                                   'vector2Ddim': PVC(None, str), 'vector3Ddim': PVC(None, str)},
-                                 'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
-                                 'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
-                                 })  # list of normal required dimensions
+             'dimension_map': {'time': PVC('time', str, is_required=True), 'node': PVC('node', str), 'z': PVC(None, str),
+                                'vector2Ddim': PVC(None, str), 'vector3Ddim': PVC(None, str)},
+             'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
+             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
+             })  # list of normal required dimensions
 
         # store instances of shared memory classes for variables shared between processes
         self.shared_memory= {'grid' :{}, 'fields':{},'control':{}}
         self.grid={}
-
-    def initial_setup(self):
-        si = self.shared_info
-        self.file_info = si.working_params['file_info']
-        nc = self._open_first_file(self.file_info)
-        self.grid = self.build_grid(nc, self.grid)
-        nc.close()
-
 
     def read_nodal_x_as_float64(self, nc): nopass('reader method: read_x is required')
     def read_bottom_cell_index_as_int32(self, nc):nopass('reader method: read_bottom_cell_index_as_int32 is required for 3D hindcasts')
@@ -111,11 +104,13 @@ class _BaseReader(ParameterBaseClass):
         nc = self._open_first_file(self.info['file_info'])
 
         self.additional_setup_and_hindcast_file_checks(nc, msg_logger)
+        t0 = perf_counter()
         grid = self.build_grid(nc, grid)
-
+        si.block_timer('Build grid', t0)
         # set up reader fields, using shared memory if requested
         self.setup_reader_fields(nc)
         nc.close()
+        si.block_timer('Build grid', t0)
 
     def sort_files_by_time(self,file_list, msg_logger):
         # get time sorted list of files matching mask

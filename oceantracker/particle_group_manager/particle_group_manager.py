@@ -1,4 +1,5 @@
 import numpy as np
+from time import perf_counter
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
@@ -255,6 +256,7 @@ class ParticleGroupManager(ParameterBaseClass):
     def update_PartProp(self, t, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
         si = self.shared_info
+        t0 = perf_counter()
         si.classes['time_varying_info']['time'].set_values(t)
         si.classes['time_varying_info']['num_part_released_so_far'].set_values(self.info['particles_released'])
         part_prop =si.classes['particle_properties']
@@ -273,6 +275,7 @@ class ParticleGroupManager(ParameterBaseClass):
         for key, i in si.classes['particle_properties'].items():
             if i.info['group'] == 'user':
                 i.update(active)
+        si.block_timer('Update particle properties',t0)
 
     def status_counts_and_kill_old_particles(self, t,):
         # deactivate old particles for each release group

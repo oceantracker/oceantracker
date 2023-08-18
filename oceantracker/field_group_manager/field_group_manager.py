@@ -4,7 +4,7 @@ from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
 from oceantracker.util import time_util
 from oceantracker.util.profiling_util import function_profiler
-
+from time import  perf_counter
 
 #TODO allow fields to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
@@ -27,8 +27,9 @@ class FieldGroupManager(ParameterBaseClass):
     def fill_reader_buffers_if_needed(self,time_sec):
         # check if all interpolators have the time steps they need
         si  = self.shared_info
+        t0 = perf_counter()
         si.classes['interpolator'].check_steps_in_reader_buffer(time_sec)
-
+        si.block_timer('Fill reader buffers',t0)
 
     def setup_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any  interpolation

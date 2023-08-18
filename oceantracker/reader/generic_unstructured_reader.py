@@ -55,6 +55,8 @@ class GenericUnstructuredReader(_BaseReader):
             grid['bottom_cell_index'] = self.read_bottom_cell_index_as_int32(nc)
             s = [self.params['time_buffer_size'], grid['x'].shape[0], self.get_number_of_z_levels(nc)]
             grid['zlevel'] = np.zeros(s,  dtype=np.float32, order='c')
+            #grid['z_fraction_level'] = np.zeros(s     , dtype=np.float32, order='c')
+            #grid['total_water_depth'] = np.zeros(s[:-1], dtype=np.float32, order='c')
             grid['nz'] = grid['zlevel'].shape[2]
 
             #todo dev zlevel by triangles
@@ -127,6 +129,7 @@ class GenericUnstructuredReader(_BaseReader):
 
     def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
         # read time and  grid variables, eg time, tide, zlevel
+        si = self.shared_info
         grid = self.grid
 
         grid['time'][buffer_index] = self.read_time_sec_since_1970(nc, file_index=file_index)
@@ -134,7 +137,8 @@ class GenericUnstructuredReader(_BaseReader):
         # add date for convenience
         grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
 
-        if grid['zlevel'] is not None:
+        if si.is_3D_run:
+            #grid['total_water_depth'][buffer_index,:]= np.squeeze(si.classes['fields']['tide'].data[buffer_index,:] + si.classes['fields']['water_depth'].data)
             # read zlevel inplace to save memory?
             self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
 

@@ -70,7 +70,11 @@ Note: In Windows may need to run conda prompt window as administrator to install
       ``conda install -c anaconda psutil``
 
       ``conda install -c conda-forge matplotlib``
+      
+      ``conda install -c conda-forge fiona``
 
+Note: The last fiona module, which reads geojson and shape files, can be slow finding a repository, alternative ways at
+https://anaconda.org/conda-forge/fiona
 
 
 7. Make oceantracker package findable

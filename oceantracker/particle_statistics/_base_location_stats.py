@@ -64,7 +64,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         if params['min_water_depth'] is not None:  info['water_depth_range'][0] = params['min_water_depth']
         if params['max_water_depth'] is not None:  info['water_depth_range'][1] = params['max_water_depth']
 
-
     def check_part_prop_list(self):
         si = self.shared_info
         part_prop = si.classes['particle_properties']

@@ -142,7 +142,7 @@ class Solver(ParameterBaseClass):
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             info['time_steps_completed'] += 1
-
+            si.block_timer('Time stepping',t0_step)
             if abs(t2 - info['model_start_time']) > info['model_duration']:  break
 
         # write out props etc at last step
@@ -305,28 +305,34 @@ class Solver(ParameterBaseClass):
     def _update_stats(self,time_sec):
         # update and write stats
         si= self.shared_info
+        t0 = perf_counter()
         for name, i in si.classes['particle_statistics'].items():
             if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['update_interval']:
                 i.start_update_timer()
                 i.update(time_sec)
                 i.stop_update_timer()
+        si.block_timer('Update statistics', t0)
 
     def _update_concentrations(self, time_sec):
         # update triangle concentrations
         si = self.shared_info
+        t0 = perf_counter()
         for name, i in si.classes['particle_concentrations'].items():
             if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['update_interval']:
                 i.start_update_timer()
                 i.update(time_sec)
                 i.stop_update_timer()
+        si.block_timer('Update concentrations', t0)
 
     def _update_events(self, t):
         # write events
         si = self.shared_info
+        t0 = perf_counter()
         for name, i in si.classes['event_loggers'].items():
             i.start_update_timer()
             i.update(time_sec=t)
             i.stop_update_timer()
+        si.block_timer('Update event loggers', t0)
 
     def close(self):
         pass
