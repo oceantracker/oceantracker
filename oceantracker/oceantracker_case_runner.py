@@ -72,16 +72,29 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         case_info_file = None
         case_exception = None
+        return_msgs = {'errors': si.msg_logger.errors_list, 'warnings': si.msg_logger.warnings_list, 'notes': si.msg_logger.notes_list}
         # case set up
-        #try:
-        self._set_up_run()
-        self._make_core_class_instances()
-        self._do_pre_processing()
-        si.solver_info = si.classes['solver'].info  # todo is this needed?? allows shortcut access from other classes
-        self._initialize_solver_core_classes_and_release_groups()
+        try:
+            self._set_up_run()
+            self._make_core_class_instances()
+            self._do_pre_processing()
+            si.solver_info = si.classes['solver'].info  # todo is this needed?? allows shortcut access from other classes
+            self._initialize_solver_core_classes_and_release_groups()
+            self._make_and_initialize_user_classes()
 
+        except GracefulError as e:
+            si.msg_logger.show_all_warnings_and_errors()
+            si.msg_logger.write_error_log_file(e)
+            si.msg_logger.msg(f' Case Funner graceful exit from case number [{si.caseID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+            si.msg_logger.close()
+            return None, return_msgs
 
-        self._make_and_initialize_user_classes()
+        except Exception as e:
+            si.msg_logger.show_all_warnings_and_errors()
+            si.msg_logger.write_error_log_file(e)
+            si.msg_logger.msg(f' Unexpected error in case number [{si.caseID:2}] ', fatal_error=True,hint='check above or .err file')
+            si.msg_logger.close()
+            return  None, return_msgs
 
         # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
         si.classes['dispersion'].initial_setup()
@@ -91,7 +104,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # check particle properties have other particle properties, fields and other compatibles they require
         self._do_run_integrity_checks()
-        return_msgs = {'errors':si.msg_logger.errors_list,'warnings':si.msg_logger.warnings_list, 'notes': si.msg_logger.notes_list }
+
 
         try:
             self._do_a_run()

@@ -188,7 +188,6 @@ class ParameterListChecker(object):
                  possible_values=None,
                  ) :
 
-
         self.info= dict(locals()) # get keyword args as dict
         self.info.pop('self') # dont want self param
 
@@ -222,13 +221,14 @@ class ParameterListChecker(object):
         ul = [] if user_list is None else deepcopy(user_list)
         dl = [] if info['default_list'] is None else deepcopy(info['default_list'])
 
-        # check if user and base param are lists
+         # check if user and base param are lists
         if type(ul) != list:
             msg_logger.msg('ParameterListChecker: param "' + crumb_trail + '" both base and case parameters must be a lists ', fatal_error=True)
 
         if info['fixed_len'] is None:
             complete_list = dl  + ul
-            if info['make_list_unique'] is not None and info['make_list_unique']: complete_list = list(set(complete_list)) # only keep unique list
+            if info['make_list_unique'] is not None and info['make_list_unique']:
+                complete_list = list(set(complete_list)) # only keep unique list
 
         elif info['fixed_len'] is not None:
             complete_list = info['fixed_len']*[None]
