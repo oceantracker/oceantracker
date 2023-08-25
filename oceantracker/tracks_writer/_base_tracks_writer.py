@@ -48,7 +48,7 @@ class _BaseWriter(ParameterBaseClass):
         if params['update_interval'] is None :
             nt_step = 1
         else:
-            nt_step = int(np.round(params['update_interval']/si.model_time_step))
+            nt_step = int(np.round(params['update_interval']/si.run_info['model_time_step']))
 
         self.info['output_step_count'] = min(nt_step,1)
 
@@ -154,7 +154,7 @@ class _BaseWriter(ParameterBaseClass):
 
         si= self.shared_info
         grid = si.classes['reader'].grid
-        if si.solver_info['time_steps_completed'] % self.info['output_step_count'] != 0: return
+        if si.run_info['time_steps_completed'] % self.info['output_step_count'] != 0: return
 
         # write time vary info , eg "time"
         self.pre_time_step_write_book_keeping()

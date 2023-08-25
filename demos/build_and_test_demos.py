@@ -249,7 +249,7 @@ schsim_base_params=\
  'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': 'demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',
-                     'field_variables':{'water_temperature':'temp'}
+                     'field_variables':['water_temperature']
                           },
         'dispersion': {'A_H': .2, 'A_V': 0.001},
         'release_groups': {
@@ -277,7 +277,7 @@ params.append (s50)
 
 # schsim 3D
 s56 = deepcopy(schsim_base_params)
-s56['reader'].update({'depth_average': False,'field_variables_to_depth_average' :[ 'water_velocity', 'salt', 'water_temperature']})
+s56['reader'].update({'depth_average': False})
 
 s56['release_groups']={
             'P1':{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
@@ -291,7 +291,7 @@ s56['velocity_modifiers']={'terminal_velocity':
                            }
 s56['particle_statistics']= {'grid1':
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                      'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min':'moving','z_min' :-2,
+                      'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min':'moving','min_z' :-2,
                       'grid_size': [120, 121]}}
 
 
@@ -407,8 +407,8 @@ ROMS_params={'output_file_base' :'demo70_ROMS_reader', 'debug': True,
  'reader': {'class_name': 'oceantracker.reader.ROMS_reader.ROMsNativeReader',
                     'input_dir': 'demo_hindcast',
                      'file_mask': 'DopAnV2R3-ini2007_da_his.nc',
-                     'field_variables':{'water_temperature':'temp'}
-                          },
+                     'field_variables':['water_temperature']},
+
             'open_boundary_type': 1,
             'dispersion': {'A_H': .2, 'A_V': 0.001},
             'release_groups': {

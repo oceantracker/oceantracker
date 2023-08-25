@@ -32,7 +32,8 @@ class BasicResuspension(_BaseResuspension):
         info = self.info
         info['number_resupended'] = 0
         # add required field and particle property for resuspension
-        si.classes['field_group_manager'].create_field('friction_velocity', 'derived_from_reader_field',   {'class_name':self.params['friction_velocity_field_class_name']},
+
+        si.classes['field_group_manager'].add_custom_field('friction_velocity',  {'class_name':self.params['friction_velocity_field_class_name']},
                                                        crumbs='initializing resuspension class ')
         si.classes['particle_group_manager'].create_particle_property('friction_velocity','from_fields', {}, crumbs='initializing resuspension class friction velocity')
 
@@ -56,7 +57,7 @@ class BasicResuspension(_BaseResuspension):
         self.start_update_timer()
         si= self.shared_info
         info = self.info
-        info['resuspension_factor']= 2.0*0.4*si.z0*si.solver_info['model_time_step']/(1. - 2./np.pi)
+        info['resuspension_factor']= 2.0*0.4*si.z0*si.run_info['model_time_step']/(1. - 2./np.pi)
         info['min_resuspension_jump']  = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
 
         # redsuspend those on bottom and friction velocity exceeds critical value

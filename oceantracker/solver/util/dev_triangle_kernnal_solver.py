@@ -64,7 +64,7 @@ def eval_water_velocity(xq, time_sec,vel_field, grid, part_prop, st, bc,  n, v_o
     # then evaluate velocity
     tri_interp_util._kernal_BCwalk_with_move_backs(xq, grid, part_prop, n, st, bc)
 
-    if st['is_3D_run']:
+    if st['is3D_run']:
         # vertical walk
         tri_interp_util._kernal_get_depth_cell_time_varying_Slayer(xq, grid, part_prop, st, n)
         triangle_eval_interp._kernal_eval_water_velocity_3D(v_out, vel_field, grid, part_prop, st, n)

@@ -325,7 +325,6 @@ class _OceanTrackerRunner(object):
             working_params['caseID'] = n_case
             working_params['output_files'] = deepcopy(working_bc['output_files'])
             working_params['output_files']['output_file_base'] += '_C%03.0f' % (n_case)
-            working_params['hindcast_is3D'] = working_bc['hindcast_is3D']
             working_params['file_info'] = working_bc['file_info']
 
             # now add to list to run
@@ -457,7 +456,7 @@ class _OceanTrackerRunner(object):
         reader = make_class_instance_from_params('reader', reader_params, ml,  class_role_name='reader')
         ml.exit_if_prior_errors() # class name missing or missing required variables
 
-        working_params['file_info'] ,working_params['hindcast_is3D'] = reader.get_hindcast_files_info(file_list, ml) # get file lists
+        working_params['file_info']  = reader.get_hindcast_files_info(file_list, ml) # get file lists
 
         ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
 
@@ -531,7 +530,6 @@ class _OceanTrackerRunner(object):
             ml.exit_if_prior_errors()
 
 
-
     def _write_run_info_json(self, case_info_files, t0):
         # read first case info for shared info
         ml = self.msg_logger
@@ -547,13 +545,12 @@ class _OceanTrackerRunner(object):
 
             if case_file is not None :
                 c= json_util.read_JSON(case_file)
-                sinfo = c['class_roles_info']['solver']
-                n_time_steps += sinfo['time_steps_completed']
-                total_alive_particles += sinfo['total_alive_particles']
+                n_time_steps +=  c['run_info']['time_steps_completed']
+                total_alive_particles += c['run_info']['total_alive_particles']
                 case_info_list.append(path.basename(case_file))
             else:
                 case_info_list.append((None))
-                ml.msg(f'Case #{n:d} has no case info file, likley has crashed',warning=True)
+                ml.msg(f'Case #{n:d} has no case info file, likely has crashed',warning=True)
 
         num_cases = len(ci)
 

@@ -13,7 +13,7 @@ particle_properties:
 reader:
   class_name: oceantracker.reader.ROMS_reader.ROMsNativeReader
   field_variables:
-    water_temperature: temp
+  - water_temperature
   file_mask: DopAnV2R3-ini2007_da_his.nc
   input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
 release_groups:

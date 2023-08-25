@@ -17,7 +17,7 @@ class SharedInfoClass(object):
         for key in list(common_info.class_dicts.keys()):
             self.classes[key] = {}
 
-    def add_core_class(self, name, params, crumbs =''):
+    def add_core_class(self, name, params, crumbs ='',initialise=False):
 
         ml= self.msg_logger
         crumb_base = f' >>> adding core class type >> "{name}" '
@@ -26,9 +26,10 @@ class SharedInfoClass(object):
         i = make_class_instance_from_params(name, params, ml, class_role_name=name,
                                             crumbs=crumb_base + crumbs )
         self.classes[name] = i
+        if initialise: i.initial_setup()
         return i
 
-    def create_class_dict_instance(self,name,class_role, group, params,  crumbs=''):
+    def create_class_dict_instance(self,name,class_role, group, params,  crumbs='', initialise=False):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         ml= self.msg_logger
 
@@ -37,8 +38,7 @@ class SharedInfoClass(object):
         crumb_base = f' >>> adding_class type >> "{class_role}"  (name=  "{name}" instance #{instanceID: 1d}), '
 
         # make instance  and merge params
-        i = make_class_instance_from_params(name, params, self.msg_logger,
-                                            crumbs= crumb_base + crumbs)
+        i = make_class_instance_from_params(name, params, self.msg_logger,   crumbs= crumb_base + crumbs)
 
         if class_role not in common_info.class_dicts.keys() :
             ml.msg(f'Class type = "{class_role}": name is not a known class_role=' + class_role ,
@@ -60,6 +60,7 @@ class SharedInfoClass(object):
 
         else:
             self.classes[class_role][name] = i
+        if initialise : i.initial_setup()
         return i
 
     def all_class_instance_pointers_iterator(self):

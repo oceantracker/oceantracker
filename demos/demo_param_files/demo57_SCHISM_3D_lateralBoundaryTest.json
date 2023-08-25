@@ -5,9 +5,9 @@
     "reader": {
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",
-        "field_variables": {
-            "water_temperature": "temp"
-        }
+        "field_variables": [
+            "water_temperature"
+        ]
     },
     "dispersion": {
         "A_H": 10,

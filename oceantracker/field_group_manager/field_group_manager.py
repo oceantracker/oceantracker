@@ -15,14 +15,19 @@ class FieldGroupManager(ParameterBaseClass):
     # works with 2D or 3D  with appropriate interplotor
     known_field_types = ['from_reader_field','derived_from_reader_field', 'depth_averaged_from_reader_field', 'user']
 
+    # todo distingish between hydro model reader fields and auxilary feils, eg waves from another reader
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
         self.n_buffer = np.zeros((2, ), dtype=np.int32)
 
-
     def initial_setup(self):
-        si=self.shared_info
+
+        self.setup_hydro_fields()
+
+    def  add_custom_field(self, name, params, crumbs=''):
+        si = self.shared_info
+        si.create_class_dict_instance(name, 'fields', 'derived_from_reader_field', params, crumbs=crumbs+ f'Custom fields Setup > "{name}"', initialise=True)
 
     def fill_reader_buffers_if_needed(self,time_sec):
         # check if all interpolators have the time steps they need
@@ -66,17 +71,20 @@ class FieldGroupManager(ParameterBaseClass):
                                                                         output=output, n_cell=n_cell)
         return output
 
-    def create_field(self, name, field_group, field_params, crumbs=''):
+    def setup_hydro_fields(self):
         si = self.shared_info
-        i = si.create_class_dict_instance(name,'fields', field_group, field_params, crumbs=crumbs + ' adding  a field ')
-        i.initial_setup()
-        return i
-
+        reader = si.add_core_class('reader', si.working_params['core_roles']['reader'],
+                                        crumbs=f'Feild Group Manager>setup_hydro_fields> reader class  ')
+        reader.initial_setup()
+        si.is3D_run =  reader.info['is3D']
 
     def update_dry_cells(self):
         # update 0-255 dry cell index for each interpolator
         si =self. shared_info
         si.classes['interpolator'].update_dry_cells()
+
+    def get_hydo_model_time_step(self):
+        return self.shared_info.classes['reader'].info['file_info']['hydro_model_time_step']
 
     def get_hindcast_range(self):
         si = self.shared_info

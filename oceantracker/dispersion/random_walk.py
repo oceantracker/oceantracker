@@ -14,12 +14,12 @@ class RandomWalk(_BaseTrajectoryModifer):
     def initial_setup(self):
         si = self.shared_info
         info = self.info
-        dt = si.model_time_step
+        dt = si.run_info['model_time_step']
         info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
-        if not si.hydro_model_is3D:
+        if not si.is3D_run:
             info['random_walk_size'] = info['random_walk_size'][:2]
 
-        info['random_walk_velocity'] = info['random_walk_size'] /si.solver_info['model_time_step']  # velocity equivalent of random walk distance
+        info['random_walk_velocity'] = info['random_walk_size'] /si.run_info['model_time_step']  # velocity equivalent of random walk distance
 
     def calc_walk(self, A_turb, dt):
         # this is variance of particle motion in each vector direction,

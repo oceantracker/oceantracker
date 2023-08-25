@@ -12,10 +12,10 @@ poly_points=[[1597682.1237, 5489972.7479],
 # case 50 schism basic
 params=\
 {'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,
- 'reader': {'class_name': 'oceantracker.reader.dev.dev_schism_reader.SCHISMSreaderNCDF',
+ 'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': '..\..\demos\demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',
-                     'field_variables':{'water_temperature':'temp'}
+                     'field_variables':['water_temperature'],
                           },
         'dispersion': {'A_H': .2, 'A_V': 0.001},
         'release_groups': {
