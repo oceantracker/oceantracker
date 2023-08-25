@@ -52,18 +52,14 @@ particle_statistics:
     grid_size:
     - 120
     - 121
+    min_z: -2
     particle_property_list:
     - water_depth
     status_min: moving
     update_interval: 3600
-    z_min: -2
 reader:
   depth_average: false
   field_variables:
-    water_temperature: temp
-  field_variables_to_depth_average:
-  - water_velocity
-  - salt
   - water_temperature
   file_mask: demoHindcastSchism3D.nc
   input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast

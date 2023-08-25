@@ -51,7 +51,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # other useful shared values
         si.backtracking = si.settings['backtracking']
         si.model_direction = -1 if si.backtracking else 1
-        si.is_3D_run = working_params['hindcast_is3D'] and not si.settings['run_as_depth_averaged']
 
         si.write_output_files = si.settings['write_output_files']
         si.write_tracks = si.settings['write_tracks']
@@ -76,10 +75,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # case set up
         try:
             self._set_up_run()
-            self._make_core_class_instances()
             self._do_pre_processing()
-            si.solver_info = si.classes['solver'].info  # todo is this needed?? allows shortcut access from other classes
-            self._initialize_solver_core_classes_and_release_groups()
+            self._make_core_classes_and_release_groups()
             self._make_and_initialize_user_classes()
 
         except GracefulError as e:
@@ -98,7 +95,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
         si.classes['dispersion'].initial_setup()
-        if si.is_3D_run:
+        if si.is3D_run:
             si.classes['resuspension'].initial_setup()
 
 
@@ -194,10 +191,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         solver = si.classes['solver']
         p, reader, f = si.classes['particle_group_manager'], si.classes['reader'], si.classes['field_group_manager']  # for later use
 
-
         # fill and process buffer until there is less than 2 steps
         si.msg_logger.print_line()
-        si.msg_logger.progress_marker('Starting ' + si.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.solver_info['model_duration']))
+        si.msg_logger.progress_marker('Starting ' + si.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info['model_duration']))
 
         t0 = perf_counter()
         solver.initialize_run()
@@ -206,7 +202,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # ------------------------------------------
         solver.solve()
         # ------------------------------------------
-
 
     def _do_run_integrity_checks(self):
         si=self.shared_info
@@ -217,6 +212,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             i.check_requirements()
 
         # other checks and warnings
+        #todo move to set up fields
         if si.settings['open_boundary_type'] > 0:
             if not np.any(grid['node_type'] == 3):
                 si.msg_logger.msg('Open boundary requested, but no open boundary node data available, boundaries will be closed,',
@@ -227,17 +223,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.msg_logger.exit_if_prior_errors()
 
-    def _make_core_class_instances(self):
-        # params are full merged by oceantracker main and instance making tested, so m=no parm merge needed
-        si = self.shared_info
-        case_params= si.working_params
 
-        # make core classes, eg. field group
-        for name, params in case_params['core_roles'].items():
-            if name == 'resuspension' and not si.is_3D_run : continue # dont add resupension in 2D
-            i = si.add_core_class(name, params, crumbs= f'core class "{name}" ')
-
-        si.particle_status_flags= si.classes['particle_group_manager'].status_flags
 
     def _do_pre_processing(self):
         # do pre-processing, eg read polygons from files
@@ -291,31 +277,52 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # time range in forwards order
         return t_first,t_last
 
-    def _initialize_solver_core_classes_and_release_groups(self):
+    def _make_core_class_instances(self):
+        # params are full merged by oceantracker main and instance making tested, so m=no parm merge needed
+        si = self.shared_info
+        case_params= si.working_params
+
+        # make core classes, eg. field group
+
+        for name, params in case_params['core_roles'].items():
+            if name in ['reader',  'resuspension']: continue
+            i = si.add_core_class(name, params, crumbs= f'core class "{name}" ')
+
+        si.particle_status_flags= si.classes['particle_group_manager'].status_flags
+
+    def _make_core_classes_and_release_groups(self):
         # initialise all classes, order is important!
         # shortcuts
         t0 = perf_counter()
         si = self.shared_info
-        reader= si.classes['reader']
-        # start with setting up reader as it has info on whether 2D or 3D which  changes class options'
-        # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
-        si.classes['field_group_manager'].initial_setup()  # needed here to add reader fields inside reader build
-        reader.initial_setup()
 
-        # now know if 3D hindcast
-        si.hydro_model_is3D = si.classes['fields']['water_velocity'].is3D()
+        # start with setting up field gropus, which set up readers
+        # as it has info on whether 2D or 3D which  changes class options'
+        # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
+        fgm = si.add_core_class('field_group_manager', si.working_params['core_roles']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
+        fgm.initial_setup()  # needed here to add reader fields inside reader build
+
+        # make other core classes, eg.
+        core_role_params=si.working_params['core_roles']
+        for name in ['interpolator','particle_group_manager','solver','dispersion']:
+            si.add_core_class(name, core_role_params[name], crumbs=f'core class "{name}" ')
+
+        if si.is3D_run:
+            si.add_core_class('resuspension', core_role_params['resuspension'], crumbs= 'core class "resuspension" ')
+
+        si.particle_status_flags = si.classes['particle_group_manager'].status_flags
 
         if si.settings['time_step'] is None:
-            time_step = reader.info['file_info']['hydro_model_time_step']
+            time_step = fgm.get_hydo_model_time_step()
             si.msg_logger.msg("No time step given, using hydro-model's time step =" + str(time_step) + 'sec', note=True)
         else:
             time_step =  si.settings['time_step']
-            if time_step > reader.info['file_info']['hydro_model_time_step']:
-                time_step = reader.info['file_info']['hydro_model_time_step']
+            if time_step > fgm.get_hydo_model_time_step():
+                time_step = fgm.get_hydo_model_time_step()
                 si.msg_logger.msg("Time step is greater than hydro-model's, this capability not yet available, using hydro-model's time step = " + str(time_step) + ' sec', warning=True)
 
-        si.solver_info['model_time_step'] = time_step
-        si.model_time_step = time_step
+        si.run_info = {}
+        si.run_info['model_time_step'] = time_step
 
         # set up start time and duration based on particle releases
         t0 = perf_counter()
@@ -328,29 +335,30 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         time_end = time_start + duration* si.model_direction
 
         # note results
-        si.solver_info['model_start_time'] = time_start
-        si.solver_info['model_end_time'] = time_end
-        si.solver_info['model_duration'] = max(abs(time_end - time_start), si.model_time_step) # at least one time step
+        si.run_info['model_start_time'] = time_start
+        si.run_info['model_end_time'] = time_end
+        si.run_info['model_duration'] = max(abs(time_end - time_start), si.run_info['model_time_step']) # at least one time step
 
         si.msg_logger.progress_marker('set up release_groups', start_time=t0)
 
         # useful info
-        si.solver_info['model_start_date'] = time_util.seconds_to_datetime64(time_start)
-        si.solver_info['model_end_date'] = time_util.seconds_to_datetime64(time_end)
-        si.solver_info['model_timedelta'] =time_util.seconds_to_pretty_duration_string(si.model_time_step)
-        si.solver_info['model_duration_timedelta'] = time_util.seconds_to_pretty_duration_string(si.solver_info['model_duration'] )
+        si.run_info['model_start_date'] = time_util.seconds_to_datetime64(time_start)
+        si.run_info['model_end_date'] = time_util.seconds_to_datetime64(time_end)
+        si.run_info['model_timedelta'] =time_util.seconds_to_pretty_duration_string(si.run_info['model_time_step'])
+        si.run_info['model_duration_timedelta'] = time_util.seconds_to_pretty_duration_string(si.run_info['model_duration'] )
 
         # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
         si.time_of_nominal_first_occurrence = si.model_direction * 1.0E36
         # todo get rid of time_of_nominal_first_occurrence
 
         if si.write_tracks:
-            si.classes['tracks_writer'].initial_setup()
+            si.add_core_class('tracks_writer',si.working_params['core_roles']['tracks_writer'], initialise=True)
 
         # initialize the rest of the core classes
         #todo below apply to all core classes, reader
+        #todo alternative can they be intitlised on creation here?
         t0 = perf_counter()
-        for name in ['field_group_manager','particle_group_manager', 'interpolator', 'solver'] : # order may matter?
+        for name in ['particle_group_manager', 'interpolator', 'solver'] : # order may matter?
             si.classes[name].initial_setup()
         si.msg_logger.progress_marker('initial set up of core classes', start_time=t0)
 
@@ -419,7 +427,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                          duration=str(datetime.now() - d0),
                          elapsed_time_sec=elapsed_time_sec,
                          number_particles_released= pgm.info['particles_released']))
-
+        info.update(si.run_info)
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'user_note': si.settings['user_note'],
              'output_files': si.output_files,
@@ -429,7 +437,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             'computer_info': get_versions_computer_info.get_computer_info(),
             'file_written': datetime.now().isoformat(),
              'run_info' : info,
-             'solver_info' : si.solver_info,
+             'solver_info' : si.run_info,
              'hindcast_info': r.info,
              'full_case_params': si.working_params,
              'particle_status_flags': si.particle_status_flags,

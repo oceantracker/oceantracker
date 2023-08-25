@@ -20,7 +20,6 @@ class GenericUnstructuredReader(_BaseReader):
         self.class_doc(description='Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names')
 
 
-      
     #@profile
     def build_grid(self, nc, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
@@ -137,7 +136,7 @@ class GenericUnstructuredReader(_BaseReader):
         # add date for convenience
         grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
 
-        if si.is_3D_run:
+        if si.is3D_run:
             #grid['total_water_depth'][buffer_index,:]= np.squeeze(si.classes['fields']['tide'].data[buffer_index,:] + si.classes['fields']['water_depth'].data)
             # read zlevel inplace to save memory?
             self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)

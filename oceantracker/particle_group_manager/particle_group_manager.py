@@ -28,7 +28,7 @@ class ParticleGroupManager(ParameterBaseClass):
         info['particles_in_buffer'] = 0
         info['particles_released'] = 0
         info['num_alive'] = 0
-        nDim = 3 if si.hydro_model_is3D else  2
+        nDim = 3 if si.is3D_run else  2
         info['current_particle_buffer_size'] = self.params['particle_buffer_chunk_size']
 
         #  time dependent core  properties

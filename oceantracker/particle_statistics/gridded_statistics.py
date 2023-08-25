@@ -214,13 +214,13 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         age_max = abs(self.params['max_age_to_bin'])
 
         # check age order and length
-        if age_min >  si.solver_info['model_duration']:
+        if age_min >  si.run_info['model_duration']:
             si.msg_logger.msg(' parameter min_age_to_bin must be > duration of model run (min,max) = '
-                                    + str([age_min, age_max]) + ', duration=' + str(si.solver_info['model_duration']), fatal_error=True)
+                                    + str([age_min, age_max]) + ', duration=' + str(si.run_info['model_duration']), fatal_error=True)
 
         if age_max <= age_min:
             si.msg_logger.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
-                                    + str([age_min,age_max ]) + ', duration=' + str(si.solver_info['model_duration']),fatal_error=True)
+                                    + str([age_min,age_max ]) + ', duration=' + str(si.run_info['model_duration']),fatal_error=True)
 
         # arange requites one mere step beyong required max_age
         dage= abs(int(self.params['age_bin_size']))

@@ -43,12 +43,12 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.check_part_prop_list()
 
         if params['count_start_date'] is None:
-            info['start_time'] = si.solver_info['model_start_time']
+            info['start_time'] = si.run_info['model_start_time']
         else:
             info['start_time'] = time_util.isostr_to_seconds(params['count_start_date'])
 
         if params['count_end_date'] is None:
-            info['end_time'] = si.solver_info['model_end_time']
+            info['end_time'] = si.run_info['model_end_time']
         else:
             info['end_time'] = time_util.isostr_to_seconds(params['count_end_date'])
 
@@ -149,17 +149,17 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         info=self.info
 
         if params['count_start_date'] is None:
-            info['start_time'] = si.solver_info['model_start_time']
+            info['start_time'] = si.run_info['model_start_time']
         else:
             info['start_time'] = time_util.isostr_to_seconds(params['count_start_date'])
 
         if params['count_end_date'] is None:
-            info['end_time'] = si.solver_info['model_end_time']
+            info['end_time'] = si.run_info['model_end_time']
         else:
             info['end_time'] = time_util.isostr_to_seconds(params['count_end_date'])
 
         md= si.model_direction
-        out =   info['start_time'] * md <=  si.solver_info['current_model_time'] * md  <= info['end_time'] * md
+        out =   info['start_time'] * md <=  si.run_info['current_model_time'] * md  <= info['end_time'] * md
         return out
 
     def record_time_stats_last_recorded(self, t):   self .info['time_last_stats_recorded'] = t

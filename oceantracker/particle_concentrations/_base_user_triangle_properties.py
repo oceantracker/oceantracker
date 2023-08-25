@@ -58,7 +58,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         si = self.shared_info
         if self.params['only_update_concentrations_on_write']: self.update(time_sec)
 
-        if si.write_output_files and self.params['write'] and si.solver_info['time_steps_completed'] % self.params['output_step_count'] == 0:
+        if si.write_output_files and self.params['write'] and si.run_info['time_steps_completed'] % self.params['output_step_count'] == 0:
             self.nc.file_handle['time'][self.time_steps_written] = time_sec
             self.nc.file_handle['particle_count'][self.time_steps_written,...] = self.particle_count[:]
             self.nc.file_handle['particle_concentration'][self.time_steps_written, ...] = self.particle_concentration[:]

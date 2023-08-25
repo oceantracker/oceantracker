@@ -95,7 +95,7 @@ class PointRelease(ParameterBaseClass):
             time_end = hindcast_start if si.backtracking else hindcast_end
 
         # get time steps for release in a dow safe way
-        model_time_step = si.model_time_step
+        model_time_step = si.run_info['model_time_step']
 
 
         # get release times within the hindcast
@@ -182,7 +182,7 @@ class PointRelease(ParameterBaseClass):
 
         info['number_released'] += n  # count number released in this group
 
-        if si.hydro_model_is3D and (len(self.params['z_range']) > 0 or x0.shape[1] < 3):
+        if si.is3D_run and (len(self.params['z_range']) > 0 or x0.shape[1] < 3):
 
             if len(self.params['z_range']) == 0:  self.params['z_range']= [-1.0E30,1.0E30]
 

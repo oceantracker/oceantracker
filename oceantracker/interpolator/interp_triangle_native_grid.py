@@ -48,7 +48,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         p.create_particle_property('bc_cords','manual_update',dict(  write=False, initial_value=0., vector_dim=3,dtype=np.float64))
 
         # BC walk info
-        if si.hydro_model_is3D:
+        if si.is3D_run:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
             p.create_particle_property('nz_cell', 'manual_update',dict( write=False, dtype=np.int32, initial_value=grid['zlevel'].shape[2]-2)) # todo  create  initial serach for vertical cell
@@ -346,7 +346,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                            active)
         si.block_timer('Find cell, horizontal walk', t0)
 
-        if si.is_3D_run:
+        if si.is3D_run:
             t0 = perf_counter()
             nz_cell = part_prop['nz_cell'].data
             z_fraction = part_prop['z_fraction'].data
@@ -413,7 +413,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 info[key] = int(info[key])
 
         info['average_number_of_triangles_walked']= info['number_of_triangles_walked']/max(1,info['particles_located_by_walking'])
-        if si.is_3D_run:
+        if si.is3D_run:
             info['average_vertical_walk_steps'] = info['total_vertical_steps_walked'] / max(1, info['particles_located_by_walking'])
 
         f = f" Triangle walk summary: Of  {info['particles_located_by_walking']:6,d} particles located "

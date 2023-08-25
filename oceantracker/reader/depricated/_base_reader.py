@@ -12,250 +12,52 @@ from oceantracker.reader.util.reader_util import append_split_cell_data
 from oceantracker.util import  cord_transforms
 from oceantracker.reader.util import shared_reader_memory_util
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.util import triangle_utilities_code
-from oceantracker.util.triangle_utilities_code import split_quad_cells
+
 
 from oceantracker.reader.util import reader_util
 
 class _BaseReader(ParameterBaseClass):
 
-    def __init__(self, shared_memory_info=None):
+    def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
             'input_dir': PVC(None, str, is_required=True),
             'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
+            'grid_file': PVC(None, str, doc_str='File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file'),
             'time_zone': PVC(None, int, min=-12, max=12, units='hours', doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
-            'cords_in_lat_long': PVC(False, bool, doc_str='Convert given nodal lat longs to a UTM metres grid'),
+            'cords_in_lat_long': PVC(False, bool),
             'time_buffer_size': PVC(24, int, min=2),
-            'time_dim_name': PVC('time', str, doc_str='Name of time dimension in netcdf file,  used to see if field is time dependent', is_required=True),
-            'z_var_name' :  PVC('zlevel', str, doc_str='Name of z layers variable, if present hindcast is taken as 3D', is_required=True),
-            'z_dim_name': PVC(None, str, doc_str='Name of z dimension in netcdf file,  used to see if field is 3D', is_required=True),
-            'triangles_var_name': PVC(None, str, doc_str='Name of triangle variable in file', is_required=True),
-            'x_var_map': PLC(None, acceptable_types=[str], doc_str='Map to  of x coord variables in file', make_list_unique=True),
+            'required_file_variables' :PLC([], [str]),
+            'required_file_dimensions': PLC([], [str]),
+             #'water_density': PVC(48, int, min=2),
+            'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
             'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
-            'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
-            'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
+            'EPSG_transform_code' : PVC(None, int, min=0, doc_str='Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)'),
+            'grid_variables': {'time': PVC('time', str, is_required=True),
+                            'x': PLC(['x', 'y'], [str], fixed_len=2),
+                            'zlevel': PVC(None, str),
+                            'bottom_cell_index': PVC(None, str),
+                            'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
+            'field_variables': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3,is_required=True),
+                                'water_depth': PVC(None, str),
+                                'tide': PVC(None, str),
+                                'water_temperature': PVC(None, str),
+                                'salinity': PVC(None, str),
+                                'wind_stress': PVC(None, str),
+                                'bottom_stress': PVC(None, str),
+                                                     },
+             'dimension_map': {'time': PVC('time', str, is_required=True), 'node': PVC('node', str), 'z': PVC(None, str),
+                                'vector2Ddim': PVC(None, str), 'vector3Ddim': PVC(None, str)},
+             'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
+             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
              })  # list of normal required dimensions
 
-        self.shared_memory_info = shared_memory_info
+        # store instances of shared memory classes for variables shared between processes
+        self.shared_memory= {'grid' :{}, 'fields':{},'control':{}}
+        self.grid={}
 
-    def initial_setup(self):
-        # map variable internal names to names in NETCDF file
-        # set update default value and vector variables map  based on given list
-        si = self.shared_info
-        info = self.info
-        self.info['file_info'] = si.working_params['file_info']  # add file_info to reader info
-        nc = NetCDFhandler(self.info['file_info']['names'][0])
-        info['is3D']=self.is_hindcast3D(nc)
-        grid = self.read_grid(nc)
-        self.grid= self.build_grid(grid)
-        self.fields= self.build_fields(nc) # move to final setup
-
-    def sort_files_by_time(self,file_list, msg_logger):
-        # get time sorted list of files matching mask
-
-        fi = {'names': file_list, 'n_time_steps': [], 'time_start': [], 'time_end': []}
-        for n, fn in enumerate(file_list):
-            # get first/second/last time from each file,
-            nc = NetCDFhandler(fn, 'r')
-            time = self.read_time_sec_since_1970(nc)
-            nc.close()
-            fi['time_start'].append(time[0])
-            fi['time_end'].append(time[-1]) # -1 guards against there being only one time step in the file
-            fi['n_time_steps'].append(time.shape[0])
-            if n + 1 >= self.params['max_numb_files_to_load']: break
-
-        # check some files found
-        if len(fi['names']) == 0:
-            msg_logger.msg('reader: cannot find any files matching mask "' + self.params['file_mask']
-                           + '"  in input_dir : "' + self.params['input_dir'] + '"', fatal_error=True)
-
-        # convert file info to numpy arrays for sorting
-        keys = ['names', 'n_time_steps', 'time_start', 'time_end']
-        for key in keys:
-            fi[key] = np.asarray(fi[key])
-
-        # sort files into order based on start time
-        s = np.argsort(fi['time_start'])
-        for key in fi.keys():
-            if isinstance(fi[key],np.ndarray):
-                fi[key] = fi[key][s]
-
-        # tidy up file info
-        fi['names'] =    fi['names'].tolist()
-
-        # get time step index at start and end on files
-        cs = np.cumsum(fi['n_time_steps'])
-        fi['nt_starts'] = cs - fi['n_time_steps']
-        fi['n_time_steps_in_hindcast'] = np.sum(fi['n_time_steps'], axis=0)
-        fi['nt_ends'] = fi['nt_starts'] + fi['n_time_steps'] - 1
-
-        self.info['file_info'] = fi
-
-        return fi
-
-    def read_grid(self, nc):
-        # read nodal values and triangles
-        params = self.params
-        info = self.info
-        grid = {}
-        grid['triangles'] = self.read_triangles(nc).astype(np.int32)
-        grid['triangles'], grid['triangles_to_split'] = self.find_quad_cells_split_to_split(grid['triangles'])
-        grid['nz_levels'] = nc.dim_size(params['z_dim_name']) if info['is3D']  else None
-        grid['x'] = self.read_nodal_x(nc).astype(np.float64)
-        if self.info['is3D']:
-            grid['bottom_cell_index'],grid['vertical_grid_type'] = self.read_bottom_cell_index(nc)
-            grid['bottom_cell_index'] = grid['bottom_cell_index'].astype(np.int32)
-
-
-        return grid
-
-    def build_grid(self, grid):
-        # set up grid variables which don't vary in time and are shared by all case runners and main
-        # add to reader build info
-        si = self.shared_info
-        msg_logger = self.msg_logger
-        msg_logger.progress_marker('Starting grid setup')
-
-        # node to cell map
-        t0 = perf_counter()
-        grid['node_to_tri_map'], grid['tri_per_node'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
-        msg_logger.progress_marker('built node to triangles map', start_time=t0)
-
-        # adjacency map
-        t0 = perf_counter()
-        grid['adjacency'] = triangle_utilities_code.build_adjacency_from_node_cell_map(grid['node_to_tri_map'], grid['tri_per_node'], grid['triangles'])
-        msg_logger.progress_marker('built triangle adjacency matrix', start_time=t0)
-
-        # boundary triangles
-        t0 = perf_counter()
-        grid['is_boundary_triangle'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
-        msg_logger.progress_marker('found boundary triangles', start_time=t0)
-        t0 = perf_counter()
-        grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid['triangles'], grid['adjacency'],
-                                                                           grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
-
-        msg_logger.progress_marker('built domain and island outlines', start_time=t0)
-
-        # make island and domain nodes
-        grid['node_type'] = np.zeros(grid['x'].shape[0], dtype=np.int8)
-        for c in grid['grid_outline']['islands']:
-            grid['node_type'][c['nodes']] = 1
-
-        grid['node_type'][grid['grid_outline']['domain']['nodes']] = 2
-
-        t0 = perf_counter()
-        grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
-        msg_logger.progress_marker('calculated triangle areas', start_time=t0)
-        msg_logger.progress_marker('Finished grid setup')
-
-        # adjust node type and adjacent for open boundaries
-        # todo define node and adjacent type values in dict, for single definition and case info output?
-        is_open_boundary_node = self.read_open_boundary_data_as_boolean(grid)
-        grid['node_type'][is_open_boundary_node] = 3
-
-        is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'], grid['adjacency'], is_open_boundary_node)
-        grid['adjacency'][is_open_boundary_adjacent] = -2
-        grid['limits'] = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
-
-        # now set up time buffers
-        time_buffer_size = self.params['time_buffer_size']
-        grid['time'] = np.zeros((time_buffer_size,), dtype=np.float64)
-        grid['date'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')  # time buffer
-        grid['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
-
-        # set up zlevel
-        if self.info['is3D']:
-            s = [self.params['time_buffer_size'], grid['x'].shape[0], grid['nz_levels']]
-            grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
-            grid['nz_levels'] = grid['zlevel'].shape[2]
-
-            # todo dev zlevel by triangles
-            s = [self.params['time_buffer_size'], grid['triangles'].shape[0], grid['nz_levels'], 3]
-            grid['zlevel_vertex'] = np.zeros(s, dtype=np.float32, order='c')
-
-        else:
-            grid['zlevel'] = None
-            grid['nz'] = 1  # note if 3D
-
-            # space for dry cell info
-        grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
-
-        # working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
-        grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
-
-        # note which are time buffers
-
-        return grid
-
-    def build_fields (self, nc):
-        si = self.shared_info
-        params= self.params
-        info= self.info
-        info['field_info'] = {}
-        fi = info['field_info']
-
-        msg_logger = self.msg_logger
-        msg_logger.progress_marker('Starting grid setup')
-        fields={}
-
-        # water velocity
-        fi['water_velocity'] =   self.field_var_info(nc, params['water_velocity_var_map'])
-
-        return  fields
-
-
-    def find_quad_cells_split_to_split(self, triangles):
-        # flag quad cells for splitting if index in 4th column
-        if triangles.shape[1] == 4 and np.any(triangles > 0):
-            # split quad grids buy making new triangles
-            quad_cells_to_split = triangles[:, 3] > 0
-            triangles = split_quad_cells(triangles, quad_cells_to_split)
-        else:
-            quad_cells_to_split = np.full((triangles.shape[0],), False, dtype=bool)
-
-        return triangles, quad_cells_to_split
-
-    def field_var_info(self,nc, file_var_map):
-        # get dim sized from  vectors and scalers
-        params = self.params
-        grid = self.grid
-        if type(file_var_map) != list :  [file_var_map]
-        var_list = [v for v in file_var_map if v != None]
-
-        # get require dim of field
-        s=[1,grid['x'].shape[0], 1,0]
-        for v in file_var_map:
-            if params['time_dim_name'] in nc.all_var_dims(v): s[0] = params['time_buffer_size']
-            if params['z_dim_name'] in nc.all_var_dims(v): s[2] = grid['nz_levels']
-            if params['2D_dim_name'] in nc.all_var_dims(v):   s[3] +=2
-            else: s[3] +=1
-
-        params = dict(is_time_varying = s[0] > 0, is3D = s[2] > 0, num_components= s[3])
-        return  dict( var_list= var_list,params=params, shape= s )
-
-    # Below are basic variable read methods for any new reader
-    #---------------------------------------------------------
-    def is_hindcast3D(self, nc): return nc.is_var(self.params['z_var_name'])
-
-    def read_nodal_x(self, nc):
-        params= self.params
-        x = np.stack((nc.read_a_variable(params['x_var_map'][0]), nc.read_a_variable(params['x_var_map'][1])), axis=1).astype(np.float64)
-        if self.params['cords_in_lat_long']:
-            x = self.convert_lon_lat_to_meters_grid(x)
-        return x
-
-    def read_triangles(self, nc):
-        # return triangulation
-        # if triangualur has /quad cells
-        params = self.params
-        triangles = nc.read_a_variable(params['triangles_var_name']).astype(np.int32)
-
-        if params['one_based_indices']: triangles -= 1
-        return triangles
-
-    ##------------------------------------------------ old code below
-
+    def read_nodal_x_as_float64(self, nc): nopass('reader method: read_x is required')
+    def read_bottom_cell_index_as_int32(self, nc):nopass('reader method: read_bottom_cell_index_as_int32 is required for 3D hindcasts')
 
     # required methods time dependent variables, also require a set up method
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index): nopass('reader method: read_zlevel_as_float32 is required for 3D hindcasts')
@@ -263,7 +65,7 @@ class _BaseReader(ParameterBaseClass):
     # checks on first hindcast file
     def additional_setup_and_hindcast_file_checks(self, nc,msg_logger): pass
 
-
+    def build_grid(self, nc, grid): nopass('setup_grid required')
 
     # required variable  structure query methods
     def is_var_in_file_3D(self, nc, var_name_in_file):
@@ -283,12 +85,32 @@ class _BaseReader(ParameterBaseClass):
 
     def get_number_of_z_levels(self,nc): return nc.dim_size(self.params['dimension_map']['z'])
 
-
+    def is_hindcast3D(self, nc): nopass('must define method to test if hindcast is 3D')
 
     # working methods
+
     def preprocess_field_variable(self, nc,name, data): return data # allows tweaks to named fields, eg if name=='depth:
 
     def _add_grid_attributes(self, grid): pass
+
+    def initial_setup(self):
+        # map variable internal names to names in NETCDF file
+        # set update default value and vector variables map  based on given list
+        si = self.shared_info
+        msg_logger= si.msg_logger
+        grid = self.grid
+        self.info['file_info']= si.working_params['file_info'] # add file_info to reader info
+
+        nc = self._open_first_file(self.info['file_info'])
+
+        self.additional_setup_and_hindcast_file_checks(nc, msg_logger)
+        t0 = perf_counter()
+        grid = self.build_grid(nc, grid)
+        si.block_timer('Build grid', t0)
+        # set up reader fields, using shared memory if requested
+        self.setup_reader_fields(nc)
+        nc.close()
+        si.block_timer('Build grid', t0)
 
     def sort_files_by_time(self,file_list, msg_logger):
         # get time sorted list of files matching mask
@@ -344,7 +166,7 @@ class _BaseReader(ParameterBaseClass):
 
         # checks on hindcast using first hindcast file
         nc = NetCDFhandler(fi['names'][0], 'r')
-
+        self._basic_file_checks(nc, msg_logger)
         hindcast_is3D = self.is_hindcast3D(nc)
         nc.close()
 
@@ -425,6 +247,35 @@ class _BaseReader(ParameterBaseClass):
         bi['nt_buffer0'] = 0
 
 
+    def _basic_file_checks(self, nc, msg_logger):
+        # check named variables are in first file
+        # check dim
+        for name, d in self.params['dimension_map'].items():
+            if d is not None and not nc.is_dim(d):
+                msg_logger.msg('Cannot find dimension_map dimension "' + name + ' ", file dimension given is "' + d + '"',
+                               hint='Dimensions in hydro-model file = ' + str(nc.dim_list()),
+                               fatal_error=True)
+
+        # check variables are there
+        for vm in ['grid_variables', 'field_variables']:
+            for name, d in self.params[vm].items():
+                if type(d)== list:
+                    for vf in d:
+                        if vf is not None and not nc.is_var(vf):
+                            msg_logger.msg(' For  "' + vm + '" for param   "' + name + ' ",  cannot find variable in file  "' + vf + '"', fatal_error=True)
+
+                elif d is not None and not nc.is_var(d) :
+                    msg_logger.msg('For "' + vm + '" for param,  "' + name + ' ", cannot find variable in file "' + str(d) + '"', fatal_error=True)
+
+
+        # check if all required dims and non-feilds variables present
+        for v in self.params[ 'required_file_variables']:
+            if not nc.is_var(v):
+                msg_logger.msg('Cannot find required variable in hydro model output file "' + v + '"', fatal_error=True)
+
+        for v in self.params[ 'required_file_dimensions']:
+            if not nc.is_dim(v):
+                msg_logger.msg( 'Cannot find required dimension in hydro model outptut file "' + v + '"', fatal_error=True)
 
 
     def get_field_variable_info(self, nc, name,var_list):
@@ -639,9 +490,12 @@ class _BaseReader(ParameterBaseClass):
         # if back tracking ronud up as moving backwards through buffer, forward round down
         return np.int32(np.floor(nt*model_dir)*model_dir)
 
+
     def hydro_model_index_to_buffer_offset(self, nt_hindcast):
         # ring buffer mapping
         return nt_hindcast % self.info['buffer_info']['buffer_size']
+
+
 
     def are_time_steps_in_buffer(self, time_sec):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer

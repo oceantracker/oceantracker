@@ -62,6 +62,9 @@ class MyEncoder(json.JSONEncoder):
                 if np.all(np.isfinite(obj)):
                     if obj.dtype == np.datetime64:
                         str(obj)
+                    elif obj.dtype in [np.bool_,bool]:
+                        obj = obj.astype(np.int8)
+                        return obj.tolist()
                     else:
                         return  obj.tolist()
                 else:
@@ -74,7 +77,9 @@ class MyEncoder(json.JSONEncoder):
             elif isinstance(obj,(np.int8, np.int16, np.int32,np.int64)):
                 # make single numpy int values
                 return int(obj)
-
+            elif  type(obj) in [np.bool_,bool]:
+                # make single numpy int values
+                return int(obj)
             # date/time strings
             elif isinstance(obj, (datetime, date)):
                 return obj.isoformat()

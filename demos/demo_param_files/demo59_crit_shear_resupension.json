@@ -5,15 +5,10 @@
     "reader": {
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",
-        "field_variables": {
-            "water_temperature": "temp"
-        },
-        "depth_average": false,
-        "field_variables_to_depth_average": [
-            "water_velocity",
-            "salt",
+        "field_variables": [
             "water_temperature"
-        ]
+        ],
+        "depth_average": false
     },
     "dispersion": {
         "A_H": 0.1,
@@ -124,7 +119,7 @@
                 "water_depth"
             ],
             "status_min": "moving",
-            "z_min": -2,
+            "min_z": -2,
             "grid_size": [
                 120,
                 121
