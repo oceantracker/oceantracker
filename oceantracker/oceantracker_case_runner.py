@@ -15,6 +15,7 @@ from time import sleep
 import traceback
 from oceantracker.util.parameter_checking import merge_params_with_defaults
 from oceantracker import common_info_default_param_dict_templates as common_info
+from oceantracker.util.numba_util import seed_numba_random
 
 class OceanTrackerCaseRunner(ParameterBaseClass):
     # this class runs a single case
@@ -147,8 +148,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.print_line()
 
         if si.settings['use_random_seed']:
-            #todo this may not set numbas random seed!!
-            np.random.seed(0)
+            np.random.seed(0) # set numpy
+            seed_numba_random(0)
             si.msg_logger.msg('Using numpy.random.seed(0), makes results reproducible (only use for testing developments give the same results!)',warning=True)
 
         # get short class names map
