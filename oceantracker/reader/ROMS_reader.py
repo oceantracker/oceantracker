@@ -45,7 +45,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
                                   'required_file_dimensions': PLC(['s_w','s_rho','eta_u','eta_v'], [str]),
                                 })
         # don't use name mappings for these variables
-        self.clear_default_params(['dimension_map','grid_variables','one_based_indices'])
+        self.clear_default_params(['dimension_map','grid_variable_map','one_based_indices'])
 
     def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.all_var_dims(var_name_in_file) for x in ['s_w','s_rho'])
 
@@ -146,17 +146,16 @@ class ROMsNativeReader(GenericUnstructuredReader):
 
     def read_time_sec_since_1970(self, nc, file_index=None):
         # get times relative to base date from netcdf encoded  strings
+        var_name = self.grid['grid_variable_map']['time']
         if file_index is None:
-            time_sec = nc.read_a_variable('ocean_time', sel=None)
+            time_sec = nc.read_a_variable(var_name, sel=None)
         else:
-            time_sec = nc.read_a_variable('ocean_time', sel=file_index)
+            time_sec = nc.read_a_variable(var_name, sel=file_index)
 
-        base_date = nc.var_attr('ocean_time','units').split('since ')[-1]
+        base_date = nc.var_attr(var_name,'units').split('since ')[-1]
         t0 = time_util.isostr_to_seconds(base_date)
 
         time_sec += t0
-
-        if self.params['time_zone'] is not None: time_sec += self.params['time_zone'] * 3600.
 
         return time_sec
 

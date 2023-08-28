@@ -36,23 +36,7 @@ class Solver(ParameterBaseClass):
             required_props_list=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'],
             required_grid_var_list=[])
 
-    def initialize_run(self):
-        si = self.shared_info
-        grid = si.classes['reader'].grid
-        info = self.info
-        pgm, fgm, tracks_writer = si.classes['particle_group_manager'], si.classes['field_group_manager'], si.classes['tracks_writer']
-        part_prop = si.classes['particle_properties']
 
-
-
-        # todo dev work kernal solvnot working yet
-        # kernal working space as numpy structure
-        val = np.zeros((3,), dtype=np.float64)
-        self.kernal_solver_info = numpy_util.numpy_structure_from_dict(
-            dict( bc=val.copy(), x_temp= val.copy(),
-                v1 =val.copy(),v2 =val.copy(),v3 =val.copy(),v4 =val.copy(),
-                v=val.copy()
-                ))  # barycentric coords
 
     #@profile
     def solve(self):

@@ -27,7 +27,7 @@ class unstructured_FVCOM(GenericUnstructuredReader):
                                   'required_file_dimensions': PLC(['siglay', 'siglev'], [str]),
                                 })
         # don't use name mappings for these variables
-        self.clear_default_params(['dimension_map','grid_variables','one_based_indices'])
+        self.clear_default_params(['dimension_map','grid_variable_map','one_based_indices'])
 
     def additional_setup_and_hindcast_file_checks(self, nc, msg_logger):
         # include vertical velocity if in file

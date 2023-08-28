@@ -33,7 +33,7 @@ class _BaseReader(ParameterBaseClass):
             'field_variables_to_depth_average': PLC([], [str]),  # list of field_variables that are depth averaged on the fly
             'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
             'EPSG_transform_code' : PVC(None, int, min=0, doc_str='Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)'),
-            'grid_variables': {'time': PVC('time', str, is_required=True),
+            'grid_variable_map': {'time': PVC('time', str, is_required=True),
                             'x': PLC(['x', 'y'], [str], fixed_len=2),
                             'zlevel': PVC(None, str),
                             'bottom_cell_index': PVC(None, str),
@@ -257,7 +257,7 @@ class _BaseReader(ParameterBaseClass):
                                fatal_error=True)
 
         # check variables are there
-        for vm in ['grid_variables', 'field_variables']:
+        for vm in ['grid_variable_map', 'field_variables']:
             for name, d in self.params[vm].items():
                 if type(d)== list:
                     for vf in d:
@@ -457,7 +457,7 @@ class _BaseReader(ParameterBaseClass):
         si = self.shared_info
         fields = si.classes['fields']
 
-        if self.params['grid_variables']['is_dry_cell'] is None:
+        if self.params['grid_variable_map']['is_dry_cell'] is None:
             if grid['zlevel'] is None:
                 reader_util.set_dry_cell_flag_from_tide( grid['triangles'],
                                                         fields['tide'].data, fields['water_depth'].data,
@@ -468,7 +468,7 @@ class _BaseReader(ParameterBaseClass):
                                                           si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
         else:
             # get dry cells for each triangle allowing for splitting quad cells
-            data_added_to_buffer = nc.read_a_variable(self.params['grid_variables']['is_dry_cell'], file_index)
+            data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
             is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
     def read_open_boundary_data_as_boolean(self, grid):

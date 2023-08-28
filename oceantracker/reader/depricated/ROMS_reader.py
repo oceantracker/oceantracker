@@ -45,7 +45,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
                                   'required_file_dimensions': PLC(['s_w','s_rho','eta_u','eta_v'], [str]),
                                 })
         # don't use name mappings for these variables
-        self.clear_default_params(['dimension_map','grid_variables','one_based_indices'])
+        self.clear_default_params(['dimension_map','grid_variable_map','one_based_indices'])
 
     def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.all_var_dims(var_name_in_file) for x in ['s_w','s_rho'])
 

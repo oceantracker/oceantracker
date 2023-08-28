@@ -354,11 +354,10 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                             #grid['triangles'],grid['zlevel'],grid['bottom_cell_index'],
                                             grid['triangles'], grid['zlevel_vertex'], grid['bottom_cell_index'],
-                                            si.z0,
                                             n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
                                             info['current_buffer_steps'],info['current_fractional_time_steps'],
                                             self.walk_counts,
-                                            active)
+                                            active,  si.z0)
             si.block_timer('Find cell, vertical walk', t0)
 
     #@function_profiler(__name__)

@@ -11,7 +11,7 @@ class SCHISMSreaderNCDF(_BaseReader):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
             'cords_in_lat_long': PVC(False, bool, doc_str='Convert given nodal lat longs to a UTM metres grid'),
-            'grid_variables': {'time': PVC('time', str),
+            'grid_variable_map': {'time': PVC('time', str),
                                'x': PLC(['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y'], [str], fixed_len=2),
                                'zlevel': PVC('zcor', str),
                                'triangles': PVC('SCHISM_hgrid_face_nodes', str),
@@ -38,7 +38,7 @@ class SCHISMSreaderNCDF(_BaseReader):
     #---------------------------------------------------------
 
     def read_time_sec_since_1970(self, nc, file_index=None):
-        var_name=self.params['grid_variables']['time']
+        var_name=self.params['grid_variable_map']['time']
         time = nc.read_a_variable(var_name, sel=file_index)
 
         base_date=  [ int(float(x)) for x in nc.var_attr(var_name,'base_date').split()]
@@ -47,15 +47,11 @@ class SCHISMSreaderNCDF(_BaseReader):
         d0 = np.datetime64(d0).astype('datetime64[s]')
         sec = time_util.datetime64_to_seconds(d0)
         time += sec
-
-        if self.params['time_zone'] is not None:
-            time += self.params['time_zone'] * 3600.
-
         return time
 
     def read_bottom_cell_index(self, nc):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid
-        var_name =self.params['grid_variables']['bottom_cell_index']
+        var_name =self.params['grid_variable_map']['bottom_cell_index']
         if nc.is_var(var_name):
             node_bottom_index = nc.read_a_variable(var_name)
             node_bottom_index -= 1 # make zero based index
