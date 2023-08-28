@@ -5,7 +5,7 @@
         "time_step": 600,
         "debug": true,
         "reader": {
-            "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
+            "class_name": "oceantracker.reader._base_reader._BaseReader",
             "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
             "file_mask": "demoHindcast2D*.nc",
             "search_sub_dirs": true,
@@ -13,7 +13,7 @@
                 "time": "time",
                 "node": "nodes"
             },
-            "grid_variables": {
+            "grid_variable_map": {
                 "time": "time_sec",
                 "x": [
                     "east",
@@ -21,7 +21,7 @@
                 ],
                 "triangles": "tri"
             },
-            "field_variables": {
+            "field_variable_map": {
                 "water_velocity": [
                     "east_vel",
                     "north_vel"

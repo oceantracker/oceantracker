@@ -14,7 +14,7 @@ class GenericUnstructuredReader(_BaseReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({ 'dimension_map': {'node': PVC('node', str,is_required=True)},
-                                'grid_variables': {'triangles': PVC(None, str, is_required=True)}})
+                                'grid_variable_map': {'triangles': PVC(None, str, is_required=True)}})
 
         self.info['buffer_info'] ={'n_filled' : None}
         self.class_doc(description='Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names')
@@ -105,7 +105,7 @@ class GenericUnstructuredReader(_BaseReader):
                            hint='Ensure reader parameter "one_based_indices" is set correctly for hindcast file')
 
     def read_time_sec_since_1970(self, nc, file_index=None):
-        vname=self.params['grid_variables']['time']
+        vname=self.params['grid_variable_map']['time']
         if file_index is None : file_index = np.arange(nc.var_shape(vname)[0])
 
         time = nc.read_a_variable(vname, sel=file_index)
@@ -119,7 +119,7 @@ class GenericUnstructuredReader(_BaseReader):
 
     def read_nodal_x_as_float64(self, nc):
         si=self.shared_info
-        gv= self.params['grid_variables']
+        gv= self.params['grid_variable_map']
         x = np.stack((nc.read_a_variable(gv['x'][0]), nc.read_a_variable(gv['x'][1])), axis=1).astype(np.float64)
         if self.params['cords_in_lat_long']:
             #todo write warning of conversion to meters grid
@@ -147,14 +147,14 @@ class GenericUnstructuredReader(_BaseReader):
         self.read_dry_cell_data(nc, file_index, grid['is_dry_cell'],buffer_index)
 
     def read_triangles_as_int32(self, nc):
-        data = nc.read_a_variable(self.params['grid_variables']['triangles'])
+        data = nc.read_a_variable(self.params['grid_variable_map']['triangles'])
         if self.params['one_based_indices']:  data -= 1
         quad_cells_to_split = np.full((data.shape[0],),False,dtype=bool)
         return data[:, :3].astype(np.int32), quad_cells_to_split
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         # read in place
-        zlevel_buffer[buffer_index,...] = nc.read_a_variable(self.params['grid_variables']['zlevel'], sel=file_index).astype(np.float32)
+        zlevel_buffer[buffer_index,...] = nc.read_a_variable(self.params['grid_variable_map']['zlevel'], sel=file_index).astype(np.float32)
 
     def read_bottom_cell_index_as_int32(self, nc):
         # Slayer grid, bottom cell index = zero
@@ -199,7 +199,7 @@ class GenericUnstructuredReader(_BaseReader):
 
     def is_hindcast3D(self, nc):
         #is zlevel defined then it is 3D
-        return  self.params['grid_variables']['zlevel'] is not None
+        return  self.params['grid_variable_map']['zlevel'] is not None
 
     def write_hydro_model_grid(self):
         # write a netcdf of the grid from first hindcast file

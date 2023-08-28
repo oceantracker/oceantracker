@@ -27,7 +27,7 @@ class _BaseReader(ParameterBaseClass):
             'time_zone': PVC(None, int, min=-12, max=12, units='hours', doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
             'cords_in_lat_long': PVC(False, bool, doc_str='Convert given nodal lat longs to a UTM metres grid'),
             'time_buffer_size': PVC(24, int, min=2),
-            'grid_variables': {'time': PVC('time', str, is_required=True),
+            'grid_variable_map': {'time': PVC('time', str, is_required=True),
                                'x': PLC(['x', 'y'], [str], fixed_len=2),
                                'zlevel': PVC(None, str),
                                'triangles': PVC(None, str),
@@ -62,6 +62,7 @@ class _BaseReader(ParameterBaseClass):
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         si = self.shared_info
+        ml= si.msg_logger
         info = self.info
         self.info['file_info'] = si.working_params['file_info']  # add file_info to reader info
         nc = NetCDFhandler(info['file_info']['names'][0])
@@ -73,6 +74,8 @@ class _BaseReader(ParameterBaseClass):
         self.setup_fields(nc)
         nc.close()
 
+        ml.exit_if_prior_errors()
+
         #set up ring buffer  info
         bi = self.info['buffer_info']
         bi['n_filled'] = 0
@@ -80,7 +83,6 @@ class _BaseReader(ParameterBaseClass):
         bi['time_steps_in_buffer'] = []
         bi['buffer_available'] = bi['buffer_size']
         bi['nt_buffer0'] = 0
-
 
     def sort_files_by_time(self,file_list, msg_logger):
         # get time sorted list of files matching mask
@@ -173,8 +175,17 @@ class _BaseReader(ParameterBaseClass):
     def read_grid(self, nc):
         # read nodal values and triangles
         params = self.params
-        info = self.info
-        grid = {}
+        ml = self.shared_info.msg_logger
+        grid_map= params['grid_variable_map']
+
+        # todo check variables exist
+
+
+        for v in grid_map['x'] + [grid_map['triangles'], grid_map['time']]:
+            if not nc.is_var(v):
+                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in grid set', fatal_error=True)
+                return
+        grid =  {}
         grid['triangles'] = self.read_triangles(nc).astype(np.int32)
         grid['triangles'], grid['triangles_to_split'] = self.find_quad_cells_split_to_split(grid['triangles'])
         grid['x'] = self.read_nodal_x(nc).astype(np.float64)
@@ -254,7 +265,7 @@ class _BaseReader(ParameterBaseClass):
             # space for dry cell info
         grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
 
-        # working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
+        # reader working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
 
         # note which are time buffers
@@ -273,10 +284,12 @@ class _BaseReader(ParameterBaseClass):
         return triangles, quad_cells_to_split
 
     def field_var_info(self,nc,file_var_map):
+        si = self.shared_info
         params = self.params
         dim_map= params['dimension_map']
         grid = self.grid
         info = self.info
+        ml = si.msg_logger
 
         # get dim sized from  vectors and scalers
         if type(file_var_map) != list : file_var_map = [file_var_map]
@@ -286,6 +299,9 @@ class _BaseReader(ParameterBaseClass):
         s=np.asarray([1,grid['x'].shape[0], 1,0],dtype=np.int32)
         component_list = []
         for v in var_list:
+            if not  nc.is_var(v):
+                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in reader set up fields',fatal_error=True)
+                continue
             if dim_map['time'] in nc.all_var_dims(v): s[0] = params['time_buffer_size']
             if dim_map['z'] in nc.all_var_dims(v): s[2] = info['nz_levels']
             if dim_map['vector2Ddim'] in nc.all_var_dims(v):
@@ -330,11 +346,21 @@ class _BaseReader(ParameterBaseClass):
 
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
-    def is_hindcast3D(self, nc): return nc.is_var(self.params['grid_variables']['zlevel'])
+    def is_hindcast3D(self, nc): return nc.is_var(self.params['grid_variable_map']['zlevel'])
+
+    def read_time_sec_since_1970(self, nc, file_index=None):
+        vname = self.params['grid_variable_map']['time']
+        if file_index is None: file_index = np.arange(nc.var_shape(vname)[0])
+
+        time = nc.read_a_variable(vname, sel=file_index)
+
+        if self.params['isodate_of_hindcast_time_zero'] is not None:
+            time += time_util.isostr_to_seconds(self.params['isodate_of_hindcast_time_zero'])
+        return time
 
     def read_nodal_x(self, nc):
         params= self.params
-        var_name = params['grid_variables']['x']
+        var_name = params['grid_variable_map']['x']
         x = np.stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1])), axis=1)
         if self.params['cords_in_lat_long']:
             x = self.convert_lon_lat_to_meters_grid(x)
@@ -344,7 +370,7 @@ class _BaseReader(ParameterBaseClass):
         # return triangulation
         # if triangualur has /quad cells
         params = self.params
-        var_name = params['grid_variables']['triangles']
+        var_name = params['grid_variable_map']['triangles']
         triangles = nc.read_a_variable(var_name).astype(np.int32)
 
         if params['one_based_indices']: triangles -= 1
@@ -472,6 +498,10 @@ class _BaseReader(ParameterBaseClass):
 
         grid['time'][buffer_index] = self.read_time_sec_since_1970(nc, file_index=file_index)
 
+        # do time zone adjustment
+        if self.params['time_zone'] is not None:
+            grid['time'][buffer_index] += self.params['time_zone'] * 3600.
+
         # add date for convenience
         grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
 
@@ -491,7 +521,7 @@ class _BaseReader(ParameterBaseClass):
         si = self.shared_info
         fields = si.classes['fields']
 
-        if self.params['grid_variables']['is_dry_cell'] is None:
+        if self.params['grid_variable_map']['is_dry_cell'] is None:
             if grid['zlevel'] is None:
                 reader_util.set_dry_cell_flag_from_tide( grid['triangles'],
                                                         fields['tide'].data, fields['water_depth'].data,
@@ -502,7 +532,7 @@ class _BaseReader(ParameterBaseClass):
                                                           si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
         else:
             # get dry cells for each triangle allowing for splitting quad cells
-            data_added_to_buffer = nc.read_a_variable(self.params['grid_variables']['is_dry_cell'], file_index)
+            data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
             is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):

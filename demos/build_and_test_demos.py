@@ -26,20 +26,17 @@ poly_points_large=[[1597682.1237, 5489972.7479],
                        [1597682.1237, 5489972.7479]]
 
 
-#ot.run()
-#exit(1)
-
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
    'time_step' : 900,
     'debug': True,
-    'reader': {"class_name": 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
+    'reader': {"class_name": 'oceantracker.reader._base_reader._BaseReader',
                 'input_dir': '.',
                 'file_mask': 'demoHindcast2D*.nc',
                 'search_sub_dirs': True,
                 'dimension_map': {'time': 'time', 'node': 'nodes'},
-                'grid_variables'  : {'time': 'time_sec', 'x':['east','north'],  'triangles': 'tri'},
-                'field_variables': {'water_velocity' : ['east_vel','north_vel'],'water_depth': 'depth','tide':'tide'},
+                'grid_variable_map'  : {'time': 'time_sec', 'x':['east','north'],  'triangles': 'tri'},
+                'field_variable_map': {'water_velocity' : ['east_vel','north_vel'],'water_depth': 'depth','tide':'tide'},
                 'time_buffer_size': 15,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
     'user_note':'test of notes',

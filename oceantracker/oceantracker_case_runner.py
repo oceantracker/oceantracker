@@ -196,7 +196,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.progress_marker('Starting ' + si.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info['model_duration']))
 
         t0 = perf_counter()
-        solver.initialize_run()
         si.msg_logger.progress_marker('Initialized Solver Class', start_time=t0)
 
         # ------------------------------------------
@@ -303,6 +302,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         fgm.initial_setup()  # needed here to add reader fields inside reader build
 
         # make other core classes, eg.
+
+
         core_role_params=si.working_params['core_roles']
         for name in ['interpolator','particle_group_manager','solver','dispersion']:
             si.add_core_class(name, core_role_params[name], crumbs=f'core class "{name}" ')
@@ -353,6 +354,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         if si.write_tracks:
             si.add_core_class('tracks_writer',si.working_params['core_roles']['tracks_writer'], initialise=True)
+        else:
+            si.classes['tracks_writer'] = None
 
         # initialize the rest of the core classes
         #todo below apply to all core classes, reader
@@ -450,6 +453,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'class_roles_info': {}, }
 
         for key, i in si.classes.items():
+            if i is None : continue
 
             if type(i) == dict:
                 d['class_roles_info'][key] = {}

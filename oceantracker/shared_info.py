@@ -10,6 +10,7 @@ class SharedInfoClass(object):
     def __init__(self):
         self.reset()
         self.block_timers={}
+        for name in common_info.core_classes.keys(): self.classes[name] = None
 
     def reset(self):
         self.classes = {}

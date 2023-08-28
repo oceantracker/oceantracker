@@ -223,7 +223,7 @@ def base_param(is3D=False, isBackwards = False):
                   'file_mask' : 'circFlow2D*.nc', 'input_dir': input_dir,
                         'field_variables': {'water_velocity' : ['u','v'],'water_depth': 'depth','tide': 'tide' },
                         'dimension_map': {'node': 'node', 'time': 'time'},
-                        'grid_variables': {'time': 'time', 'x': ['x','y'],
+                        'grid_variable_map': {'time': 'time', 'x': ['x','y'],
                                       'triangles': 'simplex',
                                        },
                          'time_buffer_size': 200,
@@ -253,7 +253,7 @@ def base_param(is3D=False, isBackwards = False):
         # tweak for circle flow 3D
         r=params['reader']
         r['field_variables'].update({ 'water_velocity' : ['u','v', 'w']})
-        r['grid_variables'].update({'zlevel': 'zlevel'})
+        r['grid_variable_map'].update({'zlevel': 'zlevel'})
         r['dimension_map'].update({'z': 'zlevel'})
         r['file_mask'] = params['reader']['file_mask'].replace('2D', '3D')
         params['dispersion'].update({'A_H': 0.,'A_V': 0.})

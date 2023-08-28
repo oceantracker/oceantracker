@@ -41,18 +41,18 @@ particle_statistics:
     update_interval: 1800
     use_release_group_polygons: true
 reader:
-  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+  class_name: oceantracker.reader._base_reader._BaseReader
   dimension_map:
     node: nodes
     time: time
-  field_variables:
+  field_variable_map:
     tide: tide
     water_depth: depth
     water_velocity:
     - east_vel
     - north_vel
   file_mask: demoHindcast2D*.nc
-  grid_variables:
+  grid_variable_map:
     time: time_sec
     triangles: tri
     x:

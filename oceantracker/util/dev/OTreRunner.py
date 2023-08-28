@@ -102,7 +102,6 @@ class OceanTrackerReRunner(object):
 
         particle.info['num_released'] = 0
 
-        solver.initialize_run()
         solver.solve_for_data_in_buffer()
 
     def _get_engine_info(self):

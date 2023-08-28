@@ -24,7 +24,7 @@ class SCHISMSreaderNCDF(GenericUnstructuredReader):
                                             'tide': PVC('elev', str)},
                                 })
         self.class_doc(description='Reads SCHISM netCDF output files')
-        self.clear_default_params(['grid_variables', 'one_based_indices','dimension_map']) # only used in generic reader
+        self.clear_default_params(['grid_variable_map', 'one_based_indices','dimension_map']) # only used in generic reader
 
     def is_hindcast3D(self, nc): return  nc.is_var('hvel')
 
