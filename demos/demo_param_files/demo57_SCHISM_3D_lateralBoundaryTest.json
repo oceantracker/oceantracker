@@ -5,7 +5,7 @@
     "reader": {
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",
-        "field_variables": [
+        "load_fields": [
             "water_temperature"
         ]
     },

@@ -246,7 +246,7 @@ schsim_base_params=\
  'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': 'demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',
-                     'field_variables':['water_temperature']
+                     'load_fields':['water_temperature']
                           },
         'dispersion': {'A_H': .2, 'A_V': 0.001},
         'release_groups': {
@@ -404,7 +404,7 @@ ROMS_params={'output_file_base' :'demo70_ROMS_reader', 'debug': True,
  'reader': {'class_name': 'oceantracker.reader.ROMS_reader.ROMsNativeReader',
                     'input_dir': 'demo_hindcast',
                      'file_mask': 'DopAnV2R3-ini2007_da_his.nc',
-                     'field_variables':['water_temperature']},
+                     'load_fields':['water_temperature']},
 
             'open_boundary_type': 1,
             'dispersion': {'A_H': .2, 'A_V': 0.001},

@@ -15,7 +15,7 @@ params=\
  'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': '..\..\demos\demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',
-                     'field_variables':['water_temperature'],
+                     'load_fields':['water_temperature'],
                           },
         'dispersion': {'A_H': .2, 'A_V': 0.001},
         'release_groups': {
