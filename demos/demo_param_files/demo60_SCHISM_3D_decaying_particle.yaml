@@ -8,10 +8,10 @@ particle_properties:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 25714.28571428571
 reader:
-  field_variables:
-  - water_temperature
   file_mask: demoHindcastSchism3D.nc
   input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  load_fields:
+  - water_temperature
 release_groups:
   P1:
     max_age: 17280.000000000004

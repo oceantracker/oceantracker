@@ -20,7 +20,7 @@ class unstructured_FVCOM(GenericUnstructuredReader):
     def __init__(self):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({ 'field_variables': {'water_velocity': PLC(['u','v'], [str], fixed_len=2),
+        self.add_default_params({ 'load_fields': {'water_velocity': PLC(['u','v'], [str], fixed_len=2),
                                   'water_depth': PVC('h', str),
                                   'tide': PVC('zeta', str)},
                                   'required_file_variables': PLC(['Times','nv', 'u', 'v', 'h'], [str]),

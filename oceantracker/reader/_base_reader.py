@@ -33,8 +33,9 @@ class _BaseReader(ParameterBaseClass):
                                'triangles': PVC(None, str),
                                'bottom_cell_index': PVC(None, str),
                                'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-
-            'field_variables': PLC(['water_velocity', 'tide','water_depth'], [str], doc_str='names of variables to read and interplate to give particle values. If name in field_variable_map, then the mapped file variables will be used. If not the given name must be a file variable name.',
+            'load_fields': PLC([], [str], doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
+                                   make_list_unique=True),
+            'field_variables': PLC([], [str], obsolete=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',
                                    make_list_unique=True),
             'field_variable_map': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3, is_required=True),
                                 'tide': PVC('elev', str),
@@ -327,7 +328,8 @@ class _BaseReader(ParameterBaseClass):
         info=self.info
         params = self.params
         field_params = dict(class_name='oceantracker.fields._base_field.ReaderField')
-        for name in params['field_variables']:
+        # setup compulsory fields, plus others required
+        for name in list(set(params['load_fields'] + ['water_velocity','tide','water_depth'])):
             if name in params['field_variable_map']:
                 file_var_map = params['field_variable_map'][name]
             else:

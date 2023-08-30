@@ -6,7 +6,7 @@
         "class_name": "oceantracker.reader.ROMS_reader.ROMsNativeReader",
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "DopAnV2R3-ini2007_da_his.nc",
-        "field_variables": [
+        "load_fields": [
             "water_temperature"
         ]
     },

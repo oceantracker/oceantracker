@@ -59,10 +59,10 @@ particle_statistics:
     update_interval: 3600
 reader:
   depth_average: false
-  field_variables:
-  - water_temperature
   file_mask: demoHindcastSchism3D.nc
   input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  load_fields:
+  - water_temperature
 release_groups:
   P1: &id001
     points:

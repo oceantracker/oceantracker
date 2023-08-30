@@ -490,7 +490,7 @@ if __name__ == '__main__':
                    'file_mask': 'schout_*.nc', 'input_dir': input_dir,
                    'hgrid_file_name': path.join(input_dir, 'hgrid.gr3'),
                    # fields to track at particle locations
-                   'field_variables': {'ECO_no3': 'ECO_no3', 'A_Z': 'diffusivity'},
+                   'load_fields': {'ECO_no3': 'ECO_no3', 'A_Z': 'diffusivity'},
                    'field_variables_to_depth_average': ['water_velocity']
                    },
 

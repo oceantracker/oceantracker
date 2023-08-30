@@ -54,10 +54,10 @@ particle_properties:
   total_water_depth:
     class_name: oceantracker.particle_properties.total_water_depth.TotalWaterDepth
 reader:
-  field_variables:
-  - water_temperature
   file_mask: demoHindcastSchism3D.nc
   input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  load_fields:
+  - water_temperature
 release_groups:
   P1:
     allow_release_in_dry_cells: true

@@ -3,6 +3,9 @@ from numba import types as nbt,jit,  njit, typeof, typed
 from numba.experimental import jitclass
 
 
+@njit
+def seed_numba_random(a):
+    np.random.seed(a)
 
 def njitter(f,signature,return_type=None, parallel=False, nogil=True):
 

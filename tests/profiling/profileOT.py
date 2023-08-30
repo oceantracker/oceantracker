@@ -63,7 +63,7 @@ def get_params(datasource=1):
          'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,
                     #'time_buffer_size': 3,
-                    'field_variables': ['water_temperature']
+                    'load_fields': ['water_temperature']
                     },
         'write_tracks': False,
         'dispersion': {'A_H': .2, 'A_V': 0.001},
