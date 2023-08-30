@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument('-noplots', action='store_true')
     parser.add_argument('-norun', action='store_true')
     args = parser.parse_args()
-    root_input_dir='F:\\Hindcasts\\Hindcast_parts\\OceanNumNZhindcast-2020-06-018\\2019\\07'
+    root_input_dir=r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022'
     root_output_dir= 'F:\\OceanTrackerOuput\\OceanNum\\test'
     output_file_base='NZnational'
 
@@ -60,11 +60,10 @@ if __name__ == '__main__':
     if args.mode_debug: params['debug'] = True
 
     if not args.norun:
-        caseInfoFile, has_errors= run(params)
+        caseInfoFile= run(params)
 
     else:
-        run_dir= path.join(root_output_dir, output_file_base)
-        caseInfoFile = load_output_files.get_case_info_files_from_dir(run_dir, case=1)
+        caseInfoFile= path.join(root_output_dir, output_file_base,output_file_base+'_caseInfo.json')
 
     # do plot
     if not args.noplots:
@@ -75,7 +74,7 @@ if __name__ == '__main__':
         axBOP= [1856014.778854954,1978628.00674731, 5794851.51338963, 5889202.600050561]
         track_data = load_output_files.load_track_data(caseInfoFile)
         plot_tracks.animate_particles(track_data, axis_lims=ax, title='OceanNum NZ Schism test, fall velocity and critical friction  resuspension')
-        plot_tracks.plot_path_in_vertical_section(track_data, title='OceanNum, fall velocity and critical friction  resuspension ')
+        #plot_tracks.plot_path_in_vertical_section(track_data, title='OceanNum, fall velocity and critical friction  resuspension ')
 
         stats_data = load_output_files.load_stats_data((caseInfoFile))
         plot_statistics.animate_heat_map(stats_data, axis_lims=ax, title='OceanNum Schism, time based particle count heatmaps, built on the fly,  log scale', logscale=True)
