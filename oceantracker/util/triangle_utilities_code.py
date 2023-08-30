@@ -145,15 +145,20 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
     out= {'domain' : {},'islands':[]}
     len_seg = [len(l) for l in segs] # f
 
+    # split segments into  domain or island
+    # domain is line segment containing most easterly node
+    domain_node= np.argmax( x[:, 0]== x[:, 0].min())
+
     for s in segs:
         nodes=np.asarray(s).astype(np.int32)
         points = x[s, :]
         face_nodes= np.stack((nodes[:-1],nodes[1:]), axis=1)
+        d = {'nodes': nodes, 'points': points, 'face_nodes': face_nodes}
         # longest segment must be the domain
-        if max(len_seg) == len(s) :
-            out['domain'].update({'nodes': nodes, 'points': points, 'face_nodes': face_nodes})
+        if domain_node in nodes :
+            out['domain'].update(d)
         else:
-            out['islands'].append({'nodes': nodes, 'points': points, 'face_nodes': face_nodes})
+            out['islands'].append(d)
     return out
 
 def calcuate_triangle_areas(xy, tri):
