@@ -41,6 +41,7 @@
     "particle_concentrations": {},
     "particle_properties": {},
     "particle_statistics": {},
+    "pre_processing": {},
     "release_groups": {},
     "status_modifiers": {},
     "time_varying_info": {},

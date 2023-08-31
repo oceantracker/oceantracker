@@ -1,0 +1,12 @@
+main:   -  oceantracker:multiProcessing: processors:2
+main:   - parallel pool complete
+main:     >>> Note: run summary with case file names   "demo00_helper_class_test_runInfo.json"
+    >>> Note: output is in dir= E:\H_Local_drive\ParticleTracking\oceantracker\demos\root_output_dir\demo00_helper_class_test
+    >>> Note: to help with debugging, parameters as given by user  are in "demo00_helper_class_test_raw_user_params.json"
+    >>> Note: run summary with case file names   "demo00_helper_class_test_runInfo.json"
+main: --------------------------------------------------------------------------
+main: OceanTracker summary:  elapsed time =0:00:18.175161
+main:       Cases -   0 errors,   6 warnings,   4 notes, check above
+main:       Helper-   0 errors,   0 warnings,   0 notes, check above
+main:       Main  -   0 errors,   0 warnings,   3 notes, check above
+main: --------------------------------------------------------------------------
