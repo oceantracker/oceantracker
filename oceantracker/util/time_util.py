@@ -13,9 +13,11 @@ def seconds_to_isostr(s): return str(seconds_to_datetime64(s))
 def datetime64_to_seconds(dt64):
     return dt64.astype(np.float64)
 
-def isostr_to_datetime64(s):   return np.datetime64(s).astype('datetime64[s]')
-
-def isostr_to_seconds(s):    return isostr_to_datetime64(s).astype(np.float64)
+def isostr_to_seconds(s):
+    # seconds since epoch of 1970-01-01
+    # below works around date time assuming a computer local time zone if no timezone given
+    d = dateutil.parser.isoparse(s)
+    return np.datetime64(d).astype('datetime64[s]').astype(float)
 
 def seconds_to_pretty_duration_string(s,seconds=True):
     td = np.timedelta64(int(np.round(s)),'s')
