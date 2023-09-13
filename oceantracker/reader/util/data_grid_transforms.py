@@ -2,9 +2,41 @@ import numpy as np
 from numba import njit
 from oceantracker.interpolator.util.interp_kernals import kernal_linear_interp1D
 
+
+#@njit
+def convert_zlevels_fractional_depth(zlevels,bottom_cell_index):
+    # convert zlevels to fractional water depths in place
+    z_frac = np.fill(zlevels,dtype=zlevels.dtype)
+    for node in range(zlevels.shape[0]): # loop over nodes
+        z_surface = float(zlevels[node, -1])
+        z_bottom= float(zlevels[node,bottom_cell_index[node]])
+        for nz in range(bottom_cell_index[node], zlevels.shape[1]): # loop over nodes
+            zlevels[node,nz] = (zlevels[node,nz]-z_bottom)/max(z_surface-z_bottom,0.01) # 1cm min total water depth
+    return zlevels
+@njit
+def convert_layer_field_to_levels_from_fixed_depth_fractions(data, zfraction_center, zfraction_boundaries):
+    # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
+    # used in FVCOM reader
+    data_levels = np.full((data.shape[0],) + (data.shape[1],) + (zfraction_boundaries.shape[0],), 0., dtype=np.float32)
+
+    for nt in range(data.shape[0]):
+        for n in range(data.shape[1]):
+            for nz in range(1, data.shape[2]):
+                # linear interp levels not, first or last boundary
+                data_levels[nt, n, nz] = kernal_linear_interp1D(zfraction_center[nz - 1], data[nt, n, nz - 1], zfraction_center[nz], data[nt, n, nz], zfraction_boundaries[nz])
+
+            # extrapolate to top zlevel
+            data_levels[nt, n, -1] = kernal_linear_interp1D(zfraction_center[-2], data[nt, n, -2], zfraction_center[-1], data[nt, n, -1], zfraction_boundaries[-1])
+
+            # extrapolate to bottom zlevel
+            data_levels[nt, n, 0] = kernal_linear_interp1D(zfraction_center[0], data[nt, n, 0], zfraction_center[1], data[nt, n, 1], zfraction_boundaries[0])
+
+    return data_levels
+
 @njit
 def get_node_layer_field_values(data, node_to_tri_map, tri_per_node,cell_center_weights):
     # get nodal values from data in surrounding cells based in distance weighting
+    # used in FVCOM reader
 
     data_nodes = np.full((data.shape[0],) + (len(node_to_tri_map),) +(data.shape[2],) , 0., dtype=np.float32)
 
@@ -19,28 +51,12 @@ def get_node_layer_field_values(data, node_to_tri_map, tri_per_node,cell_center_
 
     return data_nodes
 
-@njit
-def convert_layer_field_to_levels_from_fixed_depth_fractions(data, zfraction_center, zfraction_boundaries):
-    # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depths
-    data_levels = np.full((data.shape[0],) + (data.shape[1],) + (zfraction_boundaries.shape[0],), 0., dtype=np.float32)
 
-    for nt in range(data.shape[0]):
-        for n in range(data.shape[1]):
-            for nz in range(1,data.shape[2]):
-                # linear interp levels not, first or last boundary
-                data_levels[nt, n, nz] = kernal_linear_interp1D(zfraction_center[nz - 1], data[nt, n, nz - 1], zfraction_center[nz], data[nt, n, nz], zfraction_boundaries[nz])
-
-            # extrapolate to top zlevel
-            data_levels[nt, n, -1] = kernal_linear_interp1D(zfraction_center[-2], data[nt, n, -2], zfraction_center[-1], data[nt, n, -1], zfraction_boundaries[-1])
-
-            # extrapolate to bottom zlevel
-            data_levels[nt, n, 0] = kernal_linear_interp1D(zfraction_center[0], data[nt, n, 0], zfraction_center[1], data[nt, n, 1], zfraction_boundaries[0])
-
-    return data_levels
 
 @njit
 def convert_layer_field_to_levels_from_depth_fractions_at_each_node(data, zfraction_center, zfraction_boundaries):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depths
+    # used in FVCOM reader
     data_levels = np.full((data.shape[0],) + (data.shape[1],) + (zfraction_boundaries.shape[1],), 0., dtype=np.float32)
 
     for nt in range(data.shape[0]):

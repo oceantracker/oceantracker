@@ -9,6 +9,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from oceantracker.util.basic_util import nopass
 from oceantracker.reader.util.reader_util import append_split_cell_data
+from oceantracker.reader.util.data_grid_transforms import convert_zlevels_fractional_depth
 from oceantracker.util import  cord_transforms
 from oceantracker.reader.util import shared_reader_memory_util
 from oceantracker.util.profiling_util import function_profiler
@@ -26,6 +27,7 @@ class _BaseReader(ParameterBaseClass):
             'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
             'time_zone': PVC(None, int, min=-12, max=12, units='hours', doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
             'cords_in_lat_long': PVC(False, bool, doc_str='Convert given nodal lat longs to a UTM metres grid'),
+            'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels'),
             'time_buffer_size': PVC(24, int, min=2),
             'grid_variable_map': {'time': PVC('time', str, is_required=True),
                                'x': PLC(['x', 'y'], [str], fixed_len=2),
@@ -72,7 +74,10 @@ class _BaseReader(ParameterBaseClass):
 
         grid = self.read_grid(nc)
         self.grid= self.build_grid(grid)
+        grid = self.setup_vertical_grid_transform(nc, grid)
+
         self.setup_fields(nc)
+
         nc.close()
 
         ml.exit_if_prior_errors()
@@ -345,6 +350,27 @@ class _BaseReader(ParameterBaseClass):
                 data = self.assemble_field_components(nc, vi[name])
                 data = self.convert_field_grid(nc, name, data)  # do any customised tweaks
                 field.data[0, ...] = data
+
+    def setup_vertical_grid_transform(self, nc, grid):
+        # setup transforms on the data, eg regrid vertical if 3D to same sigma levels
+        si= self.shared_info
+        params = self.params
+        # get fractional depths from first time step
+        zlevel = nc.read_a_variable(params['grid_variable_map']['zlevel'], sel=0)
+        z_frac= convert_zlevels_fractional_depth(zlevel, grid['bottom_cell_index'])
+        if True:
+            from  matplotlib import pyplot as plt
+            plt.plot(z_frac.T)
+            plt.show()
+            h= np.histogram(grid['bottom_cell_index'], bins=zlevel.shape[1])
+        # convert to fractional depths
+
+
+
+        return grid
+
+    def do_grid_transforms(self, var_name, data,grid):     return  data
+        # do tranfor,s on the data, eg regrid vertcal if 3D to same sigma levels
 
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
