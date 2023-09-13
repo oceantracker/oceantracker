@@ -58,7 +58,7 @@ class InsidePolygon(object):
         # 2) recalculates inv_slope for intersection calc and bounding box
         # 3) form subgrid of bounding region with vaules =1 if polygon overlays  subgrid cell
         # assumes a closed polygon
-
+        #todo this can be much faster with numba?
         nv = vert.shape[0]
         self.line_bounds = np.zeros((nv,3,2),dtype=np.float64)
         xyb= np.zeros((2,2),dtype=np.float64)

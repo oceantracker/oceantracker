@@ -42,8 +42,7 @@ class SCHISMSreaderNCDF(_BaseReader):
         time = nc.read_a_variable(var_name, sel=file_index)
 
         base_date=  [ int(float(x)) for x in nc.var_attr(var_name,'base_date').split()]
-
-        d0= datetime(base_date[0], base_date[1], base_date[2], base_date[3], base_date[4])
+        d0= datetime(*tuple(base_date))
         d0 = np.datetime64(d0).astype('datetime64[s]')
         sec = time_util.datetime64_to_seconds(d0)
         time += sec
