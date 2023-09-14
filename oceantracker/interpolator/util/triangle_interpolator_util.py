@@ -54,11 +54,11 @@ def BCwalk_with_move_backs(xq,
     for nn in prange(active.size):
         n= active[nn]
 
-        if xq[n, 0] == np.nan or xq[n, 1] == np.nan:
+        if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
             # if any is nan copy all and move on
             _move_back(xq[n,:], x_last_good[n, :])
             walk_counts[3] += 1  # count nans
-            return
+            continue
 
         n_tri = n_cell[n]  # starting triangle
         # do BC walk
