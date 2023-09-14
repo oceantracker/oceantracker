@@ -1,17 +1,23 @@
 from oceantracker import main
 from oceantracker.util import json_util
-ncase=0
-import multiprocessing
-import numpy
-import numba
+from os import  path
 
-if ncase ==0:
-    fn = r'E:\OneDrive - Cawthron\H_Local_drive\ParticleTracking\bug_hunting\paramsBWDFY20120.json'
-    params = json_util.read_JSON(fn)
-    params['reader']['input_dir'] = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2010'
-    params['shared_params']['root_output_dir'] = r'F:\OceanTrackerOuput\bug_hunting'
-    params['case_list'] =  params['case_list'][23:25]
-    params['shared_params']['processors'] = 1
+ncase=1
+
+match ncase:
+    case 1:
+        fn = r'E:\H_Local_drive\ParticleTracking\bug_hunting\remy\bluff_bug.json'
+        params = json_util.read_JSON(fn)
+        hindcast_dir = r'F:\Hindcasts\Hindcast_samples_tests\remy_bluff_2023'
+        params['reader'].update(dict(input_dir=hindcast_dir ),
+                                hgrid_file_name= path.join(hindcast_dir,'hgrid.gr3'),
+                                #file_mask= 'schout_29.nc'
+                                )
+        params['root_output_dir'] = r'F:\OceanTrackerOuput\bug_hunting'
+        params['output_file_base'] += '_remy_bluff'
+        del params['release_groups']['clay']['custom_release']
+        params['resuspension']['critical_friction_velocity'] = params['resuspension']['critical_friction_velocity'][0]
+        #params['shared_params']['processors'] = 1
 
 if __name__ == '__main__':
 

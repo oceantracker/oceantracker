@@ -54,11 +54,11 @@ def BCwalk_with_move_backs(xq,
     for nn in prange(active.size):
         n= active[nn]
 
-        if xq[n, 0] == np.nan or xq[n, 1] == np.nan:
+        if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
             # if any is nan copy all and move on
             _move_back(xq[n,:], x_last_good[n, :])
             walk_counts[3] += 1  # count nans
-            return
+            continue
 
         n_tri = n_cell[n]  # starting triangle
         # do BC walk
@@ -114,86 +114,6 @@ def BCwalk_with_move_backs(xq,
         walk_counts[0] += 1  # particles walked
         walk_counts[1] += n_steps  # steps taken
         walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
-
-# ________ Barycentric triangle walk________
-@njit()
-def BCwalk_with_move_backsV1(xq,
-                           adjacency, bc_transform, dry_cell_index,
-                           x_last_good, n_cell,status,bc_cords,
-                            walk_counts,
-                           max_triangle_walk_steps,bc_walk_tol, open_boundary_type, block_dry_cells,
-                           active):
-    # Barycentric walk across triangles to find cells
-
-    bc = np.zeros((3,), dtype=np.float64) # working space
-    # shortcuts needed to use prange
-
-
-    # loop over active particles in place
-    for nn in prange(active.size):
-        n= active[nn]
-
-        if xq[n, 0] == np.nan or xq[n, 1] == np.nan:
-            # if any is nan copy all and move on
-            _move_back(xq[n,:], x_last_good[n, :])
-            walk_counts[3] += 1  # count nans
-            return
-
-        n_tri = n_cell[n]  # starting triangle
-        # do BC walk
-        n_steps = 0
-        move_back = False
-
-        while n_steps < max_triangle_walk_steps:
-            # update barcentric cords of xq
-            n_min, n_max = _get_single_BC_cord_numba(xq[n, :], bc_transform[n_tri, :, :], bc)
-
-            if bc[n_min] > -bc_walk_tol and bc[n_max] < 1. + bc_walk_tol:
-                # are now inside triangle, leave particle status as is
-                break  # with current n_tri as found cell
-
-            n_steps += 1
-            # move to neighbour triangle at face with smallest bc then test bc cord again
-            next_tri = adjacency[n_tri, n_min]  # n_min is the face num in  tri to move across
-
-            if next_tri < 0:
-                # if no new adjacent triangle, then are trying to exit domain at a boundary triangle,
-                # keep n_cell, bc  unchanged
-                if open_boundary_type > 0 and next_tri == -2:  # outside domain
-                    # leave x, bc, cell, location  unchanged as outside
-                    status[n] = status_outside_open_boundary
-                    break
-                else:  # n_tri == -1 outside domain and any future
-                    # solid boundary, so just move back
-                    move_back = True
-                    break
-
-            # check for dry cell
-            if block_dry_cells:  # is faster split into 2 ifs, not sure why
-                if dry_cell_index[next_tri] > 128:
-                    # treats dry cell like a lateral boundary,  move back and keep triangle the same
-                    move_back = True
-                    break
-
-            n_tri = next_tri
-
-        # not found in given number of search steps
-        if n_steps >= max_triangle_walk_steps:  # dont update cell
-            status[n] = status_cell_search_failed
-            # move_back = True# todo shoul it just move back, not retyr?do move back externally
-
-        if move_back:
-            # move back dont update
-            _move_back(xq[n,:], x_last_good[n, :])
-        else:
-            # update cell anc BC for new triangle
-            n_cell[n] = n_tri
-            for i in range(3): bc_cords[n, i] = bc[i]
-
-        walk_counts[0] += 1  # particles walked
-        walk_counts[1] += n_steps  # steps taken
-        walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
-
 
 @njit()
 def _move_back(x, x_old):
