@@ -6,7 +6,7 @@ from oceantracker.interpolator.util.interp_kernals import kernal_linear_interp1D
 #@njit
 def convert_zlevels_fractional_depth(zlevels,bottom_cell_index):
     # convert zlevels to fractional water depths in place
-    z_frac = np.fill(zlevels,dtype=zlevels.dtype)
+    z_frac = np.full_like(zlevels,0., dtype=zlevels.dtype)
     for node in range(zlevels.shape[0]): # loop over nodes
         z_surface = float(zlevels[node, -1])
         z_bottom= float(zlevels[node,bottom_cell_index[node]])
