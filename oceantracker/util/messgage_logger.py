@@ -120,6 +120,11 @@ class MessageLogger(object):
 
     def exit_if_prior_errors(self,msg=None):
         if self.has_fatal_errors():
+            self.print_line()
+            self.msg('>>> Fatal errors, can not continue')
+            for m in self.errors_list:
+                self.msg(m)
+            self.print_line()
             raise GracefulError('Fatal error cannot continue >>> ' +msg if msg is not None else '', hint='Check above or run.err file for errors')
 
     def print_line(self):

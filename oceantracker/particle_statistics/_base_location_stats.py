@@ -169,7 +169,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         return out
 
 
-
     def update(self, time_sec):
         if not self.is_time_to_count(): return
         si= self.shared_info
@@ -183,7 +182,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         num_in_buffer = si.classes['particle_group_manager'].info['particles_in_buffer']
 
         # first select those to count based on status and z location
-        sel = self.sel_status_and_z(part_prop['status'].data, part_prop['x'].data,part_prop['water_depth'].data,
+        sel = self.sel_status_and_z(part_prop['status'].data, part_prop['x'].data,part_prop['water_depth'].data.ravel(),
                                     info['status_range'], info['z_range'],info['water_depth_range'],
                                     num_in_buffer,  self.get_partID_buffer('B1'))
 

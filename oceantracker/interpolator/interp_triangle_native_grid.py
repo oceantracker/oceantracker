@@ -30,7 +30,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         super().initial_setup()  # children must call this parent class to default shared_params etc
         params = self.params
         si= self.shared_info
-        grid = si.classes['reader'].grid
+        reader=  si.classes['reader']
+        grid = reader.grid
 
         # make barcentric transform matrix for the grid,  typee to match numba signature
         t0 = perf_counter()
@@ -51,7 +52,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if si.is3D_run:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
-            p.create_particle_property('nz_cell', 'manual_update',dict( write=False, dtype=np.int32, initial_value=grid['zlevel'].shape[2]-2)) # todo  create  initial serach for vertical cell
+            p.create_particle_property('nz_cell', 'manual_update',dict( write=False, dtype=np.int32, initial_value=grid['nz']-2)) # todo  create  initial serach for vertical cell
             p.create_particle_property('z_fraction','manual_update',dict(   write=False, dtype=np.float32, initial_value=0.))
             p.create_particle_property('z_fraction_bottom_layer','manual_update', dict( write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
@@ -70,7 +71,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         bi = reader.info['buffer_info']
         info = self.info
         info['current_hydro_model_step']= 0
-        info['current_fractional_time_steps']= np.zeros((2,), dtype=np.float64)
+        info['fractional_time_steps']= np.zeros((2,), dtype=np.float64)
         info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
 
         # set up place for walk info failures
@@ -128,8 +129,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # surrounding hindcast time steps
         # abs makes it work when backtracking
         s = abs(time_sec - time_hindcast) / fi['hydro_model_time_step']
-        info['current_fractional_time_steps'][0] = s
-        info['current_fractional_time_steps'][1] = 1.0 - s
+        info['fractional_time_steps'][0] = 1.0 - s
+        info['fractional_time_steps'][1] = s
 
         # find cell for xq, node list and weight for interp at calls
         self.find_cell(xq, active)
@@ -152,7 +153,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         bc_cords = part_prop['bc_cords'].data
         info = self.info
         nb = info['current_buffer_steps']
-        fractional_time_steps = info['current_fractional_time_steps']
+        fractional_time_steps = info['fractional_time_steps']
 
         if field_instance.is3D():
             nz_cell = part_prop['nz_cell'].data
@@ -160,12 +161,18 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             bottom_cell_index = grid['bottom_cell_index']
             z_fraction = part_prop['z_fraction'].data
             z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
-
-            triangle_eval_interp.eval_water_velocity_3D(nb, fractional_time_steps, basic_util.atLeast_Nby1(output),
+            if grid['regrid_z_to_equal_sigma']:
+                triangle_eval_interp.eval_water_velocity_3D_sigma_grid(nb, fractional_time_steps, basic_util.atLeast_Nby1(output),
                                                field_instance.data,
-                                               triangles, bottom_cell_index,
+                                               triangles,
                                                n_cell, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
                                                active)
+            else:
+                triangle_eval_interp.eval_water_velocity_3D_LSC_grid(nb, fractional_time_steps, basic_util.atLeast_Nby1(output),
+                                                                     field_instance.data,
+                                                                     triangles, bottom_cell_index,
+                                                                     n_cell, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
+                                                                     active)
         else:
             self._interp_field2D(field_instance, n_cell, bc_cords, output, active)
 
@@ -204,7 +211,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         triangles = grid['triangles']
         info = self.info
         nb = info['current_buffer_steps']
-        fractional_time_steps = info['current_fractional_time_steps']
+        fractional_time_steps = info['fractional_time_steps']
 
         if field_instance.is_time_varying():
             triangle_eval_interp.time_dependent_2Dfield(nb, fractional_time_steps,basic_util.atLeast_Nby1(output),
@@ -230,11 +237,19 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         info = self.info
 
         if field_instance.is_time_varying():
-            triangle_eval_interp.time_dependent_3Dfield(info['current_buffer_steps'], info['current_fractional_time_steps'],
+            if grid['regrid_z_to_equal_sigma']:
+                triangle_eval_interp.time_dependent_3Dfield_sigma_grid(info['current_buffer_steps'], info['fractional_time_steps'],
                                                     field_instance.data,
-                           triangles, bottom_cell_index,
+                           triangles,
                            n_cell, bc_cords, nz_cell, z_fraction,
                            basic_util.atLeast_Nby1(output), active)
+            else:
+
+                triangle_eval_interp.time_dependent_3Dfield_LSC_grid(info['current_buffer_steps'], info['fractional_time_steps'],
+                                                                     field_instance.data,
+                                                                     triangles, bottom_cell_index,
+                                                                     n_cell, bc_cords, nz_cell, z_fraction,
+                                                                     basic_util.atLeast_Nby1(output), active)
         else:
             # 3D non-time varying
             # todo eval_interp3D_timeIndependent not implented for 3D non-time varying fields
@@ -329,6 +344,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         t0= perf_counter()
         info = self.info
         part_prop = si.classes['particle_properties']
+        fields= si.classes['fields']
         x_last_good = part_prop['x_last_good'].data
         n_cell = part_prop['n_cell'].data
         status = part_prop['status'].data
@@ -351,11 +367,23 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             nz_cell = part_prop['nz_cell'].data
             z_fraction = part_prop['z_fraction'].data
             z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
-            tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
-                                            #grid['triangles'],grid['zlevel'],grid['bottom_cell_index'],
-                                            grid['triangles'], grid['zlevel_vertex'], grid['bottom_cell_index'],
+            if grid['regrid_z_to_equal_sigma']:
+
+                tri_interp_util.get_depth_cell_sigma_layers(xq,
+                                            grid['triangles'],
+                                            fields['water_depth'].data.ravel(),
+                                            fields['tide'].data,
+                                            grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],grid['sigma_map_dz'],
+                                            n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
+                                            info['current_buffer_steps'], info['fractional_time_steps'],
+                                            active, si.z0)
+            else:
+                # natve slayer option
+                tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
+                                            grid['triangles'],grid['zlevel'],grid['bottom_cell_index'],
+                                            #grid['triangles'], grid['zlevel_vertex'], grid['bottom_cell_index'],
                                             n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
-                                            info['current_buffer_steps'],info['current_fractional_time_steps'],
+                                            info['current_buffer_steps'],info['fractional_time_steps'],
                                             self.walk_counts,
                                             active,  si.z0)
             si.block_timer('Find cell, vertical walk', t0)
@@ -400,7 +428,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         grid= self.grid
         info= self.info
         triangle_eval_interp.update_dry_cell_index(grid['is_dry_cell'], grid['dry_cell_index'],
-                                                   info['current_buffer_steps'], info['current_fractional_time_steps'])
+                                                   info['current_buffer_steps'], info['fractional_time_steps'])
     def close(self):
         si=self.shared_info
         info = self.info

@@ -22,7 +22,7 @@ from oceantracker.util.triangle_utilities_code import split_quad_cells
 from oceantracker.util.basic_util import  is_substring_in_list
 
 from oceantracker.reader.util import reader_util
-from oceantracker.reader.util.data_grid_transforms import convert_layer_field_to_levels_from_fixed_depth_fractions
+from oceantracker.reader.util.hydromodel_grid_transforms import convert_layer_field_to_levels_from_fixed_depth_fractions
 
 # todo use ROMs turbulent viscosity for dispersion
 #todo use  openbondary data to improve identifcation of open boundary nodes?
@@ -63,7 +63,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
         grid['rho_land_mask'] = nc.read_a_variable('mask_rho') != 1
 
 
-        grid = super().build_grid(nc, grid)
+        grid = super().build_2Dgrid(nc, grid)
 
         grid['active_nodes'] = np.unique(grid['triangles']) # the nodes that are used in triangulation ( ie owithout land)
 

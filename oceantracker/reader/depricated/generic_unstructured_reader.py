@@ -21,7 +21,7 @@ class GenericUnstructuredReader(_BaseReader):
 
 
     #@profile
-    def build_grid(self, nc, grid):
+    def build_2Dgrid(self, nc, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
         si = self.shared_info

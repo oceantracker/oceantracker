@@ -4,7 +4,7 @@ from oceantracker.util import time_util
 
 import numpy as np
 from datetime import datetime
-from oceantracker.reader.util import data_grid_transforms
+from oceantracker.reader.util import hydromodel_grid_transforms
 
 from oceantracker.reader.util import reader_util
 
@@ -46,7 +46,7 @@ class unstructured_FVCOM(GenericUnstructuredReader):
 
 
     def build_grid(self, nc, grid):
-        grid = super().build_grid(nc, grid)
+        grid = super().build_2Dgrid(nc, grid)
         # add time invariant vertical grid variables needed for transformations
         # sigma level fractions required to build zlevel after reading  tide
         # siglay, siglev are <0 and  look like layer fraction from free surface starting at top moving down, convert to fraction from bottom starting at bottom

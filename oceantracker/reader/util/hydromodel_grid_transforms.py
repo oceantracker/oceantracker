@@ -1,18 +1,85 @@
 import numpy as np
 from numba import njit
 from oceantracker.interpolator.util.interp_kernals import kernal_linear_interp1D
+from copy import copy
 
+@njit
+def find_node_with_smallest_top_bot_layer(zlevels,bottom_cell_index,z0):
+    # find the  profile with thinest top/bottom layer as fraction of water depth
+    # from single time step of zlevels
+    z_fractions= np.full_like(zlevels,np.nan,dtype=np.float32)
+    node_min= -1
+    min_dz= np.inf
+    for n in range(zlevels.shape[0]): # loop over nodes
+        z_surface = float(zlevels[n, -1])
+        z_bottom= float(zlevels[n,bottom_cell_index[n]])
+        total_water_depth = abs(z_surface-z_bottom)
 
-#@njit
-def convert_zlevels_fractional_depth(zlevels,bottom_cell_index):
-    # convert zlevels to fractional water depths in place
-    z_frac = np.full_like(zlevels,0., dtype=zlevels.dtype)
-    for node in range(zlevels.shape[0]): # loop over nodes
-        z_surface = float(zlevels[node, -1])
-        z_bottom= float(zlevels[node,bottom_cell_index[node]])
-        for nz in range(bottom_cell_index[node], zlevels.shape[1]): # loop over nodes
-            zlevels[node,nz] = (zlevels[node,nz]-z_bottom)/max(z_surface-z_bottom,0.01) # 1cm min total water depth
-    return zlevels
+        if total_water_depth > .2:
+            # Get bottom layer thickness as fraction of water depth
+            dz_bot = (zlevels[n, bottom_cell_index[n] + 1] - z_bottom) / total_water_depth
+
+            if  dz_bot < min_dz:
+                min_dz = dz_bot
+                node_min = n
+        for nz in range(bottom_cell_index[n], zlevels.shape[1]):
+            if total_water_depth > z0:
+                z_fractions[n,nz] = (zlevels[n,nz]-z_bottom)/total_water_depth
+            else:
+                z_fractions[n, nz] = 0.
+    return node_min, z_fractions
+
+@njit()
+def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,sigma,
+                                           water_depth,tide,z0,minimum_total_water_depth,
+                                           data,out, is_water_velocity):
+    # assumes time invariant zlevel_fractions, linear interp
+    # set up space
+    for nt in range(out.shape[0]):
+        for node in range(out.shape[1]):
+            nz_bottom =  int(bottom_cell_index[node])
+            nz_data = nz_bottom
+            # loop over new levels
+            for nz in range(sigma.size-1):
+                # if the sigma is above next zlevel, move data zlevel index up one
+                if sigma[nz] > zlevel_fractions[node, nz_data+1]:
+                    nz_data += 1
+                    nz_data = min(nz_data, zlevel_fractions.shape[1] - 2)
+
+                # do vertical linear interp
+                # get fraction within zlevel layer to use in interp
+                dzf= zlevel_fractions[node, nz_data + 1] - zlevel_fractions[node, nz_data]
+                if dzf < .001:
+                    f = 0.
+                    dzf = 0.0
+                else:
+                    f = (sigma[nz] - zlevel_fractions[node, nz_data])/dzf
+
+                # if in bottom data cell use log interp if water velocity
+                # by adjusting f
+                if nz_data == nz_bottom and is_water_velocity:
+                    # get total water depth
+                    twd = abs(tide[nt, node, 0, 0] + water_depth[0, node, 0, 0])
+                    if twd < minimum_total_water_depth: twd = minimum_total_water_depth
+
+                    # dz is  bottom layer thickness in metres, in original hydro model data
+                    dz =  twd*dzf
+                    if dz < z0:
+                        f = 0.0
+                    else:
+                        z0p = z0 / dz
+                        f = (np.log(f + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
+
+                for m in range(out.shape[3]):
+                    out[nt,node,nz,m] = (1-f) *data[nt,node,nz_data,m] + f *data[nt,node,nz_data+1,m]
+        # do top value at sigma= 1
+            for m in range(out.shape[3]):
+                out[nt, node, -1, m] = data[nt, node, -1, m]
+
+            pass
+
+    return out
+
 @njit
 def convert_layer_field_to_levels_from_fixed_depth_fractions(data, zfraction_center, zfraction_boundaries):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
