@@ -138,6 +138,7 @@ class PointRelease(ParameterBaseClass):
         si = self.shared_info
         grid = si.classes['reader'].grid
         info= self.info
+        fields= si.classes['fields']
 
         n_required = self.get_number_required()
 
@@ -187,7 +188,8 @@ class PointRelease(ParameterBaseClass):
             if len(self.params['z_range']) == 0:  self.params['z_range']= [-1.0E30,1.0E30]
 
             z = self.get_z_release_in_depth_range(np.asarray(self.params['z_range']), n_cell_guess,
-                                            grid['zlevel'], grid['bottom_cell_index'] , grid['triangles'],
+                                            fields['water_depth'].data.ravel() , fields['tide'].data ,
+                                            grid['triangles'],
                                             si.classes['field_group_manager'].n_buffer)
             x0 = np.hstack((x0[:, :2], z))
 
@@ -195,7 +197,7 @@ class PointRelease(ParameterBaseClass):
 
     @staticmethod
     @njit()
-    def get_z_release_in_depth_range(z_range, ncell, zlevel, bottom_cell_index ,triangles, nb):
+    def get_z_release_in_depth_range(z_range, ncell, water_depth,tide,triangles, nb):
         # get release in range of top and bottom
         nx = ncell.shape[0]
 
@@ -207,8 +209,8 @@ class PointRelease(ParameterBaseClass):
             ztop, zbot = 0., 0.
             for m in range(3):
                 node = triangles[ncell[n],m]
-                ztop += zlevel[nb[0], node, -1] # todo allow for slow time variation in z?
-                zbot += zlevel[nb[0], node, bottom_cell_index[node]]
+                ztop += tide[nb[0], node, 0,0] # todo allow for slow time variation in z?
+                zbot += water_depth[node]
 
             zr[0] = max(zbot/3., z_range[0])
             zr[1] = min(ztop/3., z_range[1])

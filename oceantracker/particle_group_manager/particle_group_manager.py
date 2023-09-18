@@ -75,7 +75,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
         pass
 
-
     #@function_profiler(__name__)
     def release_particles(self, time_sec):
         # see if any group is ready to release

@@ -30,6 +30,7 @@ if __name__ == "__main__":
     parser.add_argument('-testing', action='store_true')
     args = parser.parse_args()
 
+    np.random.seed(0)
 
     build_and_test_demos.build_demos()
 
@@ -68,6 +69,7 @@ if __name__ == "__main__":
             exit('runOTdemos.py: No demo file number ' + str(n))
 
         params = json_util.read_JSON(f[0])
+        params['use_random_seed'] = True
         if type(params) is list:
             demo_name = params[0]['output_file_base']
             if params[0]['reader'] is not None:

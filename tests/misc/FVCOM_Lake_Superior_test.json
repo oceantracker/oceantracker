@@ -1,0 +1,44 @@
+{
+    "output_file_base": "FVCOM_Lake_Superior_test",
+    "root_output_dir": "output",
+    "time_step": 1200,
+    "reader": {
+        "class_name": "oceantracker.reader.FVCOM_reader.unstructured_FVCOM",
+        "input_dir": "F:\\Hindcasts\\colaborations\\LakeSuperior\\historical_sample\\2022",
+        "search_sub_dirs": true,
+        "file_mask": "nos.lsofs.fields.n000*.nc"
+    },
+    "user_note": "test of notes",
+    "release_groups": {
+        "mytest_points": {
+            "points": [
+                [
+                    439094.44415005075,
+                    5265627.962025132,
+                    -10
+                ]
+            ],
+            "pulse_size": 250,
+            "release_interval": 7200
+        }
+    },
+    "particle_statistics": {
+        "example_gridded_stat": {
+            "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
+            "update_interval": 72000,
+            "grid_size": [
+                320,
+                321
+            ],
+            "grid_span": [
+                250000,
+                250000
+            ],
+            "grid_center": [
+                439094.44415005075,
+                5265627.962025132,
+                -10
+            ]
+        }
+    }
+}

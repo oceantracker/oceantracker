@@ -87,7 +87,7 @@ class SCHISMSreaderNCDF(GenericUnstructuredReader):
 
 
     def build_grid(self, nc, grid):
-        grid =super().build_grid(nc, grid)
+        grid =super().build_2Dgrid(nc, grid)
         return grid
 
     def read_time_sec_since_1970(self, nc, file_index=None):

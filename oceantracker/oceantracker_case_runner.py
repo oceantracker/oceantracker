@@ -60,9 +60,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
         si.computer_info = get_versions_computer_info.get_computer_info()
 
-        # set processors for threading, ie numba/parallel prange loops
-        #if si.settings['max_threads'] is None:
-         #   si.settings['max_threads']= si.computer_info['CPUs_hardware'] - 2
+
 
         #set_num_threads(max(1, si.settings['max_threads']))
         #set_num_threads(5)

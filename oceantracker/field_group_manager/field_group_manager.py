@@ -76,7 +76,7 @@ class FieldGroupManager(ParameterBaseClass):
         reader = si.add_core_class('reader', si.working_params['core_roles']['reader'],
                                         crumbs=f'Feild Group Manager>setup_hydro_fields> reader class  ')
         reader.initial_setup()
-        si.is3D_run =  reader.info['is3D']
+        si.is3D_run =  reader.grid['is3D']
 
     def update_dry_cells(self):
         # update 0-255 dry cell index for each interpolator

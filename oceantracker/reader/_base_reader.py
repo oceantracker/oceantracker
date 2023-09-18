@@ -4,12 +4,13 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from oceantracker.util import time_util, json_util
 from os import path, walk
 from datetime import datetime
-
+from copy import copy
 from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from oceantracker.util.basic_util import nopass
 from oceantracker.reader.util.reader_util import append_split_cell_data
-from oceantracker.reader.util.data_grid_transforms import convert_zlevels_fractional_depth
+import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
+
 from oceantracker.util import  cord_transforms
 from oceantracker.reader.util import shared_reader_memory_util
 from oceantracker.util.profiling_util import function_profiler
@@ -52,7 +53,7 @@ class _BaseReader(ParameterBaseClass):
                               'z': PVC(None, str),
                               'vector2Ddim': PVC(None, str),
                               'vector3Ddim': PVC(None, str)},
-
+            'regrid_z_to_equal_sigma': PVC(True, bool, doc_str='speed run by re-griding 3D fields  in the z to equal sigma levels, based on most curve z_level profile'),
             'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
             'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
@@ -69,12 +70,25 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         self.info['file_info'] = si.working_params['file_info']  # add file_info to reader info
         nc = NetCDFhandler(info['file_info']['names'][0])
-        info['is3D']=self.is_hindcast3D(nc)
-        info['nz_levels'] = nc.dim_size(self.params['dimension_map']['z']) if info['is3D']  else None
 
-        grid = self.read_grid(nc)
-        self.grid= self.build_grid(grid)
-        grid = self.setup_vertical_grid_transform(nc, grid)
+
+        grid = self.read_2Dgrid(nc)
+        self.grid= self.build_2Dgrid(grid)
+
+
+        if self.is_hindcast3D(nc):
+            grid['is3D'] = True
+            grid = self.setup_vertical_grid(nc, grid)
+            # add core total water depth property
+            si.classes['field_group_manager'].add_custom_field(
+                'total_water_depth', dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',
+                                           crumbs='initializing core TotalWaterDepth class ')
+                                                )
+        else:
+            #2D
+            grid['is3D'] = False
+            grid['zlevel'] = None
+            grid['nz'] = 1  # only one z
 
         self.setup_fields(nc)
 
@@ -178,28 +192,27 @@ class _BaseReader(ParameterBaseClass):
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
         return fi
 
-    def read_grid(self, nc):
+    def read_2Dgrid(self, nc):
         # read nodal values and triangles
         params = self.params
         ml = self.shared_info.msg_logger
         grid_map= params['grid_variable_map']
-
-        # todo check variables exist
-
 
         for v in grid_map['x'] + [grid_map['triangles'], grid_map['time']]:
             if not nc.is_var(v):
                 ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in grid set', fatal_error=True)
                 return
         grid =  {}
-        grid['triangles'] = self.read_triangles(nc).astype(np.int32)
-        grid['triangles'], grid['triangles_to_split'] = self.find_quad_cells_split_to_split(grid['triangles'])
+        grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles(nc)
+        # ensure np.int32 values
+        grid['triangles']=grid['triangles'].astype(np.int32)
+        grid['quad_cells_to_split'] = grid['quad_cells_to_split'].astype(np.int32)
+
+        # read nodal x's
         grid['x'] = self.read_nodal_x(nc).astype(np.float64)
-        if self.info['is3D']:
-            grid['bottom_cell_index'] = self.read_bottom_cell_index(nc).astype(np.int32)
         return grid
 
-    def build_grid(self, grid):
+    def build_2Dgrid(self, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
         si = self.shared_info
@@ -254,40 +267,15 @@ class _BaseReader(ParameterBaseClass):
         grid['date'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')  # time buffer
         grid['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
 
-        # set up zlevel
-        if self.info['is3D']:
-            s = [self.params['time_buffer_size'], grid['x'].shape[0], info['nz_levels']]
-            grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
-            info['nz_levels'] = grid['zlevel'].shape[2]
-
-            # todo dev zlevel by triangles
-            s = [self.params['time_buffer_size'], grid['triangles'].shape[0], info['nz_levels'], 3]
-            grid['zlevel_vertex'] = np.zeros(s, dtype=np.float32, order='c')
-
-        else:
-            grid['zlevel'] = None
-            grid['nz'] = 1  # note if 3D
-
-            # space for dry cell info
+        # space for dry cell info
         grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
 
         # reader working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
 
-        # note which are time buffers
 
         return grid
 
-    def find_quad_cells_split_to_split(self, triangles):
-        # flag quad cells for splitting if index in 4th column
-        if triangles.shape[1] == 4 and np.any(triangles > 0):
-            # split quad grids buy making new triangles
-            quad_cells_to_split = triangles[:, 3] > 0
-            triangles = split_quad_cells(triangles, quad_cells_to_split)
-        else:
-            quad_cells_to_split = np.full((triangles.shape[0],), False, dtype=bool)
-
-        return triangles, quad_cells_to_split
 
     def field_var_info(self,nc,file_var_map):
         si = self.shared_info
@@ -309,7 +297,7 @@ class _BaseReader(ParameterBaseClass):
                 ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in reader set up fields',fatal_error=True)
                 continue
             if dim_map['time'] in nc.all_var_dims(v): s[0] = params['time_buffer_size']
-            if dim_map['z'] in nc.all_var_dims(v): s[2] = info['nz_levels']
+
             if dim_map['vector2Ddim'] in nc.all_var_dims(v):
                 s[3] +=2
                 comp_per_var =2
@@ -318,12 +306,28 @@ class _BaseReader(ParameterBaseClass):
                 comp_per_var= 3
             else:
                 s[3] += 1
-                comp_per_var =1
+                comp_per_var = 1
             component_list.append(dict(file_name=v,comp_per_var=comp_per_var))
 
         p= dict(is_time_varying = s[0] > 0, is3D = s[2] > 0, num_components= s[3])
+        if dim_map['z'] in nc.all_var_dims(v):
+            # due to vertical regrid, shape in memory may not match disk shape
+            shape_in_memory = s.copy()
+            shape_in_memory[2] = grid['nz']
+            shape_on_disk = s.copy()
+            shape_on_disk[2] = nc.dim_size(dim_map['z'])
+        else:
+            shape_in_memory = s.copy()
+            shape_on_disk = s.copy()
 
-        return dict(component_list=component_list,   params=p,comp_per_var=comp_per_var,shape_in_memory=s.tolist())
+        out = dict( component_list=component_list,
+                    params=p,
+                    comp_per_var=comp_per_var,
+                    shape_in_memory=shape_in_memory.tolist(),
+                    shape_on_disk = shape_on_disk.tolist()
+                   )
+
+        return out
 
     def setup_fields(self, nc):
 
@@ -351,26 +355,60 @@ class _BaseReader(ParameterBaseClass):
                 data = self.convert_field_grid(nc, name, data)  # do any customised tweaks
                 field.data[0, ...] = data
 
-    def setup_vertical_grid_transform(self, nc, grid):
+    def setup_vertical_grid(self, nc, grid):
         # setup transforms on the data, eg regrid vertical if 3D to same sigma levels
         si= self.shared_info
         params = self.params
-        # get fractional depths from first time step
-        zlevel = nc.read_a_variable(params['grid_variable_map']['zlevel'], sel=0)
-        z_frac= convert_zlevels_fractional_depth(zlevel, grid['bottom_cell_index'])
-        if True:
-            from  matplotlib import pyplot as plt
-            plt.plot(z_frac.T)
-            plt.show()
-            h= np.histogram(grid['bottom_cell_index'], bins=zlevel.shape[1])
-        # convert to fractional depths
+        info = self.info
 
+        grid['bottom_cell_index'] = self.read_bottom_cell_index(nc).astype(np.int32)
+        grid['regrid_z_to_equal_sigma'] =params['regrid_z_to_equal_sigma']
+        # set up zlevel
+        if params['regrid_z_to_equal_sigma']:
+            # setup  regrid grid equal time invariace sigma layers
+            # based on profile with thiniest top nad bootm layers
 
+            # read first zlevel time step
+            zlevel = nc.read_a_variable(params['grid_variable_map']['zlevel'], sel=0)
+            # use node with thinest top/bot layers as template for all sigma levels
+
+            node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(zlevel, grid['bottom_cell_index'],si.z0)
+
+            # use layer fractions from this node to give layer fractions everywhere
+            # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
+            nz_bottom = grid['bottom_cell_index'][node_min]
+
+            # stretch sigma out to same number of depth cells,
+            # needed for LSC grid if node_min profile is not full number of cells
+            zf_model= grid['zlevel_fractions'][node_min,nz_bottom:]
+            nz = grid['zlevel_fractions'].shape[1]
+            nz_fractions = nz - nz_bottom
+            grid['sigma']  =np.interp(np.arange(nz)/nz,  np.arange(nz_fractions)/nz_fractions,zf_model)
+            grid['nz'] =grid['sigma'].size # used to size field data arrays
+
+            # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
+            # need to check if zq > ['sigma_map_z'][nz+1] to see if nz must be increased by 1 tp get sigma interval
+            dz = 0.66*abs(np.diff(grid['sigma']).min()) # approx dz
+            nz_map = int(np.ceil(1.0/dz))  # number of cells in map
+            grid['sigma_map_z'] =  np.arange(nz_map)/(nz_map-1) # zlevels at the map intervals
+            grid['sigma_map_dz'] = np.diff(grid['sigma_map_z']).mean() # exact dz
+
+            # make evenly spaced map which gives cells contating a sigma level
+            grid['sigma_map_nz_interval_with_sigma'] = np.zeros((nz_map,), dtype=np.int32)
+            interval_with_sigma_level = (grid['sigma']*nz_map).astype(np.int32)
+            
+            # omit sigma = 0 and 1 from intervals, to ensurethey fall in first and last intervals
+            grid['sigma_map_nz_interval_with_sigma'][ interval_with_sigma_level[1:-1] ] = 1
+            grid['sigma_map_nz_interval_with_sigma'] =  grid['sigma_map_nz_interval_with_sigma'].cumsum()
+
+        else:
+            # native  vertical grid option, could be  Schisim LCS vertical grid
+            grid['nz']= nc.dim_size(params['dimension_map']['z'])  # used to size field data arrays
+            s = [self.params['time_buffer_size'], grid['x'].shape[0], grid['nz']]
+            grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
 
         return grid
 
-    def do_grid_transforms(self, var_name, data,grid):     return  data
-        # do tranfor,s on the data, eg regrid vertcal if 3D to same sigma levels
 
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
@@ -402,7 +440,10 @@ class _BaseReader(ParameterBaseClass):
         triangles = nc.read_a_variable(var_name).astype(np.int32)
 
         if params['one_based_indices']: triangles -= 1
-        return triangles
+
+        # note indices of any triangles neeeding splitting
+        triangles_to_split =  np.full((0,),0,np.int32)
+        return triangles, triangles_to_split
 
 
     # checks on first hindcast file
@@ -419,6 +460,8 @@ class _BaseReader(ParameterBaseClass):
         # todo change so does not read current step again after first fill of buffer
 
         si = self.shared_info
+        params = self.params
+        fields = si.classes['fields']
         t0 = perf_counter()
 
         grid = self.grid
@@ -428,6 +471,7 @@ class _BaseReader(ParameterBaseClass):
         vi = info['field_variable_info']
         buffer_size = bi['buffer_size']
 
+        field_data_temp1=0
 
         nt0_hindcast = self.time_to_hydro_model_index(time_sec)
         bi['nt_buffer0'] = nt0_hindcast  # nw start of buffer
@@ -446,6 +490,12 @@ class _BaseReader(ParameterBaseClass):
         nt_hindcast_required = nt_hindcast_required[sel]
 
         bi['time_steps_in_buffer'] = []
+
+        # need tide and water depth at front of order, before water velocity, to read fields to regrid in vertical
+        field_names = list(fields.keys())
+        for name in ['tide', 'water_depth','water_velocity']:
+            field_names.remove(name)
+            field_names.insert(0, name)
 
         while len(nt_hindcast_required) > 0 and 0 <= n_file < len(fi['names']):
 
@@ -470,11 +520,39 @@ class _BaseReader(ParameterBaseClass):
             grid['nt_hindcast'][buffer_index] = nt_hindcast_required[:num_read]  # add a grid variable with global hindcast time steps
 
             # read time varying vector and scalar reader fields
-            for name, field in si.classes['fields'].items():
+            # do this in order set above
+            #todo make buffers for data
+            for name in field_names:
+                field = fields[name]
                 if field.is_time_varying() and field.info['group'] == 'from_reader_field':
                     data  = self.assemble_field_components(nc, vi[name], file_index=file_index)
                     data = self.convert_field_grid(nc, name, data) # do any customised tweaks
+                    junk = data
+                    if field.is3D() and params['regrid_z_to_equal_sigma']:
+                        s = list(np.asarray(data.shape, dtype=np.int32))
+                        s[2] = grid['sigma'].size
+                        out = np.full(tuple(s), np.nan, dtype=np.float32)
+                        data = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
+                                    grid['zlevel_fractions'], grid['bottom_cell_index'],
+                                    grid['sigma'],
+                                    fields['water_depth'].data, fields['tide'].data,
+                                    si.z0, si.minimum_total_water_depth,
+                                    data, out,
+                                    name=='water_velocity')
+                    # insert data
                     field.data[buffer_index, ...] = data
+
+                    if False:
+                        # check overplots of regridding
+                        from matplotlib import pyplot as plt
+                        nn= 300
+                        plt.plot(grid['zlevel_fractions'][nn,:],junk[0,nn,:,0],c='g')
+                        plt.plot(grid['zlevel_fractions'][nn, :], junk[0, nn, :, 0], 'g.')
+                        plt.plot(grid['sigma'], data[0, nn, :, 0], 'r--')
+                        plt.plot(grid['sigma'], data[0, nn, :, 0],'rx')
+                        plt.show()
+
+
 
             # read grid time, zlevel
             # do this after reading fields as some hindcasts required tide field to get zlevel, eg FVCOM
@@ -505,7 +583,7 @@ class _BaseReader(ParameterBaseClass):
         # read scalar fields / join together the components which make vector from component list
 
         grid = self.grid
-        s= var_info['shape_in_memory'].copy()
+        s= var_info['shape_on_disk'].copy()
         s[0] = 1 if file_index is None else file_index.size
         out  = np.zeros(s,dtype=np.float32) #todo faster make a generic  buffer at start
         m= 0 # num of vector components read so far
@@ -520,7 +598,7 @@ class _BaseReader(ParameterBaseClass):
         return out
 
     def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
-        # read time and  grid variables, eg time, tide, zlevel
+        # read time and  grid variables, eg time,dry cell
         si = self.shared_info
         grid = self.grid
 
@@ -533,15 +611,14 @@ class _BaseReader(ParameterBaseClass):
         # add date for convenience
         grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
 
+        self.read_dry_cell_data(nc, file_index, grid['is_dry_cell'], buffer_index)
+
         if si.is3D_run:
             # grid['total_water_depth'][buffer_index,:]= np.squeeze(si.classes['fields']['tide'].data[buffer_index,:] + si.classes['fields']['water_depth'].data)
             # read zlevel inplace to save memory?
-            self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
-
-            # unpack zlevel's at each triangle's vertex
-            reader_util.zlevel_node_to_vertex(grid['zlevel'], grid['triangles'], grid['zlevel_vertex'])
-
-        self.read_dry_cell_data(nc, file_index, grid['is_dry_cell'], buffer_index)
+            if not self.params['regrid_z_to_equal_sigma']:
+                # native zlevel grid and used for regidding in sigma
+                self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
 
     def read_dry_cell_data(self,nc,file_index,is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry
@@ -633,7 +710,7 @@ class _BaseReader(ParameterBaseClass):
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
-        nc.write_a_new_variable('water_depth', si.classes['fields']['water_depth'].data.squeeze(), ('node_dim',))
+        nc.write_a_new_variable('water_depth', si.classes['fields']['water_depth'].data.ravel(), ('node_dim',))
         nc.close()
 
         output_files['grid_outline'] = output_files['output_file_base'] + '_grid_outline.json'

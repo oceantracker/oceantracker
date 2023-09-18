@@ -103,7 +103,6 @@ def BCinterpScaler(bc, f_nodes, fout):
     for m in range(3):
         fout[0] += bc[m]*f_nodes[m,0]
 
-#@njit((int32[:,:], float64[:,:], int32[:], float64[:,:], float64[:,:], int32[:]))
 @njit()
 def F4(nt, tri, BCcord,n_cell, F, F_out,  sel,tfrac):
     F1= F[nt,:,:]

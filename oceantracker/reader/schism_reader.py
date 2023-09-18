@@ -3,7 +3,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC,Parame
 from oceantracker.util import  time_util
 from datetime import  datetime
 import numpy as np
-
+from oceantracker.util.triangle_utilities_code import split_quad_cells
 
 class SCHISMSreaderNCDF(_BaseReader):
 
@@ -16,7 +16,7 @@ class SCHISMSreaderNCDF(_BaseReader):
                                'zlevel': PVC('zcor', str),
                                'triangles': PVC('SCHISM_hgrid_face_nodes', str),
                                'bottom_cell_index': PVC('node_bottom_index', str),
-                               'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
+                               'is_dry_cell': PVC('wetdry_elem', np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
             'field_variable_map': {'water_velocity': PLC(['hvel', 'vertical_velocity'], [str], fixed_len=3),
                                 'tide': PVC('elev', str),
                                 'water_depth': PVC('depth', str),
@@ -61,4 +61,21 @@ class SCHISMSreaderNCDF(_BaseReader):
             vertical_grid_type = 'Slayer'
         self.info['vertical_grid_type'] =vertical_grid_type
         return node_bottom_index
+
+    def read_triangles(self, nc):
+        params = self.params
+        var_name = params['grid_variable_map']['triangles']
+        triangles = nc.read_a_variable(var_name).astype(np.int32)
+        triangles -= 1 # make zero based
+
+        # split quad cells aby adding new triangles
+        # flag quad cells for splitting if index in 4th column
+        if triangles.shape[1] == 4 :
+            # split quad grids buy making new triangles
+            quad_cells_to_split = triangles[:, 3] > 0
+            triangles = split_quad_cells(triangles, quad_cells_to_split)
+        else:
+            quad_cells_to_split = np.full((triangles.shape[0],), False)
+
+        return triangles, np.flatnonzero(quad_cells_to_split)
 
