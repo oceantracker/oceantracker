@@ -37,7 +37,6 @@ class BasicResuspension(_BaseResuspension):
                                                        crumbs='initializing resuspension class ')
         si.classes['particle_group_manager'].create_particle_property('friction_velocity','from_fields', {}, crumbs='initializing resuspension class friction velocity')
 
-    from oceantracker.fields.friction_velocity import FrictionVelocity
     def select_particles_to_resupend(self, active):
         # compare to single critical value
         # todo add comparison to  particles critical value from distribution, add new particle property to hold  individual critical values
@@ -58,20 +57,20 @@ class BasicResuspension(_BaseResuspension):
         si= self.shared_info
         info = self.info
         info['resuspension_factor']= 2.0*0.4*si.z0*si.run_info['model_time_step']/(1. - 2./np.pi)
-        info['min_resuspension_jump']  = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
+        info['min_resuspension_jump_not_used']  = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
 
         # redsuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.classes['particle_properties']
-        resupend = self.select_particles_to_resupend(active)
+        resuspend = self.select_particles_to_resupend(active)
 
-        self.resuspension_jump(part_prop['friction_velocity'].data, self.info['resuspension_factor'], part_prop['x'].data, resupend)
+        self.resuspension_jump(part_prop['friction_velocity'].data, self.info['resuspension_factor'], part_prop['x'].data, resuspend)
 
-        #  dont adjust resupension distance for terminal velocity,
+        #  don't adjust resupension distance for terminal velocity,
         #  Lynch (Particles in the Ocean Book, says dont adjust as a fall velocity  affects prior that particle resuspends)
 
         # any z out of bounds will  be fixed by find_depth cell at start of next time step
-        self.info['number_resupended'] += resupend.shape[0]
-        part_prop['status'].set_values(si.particle_status_flags['moving'], resupend)
+        self.info['number_resupended'] += resuspend.shape[0]
+        part_prop['status'].set_values(si.particle_status_flags['moving'], resuspend)
 
         self.stop_update_timer()
 

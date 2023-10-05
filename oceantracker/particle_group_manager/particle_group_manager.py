@@ -268,7 +268,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # first interpolate to give particle properties from reader derived  fields
         for key,i in si.classes['particle_properties'].items():
             if i.info['group'] == 'from_fields':
-                si.classes['field_group_manager'].interp_named_field_at_particle_locations(key, active)
+                si.classes['field_group_manager'].interp_field_at_particle_locations(key, active)
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for key, i in si.classes['particle_properties'].items():

@@ -113,7 +113,7 @@ class ParamValueChecker(object):
         info = self.info
 
         if value is not None and info['obsolete'] is not None:
-            msg_logger.msg('Parameter  "' + crumb_trail + '" is obsolete- ' + info['obsolete'], warning=True)
+            msg_logger.msg('Parameter  ' + crumb_trail + ' is obsolete- ' + info['obsolete'], warning=True)
 
         if value is None:
             # check default exits
@@ -201,7 +201,7 @@ class ParameterListChecker(object):
         crumb_trail = crumbs + crumb_seperator + name
 
         if info['obsolete'] is not None:
-            msg_logger.msg('Parameter "' + crumb_trail + '" is obsolete  - ' + info['obsolete'],warning=True)
+            msg_logger.msg('Parameter ' + crumb_trail + ' is obsolete  - ' + info['obsolete'],warning=True)
 
 
         if user_list is not None and type(user_list) != list:

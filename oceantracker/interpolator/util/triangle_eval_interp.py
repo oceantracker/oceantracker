@@ -73,7 +73,7 @@ def time_independent_3Dfield_LSC_grid(F_out, F_data, grid, part_prop, active, st
                 # add contributions from layer above and below particle, for each spatial component
                 F_out[n, c] += bc * (F[n_node, nz_below, c] * zf1 + F[n_node, nz_above, c] * zf)
 @njit()
-def time_dependent_3Dfield_sigma_grid(nb ,fractional_time_steps, F_data,
+def time_dependent_3Dfield_sigma_grid(nb,fractional_time_steps, F_data,
                             triangles,
                             n_cell, bc_cords, nz_cell, z_fraction,
                             F_out, active):
@@ -87,19 +87,21 @@ def time_dependent_3Dfield_sigma_grid(nb ,fractional_time_steps, F_data,
 
     # loop over active particles and vector components
     for n in active:
-        for i in range(n_comp): F_out[n, i] = 0. # zero out for summing
-        zf = z_fraction[n]
-        zf1 = 1. - zf
+
+        zf2 = z_fraction[n]
+        zf1 = 1. - zf2
         nz = nz_cell[n]
 
         # loop over each vertex in triangle
+        for i in range(n_comp): F_out[n, i] = 0. # zero out for summing
+
         for m in range(3):
             n_node = triangles[n_cell[n], m]
             # loop over vector components
             for c in range(n_comp):
                 # add contributions from layer above and below particle, for each spatial component at two time steps
-                F_out[n, c] += bc_cords[n, m] * (F1[n_node, nz, c] * zf1 + F1[n_node, nz + 1, c] * zf)*fractional_time_steps[0]  \
-                            +  bc_cords[n, m] * (F2[n_node, nz, c] * zf1 + F2[n_node, nz+ 1, c] * zf)*fractional_time_steps[1]  # second time step
+                F_out[n, c] += bc_cords[n, m] * (F1[n_node, nz, c] * zf1 + F1[n_node, nz + 1, c] * zf2)*fractional_time_steps[0]  \
+                            +  bc_cords[n, m] * (F2[n_node, nz, c] * zf1 + F2[n_node, nz + 1, c] * zf2)*fractional_time_steps[1]  # second time step
 
 
 #@function_profiler(__name__)
@@ -136,86 +138,6 @@ def time_dependent_3Dfield_LSC_grid(nb ,fractional_time_steps, F_data,
                 # add contributions from layer above and below particle, for each spatial component at two time steps
                 F_out[n, c] +=     bc_cords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*fractional_time_steps[0]  \
                                 +  bc_cords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step
-
-@njit
-def eval_water_velocity_3D_LSC_grid(nb,fractional_time_steps, V_out, V_data,
-                           triangles,bottom_cell_index,
-                           n_cell,bc_cords,nz_cell,z_fraction, z_fraction_bottom_layer,
-                           active):
-    #  special case of interpolating water velocity with log layer in bottom cell, linear z interpolation at other depth cells
-
-    # create views to remove redundant dim at current and next time step, improves speed?
-    # nb is required buffer time step
-    v1, v2 = V_data[nb[0], :, :, :], V_data[nb[1], :, :, :]
-
-    # loop over active particles and vector components
-    for n in active:
-
-        for i in range(3): V_out[n, i] = 0. # zero out for summing
-
-        nz =nz_cell[n]
-
-        # if in bottom cell adjust fraction to larger value to give log layer interp
-        # first time step z_fraction[n, 10, m]
-        if z_fraction_bottom_layer[n] >= 0 :
-            zf = z_fraction_bottom_layer[n]
-        else:
-            # fraction =-00 is not on the bottom
-            zf = z_fraction[n]
-
-        zf1 = 1.0 - zf
-
-        # loop over each vertex in triangle
-        for m in range(3):
-            n_node = triangles[n_cell[n], m]
-
-            # for LSC grid need to get highest node of nz or bottom at each triangle vertex
-            nzb =  bottom_cell_index[n_node]  # bottom node at this vertex
-            nz_below = max(nzb, nz    )
-            nz_above = max(nzb, nz + 1)
-            # loop over vector components
-            for c in range(3):
-                # add contributions from layer above and below particle, for each spatial component at two time steps
-                V_out[n, c] +=  bc_cords[n, m] * (v1[n_node, nz_below, c] * zf1 + v1[n_node, nz_above, c] * zf) * fractional_time_steps[0] \
-                             +  bc_cords[n, m] * (v2[n_node, nz_below, c] * zf1 + v2[n_node, nz_above, c] * zf) * fractional_time_steps[1]   # second time step
-                pass
-@njit
-def eval_water_velocity_3D_sigma_grid(nb,fractional_time_steps, V_out, V_data,
-                           triangles,
-                           n_cell,bc_cords,nz_cell,z_fraction, z_fraction_bottom_layer,
-                           active):
-    #  special case of interpolating water velocity with log layer in bottom cell, linear z interpolation at other depth cells
-
-    # create views to remove redundant dim at current and next time step, improves speed?
-    # nb is required buffer time step
-    v1, v2 = V_data[nb[0], :, :, :], V_data[nb[1], :, :, :]
-
-    # loop over active particles and vector components
-    for n in active:
-
-        for i in range(3): V_out[n, i] = 0. # zero out for summing
-
-        nz =nz_cell[n]
-
-        # if in bottom cell adjust fraction to larger value to give log layer interp
-        # first time step z_fraction[n, 10, m]
-        if z_fraction_bottom_layer[n] >= 0 :
-            zf = z_fraction_bottom_layer[n]
-        else:
-            # fraction =-00 is not on the bottom
-            zf = z_fraction[n]
-
-        zf1 = 1.0 - zf
-
-        # loop over each vertex in triangle
-        for m in range(3):
-            n_node = triangles[n_cell[n], m]
-            # loop over vector components
-            for c in range(3):
-                # add contributions from layer above and below particle, for each spatial component at two time steps
-                V_out[n, c] +=  bc_cords[n, m] * (v1[n_node, nz, c] * zf1 + v1[n_node, nz+1, c] * zf) * fractional_time_steps[0] \
-                             +  bc_cords[n, m] * (v2[n_node, nz, c] * zf1 + v2[n_node, nz+1, c] * zf) * fractional_time_steps[1]   # second time step
-                pass
 
 @njit
 def update_dry_cell_index(is_dry_cell,dry_cell_index, current_buffer_steps,fractional_time_steps):

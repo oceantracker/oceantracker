@@ -527,6 +527,8 @@ class _BaseReader(ParameterBaseClass):
                 if field.is_time_varying() and field.info['group'] == 'from_reader_field':
                     data  = self.assemble_field_components(nc, vi[name], file_index=file_index)
                     data = self.convert_field_grid(nc, name, data) # do any customised tweaks
+                    data = self.preprocess_field_variable(nc, name, data) # in place tweaks, eg zero vel at bottom
+
                     junk = data
                     if field.is3D() and params['regrid_z_to_equal_sigma']:
                         s = list(np.asarray(data.shape, dtype=np.int32))
@@ -539,18 +541,24 @@ class _BaseReader(ParameterBaseClass):
                                     si.z0, si.minimum_total_water_depth,
                                     data, out,
                                     name=='water_velocity')
+
+                    #o = reader_util.get_values_at_bottom(junk, grid['bottom_cell_index'])
+                    #pass
+
                     # insert data
                     field.data[buffer_index, ...] = data
 
                     if False:
                         # check overplots of regridding
                         from matplotlib import pyplot as plt
-                        nn= 300
+                        nn= 300  # for test hindcats
+                        nn = 1000
                         plt.plot(grid['zlevel_fractions'][nn,:],junk[0,nn,:,0],c='g')
                         plt.plot(grid['zlevel_fractions'][nn, :], junk[0, nn, :, 0], 'g.')
                         plt.plot(grid['sigma'], data[0, nn, :, 0], 'r--')
                         plt.plot(grid['sigma'], data[0, nn, :, 0],'rx')
-                        plt.show()
+                        #plt.show()
+                        plt.savefig('\myfig.png')
 
 
 

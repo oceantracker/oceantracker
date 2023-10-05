@@ -1,4 +1,5 @@
 from oceantracker.reader._base_reader import _BaseReader
+from oceantracker.reader.util import reader_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
 from oceantracker.util import  time_util
 from datetime import  datetime
@@ -59,7 +60,7 @@ class SCHISMSreaderNCDF(_BaseReader):
             # Slayer grid, bottom cell index = zero
             node_bottom_index = np.zeros((self.grid['x'].shape[0],),dtype=np.int32)
             vertical_grid_type = 'Slayer'
-        self.info['vertical_grid_type'] =vertical_grid_type
+        self.info['vertical_grid_type'] = vertical_grid_type
         return node_bottom_index
 
     def read_triangles(self, nc):
@@ -79,3 +80,10 @@ class SCHISMSreaderNCDF(_BaseReader):
 
         return triangles, np.flatnonzero(quad_cells_to_split)
 
+
+    def preprocess_field_variable(self, nc,name, data):
+        if name =='water_velocity' and data.shape[2] > 1:
+            # for 3D schism velocity partial fix for  non-zero hvel at nodes where cells in LSC grid span a change in bottom_cell_index
+            data = reader_util.patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
+
+        return data

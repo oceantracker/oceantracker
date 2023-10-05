@@ -47,6 +47,7 @@ if __name__ == '__main__':
                                  'grid_size': [120, 121]}},
          'reader': {'file_mask': 'NZ*.nc',
                    'input_dir': root_input_dir,
+                    'regrid_z_to_equal_sigma': True,
                       'depth_average': args.depthaverage,
                         'field_variables_to_depth_average': ['water_velocity'],
                       #'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
@@ -56,8 +57,10 @@ if __name__ == '__main__':
 
     if not args.depthaverage:
         params['velocity_modifiers']= {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': 0.000}}
-        params['resuspension']={'critical_friction_velocity': 0.025}
+        params['resuspension']={'critical_friction_velocity': 0.}
     if args.mode_debug: params['debug'] = True
+
+    pass
 
     if not args.norun:
         caseInfoFile= run(params)

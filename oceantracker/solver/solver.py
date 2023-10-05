@@ -157,6 +157,8 @@ class Solver(ParameterBaseClass):
         # some may now have status dead so update
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
 
+
+
         # modify status, eg tidal stranding
         for name, i in si.classes['status_modifiers'].items():
             i.update(time_sec, alive)
@@ -165,10 +167,11 @@ class Solver(ParameterBaseClass):
         for name, i in si.classes['trajectory_modifiers'].items():
             i.update(time_sec, alive)
 
-        if si.is3D_run:
-            si.classes['resuspension'].update(time_sec, alive)
-
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
+
+        if si.is3D_run:
+            # friction_velocity property  is now updated, so do resupension
+            si.classes['resuspension'].update(time_sec, alive)
 
         # setup_interp_time_step
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
@@ -219,12 +222,13 @@ class Solver(ParameterBaseClass):
         fgm.setup_time_step(time_sec, x1, is_moving)
 
         if RK_order==1:
-            fgm.eval_water_velocity(v, is_moving)
+            fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v)
             solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)
             return is_moving
 
         # do first half step location from RK1 to update values
-        fgm.eval_water_velocity( v_temp, is_moving)
+        fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
+
         solver_util.euler_substep( x1, v_temp, velocity_modifier, dt2, is_moving, x2)
         particle_operations_util.copy(v, v_temp, is_moving, scale=1.0 / 6.0)   # accumulate RK velocity to reduce space taken by temporary working variables
 
@@ -233,25 +237,25 @@ class Solver(ParameterBaseClass):
         fgm.setup_time_step(t2, x2, is_moving)
 
         if RK_order==2:
-            fgm.eval_water_velocity(v, is_moving)
+            fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v)
             solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)
             return is_moving
 
-        fgm.eval_water_velocity( v_temp, is_moving)
+        fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
         solver_util.euler_substep( x1, v_temp, velocity_modifier, dt2, is_moving, x2)
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity step 2
 
         # step 3, a second half step
         t2 = time_sec + 0.5 * dt
         fgm.setup_time_step(t2, x2, is_moving)
-        fgm.eval_water_velocity( v_temp, is_moving)
+        fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
         solver_util.euler_substep( x1, v_temp, velocity_modifier, dt, is_moving, x2)  # improve half step position values
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity from step 3
 
         # step 4, full step
         t2 = time_sec + dt
         fgm.setup_time_step(t2,  x2, is_moving)
-        fgm.eval_water_velocity( v_temp, is_moving)
+        fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
         particle_operations_util.add_to(v, v_temp, is_moving, scale=1.0 / 6.0)  # last accumulation of velocity for v4
 
         # final location using  accumulation in "v"
@@ -259,7 +263,7 @@ class Solver(ParameterBaseClass):
         #  v = (v1 + 2.0 * (v2 + v3) + v4) /6
         #  x2 = x1 + v*dt
         solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)  # set final location directly to particle x property
-
+        pass
         #print('xxx', x2[:10, :] - x1[:10, :],v[:10,:])
 
     def screen_output(self, nt, time_sec,t0_model, t0_step):

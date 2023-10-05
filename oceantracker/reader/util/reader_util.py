@@ -55,7 +55,7 @@ def find_open_boundary_faces(triangles, is_boundary_triangle, adjacency, is_open
 
 
 
-def append_split_cell_data(grid,data,axis=0):
+def append_split_cell_data(grid,data, axis=0):
     # for cell based data add split cell data below given data
     return  np.concatenate((data, data[:, grid['quad_cells_to_split']]), axis=axis)
 
@@ -68,7 +68,7 @@ def get_values_at_bottom(field_data4D, bottom_cell_index, out=None):
         out = np.full(s[:2]+(s[3],), np.nan,dtype=field_data4D.dtype)
 
     for n in range(field_data4D.shape[1]):
-        out[:,n,:] = field_data4D[:, :, bottom_cell_index[n], :]
+        out[:,n,:] = field_data4D[:, n, bottom_cell_index[n], :]
     return out
 
 
@@ -116,3 +116,14 @@ def zlevel_node_to_vertex(zlevel, triangles, zlevel_vertex):
                 for m in range(3):
                     zlevel_vertex[nt, ntri, nz, m] = zlevel[nt, triangles[ntri,m],  nz]
 
+
+@njit
+def patch_bottom_velocity_to_make_it_zero(vel_data, bottom_cell_index):
+    # ensure velocity vector at bottom is zero, as patch LSC vertical grid issue with nodal values spanning change in number of depth levels
+    # needed in schsoim LSC grids due to interplotion bug
+    for nt in range(vel_data.shape[0]):
+        for node in range(vel_data.shape[1]):
+            bottom_node= bottom_cell_index[node]
+            for component in range(vel_data.shape[3]):
+                vel_data[nt, node, bottom_node, component] = 0.
+    return vel_data
