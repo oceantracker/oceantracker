@@ -169,6 +169,7 @@ class Solver(ParameterBaseClass):
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
 
+        # resuspension is a core trajectory modifier
         if si.is3D_run:
             # friction_velocity property  is now updated, so do resupension
             si.classes['resuspension'].update(time_sec, alive)
@@ -176,6 +177,10 @@ class Solver(ParameterBaseClass):
         # setup_interp_time_step
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
         fgm.update_dry_cells()
+
+        if si.is3D_run:
+            # friction_velocity property  is now updated, so do resupension
+            si.classes['resuspension'].update(time_sec, alive)
 
         # update particle properties
         pgm.update_PartProp(time_sec, alive)
@@ -245,6 +250,9 @@ class Solver(ParameterBaseClass):
         solver_util.euler_substep( x1, v_temp, velocity_modifier, dt2, is_moving, x2)
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity step 2
 
+        #print('xxxa1', x1[:5, 2], x2[:5, 2])
+        #print('xxxa2',v_temp[:5,2],part_prop['tide'].data[:5], part_prop['water_depth'].data[:5])
+
         # step 3, a second half step
         t2 = time_sec + 0.5 * dt
         fgm.setup_time_step(t2, x2, is_moving)
@@ -264,7 +272,8 @@ class Solver(ParameterBaseClass):
         #  x2 = x1 + v*dt
         solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)  # set final location directly to particle x property
         pass
-        #print('xxx', x2[:10, :] - x1[:10, :],v[:10,:])
+        #print('xxx1', x1[:5, 2], x2[:5, 2])
+        #print('xxx2',v[:5,2],part_prop['tide'].data[:5], part_prop['water_depth'].data[:5])
 
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
