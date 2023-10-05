@@ -239,17 +239,17 @@ def get_depth_cell_sigma_layers(xq,
 
 
         # get  nz from evenly space sigma map, but zf always < 1, due to above
-        nz = int(zf/sigma_map_dz) # find fraction of length of map
+        ns = int(zf/sigma_map_dz) # find fraction of length of map
         # get approx nz from map
-        nz = sigma_map_nz[nz]
+        nz = sigma_map_nz[ns]
 
-        if zf > sigma[nz] :
-            # correct if zf, more than sigma at approx interval
-            nz = sigma_map_nz[nz+1]
+        if zf > sigma[nz+1] :
+            # correct if zf, for approc nz is above next sigma level
+            nz +=  1
 
         # get fraction within the sigma layer
         z_fraction[n] = (zf - sigma[nz])/(sigma[nz+1]- sigma[nz])
-
+        pass
         # make any already on bottom active, may be flagged on bottom if found on bottom, below
         if status[n] == status_on_bottom:
             status[n] = status_moving

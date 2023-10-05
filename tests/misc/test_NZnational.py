@@ -29,27 +29,25 @@ if __name__ == '__main__':
         [1838293.4656,      5940629.8263],
         [1788021.4244,      5940860.2283]
          ]
-
+    #x0=[x0[0]]
     params ={
         'max_run_duration': 5. * 24 * 3600,
         'write_tracks': True,
         'tracks_writer' : {'output_step_count': 3},
         'output_file_base': output_file_base,
         'root_output_dir': root_output_dir,
-        'release_groups': {'P1': {'points': x0 ,'pulse_size':5, 'release_interval': 1800}},
+        'release_groups': {'P1': {'points': x0 ,'pulse_size':5, 'release_interval': 3600}},
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
 
         'particle_statistics' : {'S1':{
                                  'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                                  'update_interval': 3600, 'particle_property_list': ['water_depth'],
                                 'grid_center': x0[0],'grid_span': [25000.,25000.],
-
                                  'grid_size': [120, 121]}},
          'reader': {'file_mask': 'NZ*.nc',
                    'input_dir': root_input_dir,
                     'regrid_z_to_equal_sigma': True,
-                      'depth_average': args.depthaverage,
-                        'field_variables_to_depth_average': ['water_velocity'],
+                    'field_variables_to_depth_average': ['water_velocity'],
                       #'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                       },
 

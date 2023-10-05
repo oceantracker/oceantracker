@@ -63,10 +63,10 @@ class BasicResuspension(_BaseResuspension):
         part_prop = si.classes['particle_properties']
         resuspend = self.select_particles_to_resupend(active)
 
-        self.resuspension_jump(part_prop['friction_velocity'].data, self.info['resuspension_factor'], part_prop['x'].data, resuspend)
+        self.resuspension_jump(part_prop['friction_velocity'].data, self.info['resuspension_factor'], part_prop['x'].data, part_prop['water_depth'].data,si.z0, resuspend)
 
         #  don't adjust resupension distance for terminal velocity,
-        #  Lynch (Particles in the Ocean Book, says dont adjust as a fall velocity  affects prior that particle resuspends)
+        #  Lynch (Particles in the Ocean Book, says don't adjust as a fall velocity  affects prior that particle resuspends)
 
         # any z out of bounds will  be fixed by find_depth cell at start of next time step
         self.info['number_resupended'] += resuspend.shape[0]
@@ -76,8 +76,8 @@ class BasicResuspension(_BaseResuspension):
 
     @staticmethod
     @njit
-    def resuspension_jump(friction_velocity, resuspension_factor, x, sel):
+    def resuspension_jump(friction_velocity, resuspension_factor, x, water_depth, z0, sel):
         # add entrainment jump up to particle z, Book: Lynch(2015) book, Particles in the coastal ocean  eq 9.26 and 9.28
         for n in sel:
-            x[n, 2] += np.sqrt(resuspension_factor*friction_velocity[n])*np.abs(np.random.randn())
+            x[n, 2] = water_depth[n] + z0 + np.sqrt(resuspension_factor*friction_velocity[n])*np.abs(np.random.randn())
 
