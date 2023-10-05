@@ -54,7 +54,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             # used to do 3D time dependent interpolation
             p.create_particle_property('nz_cell', 'manual_update',dict( write=False, dtype=np.int32, initial_value=grid['nz']-2)) # todo  create  initial serach for vertical cell
             p.create_particle_property('z_fraction','manual_update',dict(   write=False, dtype=np.float32, initial_value=0.))
-            p.create_particle_property('z_fraction_bottom_layer','manual_update', dict( write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
+            p.create_particle_property('z_fraction_water_velocity','manual_update', dict( write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
 
         # attach a reader to this interpolator
@@ -99,8 +99,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                         adjacency=  grid['adjacency']),
                                         )
 
-
-
     def setup_interp_time_step(self, time_sec, xq, active):
         # set up stuff needed by all fields before any 2D interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
@@ -139,77 +137,37 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if not self.reader.are_time_steps_in_buffer(time_sec):
             self.reader.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
 
-    # @function_profiler(__name__)
-    def eval_water_velocity_at_particle_locations(self,output, active ):
-        # interp reader fieldName inplace to particle locations to same time and memory
-        # output can optionally be redirected to another particle property name different from  reader's fieldName
-        # particle_prop_name
-        # in place evaluation of field interpolation
-        si = self.shared_info
-        grid = self.grid
-        field_instance = si.classes['fields']['water_velocity']
-        part_prop = si.classes['particle_properties']
-        n_cell = part_prop['n_cell'].data
-        bc_cords = part_prop['bc_cords'].data
-        info = self.info
-        nb = info['current_buffer_steps']
-        fractional_time_steps = info['fractional_time_steps']
-
-        if field_instance.is3D():
-            nz_cell = part_prop['nz_cell'].data
-            triangles = grid['triangles']
-            bottom_cell_index = grid['bottom_cell_index']
-            z_fraction = part_prop['z_fraction'].data
-            z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
-            if grid['regrid_z_to_equal_sigma']:
-                triangle_eval_interp.eval_water_velocity_3D_sigma_grid(nb, fractional_time_steps, basic_util.atLeast_Nby1(output),
-                                               field_instance.data,
-                                               triangles,
-                                               n_cell, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
-                                               active)
-            else:
-                triangle_eval_interp.eval_water_velocity_3D_LSC_grid(nb, fractional_time_steps, basic_util.atLeast_Nby1(output),
-                                                                     field_instance.data,
-                                                                     triangles, bottom_cell_index,
-                                                                     n_cell, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
-                                                                     active)
-        else:
-            self._interp_field2D(field_instance, n_cell, bc_cords, output, active)
-
     #@function_profiler(__name__)
-    def interp_field_at_current_particle_locations(self, field_instance, active, output):
-        # interp reader fieldName inplace to particle locations to same time and memory
-        # output can optionally be redirected to another particle property name different from  reader's fieldName
+    def interp_field_at_current_particle_locations(self, field_name, active, output):
+        # interp reader field_name inplace to particle locations to same time and memory
+        # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
        # in place evaluation of field interpolation
         si = self.shared_info
+        field_instance = si.classes['fields'][field_name]
+
+        if field_instance.is3D():
+            self._interp_field3D(field_name, field_instance, output,active)
+        else:
+
+          self._interp_field2D(field_name,field_instance, output,active)
+
+    # @function_profiler(__name__)
+    def _interp_field2D(self,field_name, field_instance, output, active):
+        # interp reader field_name inplace to particle locations to same time and memory
+        # output can optionally be redirected to another particle property name different from  reader's field_name
+        # particle_prop_name
+        # in place evaluation of field interpolation
+        si = self.shared_info
         grid = self.grid
+        triangles = grid['triangles']
+
         part_prop = si.classes['particle_properties']
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
 
-        if field_instance.is3D():
-            nz_cell = part_prop['nz_cell'].data
-            z_fraction = part_prop['z_fraction'].data
-            bottom_cell_index = grid['bottom_cell_index']
-
-            self._interp_field3D(field_instance, n_cell, bc_cords, nz_cell,
-                                 z_fraction,bottom_cell_index, active, output)
-        else:
-
-          self._interp_field2D(field_instance, n_cell, bc_cords,output, active)
-
-    # @function_profiler(__name__)
-    def _interp_field2D(self, field_instance, n_cell, bc_cords,output, active):
-        # interp reader fieldName inplace to particle locations to same time and memory
-        # output can optionally be redirected to another particle property name different from  reader's fieldName
-        # particle_prop_name
-        # in place evaluation of field interpolation
-        si = self.shared_info
-        part_prop = si.classes['particle_properties']
-        grid = self.grid
-        triangles = grid['triangles']
         info = self.info
+
         nb = info['current_buffer_steps']
         fractional_time_steps = info['fractional_time_steps']
 
@@ -225,15 +183,26 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                  active)
 
     # @function_profiler(__name__)
-    def _interp_field3D(self, field_instance, n_cell, bc_cords,
-                        nz_cell, z_fraction, bottom_cell_index,active, output):
-        # interp reader fieldName inplace to particle locations to same time and memory
-        # output can optionally be redirected to another particle property name different from  reader's fieldName
+    def _interp_field3D(self, field_name, field_instance, output,active):
+        # interp reader field_name inplace to particle locations to same time and memory
+        # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
         # in place evaluation of field interpolation
         si = self.shared_info
         grid = self.grid
         triangles = grid['triangles']
+
+        part_prop = si.classes['particle_properties']
+        n_cell = part_prop['n_cell'].data
+        bc_cords = part_prop['bc_cords'].data
+        nz_cell = part_prop['nz_cell'].data
+
+        if field_name == 'water_velocity':
+            # fractions for water vel. are log layer in bottom cell
+            z_fraction = part_prop['z_fraction_water_velocity'].data
+        else:
+            z_fraction = part_prop['z_fraction'].data
+
         info = self.info
 
         if field_instance.is_time_varying():
@@ -244,10 +213,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                            n_cell, bc_cords, nz_cell, z_fraction,
                            basic_util.atLeast_Nby1(output), active)
             else:
-
                 triangle_eval_interp.time_dependent_3Dfield_LSC_grid(info['current_buffer_steps'], info['fractional_time_steps'],
                                                                      field_instance.data,
-                                                                     triangles, bottom_cell_index,
+                                                                     triangles,  grid['bottom_cell_index'],
                                                                      n_cell, bc_cords, nz_cell, z_fraction,
                                                                      basic_util.atLeast_Nby1(output), active)
         else:
@@ -267,7 +235,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         part_prop = si.classes['particle_properties']
         grid = self.grid
 
-        # is no output name give particle property for output is same as hindcast fieldName
+        # is no output name give particle property for output is same as hindcast field_name
         if output is None:
             if field_instance.data.shape[3] > 1:
                 output = np.full((x.shape[0], field_instance.data.shape[3]), np.nan)
@@ -366,7 +334,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             t0 = perf_counter()
             nz_cell = part_prop['nz_cell'].data
             z_fraction = part_prop['z_fraction'].data
-            z_fraction_bottom_layer = part_prop['z_fraction_bottom_layer'].data
+            z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
             if grid['regrid_z_to_equal_sigma']:
 
                 tri_interp_util.get_depth_cell_sigma_layers(xq,
@@ -374,7 +342,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                             fields['water_depth'].data.ravel(),
                                             fields['tide'].data,
                                             grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],grid['sigma_map_dz'],
-                                            n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
+                                            n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                             info['current_buffer_steps'], info['fractional_time_steps'],
                                             active, si.z0)
             else:
@@ -382,7 +350,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                             grid['triangles'],grid['zlevel'],grid['bottom_cell_index'],
                                             #grid['triangles'], grid['zlevel_vertex'], grid['bottom_cell_index'],
-                                            n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_bottom_layer,
+                                            n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_water_velocity,
                                             info['current_buffer_steps'],info['fractional_time_steps'],
                                             self.walk_counts,
                                             active,  si.z0)

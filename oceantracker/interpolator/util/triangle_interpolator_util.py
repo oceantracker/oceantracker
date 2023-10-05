@@ -200,12 +200,12 @@ def get_BC_transform_matrix(points, simplices):
 def get_depth_cell_sigma_layers(xq,
                                 triangles, water_depth, tide,
                                 sigma, sigma_map_nz,sigma_map_dz,
-                                n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
+                                n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                 current_buffer_steps, fractional_time_steps,
                                 active, z0):
     for n in active:  # loop over active particles
         nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
-        zq = xq[n, 2]
+        zq = float(xq[n, 2])
 
         # interp water depth
         z_bot = 0.
@@ -217,7 +217,7 @@ def get_depth_cell_sigma_layers(xq,
             nz_cell[n] = 0
             xq[n, 2] = z_bot
             z_fraction[n] = 0.0
-            z_fraction_bottom_layer[n] = 0.0
+            z_fraction_water_velocity[n] = 0.0
             continue
 
         # interp tide
@@ -226,19 +226,17 @@ def get_depth_cell_sigma_layers(xq,
             z_top += bc_cords[n, m] * tide[current_buffer_steps[0], nodes[m], 0, 0] * fractional_time_steps[0]
             z_top += bc_cords[n, m] * tide[current_buffer_steps[1], nodes[m], 0, 0] * fractional_time_steps[1]
 
+        # clip z into range
+        if zq >= z_top:
+            zq = z_top - 0.001 # put just below the surface to force into top depth bin
+        elif zq < z_bot:
+            zq = z_bot
+
         twd = abs(z_top - z_bot)
         twd = max(z0, twd)
-        zf = (zq- z_bot)/twd
+        zf = (zq - z_bot)/twd
         z0f = z0/twd # z0 as fraction of water depth
 
-        # clip into range
-        if zf > 0.999:
-            zf = 0.999
-            zq = z_top
-
-        elif zf < z0f:
-            zf = 0.
-            zq = z_bot
 
         # get  nz from evenly space sigma map, but zf always < 1, due to above
         nz = int(zf/sigma_map_dz) # find fraction of length of map
@@ -246,7 +244,7 @@ def get_depth_cell_sigma_layers(xq,
         nz = sigma_map_nz[nz]
 
         if zf > sigma[nz] :
-            # correct if zf, more than approx a sigma level interval
+            # correct if zf, more than sigma at approx interval
             nz = sigma_map_nz[nz+1]
 
         # get fraction within the sigma layer
@@ -257,21 +255,18 @@ def get_depth_cell_sigma_layers(xq,
             status[n] = status_moving
 
         # extra work if in bottom cell
-        z_fraction_bottom_layer[n] = -999.  # flag as not in bottom layer, will become >= 0 if in layer
+        z_fraction_water_velocity[n] = z_fraction[n]
         if nz == 0:
             # set status if on the bottom set status
             if zf < z0f:
                 status[n] = status_on_bottom
                 zq = z_bot
-
-            # get z_fraction for log layer
-            if zf < z0f:
-                z_fraction_bottom_layer[n] = 0.0
+                z_fraction_water_velocity[n] = 0.0
             else:
                 # adjust z fraction so that linear interp acts like log layer
-                z1 = (sigma[1]-sigma[0])*twd
+                z1 = (sigma[1]-sigma[0])*twd # dimensional bottom layer thickness
                 z0p = z0 / z1
-                z_fraction_bottom_layer[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
+                z_fraction_water_velocity[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
 
         # record new depth cell
         nz_cell[n] = nz
@@ -291,7 +286,7 @@ def _eval_z_at_nz_cell(tf, nz_cell, zlevel1, zlevel2, nodes, nz_bottom_nodes, nz
 @njit()
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                                   triangles, zlevel, bottom_cell_index,
-                                                  n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_bottom_layer,
+                                                  n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                                   current_buffer_steps, fractional_time_steps,
                                                   walk_counts,
                                                   active, z0):
@@ -377,7 +372,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
             z_fraction[n] = (zq - z_below) / dz
 
         # extra work if in bottom cell
-        z_fraction_bottom_layer[n] = -999.  # flag as not in bottom layer, will become >= 0 if in layer
+        z_fraction_water_velocity[n] = z_fraction[n]  # flag as not in bottom layer, will become >= 0 if in layer
         if nz == bottom_nz_cell:
             # set status if on the bottom set status
             if zq < z_below + z0:
@@ -386,11 +381,11 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
 
             # get z_fraction for log layer
             if dz < z0:
-                z_fraction_bottom_layer[n] = 0.0
+                z_fraction_water_velocity[n] = 0.0
             else:
                 # adjust z fraction so that linear interp acts like log layer
                 z0p = z0 / dz
-                z_fraction_bottom_layer[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
+                z_fraction_water_velocity[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
 
         # record new depth cell
         nz_cell[n] = nz
