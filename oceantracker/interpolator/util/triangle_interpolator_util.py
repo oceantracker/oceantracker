@@ -198,7 +198,7 @@ def get_BC_transform_matrix(points, simplices):
 
 @njit()
 def get_depth_cell_sigma_layers(xq,
-                                triangles, water_depth, tide,
+                                triangles, water_depth, tide, minimum_total_water_depth,
                                 sigma, sigma_map_nz,sigma_map_dz,
                                 n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                 current_buffer_steps, fractional_time_steps,
@@ -232,20 +232,24 @@ def get_depth_cell_sigma_layers(xq,
         elif zq < z_bot:
             zq = z_bot
 
-        twd = abs(z_top - z_bot)
-        twd = max(z0, twd)
-        zf = (zq - z_bot)/twd
+        twd = z_top - z_bot
+        if twd < minimum_total_water_depth:
+            # hydro models typically have min water depth to operate
+            zf = 0.
+            twd = minimum_total_water_depth
+        else:
+            zf = (zq - z_bot)/twd
+
         z0f = z0/twd # z0 as fraction of water depth
 
-
         # get  nz from evenly space sigma map, but zf always < 1, due to above
-        ns = int(zf/sigma_map_dz) # find fraction of length of map
+        ns = int(zf * sigma_map_nz.size) # find fraction of length of map
         # get approx nz from map
         nz = sigma_map_nz[ns]
 
-        if zf > sigma[nz+1] :
+        if zf > sigma[nz+1]:
             # correct if zf, for approc nz is above next sigma level
-            nz +=  1
+            nz += 1
 
         # get fraction within the sigma layer
         z_fraction[n] = (zf - sigma[nz])/(sigma[nz+1]- sigma[nz])
