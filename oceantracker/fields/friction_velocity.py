@@ -46,11 +46,9 @@ class FrictionVelocity(UserFieldBase):
             for n in np.arange(out.shape[1]):  # loop over nodes
                 # size of bottom cell from its fraction of the water depth
                 dz = (sigma[1] - sigma[0]) * total_water_depth[nt, n, 0, 0]
-                if dz < z0:
-                    out[nt, n, 0, 0] = 0.
-                else:
-                    speed = np.sqrt(water_velocity[nt, n, 1, 0] ** 2 + water_velocity[nt, n, 1, 1] ** 2)
-                    out[nt, n, 0, 0] = 0.4 * speed / np.log((dz + z0) / z0)
+                speed = np.sqrt(water_velocity[nt, n, 1, 0] ** 2 + water_velocity[nt, n, 1, 1] ** 2)
+                out[nt, n, 0, 0] = 0.4 * speed / np.log((dz + z0) / z0)
+                # will give np.inf for very thin lower layers, ie small total water depth
 
     @staticmethod
     @njit()
@@ -61,9 +59,6 @@ class FrictionVelocity(UserFieldBase):
             for n in np.arange(zlevel.shape[1]): # loop over nodes
                 nz1=bottom_cell_index[n]+1
                 dz =  zlevel[nt, n, nz1] - zlevel[nt, n, bottom_cell_index[n]] # size of bottom cell
-                if dz < z0:
-                    out[nt, n, 0, 0]= 0.
-                else:
-                    speed = np.sqrt(water_velocity[nt, n, nz1, 0]**2 + water_velocity[nt, n, nz1, 1]**2)
-                    out[nt, n, 0, 0] = 0.4*speed/np.log((dz+z0)/z0)
+                speed = np.sqrt(water_velocity[nt, n, nz1, 0]**2 + water_velocity[nt, n, nz1, 1]**2)
+                out[nt, n, 0, 0] = 0.4*speed/np.log((dz+z0)/z0)
 

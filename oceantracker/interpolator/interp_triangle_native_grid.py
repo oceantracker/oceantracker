@@ -150,7 +150,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             self._interp_field3D(field_name, field_instance, output,active)
         else:
 
-          self._interp_field2D(field_name,field_instance, output,active)
+            self._interp_field2D(field_name,field_instance, output,active)
+            #print('xx interp',field_name, output[:5])
+
 
     # @function_profiler(__name__)
     def _interp_field2D(self,field_name, field_instance, output, active):
@@ -336,15 +338,18 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             z_fraction = part_prop['z_fraction'].data
             z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
             if grid['regrid_z_to_equal_sigma']:
-
-                tri_interp_util.get_depth_cell_sigma_layers(xq,
+                try:
+                    tri_interp_util.get_depth_cell_sigma_layers(xq,
                                             grid['triangles'],
                                             fields['water_depth'].data.ravel(),
                                             fields['tide'].data,
+                                            si.minimum_total_water_depth,
                                             grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],grid['sigma_map_dz'],
                                             n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                             info['current_buffer_steps'], info['fractional_time_steps'],
                                             active, si.z0)
+                except Exception as e:
+                        pass
             else:
                 # natve slayer option
                 tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,

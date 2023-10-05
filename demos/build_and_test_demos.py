@@ -320,7 +320,6 @@ pg1= bc['release_groups']['P1']
 pg1.update({'pulse_size':10,'release_interval':0, 'points': [[1593000., 5484000.+2000, -1]] }) # 1 release only
 bc['release_groups']['P11']= pg1 # only point release
 
-
 params.append(s58)
 
 # schsim 3D, vertical section  with critical friction velocity

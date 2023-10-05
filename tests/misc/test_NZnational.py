@@ -29,7 +29,7 @@ if __name__ == '__main__':
         [1838293.4656,      5940629.8263],
         [1788021.4244,      5940860.2283]
          ]
-    #x0=[x0[0]]
+    x0=[x0[0]]
     params ={
         'max_run_duration': 5. * 24 * 3600,
         'write_tracks': True,
@@ -38,7 +38,6 @@ if __name__ == '__main__':
         'root_output_dir': root_output_dir,
         'release_groups': {'P1': {'points': x0 ,'pulse_size':5, 'release_interval': 3600}},
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
-
         'particle_statistics' : {'S1':{
                                  'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                                  'update_interval': 3600, 'particle_property_list': ['water_depth'],
@@ -50,12 +49,11 @@ if __name__ == '__main__':
                     'field_variables_to_depth_average': ['water_velocity'],
                       #'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                       },
-
            }
 
     if not args.depthaverage:
         params['velocity_modifiers']= {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': 0.000}}
-        params['resuspension']={'critical_friction_velocity': 0.}
+        params['resuspension']={'critical_friction_velocity': 0.001}
     if args.mode_debug: params['debug'] = True
 
     pass
