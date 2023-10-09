@@ -49,8 +49,8 @@ params={'output_file_base' : output_file_base,
 
 }
 
-yaml_util.write_YAML(output_file_base+'.yaml',params)
-json_util.write_JSON(output_file_base+'.json',params)
+#yaml_util.write_YAML(output_file_base+'.yaml',params)
+#json_util.write_JSON(output_file_base+'.json',params)
 
 if args.norun:
     # infer run file name

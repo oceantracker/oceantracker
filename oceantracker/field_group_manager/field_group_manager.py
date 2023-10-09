@@ -25,9 +25,20 @@ class FieldGroupManager(ParameterBaseClass):
 
         self.setup_hydro_fields()
 
-    def  add_custom_field(self, name, params, crumbs=''):
+    def add_reader_field(self, name, reader, params, crumbs=''):
         si = self.shared_info
-        si.create_class_dict_instance(name, 'fields', 'derived_from_reader_field', params, crumbs=crumbs+ f'Custom fields Setup > "{name}"', initialise=True)
+        params['class_name'] = 'oceantracker.fields._base_field._BaseField'
+        i = si.create_class_dict_instance(name, 'fields', 'from_reader_field', params, crumbs=crumbs+ f' reader field setup > "{name}"', initialise=False)
+        # attached reader to field
+
+        i.reader = reader
+        i.initial_setup()
+        return i
+
+    def add_custom_field(self, name,  params, crumbs=''):
+        si = self.shared_info
+        i = si.create_class_dict_instance(name, 'fields', 'derived_from_reader_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=True)
+        return i
 
     def fill_reader_buffers_if_needed(self,time_sec):
         # check if all interpolators have the time steps they need
@@ -63,7 +74,7 @@ class FieldGroupManager(ParameterBaseClass):
         # particle_prop_name
 
         si = self.shared_info
-        output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(si.classes['fields'][field_name], x, time,
+        output = si.classes['interpolator'].eval_field_interpolation_at_given_locations(field_name,si.classes['fields'][field_name], x, time,
                                                                         output=output, n_cell=n_cell)
         return output
 

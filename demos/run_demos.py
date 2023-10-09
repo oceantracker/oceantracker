@@ -69,7 +69,7 @@ if __name__ == "__main__":
             exit('runOTdemos.py: No demo file number ' + str(n))
 
         params = json_util.read_JSON(f[0])
-        params['use_random_seed'] = True
+
         if type(params) is list:
             demo_name = params[0]['output_file_base']
             if params[0]['reader'] is not None:
@@ -77,6 +77,7 @@ if __name__ == "__main__":
             output_folder = path.join(params[0]['root_output_dir'], params[0]['output_file_base'])
             params[0]['root_output_dir'] = 'output'
         else:
+            params['use_random_seed'] = True
             demo_name = params['output_file_base']
             if params['reader'] is not None:
                 params['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')

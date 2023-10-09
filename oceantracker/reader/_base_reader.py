@@ -51,8 +51,8 @@ class _BaseReader(ParameterBaseClass):
             'dimension_map': {'time': PVC('time', str, is_required=True),
                               'node': PVC('node', str),
                               'z': PVC(None, str),
-                              'vector2Ddim': PVC(None, str),
-                              'vector3Ddim': PVC(None, str)},
+                              'vector2D': PVC(None, str),
+                              'vector3D': PVC(None, str)},
             'regrid_z_to_equal_sigma': PVC(True, bool, doc_str='speed run by re-griding 3D fields  in the z to equal sigma levels, based on most curve z_level profile'),
             'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
             'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
@@ -61,6 +61,7 @@ class _BaseReader(ParameterBaseClass):
 
         self.info['field_variable_info'] = {}
         self.info['buffer_info'] ={}
+
 
     def initial_setup(self):
         # map variable internal names to names in NETCDF file
@@ -71,8 +72,8 @@ class _BaseReader(ParameterBaseClass):
         self.info['file_info'] = si.working_params['file_info']  # add file_info to reader info
         nc = NetCDFhandler(info['file_info']['names'][0])
 
-
         grid = self.read_2Dgrid(nc)
+        grid['equal_sigma_layers'] = False
         self.grid= self.build_2Dgrid(grid)
 
 
@@ -81,7 +82,8 @@ class _BaseReader(ParameterBaseClass):
             grid = self.setup_vertical_grid(nc, grid)
             # add core total water depth property
             si.classes['field_group_manager'].add_custom_field(
-                'total_water_depth', dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',
+                'total_water_depth',
+                dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',
                                            crumbs='initializing core TotalWaterDepth class ')
                                                 )
         else:
@@ -289,69 +291,44 @@ class _BaseReader(ParameterBaseClass):
         if type(file_var_map) != list : file_var_map = [file_var_map]
         var_list = [v for v in file_var_map if v != None]
 
-        # get require dim of field
-        s=np.asarray([1,grid['x'].shape[0], 1,0],dtype=np.int32)
-        component_list = []
+        is_vector = len(var_list) > 1
         for v in var_list:
-            if not  nc.is_var(v):
-                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in reader set up fields',fatal_error=True)
+            if not nc.is_var(v):
+                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in reader set up fields', fatal_error=True)
                 continue
-            if dim_map['time'] in nc.all_var_dims(v): s[0] = params['time_buffer_size']
+            if dim_map['vector2D'] in nc.all_var_dims(v) or dim_map['vector3D'] in nc.all_var_dims(v):
+                is_vector = True
 
-            if dim_map['vector2Ddim'] in nc.all_var_dims(v):
-                s[3] +=2
-                comp_per_var =2
-            elif dim_map['vector3Ddim'] in nc.all_var_dims(v):
-                s[3] += 3
-                comp_per_var= 3
-            else:
-                s[3] += 1
-                comp_per_var = 1
-            component_list.append(dict(file_name=v,comp_per_var=comp_per_var))
-
-        p= dict(is_time_varying = s[0] > 0, is3D = s[2] > 0, num_components= s[3])
-        if dim_map['z'] in nc.all_var_dims(v):
-            # due to vertical regrid, shape in memory may not match disk shape
-            shape_in_memory = s.copy()
-            shape_in_memory[2] = grid['nz']
-            shape_on_disk = s.copy()
-            shape_on_disk[2] = nc.dim_size(dim_map['z'])
-        else:
-            shape_in_memory = s.copy()
-            shape_on_disk = s.copy()
-
-        out = dict( component_list=component_list,
-                    params=p,
-                    comp_per_var=comp_per_var,
-                    shape_in_memory=shape_in_memory.tolist(),
-                    shape_on_disk = shape_on_disk.tolist()
-                   )
+        out = dict(time_varying=dim_map['time'] in nc.all_var_dims(var_list[0]),
+                 is3D=dim_map['z'] in nc.all_var_dims(var_list[0]),
+                 is_vector= is_vector)
 
         return out
+
 
     def setup_fields(self, nc):
 
         si= self.shared_info
+        fgm = si.classes['field_group_manager']
         vi = self.info['field_variable_info']
 
         info=self.info
         params = self.params
-        field_params = dict(class_name='oceantracker.fields._base_field.ReaderField')
+
         # setup compulsory fields, plus others required
-        for name in list(set(params['load_fields'] + ['water_velocity','tide','water_depth'])):
+        params['load_fields'] = list(set(['water_velocity','tide','water_depth'] + params['load_fields'] ))
+        for name in  params['load_fields'] :
             if name in params['field_variable_map']:
                 file_var_map = params['field_variable_map'][name]
             else:
                 file_var_map = name # assume given field variable is in the file
             vi[name] =self.field_var_info(nc,file_var_map )
-            # setup field
-            field_params['shape_in_memory']= vi[name]['shape_in_memory']
-            si.create_class_dict_instance(name,'fields','from_reader_field',field_params, crumbs=f'Fields Setup > "{name}"',initialise=True)
+            fgm.add_reader_field(name, self, vi[name] , crumbs='Reader Field' )
 
         # read time independent vector and scalar reader fields
         for name, field in si.classes['fields'].items():
             if not field.is_time_varying() and field.info['group'] == 'from_reader_field':
-                data = self.assemble_field_components(nc, vi[name])
+                data = self.assemble_field_components(nc, name)
                 data = self.convert_field_grid(nc, name, data)  # do any customised tweaks
                 field.data[0, ...] = data
 
@@ -365,6 +342,7 @@ class _BaseReader(ParameterBaseClass):
         grid['regrid_z_to_equal_sigma'] =params['regrid_z_to_equal_sigma']
         # set up zlevel
         if params['regrid_z_to_equal_sigma']:
+            grid['equal_sigma_layers'] = True
             # setup  regrid grid equal time invariace sigma layers
             # based on profile with thiniest top nad bootm layers
 
@@ -445,6 +423,7 @@ class _BaseReader(ParameterBaseClass):
         triangles_to_split =  np.full((0,),0,np.int32)
         return triangles, triangles_to_split
 
+    def preprocess_field_variable(self, nc, name, data): return data
 
     # checks on first hindcast file
     def additional_setup_and_hindcast_file_checks(self, nc,msg_logger): pass
@@ -525,7 +504,7 @@ class _BaseReader(ParameterBaseClass):
             for name in field_names:
                 field = fields[name]
                 if field.is_time_varying() and field.info['group'] == 'from_reader_field':
-                    data  = self.assemble_field_components(nc, vi[name], file_index=file_index)
+                    data  = self.assemble_field_components(nc, name, file_index=file_index)
                     data = self.convert_field_grid(nc, name, data) # do any customised tweaks
                     data = self.preprocess_field_variable(nc, name, data) # in place tweaks, eg zero vel at bottom
 
@@ -587,23 +566,42 @@ class _BaseReader(ParameterBaseClass):
         # record useful info/diagnostics
         bi['n_filled'] = total_read
 
-    def assemble_field_components(self,nc, var_info, file_index=None):
+    def assemble_field_components(self,nc, name, file_index=None):
         # read scalar fields / join together the components which make vector from component list
+        si = self.shared_info
+        field = si.classes['fields'][name]
 
-        grid = self.grid
-        s= var_info['shape_on_disk'].copy()
+        params = self.params
+
+        s= list(field.data.shape)
         s[0] = 1 if file_index is None else file_index.size
         out  = np.zeros(s,dtype=np.float32) #todo faster make a generic  buffer at start
+
         m= 0 # num of vector components read so far
-        for component_info in var_info['component_list']:
-            data = nc.read_a_variable(component_info['file_name'], sel= file_index).astype(np.float32)
-            s[3] = component_info['comp_per_var']
-            data= data.reshape(s)
-            m1 = m + component_info['comp_per_var']
+        var_names = params['field_variable_map'][name] if type(params['field_variable_map'][name]) ==list  else [params['field_variable_map'][name]]
+
+        for var_name in var_names:
+            if var_name is None: continue
+            data = self.read_file_var_as_4D_nodal_values(nc, var_name, file_index)
+            comp_per_var = data.shape[3]
+            m1 = m + comp_per_var
             # get view of where in buffer data is to be placed
             out[:, :, :, m:m1] = data
-            m += component_info['comp_per_var']
+            m += comp_per_var
         return out
+
+    def read_file_var_as_4D_nodal_values(self,nc,var_name, file_index=None):
+        # read variable into 4D ( time, node, depth, comp) format
+        # assumes same variable order in the file
+        dm = self.params['dimension_map']
+        data = nc.read_a_variable(var_name, sel=file_index)
+        # get 4d size
+        s= list(data.shape)
+        if not nc.is_var_dim(var_name,dm['time']): s = [1] + s
+        if not nc.is_var_dim(var_name,dm['z']):  s = s[:3] + [1] + s[3:]
+        if not nc.is_var_dim(var_name, dm['vector2D']) and not nc.is_var_dim(var_name, dm['vector3D']): s += [1]
+
+        return data.reshape(s)
 
     def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
         # read time and  grid variables, eg time,dry cell

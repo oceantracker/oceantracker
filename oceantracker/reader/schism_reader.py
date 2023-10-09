@@ -29,8 +29,8 @@ class SCHISMSreaderNCDF(_BaseReader):
             'dimension_map': {'time': PVC('time', str),
                               'node': PVC('node', str),
                               'z': PVC('nSCHISM_vgrid_layers', str),
-                              'vector2Ddim': PVC('two', str),
-                              'vector3Ddim': PVC('three', str)},
+                              'vector2D': PVC('two', str),
+                              'vector3D': PVC('three', str)},
             'one_based_indices': PVC(True, bool, doc_str='indices in Schism are 1 based'),
             'hgrid_file_name': PVC(None, str),
              })
