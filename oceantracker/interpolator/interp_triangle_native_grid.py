@@ -149,7 +149,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if field_instance.is3D():
             self._interp_field3D(field_name, field_instance, output,active)
         else:
-
             self._interp_field2D(field_name,field_instance, output,active)
             #print('xx interp',field_name, output[:5])
 
@@ -208,7 +207,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         info = self.info
 
         if field_instance.is_time_varying():
-            if grid['regrid_z_to_equal_sigma']:
+            if grid['equal_sigma_layers']:
                 triangle_eval_interp.time_dependent_3Dfield_sigma_grid(info['current_buffer_steps'], info['fractional_time_steps'],
                                                     field_instance.data,
                            triangles,
@@ -226,18 +225,18 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             raise Exception('eval_field_interpolation_at_particle_locations : spatial interp using eval_interp3D_timeIndependent not implemented yet ')
 
     # @function_profiler(__name__)
-    def eval_field_interpolation_at_given_locations(self, field_instance, x, time=None, output=None, n_cell=None):
+    def eval_field_interpolation_at_given_locations(self,field_name, field_instance, x, time=None, output=None, n_cell=None):
         # in  evaluation of field interpolation at specific locations, ie not particle locations
         # todo only time_dependent_2Dfield  working - eval_field_interpolation_at_given_locations
         # todo add time dependence/ time fractions
         # does this over write paricle props??
         si = self.shared_info
+        info = self.info
         reader = si.classes['reader']
-
         part_prop = si.classes['particle_properties']
         grid = self.grid
 
-        # is no output name give particle property for output is same as hindcast field_name
+        # is no output name given particle property for output is same as hindcast field_name
         if output is None:
             if field_instance.data.shape[3] > 1:
                 output = np.full((x.shape[0], field_instance.data.shape[3]), np.nan)
@@ -262,14 +261,21 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             nz_cell = part_prop['nz_cell'].data
             z_fraction = part_prop['z_fraction'].data
             bottom_cell_index = grid['bottom_cell_index']
-
+            #todo not working in 3D or equal sigma layers
             self._interp_field3D(field_instance, n_cell, bc_cords, nz_cell,
                                  z_fraction,bottom_cell_index, active, output)
         else:
 
-          self._interp_field2D( field_instance, n_cell, bc_cords,output, active)
-
-
+            if field_instance.is_time_varying():
+                triangle_eval_interp.time_dependent_2Dfield(nb,  info['fractional_time_steps'], basic_util.atLeast_Nby1(output),
+                                                            field_instance.data, grid['triangles'],
+                                                            n_cell, bc_cords,
+                                                            active)
+            else:
+                triangle_eval_interp.time_independent_2Dfield(basic_util.atLeast_Nby1(output),
+                                                              field_instance.data, grid['triangles'],
+                                                              n_cell, bc_cords,
+                                                              active)
         return output
 
     def find_cell(self, xq, active):
@@ -337,7 +343,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             nz_cell = part_prop['nz_cell'].data
             z_fraction = part_prop['z_fraction'].data
             z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
-            if grid['regrid_z_to_equal_sigma']:
+            if grid['equal_sigma_layers']:
                 try:
                     tri_interp_util.get_depth_cell_sigma_layers(xq,
                                             grid['triangles'],

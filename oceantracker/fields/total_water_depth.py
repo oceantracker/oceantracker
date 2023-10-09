@@ -5,8 +5,8 @@ from oceantracker.fields._base_field import UserFieldBase
 class TotalWaterDepth(UserFieldBase):
     def __init__(self):
         super().__init__()
-        self.add_default_params({'is_time_varying': PVC(True,bool),
-                                 'num_components': PVC(1, bool),
+        self.add_default_params({'time_varying': PVC(True,bool),
+                                 'is_vector': PVC(False, bool),
                                  'write_interp_particle_prop_to_tracks_file' :  PVC(False, bool),
                                  'is3D': PVC(False,bool)})
 

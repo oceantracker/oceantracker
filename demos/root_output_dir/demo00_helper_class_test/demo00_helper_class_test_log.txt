@@ -4,10 +4,10 @@ main:     >>> Note: run summary with case file names   "demo00_helper_class_test
     >>> Note: output is in dir= E:\H_Local_drive\ParticleTracking\oceantracker\demos\root_output_dir\demo00_helper_class_test
     >>> Note: to help with debugging, parameters as given by user  are in "demo00_helper_class_test_raw_user_params.json"
     >>> Note: run summary with case file names   "demo00_helper_class_test_runInfo.json"
->>> Warning: Parameter " >> field_variables" is obsolete  -  parameter obsolete, use "load_fields" parameter, with field_variable_map if needed
+>>> Warning: Parameter  >> field_variables is obsolete  -  parameter obsolete, use "load_fields" parameter, with field_variable_map if needed
 main: --------------------------------------------------------------------------
-main: OceanTracker summary:  elapsed time =0:00:18.311622
-main:       Cases -   0 errors,   8 warnings,   4 notes, check above
+main: OceanTracker summary:  elapsed time =0:00:16.167448
+main:       Cases -   0 errors,  14 warnings,   4 notes, check above
 main:       Helper-   0 errors,   0 warnings,   0 notes, check above
 main:       Main  -   0 errors,   1 warnings,   3 notes, check above
 main: --------------------------------------------------------------------------
