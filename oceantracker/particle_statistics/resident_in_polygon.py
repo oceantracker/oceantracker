@@ -50,7 +50,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         # create resident in polygon for single release group
         particles = si.classes['particle_group_manager']
         self.info['inside_polygon_particle_prop'] = f'resident_in_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
-        particles.create_particle_property(self.info['inside_polygon_particle_prop'],'manual_update',dict(
+        particles.add_particle_property(self.info['inside_polygon_particle_prop'],'manual_update',dict(
                                                class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=[polygon],
                                                 write=False))

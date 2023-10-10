@@ -24,7 +24,7 @@ class Solver(ParameterBaseClass):
 
     def initial_setup(self):
         si = self.shared_info
-        si.classes['particle_group_manager'].create_particle_property('v_temp','manual_update', dict( vector_dim=si.classes['particle_properties']['x'].num_vector_dimensions(), write=False))
+        si.classes['particle_group_manager'].add_particle_property('v_temp','manual_update', dict( vector_dim=si.classes['particle_properties']['x'].num_vector_dimensions(), write=False))
 
         # set up working space for RK stesp to impriove L3 cache performance
 

@@ -1,8 +1,8 @@
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 import numpy as np
-from oceantracker.fields._base_field import UserFieldBase
-class TotalWaterDepth(UserFieldBase):
+from oceantracker.fields._base_field import CustomFieldBase
+class TotalWaterDepth(CustomFieldBase):
     def __init__(self):
         super().__init__()
         self.add_default_params({'time_varying': PVC(True,bool),

@@ -37,25 +37,25 @@ class ParticleGroupManager(ParameterBaseClass):
                                    dtype=np.int32)  # time has only one value at each time step
 
         # core particle props. , write at each required time step
-        self.create_particle_property('x','manual_update',dict(vector_dim=nDim))  # particle location
-        self.create_particle_property('particle_velocity','manual_update',dict(vector_dim=nDim))
-        self.create_particle_property('velocity_modifier','manual_update', dict(vector_dim=nDim))
+        self.add_particle_property('x','manual_update',dict(vector_dim=nDim))  # particle location
+        self.add_particle_property('particle_velocity','manual_update',dict(vector_dim=nDim))
+        self.add_particle_property('velocity_modifier','manual_update', dict(vector_dim=nDim))
 
-        self.create_particle_property('status','manual_update',dict( dtype=np.int8,   fill_value=si.particle_status_flags['notReleased']))
-        self.create_particle_property('age','manual_update',dict(  initial_value=0.))
+        self.add_particle_property('status','manual_update',dict( dtype=np.int8,   fill_value=si.particle_status_flags['notReleased']))
+        self.add_particle_property('age','manual_update',dict(  initial_value=0.))
 
         # parameters are set once and then don't change with time
-        self.create_particle_property('ID','manual_update',dict( dtype=np.int32, initial_value=-1, time_varying= False,
+        self.add_particle_property('ID','manual_update',dict( dtype=np.int32, initial_value=-1, time_varying= False,
                                       description='unique particle ID number, zero based'))
-        self.create_particle_property('IDrelease_group', 'manual_update',dict( dtype=np.int32, initial_value=-1, time_varying=False,
+        self.add_particle_property('IDrelease_group', 'manual_update',dict( dtype=np.int32, initial_value=-1, time_varying=False,
                                            description='ID of group release particle is part of  is in, zero based'))
-        self.create_particle_property('user_release_groupID', 'manual_update',dict( dtype=np.int32, initial_value=-1, time_varying= False,
+        self.add_particle_property('user_release_groupID', 'manual_update',dict( dtype=np.int32, initial_value=-1, time_varying= False,
                                       description='user given integer ID of release group'))
-        self.create_particle_property('IDpulse','manual_update',dict(  dtype=np.int32, initial_value=-1, time_varying= False,
+        self.add_particle_property('IDpulse','manual_update',dict(  dtype=np.int32, initial_value=-1, time_varying= False,
                                       description='ID of pulse particle was released within its release group, zero based'))
-        self.create_particle_property('time_released', 'manual_update',dict(time_varying= False, description='time (sec) each particle was released'))
-        self.create_particle_property('x_last_good','manual_update',dict( write=True, vector_dim=nDim))  # location when last moving
-        self.create_particle_property('x0','manual_update',dict(  vector_dim=nDim, time_varying=False,
+        self.add_particle_property('time_released', 'manual_update',dict(time_varying= False, description='time (sec) each particle was released'))
+        self.add_particle_property('x_last_good','manual_update',dict( write=True, vector_dim=nDim))  # location when last moving
+        self.add_particle_property('x0','manual_update',dict(  vector_dim=nDim, time_varying=False,
                                       description='initial location of each particle'))  # exact location released including any randomization
 
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
@@ -205,15 +205,20 @@ class ParticleGroupManager(ParameterBaseClass):
             w = si.classes['tracks_writer']
             w.create_variable_to_write(name, 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
 
-    def create_particle_property(self, name, prop_group, prop_params, crumbs=''):
+    def add_particle_property(self, name, prop_group, prop_params, crumbs=''):
         si = self.shared_info
         ml= si.msg_logger
 
-        # todo make name first colpulsory argument of this function and create_class_dict_instance
+        # todo make name first compulsory argument of this function and create_class_dict_instance
         if name is None:
             ml.msg('ParticleGroupManager.create_particle_property, prop name cannot be None, must be unique str',
                    hint='got prop_type of type=' + str(type(prop_group)),
                    fatal_error=True, exit_now=True)
+
+        if name in si.classes['particle_properties']:
+            ml.msg(f'particle property  name "{name}"is already in use',
+                   hint='got prop_type of type=' + str(type(prop_group)), crumbs= crumbs+'ParticleGroupManager.create_particle_property' + name,
+                   fatal_error=True)
 
         if type(prop_group) != str :
             ml.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str',

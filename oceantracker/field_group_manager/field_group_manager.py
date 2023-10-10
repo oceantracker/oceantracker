@@ -13,9 +13,8 @@ class FieldGroupManager(ParameterBaseClass):
     # class holding data in file and ability to spatially interpolate fields that it holds
     #   all the fields in a file and interpolation which belongs to the set of fields (rather than individual variable)
     # works with 2D or 3D  with appropriate interplotor
-    known_field_types = ['from_reader_field','derived_from_reader_field', 'depth_averaged_from_reader_field', 'user']
-
-    # todo distingish between hydro model reader fields and auxilary feils, eg waves from another reader
+    known_field_types=['reader_field','custom_field']
+    # todo distingish between hydro model reader fields and auxilary feilds, eg waves from another reader
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
@@ -23,21 +22,30 @@ class FieldGroupManager(ParameterBaseClass):
 
     def initial_setup(self):
 
-        self.setup_hydro_fields()
+        self.initial_setup_hydro_fields()
+
+    def final_setup(self):
+        si = self.shared_info
+        si.classes['reader'].final_setup()
 
     def add_reader_field(self, name, reader, params, crumbs=''):
         si = self.shared_info
-        params['class_name'] = 'oceantracker.fields._base_field._BaseField'
-        i = si.create_class_dict_instance(name, 'fields', 'from_reader_field', params, crumbs=crumbs+ f' reader field setup > "{name}"', initialise=False)
+        params['class_name'] = 'oceantracker.fields._base_field.ReaderField'
+        i = si.create_class_dict_instance(name, 'fields', 'reader_field', params, crumbs=crumbs+ f' reader field setup > "{name}"', initialise=False)
         # attached reader to field
-
         i.reader = reader
         i.initial_setup()
+
         return i
 
+
     def add_custom_field(self, name,  params, crumbs=''):
+        # classname must be given
         si = self.shared_info
-        i = si.create_class_dict_instance(name, 'fields', 'derived_from_reader_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=True)
+        if 'class_name' not in params:
+            si.msg_logger.msg('field+grup_manager> add_custom_field parameters must contain  "class_name"')
+        i = si.create_class_dict_instance(name, 'fields', 'custom_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=True)
+        i.known_field_types = self.known_field_types
         return i
 
     def fill_reader_buffers_if_needed(self,time_sec):
@@ -78,12 +86,13 @@ class FieldGroupManager(ParameterBaseClass):
                                                                         output=output, n_cell=n_cell)
         return output
 
-    def setup_hydro_fields(self):
+    def initial_setup_hydro_fields(self):
         si = self.shared_info
         reader = si.add_core_class('reader', si.working_params['core_roles']['reader'],
                                         crumbs=f'Feild Group Manager>setup_hydro_fields> reader class  ')
+
         reader.initial_setup()
-        si.is3D_run =  reader.grid['is3D']
+        si.is3D_run = reader.grid['is3D']
 
     def update_dry_cells(self):
         # update 0-255 dry cell index for each interpolator

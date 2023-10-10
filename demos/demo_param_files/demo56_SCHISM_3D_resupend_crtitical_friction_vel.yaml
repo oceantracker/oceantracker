@@ -57,7 +57,6 @@ particle_statistics:
     status_min: moving
     update_interval: 3600
 reader:
-  depth_average: false
   file_mask: demoHindcastSchism3D.nc
   input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   load_fields:

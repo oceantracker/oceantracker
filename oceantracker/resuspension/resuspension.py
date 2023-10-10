@@ -33,9 +33,10 @@ class BasicResuspension(_BaseResuspension):
         info['number_resupended'] = 0
         # add required field and particle property for resuspension
 
-        si.classes['field_group_manager'].add_custom_field('friction_velocity',  {'class_name':self.params['friction_velocity_field_class_name']},
+        si.classes['field_group_manager'].add_custom_field('friction_velocity',  {'class_name':self.params['friction_velocity_field_class_name'],
+                                                           'time_varying' : True},
                                                        crumbs='initializing resuspension class ')
-        si.classes['particle_group_manager'].create_particle_property('friction_velocity','from_fields', {}, crumbs='initializing resuspension class friction velocity')
+        si.classes['particle_group_manager'].add_particle_property('friction_velocity','from_fields', {}, crumbs='initializing resuspension class friction velocity')
 
     def select_particles_to_resupend(self, active):
         # compare to single critical value

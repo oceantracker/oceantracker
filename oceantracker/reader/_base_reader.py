@@ -16,7 +16,7 @@ from oceantracker.reader.util import shared_reader_memory_util
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util import triangle_utilities_code
 from oceantracker.util.triangle_utilities_code import split_quad_cells
-
+from oceantracker.fields._base_field import  CustomFieldBase , ReaderField
 from oceantracker.reader.util import reader_util
 
 class _BaseReader(ParameterBaseClass):
@@ -36,17 +36,17 @@ class _BaseReader(ParameterBaseClass):
                                'triangles': PVC(None, str),
                                'bottom_cell_index': PVC(None, str),
                                'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-            'load_fields': PLC([], [str], doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
+            'load_fields': PLC([], [str], doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                    make_list_unique=True),
             'field_variables': PLC([], [str], obsolete=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',
                                    make_list_unique=True),
-            'field_variable_map': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3, is_required=True),
-                                'tide': PVC('elev', str),
-                                'water_depth': PVC('depth', str, is_required=True),
-                                'water_temperature': PVC('temp', str),
-                                'salinity': PVC(None, str),
-                                'wind_stress': PVC(None, str),
-                                'bottom_stress': PVC(None, str),
+            'field_variable_map': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
+                                'tide': PVC('elev', str, doc_str='maps standard internal field name to file variable name'),
+                                'water_depth': PVC('depth', str, is_required=True,doc_str='maps standard internal field name to file variable name'),
+                                'water_temperature': PVC('temp', str,doc_str='maps standard internal field name to file variable name'),
+                                'salinity': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
+                                'wind_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
+                                'bottom_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
                                 },
             'dimension_map': {'time': PVC('time', str, is_required=True),
                               'node': PVC('node', str),
@@ -61,7 +61,6 @@ class _BaseReader(ParameterBaseClass):
 
         self.info['field_variable_info'] = {}
         self.info['buffer_info'] ={}
-
 
     def initial_setup(self):
         # map variable internal names to names in NETCDF file
@@ -80,12 +79,7 @@ class _BaseReader(ParameterBaseClass):
         if self.is_hindcast3D(nc):
             grid['is3D'] = True
             grid = self.setup_vertical_grid(nc, grid)
-            # add core total water depth property
-            si.classes['field_group_manager'].add_custom_field(
-                'total_water_depth',
-                dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',
-                                           crumbs='initializing core TotalWaterDepth class ')
-                                                )
+
         else:
             #2D
             grid['is3D'] = False
@@ -105,6 +99,17 @@ class _BaseReader(ParameterBaseClass):
         bi['time_steps_in_buffer'] = []
         bi['buffer_available'] = bi['buffer_size']
         bi['nt_buffer0'] = 0
+
+    def final_setup(self):
+        # set up particle properties accocated with fields
+        si = self.shared_info
+        for name, i in si.classes['fields'].items():
+            if i.params['create_particle_property_with_same_name']:
+                si.classes['particle_group_manager'].add_particle_property(name, 'from_fields',
+                        dict(time_varying=i.is_time_varying(),
+                         vector_dim=i.get_number_components()),
+                        crumbs= f' reader field setup > "{name}"'
+                        )
 
     def sort_files_by_time(self,file_list, msg_logger):
         # get time sorted list of files matching mask
@@ -311,6 +316,7 @@ class _BaseReader(ParameterBaseClass):
         si= self.shared_info
         fgm = si.classes['field_group_manager']
         vi = self.info['field_variable_info']
+        grid = self.grid
 
         info=self.info
         params = self.params
@@ -325,11 +331,17 @@ class _BaseReader(ParameterBaseClass):
             vi[name] =self.field_var_info(nc,file_var_map )
             fgm.add_reader_field(name, self, vi[name] , crumbs='Reader Field' )
 
+        if grid['is3D']:
+            # add core total water depth property
+            si.classes['field_group_manager'].add_custom_field(
+                'total_water_depth',
+                dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',time_varying=True),
+                                           crumbs='initializing core TotalWaterDepth class ')
+
         # read time independent vector and scalar reader fields
         for name, field in si.classes['fields'].items():
-            if not field.is_time_varying() and field.info['group'] == 'from_reader_field':
+            if not field.is_time_varying() and isinstance(field,ReaderField):
                 data = self.assemble_field_components(nc, name)
-                data = self.convert_field_grid(nc, name, data)  # do any customised tweaks
                 field.data[0, ...] = data
 
     def setup_vertical_grid(self, nc, grid):
@@ -429,9 +441,6 @@ class _BaseReader(ParameterBaseClass):
     def additional_setup_and_hindcast_file_checks(self, nc,msg_logger): pass
 
 
-   # working methods
-    def convert_field_grid(self, nc, name, data): return data # allows tweaks to grid of named fields, eg if name=='depth:
-
     #@function_profiler(__name__)
     def fill_time_buffer(self, time_sec):
         # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
@@ -449,8 +458,6 @@ class _BaseReader(ParameterBaseClass):
         bi = info['buffer_info']
         vi = info['field_variable_info']
         buffer_size = bi['buffer_size']
-
-        field_data_temp1=0
 
         nt0_hindcast = self.time_to_hydro_model_index(time_sec)
         bi['nt_buffer0'] = nt0_hindcast  # nw start of buffer
@@ -500,12 +507,10 @@ class _BaseReader(ParameterBaseClass):
 
             # read time varying vector and scalar reader fields
             # do this in order set above
-            #todo make buffers for data
             for name in field_names:
                 field = fields[name]
-                if field.is_time_varying() and field.info['group'] == 'from_reader_field':
+                if field.is_time_varying() and field.info['group'] =='reader_field':
                     data  = self.assemble_field_components(nc, name, file_index=file_index)
-                    data = self.convert_field_grid(nc, name, data) # do any customised tweaks
                     data = self.preprocess_field_variable(nc, name, data) # in place tweaks, eg zero vel at bottom
 
                     junk = data
@@ -549,9 +554,9 @@ class _BaseReader(ParameterBaseClass):
 
             # now all  data has been read from file, now
             # update user fields from newly read fields and data
-            for name, i in si.classes['fields'].items():
-                if i.is_time_varying() and i.info['group'] in ['derived_from_reader_field','user']:
-                    i.update(buffer_index)
+            for name, field in fields.items():
+                if field.is_time_varying() and field.info['group']=='custom_field':
+                    field.update(buffer_index)
 
             total_read += num_read
 

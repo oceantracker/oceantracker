@@ -293,6 +293,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # shortcuts
         t0 = perf_counter()
         si = self.shared_info
+        si.particle_status_flags = common_info.particle_info['status_flags']
 
         # start with setting up field gropus, which set up readers
         # as it has info on whether 2D or 3D which  changes class options'
@@ -300,17 +301,27 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         fgm = si.add_core_class('field_group_manager', si.working_params['core_roles']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
 
+       
+
+        if si.write_tracks:
+            si.add_core_class('tracks_writer',si.working_params['core_roles']['tracks_writer'], initialise=True)
+        else:
+            si.classes['tracks_writer'] = None
+
+        pgm = si.add_core_class('particle_group_manager', si.working_params['core_roles']['particle_group_manager'], crumbs=f'adding core class "particle_group_manager" ')
+        pgm.initial_setup()  # needed here to add reader fields inside reader build
+
+        fgm.final_setup()  # set up particle properties associated with fields
+
         # make other core classes, eg.
-
-
         core_role_params=si.working_params['core_roles']
-        for name in ['interpolator','particle_group_manager','solver','dispersion']:
+        for name in ['interpolator','solver','dispersion']:
             si.add_core_class(name, core_role_params[name], crumbs=f'core class "{name}" ')
+
 
         if si.is3D_run:
             si.add_core_class('resuspension', core_role_params['resuspension'], crumbs= 'core class "resuspension" ')
 
-        si.particle_status_flags = si.classes['particle_group_manager'].status_flags
 
         if si.settings['time_step'] is None:
             time_step = fgm.get_hydo_model_time_step()
@@ -351,23 +362,20 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.time_of_nominal_first_occurrence = si.model_direction * 1.0E36
         # todo get rid of time_of_nominal_first_occurrence
 
-        if si.write_tracks:
-            si.add_core_class('tracks_writer',si.working_params['core_roles']['tracks_writer'], initialise=True)
-        else:
-            si.classes['tracks_writer'] = None
+
 
         # initialize the rest of the core classes
         #todo below apply to all core classes, reader
         #todo alternative can they be intitlised on creation here?
         t0 = perf_counter()
-        for name in ['particle_group_manager', 'interpolator', 'solver'] : # order may matter?
+        for name in ['interpolator', 'solver'] : # order may matter?
             si.classes[name].initial_setup()
         si.msg_logger.progress_marker('initial set up of core classes', start_time=t0)
 
         # do final setp which may depend on settingd from intitial st up
         t0= perf_counter()
         # order matters, must do interpolator after particle_group_manager, to get stucted arrays and solver last
-        for name in ['field_group_manager','particle_group_manager', 'interpolator', 'solver'] :
+        for name in ['particle_group_manager', 'interpolator', 'solver'] :
             si.classes[name].final_setup()
         si.msg_logger.progress_marker('final set up of core classes',start_time=t0)
 
@@ -382,7 +390,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for prop_type in ['from_reader_field','derived_from_reader_field','depth_averaged_from_reader_field']:
             for name, i in si.classes['fields'].items():
                 if i.info['group'] == prop_type:
-                    pgm.create_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
+                    pgm.add_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
                                                                  write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
         si.msg_logger.progress_marker('created particle properties derived from fields', start_time=t0)
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
@@ -390,7 +398,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             i = si.create_class_dict_instance(name,'fields', 'user', params, crumbs='Adding "fields" from user params')
             i.initial_setup()
             # now add custom prop based on  this field
-            pgm.create_particle_property(i.info['name'], 'from_fields', dict(vector_dim=i.get_number_components(), time_varying=i.is_time_varying(),
+            pgm.add_particle_property(i.info['name'], 'from_fields', dict(vector_dim=i.get_number_components(), time_varying=i.is_time_varying(),
                                                              write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
 
             # if not time varying can update once at start from other non-time varying fields
@@ -398,7 +406,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # any custom particle properties added by user
         for name, p in si.working_params['role_dicts']['particle_properties'].items():
-            pgm.create_particle_property(name, 'user',p)
+            pgm.add_particle_property(name, 'user',p)
 
         # add default classes, eg tidal stranding
         #todo this may be better else where

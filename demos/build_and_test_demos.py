@@ -274,7 +274,6 @@ params.append (s50)
 
 # schsim 3D
 s56 = deepcopy(schsim_base_params)
-s56['reader'].update({'depth_average': False})
 
 s56['release_groups']={
             'P1':{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],

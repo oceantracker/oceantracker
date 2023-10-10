@@ -7,8 +7,7 @@
         "file_mask": "demoHindcastSchism3D.nc",
         "load_fields": [
             "water_temperature"
-        ],
-        "depth_average": false
+        ]
     },
     "dispersion": {
         "A_H": 0.1,

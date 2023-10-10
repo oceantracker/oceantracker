@@ -491,7 +491,6 @@ if __name__ == '__main__':
                    'hgrid_file_name': path.join(input_dir, 'hgrid.gr3'),
                    # fields to track at particle locations
                    'load_fields': {'ECO_no3': 'ECO_no3', 'A_Z': 'diffusivity'},
-                   'field_variables_to_depth_average': ['water_velocity']
                    },
 
         'tracks_writer': {
