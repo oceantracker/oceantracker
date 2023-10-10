@@ -22,8 +22,6 @@ x0 = WGS84_to_NZTM(np.asarray([[173.321831,-41.201488+.005]])).tolist()
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-
-    parser.add_argument('-depthaverage', action='store_true')
     parser.add_argument('-mode_debug', action='store_true')
     parser.add_argument('-noplots', action='store_true')
     args = parser.parse_args()
@@ -35,7 +33,6 @@ if __name__ == '__main__':
             'write_tracks': True,
             'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                       'file_mask': 'schism_marl201701*.nc', 'input_dir': 'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2017',
-                      'depth_average': args.depthaverage,
                         'field_variables_to_depth_average': ['water_velocity'],
                       },
         'tracks_writer': {'output_step_count': 3},

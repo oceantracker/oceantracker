@@ -27,7 +27,7 @@ class TerminalVelocity(VelocityModiferBase):
 
         if self.params['variance'] is not None:
            # set up individual particle terminal velocties
-           particle.create_particle_property('terminal_velocity','user',dict(
+           particle.add_particle_property('terminal_velocity','user',dict(
                                                           class_name='oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution',
                                              value=self.params['value'], variance=self.params['variance']))
 

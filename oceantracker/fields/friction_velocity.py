@@ -1,10 +1,10 @@
-from oceantracker.fields._base_field import UserFieldBase
+from oceantracker.fields._base_field import CustomFieldBase
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 from numba import njit
 import numpy as np
 
-class FrictionVelocity(UserFieldBase):
+class FrictionVelocity(CustomFieldBase):
     def __init__(self):
         super().__init__()
         self.add_default_params({'is_time_varying': PVC(True,bool),

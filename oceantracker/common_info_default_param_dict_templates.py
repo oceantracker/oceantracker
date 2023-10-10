@@ -18,8 +18,7 @@ shared_settings_defaults ={
                 'time_step': PVC(None, float, min=0.01, units='sec',doc_str='Time step in seconds for all cases'),
                 'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
                 'backtracking':        PVC(False, bool, doc_str='Run model backwards in time'),
-                'run_as_depth_averaged': PVC(False, bool,doc_str='in development; Force a run using 2D velocity  if available in files or  to allow 3D hydro-model to be depth averaged on the fly to run faster'),  # turns 3D hindcast into a 2D one
-                'debug':               PVC(False, bool,doc_str='Gives more useful numba code error messages'),
+                 'debug':               PVC(False, bool,doc_str='Gives more useful numba code error messages'),
                 'minimum_total_water_depth': PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
                 'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
                 'max_run_duration':    PVC(max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration

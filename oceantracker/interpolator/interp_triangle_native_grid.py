@@ -45,16 +45,16 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # create particle properties to  store history of current triangle  for reuse
 
         p = si.classes['particle_group_manager']
-        p.create_particle_property('n_cell', 'manual_update',dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
-        p.create_particle_property('bc_cords','manual_update',dict(  write=False, initial_value=0., vector_dim=3,dtype=np.float64))
+        p.add_particle_property('n_cell', 'manual_update',dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
+        p.add_particle_property('bc_cords','manual_update',dict(  write=False, initial_value=0., vector_dim=3,dtype=np.float64))
 
         # BC walk info
         if si.is3D_run:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
-            p.create_particle_property('nz_cell', 'manual_update',dict( write=False, dtype=np.int32, initial_value=grid['nz']-2)) # todo  create  initial serach for vertical cell
-            p.create_particle_property('z_fraction','manual_update',dict(   write=False, dtype=np.float32, initial_value=0.))
-            p.create_particle_property('z_fraction_water_velocity','manual_update', dict( write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
+            p.add_particle_property('nz_cell', 'manual_update',dict( write=False, dtype=np.int32, initial_value=grid['nz']-2)) # todo  create  initial serach for vertical cell
+            p.add_particle_property('z_fraction','manual_update',dict(   write=False, dtype=np.float32, initial_value=0.))
+            p.add_particle_property('z_fraction_water_velocity','manual_update', dict( write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
 
         # attach a reader to this interpolator

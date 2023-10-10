@@ -8,8 +8,6 @@ import argparse
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-
-    parser.add_argument('-depthaverage', action='store_true')
     parser.add_argument('-mode_debug', action='store_true')
     parser.add_argument('-noplots', action='store_true')
     parser.add_argument('-norun', action='store_true')
@@ -29,11 +27,10 @@ if __name__ == '__main__':
         [1838293.4656,      5940629.8263],
         [1788021.4244,      5940860.2283]
          ]
-    x0=[x0[0]]
+
     params ={
         'max_run_duration': 5. * 24 * 3600,
         'write_tracks': True,
-        'tracks_writer' : {'output_step_count': 3},
         'output_file_base': output_file_base,
         'root_output_dir': root_output_dir,
         'release_groups': {'P1': {'points': x0 ,'pulse_size':5, 'release_interval': 3600}},
@@ -46,14 +43,13 @@ if __name__ == '__main__':
          'reader': {'file_mask': 'NZ*.nc',
                    'input_dir': root_input_dir,
                     'regrid_z_to_equal_sigma': True,
-                    'field_variables_to_depth_average': ['water_velocity'],
                       #'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                       },
            }
 
-    if not args.depthaverage:
-        params['velocity_modifiers']= {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': 0.000}}
-        params['resuspension']={'critical_friction_velocity': 0.001}
+
+    params['velocity_modifiers']= {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': 0.000}}
+    params['resuspension']={'critical_friction_velocity': 0.01}
     if args.mode_debug: params['debug'] = True
 
     pass

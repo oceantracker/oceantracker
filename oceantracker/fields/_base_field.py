@@ -7,7 +7,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 
 
 # make and access 4D fields from reader or custom fields with dims [ time,node,z, vector components]
-class _BaseField(ParameterBaseClass):
+class ReaderField(ParameterBaseClass):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params
 
@@ -53,14 +53,13 @@ class _BaseField(ParameterBaseClass):
     def update(self): pass
 
 
-class UserFieldBase(_BaseField):
+class CustomFieldBase(ReaderField):
     # same as above but update method is required
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params
 
 
-
-    def update(self, time_sec): basic_util.nopass('User fields must have update method')
+    def update(self, active): basic_util.nopass('User fields must have update method')
     # if buffer index None, this  allows update of non-time varying use fields
 
 

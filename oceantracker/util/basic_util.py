@@ -47,7 +47,8 @@ def is_substring_in_list(sub_str,str_list):
 
 
 
-def nopass(msg=''):  raise Exception("Missing method, base method must be overwritten" +msg)
+def nopass(msg=''):
+    raise Exception("Missing method, base method must be overwritten" +msg)
 
 
 
