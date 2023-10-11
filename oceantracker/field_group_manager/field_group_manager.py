@@ -88,11 +88,33 @@ class FieldGroupManager(ParameterBaseClass):
 
     def initial_setup_hydro_fields(self):
         si = self.shared_info
+
+
         reader = si.add_core_class('reader', si.working_params['core_roles']['reader'],
                                         crumbs=f'Feild Group Manager>setup_hydro_fields> reader class  ')
 
+        # work out if 3D, by examining wter velocity
+        nc = reader.open_first_file()
+        vm = reader.params['field_variable_map']
+
+        if nc.is_var(vm['water_velocity'][0]):
+            # check if water vel variable has z dim
+            si.is3D_run = True if nc.is_var_dim( vm['water_velocity'][0],reader.params['dimension_map']['z_water_velocity'] ) else False
+
+        elif len(vm['water_velocity_depth_averaged']) > 0 and nc.is_var(vm['water_velocity_depth_averaged'][0]):
+            # see if depth average velocity available and use it
+            vm['water_velocity'] = vm['water_velocity_depth_averaged']
+            si.is3D_run = False
+        else:
+            si.msg_logger.msg(f'Can not find water velocity variables "{str(vm["water_velocity"])}", nor depth average water velocity variables "{str(vm["water_velocity"])}" in first hydro file',
+                             fatal_error=True, exit_now=True)
+
+        nc.close()
+
+        si.msg_logger.msg(f'Hydro files are "{"3D" if  si.is3D_run else "2D"}"', note=True)
+
         reader.initial_setup()
-        si.is3D_run = reader.grid['is3D']
+
 
     def update_dry_cells(self):
         # update 0-255 dry cell index for each interpolator

@@ -56,7 +56,7 @@ class Solver(ParameterBaseClass):
         # get hindcast step range
         time_span = fgm.get_hindcast_range()
         #todo simplify by dropping need to find model end time
-        model_times = ri['model_start_time'] + si.model_direction*np.arange(0., abs(time_span[1]-time_span[0]),abs(ri['model_time_step']))
+        model_times = ri['model_start_time'] + si.model_direction*np.arange(0., abs(time_span[1]-time_span[0]),abs(si.settings['time_step']))
         # trim times to hindcast range
         sel = np.logical_and(model_times >= time_span[0], model_times <=time_span[1])
         model_times = model_times[ sel]
@@ -66,7 +66,7 @@ class Solver(ParameterBaseClass):
         if write_tracks_time_step is None:
             nt_write_time_step_to_screen = 1
         else:
-            nt_write_time_step_to_screen = max(1,int(write_tracks_time_step/ri['model_time_step']))
+            nt_write_time_step_to_screen = max(1,int(write_tracks_time_step/si.settings['time_step']))
 
         t0_model = perf_counter()
         free_wheeling =False
@@ -122,7 +122,7 @@ class Solver(ParameterBaseClass):
             if nt % nt_write_time_step_to_screen == 0:
                 self.screen_output(ri['time_steps_completed'], time_sec, t0_model, t0_step)
 
-            t2 = time_sec + ri['model_time_step'] * si.model_direction
+            t2 = time_sec + si.settings['time_step'] * si.model_direction
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             ri['time_steps_completed'] += 1
@@ -211,7 +211,7 @@ class Solver(ParameterBaseClass):
         part_prop =  si.classes['particle_properties']
 
         # note here subStep_time_step has sign of forwards/backwards
-        dt = si.run_info['model_time_step']*si.model_direction
+        dt = si.settings['time_step']*si.model_direction
         dt2=dt/2.
         # set up views of  working variable space
         x1      = part_prop['x_last_good'].data

@@ -47,12 +47,17 @@ class _BaseReader(ParameterBaseClass):
                                 'salinity': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
                                 'wind_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
                                 'bottom_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
+                                'water_velocity_depth_averaged': PLC([], [str, None],fixed_len=2,
+                                                                     doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available',
+                                                                     make_list_unique=True)
                                 },
             'dimension_map': {'time': PVC('time', str, is_required=True),
                               'node': PVC('node', str),
                               'z': PVC(None, str),
+                              'z_water_velocity': PVC('z', str, doc_str='z dimension of water velocity, used to test if hydro model has 3D velocity field'),
                               'vector2D': PVC(None, str),
                               'vector3D': PVC(None, str)},
+            'CRS_transform_code':  PVC(None, int, doc_str='CRY code for coordinate conversion of hydro-model lon-lat to a meters grid , eg. CRS for NZTM is 2193'),
             'regrid_z_to_equal_sigma': PVC(True, bool, doc_str='speed run by re-griding 3D fields  in the z to equal sigma levels, based on most curve z_level profile'),
             'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
             'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
@@ -75,14 +80,10 @@ class _BaseReader(ParameterBaseClass):
         grid['equal_sigma_layers'] = False
         self.grid= self.build_2Dgrid(grid)
 
-
-        if self.is_hindcast3D(nc):
-            grid['is3D'] = True
+        if si.is3D_run:
             grid = self.setup_vertical_grid(nc, grid)
-
         else:
             #2D
-            grid['is3D'] = False
             grid['zlevel'] = None
             grid['nz'] = 1  # only one z
 
@@ -154,6 +155,13 @@ class _BaseReader(ParameterBaseClass):
 
         return fi
 
+    def open_first_file(self):
+        si = self.shared_info
+
+        fi= si.working_params['file_info']
+        nc = NetCDFhandler(fi['names'][0], 'r')
+        return nc
+
     def get_hindcast_files_info(self, file_list, msg_logger):
         # read through files to get start and finish times of each file
         # create a time sorted list of files given by file mask in file_info dictionary
@@ -165,9 +173,6 @@ class _BaseReader(ParameterBaseClass):
         # check cals name
         fi = self.sort_files_by_time(file_list, msg_logger)
 
-        # checks on hindcast using first hindcast file
-        nc = NetCDFhandler(fi['names'][0], 'r')
-        nc.close()
 
         t =  np.concatenate((fi['time_start'],   fi['time_end']))
         fi['first_time'] = np.min(t)
@@ -190,11 +195,11 @@ class _BaseReader(ParameterBaseClass):
         # check if time diff between starts of file and end of last are larger than average time step
         if len(fi['time_start']) > 1:
             dt_gaps = fi['time_start'][1:] - fi['time_end'][:-1]
-            sel = np.abs(dt_gaps) > 2* fi['hydro_model_time_step']
+            sel = np.abs(dt_gaps) > 2.5* fi['hydro_model_time_step']
             if np.any(sel):
-                msg_logger.msg('Some time gaps between hindcast files is are > 1.8 times average time step, check hindcast files are all present??', hint='check hindcast files are all present and times in files consistent', warning=True)
+                msg_logger.msg('Some time gaps between hydro-model files is are > 2.5 times average time step, check hindcast files are all present??', hint='check hindcast files are all present and times in files consistent', warning=True)
                 for n in np.flatnonzero(sel):
-                    msg_logger.msg(' large time gaps bwteen flies > 2 time steps) for  files in squence ' + fi['names'][n] + ' and ' + fi['names'][n + 1], tabs=1)
+                    msg_logger.msg(' large time gaps between file ' + fi['names'][n] + ' and ' + fi['names'][n + 1], tabs=1)
 
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
         return fi
@@ -331,7 +336,7 @@ class _BaseReader(ParameterBaseClass):
             vi[name] =self.field_var_info(nc,file_var_map )
             fgm.add_reader_field(name, self, vi[name] , crumbs='Reader Field' )
 
-        if grid['is3D']:
+        if si.is3D_run:
             # add core total water depth property
             si.classes['field_group_manager'].add_custom_field(
                 'total_water_depth',
@@ -583,13 +588,14 @@ class _BaseReader(ParameterBaseClass):
         out  = np.zeros(s,dtype=np.float32) #todo faster make a generic  buffer at start
 
         m= 0 # num of vector components read so far
+
         var_names = params['field_variable_map'][name] if type(params['field_variable_map'][name]) ==list  else [params['field_variable_map'][name]]
 
         for var_name in var_names:
             if var_name is None: continue
             data = self.read_file_var_as_4D_nodal_values(nc, var_name, file_index)
             comp_per_var = data.shape[3]
-            m1 = m + comp_per_var
+            m1 = m + comp_per_var + 1
             # get view of where in buffer data is to be placed
             out[:, :, :, m:m1] = data
             m += comp_per_var
@@ -601,10 +607,16 @@ class _BaseReader(ParameterBaseClass):
         dm = self.params['dimension_map']
         data = nc.read_a_variable(var_name, sel=file_index)
         # get 4d size
-        s= list(data.shape)
-        if not nc.is_var_dim(var_name,dm['time']): s = [1] + s
-        if not nc.is_var_dim(var_name,dm['z']):  s = s[:3] + [1] + s[3:]
-        if not nc.is_var_dim(var_name, dm['vector2D']) and not nc.is_var_dim(var_name, dm['vector3D']): s += [1]
+        s= [0,0,0,0]
+        s[0] = data.shape[0] if nc.is_var_dim(var_name,dm['time']) else 1
+        s[1] = nc.dim_size(self.params['dimension_map']['node'])
+        s[2] = nc.dim_size(self.params['dimension_map']['z']) if nc.is_var_dim(var_name,dm['z']) else 1
+        if nc.is_var_dim(var_name, dm['vector2D']):
+            s[3] = 2
+        elif  nc.is_var_dim(var_name, dm['vector3D']):
+            s[3] = 3
+        else:
+            s[3] = 1
 
         return data.reshape(s)
 
@@ -696,7 +708,7 @@ class _BaseReader(ParameterBaseClass):
 
     def convert_lon_lat_to_meters_grid(self, x):
 
-        if self.params['EPSG_transform_code'] is None:
+        if self.params['CRS_transform_code'] is None:
             x_out, self.cord_transformer= cord_transforms.WGS84_to_UTM( x, out=None)
         else:
             #todo make it work with users transform?

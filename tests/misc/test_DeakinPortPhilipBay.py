@@ -53,6 +53,7 @@ if __name__ == '__main__':
 
     x0 = [[312197, 5795541],
           [294455, 5758887],
+          [294455, 5760000],
           ]
 
     params = set_params(args, x0, duration_sec=7. * 24 * 3600)
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     params['root_output_dir'] = 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay'
 
     if not args.norun:
-        caseInfoFile, has_errors = run(params)
+        caseInfoFile = run(params)
     else:
         run_info_file = path.join(
             params['root_output_dir'],
