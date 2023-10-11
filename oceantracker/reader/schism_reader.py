@@ -25,13 +25,18 @@ class SCHISMSreaderNCDF(_BaseReader):
                                 'salinity': PVC('salt', str,doc_str='maps standard internal field name to file variable name'),
                                 'wind_stress': PVC('wind_stress', str,doc_str='maps standard internal field name to file variable name'),
                                 'bottom_stress': PVC('bottom_stress', str,doc_str='maps standard internal field name to file variable name'),
-                                'A_Z_profile':  PVC('diffusivity', str,doc_str='maps standard internal field name to file variable name'),
-                                },
+                                'A_Z_profile':  PVC('diffusivity', str,doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
+                                'water_velocity_depth_averaged': PLC(['dahv'], [str],  fixed_len=2,
+                                                                     doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
+
+                                   },
             'dimension_map': {'time': PVC('time', str),
-                              'node': PVC('node', str),
+                              'node': PVC('nSCHISM_hgrid_node', str),
                               'z': PVC('nSCHISM_vgrid_layers', str),
+                              'z_water_velocity': PVC('nSCHISM_vgrid_layers', str, doc_str='z dimension of water velocity, used to test if hydro model has 3D velocity field'),
                               'vector2D': PVC('two', str),
-                              'vector3D': PVC('three', str)},
+                              'vector3D': PVC('three', str),
+                              },
             'one_based_indices': PVC(True, bool, doc_str='indices in Schism are 1 based'),
             'hgrid_file_name': PVC(None, str),
              })
@@ -86,5 +91,4 @@ class SCHISMSreaderNCDF(_BaseReader):
         if name =='water_velocity' and data.shape[2] > 1:
             # for 3D schism velocity partial fix for  non-zero hvel at nodes where cells in LSC grid span a change in bottom_cell_index
             data = reader_util.patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
-
         return data

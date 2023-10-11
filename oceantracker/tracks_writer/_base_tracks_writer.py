@@ -48,7 +48,7 @@ class _BaseWriter(ParameterBaseClass):
         if params['update_interval'] is None :
             nt_step = 1
         else:
-            nt_step = int(np.round(params['update_interval']/si.run_info['model_time_step']))
+            nt_step = int(np.round(params['update_interval']/si.settings['time_step']))
 
         self.info['output_step_count'] = min(nt_step,1)
 

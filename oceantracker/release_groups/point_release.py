@@ -95,7 +95,7 @@ class PointRelease(ParameterBaseClass):
             time_end = hindcast_start if si.backtracking else hindcast_end
 
         # get time steps for release in a dow safe way
-        model_time_step = si.run_info['model_time_step']
+        model_time_step = si.settings['time_step']
 
 
         # get release times within the hindcast

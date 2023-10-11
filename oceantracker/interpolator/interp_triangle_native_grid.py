@@ -53,7 +53,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
             p.add_particle_property('nz_cell', 'manual_update',dict( write=False, dtype=np.int32, initial_value=grid['nz']-2)) # todo  create  initial serach for vertical cell
-            p.add_particle_property('z_fraction','manual_update',dict(   write=False, dtype=np.float32, initial_value=0.))
+            p.add_particle_property('z_fraction','manual_update',dict( write=False, dtype=np.float32, initial_value=0.))
             p.add_particle_property('z_fraction_water_velocity','manual_update', dict( write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
 
@@ -286,7 +286,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         # used 2D or 3D walk chosen above
         self._do_walk(xq, active)
-
         #retry any too long wallks
         part_prop = si.classes['particle_properties']
 

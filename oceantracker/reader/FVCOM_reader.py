@@ -20,9 +20,10 @@ class unstructured_FVCOM(_BaseReader):
     def __init__(self):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({ 'load_fields': {'water_velocity': PLC(['u','v'], [str], fixed_len=2),
-                                  'water_depth': PVC('h', str),
-                                  'tide': PVC('zeta', str)},
+        self.add_default_params({ 'field_variable_map': {'water_velocity': PLC(['u','v'], [str], fixed_len=2),
+                                                          'water_depth': PVC('h', str,doc_str='maps standard internal field name to file variable name'),
+                                                          'tide': PVC('zeta', str,doc_str='maps standard internal field name to file variable name')},
+
                                   'required_file_variables': PLC(['Times','nv', 'u', 'v', 'h'], [str]),
                                   'required_file_dimensions': PLC(['siglay', 'siglev'], [str]),
                                 })
@@ -89,7 +90,6 @@ class unstructured_FVCOM(_BaseReader):
         quad_cells_to_split = np.full((data.shape[0],),False,dtype=bool)
         return data[:,:3].astype(np.int32), quad_cells_to_split
 
-    def is_hindcast3D(self, nc):  return nc.is_var('u') # are always 3D
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         # calcuate zlevel from depth fractions, tide and water depth

@@ -295,6 +295,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si = self.shared_info
         si.particle_status_flags = common_info.particle_info['status_flags']
 
+        si.run_info = {}
+
+
         # start with setting up field gropus, which set up readers
         # as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
@@ -323,17 +326,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.add_core_class('resuspension', core_role_params['resuspension'], crumbs= 'core class "resuspension" ')
 
 
-        if si.settings['time_step'] is None:
-            time_step = fgm.get_hydo_model_time_step()
-            si.msg_logger.msg("No time step given, using hydro-model's time step =" + str(time_step) + 'sec', note=True)
-        else:
-            time_step =  si.settings['time_step']
-            if time_step > fgm.get_hydo_model_time_step():
-                time_step = fgm.get_hydo_model_time_step()
-                si.msg_logger.msg("Time step is greater than hydro-model's, this capability not yet available, using hydro-model's time step = " + str(time_step) + ' sec', warning=True)
-
-        si.run_info = {}
-        si.run_info['model_time_step'] = time_step
+        if  si.settings['time_step'] > fgm.get_hydo_model_time_step():
+            si.msg_logger.msg(f'Results may not be accurate as, time step param={si.settings["time_step"]:2.0f} sec,  > hydo model time step = {fgm.get_hydo_model_time_step():2.0f}',
+                              warning=True)
 
         # set up start time and duration based on particle releases
         t0 = perf_counter()
@@ -348,14 +343,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # note results
         si.run_info['model_start_time'] = time_start
         si.run_info['model_end_time'] = time_end
-        si.run_info['model_duration'] = max(abs(time_end - time_start), si.run_info['model_time_step']) # at least one time step
+        si.run_info['model_duration'] = max(abs(time_end - time_start), si.settings['time_step']) # at least one time step
 
         si.msg_logger.progress_marker('set up release_groups', start_time=t0)
 
         # useful info
         si.run_info['model_start_date'] = time_util.seconds_to_datetime64(time_start)
         si.run_info['model_end_date'] = time_util.seconds_to_datetime64(time_end)
-        si.run_info['model_timedelta'] =time_util.seconds_to_pretty_duration_string(si.run_info['model_time_step'])
+        si.run_info['model_timedelta'] =time_util.seconds_to_pretty_duration_string(si.settings['time_step'])
         si.run_info['model_duration_timedelta'] = time_util.seconds_to_pretty_duration_string(si.run_info['model_duration'] )
 
         # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
