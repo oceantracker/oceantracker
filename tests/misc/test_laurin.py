@@ -594,7 +594,7 @@ if __name__ == '__main__':
 
     if not args.doconcentration:
 
-        c = load_output_files.load_concentration_vars(
+        c = load_output_files.load_concentration_data(
             caseInfoFile, var_list=['particle_concentration']
         )
 

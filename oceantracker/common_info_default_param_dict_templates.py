@@ -18,6 +18,7 @@ shared_settings_defaults ={
                 'time_step': PVC(3600., float, min=0.01, units='sec',doc_str='Time step in seconds for all cases'),
                 'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
                 'backtracking':        PVC(False, bool, doc_str='Run model backwards in time'),
+                'regrid_z_to_uniform_sigma_levels': PVC(True, bool, doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),
                  'debug':               PVC(False, bool,doc_str='Gives more useful numba code error messages'),
                 'minimum_total_water_depth': PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
                 'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
@@ -104,7 +105,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
                  'roms': 'oceantracker.reader.ROMS_reader.OMsNativeReader'}
 
 # TODO LIST
-# todo for version 0.40.01
+# todo for version 0.41
     #TODO BUGS
         #todo error handling and log file permission errors when reunning cells in note books
 
@@ -114,9 +115,13 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
 
     # TODO STRUCTURE
         # todo remove writing to file or mp4, and show how to save it by example???
+        #todo plots to return figure handle to allow adding plots, on no show
+        # work only with triangle face values, better for vel bc etc , group feils in array of strutures for faseter acess. No read cost if async reader
 
     # TODO SIMPLIFY
 
+    # TODO input checking
+        #todo check class being added is child of given role
 
     #TODO Nice to haves
         # todo get rid of info[points], just alter params points
@@ -206,7 +211,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
         #  nice to have tme varying write at end
     #todo get rid of base tracks writer???
     #todo conver LSC grid to S layer on read, using smallest number of layers, while keeping bootom log layer?
-    #todo tidy up particle concentrations
+    #todo tidy up particle concentrations, add grid data to netcdf
 
 # TODO FUTURE
     # todo Kernal RK steps

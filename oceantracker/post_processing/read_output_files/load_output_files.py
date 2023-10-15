@@ -108,10 +108,10 @@ def _extract_useful_info(case_info, d):
 
     return d
 
-def load_concentration_vars(case_info_file_name, var_list=[], name= None):
+def load_concentration_data(case_info_file_name, name= None):
     case_info = read_case_info_file(case_info_file_name)
     nc_file_name= _get_role_dict_file_name(case_info, 'particle_concentrations', name)
-    d = read_ncdf_output_files.read_concentration_file(nc_file_name, var_list=var_list)
+    d = read_ncdf_output_files.read_concentration_file(nc_file_name)
     d['grid'] = load_grid(case_info_file_name)
     d =  _extract_useful_info(case_info, d)
     return d

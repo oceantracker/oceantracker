@@ -12,7 +12,7 @@ import make_demo_plots
 import build_and_test_demos
 import numpy as np
 from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.post_processing.read_output_files.load_output_files import load_stats_data, load_concentration_vars
+from oceantracker.post_processing.read_output_files.load_output_files import load_stats_data, load_concentration_data
 from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
 
 two_points= [[1594500, 5483000], [1598000, 5486100]]
@@ -152,20 +152,20 @@ if __name__ == "__main__":
 
         elif n == 61:
             #todo make conc plotting work
-            continue
+
             from oceantracker.post_processing.plotting.plot_statistics import animate_concentrations
 
-            c = load_concentration_vars(case_info_file_name, var_list=['particle_concentration', 'C'])
+            c = load_concentration_data(case_info_file_name)
 
             axis_lims = [1591000, 1601500, 5478500, 5491000]
 
-            animate_concentrations(c, data_to_plot=c['particle_concentration'], logscale=True,
+            animate_concentrations(c, plot_load=False, logscale=True,
                                    axis_lims=axis_lims, cmap='hot_r',
                                    heading='SCHISIM-3D, 2D concentrations in triangles, shading',
                                    movie_file=plot_output_file + '_shading.mp4' if plot_output_file is not None else None,
                                    fps=7, interval=20,
                                    vmin=0., vmax=1.0)
-            animate_concentrations(c, data_to_plot=c['particle_count'], logscale=True,
+            animate_concentrations(c, plot_load=True, logscale=True,
                                    axis_lims=axis_lims, cmap='hot_r', shading=False, interval=200,
                                    heading='SCHISIM-3D, 2D particle counts in triangles, noshading',
                                    fps=7,

@@ -18,11 +18,12 @@ class _BaseTriangleProperties(ParameterBaseClass):
                                  'write': PVC(True, bool),
                                  'role_output_file_tag': PVC('_concentrations_', str),
                                  'count_status_equal_to': PVC(None, str, possible_values=particle_info['status_flags'].keys()),
-                                 'release_group_to_track': PVC(None, int, min=0),
-                                 'only_update_concentrations_on_write': PVC(False, bool),
-                                 'output_step_count': PVC(1, int, min=1),
-                                 'update_interval' : PVC(1, float, min=1) # not 1 to keep file size small
+                                 'only_update_concentrations_on_write': PVC(True, bool),
+                                 'update_interval': PVC(3600., int, min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
+                                 'update_values_every_time_step': PVC(False, bool, min=1, units='sec', doc_str='update values in memory every time step, needed if using concentrations within modelling to change particle behaviour or properties. Output interval still sep by update_interval')
                                  })
+        self.info['time_last_stats_recorded'] = -np.inf
+
     def initial_setup(self):
         # set up data buffer and output variables
         self.set_up_data_buffers()
@@ -54,17 +55,11 @@ class _BaseTriangleProperties(ParameterBaseClass):
         part_prop =  si.classes['particle_properties']
         return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
 
-    def write(self, time_sec):
-        si = self.shared_info
-        if self.params['only_update_concentrations_on_write']: self.update(time_sec)
+    def write(self, time_sec): nopass()
 
-        if si.write_output_files and self.params['write'] and si.run_info['time_steps_completed'] % self.params['output_step_count'] == 0:
-            self.nc.file_handle['time'][self.time_steps_written] = time_sec
-            self.nc.file_handle['particle_count'][self.time_steps_written,...] = self.particle_count[:]
-            self.nc.file_handle['particle_concentration'][self.time_steps_written, ...] = self.particle_concentration[:]
-            self.time_steps_written += 1
 
-    def update(self, time_sec):nopass
+    def update(self, time_sec):nopass()
+
     def check_requirements(self): pass
 
     def record_time_stats_last_recorded(self, t): self.info['time_last_stats_recorded'] = t

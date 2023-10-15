@@ -9,12 +9,12 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo61_concentration_test
 
 # below only required for plotting
-from oceantracker.post_processing.read_output_files.load_output_files import load_concentration_vars, get_case_info_file_from_run_file
+from oceantracker.post_processing.read_output_files.load_output_files import load_concentration_data, get_case_info_file_from_run_file
 from oceantracker.post_processing.plotting.plot_statistics import animate_concentrations
 
 output_file= "output\demo61_concentration_test"
 
-c = load_concentration_vars(case_info_file_name, var_list=['particle_concentration', 'C'])
+c = load_concentration_data(case_info_file_name, var_list=['particle_concentration', 'C'])
 
 axis_lims = [1591000, 1601500, 5478500, 5491000]
 

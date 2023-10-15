@@ -30,7 +30,7 @@ class _BaseReader(ParameterBaseClass):
             'cords_in_lat_long': PVC(False, bool, doc_str='Convert given nodal lat longs to a UTM metres grid'),
             'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels'),
             'time_buffer_size': PVC(24, int, min=2),
-            'grid_variable_map': {'time': PVC('time', str, is_required=True),
+            'grid_variable_map': {'time': PVC('time',str, doc_str='time variable nae in file' ),
                                'x': PLC(['x', 'y'], [str], fixed_len=2),
                                'zlevel': PVC(None, str),
                                'triangles': PVC(None, str),
@@ -53,12 +53,11 @@ class _BaseReader(ParameterBaseClass):
                                 },
             'dimension_map': {'time': PVC('time', str, is_required=True),
                               'node': PVC('node', str),
-                              'z': PVC(None, str),
-                              'z_water_velocity': PVC('z', str, doc_str='z dimension of water velocity, used to test if hydro model has 3D velocity field'),
+                              'z': PVC(None, str,doc_str='name of dim for vertical layer boundaries'),
                               'vector2D': PVC(None, str),
                               'vector3D': PVC(None, str)},
             'CRS_transform_code':  PVC(None, int, doc_str='CRY code for coordinate conversion of hydro-model lon-lat to a meters grid , eg. CRS for NZTM is 2193'),
-            'regrid_z_to_equal_sigma': PVC(True, bool, doc_str='speed run by re-griding 3D fields  in the z to equal sigma levels, based on most curve z_level profile'),
+
             'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
             'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
@@ -77,11 +76,10 @@ class _BaseReader(ParameterBaseClass):
         nc = NetCDFhandler(info['file_info']['names'][0])
 
         grid = self.read_2Dgrid(nc)
-        grid['equal_sigma_layers'] = False
         self.grid= self.build_2Dgrid(grid)
 
         if si.is3D_run:
-            grid = self.setup_vertical_grid(nc, grid)
+            grid = self.build_vertical_grid(nc, grid)
         else:
             #2D
             grid['zlevel'] = None
@@ -204,6 +202,15 @@ class _BaseReader(ParameterBaseClass):
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
         return fi
 
+
+    def is_3D_hydromodel(self,nc):
+        return  True if nc.is_var_dim( self.params['field_variable_map']['water_velocity'][0],self.params['dimension_map']['z_water_velocity'] ) else False
+
+    def is_3D_variable(self,nc, var_name):
+        # is variable 3D
+        return  nc.is_var_dim(var_name,self.params['dimension_map']['z'])
+
+
     def read_2Dgrid(self, nc):
         # read nodal values and triangles
         params = self.params
@@ -215,13 +222,16 @@ class _BaseReader(ParameterBaseClass):
                 ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in grid set', fatal_error=True)
                 return
         grid =  {}
-        grid['triangles'], grid['quad_cells_to_split'] = self.read_triangles(nc)
+
+        # read nodal x's
+        grid = self.read_nodal_x(nc, grid)
+        grid['x'] = grid['x'].astype(np.float64)
+
+        grid = self.read_triangles(nc, grid)
         # ensure np.int32 values
         grid['triangles']=grid['triangles'].astype(np.int32)
         grid['quad_cells_to_split'] = grid['quad_cells_to_split'].astype(np.int32)
 
-        # read nodal x's
-        grid['x'] = self.read_nodal_x(nc).astype(np.float64)
         return grid
 
     def build_2Dgrid(self, grid):
@@ -310,7 +320,7 @@ class _BaseReader(ParameterBaseClass):
                 is_vector = True
 
         out = dict(time_varying=dim_map['time'] in nc.all_var_dims(var_list[0]),
-                 is3D=dim_map['z'] in nc.all_var_dims(var_list[0]),
+                 is3D= self.is_3D_variable(nc, var_list[0]),
                  is_vector= is_vector)
 
         return out
@@ -336,11 +346,9 @@ class _BaseReader(ParameterBaseClass):
             vi[name] =self.field_var_info(nc,file_var_map )
             fgm.add_reader_field(name, self, vi[name] , crumbs='Reader Field' )
 
-        if si.is3D_run:
-            # add core total water depth property
-            si.classes['field_group_manager'].add_custom_field(
-                'total_water_depth',
-                dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',time_varying=True),
+        # add core total water depth property
+        fgm.add_custom_field('total_water_depth',
+                dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',time_varying=True,write_interp_particle_prop_to_tracks_file =False),
                                            crumbs='initializing core TotalWaterDepth class ')
 
         # read time independent vector and scalar reader fields
@@ -349,17 +357,16 @@ class _BaseReader(ParameterBaseClass):
                 data = self.assemble_field_components(nc, name)
                 field.data[0, ...] = data
 
-    def setup_vertical_grid(self, nc, grid):
+    def build_vertical_grid(self, nc, grid):
         # setup transforms on the data, eg regrid vertical if 3D to same sigma levels
         si= self.shared_info
         params = self.params
         info = self.info
 
         grid['bottom_cell_index'] = self.read_bottom_cell_index(nc).astype(np.int32)
-        grid['regrid_z_to_equal_sigma'] =params['regrid_z_to_equal_sigma']
+
         # set up zlevel
-        if params['regrid_z_to_equal_sigma']:
-            grid['equal_sigma_layers'] = True
+        if si.settings['regrid_z_to_uniform_sigma_levels']:
             # setup  regrid grid equal time invariace sigma layers
             # based on profile with thiniest top nad bootm layers
 
@@ -419,26 +426,26 @@ class _BaseReader(ParameterBaseClass):
             time += time_util.isostr_to_seconds(self.params['isodate_of_hindcast_time_zero'])
         return time
 
-    def read_nodal_x(self, nc):
+    def read_nodal_x(self, nc, grid):
         params= self.params
         var_name = params['grid_variable_map']['x']
-        x = np.stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1])), axis=1)
+        grid['x'] = np.stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1])), axis=1)
         if self.params['cords_in_lat_long']:
-            x = self.convert_lon_lat_to_meters_grid(x)
-        return x
+            grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
+        return grid
 
-    def read_triangles(self, nc):
+    def read_triangles(self, nc, grid):
         # return triangulation
         # if triangualur has /quad cells
         params = self.params
         var_name = params['grid_variable_map']['triangles']
-        triangles = nc.read_a_variable(var_name).astype(np.int32)
+        grid['triangles'] = nc.read_a_variable(var_name).astype(np.int32)
 
-        if params['one_based_indices']: triangles -= 1
+        if params['one_based_indices']:  grid['triangles'] -= 1
 
         # note indices of any triangles neeeding splitting
-        triangles_to_split =  np.full((0,),0,np.int32)
-        return triangles, triangles_to_split
+        grid['triangles_to_split'] =  np.full((0,),0,np.int32)
+        return grid
 
     def preprocess_field_variable(self, nc, name, data): return data
 
@@ -519,7 +526,7 @@ class _BaseReader(ParameterBaseClass):
                     data = self.preprocess_field_variable(nc, name, data) # in place tweaks, eg zero vel at bottom
 
                     junk = data
-                    if field.is3D() and params['regrid_z_to_equal_sigma']:
+                    if field.is3D() and si.settings['regrid_z_to_uniform_sigma_levels']:
                         s = list(np.asarray(data.shape, dtype=np.int32))
                         s[2] = grid['sigma'].size
                         out = np.full(tuple(s), np.nan, dtype=np.float32)
@@ -546,7 +553,7 @@ class _BaseReader(ParameterBaseClass):
                         plt.plot(grid['zlevel_fractions'][nn, :], junk[0, nn, :, 0], 'g.')
                         plt.plot(grid['sigma'], data[0, nn, :, 0], 'r--')
                         plt.plot(grid['sigma'], data[0, nn, :, 0],'rx')
-                        #plt.show()
+                        #plt.show(block= True)
                         plt.savefig('\myfig.png')
 
 
@@ -595,7 +602,7 @@ class _BaseReader(ParameterBaseClass):
             if var_name is None: continue
             data = self.read_file_var_as_4D_nodal_values(nc, var_name, file_index)
             comp_per_var = data.shape[3]
-            m1 = m + comp_per_var + 1
+            m1 = m + comp_per_var
             # get view of where in buffer data is to be placed
             out[:, :, :, m:m1] = data
             m += comp_per_var
@@ -610,7 +617,16 @@ class _BaseReader(ParameterBaseClass):
         s= [0,0,0,0]
         s[0] = data.shape[0] if nc.is_var_dim(var_name,dm['time']) else 1
         s[1] = nc.dim_size(self.params['dimension_map']['node'])
-        s[2] = nc.dim_size(self.params['dimension_map']['z']) if nc.is_var_dim(var_name,dm['z']) else 1
+
+        # see if z or z water level  in variable
+        if  nc.is_var_dim(var_name,dm['z']) :
+            s[2] = nc.dim_size(self.params['dimension_map']['z'])
+
+        elif nc.is_var_dim(var_name, dm['z_water_velocity']):
+            s[2] = nc.dim_size(self.params['dimension_map']['z_water_velocity'])
+        else:
+            s[2] = 1
+
         if nc.is_var_dim(var_name, dm['vector2D']):
             s[3] = 2
         elif  nc.is_var_dim(var_name, dm['vector3D']):
@@ -639,7 +655,7 @@ class _BaseReader(ParameterBaseClass):
         if si.is3D_run:
             # grid['total_water_depth'][buffer_index,:]= np.squeeze(si.classes['fields']['tide'].data[buffer_index,:] + si.classes['fields']['water_depth'].data)
             # read zlevel inplace to save memory?
-            if not self.params['regrid_z_to_equal_sigma']:
+            if not si.settings['regrid_z_to_uniform_sigma_levels']:
                 # native zlevel grid and used for regidding in sigma
                 self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
 
@@ -662,6 +678,11 @@ class _BaseReader(ParameterBaseClass):
             # get dry cells for each triangle allowing for splitting quad cells
             data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
             is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
+
+    def read_bottom_cell_index(self, nc):
+        # assume  not LSc grid, so bottom cel is zero
+        return np.full((self.grid['x'].shape[0],),0, dtype=np.int32)
+
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         # read in place

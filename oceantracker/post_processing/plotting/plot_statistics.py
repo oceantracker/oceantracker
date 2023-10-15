@@ -58,9 +58,9 @@ def animate_heat_map(stats_data, release_group, var='count',  axis_lims=None, cr
 
     return anim
 
-def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, credit=None, interval=100, colourbar=True,heading=None,
+def animate_concentrations(concentration_data, plot_load=False,  axis_lims=None, credit=None, interval=100, colourbar=True,heading=None,
                      vmin=None, vmax=None,show_grid=False,title=None,logscale=False, cmap='viridis', shading=True,
-                     movie_file= None, fps=15, dpi=300, release_group=1, back_ground_depth=True, back_ground_color_map= None):
+                     movie_file= None, fps=15, dpi=300, back_ground_depth=True, back_ground_color_map= None):
 
     def draw_frame(nt):
 
@@ -71,6 +71,11 @@ def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, cr
 
     fig = plt.gcf()
     ax = plt.gca()
+
+    if plot_load:
+        data_to_plot = concentration_data['load_concentration']
+    else:
+        data_to_plot = concentration_data['particle_concentration']
 
     vmin, vmax, data = plot_utilities._sort_colour_limits(data_to_plot, vmin, vmax, logscale, masking=back_ground_depth)
 
@@ -90,7 +95,7 @@ def animate_concentrations(concentration_data, data_to_plot,  axis_lims=None, cr
     plot_utilities.draw_base_map(grid, ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title,credit=credit,
                   back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
-    plot_utilities.plot_release_points_and_polygons(concentration_data, ax= ax, release_group=release_group)
+    plot_utilities.plot_release_points_and_polygons(concentration_data, ax= ax)
     #plot_utilities.show_particleNumbers(data_to_plot['total_num_particles_released'])
 
     if colourbar: fig.colorbar(pc, ax=ax)
@@ -132,7 +137,7 @@ def plot_heat_map(stats_data,  release_group, nt=-1, axis_lims=None,show_grid=Fa
 
     plot_utilities.show_output(plot_file_name= plot_file_name)
 
-    return plot_file_name
+    return fig
 
 
 def _get_stats_data(nt, d, var, release_group, logscale, zmin=None):

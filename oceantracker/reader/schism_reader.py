@@ -28,7 +28,6 @@ class SCHISMSreaderNCDF(_BaseReader):
                                 'A_Z_profile':  PVC('diffusivity', str,doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
                                 'water_velocity_depth_averaged': PLC(['dahv'], [str],  fixed_len=2,
                                                                      doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
-
                                    },
             'dimension_map': {'time': PVC('time', str),
                               'node': PVC('nSCHISM_hgrid_node', str),
@@ -69,7 +68,7 @@ class SCHISMSreaderNCDF(_BaseReader):
         self.info['vertical_grid_type'] = vertical_grid_type
         return node_bottom_index
 
-    def read_triangles(self, nc):
+    def read_triangles(self, nc, grid):
         params = self.params
         var_name = params['grid_variable_map']['triangles']
         triangles = nc.read_a_variable(var_name).astype(np.int32)
@@ -79,12 +78,12 @@ class SCHISMSreaderNCDF(_BaseReader):
         # flag quad cells for splitting if index in 4th column
         if triangles.shape[1] == 4 :
             # split quad grids buy making new triangles
-            quad_cells_to_split = triangles[:, 3] > 0
-            triangles = split_quad_cells(triangles, quad_cells_to_split)
+            grid['quad_cells_to_split'] = np.flatnonzero(triangles[:, 3] > 0)
+            grid['triangles'] = split_quad_cells(triangles, grid['quad_cells_to_split'])
         else:
-            quad_cells_to_split = np.full((triangles.shape[0],), False)
+            grid['quad_cells_to_split'] = np.full((0,), 0, dtype=np.int32)
 
-        return triangles, np.flatnonzero(quad_cells_to_split)
+        return grid
 
 
     def preprocess_field_variable(self, nc,name, data):

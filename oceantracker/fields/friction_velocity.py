@@ -23,7 +23,7 @@ class FrictionVelocity(CustomFieldBase):
         si = self.shared_info
         grid = si.classes['reader'].grid
         fields = si.classes['fields']
-        if grid['equal_sigma_layers']:
+        if si.settings['regrid_z_to_uniform_sigma_levels']:
             # sigma model
             self.calc_friction_velocity_from_sigma_levels(buffer_index,
                                                           grid['sigma'],
