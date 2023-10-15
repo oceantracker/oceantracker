@@ -208,13 +208,12 @@ def read_stats_file(file_name):
     nc.close()
     return d
 
-def read_concentration_file(file_name, var_list=[]):
+def read_concentration_file(file_name):
     # read concentration et cdf
     d={}
     nc = NetCDFhandler(file_name, 'r')
-    var_list= list(set(['time','particle_count', 'particle_concentration']+ var_list))
     d.update(_get_release_group_map_and_points(nc))
-    for var in var_list:
+    for var in  nc.all_var_names():
         if nc.is_var(var):
             d[var]= nc.read_a_variable(var)
         else:

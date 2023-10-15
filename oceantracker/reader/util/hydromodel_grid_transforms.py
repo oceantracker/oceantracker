@@ -124,7 +124,7 @@ def get_node_layer_field_values(data, node_to_tri_map, tri_per_node,cell_center_
 def convert_layer_field_to_levels_from_depth_fractions_at_each_node(data, zfraction_center, zfraction_boundaries):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depths
     # used in FVCOM reader
-    data_levels = np.full((data.shape[0],) + (data.shape[1],) + (zfraction_boundaries.shape[1],), 0., dtype=np.float32)
+    data_levels = np.full((data.shape[0],data.shape[1], zfraction_boundaries.shape[1]), 0., dtype=np.float32)
 
     for nt in range(data.shape[0]):
         for n in range(data.shape[1]):

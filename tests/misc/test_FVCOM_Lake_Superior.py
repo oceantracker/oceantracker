@@ -34,12 +34,12 @@ points = [[256203.6793068961, 5193002.88896844, -10],
 points= [[439094.44415005075, 5265627.962025132, -10]]
 
 params={'output_file_base' : output_file_base,
+        'regrid_z_to_uniform_sigma_levels': False,
         'root_output_dir':root_output_dir,
         'time_step' : 20*60,
         'reader': {"class_name": 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
-                'input_dir': input_dir, 'search_sub_dirs': True,
+                'input_dir': input_dir,
                 'file_mask': file_mask},
-
         'user_note':'test of notes',
         'release_groups': {'mytest_points': {'points': points, 'pulse_size': 250, 'release_interval': 7200}} ,
         'particle_statistics':{'example_gridded_stat' :

@@ -354,7 +354,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.run_info['model_duration_timedelta'] = time_util.seconds_to_pretty_duration_string(si.run_info['model_duration'] )
 
         # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
-        si.time_of_nominal_first_occurrence = si.model_direction * 1.0E36
+        si.time_of_nominal_first_occurrence = -si.model_direction * 1.0E36
         # todo get rid of time_of_nominal_first_occurrence
 
 
@@ -394,7 +394,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             i.initial_setup()
             # now add custom prop based on  this field
             pgm.add_particle_property(i.info['name'], 'from_fields', dict(vector_dim=i.get_number_components(), time_varying=i.is_time_varying(),
-                                                             write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
+                                                             write= i.params['write_interp_particle_prop_to_tracks_file']))
 
             # if not time varying can update once at start from other non-time varying fields
             if not i.is_time_varying(): i.update()

@@ -209,13 +209,9 @@ def split_quad_cells(triangles_and_quads,quad_cells_to_split):
     # find indices flagged by boolean for splitting
     # put split cell info next to each other which mayu speed accesing getting nodal data from memory due to caching
     if quad_cells_to_split is not None:
-        num_tri_quad=triangles_and_quads.shape[0]
-        num_to_split = np.sum(quad_cells_to_split)
-        triangles = np.full((num_tri_quad+num_to_split, 3),-1,dtype=np.int32)
-        triangles[:num_tri_quad,:] = triangles_and_quads[: ,:3] # those not split
-
-        qtri = triangles_and_quads[quad_cells_to_split, :]# simplex for those to split
-        triangles[num_tri_quad:, :] = qtri[:, [0, 2, 3]]
+        qtri = triangles_and_quads[quad_cells_to_split, :] # quad simplex for those to split
+        new_tri =  qtri[:, [0, 2, 3]] # build simplex for split triangles
+        triangles = np.concatenate((triangles_and_quads[:,:3],new_tri), axis=0)
     return triangles
 
 if __name__ == "__main__":

@@ -348,7 +348,7 @@ s61.update({'max_run_duration': 15*24*3600.,'output_file_base': 'demo61_concentr
 s61['write_tracks']= False
 s61['particle_concentrations']={'outfall_conc':{'class_name':'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
                                                           'case_output_file_tag': 'siteA','update_interval': 1800}}
-s61['particle_properties']['total_water_depth']={'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth'}
+
 
 for rg in s61['release_groups'].values():
     rg.update({'pulse_size': 1000, 'release_interval': 3600})

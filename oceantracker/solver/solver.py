@@ -310,14 +310,13 @@ class Solver(ParameterBaseClass):
         si.block_timer('Update statistics', t0)
 
     def _update_concentrations(self, time_sec):
-        # update triangle concentrations
+        # update triangle concentrations, these can optionally be done every time step, if concentrations values affect particle properties
         si = self.shared_info
         t0 = perf_counter()
         for name, i in si.classes['particle_concentrations'].items():
-            if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['update_interval']:
-                i.start_update_timer()
-                i.update(time_sec)
-                i.stop_update_timer()
+            i.start_update_timer()
+            i.update(time_sec)
+            i.stop_update_timer()
         si.block_timer('Update concentrations', t0)
 
     def _update_events(self, t):

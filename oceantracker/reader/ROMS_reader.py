@@ -49,7 +49,6 @@ class ROMsNativeReader(GenericUnstructuredReader):
 
     def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.all_var_dims(var_name_in_file) for x in ['s_w','s_rho'])
 
-    def get_number_of_z_levels(self,nc): return nc.dim_size('s_w')
 
     def get_num_vector_components_in_file_variable(self,nc,file_var_name): return 1 # no vector vararibles
 

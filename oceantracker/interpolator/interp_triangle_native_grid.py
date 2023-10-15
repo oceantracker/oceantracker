@@ -207,7 +207,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         info = self.info
 
         if field_instance.is_time_varying():
-            if grid['equal_sigma_layers']:
+            if si.settings['regrid_z_to_uniform_sigma_levels']:
                 triangle_eval_interp.time_dependent_3Dfield_sigma_grid(info['current_buffer_steps'], info['fractional_time_steps'],
                                                     field_instance.data,
                            triangles,
@@ -342,7 +342,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             nz_cell = part_prop['nz_cell'].data
             z_fraction = part_prop['z_fraction'].data
             z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
-            if grid['equal_sigma_layers']:
+            if si.settings['regrid_z_to_uniform_sigma_levels']:
                 try:
                     tri_interp_util.get_depth_cell_sigma_layers(xq,
                                             grid['triangles'],
