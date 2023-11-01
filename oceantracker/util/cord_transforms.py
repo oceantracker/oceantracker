@@ -57,4 +57,4 @@ def WGS84_to_UTM(lon_lat, out=None):
     T = _get_WGS84_UTM_transformer(lon_lat)
 
     out[:, 0], out[:, 1], = T.transform(lon_lat[:, 0], lon_lat[:, 1])
-    return out, T
+    return out

@@ -151,6 +151,6 @@ def update_dry_cell_index(is_dry_cell,dry_cell_index, current_buffer_steps,fract
 # below are development ideas
 #_______________________________________________
 
-# todo interpolate 3D feilds at free surface or bottom
+# todo interpolate 3D fields at free surface or bottom
 def interp_3Dfield_at_surfaces_time_indepenent(F_out, F_data, tri, n_cell, nz_bottom_cell, BCcord, active):
     basic_util.nopass('interp_3Dfield_at_surfaces_time_indepenent not yet implemented')

@@ -40,7 +40,7 @@ class _BaseReader(ParameterBaseClass):
                                    make_list_unique=True),
             'field_variables': PLC([], [str], obsolete=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',
                                    make_list_unique=True),
-            'field_variable_map': {'water_velocity': PLC(['u', 'v', None], [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
+            'field_variable_map': {'water_velocity': PLC(['u', 'v', 'w'], [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
                                 'tide': PVC('elev', str, doc_str='maps standard internal field name to file variable name'),
                                 'water_depth': PVC('depth', str, is_required=True,doc_str='maps standard internal field name to file variable name'),
                                 'water_temperature': PVC('temp', str,doc_str='maps standard internal field name to file variable name'),
@@ -244,12 +244,12 @@ class _BaseReader(ParameterBaseClass):
 
         # node to cell map
         t0 = perf_counter()
-        grid['node_to_tri_map'], grid['tri_per_node'] = triangle_utilities_code.build_node_to_cell_map(grid['triangles'], grid['x'])
+        grid['node_to_tri_map'], grid['tri_per_node'] = triangle_utilities_code.build_node_to_triangle_map(grid['triangles'], grid['x'])
         msg_logger.progress_marker('built node to triangles map', start_time=t0)
 
         # adjacency map
         t0 = perf_counter()
-        grid['adjacency'] = triangle_utilities_code.build_adjacency_from_node_cell_map(grid['node_to_tri_map'], grid['tri_per_node'], grid['triangles'])
+        grid['adjacency'] = triangle_utilities_code.build_adjacency_from_node_tri_map(grid['node_to_tri_map'], grid['tri_per_node'], grid['triangles'])
         msg_logger.progress_marker('built triangle adjacency matrix', start_time=t0)
 
         # boundary triangles
@@ -294,7 +294,6 @@ class _BaseReader(ParameterBaseClass):
 
         # reader working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
-
 
         return grid
 
@@ -429,7 +428,7 @@ class _BaseReader(ParameterBaseClass):
     def read_nodal_x(self, nc, grid):
         params= self.params
         var_name = params['grid_variable_map']['x']
-        grid['x'] = np.stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1])), axis=1)
+        grid['x'] = np.column_stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1])))
         if self.params['cords_in_lat_long']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
         return grid
@@ -659,6 +658,7 @@ class _BaseReader(ParameterBaseClass):
                 # native zlevel grid and used for regidding in sigma
                 self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
 
+
     def read_dry_cell_data(self,nc,file_index,is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry
         grid = self.grid
@@ -678,6 +678,7 @@ class _BaseReader(ParameterBaseClass):
             # get dry cells for each triangle allowing for splitting quad cells
             data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
             is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
+
 
     def read_bottom_cell_index(self, nc):
         # assume  not LSc grid, so bottom cel is zero
@@ -730,7 +731,7 @@ class _BaseReader(ParameterBaseClass):
     def convert_lon_lat_to_meters_grid(self, x):
 
         if self.params['CRS_transform_code'] is None:
-            x_out, self.cord_transformer= cord_transforms.WGS84_to_UTM( x, out=None)
+            x_out = cord_transforms.WGS84_to_UTM( x, out=None)
         else:
             #todo make it work with users transform?
             x_out = cord_transforms.WGS84_to_UTM(x, out=None)

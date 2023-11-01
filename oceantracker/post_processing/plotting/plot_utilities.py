@@ -58,7 +58,7 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
     if text1 is not None:  text_norm(.4, .1, text1, fontsize=8)
     add_credit(credit)
     add_map_scale_bar(axis_lims, ax=ax)
-    return grid
+    return ax
 
 def display_grid(grid, ginput=0, axis_lims=None):
     # for checking nad choosing release
@@ -78,7 +78,7 @@ def display_grid(grid, ginput=0, axis_lims=None):
 
 
 def plot_field(grid, field_vals, ax=plt.gca(), color_map=None, vmin=None, vmax=None, zorder=3):
-    # use tri surf to color map feild in 3D, defaul view is 2D from above
+    # use tri surf to color map field in 3D, defaul view is 2D from above
 
     pc = ax.tripcolor(grid['x'][:,0], grid['x'][:,1], field_vals, triangles=grid['triangles'],
                   shading='gouraud', cmap=color_map, edgecolors='none',

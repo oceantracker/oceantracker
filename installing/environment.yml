@@ -1,4 +1,4 @@
-pycondaname: oceantracker
+name: oceantracker
 channels:
   - conda-forge
   - anaconda

@@ -110,7 +110,7 @@ class PointRelease(ParameterBaseClass):
         release_info['release_times'] = release_info['release_times'][sel]
 
         if release_info['release_times'].size ==0:
-            ml.msg(f'No release times in range of hydro-model for release_group {info["instance_number"]:2d}, ',
+            ml.msg(f'No release times in range of hydro-model for release_group {info["instanceID"]:2d}, ',
                    fatal_error=True,
                    hint=' Check hydro-model date range and release dates  ' , exit_now = True)
 

@@ -39,15 +39,15 @@ class VerticalGradient(UserFieldBase):
         _calc_field_vert_grad(fields[self.params['name_of_field']].data,grid['zlevel'],
                                     grid['bottom_cell_index'], si.z0, fields[self.info['name']].data)
 @njit
-def _calc_field_vert_grad(feild4D,zlevel,bottom_cell_index,z0,gradient_field):
+def _calc_field_vert_grad(field4D,zlevel,bottom_cell_index,z0,gradient_field):
 
-    for nt in range(feild4D.shape[0]):
-        for node  in  range(feild4D.shape[1]):
-            for nz in  range(bottom_cell_index[node],feild4D.shape[2]-1):
+    for nt in range(field4D.shape[0]):
+        for node  in  range(field4D.shape[1]):
+            for nz in  range(bottom_cell_index[node],field4D.shape[2]-1):
                 dz = zlevel[nt,node,nz+1] - zlevel[nt,node,nz]
                 if dz > z0:
-                    for ncomp in range(feild4D.shape[3]):
-                        gradient_field[nt, node, nz, ncomp] = (feild4D[nt, node, nz+1, ncomp] - feild4D[nt, node, nz, ncomp])/dz
+                    for ncomp in range(field4D.shape[3]):
+                        gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp] - field4D[nt, node, nz, ncomp])/dz
                 else:
                     gradient_field[nt, node, nz, :] = 0.
 
