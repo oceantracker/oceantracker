@@ -7,7 +7,7 @@ from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.util import spell_check_util
 from  oceantracker.particle_group_manager.util import  pgm_util
 
-# holds and provides access to different types a group of particle properties, eg position, feild properties, custom properties
+# holds and provides access to different types a group of particle properties, eg position, field properties, custom properties
 class ParticleGroupManager(ParameterBaseClass):
 
     def __init__(self):

@@ -18,7 +18,7 @@ class SCHISMSreaderNCDF(_BaseReader):
                                'triangles': PVC('SCHISM_hgrid_face_nodes', str),
                                'bottom_cell_index': PVC('node_bottom_index', str),
                                'is_dry_cell': PVC('wetdry_elem', np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-            'field_variable_map': {'water_velocity': PLC(['hvel', 'vertical_velocity'], [str], fixed_len=3),
+            'field_variable_map': {'water_velocity': PLC(['hvel', 'vertical_velocity'], [str], fixed_len=2),
                                 'tide': PVC('elev', str,doc_str='maps standard internal field name to file variable name'),
                                 'water_depth': PVC('depth', str,doc_str='maps standard internal field name to file variable name'),
                                 'water_temperature': PVC('temp', str,doc_str='maps standard internal field name to file variable name'),
@@ -91,3 +91,72 @@ class SCHISMSreaderNCDF(_BaseReader):
             # for 3D schism velocity partial fix for  non-zero hvel at nodes where cells in LSC grid span a change in bottom_cell_index
             data = reader_util.patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
         return data
+
+    def read_open_boundary_data_as_boolean(self, grid):
+        # make boolen of whether node is an open boundary node
+        # read schisim  hgrid file for open boundary data
+        is_open_boundary_node = np.full((grid['x'].shape[0],), False)
+
+        if self.params['hgrid_file_name'] is None:
+            return is_open_boundary_node
+
+        with open(self.params['hgrid_file_name']) as f:
+            lines = f.readlines()
+
+        vals = lines[1].split()
+        n_nodes = int(vals[0])
+        n_tri = int(vals[1])
+
+        n_line_open = n_nodes + n_tri + 3 - 1  # line with number of open boundries
+        n_open = int(lines[n_line_open].split()[0])
+
+        if n_open > 0:
+
+            tri_open_bound_node_list = [[] for _ in range(grid['triangles'].shape[0])]
+            nl = n_line_open + 1
+            for n in range(n_open):
+                # get block of open node numbers
+                nl += 1  # move to line with number of nodes in this open boundary
+                n_nodes = int(lines[nl].split()[0])
+                nodes = []
+                for n in range(n_nodes):
+                    nl += 1
+                    l = lines[nl].strip('\n')
+                    nodes.append(int(l))
+                ob_nodes = np.asarray(nodes, dtype=np.int32) - 1
+
+                is_open_boundary_node[ob_nodes] = True  # get zero based node number
+
+        return is_open_boundary_node
+
+
+def read_hgrid_file(file_name):
+
+    d={}
+    with open(file_name) as f:
+        lines = f.readlines()
+
+    n_nodes, n_tri = [ int(x) for x in lines[1].split()]
+
+    is_open_boundary_node = np.full((n_nodes,),False)
+
+    n_line_open = n_nodes + n_tri + 3 - 1  # line with number of open boundaries
+    n_open = int(lines[n_line_open].split()[0])
+
+    if n_open > 0:
+
+        nl = n_line_open + 1
+        for n in range(n_open):
+            # get block of open node numbers
+            nl += 1  # move to line with number of nodes in this open boundary
+            n_open_nodes = int(lines[nl].split()[0])
+            open_nodes = []
+            for n in range(n_open_nodes):
+                nl += 1
+                l = lines[nl].strip('\n')
+                open_nodes.append(int(l))
+            open_nodes = np.asarray(open_nodes, dtype=np.int32) - 1
+
+            is_open_boundary_node[open_nodes] = True  # get zero based node number        with open(self.params['hgrid_file_name']) as f:
+
+    return is_open_boundary_node

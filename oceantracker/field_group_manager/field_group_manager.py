@@ -14,7 +14,7 @@ class FieldGroupManager(ParameterBaseClass):
     #   all the fields in a file and interpolation which belongs to the set of fields (rather than individual variable)
     # works with 2D or 3D  with appropriate interplotor
     known_field_types=['reader_field','custom_field']
-    # todo distingish between hydro model reader fields and auxilary feilds, eg waves from another reader
+    # todo distingish between hydro model reader fields and auxilary fields, eg waves from another reader
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
@@ -91,35 +91,41 @@ class FieldGroupManager(ParameterBaseClass):
 
 
         reader = si.add_core_class('reader', si.working_params['core_roles']['reader'],
-                                        crumbs=f'Feild Group Manager>setup_hydro_fields> reader class  ')
+                                        crumbs=f'field Group Manager>setup_hydro_fields> reader class  ')
 
         # work out if 3D, by examining wter velocity
         nc = reader.open_first_file()
         vm = reader.params['field_variable_map']
 
+
+        if  not nc.is_var(vm['water_velocity'][0]):
+                if  len(vm['water_velocity_depth_averaged']) > 0 and nc.is_var(vm['water_velocity_depth_averaged'][0]):
+                    # see if depth average velocity available and use it
+                    vm['water_velocity'] = vm['water_velocity_depth_averaged']
+                else:
+                    si.msg_logger.msg(f'Cannot find water velocity  velocity varaiables "{str(vm["water_velocity"])}"or depth averaged water  "{str(vm["water_velocity_depth_averaged"])}" in first file ',
+                                      fatal_error=True,exit_now=True)
+
         si.is3D_run = reader.is_3D_hydromodel(nc)
-        if not si.is3D_run and len(vm['water_velocity_depth_averaged']) > 0 and nc.is_var(vm['water_velocity_depth_averaged'][0]):
-            # see if depth average velocity available and use it
-            vm['water_velocity'] = vm['water_velocity_depth_averaged']
-            si.is3D_run = False
+        si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
         # configure required fields
         # if 3D
         if  si.is3D_run:
-            #  add friction velocity field, for use in re-suspension, which will give a particle prop of same name
+            if not nc.is_var(vm['water_velocity'][-1]):
+                # adjust variables if vertical velocity not present
+                si.msg_logger.msg(f'Vertical velocity variable "{str(vm["water_velocity"][0])}" not in first hydro file for 3D run, assuming vert. vel. is zero',   note=True)
+                vm['water_velocity'][-1] = None
 
-                # use bottom stress if in file
+                #  add friction velocity field, for use in re-suspension, which will give a particle prop of same name?
+                # use bottom stress if in file or  near sea bed velocity
 
-                # else use near sea bed velocity
-
-            # add total water depth field if equal sigma
+            # add total water depth field if equal sigma??
 
             pass
 
         # end of configuration
         nc.close()
-
-        si.msg_logger.msg(f'Hydro files are "{"3D" if  si.is3D_run else "2D"}"', note=True)
 
         reader.initial_setup()
 

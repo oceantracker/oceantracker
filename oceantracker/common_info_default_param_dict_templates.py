@@ -125,8 +125,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
 
     #TODO Nice to haves
         # todo get rid of info[points], just alter params points
-        # todo field type reader, derived from reader feild ,  or custom
-        # todo simplfy run in depth average mode and depth averaing fields, swap to explict depth aver tags feild names??
+        # todo field type reader, derived from reader field ,  or custom
+        # todo simplfy run in depth average mode and depth averaing fields, swap to explict depth aver tags field names??
         # todo check time_step default is hindcast time step
         # todo read write polygons from geo-jsons, release groups poly stats
         # todo add units to Parameter check and show in user docs
@@ -217,8 +217,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
     # todo Kernal RK steps
     #todo aysc reader
     #todo FIELD group to manage readers/interp in multi-reader future
-        # todo  move reader opertions to feild group mangager to allow for future with multiple readers
-        # todo attach reader/interp to each  feild instance to
+        # todo  move reader opertions to field group mangager to allow for future with multiple readers
+        # todo attach reader/interp to each  field instance to
     # todo support for lat long inout/output
     # todo  as a utility set up reading geojson/ shapely polygons and show example
     # todo grid outline file as geojson?
@@ -240,8 +240,8 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
     #todo compact model only with self expanding buffer??
     #todo remove depth range stats and make depth range part of stats
     # add part property from field wwhich checks if field exists
-    # field type reader, derived from reader feild ,  or custom
-    # simplfy run in depth average mode and depth averaing fields, swap to explict depth aver tags feild names??
+    # field type reader, derived from reader field ,  or custom
+    # simplfy run in depth average mode and depth averaing fields, swap to explict depth aver tags field names??
 
 #TODO ISSUES
     #  todo in making custom fields how do i know fiels have been added before i use i

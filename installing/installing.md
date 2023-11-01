@@ -55,7 +55,7 @@ Note: In Windows may need to run conda prompt window as administrator to install
    
    Then install these packages
 
-      ``conda install -c anacondanumpy``
+      ``conda install -c anaconda numpy``
 
       ``conda install -c conda-forge numba``
 

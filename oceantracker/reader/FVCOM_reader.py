@@ -89,7 +89,6 @@ class unstructured_FVCOM(_BaseReader):
         grid['nz'] = nc.dim_size(dm['z'])
 
 
-
         # non-uniform sigma layers
         s = [self.params['time_buffer_size'], grid['x'].shape[0], grid['nz']]
         grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')

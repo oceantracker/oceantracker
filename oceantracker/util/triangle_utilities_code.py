@@ -6,12 +6,12 @@ from oceantracker.util import  basic_util
 
 # build node to cell map
 @njit()
-def build_node_to_cell_map(tri,x):
+def build_node_to_triangle_map(tri, x):
     # build list  giving map from each node to list of cells which contain that node
 
     # make empty array with guess of how many triangles per node
     # using arrays faster than appending to lists
-    # need to exapnd array if needed to avios crash
+    # need to expand array if needed to aviod crash
     n_block = 10
     empty_block = np.full((x.shape[0],n_block), 0, dtype=np.int32)
     node_to_tri_map =empty_block.copy()
@@ -22,7 +22,7 @@ def build_node_to_cell_map(tri,x):
     #  build a node to triangles map
 
     for nTri  in range(tri.shape[0]):
-        for m  in range(tri.shape[1]):
+        for m  in range(3):
             node = tri[nTri, m]
             tri_per_node[node] += 1
             max_cells_per_node = max(tri_per_node[node], max_cells_per_node)
@@ -31,6 +31,7 @@ def build_node_to_cell_map(tri,x):
             if tri_per_node[node] >= node_to_tri_map.shape[1]:
                 # add another block
                 node_to_tri_map = np.concatenate((node_to_tri_map, empty_block.copy()),axis=1)
+
             # log one more triangle for this node
             node_to_tri_map[node, tri_per_node[node]-1] = nTri
 
@@ -38,7 +39,7 @@ def build_node_to_cell_map(tri,x):
 
 # build adjacency matrix from node to triangles map
 @njit
-def build_adjacency_from_node_cell_map(node_to_tri_map,tri_per_node, tri):
+def build_adjacency_from_node_tri_map(node_to_tri_map, tri_per_node, tri):
     # build adjacency matrix for use in triangle walk and as lateral boundary of model
     adjacency = np.full(tri.shape, -1, dtype=np.int32)
 
@@ -192,7 +193,7 @@ def convert_face_to_nodal_values(x, tri, face_data):
                     out[node] = np.nan
         return out
 
-    node_to_tri_map = build_node_to_cell_map(tri, x)
+    node_to_tri_map = build_node_to_triangle_map(tri, x)
     xtri = np.concatenate((np.mean(x[tri, 0], 1).reshape(-1, 1), np.mean(x[tri, 0], 1).reshape(-1,1)), axis=1)
 
     if face_data.size==1:
@@ -234,12 +235,12 @@ if __name__ == "__main__":
     msg.progress_marker('split quad cells', start_time=t0)
 
     t0 = perf_counter()
-    node_to_tri_map, tri_per_node = build_node_to_cell_map(tri,xy)
+    node_to_tri_map, tri_per_node = build_node_to_triangle_map(tri, xy)
     msg.progress_marker('split node_to_cell_map cells', start_time=t0)
 
 
     t0 = perf_counter()
-    adjacency = build_adjacency_from_node_cell_map(node_to_tri_map, tri_per_node, tri)
+    adjacency = build_adjacency_from_node_tri_map(node_to_tri_map, tri_per_node, tri)
     msg.progress_marker('build_adjacency_from_node_cell_map', start_time=t0)
 
     is_boundary_triangle = get_boundary_triangles(adjacency)
