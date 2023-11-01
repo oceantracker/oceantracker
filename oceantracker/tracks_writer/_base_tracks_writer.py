@@ -45,18 +45,17 @@ class _BaseWriter(ParameterBaseClass):
         params = self.params
 
         # find steps between wrtites, rounded to nearest model time step
-        if params['update_interval'] is None :
+        if params['update_interval'] is None:
             nt_step = 1
         else:
             nt_step = int(np.round(params['update_interval']/si.model_time_step))
 
-        self.info['output_step_count'] = min(nt_step,1)
+        self.info['output_step_count'] = max(nt_step,1)
 
         if params['write_dry_cell_index']:
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])
             self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])
-
 
     def add_dimension(self, name, size):
         self.info['file_builder']['dimensions' ][name] ={'size': size}
