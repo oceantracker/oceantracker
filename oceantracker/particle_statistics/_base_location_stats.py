@@ -16,12 +16,12 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         super().__init__()
         #todo add depth range for count
         self.add_default_params({ 'update_interval':       PVC(60*60.,float, doc_str='Time in seconds between calculating statistics', units='sec'),
-                                  'count_start_date': PVC(None, 'iso8601date',doc_str= 'Start particle counting from this date'),
-                                  'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this date'),
+                                  'count_start_date': PVC(None, 'iso8601date',doc_str= 'Start particle counting from this iso date-time'),
+                                  'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this iso date-time'),
                                   'role_output_file_tag' :           PVC('stats_base',str),
                                   'write':                      PVC(True,bool,doc_str='Write statistcs to disk'),
                                   'status_min': PVC('frozen', [str], possible_values=particle_info['status_keys_list'],
-                                                                 doc_str=' Count only those particles with status >= to thsi value'),
+                                                                 doc_str=' Count only those particles with status >= to this value'),
                                   'status_max': PVC('moving', [str], possible_values=particle_info['status_keys_list'],
                                                     doc_str=' Count only those particles with status  <= to this value'),
                                   'min_z': PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value'),

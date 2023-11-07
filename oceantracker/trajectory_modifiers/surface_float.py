@@ -1,0 +1,21 @@
+import numpy as np
+from numba import njit
+
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+
+#  keeps particles at the free surface
+#todo add wind stress/stokes drift to motion
+
+class SurfaceFloat(_BaseTrajectoryModifier):
+
+    def update(self, time_sec, active):
+        si = self.shared_info
+        part_prop= si.classes['particle_properties']
+        self.move_to_free_surface(part_prop['x'], part_prop['tide'], active)
+
+@njit
+def move_to_free_surface(self, x, tide, active):
+    for n in active:
+        x[n, 2] = tide[n]
+
+
