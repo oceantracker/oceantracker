@@ -2,7 +2,7 @@ from oceantracker.reader._base_reader import _BaseReader
 from oceantracker.reader.util import reader_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
 from oceantracker.util import  time_util
-from datetime import  datetime
+from datetime import  datetime, timedelta
 import numpy as np
 from oceantracker.util.triangle_utilities_code import split_quad_cells
 
@@ -47,12 +47,19 @@ class SCHISMSreaderNCDF(_BaseReader):
         var_name=self.params['grid_variable_map']['time']
         time = nc.read_a_variable(var_name, sel=file_index)
 
-        base_date=  [ int(float(x)) for x in nc.var_attr(var_name,'base_date').split()]
-        d0= datetime(*tuple(base_date))
+        s = nc.var_attr(var_name, 'base_date').split()
+        base_date= [ int(x) for x in s[:3] ]
+        d0= datetime(*tuple(base_date[:3]))
+        d0 = d0 + timedelta(hours = float(s[3]))
+
+
+        self.info['time_zone'] = float(s[4])/100.
+
         d0 = np.datetime64(d0).astype('datetime64[s]')
         sec = time_util.datetime64_to_seconds(d0)
         time += sec
         return time
+
 
     def read_bottom_cell_index(self, nc):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid

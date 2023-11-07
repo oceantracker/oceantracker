@@ -24,7 +24,7 @@ def WGS84_to_NZTM(lon_lat, out=None):
 
 def NZTM_to_WGS84(xy, out=None):
     #  NZTM ( east, north)  to (lat, lng) for numpy arays
-    if out is None: out = np.full_like(xy)
+    if out is None: out = np.full_like(xy,np.nan)
     out[:,0],out[:,1] = transformerNZTM_to_WGS84.transform(xy[:,0], xy[:,1])
 
     # ensure longitude > 0

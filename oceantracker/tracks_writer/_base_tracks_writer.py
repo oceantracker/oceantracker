@@ -50,7 +50,7 @@ class _BaseWriter(ParameterBaseClass):
         else:
             nt_step = int(np.round(params['update_interval']/si.settings['time_step']))
 
-        self.info['output_step_count'] = min(nt_step,1)
+        self.info['output_step_count'] = max(nt_step, 1)
 
         if params['write_dry_cell_index']:
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])

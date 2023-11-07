@@ -102,7 +102,7 @@ particle_info['status_keys_list']= list(particle_info['status_flags'].keys()) # 
 
 default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                  'fvcom': 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
-                 'roms': 'oceantracker.reader.ROMS_reader.OMsNativeReader'}
+                 'roms': 'oceantracker.reader.ROMS_reader.ROMsNativeReader'}
 
 # TODO LIST
 # todo for version 0.41

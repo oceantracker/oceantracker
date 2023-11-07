@@ -104,9 +104,10 @@ class ParticleProperty(_BasePropertyInfo):
     def set_values(self, values, active):
 
         if type(values) == np.ndarray:
-            if values.shape[0]  != active.shape[0] : raise Exception('set_values: shape of values must match number of indices to set')
+            if values.shape[0] != active.shape[0] : raise Exception('set_values: shape of values must match number of indices to set')
             particle_operations_util.set_values(self.data, values, active)
         else:
+            # scalar
             particle_operations_util.set_value(self.data, values, active)
 
     def fill_buffer(self,value):

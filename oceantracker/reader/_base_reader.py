@@ -203,6 +203,7 @@ class _BaseReader(ParameterBaseClass):
         return fi
 
 
+
     def is_3D_hydromodel(self,nc):
         return  True if nc.is_var_dim( self.params['field_variable_map']['water_velocity'][0],self.params['dimension_map']['z_water_velocity'] ) else False
 
@@ -224,6 +225,7 @@ class _BaseReader(ParameterBaseClass):
         grid =  {}
 
         # read nodal x's
+
         grid = self.read_nodal_x(nc, grid)
         grid['x'] = grid['x'].astype(np.float64)
 
@@ -294,6 +296,7 @@ class _BaseReader(ParameterBaseClass):
 
         # reader working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
+
 
         return grid
 
@@ -429,8 +432,10 @@ class _BaseReader(ParameterBaseClass):
         params= self.params
         var_name = params['grid_variable_map']['x']
         grid['x'] = np.column_stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1])))
+
         if self.params['cords_in_lat_long']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
+
         return grid
 
     def read_triangles(self, nc, grid):
