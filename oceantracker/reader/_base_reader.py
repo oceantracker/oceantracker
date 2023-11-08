@@ -174,7 +174,7 @@ class _BaseReader(ParameterBaseClass):
         fi['first_time'] = np.min(t)
         fi['last_time'] = np.max(t)
         fi['duration'] = fi['last_time'] - fi['first_time']
-        fi['hydro_model_time_step'] = fi['duration'] / (fi['n_time_steps_in_hindcast'] - 1)
+        fi['hydro_model_time_step'] = fi['duration'] / fi['n_time_steps_in_hindcast']
 
         # datetime versions for reference
         fi['date_start'] = time_util.seconds_to_datetime64(fi['time_start'])

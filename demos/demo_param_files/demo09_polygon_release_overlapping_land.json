@@ -39,7 +39,8 @@
         "A_H": 0.1
     },
     "tracks_writer": {
-        "time_steps_per_per_file": 700
+        "time_steps_per_per_file": 700,
+        "update_interval": 4500
     },
     "release_groups": {
         "Poly1": {
