@@ -84,7 +84,7 @@ class NetCDFhandler(object):
             output[name] = self.read_a_variable(name)
         return output
 
-    def write_a_new_variable(self, name, X, dimList, description=None, attributes=None,dtype=None, chunksizes=None, compressionLevel=0):
+    def write_a_new_variable(self, name, X, dimList, description=None, attributes=None,dtype=None, chunksizes=None, compressionLevel=0, fill_value=None):
         # write a whole variable and add dimensions if required
         if type(dimList) != list and type(dimList) != tuple :dimList =[dimList]
 
@@ -97,7 +97,8 @@ class NetCDFhandler(object):
 
         if dtype is None: dtype = X.dtype  # preserve type unless explicitly changed
 
-        v = self.create_a_variable(name, dimList,description=description,attributes= attributes,dtype=dtype, chunksizes= chunksizes, compressionLevel=compressionLevel)
+
+        v = self.create_a_variable(name, dimList,description=description,attributes= attributes,dtype=dtype, chunksizes= chunksizes, compressionLevel=compressionLevel, fill_value=-1)
 
         # check dims match as below write does not repect shape
         for n,dn in enumerate(dimList):
