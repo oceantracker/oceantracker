@@ -28,6 +28,7 @@ poly_points_large=[[1597682.1237, 5489972.7479],
 
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
+
    'time_step' : 900,
     'debug': True,
     'reader': {"class_name": 'oceantracker.reader._base_reader._BaseReader',
@@ -56,7 +57,7 @@ demo_base_params={'output_file_base' : None,
     }
 
 p1= deepcopy(demo_base_params)
-p1.update({'tracks_writer':{'time_steps_per_per_file':700}}
+p1.update({'tracks_writer':{'time_steps_per_per_file':700, 'update_interval': 900*5 }}
                                 )
 p1.update({'output_file_base' :'demo01_plot_tracks' ,'backtracking': True,
                             'time_step': 600})
