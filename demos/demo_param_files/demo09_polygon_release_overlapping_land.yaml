@@ -75,4 +75,5 @@ root_output_dir: output
 time_step: 600
 tracks_writer:
   time_steps_per_per_file: 700
+  update_interval: 4500
 user_note: test of notes
