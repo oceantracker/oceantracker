@@ -4,19 +4,17 @@ import pathlib
 from oceantracker.util.ncdf_util import NetCDFhandler
 
 
-
-def convert(input_dir,output_dir):
+def convert(input_dir, output_dir, mask= 'out*.nc'):
     # convet schims out put from new version 5 to old format , as tempoary step to adapting ocean tracker to ouput
     # convert all files in  input_dir and is sub dir, and places convestions in output_dir with the same folder structure
     # get list of grid files
     file_list = []
-    for fn in pathlib.Path(input_dir).rglob('out2D*.nc'):
+    for fn in pathlib.Path(input_dir).rglob(mask):
         file_list.append(path.abspath(fn))
     pass
 
     if not path.exists(output_dir):
         makedirs(output_dir)
-
 
     for f in file_list:
         file_dir = path.dirname(f)
@@ -88,7 +86,7 @@ def convert(input_dir,output_dir):
                                  zcor = 'zCoordinates'
                                  ).items():
 
-            fn= path.join(file_dir,var +'_'+ file_ending)
+            fn= path.join(file_dir,var + '_' + file_ending)
             if path.isfile(fn):
                 nc = NetCDFhandler( fn, mode='r')
                 attr= nc.all_var_attr(var)

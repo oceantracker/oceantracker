@@ -5,7 +5,7 @@
     "time_step": 600,
     "screen_output_time_interval": null,
     "backtracking": null,
-    "run_as_depth_averaged": null,
+    "regrid_z_to_uniform_sigma_levels": null,
     "debug": null,
     "minimum_total_water_depth": null,
     "write_output_files": null,

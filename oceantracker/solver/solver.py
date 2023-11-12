@@ -70,7 +70,7 @@ class Solver(ParameterBaseClass):
 
         t0_model = perf_counter()
         free_wheeling =False
-        fgm.fill_reader_buffers_if_needed(model_times[0]) # initial buffer fill
+        fgm.update(model_times[0]) # initial buffer fill
 
         # run forwards through model time variable, which for backtracking are backwards in time
         for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
@@ -94,7 +94,7 @@ class Solver(ParameterBaseClass):
             free_wheeling = False # has ended
            # alive partiles so do steps
             ri['total_alive_particles'] += num_alive
-            fgm.fill_reader_buffers_if_needed(time_sec)
+            fgm.update(time_sec)
 
 
             # do stats etc updates and write tracks
@@ -141,7 +141,7 @@ class Solver(ParameterBaseClass):
         ri['computation_ended'] = datetime.now()
         ri['computation_duration'] = datetime.now() -computation_started
 
-    def pre_step_bookkeeping(self, nt,time_sec,new_particleIDs=None):
+    def pre_step_bookkeeping(self, nt,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
@@ -194,7 +194,7 @@ class Solver(ParameterBaseClass):
         if si.write_tracks:
             tracks_writer = si.classes['tracks_writer']
             tracks_writer.open_file_if_needed()
-            if new_particleIDs is not None:
+            if new_particleIDs is None:
                 tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
             # write tracks file

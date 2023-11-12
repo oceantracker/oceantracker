@@ -59,6 +59,10 @@ class FrictionVelocity(CustomFieldBase):
             for n in np.arange(zlevel.shape[1]): # loop over nodes
                 nz1=bottom_cell_index[n]+1
                 dz =  zlevel[nt, n, nz1] - zlevel[nt, n, bottom_cell_index[n]] # size of bottom cell
-                speed = np.sqrt(water_velocity[nt, n, nz1, 0]**2 + water_velocity[nt, n, nz1, 1]**2)
-                out[nt, n, 0, 0] = 0.4*speed/np.log((dz+z0)/z0)
+
+                if dz >  0.2:
+                    speed = np.sqrt(water_velocity[nt, n, nz1, 0]**2 + water_velocity[nt, n, nz1, 1]**2)
+                    out[nt, n, 0, 0] = 0.4*speed/np.log((dz+z0)/z0)
+                else:
+                    out[nt, n, 0, 0] = 0.
 

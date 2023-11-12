@@ -1,13 +1,12 @@
 main:   -  oceantracker:multiProcessing: processors:2
 main:   - parallel pool complete
-main:     >>> Note: run summary with case file names   "demo00_helper_class_test_runInfo.json"
-    >>> Note: output is in dir= E:\H_Local_drive\ParticleTracking\oceantracker\demos\root_output_dir\demo00_helper_class_test
-    >>> Note: to help with debugging, parameters as given by user  are in "demo00_helper_class_test_raw_user_params.json"
-    >>> Note: run summary with case file names   "demo00_helper_class_test_runInfo.json"
->>> Warning: Parameter  >> field_variables is obsolete  -  parameter obsolete, use "load_fields" parameter, with field_variable_map if needed
-main: --------------------------------------------------------------------------
-main: OceanTracker summary:  elapsed time =0:00:16.167448
-main:       Cases -   0 errors,  14 warnings,   4 notes, check above
-main:       Helper-   0 errors,   0 warnings,   0 notes, check above
-main:       Main  -   0 errors,   1 warnings,   3 notes, check above
-main: --------------------------------------------------------------------------
+main: >>> Error: Case #000, failed to finish
+main:       Hint: hint see above, any case errors detected are listed below
+main:     >>> Error:  Unexpected error in case number [ 0] 
+main:           Hint: check above or .err file
+main: >>> Error: Case #001, failed to finish
+main:       Hint: hint see above, any case errors detected are listed below
+main:     >>> Error:  Unexpected error in case number [ 1] 
+main:           Hint: check above or .err file
+main: >>> Warning: Case #0 has no case info file, likely has crashed
+main: >>> Warning: Case #1 has no case info file, likely has crashed

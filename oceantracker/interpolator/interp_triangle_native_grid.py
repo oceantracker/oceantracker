@@ -133,9 +133,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # find cell for xq, node list and weight for interp at calls
         self.find_cell(xq, active)
 
-    def check_steps_in_reader_buffer(self,time_sec):
-        if not self.reader.are_time_steps_in_buffer(time_sec):
-            self.reader.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
+
 
     #@function_profiler(__name__)
     def interp_field_at_current_particle_locations(self, field_name, active, output):
