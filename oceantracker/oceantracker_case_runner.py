@@ -318,7 +318,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # make other core classes, eg.
         core_role_params=si.working_params['core_roles']
-        for name in ['interpolator','solver','dispersion']:
+        for name in ['solver','dispersion']:
             si.add_core_class(name, core_role_params[name], crumbs=f'core class "{name}" ')
 
 
@@ -425,7 +425,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         info['date_of_time_zero'] = time_util.seconds_to_datetime64(np.asarray([0.]))
         r = si.classes['reader']
 
-        info['time_zone'] = r.params['time_zone']
         info['backtracking'] = si.backtracking
         elapsed_time_sec = perf_counter() -t0
         info.update(dict(started=str(d0), ended=str(datetime.now()),
@@ -442,7 +441,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             'computer_info': get_versions_computer_info.get_computer_info(),
             'file_written': datetime.now().isoformat(),
              'run_info' : info,
-             'solver_info' : si.run_info,
              'hindcast_info': r.info,
              'full_case_params': si.working_params,
              'particle_status_flags': si.particle_status_flags,

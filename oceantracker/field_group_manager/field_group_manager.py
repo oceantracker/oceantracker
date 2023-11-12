@@ -22,22 +22,11 @@ class FieldGroupManager(ParameterBaseClass):
 
     def initial_setup(self):
 
-        self.initial_setup_hydro_fields()
+        self._setup_primary_hydro_reader()
 
     def final_setup(self):
         si = self.shared_info
         si.classes['reader'].final_setup()
-
-    def add_reader_field(self, name, reader, params, crumbs=''):
-        si = self.shared_info
-        params['class_name'] = 'oceantracker.fields._base_field.ReaderField'
-        i = si.create_class_dict_instance(name, 'fields', 'reader_field', params, crumbs=crumbs+ f' reader field setup > "{name}"', initialise=False)
-        # attached reader to field
-        i.reader = reader
-        i.initial_setup()
-
-        return i
-
 
     def add_custom_field(self, name,  params, crumbs=''):
         # classname must be given
@@ -46,13 +35,16 @@ class FieldGroupManager(ParameterBaseClass):
             si.msg_logger.msg('field+grup_manager> add_custom_field parameters must contain  "class_name"')
         i = si.create_class_dict_instance(name, 'fields', 'custom_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=True)
         i.known_field_types = self.known_field_types
+
         return i
 
-    def fill_reader_buffers_if_needed(self,time_sec):
+    def update(self, time_sec):
         # check if all interpolators have the time steps they need
         si  = self.shared_info
         t0 = perf_counter()
-        si.classes['interpolator'].check_steps_in_reader_buffer(time_sec)
+        reader = si.classes['reader']
+        if not reader.are_time_steps_in_buffer(time_sec):
+                reader.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
         si.block_timer('Fill reader buffers',t0)
 
     def setup_time_step(self, time_sec, xq, active):
@@ -86,54 +78,53 @@ class FieldGroupManager(ParameterBaseClass):
                                                                         output=output, n_cell=n_cell)
         return output
 
-    def initial_setup_hydro_fields(self):
+    def _setup_primary_hydro_reader(self):
         si = self.shared_info
 
-
-        reader = si.add_core_class('reader', si.working_params['core_roles']['reader'],
-                                        crumbs=f'field Group Manager>setup_hydro_fields> reader class  ')
-
-        # work out if 3D, by examining wter velocity
+        reader = si.add_core_class('reader', si.working_params['core_roles']['reader'],   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
+        reader.initial_setup()
         nc = reader.open_first_file()
-        vm = reader.params['field_variable_map']
 
-
-        if  not nc.is_var(vm['water_velocity'][0]):
-                if  len(vm['water_velocity_depth_averaged']) > 0 and nc.is_var(vm['water_velocity_depth_averaged'][0]):
-                    # see if depth average velocity available and use it
-                    vm['water_velocity'] = vm['water_velocity_depth_averaged']
-                else:
-                    si.msg_logger.msg(f'Cannot find water velocity  velocity varaiables "{str(vm["water_velocity"])}"or depth averaged water  "{str(vm["water_velocity_depth_averaged"])}" in first file ',
-                                      fatal_error=True,exit_now=True)
-
-        si.is3D_run = reader.is_3D_hydromodel(nc)
+        grid,  si.is3D_run   = reader.set_up_grid(nc)
+        reader.grid = grid
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
-        # configure required fields
-        # if 3D
-        if  si.is3D_run:
-            if not nc.is_var(vm['water_velocity'][-1]):
-                # adjust variables if vertical velocity not present
-                si.msg_logger.msg(f'Vertical velocity variable "{str(vm["water_velocity"][0])}" not in first hydro file for 3D run, assuming vert. vel. is zero',   note=True)
-                vm['water_velocity'][-1] = None
+        interp = si.add_core_class('interpolator', si.working_params['core_roles']['interpolator'],  crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
 
-                #  add friction velocity field, for use in re-suspension, which will give a particle prop of same name?
-                # use bottom stress if in file or  near sea bed velocity
+        # setup compulsory fields, plus others required
 
-            # add total water depth field if equal sigma??
+        reader.params['load_fields'] = list(set(['tide','water_depth', 'water_velocity'] + reader.params['load_fields'] ))
+        for name in  reader.params['load_fields'] :
+            if name in reader.params['field_variable_map']:
+                file_var_map = reader.params['field_variable_map'][name]
+            else:
+                file_var_map = name # assume given field variable is in the file
 
-            pass
+            field_params = reader.get_field_params(nc, name)
+            field = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs= f' creating reader feild  field setup > "{name}"')
+            field.initial_setup()
 
-        # end of configuration
+            field.reader = reader
+            field.interpolator = interp
+
+            # read data if not time varying
+            if not field.is_time_varying() :
+                field.data[0, ...] = reader.assemble_field_components(nc, name)
+
         nc.close()
 
-        reader.initial_setup()
-
+        # add core total water depth property
+        i = self.add_custom_field('total_water_depth',
+                dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',time_varying=True,write_interp_particle_prop_to_tracks_file =False),
+                                           crumbs='initializing core TotalWaterDepth class ')
+        i.reader = reader
+        i.interpolator = interp
 
     def update_dry_cells(self):
         # update 0-255 dry cell index for each interpolator
         si =self. shared_info
         si.classes['interpolator'].update_dry_cells()
+
 
     def get_hydo_model_time_step(self):
         return self.shared_info.classes['reader'].info['file_info']['hydro_model_time_step']

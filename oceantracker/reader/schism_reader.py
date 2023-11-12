@@ -11,8 +11,7 @@ class SCHISMSreaderNCDF(_BaseReader):
     def __init__(self, shared_memory_info=None):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
-            'cords_in_lat_long': PVC(False, bool, doc_str='Convert given nodal lat longs to a UTM metres grid'),
-            'grid_variable_map': {'time': PVC('time', str),
+             'grid_variable_map': {'time': PVC('time', str),
                                'x': PLC(['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y'], [str], fixed_len=2),
                                'zlevel': PVC('zcor', str),
                                'triangles': PVC('SCHISM_hgrid_face_nodes', str),
@@ -29,19 +28,50 @@ class SCHISMSreaderNCDF(_BaseReader):
                                 'water_velocity_depth_averaged': PLC(['dahv'], [str],  fixed_len=2,
                                                                      doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
-            'dimension_map': {'time': PVC('time', str),
-                              'node': PVC('nSCHISM_hgrid_node', str),
-                              'z': PVC('nSCHISM_vgrid_layers', str),
-                              'z_water_velocity': PVC('nSCHISM_vgrid_layers', str, doc_str='z dimension of water velocity, used to test if hydro model has 3D velocity field'),
-                              'vector2D': PVC('two', str),
-                              'vector3D': PVC('three', str),
-                              },
-            'one_based_indices': PVC(True, bool, doc_str='indices in Schism are 1 based'),
             'hgrid_file_name': PVC(None, str),
              })
 
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
+    def read_nodal_x(self, nc, grid):
+        x_var ='SCHISM_hgrid_node_x'
+        x =  nc.read_a_variable(x_var)
+        y = nc.read_a_variable('SCHISM_hgrid_node_y')
+        grid['x'] = np.stack((x,y),axis=1)
+
+        # test if lat long
+        if nc.is_var_attr(x_var,'units') and 'degree' in nc.var_attr(x_var,'units').lower():
+            grid['is_lon_lat'] = True
+        else:
+            grid['is_lon_lat'] = self.params['cords_in_lat_long']
+
+        if grid['is_lon_lat']:
+            grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
+
+        return  grid
+
+    def read_triangles(self, nc, grid):
+        grid['triangles'] = nc.read_a_variable('SCHISM_hgrid_face_nodes').astype(np.int32)
+        grid['triangles'] -= 1 # make zero based
+
+        # split quad cells aby adding new triangles
+        # flag quad cells for splitting if index in 4th column
+        if grid['triangles'].shape[1] == 4 :
+            # split quad grids buy making new triangles
+            grid['quad_cells_to_split'] = np.flatnonzero(grid['triangles'][:, 3] > 0)
+            grid['triangles'] = split_quad_cells(grid['triangles'], grid['quad_cells_to_split'])
+        else:
+            grid['quad_cells_to_split'] = np.full((0,), 0, dtype=np.int32)
+
+        return grid
+
+    def is_hindcast3D(self, nc):
+        return nc.is_var('hvel')
+
+    def number_hindcast_zlayers(self, nc): return nc.dim_size('nSCHISM_vgrid_layers')
+
+    def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
+        zlevel_buffer[buffer_index,...] = nc.read_a_variable('zcor', sel=file_index).astype(np.float32)
 
     def read_time_sec_since_1970(self, nc, file_index=None):
         var_name=self.params['grid_variable_map']['time']
@@ -60,6 +90,17 @@ class SCHISMSreaderNCDF(_BaseReader):
         time += sec
         return time
 
+    def get_field_params(self,nc, name, crumbs=''):
+        # work out if feild is 3D ,etc
+        fmap = self.params['field_variable_map'][name]
+        if type(fmap) != list: fmap =[fmap]
+        f_params = dict(class_name = 'oceantracker.fields._base_field.ReaderField',
+                        time_varying = nc.is_var_dim(fmap[0], 'time'),
+                        is3D = nc.is_var_dim(fmap[0],'nSCHISM_vgrid_layers'),
+                        is_vector = nc.is_var_dim(fmap[0],'two') or len(fmap) > 1
+                        )
+        return f_params
+
 
     def read_bottom_cell_index(self, nc):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid
@@ -75,22 +116,25 @@ class SCHISMSreaderNCDF(_BaseReader):
         self.info['vertical_grid_type'] = vertical_grid_type
         return node_bottom_index
 
-    def read_triangles(self, nc, grid):
-        params = self.params
-        var_name = params['grid_variable_map']['triangles']
-        triangles = nc.read_a_variable(var_name).astype(np.int32)
-        triangles -= 1 # make zero based
 
-        # split quad cells aby adding new triangles
-        # flag quad cells for splitting if index in 4th column
-        if triangles.shape[1] == 4 :
-            # split quad grids buy making new triangles
-            grid['quad_cells_to_split'] = np.flatnonzero(triangles[:, 3] > 0)
-            grid['triangles'] = split_quad_cells(triangles, grid['quad_cells_to_split'])
-        else:
-            grid['quad_cells_to_split'] = np.full((0,), 0, dtype=np.int32)
+    def read_file_var_as_4D_nodal_values(self, nc, var_name, file_index=None):
+        # read variable into 4D ( time, node, depth, comp) format
+        # assumes same variable order in the file
+        data = nc.read_a_variable(var_name, sel=file_index)
+        # get 4d size
+        s = [data.shape[0] if nc.is_var_dim(var_name, 'time') else 1,
+             nc.dim_size('nSCHISM_hgrid_node'),
+             nc.dim_size('nSCHISM_vgrid_layers') if  nc.is_var_dim(var_name,'nSCHISM_vgrid_layers') else 1,
+             2  if  nc.is_var_dim(var_name,'two') else 1
+             ]
+        return data.reshape(s)
 
-        return grid
+    def read_dry_cell_data(self,nc,file_index,is_dry_cell_buffer, buffer_index):
+        # calculate dry cell flags, if any cell node is dry
+        grid = self.grid
+        si = self.shared_info
+        data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
+        is_dry_cell_buffer[buffer_index, :] = reader_util.append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
 
     def preprocess_field_variable(self, nc,name, data):
