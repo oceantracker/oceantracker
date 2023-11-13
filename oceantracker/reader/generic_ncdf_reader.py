@@ -18,8 +18,8 @@ from oceantracker.util import triangle_utilities_code
 from oceantracker.util.triangle_utilities_code import split_quad_cells
 from oceantracker.fields._base_field import  CustomFieldBase , ReaderField
 from oceantracker.reader.util import reader_util
-
-class _BaseReader(ParameterBaseClass):
+from oceantracker.reader._base_reader import _BaseReader
+class GenericNCDFreader(_BaseReader):
 
     def __init__(self, shared_memory_info=None):
         super().__init__()  # required in children to get parent defaults and merge with give params
@@ -47,9 +47,6 @@ class _BaseReader(ParameterBaseClass):
                                 'salinity': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
                                 'wind_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
                                 'bottom_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
-                                'water_velocity_depth_averaged': PLC([], [str, None],fixed_len=2,
-                                                                     doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available',
-                                                                     make_list_unique=True)
                                 },
             'dimension_map': {'time': PVC('time', str, is_required=True),
                               'node': PVC('node', str),
@@ -67,34 +64,18 @@ class _BaseReader(ParameterBaseClass):
         self.info['field_variable_info'] = {}
         self.info['buffer_info'] ={}
 
-    def initial_setup(self):
-        # map variable internal names to names in NETCDF file
-        # set update default value and vector variables map  based on given list
-        si = self.shared_info
-        ml= si.msg_logger
-        info = self.info
-        self.info['file_info'] = si.working_params['file_info']  # add file_info to reader info
+    def get_field_params(self, nc, name, crumbs=''):
+        # work out if feild is 3D ,etc
+        fmap = self.params['field_variable_map'][name]
+        dim_map = self.params['dimension_map']
 
-        ml.exit_if_prior_errors()
-
-        #set up ring buffer  info
-        bi = self.info['buffer_info']
-        bi['n_filled'] = 0
-        bi['buffer_size'] = self.params['time_buffer_size']
-        bi['time_steps_in_buffer'] = []
-        bi['buffer_available'] = bi['buffer_size']
-        bi['nt_buffer0'] = 0
-
-    def final_setup(self):
-        # set up particle properties accocated with fields
-        si = self.shared_info
-        for name, i in si.classes['fields'].items():
-            if i.params['create_particle_property_with_same_name']:
-                si.classes['particle_group_manager'].add_particle_property(name, 'from_fields',
-                        dict(time_varying=i.is_time_varying(),
-                         vector_dim=i.get_number_components()),
-                        crumbs= f' reader field setup > "{name}"'
+        if type(fmap) != list: fmap = [fmap]
+        f_params = dict(class_name='oceantracker.fields._base_field.ReaderField',
+                        time_varying=nc.is_var_dim(fmap[0], dim_map['time']),
+                        is3D=nc.is_var_dim(fmap[0], dim_map['z']),
+                        is_vector=nc.is_var_dim(fmap[0],  dim_map['vector2D']) or nc.is_var_dim(fmap[0],  dim_map['vector3D']) or len(fmap) > 1
                         )
+        return f_params
 
     def set_up_grid(self, nc ):
 
@@ -206,24 +187,7 @@ class _BaseReader(ParameterBaseClass):
 
 
 
-    def is_3D_hydromodel(self,nc):
-        # look for 3D vel variabel, if not use 2D version
 
-        si = self.shared_info
-        vm = self.params['field_variable_map']
-
-        if  not nc.is_var(vm['water_velocity'][0]):
-            is3D_hydro = True
-        else:
-                if  len(vm['water_velocity_depth_averaged']) > 0 and nc.is_var(vm['water_velocity_depth_averaged'][0]):
-                    # see if depth average velocity available and use it
-                    vm['water_velocity'] = vm['water_velocity_depth_averaged']
-                    is3D_hydro = False
-                else:
-                    si.msg_logger.msg(f'Cannot find water velocity  velocity varaiables "{str(vm["water_velocity"])}"or depth averaged water  "{str(vm["water_velocity_depth_averaged"])}" in first file ',
-                                      fatal_error=True,exit_now=True)
-
-        return  is3D_hydro
 
     def is_3D_variable(self,nc, var_name):
         # is variable 3D
@@ -401,7 +365,21 @@ class _BaseReader(ParameterBaseClass):
 
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
-    def is_hindcast3D(self, nc): return nc.is_var(self.params['grid_variable_map']['zlevel'])
+    def is_hindcast3D(self, nc):
+       # look for 3D vel variabel, if not use 2D version
+
+        si = self.shared_info
+        params = self.params
+        vm = params['field_variable_map']
+
+        if nc.is_var_dim(params['field_variable_map']['water_velocity'][0], params['dimension_map']['z']):
+            is3D_hydro = True
+        else:
+            is3D_hydro = False
+            params['field_variable_map']['water_velocity'] = params['field_variable_map']['water_velocity'][:2] # remove vertical velocity if given
+
+        return is3D_hydro
+
 
     def read_time_sec_since_1970(self, nc, file_index=None):
         vname = self.params['grid_variable_map']['time']

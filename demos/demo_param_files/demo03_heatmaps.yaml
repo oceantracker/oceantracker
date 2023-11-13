@@ -45,7 +45,7 @@ particle_statistics:
         - 5489972.7479
     update_interval: 1800
 reader:
-  class_name: oceantracker.reader._base_reader._BaseReader
+  class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
   dimension_map:
     node: nodes
     time: time

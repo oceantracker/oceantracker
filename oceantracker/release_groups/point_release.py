@@ -29,8 +29,11 @@ class PointRelease(ParameterBaseClass):
                                  'allow_release_in_dry_cells': PVC(False, bool,
                                               doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.'),
                                  'z_range': PLC([],[float, int], min_length=2, doc_str='z range = [zmin, zmax] to randomly release in 3D, overrides any given release z value'),
+                                'release_offset_above_bottom': PVC(False, [float, int], min= 0., doc_str=' 3D release particles at fixed give height above the bottom at the release location ', units='m'),
+                                'water_depth_range': PLC([],[float, int], min_length=2,  units= 'm',
+                                                         doc_str=' 3D release at locations where water depth is in this range, overrides any given release z value, or z_range'),
                                   #Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}
-                                'max_cycles_to_find_release_points': PVC(50, int, min=50, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
+                                'max_cycles_to_find_release_points': PVC(100, int, min=100, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
                                  })
         self.class_doc(description= 'Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.')
 

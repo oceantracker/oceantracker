@@ -14,7 +14,7 @@ output_file_base: demo09_polygon_release_overlapping_land
   distance_travelled:
     class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
 reader:
-  class_name: oceantracker.reader._base_reader._BaseReader
+  class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
   dimension_map:
     node: nodes
     time: time

@@ -25,13 +25,13 @@ poly_points_large=[[1597682.1237, 5489972.7479],
                         [1597300, 5487000],
                        [1597682.1237, 5489972.7479]]
 
-
+import oceantracker.reader.generic_ncdf_reader
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
 
    'time_step' : 900,
     'debug': True,
-    'reader': {"class_name": 'oceantracker.reader._base_reader._BaseReader',
+    'reader': {"class_name": 'oceantracker.reader.generic_ncdf_reader.GenericNCDFreader',
                 'input_dir': '.',
                 'file_mask': 'demoHindcast2D*.nc',
                 'search_sub_dirs': True,
@@ -209,20 +209,7 @@ p8['trajectory_modifiers']={'part_spliting':
 p8.update({'output_file_base' :'demo08_particle_splitting',  })
 params.append (p8)
 
-# test polygon release overlying land
-p9 = deepcopy(p1)
-p9.update({'output_file_base' :'demo09_polygon_release_overlapping_land',  })
-p9['release_groups']={
-        'Poly1': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
-         'points': (np.asarray(poly_points_large) + np.asarray([[0,-3000]])).tolist(),
-         'pulse_size': 10, 'release_interval': 3 * 3600},
-    'Poly2':{'class_name': 'oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange',
-            'min_water_depth': 30,
-            'points': (np.asarray(poly_points_large) + np.asarray([[-3000, 0]])).tolist(),
-            'pulse_size': 10, 'release_interval': 3 * 3600}
-        }
 
-params.append(p9)
 
 # test polygon release overlying land
 p10= deepcopy(p2)
@@ -355,6 +342,23 @@ for rg in s61['release_groups'].values():
     rg.update({'pulse_size': 1000, 'release_interval': 3600})
 
 params.append(s61)
+
+
+# test polygon release overlying land
+p62 = deepcopy(schsim_base_params)
+p62.update({'output_file_base' :'demo62_polygon_release_overlapping_land',  })
+p62['release_groups']={
+        'Poly1': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
+         'points': (np.asarray(poly_points_large) + np.asarray([[0,-3000]])).tolist(),
+         'pulse_size': 10, 'release_interval': 3*3600},
+    'Poly2':{'class_name': 'oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange',
+            'min_water_depth': 30,
+            'points': (np.asarray(poly_points_large) + np.asarray([[-3000, 0]])).tolist(),
+            'pulse_size': 10, 'release_interval': 3 * 3600}
+        }
+
+params.append(p62)
+
 # back tracking test
 p90= deepcopy(p2)
 

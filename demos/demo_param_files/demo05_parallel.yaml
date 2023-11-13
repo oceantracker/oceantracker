@@ -22,7 +22,7 @@
       class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
   processors: 2
   reader:
-    class_name: oceantracker.reader._base_reader._BaseReader
+    class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
     dimension_map:
       node: nodes
       time: time
