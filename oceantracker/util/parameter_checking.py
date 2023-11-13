@@ -185,7 +185,7 @@ class ParameterListChecker(object):
     # todo do should default value be a PVC() instance, to get control over  possible values in list , max, min etc?
     def __init__(self, default_list, acceptable_types, is_required=False, can_be_empty_list= True, default_value=None,
                   fixed_len =None, min_length=None, max_length=None, doc_str=None, make_list_unique=None, obsolete = None,
-                 possible_values=None,
+                 possible_values=None, units=None,
                  ) :
 
         self.info= dict(locals()) # get keyword args as dict

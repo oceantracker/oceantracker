@@ -24,7 +24,7 @@ particle_statistics:
     name_of_polygon_release_group: near_shore
     update_interval: 1800
 reader:
-  class_name: oceantracker.reader._base_reader._BaseReader
+  class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
   dimension_map:
     node: nodes
     time: time

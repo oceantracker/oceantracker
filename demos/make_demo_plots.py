@@ -110,7 +110,7 @@ def demo08_particle_splitting(case_info_file_name,output_file=None):
                                 fps=15, back_ground_depth=True, show_dry_cells=True, interval=20)
     return None
 
-def demo09_polygon_release_overlapping_land(case_info_file_name,output_file=None):
+def demo62_polygon_release_overlapping_land(case_info_file_name,output_file=None):
     from oceantracker.post_processing.read_output_files.load_output_files import load_track_data, get_case_info_file_from_run_file
     from oceantracker.post_processing.plotting.plot_tracks import animate_particles
 

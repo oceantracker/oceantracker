@@ -61,7 +61,7 @@ class _BaseReader(ParameterBaseClass):
 
     def is_3D_variable(self, nc, var_name):   nopass()
 
-    def get_field_params(self):   nopass()
+    def get_field_params(self,nc, name):   nopass()
     def set_up_water_velocity(self):       nopass()
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):   nopass()
