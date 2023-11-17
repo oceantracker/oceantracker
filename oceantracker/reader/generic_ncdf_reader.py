@@ -70,8 +70,7 @@ class GenericNCDFreader(_BaseReader):
         dim_map = self.params['dimension_map']
 
         if type(fmap) != list: fmap = [fmap]
-        f_params = dict(class_name='oceantracker.fields._base_field.ReaderField',
-                        time_varying=nc.is_var_dim(fmap[0], dim_map['time']),
+        f_params = dict(time_varying=nc.is_var_dim(fmap[0], dim_map['time']),
                         is3D=nc.is_var_dim(fmap[0], dim_map['z']),
                         is_vector=nc.is_var_dim(fmap[0],  dim_map['vector2D']) or nc.is_var_dim(fmap[0],  dim_map['vector3D']) or len(fmap) > 1
                         )
@@ -208,10 +207,10 @@ class GenericNCDFreader(_BaseReader):
 
         # read nodal x's
 
-        grid = self.read_nodal_x(nc, grid)
+        grid = self.read_grid_coords(nc, grid)
         grid['x'] = grid['x'].astype(np.float64)
 
-        grid = self.read_triangles(nc, grid)
+        grid = self.read_triangles_as_int32(nc, grid)
         # ensure np.int32 values
         grid['triangles']=grid['triangles'].astype(np.int32)
         grid['quad_cells_to_split'] = grid['quad_cells_to_split'].astype(np.int32)
@@ -308,59 +307,6 @@ class GenericNCDFreader(_BaseReader):
 
         return out
 
-    def build_vertical_grid(self, nc, grid):
-        # setup transforms on the data, eg regrid vertical if 3D to same sigma levels
-        si= self.shared_info
-        params = self.params
-        info = self.info
-
-        grid['bottom_cell_index'] = self.read_bottom_cell_index(nc).astype(np.int32)
-
-        # set up zlevel
-        if si.settings['regrid_z_to_uniform_sigma_levels']:
-            # setup  regrid grid equal time invariace sigma layers
-            # based on profile with thiniest top nad bootm layers
-
-            # read first zlevel time step
-            zlevel = nc.read_a_variable(params['grid_variable_map']['zlevel'], sel=0)
-            # use node with thinest top/bot layers as template for all sigma levels
-
-            node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(zlevel, grid['bottom_cell_index'],si.z0)
-
-            # use layer fractions from this node to give layer fractions everywhere
-            # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
-            nz_bottom = grid['bottom_cell_index'][node_min]
-
-            # stretch sigma out to same number of depth cells,
-            # needed for LSC grid if node_min profile is not full number of cells
-            zf_model= grid['zlevel_fractions'][node_min,nz_bottom:]
-            nz = grid['zlevel_fractions'].shape[1]
-            nz_fractions = nz - nz_bottom
-            grid['sigma']  =np.interp(np.arange(nz)/nz,  np.arange(nz_fractions)/nz_fractions,zf_model)
-            grid['nz'] =grid['sigma'].size # used to size field data arrays
-
-            # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
-            # need to check if zq > ['sigma_map_z'][nz+1] to see if nz must be increased by 1 tp get sigma interval
-            dz = 0.66*abs(np.diff(grid['sigma']).min()) # approx dz
-            nz_map = int(np.ceil(1.0/dz))  # number of cells in map
-            grid['sigma_map_z'] =  np.arange(nz_map)/(nz_map-1) # zlevels at the map intervals
-            grid['sigma_map_dz'] = np.diff(grid['sigma_map_z']).mean() # exact dz
-
-            # make evenly spaced map which gives cells contating a sigma level
-            grid['sigma_map_nz_interval_with_sigma'] = np.zeros((nz_map,), dtype=np.int32)
-            interval_with_sigma_level = (grid['sigma']*nz_map).astype(np.int32)
-            
-            # omit sigma = 0 and 1 from intervals, to ensurethey fall in first and last intervals
-            grid['sigma_map_nz_interval_with_sigma'][ interval_with_sigma_level[1:-1] ] = 1
-            grid['sigma_map_nz_interval_with_sigma'] =  grid['sigma_map_nz_interval_with_sigma'].cumsum()
-
-        else:
-            # native  vertical grid option, could be  Schisim LCS vertical grid
-            grid['nz']= nc.dim_size(params['dimension_map']['z'])  # used to size field data arrays
-            s = [self.params['time_buffer_size'], grid['x'].shape[0], grid['nz']]
-            grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
-
-        return grid
 
 
     # Below are basic variable read methods for any new reader
@@ -391,7 +337,7 @@ class GenericNCDFreader(_BaseReader):
             time += time_util.isostr_to_seconds(self.params['isodate_of_hindcast_time_zero'])
         return time
 
-    def read_nodal_x(self, nc, grid):
+    def read_grid_coords(self, nc, grid):
         params= self.params
         var_name = params['grid_variable_map']['x']
         grid['x'] = np.column_stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1])))
@@ -401,7 +347,7 @@ class GenericNCDFreader(_BaseReader):
 
         return grid
 
-    def read_triangles(self, nc, grid):
+    def read_triangles_as_int32(self, nc, grid):
         # return triangulation
         # if triangualur has /quad cells
         params = self.params
@@ -411,14 +357,35 @@ class GenericNCDFreader(_BaseReader):
         if params['one_based_indices']:  grid['triangles'] -= 1
 
         # note indices of any triangles neeeding splitting
-        grid['quad_cells_to_split'] =  np.full((0,),0,np.int32)
+        grid['quad_cells_to_split'] =  np.full((0,),0, np.int32)
         return grid
 
     def preprocess_field_variable(self, nc, name, data): return data
 
-    # checks on first hindcast file
-    def additional_setup_and_hindcast_file_checks(self, nc,msg_logger): pass
 
+
+    def set_up_uniform_sigma(self, nc, grid):
+        # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
+        si = self.shared_info
+        # read first zlevel time step
+        zlevel = nc.read_a_variable(self.params['grid_variable_map']['zlevel'], sel=0)
+        bottom_cell_index = self.read_bottom_cell_index_as_int32(nc).astype(np.int32)
+        # use node with thinest top/bot layers as template for all sigma levels
+
+        node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(zlevel, bottom_cell_index, si.z0)
+
+        # use layer fractions from this node to give layer fractions everywhere
+        # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
+        nz_bottom = bottom_cell_index[node_min]
+
+        # stretch sigma out to same number of depth cells,
+        # needed for LSC grid if node_min profile is not full number of cells
+        zf_model = grid['zlevel_fractions'][node_min, nz_bottom:]
+        nz = grid['zlevel_fractions'].shape[1]
+        nz_fractions = nz - nz_bottom
+        grid['sigma'] = np.interp(np.arange(nz) / nz, np.arange(nz_fractions) / nz_fractions, zf_model)
+
+        return grid
 
     #@function_profiler(__name__)
     def fill_time_buffer(self, time_sec):
@@ -648,9 +615,7 @@ class GenericNCDFreader(_BaseReader):
             is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
 
-    def read_bottom_cell_index(self, nc):
-        # assume  not LSc grid, so bottom cel is zero
-        return np.full((self.grid['x'].shape[0],),0, dtype=np.int32)
+
 
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):

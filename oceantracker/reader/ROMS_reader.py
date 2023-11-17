@@ -86,7 +86,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
         x = self.convert_lon_lat_to_meters_grid(grid['lon_lat'])
         return x
 
-    def read_triangles_as_int32(self, nc):
+    def read_triangles_as_int32_as_int32(self, nc):
         # build triangles from regular grid
         grid = self.grid
 

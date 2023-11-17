@@ -121,22 +121,22 @@ def get_node_layer_field_values(data, node_to_tri_map, tri_per_node,cell_center_
 
 
 @njit
-def convert_layer_field_to_levels_from_depth_fractions_at_each_node(data, zfraction_center, zfraction_boundaries):
+def convert_layer_field_to_levels_from_depth_fractions_at_each_node(data, zfraction_layer, zfraction_level):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depths
     # used in FVCOM reader
-    data_levels = np.full((data.shape[0],data.shape[1], zfraction_boundaries.shape[1]), 0., dtype=np.float32)
+    data_levels = np.full((data.shape[0], data.shape[1], zfraction_level.shape[1]), 0., dtype=np.float32)
 
     for nt in range(data.shape[0]):
         for n in range(data.shape[1]):
             for nz in range(1,data.shape[2]):
                 # linear interp levels not, first or last boundary
-                data_levels[nt, n, nz] = kernal_linear_interp1D(zfraction_center[n, nz - 1], data[nt, n, nz - 1], zfraction_center[n, nz], data[nt, n, nz], zfraction_boundaries[n, nz])
+                data_levels[nt, n, nz] = kernal_linear_interp1D(zfraction_layer[n, nz - 1], data[nt, n, nz - 1], zfraction_layer[n, nz], data[nt, n, nz], zfraction_level[n, nz])
 
             # extrapolate to top zlevel
-            data_levels[nt, n, -1] = kernal_linear_interp1D(zfraction_center[n, - 2], data[nt, n, -2], zfraction_center[n, -1], data[nt, n, -1], zfraction_boundaries[n, -1])
+            data_levels[nt, n, -1] = kernal_linear_interp1D(zfraction_layer[n, - 2], data[nt, n, -2], zfraction_layer[n, -1], data[nt, n, -1], zfraction_level[n, -1])
 
             # extrapolate to bottom zlevel
-            data_levels[nt, n, 0] = kernal_linear_interp1D(zfraction_center[n, 0], data[nt, n, 0], zfraction_center[n, 1], data[nt, n, 1], zfraction_boundaries[n, 0])
+            data_levels[nt, n, 0] = kernal_linear_interp1D(zfraction_layer[n, 0], data[nt, n, 0], zfraction_layer[n, 1], data[nt, n, 1], zfraction_level[n, 0])
 
     return data_levels
 

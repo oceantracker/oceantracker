@@ -20,47 +20,43 @@ class unstructured_FVCOM(_BaseReader):
     def __init__(self):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({ 'field_variable_map': {'water_velocity': PLC(['u','v'], [str], fixed_len=2),
-                                                          'water_depth': PVC('h', str,doc_str='maps standard internal field name to file variable name'),
-                                                          'tide': PVC('zeta', str,doc_str='maps standard internal field name to file variable name')},
-
-                                  'dimension_map': {'time': PVC('time', str),
-                                                    'node': PVC('node', str),
-                                                    'triangle': PVC('nele', str),
-                                                    'z': PVC('siglev', str, doc_str='name of dim for vertical layer boundaries'),
-                                                    'z_mid_layer': PVC('siglay', str, doc_str=' name of dimension for middle of layers'),
-                                                    },
-
-                                  'grid_variable_map': {'time': PVC('time', str),
-                                                        'x': PLC(['x', 'y'], [str], fixed_len=2),
-                                                        'zlevel': PVC('siglev', str,doc_str=' name of fractional layer boundary levels'),
-                                                        'zlevel_mid_cell': PVC('siglay', str, doc_str=' name of fractional mid vertical cell  boundary'),
-                                                        'triangles': PVC('nv', str),
-                                                        'bottom_cell_index': PVC(None, str),
-                                                        'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
+        self.add_default_params({ 'field_variable_map': {
+                                                'water_velocity': PLC(['u','v','ww'], [str], fixed_len=2),
+                                                'water_depth': PVC('h', str,doc_str='maps standard internal field name to file variable name'),
+                                                'tide': PVC('zeta', str,doc_str='maps standard internal field name to file variable name'),
+                                                'water_temperature': PVC('temp', str, doc_str='maps standard internal field name to file variable name'),
+                                                 'salinity': PVC('salinity', str, doc_str='maps standard internal field name to file variable name'),
+                                                 'wind_velocity': PLC(['uwind_speed', 'vwind_speed'], [str], doc_str='maps standard internal field name to file variable name')},
                                 })
 
-    def initial_setup(self):
-        super().initial_setup()
-        grid= self.grid
+    def set_up_grid(self, nc):
+        grid, is3D_hydro = super().set_up_grid(nc)
         # make distance weighting matrix for triangle center values at nodal points
         grid['cell_center_weights'] = hydromodel_grid_transforms.calculate_cell_center_weights_at_node_locations(
                                                     grid['x'], grid['x_center'],grid['node_to_tri_map'],grid['tri_per_node'])
+        # time invarient z fractions at layer
+        grid['z_fractions'] = nc.read_a_variable('siglev').T
+        grid['z_fractions_layer'] = nc.read_a_variable('siglay').T
+        return grid, is3D_hydro
 
     def is_3D_hydromodel(self, nc):
         return True if nc.is_var_dim(self.params['field_variable_map']['water_velocity'][0], self.params['dimension_map']['z_mid_layer']) else False
+
+    def setup_water_velocity(self,nc,grid):
+        # tweak to fit variables
+        fm = self.params['field_variable_map']
+
+        if not nc.is_var(fm['water_velocity'][2]):
+                fm['water_velocity'] = fm['water_velocity'][:2]
+        # is depth aver velocity in file?
+        pass
 
 
     def is_3D_variable(self,nc, var_name):
         # is variable 3D, if layer or
         return  nc.is_var_dim(var_name,self.params['dimension_map']['z']) or   nc.is_var_dim(var_name,self.params['dimension_map']['z_mid_layer'])
 
-    def additional_setup_and_hindcast_file_checks(self, nc, msg_logger):
-        # include vertical velocity if in file
-        if nc.is_var('ww'):
-            self.params['field_variables']['water_velocity'].append('ww')
-        else:
-            msg_logger.msg('No vertical velocity "ww" variable in FVCOM hydro-model files, assuming vertical_velocity=0', note=True)
+
 
     def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.all_var_dims(var_name_in_file) for x in ['siglay','siglev'])
 
@@ -70,7 +66,7 @@ class unstructured_FVCOM(_BaseReader):
     def is_file_variable_time_varying(self, nc, var_name_in_file): return  'time' in nc.all_var_dims(var_name_in_file)
 
 
-    def build_vertical_grid(self, nc, grid):
+    def set_up_uniform_sigma(self, nc, grid):
 
         # add time invariant vertical grid variables needed for transformations
         # sigma level fractions required to build zlevel after reading  tide
@@ -95,31 +91,46 @@ class unstructured_FVCOM(_BaseReader):
 
         return grid
 
-    def read_nodal_x(self, nc, grid):
+    def read_grid_coords(self, nc, grid):
         # get node location in meters
         # also record cell center x as well to be used for get nodal field vals from values at center, eg velocity
 
-        if  self.params['cords_in_lat_long'] or np.all(nc.read_a_variable('x')==0): #  use lat long? as x may sometimes be all be zeros
+        grid['x'] = np.stack((nc.read_a_variable('x'), nc.read_a_variable('y'))).astype(np.float64)
+        grid['x_center'] = np.stack((nc.read_a_variable('xc'), nc.read_a_variable('yc')), axis=1).astype(np.float64)
 
-            grid['lat']= nc.read_a_variable('lat')
-            grid['lon']=nc.read_a_variable('lon')
-            grid['x'] = self.convert_lon_lat_to_meters_grid(np.stack((grid['lon'],grid['lat'] ), axis=1).astype(np.float64))
+        if  np.all(nc.read_a_variable('x')==0): #  use lat long? as x may sometimes be all be zeros
+            grid['is_lon_lat'] = True
+            grid['x'] =   np.stack((nc.read_a_variable('lon'), nc.read_a_variable('lat')), axis=1).astype(np.float64)
+            grid['x_center'] = np.stack((nc.read_a_variable('lonc'), nc.read_a_variable('latc')), axis=1).astype(np.float64)
 
-            grid['x_center'] = np.stack((nc.read_a_variable('lonc'), nc.read_a_variable('latc')), axis=1)
-            grid['x_center'] = self.convert_lon_lat_to_meters_grid(grid['x_center']).astype(np.float64)
+        elif self.detect_lonlat_grid(grid['x']):
+            # try auto detection
+            grid['is_lon_lat'] = True
 
         else:
-            grid['x'] = np.stack((nc.read_a_variable('x'), nc.read_a_variable('y'))).astype(np.float64)
+            grid['is_lon_lat'] = self.params['cords_in_lat_long']
 
-            grid['x_center'] = np.stack((nc.read_a_variable('xc'), nc.read_a_variable('yc')), axis=1).astype(np.float64)
+        if grid['is_lon_lat']:
+            grid['lon_lat'] = grid['x']
+            grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
+            grid['lon_lat_center'] = grid['x_center']
+            grid['x_center'] = self.convert_lon_lat_to_meters_grid(grid['x_center'])
+
 
         return grid
 
-    def read_triangles(self, nc, grid):
-        grid['triangles'] = nc.read_a_variable(self.params['grid_variable_map']['triangles']).T - 1 # convert to zero base index
-        grid['quad_cells_to_split'] = np.full((grid['triangles'] .shape[0],),False,dtype=bool)
-        return grid
+    def read_triangles_as_int32(self, nc, grid):
+        grid['triangles'] = nc.read_a_variable('nv').T.astype(np.int32) - 1 # convert to zero base index
+        grid['quad_cells_to_split'] =  np.full((0,),0, np.int32)
 
+        return  grid
+
+
+    def is_hindcast3D(self, nc):
+        return nc.is_var_dim('u','siglay')
+
+    def number_hindcast_zlayers(self, nc):
+        return nc.dim_size('siglev')
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         # calcuate zlevel from depth fractions, tide and water depth
@@ -157,41 +168,49 @@ class unstructured_FVCOM(_BaseReader):
 
         time_sec = np.asarray(time_sec, dtype= np.float64)
 
-        if self.params['time_zone'] is not None: time_sec += self.params['time_zone'] * 3600.
-
         return time_sec
+
+
+    def get_field_params(self,nc, name, crumbs=''):
+        # work out if feild is 3D ,etc
+        fmap = self.params['field_variable_map'][name]
+        if type(fmap) != list: fmap =[fmap]
+        f_params = dict(time_varying = nc.is_var_dim(fmap[0], 'time'),
+                        is3D = nc.is_var_dim(fmap[0],'siglay') or nc.is_var_dim(fmap[0],'siglev'),
+                        is_vector = len(fmap) > 1,
+                        )
+        return f_params
 
     def read_file_var_as_4D_nodal_values(self,nc,var_name, file_index=None):
         # read variable into 4D ( time, node, depth, comp) format
         # assumes same variable order in the file
-        dm = self.params['dimension_map']
+
         grid = self.grid
 
         data = nc.read_a_variable(var_name, sel=file_index)
 
         # first reorder dim to ( time, node, depth, comp), ie swap z and hori
-        if nc.is_var_dim(var_name,dm['z']) or nc.is_var_dim(var_name,dm['z_mid_layer']):
-            dim_order = [0, 2, 1] if nc.is_var_dim(var_name, dm['time']) else [2, 1]  # only 2 dims if time varying
+        if nc.is_var_dim(var_name,'siglay') or nc.is_var_dim(var_name,'siglev'):
+            dim_order = [0, 2, 1] if nc.is_var_dim(var_name, 'time') else [2, 1]  # only 2 dims if time varying
             data = np.transpose(data, dim_order)
 
         # add time dim if needed
-        if not nc.is_var_dim(var_name, dm['time']):
+        if not nc.is_var_dim(var_name, 'time'):
             data  = data[np.newaxis, ...]
 
-            # some variables at nodes, some at cell center ( eg u,v,w)
-        if nc.is_var_dim(var_name, dm['triangle']):
-            # data is at cell center/element  move to nodes
-            data = hydromodel_grid_transforms.get_node_layer_field_values(
-                data, grid['node_to_tri_map'], grid['tri_per_node'], grid['cell_center_weights'])
+        # some variables at nodes, some at cell center ( eg u,v,w)
+        if nc.is_var_dim(var_name, 'nele'):
+            # data is at cell center/element/triangle  move to nodes
+            data = hydromodel_grid_transforms.get_node_layer_field_values(data, grid['node_to_tri_map'], grid['tri_per_node'], grid['cell_center_weights'])
 
         # see if z or z water level  in variable and swap z and node dim
-        if nc.is_var_dim(var_name,dm['z_mid_layer']) :
+        if nc.is_var_dim(var_name,'siglay') :
             #3D mid layer values
             # convert mid-layer values to values at layer boundaries, ie zlevels
             data = hydromodel_grid_transforms.convert_layer_field_to_levels_from_depth_fractions_at_each_node(
-                                data, grid['z_fractions_layer_center'], grid['z_fractions'])
-        elif not nc.is_var_dim(var_name,dm['z']) :
-            # 2D
+                                data, grid['z_fractions_layer'], grid['z_fractions'])
+        elif not nc.is_var_dim(var_name, 'siglev') :
+            # 2D field
             data =    data = data[..., np.newaxis]
 
         # add dummy vector component to make 4D

@@ -6,6 +6,31 @@ Change log
 Known issues
 __________________
 
+
+Version 0.45
+_________________________
+
+Faster and simplified internal structure
+
+New features
+--------------------
+
+#. Most expensive step in 3D finding vertical cell is not 5 times faster, so net 2-3 times faster, as by default regrids  3D data to uniform S grid, to speed vertical cell search by factor of 5. Original native vertical grid short vertical walk search still available.
+#. Floating particle trajectory  modifier, forces particles to follow free surface
+#. Now exits if any the release group start time is outside time range of hindcast
+
+
+Known breaking changes- ask for help if needed to transition
+______________________________________________________________
+
+#. reader param load_fields replaces 'field_variables' param, to load variables to names used internally. These internal names may be mapped to file variables in  new  'field_variable_map'. If a special variable, eg concentration field, no map is needed.
+
+Internal changes
+_________________
+
+#.
+
+
 Version 0.4 Major upgrade
 _________________________
 
