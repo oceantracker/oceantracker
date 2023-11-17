@@ -5,7 +5,8 @@ from pyproj.aoi import AreaOfInterest
 from pyproj.database import query_utm_crs_info
 from math import floor
 
-# cord transforms from remy
+# integer values of EPSG at  https://spatialreference.org/
+
 #   uses  (x,y) order,  so geographic are in (lon, lat) order
 ID_WGS84 = 4326
 ID_NZTM  = 2193
@@ -58,3 +59,11 @@ def WGS84_to_UTM(lon_lat, out=None):
 
     out[:, 0], out[:, 1], = T.transform(lon_lat[:, 0], lon_lat[:, 1])
     return out
+
+def convert_cords(xy, EPSG_in, EPSG_out):
+    # interger values of EPSG at  https://spatialreference.org/
+    T = Transformer.from_crs(EPSG_in, EPSG_out, always_xy=True)
+    out = np.full_like(xy, 0.)
+    out[:, 0], out[:, 1], = T.transform(xy[:, 0], xy[:, 1])
+    return out
+

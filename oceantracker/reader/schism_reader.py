@@ -5,6 +5,8 @@ from oceantracker.util import  time_util
 from datetime import  datetime, timedelta
 import numpy as np
 from oceantracker.util.triangle_utilities_code import split_quad_cells
+import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
+
 
 class SCHISMSreaderNCDF(_BaseReader):
 
@@ -33,7 +35,7 @@ class SCHISMSreaderNCDF(_BaseReader):
 
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
-    def read_nodal_x(self, nc, grid):
+    def read_grid_coords(self, nc, grid):
         x_var ='SCHISM_hgrid_node_x'
         x =  nc.read_a_variable(x_var)
         y = nc.read_a_variable('SCHISM_hgrid_node_y')
@@ -41,6 +43,10 @@ class SCHISMSreaderNCDF(_BaseReader):
 
         # test if lat long
         if nc.is_var_attr(x_var,'units') and 'degree' in nc.var_attr(x_var,'units').lower():
+            grid['is_lon_lat'] = True
+
+        elif self.detect_lonlat_grid(grid['x']):
+            # try auto detection
             grid['is_lon_lat'] = True
         else:
             grid['is_lon_lat'] = self.params['cords_in_lat_long']
@@ -50,7 +56,7 @@ class SCHISMSreaderNCDF(_BaseReader):
 
         return  grid
 
-    def read_triangles(self, nc, grid):
+    def read_triangles_as_int32(self, nc, grid):
         grid['triangles'] = nc.read_a_variable('SCHISM_hgrid_face_nodes').astype(np.int32)
         grid['triangles'] -= 1 # make zero based
 
@@ -67,6 +73,19 @@ class SCHISMSreaderNCDF(_BaseReader):
 
     def is_hindcast3D(self, nc):
         return nc.is_var('hvel')
+
+    def setup_water_velocity(self,nc,grid):
+        # tweak to be depth avearged
+        fm = self.params['field_variable_map']
+
+        if nc.is_var(fm['water_velocity'][0]):
+            # check if vertical vel variable in file
+            if not nc.is_var(fm['water_velocity'][1]):
+                fm['water_velocity'] = [fm['water_velocity'][0]]
+        else:
+            # is depth averaged schism run
+            fm['water_velocity'] =fm['water_velocity_depth_averaged']
+
 
     def number_hindcast_zlayers(self, nc): return nc.dim_size('nSCHISM_vgrid_layers')
 
@@ -94,27 +113,26 @@ class SCHISMSreaderNCDF(_BaseReader):
         # work out if feild is 3D ,etc
         fmap = self.params['field_variable_map'][name]
         if type(fmap) != list: fmap =[fmap]
-        f_params = dict(class_name = 'oceantracker.fields._base_field.ReaderField',
-                        time_varying = nc.is_var_dim(fmap[0], 'time'),
+        f_params = dict(time_varying = nc.is_var_dim(fmap[0], 'time'),
                         is3D = nc.is_var_dim(fmap[0],'nSCHISM_vgrid_layers'),
                         is_vector = nc.is_var_dim(fmap[0],'two') or len(fmap) > 1
                         )
         return f_params
 
 
-    def read_bottom_cell_index(self, nc):
+    def read_bottom_cell_index_as_int32(self, nc, grid):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid
         var_name =self.params['grid_variable_map']['bottom_cell_index']
         if nc.is_var(var_name):
-            node_bottom_index = nc.read_a_variable(var_name)
-            node_bottom_index -= 1 # make zero based index
+            grid['bottom_cell_index'] = nc.read_a_variable(var_name).astype(np.int32)
+            grid['bottom_cell_index'] -= 1 # make zero based index
             vertical_grid_type = 'LSC'
         else:
             # Slayer grid, bottom cell index = zero
-            node_bottom_index = np.zeros((self.grid['x'].shape[0],),dtype=np.int32)
-            vertical_grid_type = 'Slayer'
+            grid['bottom_cell_index'] = np.zeros((self.grid['x'].shape[0],),dtype=np.int32)
+            grid['bottom_cell_index'] = 'Slayer'
         self.info['vertical_grid_type'] = vertical_grid_type
-        return node_bottom_index
+        return grid
 
 
     def read_file_var_as_4D_nodal_values(self, nc, var_name, file_index=None):
@@ -136,6 +154,52 @@ class SCHISMSreaderNCDF(_BaseReader):
         data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
         is_dry_cell_buffer[buffer_index, :] = reader_util.append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
+
+        # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
+
+        # read first zlevel time step
+        zlevel = nc.read_a_variable(self.params['grid_variable_map']['zlevel'], sel=0)
+
+        # use node with thinest top/bot layers as template for all sigma levels
+
+        node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(zlevel, grid['bottom_cell_index'], si.z0)
+
+        # use layer fractions from this node to give layer fractions everywhere
+        # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
+        nz_bottom = grid['bottom_cell_index'][node_min]
+
+        # stretch sigma out to same number of depth cells,
+        # needed for LSC grid if node_min profile is not full number of cells
+        zf_model = grid['zlevel_fractions'][node_min, nz_bottom:]
+        nz = grid['zlevel_fractions'].shape[1]
+        nz_fractions = nz - nz_bottom
+        grid['sigma'] = np.interp(np.arange(nz) / nz, np.arange(nz_fractions) / nz_fractions, zf_model)
+
+        return grid
+
+    def set_up_uniform_sigma(self, nc, grid):
+        # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
+        si= self.shared_info
+        # read first zlevel time step
+        zlevel = nc.read_a_variable('zcor', sel=0)
+
+
+        # use node with thinest top/bot layers as template for all sigma levels
+
+        node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(zlevel, grid['bottom_cell_index'], si.z0)
+
+        # use layer fractions from this node to give layer fractions everywhere
+        # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
+        nz_bottom = grid['bottom_cell_index'][node_min]
+
+        # stretch sigma out to same number of depth cells,
+        # needed for LSC grid if node_min profile is not full number of cells
+        zf_model = grid['zlevel_fractions'][node_min, nz_bottom:]
+        nz = grid['zlevel_fractions'].shape[1]
+        nz_fractions = nz - nz_bottom
+        grid['sigma'] = np.interp(np.arange(nz) / nz, np.arange(nz_fractions) / nz_fractions, zf_model)
+
+        return grid
 
     def preprocess_field_variable(self, nc,name, data):
         if name =='water_velocity' and data.shape[2] > 1:

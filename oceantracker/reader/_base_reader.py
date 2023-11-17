@@ -38,7 +38,7 @@ class _BaseReader(ParameterBaseClass):
                                    'tide': PVC('elev', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('depth', str, is_required=True, doc_str='maps standard internal field name to file variable name'),
                                    },
-            'CRS_transform_code': PVC(None, int, doc_str='CRY code for coordinate conversion of hydro-model lon-lat to a meters grid , eg. CRS for NZTM is 2193'),
+            'EPSG': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
         })  # list of normal required dimensions
 
@@ -47,7 +47,7 @@ class _BaseReader(ParameterBaseClass):
     # Below are required  methods for any new reader
     # ---------------------------------------------------------
 
-    def set_up_water_velocity(self): nopass()
+    def setup_water_velocity(self): nopass()
 
     def is_hindcast3D(self, nc):  nopass()
 
@@ -55,14 +55,13 @@ class _BaseReader(ParameterBaseClass):
 
     def read_time_sec_since_1970(self, nc, file_index=None):    nopass()
 
-    def read_nodal_x(self, nc, grid):   nopass()
+    def read_grid_coords(self, nc, grid):   nopass()
 
-    def read_triangles(self, nc, grid):     nopass()
+    def read_triangles_as_int32(self, nc, grid):     nopass()
 
     def is_3D_variable(self, nc, var_name):   nopass()
 
     def get_field_params(self,nc, name):   nopass()
-    def set_up_water_velocity(self):       nopass()
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):   nopass()
 
@@ -72,15 +71,22 @@ class _BaseReader(ParameterBaseClass):
 
     # calculate dry cell flags, if any cell node is dry
     # not required but have defaults
-    def read_bottom_cell_index(self, nc):
+    def read_bottom_cell_index_as_int32(self, nc, grid):
         # assume  not LSc grid, so bottom cel is zero
-        return np.full((self.grid['x'].shape[0],), 0, dtype=np.int32)
+        grid['bottom_cell_index'] = np.full((grid['x'].shape[0],), 0, dtype=np.int32)
+        return grid
+
 
     def read_open_boundary_data_as_boolean(self, grid):
         is_open_boundary_node = np.full((grid['x'].shape[0],), False)
         return is_open_boundary_node
 
     def read_file_var_as_4D_nodal_values(self, nc, var_name, file_index=None): nopass()
+
+    # optional methods
+    #-------------------------------------
+    # checks on first hindcast file
+    def additional_setup_and_hindcast_file_checks(self, nc,msg_logger): pass
 
     # -------------------------------------------------
     # core reader processes
@@ -94,8 +100,6 @@ class _BaseReader(ParameterBaseClass):
         ml = si.msg_logger
         info = self.info
         self.info['file_info'] = si.working_params['file_info']  # add file_info to reader info
-
-        ml.exit_if_prior_errors()
 
         # set up ring buffer  info
         bi = self.info['buffer_info']
@@ -117,16 +121,35 @@ class _BaseReader(ParameterBaseClass):
                                                                            )
 
     def set_up_grid(self, nc):
-
+        si = self.shared_info
         grid = self.read_2Dgrid(nc)
         grid = self.build_2Dgrid(grid)
         is3D_hydro = self.is_hindcast3D(nc)
         if is3D_hydro:
             grid = self.build_vertical_grid(nc, grid)
+
         else:
             # 2D
             grid['zlevel'] = None
             grid['nz'] = 1  # only one z
+
+
+        # check key data types, so that numba runs cleanly
+        for name in ['x']:
+            v= grid[name]
+            if v.dtype != np.float64:
+                si.msg_logger.msg(f'Reader type error {name} must be dtype {np.float64} ', warning=True)
+
+        for name in ['zlevel', 'zlevel_fractions']:
+            if name in grid: 
+                v = grid[name]
+                if v.dtype != np.float32:
+                    si.msg_logger.msg(f'Reader type error {name} must be dtype {np.float64} ', warning=True)
+                
+        for name in ['triangles','bottom_cell_index','quad_cells_to_split']:
+            v= grid[name]
+            if v.dtype != np.int32:
+                si.msg_logger.msg(f'Reader type error {name} must be dtype {np.int32} ', warning=True)
 
         return grid, is3D_hydro
 
@@ -224,23 +247,13 @@ class _BaseReader(ParameterBaseClass):
         # read nodal values and triangles
         params = self.params
         ml = self.shared_info.msg_logger
-        grid_map = params['grid_variable_map']
 
-        for v in grid_map['x'] + [grid_map['triangles'], grid_map['time']]:
-            if not nc.is_var(v):
-                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in grid set', fatal_error=True)
-                return
         grid = {}
 
         # read nodal x's
 
-        grid = self.read_nodal_x(nc, grid)
-        grid['x'] = grid['x'].astype(np.float64)
-
-        grid = self.read_triangles(nc, grid)
-        # ensure np.int32 values
-        grid['triangles'] = grid['triangles'].astype(np.int32)
-        grid['quad_cells_to_split'] = grid['quad_cells_to_split'].astype(np.int32)
+        grid = self.read_grid_coords(nc, grid)
+        grid = self.read_triangles_as_int32(nc, grid)
 
         return grid
 
@@ -313,31 +326,18 @@ class _BaseReader(ParameterBaseClass):
         params = self.params
         info = self.info
 
-        grid['bottom_cell_index'] = self.read_bottom_cell_index(nc).astype(np.int32)
+        grid = self.read_bottom_cell_index_as_int32(nc, grid)
 
         # set up zlevel
         if si.settings['regrid_z_to_uniform_sigma_levels']:
             # setup  regrid grid equal time invariace sigma layers
             # based on profile with thiniest top nad bootm layers
 
-            # read first zlevel time step
-            zlevel = nc.read_a_variable(params['grid_variable_map']['zlevel'], sel=0)
-            # use node with thinest top/bot layers as template for all sigma levels
+            grid = self.set_up_uniform_sigma(nc, grid)
 
-            node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(zlevel, grid['bottom_cell_index'], si.z0)
-
-            # use layer fractions from this node to give layer fractions everywhere
-            # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
-            nz_bottom = grid['bottom_cell_index'][node_min]
-
-            # stretch sigma out to same number of depth cells,
-            # needed for LSC grid if node_min profile is not full number of cells
-            zf_model = grid['zlevel_fractions'][node_min, nz_bottom:]
-            nz = grid['zlevel_fractions'].shape[1]
-            nz_fractions = nz - nz_bottom
-            grid['sigma'] = np.interp(np.arange(nz) / nz, np.arange(nz_fractions) / nz_fractions, zf_model)
             grid['nz'] = grid['sigma'].size  # used to size field data arrays
 
+            # build lookup map
             # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
             # need to check if zq > ['sigma_map_z'][nz+1] to see if nz must be increased by 1 tp get sigma interval
             dz = 0.66 * abs(np.diff(grid['sigma']).min())  # approx dz
@@ -355,11 +355,15 @@ class _BaseReader(ParameterBaseClass):
 
         else:
             # native  vertical grid option, could be  Schisim LCS vertical grid
+
+
             grid['nz'] = self.number_hindcast_zlayers(nc)  # used to size field data arrays
             s = [self.params['time_buffer_size'], grid['x'].shape[0], grid['nz']]
             grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
 
         return grid
+
+
 
     # @function_profiler(__name__)
     def fill_time_buffer(self, time_sec):
@@ -569,7 +573,7 @@ class _BaseReader(ParameterBaseClass):
 
     def convert_lon_lat_to_meters_grid(self, x):
 
-        if self.params['CRS_transform_code'] is None:
+        if self.params['EPSG'] is None:
             x_out = cord_transforms.WGS84_to_UTM(x, out=None)
         else:
             # todo make it work with users transform?
@@ -599,6 +603,15 @@ class _BaseReader(ParameterBaseClass):
 
         output_files['grid_outline'] = output_files['output_file_base'] + '_grid_outline.json'
         json_util.write_JSON(path.join(output_files['run_output_dir'], output_files['grid_outline']), grid['grid_outline'])
+
+    def detect_lonlat_grid(self, xgrid):
+        # look at range to see if too small to be meters grid
+        si = self.shared_info
+        islatlong=  (np.nanmax(xgrid[:,0])- np.nanmin(xgrid[:,0]) < 360) or (np.nanmax(xgrid[:,0])- np.nanmin(xgrid[:,0]) < 360)
+
+        if islatlong:
+            si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so not a meters grid ', warning=True)
+        return islatlong
 
     def close(self):
         pass

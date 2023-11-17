@@ -86,6 +86,7 @@ class FieldGroupManager(ParameterBaseClass):
         nc = reader.open_first_file()
 
         grid,  si.is3D_run   = reader.set_up_grid(nc)
+        reader.setup_water_velocity(nc,grid)
         reader.grid = grid
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
@@ -101,6 +102,7 @@ class FieldGroupManager(ParameterBaseClass):
                 file_var_map = name # assume given field variable is in the file
 
             field_params = reader.get_field_params(nc, name)
+            field_params['class_name']='oceantracker.fields._base_field.ReaderField'
             field = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs= f' creating reader feild  field setup > "{name}"')
             field.initial_setup()
 

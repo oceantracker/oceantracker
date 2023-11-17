@@ -264,6 +264,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 first_release_time.append(release_info['first_release_time'])
                 last_time_alive.append(release_info['last_time_alive'])
 
+        si.msg_logger.exit_if_prior_errors('Errors in release groups')
+
         if len(si.classes['release_groups']) == 0:
             # guard against there being no release groups
             si.msg_logger.msg('No valid release groups, exiting' , fatal_error=True, exit_now=True)

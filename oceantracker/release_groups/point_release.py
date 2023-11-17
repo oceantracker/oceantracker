@@ -33,7 +33,7 @@ class PointRelease(ParameterBaseClass):
                                 'water_depth_range': PLC([],[float, int], min_length=2,  units= 'm',
                                                          doc_str=' 3D release at locations where water depth is in this range, overrides any given release z value, or z_range'),
                                   #Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}
-                                'max_cycles_to_find_release_points': PVC(100, int, min=100, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
+                                'max_cycles_to_find_release_points': PVC(200, int, min=100, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
                                  })
         self.class_doc(description= 'Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.')
 
@@ -115,7 +115,7 @@ class PointRelease(ParameterBaseClass):
         if release_info['release_times'].size ==0:
             ml.msg(f'No release times in range of hydro-model for release_group {info["instanceID"]:2d}, ',
                    fatal_error=True,
-                   hint=' Check hydro-model date range and release dates  ' , exit_now = True)
+                   hint=' Check hydro-model date range and release dates  ')
 
         # get time steps when released, used to determine when to release
         release_info['release_time_steps'] =  np.round(( release_info['release_times']- hindcast_start)/model_time_step).astype(np.int32)
@@ -135,6 +135,10 @@ class PointRelease(ParameterBaseClass):
 
         # index of release the  times to be released next
         release_info['index_of_next_release'] =  0
+
+        if not   hindcast_start <= release_info['first_release_time'] <= hindcast_end :
+            ml.msg(f'Release group "{info["name"]}" >  start time {time_util.seconds_to_isostr(release_info["first_release_time"])}  is outside the range of hydro-model times for release_group instance #{info["instanceID"]:2d}, ',
+                   fatal_error=True,hint=f' Check release start time is in hydro-model  range of  {time_util.seconds_to_isostr(hindcast_start)}  to {time_util.seconds_to_isostr(hindcast_start)} ')
 
     def release_locations(self):
         # set up full set of release locations inside  polygons

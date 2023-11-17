@@ -75,7 +75,7 @@ class ParameterBaseClass(object):
         for name in required_fields_list:
             if name not in si.classes['fields']:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', "' + self.info['name']
-                                + '" requires field  "' + name + '"' + ' to work, add to reader["field_variables"], or add to fields param class list', fatal_error=True)
+                                + '" requires field  "' + name + '"' + ' to work, add to reader["fields_to_load"], or add a fields param class list', fatal_error=True)
 
         for name in required_props_list:
             if name not in si.classes['particle_properties']:
