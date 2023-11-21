@@ -122,7 +122,6 @@ class unstructured_FVCOM(_BaseReader):
     def read_triangles_as_int32(self, nc, grid):
         grid['triangles'] = nc.read_a_variable('nv').T.astype(np.int32) - 1 # convert to zero base index
         grid['quad_cells_to_split'] =  np.full((0,),0, np.int32)
-
         return  grid
 
 

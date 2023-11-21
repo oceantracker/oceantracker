@@ -32,7 +32,7 @@ class PolygonRelease(PointRelease):
 
         self.polygon = InsidePolygon(verticies = info['points'])
 
-        info['polygon_area'] = self.polygon._get_area()
+        info['polygon_area'] = self.polygon.get_area()
         b = self.polygon.polygon_bounds
         info['bounding_box_area'] = (b[1]-b[0]) * (b[3]-b[2])
 
