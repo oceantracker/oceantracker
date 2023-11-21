@@ -120,7 +120,7 @@ class InsidePolygon(object):
             p= np.vstack((p,p[0,:]))
         return p
 
-    def _get_area(self):
+    def get_area(self):
         # area of closed polygon, by planimeter method?
         #todo move to own utility, use triangle util?
         x, y=self.points[:,0], self.points[:,1]
