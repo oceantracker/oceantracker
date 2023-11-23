@@ -217,70 +217,6 @@ class GenericNCDFreader(_BaseReader):
 
         return grid
 
-    def build_2Dgrid(self, grid):
-        # set up grid variables which don't vary in time and are shared by all case runners and main
-        # add to reader build info
-        si = self.shared_info
-        info = self.info
-        msg_logger = self.msg_logger
-        msg_logger.progress_marker('Starting grid setup')
-
-        # node to cell map
-        t0 = perf_counter()
-        grid['node_to_tri_map'], grid['tri_per_node'] = triangle_utilities_code.build_node_to_triangle_map(grid['triangles'], grid['x'])
-        msg_logger.progress_marker('built node to triangles map', start_time=t0)
-
-        # adjacency map
-        t0 = perf_counter()
-        grid['adjacency'] = triangle_utilities_code.build_adjacency_from_node_tri_map(grid['node_to_tri_map'], grid['tri_per_node'], grid['triangles'])
-        msg_logger.progress_marker('built triangle adjacency matrix', start_time=t0)
-
-        # boundary triangles
-        t0 = perf_counter()
-        grid['is_boundary_triangle'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
-        msg_logger.progress_marker('found boundary triangles', start_time=t0)
-        t0 = perf_counter()
-        grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid['triangles'], grid['adjacency'],
-                                                                           grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
-
-        msg_logger.progress_marker('built domain and island outlines', start_time=t0)
-
-        # make island and domain nodes
-        grid['node_type'] = np.zeros(grid['x'].shape[0], dtype=np.int8)
-        for c in grid['grid_outline']['islands']:
-            grid['node_type'][c['nodes']] = 1
-
-        grid['node_type'][grid['grid_outline']['domain']['nodes']] = 2
-
-        t0 = perf_counter()
-        grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
-        msg_logger.progress_marker('calculated triangle areas', start_time=t0)
-        msg_logger.progress_marker('Finished grid setup')
-
-        # adjust node type and adjacent for open boundaries
-        # todo define node and adjacent type values in dict, for single definition and case info output?
-        is_open_boundary_node = self.read_open_boundary_data_as_boolean(grid)
-        grid['node_type'][is_open_boundary_node] = 3
-
-        is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'], grid['adjacency'], is_open_boundary_node)
-        grid['adjacency'][is_open_boundary_adjacent] = -2
-        grid['limits'] = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
-
-        # now set up time buffers
-        time_buffer_size = self.params['time_buffer_size']
-        grid['time'] = np.zeros((time_buffer_size,), dtype=np.float64)
-        grid['date'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')  # time buffer
-        grid['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
-
-        # space for dry cell info
-        grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
-
-        # reader working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
-        grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
-
-        return grid
-
-
     def field_var_info(self,nc,file_var_map):
         si = self.shared_info
         params = self.params
@@ -569,29 +505,6 @@ class GenericNCDFreader(_BaseReader):
             s[3] = 1
 
         return data.reshape(s)
-
-    def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
-        # read time and  grid variables, eg time,dry cell
-        si = self.shared_info
-        grid = self.grid
-
-        grid['time'][buffer_index] = self.read_time_sec_since_1970(nc, file_index=file_index)
-
-        # do time zone adjustment
-        if self.params['time_zone'] is not None:
-            grid['time'][buffer_index] += self.params['time_zone'] * 3600.
-
-        # add date for convenience
-        grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
-
-        self.read_dry_cell_data(nc, file_index, grid['is_dry_cell'], buffer_index)
-
-        if si.is3D_run:
-            # grid['total_water_depth'][buffer_index,:]= np.squeeze(si.classes['fields']['tide'].data[buffer_index,:] + si.classes['fields']['water_depth'].data)
-            # read zlevel inplace to save memory?
-            if not si.settings['regrid_z_to_uniform_sigma_levels']:
-                # native zlevel grid and used for regidding in sigma
-                self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
 
 
     def read_dry_cell_data(self,nc,file_index,is_dry_cell_buffer, buffer_index):

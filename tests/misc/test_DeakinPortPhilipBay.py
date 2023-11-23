@@ -18,7 +18,9 @@ def set_params(args, x0, duration_sec= 5. * 24 * 3600):
 
     params = {'output_file_base': 'PPBtest','time_step': 1800,
               'root_output_dir': 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay',
-              'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF', 'input_dir': 'F:\\Hindcasts\Deakin_EricT\\PPB_Hydro_netCDF',
+              'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
+                         #'input_dir': 'F:\\Hindcasts\Deakin_EricT\\PPB_Hydro_netCDF',
+                         'input_dir': r'F:\Hindcasts\PortPhillipBay\HUY2020\schism',
                          'file_mask': 'schout_*.nc',
                          'cords_in_lat_long': True,
                          # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
@@ -57,10 +59,14 @@ if __name__ == '__main__':
           ]
 
     params = set_params(args, x0, duration_sec=7. * 24 * 3600)
-
-    params['reader']['input_dir'] = r'F:\Hindcasts\Hindcast_samples_tests\Deakin_EricT\PPB_Hydro_netCDF'
-    params['reader']['file_mask']= 'schout_*.nc'
     params['root_output_dir'] = 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay'
+
+    if 1==0:
+        params['reader']['input_dir'] = r'F:\Hindcasts\Hindcast_samples_tests\Deakin_EricT\PPB_Hydro_netCDF'
+        params['reader']['file_mask']= 'schout_*.nc'
+    else:
+        params['reader']['input_dir'] = r'F:\Hindcasts\PortPhillipBay\HUY2020\schism'
+        params['reader']['file_mask'] = '*.nc'
 
     if not args.norun:
         caseInfoFile = run(params)
@@ -83,7 +89,8 @@ if __name__ == '__main__':
         track_data = load_output_files.load_track_data(
             caseInfoFile, var_list=['tide', 'water_depth','eDNA'], fraction_to_read=.02)
 
-        plot_tracks.animate_particles(track_data, axis_lims=ax, title='Port Phillip Bay Schism test',show_dry_cells = False)
+        plot_tracks.animate_particles(track_data, axis_lims=ax, title='Port Phillip Bay Schism test',
+                                      show_dry_cells = False,movie_file='\portphillip_test.mp4')
 
         dx=25000
         #ax = [217641+dx, 404133-dx, 5702747+dx, 5815571-dx]

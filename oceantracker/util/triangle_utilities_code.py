@@ -147,14 +147,16 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
     len_seg = [len(l) for l in segs] # f
 
     # split segments into  domain or island
-    # domain is line segment containing most easterly node
-    domain_node= np.argmax( x[:, 0]== x[:, 0].min())
+    # domain is line segment containing most easterly node in the trangulation
+    x_tri =  x[np.unique(triangles), 0]
+    domain_node= np.argmax( x_tri == x_tri.min())
 
     for s in segs:
         nodes=np.asarray(s).astype(np.int32)
         points = x[s, :]
-        face_nodes= np.stack((nodes[:-1],nodes[1:]), axis=1)
-        d = {'nodes': nodes, 'points': points, 'face_nodes': face_nodes}
+        #face_nodes= np.stack((nodes[:-1],nodes[1:]), axis=1)
+        #d = {'nodes': nodes, 'points': points, 'face_nodes': face_nodes}
+        d = {'nodes': nodes, 'points': points}
         # longest segment must be the domain
         if domain_node in nodes :
             out['domain'].update(d)
