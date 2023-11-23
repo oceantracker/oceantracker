@@ -54,6 +54,7 @@ class SCHISMSreaderNCDF(_BaseReader):
         if grid['is_lon_lat']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
 
+
         return  grid
 
     def read_triangles_as_int32(self, nc, grid):
@@ -154,9 +155,10 @@ class SCHISMSreaderNCDF(_BaseReader):
         data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
         is_dry_cell_buffer[buffer_index, :] = reader_util.append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
-
+    def set_up_uniform_sigma(self, nc, grid):
         # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
 
+        #todo why is this here ?????????????????????????
         # read first zlevel time step
         zlevel = nc.read_a_variable(self.params['grid_variable_map']['zlevel'], sel=0)
 

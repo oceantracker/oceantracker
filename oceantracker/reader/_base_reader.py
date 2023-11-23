@@ -143,13 +143,14 @@ class _BaseReader(ParameterBaseClass):
         for name in ['zlevel', 'zlevel_fractions']:
             if name in grid: 
                 v = grid[name]
-                if v.dtype != np.float32:
+                if v is not None and v.dtype != np.float32:
                     si.msg_logger.msg(f'Reader type error {name} must be dtype {np.float64} ', warning=True)
                 
         for name in ['triangles','bottom_cell_index','quad_cells_to_split']:
-            v= grid[name]
-            if v.dtype != np.int32:
-                si.msg_logger.msg(f'Reader type error {name} must be dtype {np.int32} ', warning=True)
+            if name in grid :
+                v= grid[name]
+                if v.dtype != np.int32:
+                    si.msg_logger.msg(f'Reader type error {name} must be dtype {np.int32} ', warning=True)
 
         return grid, is3D_hydro
 

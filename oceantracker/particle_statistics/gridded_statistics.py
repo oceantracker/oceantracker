@@ -206,9 +206,6 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         si= self.shared_info
         stats_grid = self.grid
 
-        si.msg_logger.msg('When use aged binned particle stats, to get un biases stats., need to stop releasing particles "max_age_to_bin" '
-                           + ' or max("user_age_bin_edges")  before end of run, by setting  particle param "release_duration"', note=True)
-
         # ages to bin particle ages into,  equal bins in given range
         age_min = abs(self.params['min_age_to_bin'])
         age_max = abs(self.params['max_age_to_bin'])
