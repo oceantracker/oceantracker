@@ -93,6 +93,9 @@ class SCHISMSreaderNCDF(_BaseReader):
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         zlevel_buffer[buffer_index,...] = nc.read_a_variable('zcor', sel=file_index).astype(np.float32)
 
+    def read_factional_zlevels(self, nc):
+        z_fractiosns = nc.read_a_variable('zcor').astype(np.float32)
+
     def read_time_sec_since_1970(self, nc, file_index=None):
         var_name=self.params['grid_variable_map']['time']
         time = nc.read_a_variable(var_name, sel=file_index)
@@ -149,35 +152,12 @@ class SCHISMSreaderNCDF(_BaseReader):
         return data.reshape(s)
 
     def read_dry_cell_data(self,nc,file_index,is_dry_cell_buffer, buffer_index):
-        # calculate dry cell flags, if any cell node is dry
+        # calculate dry cell flags, if any cell node is then dry is_dry_cell_buffer=1
         grid = self.grid
         si = self.shared_info
         data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
         is_dry_cell_buffer[buffer_index, :] = reader_util.append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
-    def set_up_uniform_sigma(self, nc, grid):
-        # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
-
-        #todo why is this here ?????????????????????????
-        # read first zlevel time step
-        zlevel = nc.read_a_variable(self.params['grid_variable_map']['zlevel'], sel=0)
-
-        # use node with thinest top/bot layers as template for all sigma levels
-
-        node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(zlevel, grid['bottom_cell_index'], si.z0)
-
-        # use layer fractions from this node to give layer fractions everywhere
-        # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
-        nz_bottom = grid['bottom_cell_index'][node_min]
-
-        # stretch sigma out to same number of depth cells,
-        # needed for LSC grid if node_min profile is not full number of cells
-        zf_model = grid['zlevel_fractions'][node_min, nz_bottom:]
-        nz = grid['zlevel_fractions'].shape[1]
-        nz_fractions = nz - nz_bottom
-        grid['sigma'] = np.interp(np.arange(nz) / nz, np.arange(nz_fractions) / nz_fractions, zf_model)
-
-        return grid
 
     def set_up_uniform_sigma(self, nc, grid):
         # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
@@ -185,11 +165,10 @@ class SCHISMSreaderNCDF(_BaseReader):
         # read first zlevel time step
         zlevel = nc.read_a_variable('zcor', sel=0)
 
-
         # use node with thinest top/bot layers as template for all sigma levels
 
-        node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(zlevel, grid['bottom_cell_index'], si.z0)
-
+        grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.z0)
+        node_min = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(grid['zlevel_fractions'],grid['bottom_cell_index'])
         # use layer fractions from this node to give layer fractions everywhere
         # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
         nz_bottom = grid['bottom_cell_index'][node_min]

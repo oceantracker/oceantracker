@@ -29,41 +29,36 @@ class unstructured_FVCOM(_BaseReader):
                                                  'wind_velocity': PLC(['uwind_speed', 'vwind_speed'], [str], doc_str='maps standard internal field name to file variable name')},
                                 })
 
-    def set_up_grid(self, nc):
-        grid, is3D_hydro = super().set_up_grid(nc)
+    def build_vertical_grid(self, nc, grid):
+
+        # time invarient z fractions at layer needed for super.build_vertical_grid
+        grid['zlevel_fractions']  = 1. + np.flip(nc.read_a_variable('siglev', sel=None).astype(np.float32).T, axis=1)  # layer boundary fractions
+        grid['zlevel_fractions_layer'] = 1. + np.flip(nc.read_a_variable('siglay', sel=None).astype(np.float32).T, axis=1)  # layer center fractions
+
         # make distance weighting matrix for triangle center values at nodal points
         grid['cell_center_weights'] = hydromodel_grid_transforms.calculate_cell_center_weights_at_node_locations(
-                                                    grid['x'], grid['x_center'],grid['node_to_tri_map'],grid['tri_per_node'])
-        # time invarient z fractions at layer
-        grid['z_fractions'] = nc.read_a_variable('siglev').T
-        grid['z_fractions_layer'] = nc.read_a_variable('siglay').T
-        return grid, is3D_hydro
+            grid['x'], grid['x_center'], grid['node_to_tri_map'], grid['tri_per_node'])
+        grid['vertical_grid_type'] = 'S-sigma'
 
-    def is_3D_hydromodel(self, nc):
-        return True if nc.is_var_dim(self.params['field_variable_map']['water_velocity'][0], self.params['dimension_map']['z_mid_layer']) else False
+        # now do setup
+        grid = super().build_vertical_grid(nc,grid)
+
+
+        return grid
 
     def setup_water_velocity(self,nc,grid):
         # tweak to fit variables
+
         fm = self.params['field_variable_map']
 
-        if not nc.is_var(fm['water_velocity'][2]):
-                fm['water_velocity'] = fm['water_velocity'][:2]
-        # is depth aver velocity in file?
-        pass
+        if nc.is_var(fm['water_velocity'][0]):
+            # check if vertical vel variable in file
+            if not nc.is_var(fm['water_velocity'][1]):
+                fm['water_velocity'] = [fm['water_velocity'][0]]
+        else:
+            # is depth averaged run
+            fm['water_velocity'] = fm['water_velocity_depth_averaged']
 
-
-    def is_3D_variable(self,nc, var_name):
-        # is variable 3D, if layer or
-        return  nc.is_var_dim(var_name,self.params['dimension_map']['z']) or   nc.is_var_dim(var_name,self.params['dimension_map']['z_mid_layer'])
-
-
-
-    def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.all_var_dims(var_name_in_file) for x in ['siglay','siglev'])
-
-
-    def get_num_vector_components_in_file_variable(self,nc,file_var_name): return 1 # no vector vararibles
-
-    def is_file_variable_time_varying(self, nc, var_name_in_file): return  'time' in nc.all_var_dims(var_name_in_file)
 
 
     def set_up_uniform_sigma(self, nc, grid):
@@ -73,22 +68,14 @@ class unstructured_FVCOM(_BaseReader):
         # siglay, siglev are <0 and  look like layer fraction from free surface starting at top moving down, convert to fraction from bottom starting at bottom
 
         # first values in z axis is the top? so flip
-        params = self.params
-        dm = params['dimension_map']
-        gm = params['grid_variable_map']
 
-        grid['z_fractions']              = 1. + np.flip(nc.read_a_variable(gm['zlevel'], sel=None).astype(np.float32).T, axis=1)  # layer boundary fractions
-        grid['z_fractions_layer_center'] =  1.+ np.flip(nc.read_a_variable(gm['zlevel_mid_cell'], sel=None).astype(np.float32).T,axis=1)  # layer center fractions
-        grid['vertical_grid_type'] = 'S-sigma'
+        # get node with thineest bottom layer in non-uniform sigma layers
+        node_min = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(grid['zlevel_fractions'], grid['bottom_cell_index'])
 
-        grid['bottom_cell_index'] = np.zeros((grid['x'].shape[0],), dtype=np.int32)
-        grid['nz'] = nc.dim_size(dm['z'])
+        # stretch sigma out to same number of depth cells,
+        # needed for LSC grid if node_min profile is not full number of cells
 
-
-        # non-uniform sigma layers
-        s = [self.params['time_buffer_size'], grid['x'].shape[0], grid['nz']]
-        grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
-
+        grid['sigma'] = grid['zlevel_fractions'][node_min, :]
         return grid
 
     def read_grid_coords(self, nc, grid):
@@ -116,7 +103,6 @@ class unstructured_FVCOM(_BaseReader):
             grid['lon_lat_center'] = grid['x_center']
             grid['x_center'] = self.convert_lon_lat_to_meters_grid(grid['x_center'])
 
-
         return grid
 
     def read_triangles_as_int32(self, nc, grid):
@@ -142,7 +128,7 @@ class unstructured_FVCOM(_BaseReader):
         water_depth = fields['water_depth'].data[:, :, :, 0]
         tide = fields['tide'].data[:, :, :, 0]
 
-        zlevel_buffer[buffer_index, ...] = grid['z_fractions'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
+        zlevel_buffer[buffer_index, ...] = grid['zlevel_fractions'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
 
     def read_dry_cell_data(self, nc, file_index,is_dry_cell_buffer,buffer_index):
         si = self.shared_info
@@ -207,7 +193,7 @@ class unstructured_FVCOM(_BaseReader):
             #3D mid layer values
             # convert mid-layer values to values at layer boundaries, ie zlevels
             data = hydromodel_grid_transforms.convert_layer_field_to_levels_from_depth_fractions_at_each_node(
-                                data, grid['z_fractions_layer'], grid['z_fractions'])
+                                data, grid['zlevel_fractions_layer'], grid['zlevel_fractions'])
         elif not nc.is_var_dim(var_name, 'siglev') :
             # 2D field
             data =    data = data[..., np.newaxis]
@@ -217,8 +203,6 @@ class unstructured_FVCOM(_BaseReader):
 
 
         return data
-
-
 
     def preprocess_field_variable(self, nc,name, data):
         if name =='water_velocity' and data.shape[2] > 1: # process if 3D velocity

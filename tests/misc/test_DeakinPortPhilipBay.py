@@ -90,6 +90,7 @@ if __name__ == '__main__':
             caseInfoFile, var_list=['tide', 'water_depth','eDNA'], fraction_to_read=.02)
 
         plot_tracks.animate_particles(track_data, axis_lims=ax, title='Port Phillip Bay Schism test',
+                                      show_grid=True,
                                       show_dry_cells = False,movie_file='\portphillip_test.mp4')
 
         dx=25000

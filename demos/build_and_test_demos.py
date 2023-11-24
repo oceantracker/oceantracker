@@ -402,27 +402,7 @@ params.append(p91)
 # Sample data subset
 # https://www.seanoe.org/data/00751/86286/
 
-ROMS_params={'output_file_base' :'demo70_ROMS_reader', 'debug': True,
-                               'time_step': 1800,
- 'reader': {'class_name': 'oceantracker.reader.ROMS_reader.ROMsNativeReader',
-                    'input_dir': 'demo_hindcast',
-                     'file_mask': 'DopAnV2R3-ini2007_da_his.nc',
-                     'load_fields':['water_temperature']},
 
-            'open_boundary_type': 1,
-            'dispersion': {'A_H': .2, 'A_V': 0.001},
-            'release_groups': {
-                        'group1':{'points': [[616042, 4219971,-1],[616042, 4729971,-1],[616042, 4910000,-1]  ],
-                                'pulse_size': 10, 'release_interval': 1800}
-                            },
-                'fields' :[{'class_name' : 'oceantracker.fields.friction_velocity.FrictionVelocity'}],
-                'particle_properties':{
-                 'age_decay':{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
-                                                      'decay_time_scale': 1. * 3600 * 24} },
-                'resupension':{'critical_friction_velocity': .00}
-                }
-
-params.append(ROMS_params)
 
 def make_demo_python(demo_name):
     # write a simplified version of code to add to docs

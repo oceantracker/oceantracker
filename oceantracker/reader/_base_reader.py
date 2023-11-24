@@ -47,7 +47,7 @@ class _BaseReader(ParameterBaseClass):
     # Below are required  methods for any new reader
     # ---------------------------------------------------------
 
-    def setup_water_velocity(self): nopass()
+    def setup_water_velocity(self, nc,grid): nopass()
 
     def is_hindcast3D(self, nc):  nopass()
 
@@ -59,7 +59,7 @@ class _BaseReader(ParameterBaseClass):
 
     def read_triangles_as_int32(self, nc, grid):     nopass()
 
-    def is_3D_variable(self, nc, var_name):   nopass()
+
 
     def get_field_params(self,nc, name):   nopass()
 
@@ -67,7 +67,7 @@ class _BaseReader(ParameterBaseClass):
 
     def read_dry_cell_data(self, nc, file_index, is_dry_cell_buffer, buffer_index):   nopass()
 
-
+    def set_up_uniform_sigma(self,nc, grid):nopass()
 
     # calculate dry cell flags, if any cell node is dry
     # not required but have defaults
@@ -119,11 +119,11 @@ class _BaseReader(ParameterBaseClass):
                                                                                 vector_dim=i.get_number_components()),
                                                                            crumbs=f' reader field setup > "{name}"'
                                                                            )
-
     def set_up_grid(self, nc):
         si = self.shared_info
-        grid = self.read_2Dgrid(nc)
-        grid = self.build_2Dgrid(grid)
+        grid={}
+        grid = self.build_hori_grid(nc, grid)
+        grid = self.construct_grid_variables(grid)
         is3D_hydro = self.is_hindcast3D(nc)
         if is3D_hydro:
             grid = self.build_vertical_grid(nc, grid)
@@ -244,12 +244,10 @@ class _BaseReader(ParameterBaseClass):
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
         return fi
 
-    def read_2Dgrid(self, nc):
+    def build_hori_grid(self, nc, grid):
         # read nodal values and triangles
         params = self.params
         ml = self.shared_info.msg_logger
-
-        grid = {}
 
         # read nodal x's
 
@@ -258,7 +256,7 @@ class _BaseReader(ParameterBaseClass):
 
         return grid
 
-    def build_2Dgrid(self, grid):
+    def construct_grid_variables(self, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
         si = self.shared_info
@@ -333,27 +331,8 @@ class _BaseReader(ParameterBaseClass):
         if si.settings['regrid_z_to_uniform_sigma_levels']:
             # setup  regrid grid equal time invariace sigma layers
             # based on profile with thiniest top nad bootm layers
-
-            grid = self.set_up_uniform_sigma(nc, grid)
-
-            grid['nz'] = grid['sigma'].size  # used to size field data arrays
-
-            # build lookup map
-            # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
-            # need to check if zq > ['sigma_map_z'][nz+1] to see if nz must be increased by 1 tp get sigma interval
-            dz = 0.66 * abs(np.diff(grid['sigma']).min())  # approx dz
-            nz_map = int(np.ceil(1.0 / dz))  # number of cells in map
-            grid['sigma_map_z'] = np.arange(nz_map) / (nz_map - 1)  # zlevels at the map intervals
-            grid['sigma_map_dz'] = np.diff(grid['sigma_map_z']).mean()  # exact dz
-
-            # make evenly spaced map which gives cells contating a sigma level
-            grid['sigma_map_nz_interval_with_sigma'] = np.zeros((nz_map,), dtype=np.int32)
-            interval_with_sigma_level = (grid['sigma'] * nz_map).astype(np.int32)
-
-            # omit sigma = 0 and 1 from intervals, to ensurethey fall in first and last intervals
-            grid['sigma_map_nz_interval_with_sigma'][interval_with_sigma_level[1:-1]] = 1
-            grid['sigma_map_nz_interval_with_sigma'] = grid['sigma_map_nz_interval_with_sigma'].cumsum()
-
+            grid= self._make_sigma_depth_cell_search_map(nc, grid)
+            grid['nz'] = grid['sigma'].size
         else:
             # native  vertical grid option, could be  Schisim LCS vertical grid
 
@@ -364,7 +343,27 @@ class _BaseReader(ParameterBaseClass):
 
         return grid
 
+    def _make_sigma_depth_cell_search_map(self,nc, grid):
+        grid = self.set_up_uniform_sigma(nc, grid)
 
+
+
+        # build lookup map
+        # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
+        # need to check if zq > ['sigma_map_z'][nz+1] to see if nz must be increased by 1 tp get sigma interval
+        dz = 0.66 * abs(np.diff(grid['sigma']).min())  # approx dz
+        nz_map = int(np.ceil(1.0 / dz))  # number of cells in map
+        grid['sigma_map_z'] = np.arange(nz_map) / (nz_map - 1)  # zlevels at the map intervals
+        grid['sigma_map_dz'] = np.diff(grid['sigma_map_z']).mean()  # exact dz
+
+        # make evenly spaced map which gives cells contating a sigma level
+        grid['sigma_map_nz_interval_with_sigma'] = np.zeros((nz_map,), dtype=np.int32)
+        interval_with_sigma_level = (grid['sigma'] * nz_map).astype(np.int32)
+
+        # omit sigma = 0 and 1 from intervals, to ensurethey fall in first and last intervals
+        grid['sigma_map_nz_interval_with_sigma'][interval_with_sigma_level[1:-1]] = 1
+        grid['sigma_map_nz_interval_with_sigma'] = grid['sigma_map_nz_interval_with_sigma'].cumsum()
+        return grid
 
     # @function_profiler(__name__)
     def fill_time_buffer(self, time_sec):
@@ -443,12 +442,12 @@ class _BaseReader(ParameterBaseClass):
                     s[2] = grid['sigma'].size
                     out = np.full(tuple(s), np.nan, dtype=np.float32)
                     data = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
-                        grid['zlevel_fractions'], grid['bottom_cell_index'],
-                        grid['sigma'],
-                        fields['water_depth'].data, fields['tide'].data,
-                        si.z0, si.minimum_total_water_depth,
-                        data, out,
-                        name == 'water_velocity')
+                                        grid['zlevel_fractions'], grid['bottom_cell_index'],
+                                        grid['sigma'],
+                                        fields['water_depth'].data, fields['tide'].data,
+                                        si.z0, si.minimum_total_water_depth,
+                                        data, out,
+                                        name == 'water_velocity')
 
                 # o = reader_util.get_values_at_bottom(junk, grid['bottom_cell_index'])
                 # pass
@@ -532,7 +531,7 @@ class _BaseReader(ParameterBaseClass):
         if si.is3D_run:
             # grid['total_water_depth'][buffer_index,:]= np.squeeze(si.classes['fields']['tide'].data[buffer_index,:] + si.classes['fields']['water_depth'].data)
             # read zlevel inplace to save memory?
-            if not si.settings['regrid_z_to_uniform_sigma_levels']:
+            if 'sigma' not in grid:
                 # native zlevel grid and used for regidding in sigma
                 self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
 

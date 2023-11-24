@@ -7,7 +7,7 @@
 
 # full grid 12 houly on month
 # https://tds.marine.rutgers.edu/thredds/ncss/roms/doppio/DopAnV2R3-ini2007_da/his?var=f&var=h&var=mask_psi&var=mask_rho&var=mask_u&var=mask_v&var=ubar&var=vbar&var=zeta&var=temp&var=u&var=v&var=w&disableLLSubset=on&disableProjSubset=on&horizStride=1&time_start=2007-01-02T01%3A00%3A00Z&time_end=2007-01-31T00%3A00%3A00Z&timeStride=12&vertCoord=&accept=netcdf
-from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredReader
+from oceantracker.reader._base_reader import _BaseReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 import numpy as np
@@ -29,7 +29,7 @@ from oceantracker.reader.util.hydromodel_grid_transforms import convert_layer_fi
 #todo implement depth average mode using depth average variables in the file
 #todo friction velocity from bottom stress ???
 
-class ROMsNativeReader(GenericUnstructuredReader):
+class ROMsNativeReader(_BaseReader):
     # reads  ROMS file, and tranforms all data to PSI grid
     # then splits all triangles in two to  use in oceantracker as a triangular grid,
     # so works with curvilinear ROMS grids
@@ -38,23 +38,17 @@ class ROMsNativeReader(GenericUnstructuredReader):
     def __init__(self):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({ 'field_variables': {'water_velocity': PLC(['u','v','w'], [str], fixed_len=2),
-                                  'water_depth': PVC('h', str),
-                                  'tide': PVC('zeta', str)},
-                                  'required_file_variables': PLC(['ocean_time','mask_psi','lat_psi','lon_psi','h','zeta','u','v'], [str]),
-                                  'required_file_dimensions': PLC(['s_w','s_rho','eta_u','eta_v'], [str]),
-                                })
-        # don't use name mappings for these variables
-        self.clear_default_params(['dimension_map','grid_variable_map','one_based_indices'])
-
-    def is_var_in_file_3D(self, nc, var_name_in_file): return any(x in  nc.all_var_dims(var_name_in_file) for x in ['s_w','s_rho'])
+        self.add_default_params({ 'field_variable_map': {'water_velocity': PLC(['u','v','w'], [str], fixed_len=3),
+                                                    'water_depth': PVC('h', str),
+                                                    'tide': PVC('zeta', str),
+                                                    'water_temperature': PVC('temp', str)},
+                                                    'water_velocity_depth_averaged':PLC(['ubar','vbar'], [str], fixed_len=2),
+                                     })
 
 
-    def get_num_vector_components_in_file_variable(self,nc,file_var_name): return 1 # no vector vararibles
+    def build_hori_grid(self, nc, grid):
 
-    def is_file_variable_time_varying(self, nc, var_name_in_file): return  'ocean_time' in nc.all_var_dims(var_name_in_file)
-
-    def build_grid(self, nc, grid):
+        si = self.shared_info
         # pre-read useful info
         grid['psi_land_mask'] = nc.read_a_variable('mask_psi') != 1
         grid['u_land_mask'] = nc.read_a_variable('mask_u') != 1
@@ -62,20 +56,30 @@ class ROMsNativeReader(GenericUnstructuredReader):
         grid['rho_land_mask'] = nc.read_a_variable('mask_rho') != 1
 
 
-        grid = super().build_2Dgrid(nc, grid)
+        grid = super().build_hori_grid(nc, grid)
 
-        grid['active_nodes'] = np.unique(grid['triangles']) # the nodes that are used in triangulation ( ie owithout land)
-
-        # add time invariant vertical grid variables needed for transformations
-
-        # first values in z axis is the top? so flip
-        grid['z_fractions_layer_center'] = nc.read_a_variable('s_rho', sel=None).astype(np.float32)  # layer center fractions
-        grid['z_fractions_layer_boundaries'] = nc.read_a_variable('s_w', sel=None).astype(np.float32)  # layer boundary fractions
-        grid['vertical_grid_type'] = 'S-sigma'
         return grid
 
-    def read_nodal_x_as_float64(self, nc):
-        grid = self.grid
+    def build_vertical_grid(self, nc, grid):
+        # add time invariant vertical grid variables needed for transformations
+        # first values in z axis is the top? so flip
+        si= self.shared_info
+        grid['sigma'] = 1+ nc.read_a_variable('s_w', sel=None).astype(np.float32)  # layer boundary fractions reversed from negative values
+        grid['sigma_layer'] =1 + nc.read_a_variable('s_rho', sel=None).astype(np.float32)  # layer center fractions
+        grid['vertical_grid_type'] = 'S-sigma'
+
+        grid['nz'] = grid['sigma'].size  # used to size field data arrays
+
+        #ROMS are uniform sigma
+        si.settings['regrid_z_to_uniform_sigma_levels'] = False # no need to regrid
+        grid = self._make_sigma_depth_cell_search_map(nc, grid)
+
+        return grid
+
+    def set_up_uniform_sigma(self, nc, grid): return grid
+
+    def read_grid_coords(self, nc, grid):
+
         # record useful grid info
         grid['lat_psi'] = nc.read_a_variable('lat_psi').astype(np.float64)
         grid['lon_psi'] = nc.read_a_variable('lon_psi').astype(np.float64)
@@ -83,12 +87,12 @@ class ROMsNativeReader(GenericUnstructuredReader):
         grid['lon_lat'] =  np.stack((grid['lon_psi'],grid['lat_psi']),  axis=2)
         s=   grid['lon_lat'].shape
         grid['lon_lat']=   grid['lon_lat'].reshape(s[0]*s[1],s[2])
-        x = self.convert_lon_lat_to_meters_grid(grid['lon_lat'])
-        return x
+        grid['is_lon_lat'] = True
+        grid['x'] = self.convert_lon_lat_to_meters_grid(grid['lon_lat'])
+        return grid
 
-    def read_triangles_as_int32_as_int32(self, nc):
+    def read_triangles_as_int32(self, nc, grid):
         # build triangles from regular grid
-        grid = self.grid
 
         # get nodes for each corner of quad
         rows = np.arange(grid['psi_land_mask'].shape[0])
@@ -111,12 +115,22 @@ class ROMsNativeReader(GenericUnstructuredReader):
         sel= np.sum(grid['psi_land_mask'].flatten('C')[quad_cells],axis=1) < 3
         quad_cells = quad_cells[sel,:]
 
-        quad_cells_to_split = np.full((quad_cells.shape[0],), True, dtype=bool)
-        tri = split_quad_cells(quad_cells, quad_cells_to_split)
+        grid['quad_cells_to_split'] = np.arange(quad_cells.shape[0]).astype(np.int32)
+        grid['triangles'] = split_quad_cells(quad_cells, grid['quad_cells_to_split']).astype(np.int32)
 
-        return tri.astype(np.int32), quad_cells_to_split.astype(np.int32)
+        return grid
 
     def is_hindcast3D(self, nc):  return nc.is_var('u') # are always 3D
+
+    def get_field_params(self,nc, name, crumbs=''):
+        # work out if feild is 3D ,etc
+        fmap = self.params['field_variable_map'][name]
+        if type(fmap) != list: fmap =[fmap]
+        f_params = dict(time_varying = nc.is_var_dim(fmap[0], 'ocean_time'),
+                        is3D = nc.is_var_dim(fmap[0],'s_rho') or nc.is_var_dim(fmap[0],'s_w'),
+                        is_vector = len(fmap) > 1,
+                        )
+        return f_params
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         # calcuate zlevel from depth fractions, tide and water depth
@@ -130,7 +144,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
         water_depth = fields['water_depth'].data[:, :, :, 0]
         tide = fields['tide'].data[:, :, :, 0]
 
-        zlevel_buffer[buffer_index, ...] = grid['z_fractions_layer_boundaries'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
+        zlevel_buffer[buffer_index, ...] = grid['z_fractions'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
         pass
 
     def read_dry_cell_data(self, nc, file_index,is_dry_cell_buffer,buffer_index):
@@ -145,7 +159,7 @@ class ROMsNativeReader(GenericUnstructuredReader):
 
     def read_time_sec_since_1970(self, nc, file_index=None):
         # get times relative to base date from netcdf encoded  strings
-        var_name = self.grid['grid_variable_map']['time']
+        var_name = 'ocean_time'
         if file_index is None:
             time_sec = nc.read_a_variable(var_name, sel=None)
         else:
@@ -158,17 +172,17 @@ class ROMsNativeReader(GenericUnstructuredReader):
 
         return time_sec
 
-    def read_file_field_variable_as4D(self, nc, file_var_info, is_time_varying, file_index=None):
+    def read_file_var_as_4D_nodal_values(self,nc,var_name, file_index=None):
         # reformat file variable into 4D time,node,depth, components  form
+        si =self.shared_info
         grid = self.grid
-        var_name = file_var_info['name_in_file']
-        data_dims= nc.all_var_dims(var_name)
-        data = nc.read_a_variable(var_name, sel=file_index if is_time_varying else None).astype(np.float32)  # allow for time independent data
+
+        data = nc.read_a_variable(var_name, sel=file_index)
 
         # add dummy time dim if none
-        if not self.is_file_variable_time_varying(nc, var_name): data = data[np.newaxis,...]
+        if not nc.is_var_dim(var_name, 'ocean_time'): data = data[np.newaxis,...]
 
-        if self.is_var_in_file_3D(nc, var_name):
+        if nc.is_var_dim(var_name, 's_w') or nc.is_var_dim(var_name, 's_rho'):
             # move depth to last dim
             # also depth dim [0] is deepest value, like schisim, ie cold water at bottom
             data = np.transpose(data,[0,2,3,1])
@@ -178,15 +192,15 @@ class ROMsNativeReader(GenericUnstructuredReader):
 
         # data is now shaped as (time, row, col, depth)
 
-        # convert data  to psi grid, from other variable grids if neded
-        if 'eta_rho' in data_dims:
+        # convert data  to psi grid, from other variable grids if needed
+        if nc.is_var_dim(var_name,'eta_rho'):
             data = rho_grid_to_psi(data, grid['rho_land_mask'])
 
-        elif 'eta_u' in data_dims:
+        elif nc.is_var_dim(var_name,'eta_u'):
             # masked value 10^36 ,  so set to zero before finding mean value for psi grid
             data = u_grid_to_psi(data, grid['u_land_mask'])
 
-        elif 'eta_v' in data_dims:
+        elif nc.is_var_dim(var_name,'eta_v'):
             data = v_grid_to_psi(data, grid['v_land_mask'])
 
         # now flatten (time,rows, col, depth)  to  (time,nodes, depth)
@@ -194,23 +208,25 @@ class ROMsNativeReader(GenericUnstructuredReader):
 
         # check if rows/cols now  consistent with Psi grid
         if not (grid['psi_land_mask'].shape == s[1:3]):
-            #todo better error messaging !!!
-            print('not all ROMS variables consisted and cannot map all to psi grid, may be in-correctly formed subset of full model domain , try with full model domain, files variable' + var_name)
+            si.msg_logger.msg('not all ROMS variables consisted and cannot map all to psi grid, may be in-correctly formed subset of full model domain , try with full model domain, files variable "' + var_name +'"',
+                              fatal_error=True,exit_now=True)
 
         data = data.reshape( (s[0],s[1]*s[2], s[3])) # this should match flatten in "C" order
 
-        grid = self.grid
-
-        if 's_rho' in data_dims:
+        if nc.is_var_dim(var_name,'s_rho'):
             # convert mid-layer values to values at layer boundaries, ie zlevels
             data = convert_layer_field_to_levels_from_fixed_depth_fractions(
-                data, grid['z_fractions_layer_center'], grid['z_fractions_layer_boundaries'])
+                data, grid['sigma_layer'], grid['sigma'])
 
         # add dummy vector components axis, note in ROMS vectors are stored in netcdf as individual compoents,
         # so  file_var_info['num_components'] is always 1
-        if file_var_info['num_components'] == 1:             data = data[:, :, :, np.newaxis]
+        data = data[:, :, :, np.newaxis]
 
         return data
+
+
+
+
 
 
     def preprocess_field_variable(self, nc,name, data):
@@ -222,6 +238,18 @@ class ROMsNativeReader(GenericUnstructuredReader):
                 data[:, :, 0, :]= 0.
 
         return data
+
+    def setup_water_velocity(self,nc,grid):
+        # tweak to be depth avearged
+        fm = self.params['field_variable_map']
+
+        if nc.is_var(fm['water_velocity'][0]):
+            # check if vertical vel variable in file
+            if not nc.is_var(fm['water_velocity'][1]):
+                fm['water_velocity'] = [fm['water_velocity'][0]]
+        else:
+            # is depth averaged schism run
+            fm['water_velocity'] =fm['water_velocity_depth_averaged']
 
     def read_open_boundary_data_as_boolean(self, grid):
         # and make this part of the read grid method

@@ -205,7 +205,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         info = self.info
 
         if field_instance.is_time_varying():
-            if si.settings['regrid_z_to_uniform_sigma_levels']:
+            if 'sigma' in grid:
                 triangle_eval_interp.time_dependent_3Dfield_sigma_grid(info['current_buffer_steps'], info['fractional_time_steps'],
                                                     field_instance.data,
                            triangles,
@@ -340,8 +340,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             nz_cell = part_prop['nz_cell'].data
             z_fraction = part_prop['z_fraction'].data
             z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
-            if si.settings['regrid_z_to_uniform_sigma_levels']:
-                try:
+            if 'sigma' in grid:
+
                     tri_interp_util.get_depth_cell_sigma_layers(xq,
                                             grid['triangles'],
                                             fields['water_depth'].data.ravel(),
@@ -351,8 +351,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                             n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                             info['current_buffer_steps'], info['fractional_time_steps'],
                                             active, si.z0)
-                except Exception as e:
-                        pass
+
             else:
                 # natve slayer option
                 tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,

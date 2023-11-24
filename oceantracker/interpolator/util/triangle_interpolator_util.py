@@ -196,7 +196,7 @@ def get_BC_transform_matrix(points, simplices):
     return Tinvs
 
 
-@njit()
+#@njit()
 def get_depth_cell_sigma_layers(xq,
                                 triangles, water_depth, tide, minimum_total_water_depth,
                                 sigma, sigma_map_nz,sigma_map_dz,
@@ -247,8 +247,8 @@ def get_depth_cell_sigma_layers(xq,
         # get approx nz from map
         nz = sigma_map_nz[ns]
 
-        if zf > sigma[nz+1]:
-            # correct if zf, for approc nz is above next sigma level
+        if nz < sigma.size-2 and zf > sigma[nz+1]:
+            # correct if zf, for approx nz is above next sigma level
             nz += 1
 
         # get fraction within the sigma layer

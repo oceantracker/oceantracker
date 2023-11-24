@@ -23,14 +23,13 @@ class FrictionVelocity(CustomFieldBase):
         si = self.shared_info
         grid = si.classes['reader'].grid
         fields = si.classes['fields']
-        if si.settings['regrid_z_to_uniform_sigma_levels']:
+        if 'sigma' in grid:
             # sigma model
             self.calc_friction_velocity_from_sigma_levels(buffer_index,
                                                           grid['sigma'],
                                                           fields['total_water_depth'].data,
                                                           fields['water_velocity'].data,
                                                           si.z0, self.data)
-
         else:
             # native vertical grid
             self.calc_friction_velocity_from_native_zlevels(buffer_index, grid['zlevel'], grid['bottom_cell_index'], si.z0, fields['water_velocity'].data, self.data)
