@@ -76,21 +76,7 @@ class GenericNCDFreader(_BaseReader):
                         )
         return f_params
 
-    def set_up_grid(self, nc ):
 
-        grid = self.read_2Dgrid(nc)
-        grid = self.build_2Dgrid(grid)
-        is3D_hydro = self.is_hindcast3D(nc)
-        if is3D_hydro:
-            grid = self.build_vertical_grid(nc, grid)
-        else:
-            # 2D
-            grid['zlevel'] = None
-            grid['nz'] = 1  # only one z
-
-
-
-        return grid, is3D_hydro
 
     def sort_files_by_time(self,file_list, msg_logger):
         # get time sorted list of files matching mask
@@ -193,7 +179,7 @@ class GenericNCDFreader(_BaseReader):
         return  nc.is_var_dim(var_name,self.params['dimension_map']['z'])
 
 
-    def read_2Dgrid(self, nc):
+    def build_hori_grid(self, n, grid):
         # read nodal values and triangles
         params = self.params
         ml = self.shared_info.msg_logger
@@ -323,135 +309,6 @@ class GenericNCDFreader(_BaseReader):
 
         return grid
 
-    #@function_profiler(__name__)
-    def fill_time_buffer(self, time_sec):
-        # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
-        # fill buffer starting at hindcast time step nt0_buffer
-        # todo change so does not read current step again after first fill of buffer
-
-        si = self.shared_info
-        params = self.params
-        fields = si.classes['fields']
-        t0 = perf_counter()
-
-        grid = self.grid
-        info= self.info
-        fi = info['file_info']
-        bi = info['buffer_info']
-        vi = info['field_variable_info']
-        buffer_size = bi['buffer_size']
-
-        nt0_hindcast = self.time_to_hydro_model_index(time_sec)
-        bi['nt_buffer0'] = nt0_hindcast  # nw start of buffer
-
-        # get hindcast global time indices of first block, loads in model order
-        # ie if backtracking are still moving forward in buffer
-        total_read = 0
-        bi['buffer_available'] = buffer_size
-
-        # find first file with time step in it, if backwars files are in reverse time order
-        n_file = np.argmax(np.logical_and( nt0_hindcast   >=  fi['nt_starts']* si.model_direction, nt0_hindcast  <= fi['nt_ends']))
-
-        # get required time step and trim to size of hindcast
-        nt_hindcast_required = nt0_hindcast + si.model_direction * np.arange(min(fi['n_time_steps_in_hindcast'],buffer_size))
-        sel = np.logical_and( 0 <= nt_hindcast_required,  nt_hindcast_required < fi['n_time_steps_in_hindcast'])
-        nt_hindcast_required = nt_hindcast_required[sel]
-
-        bi['time_steps_in_buffer'] = []
-
-        # need tide and water depth at front of order, before water velocity, to read fields to regrid in vertical
-        field_names = list(fields.keys())
-        for name in ['tide', 'water_depth','water_velocity']:
-            field_names.remove(name)
-            field_names.insert(0, name)
-
-        while len(nt_hindcast_required) > 0 and 0 <= n_file < len(fi['names']):
-
-            nc = NetCDFhandler(fi['names'][n_file], 'r')
-
-            # find time steps in current file,accounting for direction
-            sel =  np.logical_and( nt_hindcast_required >= fi['nt_starts'][n_file],
-                                   nt_hindcast_required <= fi['nt_ends'  ][n_file])
-            num_read = np.count_nonzero(sel)
-            nt_file = nt_hindcast_required[sel]  # hindcast steps in this file
-
-            file_index = nt_file - fi['nt_starts'][n_file]
-            buffer_index = self.hydro_model_index_to_buffer_offset(nt_file)
-            s =  f'Reading-file-{(n_file):02d}  {path.basename(fi["names"][n_file])}, steps in file {fi["n_time_steps"][n_file]:3d},'
-            s += f' steps  available {fi["nt_starts"][n_file]:03d}:{fi["nt_starts"][n_file]+fi["n_time_steps"][n_file]-1:03d}, '
-            s += f'reading  {num_read:2d} of {bi["buffer_available"]:2d} steps, '
-            s += f' for hydo-model time steps {nt_file[0]:02d}:{nt_file[-1]:02d}, '
-            s += f' from file offsets {file_index[0]:02d}:{file_index[-1]:02d}, '
-            s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03d} '
-            si.msg_logger.progress_marker(s)
-
-            grid['nt_hindcast'][buffer_index] = nt_hindcast_required[:num_read]  # add a grid variable with global hindcast time steps
-
-            # read time varying vector and scalar reader fields
-            # do this in order set above
-            for name in field_names:
-                field = fields[name]
-                if field.is_time_varying() and field.info['group'] =='reader_field':
-                    data  = self.assemble_field_components(nc, name, file_index=file_index)
-                    data = self.preprocess_field_variable(nc, name, data) # in place tweaks, eg zero vel at bottom
-
-                    junk = data
-                    if field.is3D() and si.settings['regrid_z_to_uniform_sigma_levels']:
-                        s = list(np.asarray(data.shape, dtype=np.int32))
-                        s[2] = grid['sigma'].size
-                        out = np.full(tuple(s), np.nan, dtype=np.float32)
-                        data = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
-                                    grid['zlevel_fractions'], grid['bottom_cell_index'],
-                                    grid['sigma'],
-                                    fields['water_depth'].data, fields['tide'].data,
-                                    si.z0, si.minimum_total_water_depth,
-                                    data, out,
-                                    name=='water_velocity')
-
-                    #o = reader_util.get_values_at_bottom(junk, grid['bottom_cell_index'])
-                    #pass
-
-                    # insert data
-                    field.data[buffer_index, ...] = data
-
-                    if False:
-                        # check overplots of regridding
-                        from matplotlib import pyplot as plt
-                        nn= 300  # for test hindcats
-                        nn = 1000
-                        plt.plot(grid['zlevel_fractions'][nn,:],junk[0,nn,:,0],c='g')
-                        plt.plot(grid['zlevel_fractions'][nn, :], junk[0, nn, :, 0], 'g.')
-                        plt.plot(grid['sigma'], data[0, nn, :, 0], 'r--')
-                        plt.plot(grid['sigma'], data[0, nn, :, 0],'rx')
-                        #plt.show(block= True)
-                        plt.savefig('\myfig.png')
-
-
-
-            # read grid time, zlevel
-            # do this after reading fields as some hindcasts required tide field to get zlevel, eg FVCOM
-            self.read_time_variable_grid_variables(nc, buffer_index,file_index)
-
-            nc.close()
-
-            # now all  data has been read from file, now
-            # update user fields from newly read fields and data
-            for name, field in fields.items():
-                if field.is_time_varying() and field.info['group']=='custom_field':
-                    field.update(buffer_index)
-
-            total_read += num_read
-
-            # set up for next step
-
-            bi['buffer_available'] -= num_read
-            n_file += si.model_direction
-            nt_hindcast_required = nt_hindcast_required[num_read:]
-            bi['time_steps_in_buffer'] += nt_file.tolist()
-
-        si.msg_logger.progress_marker(f' read {total_read:3d} time steps in  {perf_counter() - t0:3.1f} sec', tabs=2)
-        # record useful info/diagnostics
-        bi['n_filled'] = total_read
 
     def assemble_field_components(self,nc, name, file_index=None):
         # read scalar fields / join together the components which make vector from component list
@@ -529,15 +386,10 @@ class GenericNCDFreader(_BaseReader):
 
 
 
-
-
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
         # read in place
         zlevel_buffer[buffer_index,...] = nc.read_a_variable('zcor', sel=file_index).astype(np.float32)
 
-    def read_open_boundary_data_as_boolean(self, grid):
-        is_open_boundary_node = np.full((grid['x'].shape[0],), False)
-        return is_open_boundary_node
 
     # convert, time etc to hindcast/ buffer index
     def time_to_hydro_model_index(self, time_sec):

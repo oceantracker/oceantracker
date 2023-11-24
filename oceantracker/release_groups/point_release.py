@@ -258,8 +258,6 @@ class PointRelease(ParameterBaseClass):
         sel, n_cell ,bc  = si.classes['interpolator'].are_points_inside_domain(x[:,:2])
         grid = si.classes['reader'].grid
         # keep those inside domain
-
-
         x = x[sel, :]
         n_cell = n_cell[sel]
 
