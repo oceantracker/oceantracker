@@ -55,8 +55,6 @@ class ParticleGroupManager(ParameterBaseClass):
                                       description='ID of pulse particle was released within its release group, zero based'))
         self.add_particle_property('time_released', 'manual_update',dict(time_varying= False, description='time (sec) each particle was released'))
         self.add_particle_property('x_last_good','manual_update',dict( write=True, vector_dim=nDim))  # location when last moving
-        self.add_particle_property('x0','manual_update',dict(  vector_dim=nDim, time_varying=False,
-                                      description='initial location of each particle'))  # exact location released including any randomization
 
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
@@ -153,7 +151,6 @@ class ParticleGroupManager(ParameterBaseClass):
         part_prop = si.classes['particle_properties']
         part_prop['x'].set_values(x0, new_buffer_indices)
         part_prop['x_last_good'].set_values(x0, new_buffer_indices)
-        part_prop['x0'].set_values(x0, new_buffer_indices)  # record exact release location including any randomisation
 
         part_prop['n_cell'].set_values(n_cell_guess, new_buffer_indices)  # use x0's best guess  for starting point cell
 
