@@ -133,7 +133,7 @@ class _BaseReader(ParameterBaseClass):
             grid['zlevel'] = None
             grid['nz'] = 1  # only one z
 
-
+        si.run_info['is_lon_lat'] = grid['is_lon_lat']
         # check key data types, so that numba runs cleanly
         for name in ['x']:
             v= grid[name]

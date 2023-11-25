@@ -81,7 +81,6 @@ class unstructured_FVCOM(_BaseReader):
     def read_grid_coords(self, nc, grid):
         # get node location in meters
         # also record cell center x as well to be used for get nodal field vals from values at center, eg velocity
-
         grid['x'] = np.stack((nc.read_a_variable('x'), nc.read_a_variable('y'))).astype(np.float64)
         grid['x_center'] = np.stack((nc.read_a_variable('xc'), nc.read_a_variable('yc')), axis=1).astype(np.float64)
 

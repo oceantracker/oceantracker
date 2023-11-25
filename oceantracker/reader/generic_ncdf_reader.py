@@ -38,8 +38,6 @@ class GenericNCDFreader(_BaseReader):
                                'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
             'load_fields': PLC([], [str], doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                    make_list_unique=True),
-            'field_variables': PLC([], [str], obsolete=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',
-                                   make_list_unique=True),
             'field_variable_map': {'water_velocity': PLC(['u', 'v', 'w'], [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
                                 'tide': PVC('elev', str, doc_str='maps standard internal field name to file variable name'),
                                 'water_depth': PVC('depth', str, is_required=True,doc_str='maps standard internal field name to file variable name'),
@@ -47,7 +45,10 @@ class GenericNCDFreader(_BaseReader):
                                 'salinity': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
                                 'wind_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
                                 'bottom_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
-                                },
+                                'water_velocity_depth_averaged': PLC(['u', 'v'], [str], fixed_len=2,
+                                                                        doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
+
+                                   },
             'dimension_map': {'time': PVC('time', str, is_required=True),
                               'node': PVC('node', str),
                               'z': PVC(None, str,doc_str='name of dim for vertical layer boundaries'),
@@ -179,7 +180,7 @@ class GenericNCDFreader(_BaseReader):
         return  nc.is_var_dim(var_name,self.params['dimension_map']['z'])
 
 
-    def build_hori_grid(self, n, grid):
+    def build_hori_grid(self, nc, grid):
         # read nodal values and triangles
         params = self.params
         ml = self.shared_info.msg_logger
@@ -280,7 +281,26 @@ class GenericNCDFreader(_BaseReader):
 
         # note indices of any triangles neeeding splitting
         grid['quad_cells_to_split'] =  np.full((0,),0, np.int32)
+
+        if self.detect_lonlat_grid(grid['x']):
+            # try auto detection
+            grid['is_lon_lat'] = True
+        else:
+            grid['is_lon_lat'] = self.params['cords_in_lat_long']
+
         return grid
+
+    def setup_water_velocity(self,nc,grid):
+        # tweak to be depth avearged
+        fm = self.params['field_variable_map']
+
+        if nc.is_var(fm['water_velocity'][0]):
+            # check if vertical vel variable in file
+            if not nc.is_var(fm['water_velocity'][1]):
+                fm['water_velocity'] = [fm['water_velocity'][0]]
+        else:
+            # is depth averaged schism run
+            fm['water_velocity'] =fm['water_velocity_depth_averaged']
 
     def preprocess_field_variable(self, nc, name, data): return data
 
