@@ -196,7 +196,7 @@ def get_BC_transform_matrix(points, simplices):
     return Tinvs
 
 
-#@njit()
+@njit()
 def get_depth_cell_sigma_layers(xq,
                                 triangles, water_depth, tide, minimum_total_water_depth,
                                 sigma, sigma_map_nz,sigma_map_dz,
@@ -227,8 +227,9 @@ def get_depth_cell_sigma_layers(xq,
             z_top += bc_cords[n, m] * tide[current_buffer_steps[1], nodes[m], 0, 0] * fractional_time_steps[1]
 
         # clip z into range
-        if zq >= z_top:
-            zq = z_top - 0.001 # put just below the surface to force into top depth bin
+        if zq >= z_top :
+            # put just below the surface to force into top depth bin
+            zq = z_top
         elif zq < z_bot:
             zq = z_bot
 
@@ -244,16 +245,18 @@ def get_depth_cell_sigma_layers(xq,
 
         # get  nz from evenly space sigma map, but zf always < 1, due to above
         ns = int(zf * sigma_map_nz.size) # find fraction of length of map
+        ns = min(ns, sigma_map_nz.size - 1)  # put just below the surface to force into top depth bin
+
         # get approx nz from map
         nz = sigma_map_nz[ns]
 
-        if nz < sigma.size-2 and zf > sigma[nz+1]:
-            # correct if zf, for approx nz is above next sigma level
+        if zf > sigma[nz+1]:
+            # correct if sigma[nz+1]  < zf < sigma_map_nz[ns+1], for approx nz is above next sigma level
             nz += 1
 
         # get fraction within the sigma layer
         z_fraction[n] = (zf - sigma[nz])/(sigma[nz+1]- sigma[nz])
-        pass
+
         # make any already on bottom active, may be flagged on bottom if found on bottom, below
         if status[n] == status_on_bottom:
             status[n] = status_moving

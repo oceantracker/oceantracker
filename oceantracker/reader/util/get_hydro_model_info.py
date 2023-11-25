@@ -27,7 +27,6 @@ def get_hydro_file_list(input_dir,file_mask, msg_logger):
 def check_fileformat(reader_params,file_names, msg_logger):
     input_dir =path.normpath(reader_params['input_dir'])
 
-
     # open first file to deterime format
     if 'class_name' not in reader_params or (reader_params['class_name'] is None and reader_params['class_instance'] is None):
         # check first file
@@ -46,7 +45,7 @@ def check_fileformat(reader_params,file_names, msg_logger):
                            fatal_error=True, exit_now=True,
                            hint='check files are netcf and expected format, or try to set up a generic reader  "file_mask"')
 
-        reader_params['class_name']  = default_reader[cl]
+        reader_params['class_name'] = default_reader[cl]
         msg_logger.progress_marker('found hydro-model files of type ' + cl.upper())
 
     return reader_params
