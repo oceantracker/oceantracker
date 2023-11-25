@@ -21,11 +21,11 @@ from oceantracker.post_processing.read_output_files import load_output_files
 from oceantracker.post_processing.plotting import plot_utilities, plot_tracks
 
 
-def plot_sample(runCaseInfo, num_to_plot=10 ** 3):
+def plot_sample(caseInfoFile, num_to_plot=10 ** 3):
     # plot devation from circle
 
-    data = load_output_files.load_track_data(runCaseInfo, ['x', 'water_depth', 'time', 'x0', 'ID'])
-    grid= load_output_files.load_grid(runCaseInfo)
+    data = load_output_files.load_track_data(caseInfoFile, ['x', 'water_depth', 'time', 'x0', 'ID'])
+    grid= data['grid']
 
 
     nx = data['x'].shape[1]
@@ -33,9 +33,9 @@ def plot_sample(runCaseInfo, num_to_plot=10 ** 3):
 
     x = data['x'][:,sel,:]
     t   = (data['time']-data['time'][0])/ 24 / 3600
-    x0 = data['x0'][sel,:]
+    x0 = data['x'][0,sel,:]
 
-    depth = data['water_depth'][:,sel]
+    depth = data['water_depth'][:, sel]
 
     plt.figure()
 
@@ -219,9 +219,9 @@ def base_param(is3D=False, isBackwards = False):
            'write_tracks': True,
             'time_step': 5*60,
            'duration': 6. * 24 * 3600,
-            'reader': {'class_name':	"oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
+            'reader': {'class_name':	"oceantracker.reader.generic_ncdf_reader.GenericNCDFreader",
                   'file_mask' : 'circFlow2D*.nc', 'input_dir': input_dir,
-                        'field_variables': {'water_velocity' : ['u','v'],'water_depth': 'depth','tide': 'tide' },
+                        'field_variable_map': {'water_velocity' : ['u','v'],'water_depth': 'depth','tide': 'tide' },
                         'dimension_map': {'node': 'node', 'time': 'time'},
                         'grid_variable_map': {'time': 'time', 'x': ['x','y'],
                                       'triangles': 'simplex',
@@ -300,8 +300,8 @@ if __name__ == '__main__':
                         # params['base_case_params']['dispersion'].update({'A_V':0., 'A_H':0.})
                         # params['base_case_params']['release_groups'][0]['pulse_size']=1
 
-                    runInfoFile = run_test(params)
-                    plot_sample(runInfoFile)
+                    caseInfoFile = run_test(params)
+                    plot_sample(caseInfoFile)
                     time_check_plot(runInfoFile)
 
         elif ntest ==2:

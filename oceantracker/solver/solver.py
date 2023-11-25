@@ -194,7 +194,7 @@ class Solver(ParameterBaseClass):
         if si.write_tracks:
             tracks_writer = si.classes['tracks_writer']
             tracks_writer.open_file_if_needed()
-            if new_particleIDs is None:
+            if new_particleIDs.size > 0:
                 tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
             # write tracks file

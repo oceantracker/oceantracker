@@ -384,22 +384,24 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # create prop particle properties derived from fields loaded from reader on the fly
         t0= perf_counter()
-        for prop_type in ['from_reader_field','derived_from_reader_field','depth_averaged_from_reader_field']:
-            for name, i in si.classes['fields'].items():
-                if i.info['group'] == prop_type:
-                    pgm.add_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
-                                                                 write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
-        si.msg_logger.progress_marker('created particle properties derived from fields', start_time=t0)
+        for name, i in si.classes['fields'].items():
+            if i.info['group'] == 'reader_field':
+                pgm.add_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
+                                                    write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
+
         # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['role_dicts']['fields'].items():
             i = si.create_class_dict_instance(name,'fields', 'user', params, crumbs='Adding "fields" from user params')
             i.initial_setup()
             # now add custom prop based on  this field
-            pgm.add_particle_property(i.info['name'], 'from_fields', dict(vector_dim=i.get_number_components(), time_varying=i.is_time_varying(),
-                                                             write= i.params['write_interp_particle_prop_to_tracks_file']))
+            pgm.add_particle_property(i.info['name'], 'from_fields',
+                                      dict(vector_dim=i.get_number_components(),
+                                            time_varying=True,
+                                            write= i.params['write_interp_particle_prop_to_tracks_file']))
 
             # if not time varying can update once at start from other non-time varying fields
             if not i.is_time_varying(): i.update()
+        si.msg_logger.progress_marker('created particle properties for custom fields and derived from fields ', start_time=t0)
 
         # any custom particle properties added by user
         for name, p in si.working_params['role_dicts']['particle_properties'].items():

@@ -110,15 +110,8 @@ class _BaseReader(ParameterBaseClass):
         bi['nt_buffer0'] = 0
 
     def final_setup(self):
-        # set up particle properties accocated with fields
         si = self.shared_info
-        for name, i in si.classes['fields'].items():
-            if i.params['create_particle_property_with_same_name']:
-                si.classes['particle_group_manager'].add_particle_property(name, 'from_fields',
-                                                                           dict(time_varying=i.is_time_varying(),
-                                                                                vector_dim=i.get_number_components()),
-                                                                           crumbs=f' reader field setup > "{name}"'
-                                                                           )
+        pass
     def set_up_grid(self, nc):
         si = self.shared_info
         grid={}

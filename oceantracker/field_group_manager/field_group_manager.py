@@ -28,15 +28,7 @@ class FieldGroupManager(ParameterBaseClass):
         si = self.shared_info
         si.classes['reader'].final_setup()
 
-    def add_custom_field(self, name,  params, crumbs=''):
-        # classname must be given
-        si = self.shared_info
-        if 'class_name' not in params:
-            si.msg_logger.msg('field+grup_manager> add_custom_field parameters must contain  "class_name"')
-        i = si.create_class_dict_instance(name, 'fields', 'custom_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=True)
-        i.known_field_types = self.known_field_types
 
-        return i
 
     def update(self, time_sec):
         # check if all interpolators have the time steps they need
@@ -81,6 +73,7 @@ class FieldGroupManager(ParameterBaseClass):
     def _setup_primary_hydro_reader(self):
         si = self.shared_info
 
+
         reader = si.add_core_class('reader', si.working_params['core_roles']['reader'],   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
         reader.initial_setup()
         nc = reader.open_first_file()
@@ -95,33 +88,42 @@ class FieldGroupManager(ParameterBaseClass):
         # setup compulsory fields, plus others required
 
         reader.params['load_fields'] = list(set(['tide','water_depth', 'water_velocity'] + reader.params['load_fields'] ))
+
         for name in  reader.params['load_fields'] :
-            if name in reader.params['field_variable_map']:
-                file_var_map = reader.params['field_variable_map'][name]
-            else:
-                file_var_map = name # assume given field variable is in the file
 
             field_params = reader.get_field_params(nc, name)
             field_params['class_name']='oceantracker.fields._base_field.ReaderField'
-            field = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs= f' creating reader feild  field setup > "{name}"')
-            field.initial_setup()
+            i = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs= f' creating reader feild  field setup > "{name}"')
+            i.initial_setup()
 
-            field.reader = reader
-            field.interpolator = interp
+            i.reader = reader
+            i.interpolator = interp
 
             # read data if not time varying
-            if not field.is_time_varying() :
-                field.data[0, ...] = reader.assemble_field_components(nc, name)
+            if not i.is_time_varying() :
+                i.data[0, ...] = reader.assemble_field_components(nc, name)
 
         nc.close()
 
         # add core total water depth property
         i = self.add_custom_field('total_water_depth',
-                dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',time_varying=True,write_interp_particle_prop_to_tracks_file =False),
+                dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',
+                      time_varying=True,write_interp_particle_prop_to_tracks_file =False),
                                            crumbs='initializing core TotalWaterDepth class ')
+
         i.reader = reader
         i.interpolator = interp
+    def add_custom_field(self, name,  params, crumbs=''):
+        # classname must be given
+        si = self.shared_info
 
+
+        if 'class_name' not in params:
+            si.msg_logger.msg('field_group_manager> add_custom_field parameters must contain  "class_name"')
+        i = si.create_class_dict_instance(name, 'fields', 'custom_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=True)
+        i.known_field_types = self.known_field_types
+
+        return i
     def update_dry_cells(self):
         # update 0-255 dry cell index for each interpolator
         si =self. shared_info
