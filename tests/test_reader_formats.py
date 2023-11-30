@@ -23,11 +23,12 @@ def run_params(d):
                    'input_dir': d['root_input_dir'],
                    # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                    },
+        'resuspension': {'critical_friction_velocity': 0.01}
         }
 
     params['velocity_modifiers'] = {'fall_vel': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': 0.000}}
 
-    params['resuspension'] = {'critical_friction_velocity': 0.01}
+    params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_cords'])
 
     return  params
 def get_case(n):

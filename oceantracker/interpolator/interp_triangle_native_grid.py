@@ -294,9 +294,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             part_prop['n_cell'].set_values(new_cell, sel)
 
             self._do_walk(xq, sel)
-
             # recheck for additional failures
             sel = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_partID_subset_buffer('B1'))
+
             if sel.size > 0:
                 wf = {'x0': part_prop['x_last_good'].get_values(sel),
                       'xq': part_prop['x'].get_values(sel)}
