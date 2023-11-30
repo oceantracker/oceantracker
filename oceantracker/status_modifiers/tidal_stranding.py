@@ -33,7 +33,7 @@ class TidalStranding(_BaseStatusModifer):
 
 @njit
 def tidal_stranding_from_dry_cell_index(dry_cell_index, n_cell, sel, status):
-    # look at all particles in buffer to check total water depth < min_water_depth
+    # look at all particles in buffer to check total water depth < water_depth_min
     #  use  0-255 dry cell index updated at each interpolation update
     for n in sel:
         if status[n] >= status_frozen:

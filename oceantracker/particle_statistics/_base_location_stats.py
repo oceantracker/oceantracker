@@ -24,10 +24,10 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                                                  doc_str=' Count only those particles with status >= to this value'),
                                   'status_max': PVC('moving', [str], possible_values=particle_info['status_keys_list'],
                                                     doc_str=' Count only those particles with status  <= to this value'),
-                                  'min_z': PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value'),
-                                  'max_z': PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value'),
-                                  'min_water_depth': PVC(None, float,doc_str='Count only those particles in water depths greater than this value'),
-                                  'max_water_depth': PVC(None, float, doc_str='Count only those particles in water depths less than this value'),
+                                  'z_min': PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value'),
+                                  'z_max': PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value'),
+                                  'water_depth_min': PVC(None, float,doc_str='Count only those particles in water depths greater than this value'),
+                                  'water_depth_max': PVC(None, float, doc_str='Count only those particles in water depths less than this value'),
                                   'particle_property_list': PLC([], [str], make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for statics on water depth at particle locations inside the counted regions') })
         self.sum_binned_part_prop = {}
         self.info['output_file'] = None
@@ -57,12 +57,12 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         #set particle depth and water depth limits for counting particles
         f = 1.0E32
         info['z_range'] = np.asarray([-f, f])
-        if params['min_z'] is not None:  info['z_range'][0] = params['min_z']
-        if params['max_z'] is not None:  info['z_range'][1] = params['max_z']
+        if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
+        if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
 
         info['water_depth_range'] = np.asarray([-f, f])
-        if params['min_water_depth'] is not None:  info['water_depth_range'][0] = params['min_water_depth']
-        if params['max_water_depth'] is not None:  info['water_depth_range'][1] = params['max_water_depth']
+        if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
+        if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
 
     def check_part_prop_list(self):
         si = self.shared_info

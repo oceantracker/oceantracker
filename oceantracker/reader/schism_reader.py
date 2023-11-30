@@ -65,7 +65,7 @@ class SCHISMSreaderNCDF(_BaseReader):
         # flag quad cells for splitting if index in 4th column
         if grid['triangles'].shape[1] == 4 :
             # split quad grids buy making new triangles
-            grid['quad_cells_to_split'] = np.flatnonzero(grid['triangles'][:, 3] > 0)
+            grid['quad_cells_to_split'] = np.flatnonzero(grid['triangles'][:, 3] > 0).astype(np.int32)
             grid['triangles'] = split_quad_cells(grid['triangles'], grid['quad_cells_to_split'])
         else:
             grid['quad_cells_to_split'] = np.full((0,), 0, dtype=np.int32)

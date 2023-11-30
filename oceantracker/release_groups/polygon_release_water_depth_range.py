@@ -5,7 +5,8 @@ import numpy as np
 class PolygonReleaseWaterDepthRange(PolygonRelease):
     def __init__(self):
         super().__init__()
-        self.add_default_params({'min_water_depth' : PVC (-1.0e37,float), 'max_water_depth' : PVC(1.0e37,float)})
+        self.add_default_params({'water_depth_min' : PVC (-1.0e37,float),
+                                 'water_depth_max' : PVC(1.0e37,float)})
 
     def filter_release_points(self, x, n_cell):
 
@@ -13,6 +14,6 @@ class PolygonReleaseWaterDepthRange(PolygonRelease):
         fields= si.classes['field_group_manager']
         water_depth = fields.interp_named_field_at_given_locations_and_time('water_depth', x, time=None, n_cell=n_cell)
 
-        sel = np.logical_and(water_depth >= self.params['min_water_depth'],  water_depth <= self.params['max_water_depth'])
+        sel = np.logical_and(water_depth >= self.params['water_depth_min'],  water_depth <= self.params['water_depth_max'])
 
         return x[sel,:], n_cell[sel]

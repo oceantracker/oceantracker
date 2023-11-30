@@ -24,18 +24,17 @@ from oceantracker.post_processing.plotting import plot_utilities, plot_tracks
 def plot_sample(caseInfoFile, num_to_plot=10 ** 3):
     # plot devation from circle
 
-    data = load_output_files.load_track_data(caseInfoFile, ['x', 'water_depth', 'time', 'x0', 'ID'])
+    data = load_output_files.load_track_data(caseInfoFile, ['x','age', 'water_depth', 'time', 'x0', 'ID'])
     grid= data['grid']
 
 
     nx = data['x'].shape[1]
-    sel = np.random.default_rng().choice(nx, size=50, replace=False)
 
-    x = data['x'][:,sel,:]
+    x = data['x']
     t   = (data['time']-data['time'][0])/ 24 / 3600
-    x0 = data['x'][0,sel,:]
+    x0 = data['x'][0,:,:]
 
-    depth = data['water_depth'][:, sel]
+    depth = data['water_depth']
 
     plt.figure()
 
@@ -209,7 +208,7 @@ def base_param(is3D=False, isBackwards = False):
     p0 = [[0, 2000.], [0, 4000.], [0, 8000.], [0, 10000.]]
     poly0 = [[9000., 9000], [10000, 9000], [10000, 10000.]]
 
-    outputdir = 'output'
+    outputdir = 'tests\\output'
     input_dir =path.normpath(path.join(path.split(__file__)[0],'testData'))
 
     params={ 'debug': True,
@@ -218,7 +217,7 @@ def base_param(is3D=False, isBackwards = False):
             'backtracking': isBackwards,
            'write_tracks': True,
             'time_step': 5*60,
-           'duration': 6. * 24 * 3600,
+           'duration': 10. * 24 * 3600,
             'reader': {'class_name':	"oceantracker.reader.generic_ncdf_reader.GenericNCDFreader",
                   'file_mask' : 'circFlow2D*.nc', 'input_dir': input_dir,
                         'field_variable_map': {'water_velocity' : ['u','v'],'water_depth': 'depth','tide': 'tide' },
@@ -234,7 +233,7 @@ def base_param(is3D=False, isBackwards = False):
              'particle_group_manager': {},
              'release_groups': {'mypoint':
                                     {'points': p0, 'pulse_size': 1, 'release_interval': 3600, 'userRelease_groupID': 5,
-                                    'max_age': 7 * 24 * 3600, 'user_release_group_name': 'A group', 'z_range': [-1, 0],
+                                    'max_age': 10 * 24 * 3600, 'user_release_group_name': 'A group', 'z_range': [-1, 0],
                                     },
                             'mypolygon':{'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                                         'points': poly0, 'pulse_size': 1, 'release_interval': 3600, 'userRelease_groupID': 200,
@@ -242,7 +241,7 @@ def base_param(is3D=False, isBackwards = False):
                                             'z_range': [-1, 0],
                   }
                                 },
-             'dispersion': {'A_H': 0.},
+             'dispersion': {'A_H': 0.,'A_V':0.},
 
              'particle_properties': {'mydecay':{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay'},
                                      'mydistance':{'class_name': 'oceantracker.particle_properties.distance_travelled.DistanceTravelled'}

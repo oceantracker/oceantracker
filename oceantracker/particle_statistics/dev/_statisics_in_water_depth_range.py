@@ -13,7 +13,7 @@ class WaterDepthRangeStats(ParameterBaseClass):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'min_depth': PVC(-1.0e09, float), 'max_water_depth': PVC(1.0e09, float)})
+        self.add_default_params({'min_depth': PVC(-1.0e09, float), 'water_depth_max': PVC(1.0e09, float)})
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['water_depth'])
@@ -24,7 +24,7 @@ class WaterDepthRangeStats(ParameterBaseClass):
         part_prop= self.shared_info.classes['particle_properties']
 
 
-        sel= self.select_depth_range_status(part_prop['status'].used_buffer(),   part_prop['water_depth'].used_buffer(), self.params['min_depth'], self.params['max_water_depth'], out)
+        sel= self.select_depth_range_status(part_prop['status'].used_buffer(),   part_prop['water_depth'].used_buffer(), self.params['min_depth'], self.params['water_depth_max'], out)
         return sel
 
     @staticmethod
