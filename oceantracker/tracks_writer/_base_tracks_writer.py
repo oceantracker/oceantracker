@@ -162,9 +162,10 @@ class _BaseWriter(ParameterBaseClass):
         # write group data
         for name,d in si.classes['time_varying_info'].items():
             if d.params['write']:
-                self.write_time_varying_info(name, d)
 
-        for name,d in si.classes['particle_properties'].items():
+                self.write_time_varying_info(name, d)
+        part_prop=si.classes['particle_properties']
+        for name,d in part_prop.items():
             if d.params['write'] and d.params['time_varying']:
                 self.write_time_varying_particle_prop(name, d.data)
 

@@ -201,7 +201,7 @@ class ParameterListChecker(object):
         info =self.info
         crumb_trail = crumbs + crumb_seperator + name
 
-        if info['obsolete'] is not None and (user_list is not None or  len(user_list) > 0) :
+        if info['obsolete'] is not None and user_list is not None and len(user_list) > 0:
             msg_logger.msg(f'List Parameter "{crumb_trail}" is obsolete  - "{info["obsolete"]}"', warning=True)
             return None
 

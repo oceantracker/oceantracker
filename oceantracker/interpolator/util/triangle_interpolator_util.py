@@ -102,7 +102,7 @@ def BCwalk_with_move_backs(xq,
         # not found in given number of search steps
         if n_steps >= max_triangle_walk_steps:  # dont update cell
             status[n] = status_cell_search_failed
-            # move_back = True# todo shoul it just move back, not retyr?do move back externally
+            # move_back = True# todo should it just move back, not retyr?do move back externally
 
         if move_back:
             # move back dont update
@@ -406,6 +406,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
 def get_cell_cords_check(bc_transform,x,n_cell):
     # barycentric cords, only for use with non-improved scipy and KDtree for al time steps
     # numba code does this faster
+    #print('shapes',bc_transform.shape,x.shape, n_cell.shape)
     TT = np.take(bc_transform, n_cell, axis=0,)
     b = np.full((x.shape[0],3), np.nan, order='C')
     b[:,:2] = np.einsum('ijk,ik->ij', TT[:, :2], x[:, :2] - TT[:, 2], order='C')  # Einstein summation

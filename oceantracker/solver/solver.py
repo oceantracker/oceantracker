@@ -169,13 +169,14 @@ class Solver(ParameterBaseClass):
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
 
+        # setup_interp_time_step, cell etc
+        fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
+
         # resuspension is a core trajectory modifier
         if si.is3D_run:
             # friction_velocity property  is now updated, so do resupension
             si.classes['resuspension'].update(time_sec, alive)
 
-        # setup_interp_time_step
-        fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
         fgm.update_dry_cells()
 
         if si.is3D_run:
@@ -199,7 +200,6 @@ class Solver(ParameterBaseClass):
 
             # write tracks file
             tracks_writer.write_all_time_varying_prop_and_data()
-
 
     def integration_step(self, time_sec, is_moving):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
