@@ -275,7 +275,7 @@ s56['velocity_modifiers']={'terminal_velocity':
                            }
 s56['particle_statistics']= {'grid1':
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                      'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min':'moving','min_z' :-2,
+                      'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min':'moving','z_min' :-2,
                       'grid_size': [120, 121]}}
 
 
@@ -352,7 +352,7 @@ p62['release_groups']={
          'points': (np.asarray(poly_points_large) + np.asarray([[0,-3000]])).tolist(),
          'pulse_size': 10, 'release_interval': 3*3600},
     'Poly2':{'class_name': 'oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange',
-            'min_water_depth': 30,
+            'water_depth_min': 30,
             'points': (np.asarray(poly_points_large) + np.asarray([[-3000, 0]])).tolist(),
             'pulse_size': 10, 'release_interval': 3 * 3600}
         }

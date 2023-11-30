@@ -113,7 +113,8 @@ class ParamValueChecker(object):
         info = self.info
 
         if value is not None and info['obsolete'] is not None:
-            msg_logger.msg('Parameter  ' + crumb_trail + ' is obsolete- ' + info['obsolete'], warning=True)
+            msg_logger.msg(f'Parameter  "{crumb_trail}" is obsolete- "{info["obsolete"]}"', warning=True)
+            return  None
 
         if value is None:
             # check default exits
@@ -186,7 +187,7 @@ class ParameterListChecker(object):
     def __init__(self, default_list, acceptable_types, is_required=False, can_be_empty_list= True, default_value=None,
                   fixed_len =None, min_length=None, max_length=None, doc_str=None, make_list_unique=None, obsolete = None,
                  possible_values=None, units=None,
-                 ) :
+                 ):
 
         self.info= dict(locals()) # get keyword args as dict
         self.info.pop('self') # dont want self param
@@ -200,9 +201,9 @@ class ParameterListChecker(object):
         info =self.info
         crumb_trail = crumbs + crumb_seperator + name
 
-        if info['obsolete'] is not None:
-            msg_logger.msg('Parameter ' + crumb_trail + ' is obsolete  - ' + info['obsolete'],warning=True)
-
+        if info['obsolete'] is not None and (user_list is not None or  len(user_list) > 0) :
+            msg_logger.msg(f'List Parameter "{crumb_trail}" is obsolete  - "{info["obsolete"]}"', warning=True)
+            return None
 
         if user_list is not None and type(user_list) != list:
             msg_logger.msg('ParameterListChecker: param "' + crumb_trail + '" must be a list ', fatal_error=True)

@@ -30,9 +30,10 @@ class PointRelease(ParameterBaseClass):
                                               doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.'),
                                  'z_range': PLC([],[float, int], min_length=2, doc_str='z range = [zmin, zmax] to randomly release in 3D, overrides any given release z value'),
                                 'release_offset_above_bottom': PVC(False, [float, int], min= 0., doc_str=' 3D release particles at fixed give height above the bottom at the release location ', units='m'),
-                                'water_depth_range': PLC([],[float, int], min_length=2,  units= 'm',
-                                                         doc_str=' 3D release at locations where water depth is in this range, overrides any given release z value, or z_range'),
-                                  #Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}
+                                #'water_depth_min': PVC(None, float,doc_str='min water depth to release in, useful for releases with a depth rage, eg larvae from inter-tidal shellfish', units='m'),
+                                #'water_depth_max': PVC(None, float, doc_str='max water depth to release in', units='m'),
+
+            #Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}
                                 'max_cycles_to_find_release_points': PVC(200, int, min=100, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
                                  })
         self.class_doc(description= 'Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.')
@@ -205,7 +206,7 @@ class PointRelease(ParameterBaseClass):
     @staticmethod
     @njit()
     def get_z_release_in_depth_range(z_range, ncell, water_depth,tide,triangles, nb):
-        # get release in range of top and bottom
+        # get release in the range of top and bottom
         nx = ncell.shape[0]
 
         zr =  np.full((2,),0.)
