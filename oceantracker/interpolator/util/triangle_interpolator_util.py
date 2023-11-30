@@ -403,13 +403,10 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
 
 # Below is numpy version of numba BC cord code, now only used as check
 #________________________________________________
-def get_cell_cords_check(self,x,n_cell):
+def get_cell_cords_check(bc_transform,x,n_cell):
     # barycentric cords, only for use with non-improved scipy and KDtree for al time steps
     # numba code does this faster
-    si = self.shared_info
-    grid = si.classes['reader'].grid
-
-    TT = np.take(grid['bc_transform'], n_cell, axis=0,)
+    TT = np.take(bc_transform, n_cell, axis=0,)
     b = np.full((x.shape[0],3), np.nan, order='C')
     b[:,:2] = np.einsum('ijk,ik->ij', TT[:, :2], x[:, :2] - TT[:, 2], order='C')  # Einstein summation
     b[:,2] = 1. - b[:,:2].sum(axis=1)
