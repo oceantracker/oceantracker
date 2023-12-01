@@ -289,6 +289,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out =self.get_partID_subset_buffer('B1'))
         if sel.size > 0:
+            #si.msg_logger.msg(f'Search retried for {sel.size} cells')
             info['triangle_walks_retried'] += sel.size
             new_cell  = self.initial_cell_guess(xq[sel,:])
             part_prop['n_cell'].set_values(new_cell, sel)
