@@ -70,7 +70,6 @@ release_groups:
     release_interval: 10800
   Poly2:
     class_name: oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange
-    min_water_depth: 30
     points:
     - - 1594682.1237
       - 5489972.7479
@@ -86,5 +85,6 @@ release_groups:
       - 5489972.7479
     pulse_size: 10
     release_interval: 10800
+    water_depth_min: 30
 root_output_dir: output
 time_step: 120

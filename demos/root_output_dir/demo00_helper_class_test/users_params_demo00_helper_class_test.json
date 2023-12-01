@@ -24,7 +24,7 @@
     "open_boundary_type": null,
     "block_dry_cells": null,
     "dispersion": {
-        "A_h": 1
+        "A_H": 1
     },
     "field_group_manager": {},
     "interpolator": {},

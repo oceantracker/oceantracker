@@ -153,6 +153,7 @@ class ParticleGroupManager(ParameterBaseClass):
         part_prop['x_last_good'].set_values(x0, new_buffer_indices)
 
         part_prop['n_cell'].set_values(n_cell_guess, new_buffer_indices)  # use x0's best guess  for starting point cell
+        part_prop['n_cell_last_good'].set_values(n_cell_guess, new_buffer_indices)
 
         part_prop['status'].set_values(si.particle_status_flags['moving'], new_buffer_indices)  # set  status of released particles
 

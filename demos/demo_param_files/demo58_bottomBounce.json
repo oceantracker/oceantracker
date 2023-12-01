@@ -165,7 +165,7 @@
                 "water_depth"
             ],
             "status_min": "moving",
-            "min_z": -2,
+            "z_min": -2,
             "grid_size": [
                 120,
                 121

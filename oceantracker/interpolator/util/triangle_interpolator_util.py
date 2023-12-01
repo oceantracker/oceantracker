@@ -40,7 +40,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 @njit()
 def BCwalk_with_move_backs(xq,
                            tri_walk_AOS, dry_cell_index,
-                           x_last_good, n_cell,status,bc_cords,
+                           x_last_good, n_cell,n_cell_last_good,status,bc_cords,
                             walk_counts,
                            max_triangle_walk_steps, bc_walk_tol, open_boundary_type, block_dry_cells,
                            active):
@@ -57,6 +57,7 @@ def BCwalk_with_move_backs(xq,
         if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
             # if any is nan copy all and move on
             _move_back(xq[n,:], x_last_good[n, :])
+            n_cell[n] = n_cell_last_good[n]
             walk_counts[3] += 1  # count nans
             continue
 
@@ -107,6 +108,7 @@ def BCwalk_with_move_backs(xq,
         if move_back:
             # move back dont update
             _move_back(xq[n,:], x_last_good[n, :])
+            n_cell[n] = n_cell_last_good[n]
         else:
             # update cell anc BC for new triangle
             n_cell[n] = n_tri

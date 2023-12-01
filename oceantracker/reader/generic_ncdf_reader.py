@@ -263,7 +263,7 @@ class GenericNCDFreader(_BaseReader):
     def read_grid_coords(self, nc, grid):
         params= self.params
         var_name = params['grid_variable_map']['x']
-        grid['x'] = np.column_stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1])))
+        grid['x'] = np.column_stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1]))).astype(np.float64)
 
         if self.params['cords_in_lat_long']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])

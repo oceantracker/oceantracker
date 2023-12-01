@@ -39,7 +39,7 @@ class SCHISMSreaderNCDF(_BaseReader):
         x_var ='SCHISM_hgrid_node_x'
         x =  nc.read_a_variable(x_var)
         y = nc.read_a_variable('SCHISM_hgrid_node_y')
-        grid['x'] = np.stack((x,y),axis=1)
+        grid['x'] = np.stack((x,y),axis=1).astype(np.float64)
 
         # test if lat long
         if nc.is_var_attr(x_var,'units') and 'degree' in nc.var_attr(x_var,'units').lower():

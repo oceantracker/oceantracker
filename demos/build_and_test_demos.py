@@ -34,7 +34,6 @@ demo_base_params={'output_file_base' : None,
     'reader': {"class_name": 'oceantracker.reader.generic_ncdf_reader.GenericNCDFreader',
                 'input_dir': '.',
                 'file_mask': 'demoHindcast2D*.nc',
-                'search_sub_dirs': True,
                 'dimension_map': {'time': 'time', 'node': 'nodes'},
                 'grid_variable_map'  : {'time': 'time_sec', 'x':['east','north'],  'triangles': 'tri'},
                 'field_variable_map': {'water_velocity' : ['east_vel','north_vel'],'water_depth': 'depth','tide':'tide'},
@@ -125,15 +124,14 @@ params.append (p4)
 
 # demo 5 parallel
 base_case = deepcopy(p2)
-
+del base_case['release_groups']
 base_case.update({'output_file_base' :'demo05_parallel',
             'processors': 2,
            'advanced_settings':{ 'multiprocessing_case_start_delay' : 1.0}
           })
 case_list=[]
 for n in range(5):
-
-    case_list.append({ 'release_groups': deepcopy(p2['release_groups'])})
+    case_list.append({ 'release_groups': p2['release_groups']})
 
 params.append([base_case,case_list])
 
@@ -257,7 +255,6 @@ schsim_base_params=\
                 }
 
 s50 = deepcopy(schsim_base_params)
-s50['run_as_depth_averaged'] =  True
 params.append (s50)
 
 # schsim 3D

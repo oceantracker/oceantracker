@@ -7,7 +7,6 @@
         "class_name": "oceantracker.reader.generic_ncdf_reader.GenericNCDFreader",
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcast2D*.nc",
-        "search_sub_dirs": true,
         "dimension_map": {
             "time": "time",
             "node": "nodes"

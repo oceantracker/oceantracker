@@ -43,7 +43,6 @@ reader:
     - north
   input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   isodate_of_hindcast_time_zero: '2020-06-01'
-  search_sub_dirs: true
   time_buffer_size: 15
 release_groups:
   near_shore:

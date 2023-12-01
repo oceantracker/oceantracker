@@ -21,7 +21,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        self.add_default_params({'bc_walk_tol': PVC(1.0e-5, float,min = 0.),
+        self.add_default_params({'bc_walk_tol': PVC(1.0e-4, float,min = 0.),
                                  'max_search_steps': PVC(500,int, min =1)})
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
 
@@ -46,6 +46,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         p = si.classes['particle_group_manager']
         p.add_particle_property('n_cell', 'manual_update',dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
+        p.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
         p.add_particle_property('bc_cords','manual_update',dict(  write=False, initial_value=0., vector_dim=3,dtype=np.float64))
 
         # BC walk info
@@ -321,6 +322,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         fields= si.classes['fields']
         x_last_good = part_prop['x_last_good'].data
         n_cell = part_prop['n_cell'].data
+        n_cell_last_good = part_prop['n_cell_last_good'].data
         status = part_prop['status'].data
         bc_cords = part_prop['bc_cords'].data
         grid = self.grid
@@ -330,11 +332,22 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         tri_interp_util.BCwalk_with_move_backs(
                            xq,
                            grid['tri_walk_AOS'], grid['dry_cell_index'],
-                           x_last_good, n_cell, status, bc_cords,
+                           x_last_good, n_cell, n_cell_last_good, status, bc_cords,
                            self.walk_counts,
                            params['max_search_steps'], params['bc_walk_tol'], si.settings['open_boundary_type'],si.settings['block_dry_cells'],
                            active)
         si.block_timer('Find cell, horizontal walk', t0)
+
+        # check bc coods
+        if False :
+            from oceantracker.util import  debug_util
+            sel = debug_util.check_walk_step(si.classes['reader'].grid, part_prop, active)
+            if False and sel.size >0:
+                debug_util.plot_walk_step(xq,si.classes['reader'].grid, part_prop, sel)
+
+
+            pass
+        #debug_util.plot_walk_step(xq, si.classes['reader'].grid, part_prop)
 
         if si.is3D_run:
             t0 = perf_counter()
