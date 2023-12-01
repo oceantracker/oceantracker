@@ -59,5 +59,4 @@ release_groups:
     pulse_size: 20
     release_interval: 3600
 root_output_dir: output
-run_as_depth_averaged: true
 time_step: 120

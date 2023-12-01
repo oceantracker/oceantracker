@@ -14,7 +14,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_grid_var_list=['triangle_area', 'x'],
-                                                            required_props_list=['total_water_depth'])
+                                                            required_props_list=['tide','water_depth'])
     def set_up_data_buffers(self):
         si = self.shared_info
         grid = si.classes['reader'].grid
@@ -55,7 +55,8 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
 
         sel = self.select_particles_to_count()
         self.calcuate_concentration2D(part_prop['n_cell'].data,
-                                      part_prop['total_water_depth'].data,
+                                      part_prop['tide'].data,
+                                      part_prop['water_depth'].data,
                                       part_prop['age'].data,
                                       grid['triangle_area'],
                                       self.particle_count,
@@ -70,7 +71,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
 
     @staticmethod
     @njit()
-    def calcuate_concentration2D(n_cell, total_water_depth, age, triangle_area,particle_count, particle_concentration,
+    def calcuate_concentration2D(n_cell, tide, water_depth, age, triangle_area,particle_count, particle_concentration,
                                  load_concentration, initial_particle_load,load_decay_time_scale,
                                  sel_to_count):
         particle_count[:] = 0
@@ -79,7 +80,8 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
         for n in sel_to_count:
             c = n_cell[n]
             particle_count[c] += 1
-            vol = triangle_area[c] * total_water_depth[n]
+            twd = tide[n] + water_depth[n]
+            vol = triangle_area[c] * twd
 
             if vol > 1.:  # only calculate  if at least 1 cubic meter
                 particle_concentration[c] += 1.0 / vol

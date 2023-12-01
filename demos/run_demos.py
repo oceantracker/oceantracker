@@ -96,7 +96,7 @@ if __name__ == "__main__":
             ot.add_class('release_groups', name='my_point1', points=two_points,case=0)
             ot.add_class('release_groups', name='my_point1', points=two_points,case=1)
 
-            ot.add_class('dispersion', A_h=1)
+            ot.add_class('dispersion', A_H=1)
             ot.run()
 
             continue

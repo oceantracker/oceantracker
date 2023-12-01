@@ -219,9 +219,12 @@ class Solver(ParameterBaseClass):
         v       = part_prop['particle_velocity'].data
         v_temp  = part_prop['v_temp'].data  # temp vel from interp at each RK substeps
         velocity_modifier= part_prop['velocity_modifier'].data
+        n_cell = part_prop['n_cell'].data
+        n_cell_last_good = part_prop['n_cell_last_good'].data
 
         # this makes x1, ['x_last_good']  at start of new integration step for moving particles, allowing updates to x2 ['x']
         particle_operations_util.copy(x1, x2, is_moving)
+        particle_operations_util.copy(n_cell_last_good, n_cell, is_moving)
 
         #  step 1 from current location and time
         fgm.setup_time_step(time_sec, x1, is_moving)
