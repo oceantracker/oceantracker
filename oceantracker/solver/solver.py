@@ -8,6 +8,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
 from oceantracker.util import numpy_util
+from oceantracker.interpolator.util import triangle_interpolator_util
 
 class Solver(ParameterBaseClass):
     #  does particle tracking solution as class to allow multi processing
@@ -189,6 +190,7 @@ class Solver(ParameterBaseClass):
 
         # setup_interp_time_step
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
+
         fgm.update_dry_cells()
 
         # update particle properties
@@ -224,13 +226,17 @@ class Solver(ParameterBaseClass):
         dt2=dt/2.
         # set up views of  working variable space
         x1      = part_prop['x_last_good'].data
+        #xmid = part_prop['x_mid'].data
         x2      = part_prop['x'].data
         v       = part_prop['particle_velocity'].data
         v_temp  = part_prop['v_temp'].data  # temp vel from interp at each RK substeps
         velocity_modifier= part_prop['velocity_modifier'].data
+        n_cell =  part_prop['n_cell'].data
+        n_cell_last_good = part_prop['n_cell_last_good'].data
 
         # this makes x1, ['x_last_good']  at start of new integration step for moving particles, allowing updates to x2 ['x']
         particle_operations_util.copy(x1, x2, is_moving)
+        particle_operations_util.copy(n_cell_last_good, n_cell, is_moving)
 
         #  step 1 from current location and time
         fgm.setup_time_step(time_sec, x1, is_moving)

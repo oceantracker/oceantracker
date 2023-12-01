@@ -54,7 +54,8 @@ class ParticleGroupManager(ParameterBaseClass):
         self.create_particle_property('IDpulse','manual_update',dict(  dtype=np.int32, initial_value=-1, time_varying= False,
                                       description='ID of pulse particle was released within its release group, zero based'))
         self.create_particle_property('time_released', 'manual_update',dict(time_varying= False, description='time (sec) each particle was released'))
-        self.create_particle_property('x_last_good','manual_update',dict( write=True, vector_dim=nDim))  # location when last moving
+        self.create_particle_property('x_last_good', 'manual_update', dict(write=False, vector_dim=nDim,docstr='x at the start of the RK step'))  # location when last moving
+        #self.create_particle_property('x_mid','manual_update',dict( write=False, vector_dim=nDim,docstr='x a the mid RK step'))  # location when last moving
         self.create_particle_property('x0','manual_update',dict(  vector_dim=nDim, time_varying=False,
                                       description='initial location of each particle'))  # exact location released including any randomization
 
