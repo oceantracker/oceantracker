@@ -40,7 +40,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 @njit()
 def BCwalk_with_move_backs(xq,
                            tri_walk_AOS, dry_cell_index,
-                           x_last_good, n_cell,status,bc_cords,
+                           x_last_good, n_cell, n_cell_last_good,status,bc_cords,
                             walk_counts,
                            max_triangle_walk_steps, bc_walk_tol, open_boundary_type, block_dry_cells,
                            active):
@@ -57,6 +57,8 @@ def BCwalk_with_move_backs(xq,
         if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
             # if any is nan copy all and move on
             _move_back(xq[n,:], x_last_good[n, :])
+            n_cell[n] = n_cell_last_good[n]
+
             walk_counts[3] += 1  # count nans
             continue
 
@@ -104,8 +106,9 @@ def BCwalk_with_move_backs(xq,
             # move_back = True# todo shoul it just move back, not retyr?do move back externally
 
         if move_back:
-            # move back dont update
+            # move back dont update,tri
             _move_back(xq[n,:], x_last_good[n, :])
+            n_cell[n] = n_cell_last_good[n]
         else:
             # update cell anc BC for new triangle
             n_cell[n] = n_tri
@@ -118,6 +121,7 @@ def BCwalk_with_move_backs(xq,
 @njit()
 def _move_back(x, x_old):
     for i in range(x.shape[0]): x[i] = x_old[i]
+
 
 @njit
 def get_BC_cords_numba(x, n_cells, BCtransform, bc):
@@ -411,17 +415,17 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
 
 # Below is numpy version of numba BC cord code, now only used as check
 #________________________________________________
-def get_cell_cords_check(self,x,n_cell):
+def get_cell_cords_check(bc_transform,x,n_cell):
     # barycentric cords, only for use with non-improved scipy and KDtree for al time steps
     # numba code does this faster
-    si = self.shared_info
-    grid = si.classes['reader'].grid
-
-    TT = np.take(grid['bc_transform'], n_cell, axis=0,)
+    TT = np.take(bc_transform, n_cell, axis=0,)
     b = np.full((x.shape[0],3), np.nan, order='C')
     b[:,:2] = np.einsum('ijk,ik->ij', TT[:, :2], x[:, :2] - TT[:, 2], order='C')  # Einstein summation
     b[:,2] = 1. - b[:,:2].sum(axis=1)
     return b
+
+
+
 
 #________ old versions
 

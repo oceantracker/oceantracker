@@ -45,6 +45,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         p = si.classes['particle_group_manager']
         p.create_particle_property('n_cell', 'manual_update',dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
+        p.create_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
         p.create_particle_property('bc_cords','manual_update',dict(  write=False, initial_value=0., vector_dim=3,dtype=np.float64))
 
         # BC walk info
@@ -331,20 +332,32 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         part_prop = si.classes['particle_properties']
         x_last_good = part_prop['x_last_good'].data
         n_cell = part_prop['n_cell'].data
+        n_cell_last_good = part_prop['n_cell_last_good'].data
         status = part_prop['status'].data
         bc_cords = part_prop['bc_cords'].data
         grid = self.grid
         params = self.params
 
+
         # used 2D or 3D walk chosen above
         tri_interp_util.BCwalk_with_move_backs(
                            xq,
                            grid['tri_walk_AOS'], grid['dry_cell_index'],
-                           x_last_good, n_cell, status, bc_cords,
+                           x_last_good, n_cell,n_cell_last_good, status, bc_cords,
                            self.walk_counts,
                            params['max_search_steps'], params['bc_walk_tol'], si.settings['open_boundary_type'],si.settings['block_dry_cells'],
                            active)
         si.block_timer('Find cell, horizontal walk', t0)
+
+        if False:
+            # def check_cells_correct(bc_transform,x,n_cell,active, tol=1e-2)
+            from oceantracker.util import  debug_util
+            sel = debug_util.check_walk_step(si.classes['reader'].grid, part_prop, active)
+            if sel.size >0:
+                debug_util.plot_walk_step(xq,si.classes['reader'].grid, part_prop, sel)
+
+            debug_util.plot_walk_step(xq, si.classes['reader'].grid, part_prop)
+            pass
 
         if si.is_3D_run:
             t0 = perf_counter()
