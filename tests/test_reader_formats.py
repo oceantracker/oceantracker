@@ -12,7 +12,7 @@ def run_params(d):
         'output_file_base': d['output_file_base'],
         'root_output_dir': d['root_output_dir'],
         'regrid_z_to_uniform_sigma_levels': d['regrid_z_to_uniform_sigma_levels'],
-        'release_groups': {'P1': {'points': d['x0'], 'pulse_size': 5, 'release_interval': 3600}},
+        'release_groups': {'P1': {'points': d['x0'], 'pulse_size': 10, 'release_interval': 3600}},
         'dispersion': {'A_H': 1.0, 'A_V': 0.001},
         'particle_statistics': {'S1': {
             'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',

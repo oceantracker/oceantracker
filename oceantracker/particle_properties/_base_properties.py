@@ -110,6 +110,12 @@ class ParticleProperty(_BasePropertyInfo):
             # scalar
             particle_operations_util.set_value(self.data, values, active)
 
+    def copy(self, prop_name, active):
+        # copy from named particle
+        si = self.shared_info
+        part_prop= si.classes['particle_properties']
+        particle_operations_util.copy(self.data, part_prop[prop_name].data, active)
+
     def fill_buffer(self,value):
         n_in_buffer = self.shared_info.classes['particle_group_manager'].info['particles_in_buffer']
         self.data[:n_in_buffer,...] = value

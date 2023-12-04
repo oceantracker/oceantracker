@@ -18,11 +18,7 @@ def show():
 
 def check_walk_step(grid, part_prop, active, tol = 1.E-2):
     x= part_prop['x'].data[active,:]
-    x0 = part_prop['x_last_good'].data[active, :]
     n_cell = part_prop['n_cell'].data[active]
-    n_cell_last_good = part_prop['n_cell_last_good'].data[active]
-    status= part_prop['status'].data[active]
-    tri = grid['triangles']
 
     #check bc cords
     #triangle_interpolator_util.get_cell_cords_check()
@@ -49,7 +45,7 @@ def plot_walk_step(x_new,grid, part_prop, sel=np.zeros((1,),dtype=np.int32)):
 
     plt.triplot(grid['x'][:, 0], grid['x'][:, 1], tri[n_cell_last_good[sel],:], c=[0, .8,0.], lw=1)
 
-    plt.plot(  x_new[sel,0],  x_new[sel,1],'co')
+    plt.plot(  x_new[sel,0],  x_new[sel,1],'go')
 
     plt.plot(x[sel,0],x[sel,1],'rx')
     plt.show(block=True)

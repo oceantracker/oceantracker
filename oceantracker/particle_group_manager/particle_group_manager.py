@@ -279,7 +279,7 @@ class ParticleGroupManager(ParameterBaseClass):
                 i.update(active)
         si.block_timer('Update particle properties',t0)
 
-    def status_counts_and_kill_old_particles(self, t,):
+    def status_counts_and_kill_old_particles(self, t):
         # deactivate old particles for each release group
         si = self.shared_info
         part_prop = si.classes['particle_properties']

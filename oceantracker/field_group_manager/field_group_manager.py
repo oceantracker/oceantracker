@@ -39,13 +39,21 @@ class FieldGroupManager(ParameterBaseClass):
                 reader.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
         si.block_timer('Fill reader buffers',t0)
 
-    def setup_time_step(self, time_sec, xq, active):
+    def setup_time_step(self, time_sec, xq, active, fix_bad=True):
         # set up stuff needed by all fields before any  interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
+        # currently only sets up primary interpolator
         si =self.shared_info
-        # todo one reader/interp at the moment b    ut may be more later
-        si.classes['interpolator'].setup_interp_time_step(time_sec, xq, active)
+        si.classes['interpolator'].setup_interp_time_step(time_sec, xq, active,fix_bad=fix_bad)
+
         return active
+    def fix_time_step(self, active):
+        # fix any bad walks etc.
+        # currently only sets up primary interpolator
+        si =self.shared_info
+        si.classes['interpolator'].fix_bad_cell_search(active)
+        return active
+
 
     #@function_profiler(__name__)
     def interp_field_at_particle_locations(self, field_name, active, output=None):
