@@ -97,6 +97,9 @@ particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search
 
                  }
 particle_info['status_keys_list']= list(particle_info['status_flags'].keys()) # possible values for checking user input
+# interp cell find flags
+
+cell_search_status_flags = dict(ok =0, outside_domain=1 ,blocked_domain=-5, blocked_dry_cell=-4, bad_cord=-20, failed=-30)
 
 # default reader classes used by auto dection of file type
 

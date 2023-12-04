@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit,prange, types as nbt, typeof, from_dtype
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.common_info_default_param_dict_templates import particle_info
+from oceantracker.common_info_default_param_dict_templates import particle_info, cell_search_status_flags
 # record variable to hold walk info/counts
 # to reduce number of args required in numba functions and be morr readable
 
@@ -15,6 +15,13 @@ status_outside_open_boundary = int(particle_info['status_flags']['outside_open_b
 status_dead = int(particle_info['status_flags']['dead'])
 status_bad_cord = int(particle_info['status_flags']['bad_cord'])
 status_cell_search_failed = int(particle_info['status_flags']['cell_search_failed'])
+
+search_ok= int(cell_search_status_flags['ok'])
+search_blocked_domain= int(cell_search_status_flags['blocked_domain'])
+search_blocked_dry_cell= int(cell_search_status_flags['blocked_dry_cell'])
+search_bad_cord= int(cell_search_status_flags['bad_cord'])
+search_outside_domain= int(cell_search_status_flags['outside_domain'])
+search_failed= int(cell_search_status_flags['failed'])
 
 #below is called by another numba function which will work out signature on first call
 @njit(inline='always')
@@ -38,7 +45,83 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 
 # ________ Barycentric triangle walk________
 @njit()
-def BCwalk_with_move_backs(xq,
+def BCwalk(xq, tri_walk_AOS, dry_cell_index,
+                n_cell, cell_search_status,bc_cords,
+                walk_counts,
+                max_triangle_walk_steps, bc_walk_tol, open_boundary_type, block_dry_cells,
+                active):
+    # Barycentric walk across triangles to find cells
+
+    bc = np.zeros((3,), dtype=np.float64) # working space
+    # shortcuts needed to use prange
+
+
+    # loop over active particles in place
+    for nn in prange(active.size):
+        n= active[nn]
+
+        if cell_search_status[n] != search_ok : continue # if already outside domain, bad or blocked, wil be fixed in solver
+
+        if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
+            # if any is nan copy all and move on
+            cell_search_status[n]= search_bad_cord
+            walk_counts[3] += 1  # count nans
+            continue
+
+        n_tri = n_cell[n]  # starting triangle
+        # do BC walk
+        n_steps = 0
+
+        while n_steps < max_triangle_walk_steps:
+            # update barcentric cords of xq
+
+            n_min, n_max = _get_single_BC_cord_numba(xq[n, :], tri_walk_AOS[n_tri]['bc_transform'], bc)
+
+            if bc[n_min] > -bc_walk_tol and bc[n_max] < 1. + bc_walk_tol:
+                # are now inside triangle, leave particle status as is
+                break  # with current n_tri as found cell
+
+            n_steps += 1
+            # move to neighbour triangle at face with smallest bc then test bc cord again
+            next_tri = tri_walk_AOS[n_tri]['adjacency'][n_min]  # n_min is the face num in  tri to move across
+
+            if next_tri < 0:
+                # if no new adjacent triangle, then are trying to exit domain at a boundary triangle,
+                # keep n_cell, bc  unchanged
+                if open_boundary_type > 0 and next_tri == -2:  # outside domain
+                    # leave x, bc, cell, location  unchanged as outside
+                    cell_search_status[n] = search_outside_domain
+                    break
+                else:  # n_tri == -1 outside domain and any future
+                    # solid boundary, so just move back
+                    cell_search_status[n] = search_blocked_domain
+                    break
+
+            # check for dry cell
+            if block_dry_cells:  # is faster split into 2 ifs, not sure why
+                if dry_cell_index[next_tri] > 128:
+                    # treats dry cell like a lateral boundary,  move back and keep triangle the same
+                    cell_search_status[n] = search_blocked_dry_cell
+                    break
+
+            n_tri = next_tri
+
+        # not found in given number of search steps
+        if n_steps >= max_triangle_walk_steps:  # dont update cell
+            cell_search_status[n] = search_failed
+
+
+        if cell_search_status[n] == search_ok:
+            # update cell anc BC for new triangle, if not fixed in solver after full step
+            n_cell[n] = n_tri
+            for i in range(3): bc_cords[n, i] = bc[i]
+
+        walk_counts[0] += 1  # particles walked
+        walk_counts[1] += n_steps  # steps taken
+        walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
+
+@njit()
+def BCwalk_with_move_backsV1(xq,
                            tri_walk_AOS, dry_cell_index,
                            x_last_good, n_cell,n_cell_last_good,status,bc_cords,
                             walk_counts,
