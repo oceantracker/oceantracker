@@ -239,17 +239,6 @@ class ROMsNativeReader(_BaseReader):
 
         return data
 
-    def setup_water_velocity(self,nc,grid):
-        # tweak to be depth avearged
-        fm = self.params['field_variable_map']
-
-        if nc.is_var(fm['water_velocity'][0]):
-            # check if vertical vel variable in file
-            if not nc.is_var(fm['water_velocity'][1]):
-                fm['water_velocity'] = [fm['water_velocity'][0]]
-        else:
-            # is depth averaged schism run
-            fm['water_velocity'] =fm['water_velocity_depth_averaged']
 
     def read_open_boundary_data_as_boolean(self, grid):
         # and make this part of the read grid method

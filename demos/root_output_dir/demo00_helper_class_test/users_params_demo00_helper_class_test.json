@@ -6,6 +6,8 @@
     "screen_output_time_interval": null,
     "backtracking": null,
     "regrid_z_to_uniform_sigma_levels": null,
+    "debug_level": null,
+    "debug_plots": null,
     "debug": null,
     "minimum_total_water_depth": null,
     "write_output_files": null,
@@ -23,6 +25,7 @@
     "z0": null,
     "open_boundary_type": null,
     "block_dry_cells": null,
+    "use_AZ_profile": null,
     "dispersion": {
         "A_H": 1
     },

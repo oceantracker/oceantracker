@@ -1,4 +1,5 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 import oceantracker.util.basic_util  as basic_util
 
 class _BaseInterp(ParameterBaseClass):
@@ -7,9 +8,8 @@ class _BaseInterp(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.grid={'x':None, 'triangles':None, 'adjacency': None,'land_nodes':None, 'open_nodes': None,'bc_transform': None }
+        self.add_default_params(dict( debug_check_cell= PVC(False, bool, doc_str='checks particles are inside the cell found by interp')))
 
-    def initial_setup(self, **kwargs): pass
 
     # find hori and vertical cell containing each particle
     def find_cell(self, xq, nb, active): basic_util.nopass(' must supply find_cells method')

@@ -37,6 +37,9 @@ class _BaseReader(ParameterBaseClass):
             'field_variable_map': {'water_velocity': PLC([], [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
                                    'tide': PVC('elev', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('depth', str, is_required=True, doc_str='maps standard internal field name to file variable name'),
+                                   'A_Z_profile': PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
+                                   'water_velocity_depth_averaged': PLC([], [str], fixed_len=2,
+                                                                        doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'EPSG': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
@@ -47,7 +50,7 @@ class _BaseReader(ParameterBaseClass):
     # Below are required  methods for any new reader
     # ---------------------------------------------------------
 
-    def setup_water_velocity(self, nc,grid): nopass()
+
 
     def is_hindcast3D(self, nc):  nopass()
 
@@ -60,7 +63,6 @@ class _BaseReader(ParameterBaseClass):
     def read_triangles_as_int32(self, nc, grid):     nopass()
 
 
-
     def get_field_params(self,nc, name):   nopass()
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):   nopass()
@@ -68,6 +70,29 @@ class _BaseReader(ParameterBaseClass):
     def read_dry_cell_data(self, nc, file_index, is_dry_cell_buffer, buffer_index):   nopass()
 
     def set_up_uniform_sigma(self,nc, grid):nopass()
+
+    # default setup
+    def setup_water_velocity(self,nc,grid):
+        # tweak to be depth avearged
+        fm = self.params['field_variable_map']
+
+        if nc.is_var(fm['water_velocity'][0]):
+            # check if vertical vel variable in file
+            if not nc.is_var(fm['water_velocity'][1]):
+                fm['water_velocity'] = [fm['water_velocity'][0]]
+        else:
+            # is depth averaged schism run
+            fm['water_velocity'] =fm['water_velocity_depth_averaged']
+
+
+    def has_AZ_profile(self,nc):
+        params = self.params
+        fn = params['field_variable_map']['A_Z_profile']
+        return nc.is_var(fn)
+
+
+
+
 
     # calculate dry cell flags, if any cell node is dry
     # not required but have defaults
@@ -108,6 +133,8 @@ class _BaseReader(ParameterBaseClass):
         bi['time_steps_in_buffer'] = []
         bi['buffer_available'] = bi['buffer_size']
         bi['nt_buffer0'] = 0
+
+
 
     def final_setup(self):
         si = self.shared_info
@@ -207,11 +234,16 @@ class _BaseReader(ParameterBaseClass):
         # check cals name
         fi = self.sort_files_by_time(file_list, msg_logger)
 
+        # checks on hindcast
+        if fi['n_time_steps_in_hindcast'] < 2:
+            msg_logger.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']), fatal_error=True, exit_now=True)
+
+
         t = np.concatenate((fi['time_start'], fi['time_end']))
         fi['first_time'] = np.min(t)
         fi['last_time'] = np.max(t)
         fi['duration'] = fi['last_time'] - fi['first_time']
-        fi['hydro_model_time_step'] = fi['duration'] / fi['n_time_steps_in_hindcast']
+        fi['hydro_model_time_step'] = fi['duration'] / (fi['n_time_steps_in_hindcast']-1)
 
         # datetime versions for reference
         fi['date_start'] = time_util.seconds_to_datetime64(fi['time_start'])
@@ -220,9 +252,7 @@ class _BaseReader(ParameterBaseClass):
         fi['last_date'] = time_util.seconds_to_datetime64(fi['last_time'])
         fi['hydro_model_timedelta'] = time_util.seconds_to_pretty_duration_string(fi['hydro_model_time_step'])
 
-        # checks on hindcast
-        if fi['n_time_steps_in_hindcast'] < 2:
-            msg_logger.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']), fatal_error=True)
+
 
         # check for large time gaps between files
         # check if time diff between starts of file and end of last are larger than average time step

@@ -87,8 +87,10 @@ class FieldGroupManager(ParameterBaseClass):
         nc = reader.open_first_file()
 
         grid,  si.is3D_run   = reader.set_up_grid(nc)
-        reader.setup_water_velocity(nc,grid)
         reader.grid = grid
+        reader.setup_water_velocity(nc,grid)
+
+
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
         interp = si.add_core_class('interpolator', si.working_params['core_roles']['interpolator'],  crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
@@ -97,19 +99,12 @@ class FieldGroupManager(ParameterBaseClass):
 
         reader.params['load_fields'] = list(set(['tide','water_depth', 'water_velocity'] + reader.params['load_fields'] ))
 
-        for name in  reader.params['load_fields'] :
-
+        for name in  reader.params['load_fields']:
             field_params = reader.get_field_params(nc, name)
-            field_params['class_name']='oceantracker.fields._base_field.ReaderField'
-            i = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs= f' creating reader feild  field setup > "{name}"')
-            i.initial_setup()
+            self.add_reader_field( name, field_params, nc, reader, interp)
 
-            i.reader = reader
-            i.interpolator = interp
 
-            # read data if not time varying
-            if not i.is_time_varying() :
-                i.data[0, ...] = reader.assemble_field_components(nc, name)
+        self.setup_dispersion(nc, reader,interp)
 
         nc.close()
 
@@ -121,6 +116,34 @@ class FieldGroupManager(ParameterBaseClass):
 
         i.reader = reader
         i.interpolator = interp
+
+    def setup_dispersion(self, nc, reader,interp):
+        si = self.shared_info
+        ml = si.msg_logger
+
+        if  not (si.is3D_run and si.settings['use_AZ_profile']  ): return  # use constant given values
+        if not reader.has_AZ_profile(nc): return
+
+        self.add_reader_field( 'A_Z_profile',dict(is3D=True,time_varying=True),nc, reader,interp)
+
+
+        self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(class_name='oceantracker.fields.field_vertical_gradient.VerticalGradient', is_time_varying=True,
+                                                                  name_of_field= 'A_Z_profile'  ),   crumbs='random walk > Adding A_Z_vertical_gradient field, for using_AZ_profile')
+        pass
+
+    def add_reader_field(self, name,field_params,nc, reader,interp):
+        si = self.shared_info
+        field_params['class_name'] = 'oceantracker.fields._base_field.ReaderField'
+        i = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs=f' creating reader feild  field setup > "{name}"')
+        i.initial_setup()
+
+        i.reader = reader
+        i.interpolator = interp
+
+        # read data if not time varying
+        if not i.is_time_varying():
+            i.data[0, ...] = reader.assemble_field_components(nc, name)
+
     def add_custom_field(self, name,  params, crumbs=''):
         # classname must be given
         si = self.shared_info
@@ -130,8 +153,8 @@ class FieldGroupManager(ParameterBaseClass):
             si.msg_logger.msg('field_group_manager> add_custom_field parameters must contain  "class_name"')
         i = si.create_class_dict_instance(name, 'fields', 'custom_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=True)
         i.known_field_types = self.known_field_types
-
         return i
+
     def update_dry_cells(self):
         # update 0-255 dry cell index for each interpolator
         si =self. shared_info

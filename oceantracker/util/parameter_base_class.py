@@ -63,28 +63,28 @@ class ParameterBaseClass(object):
 
 
     def check_class_required_fields_prop_etc(self, required_props_list=[], required_fields_list=[],
-                                             required_grid_var_list=[], requires3D=None):
+                                             required_grid_var_list=[], requires3D=None, crumbs=None):
         si = self.shared_info
         grid = si.classes['reader'].grid
 
         for name in required_grid_var_list:
             if name not in grid:
                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.info['name']
-                                + ' requires grid variable  "' + name + '"' + ' to work', fatal_error=True)
+                                + ' requires grid variable  "' + name + '"' + ' to work', fatal_error=True,crumbs=crumbs )
 
         for name in required_fields_list:
             if name not in si.classes['fields']:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', "' + self.info['name']
-                                + '" requires field  "' + name + '"' + ' to work, add to reader["fields_to_load"], or add a fields param class list', fatal_error=True)
+                                + '" requires field  "' + name + '"' + ' to work, add to reader["fields_to_load"], or add a fields param class list', fatal_error=True,crumbs=crumbs)
 
         for name in required_props_list:
             if name not in si.classes['particle_properties']:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.info['name']
                                 + '" requires particle property  "' + name + '"'
-                                + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', fatal_error=True)
+                                + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', fatal_error=True,crumbs=crumbs)
 
         if requires3D and not si.is3D_run:
-                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.info['name'] + ' can only be used with 3D hindcast ', fatal_error=True)
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.info['name'] + ' can only be used with 3D hindcast ', fatal_error=True,crumbs=crumbs)
 
     def remove_default_params(self, name_list):
         # used to get rid if paramters of parent class which are not used by a child class

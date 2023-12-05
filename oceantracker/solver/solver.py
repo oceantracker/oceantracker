@@ -217,7 +217,7 @@ class Solver(ParameterBaseClass):
         # for failed walks try half step
         bad = part_prop['cell_search_status'].find_subset_where(is_moving, 'lt', cell_search_status_flags['ok'], out=self.get_partID_subset_buffer('bad_walk'))
         if bad.size> 0:
-            #self.RK_step(time_sec, dt/2.0, bad)
+            self.RK_step(time_sec, dt/2.0, bad)
             #bad2 = part_prop['cell_search_status'].find_subset_where(is_moving, 'lt', cell_search_status_flags['ok'])
             pass
 
@@ -226,11 +226,14 @@ class Solver(ParameterBaseClass):
 
 
         # check bc coords correct
-        if True:
+        if si.settings['debug_level'] > 9:
             from oceantracker.util import debug_util
-            still_bad = debug_util.check_walk_step(si.classes['reader'].grid, part_prop, bad)
+            still_bad = debug_util.check_walk_step(si.classes['reader'].grid, part_prop, bad, msg_logger=si.msg_logger, crumbs='solver-post RK step')
+
             if still_bad.size > 0:
-                if True: debug_util.plot_walk_step(part_prop['x'].data, si.classes['reader'].grid, part_prop, still_bad)
+                si.msg_logger.msg(f'Cell search,  some stil bad after fixing step  {np.count_nonzero(still_bad)} of  {is_moving.size} ', warning=True)
+                if si.settings['debug_plots']:
+                    debug_util.plot_walk_step(part_prop['x'].data, si.classes['reader'].grid, part_prop, still_bad)
                 pass
         pass
 
