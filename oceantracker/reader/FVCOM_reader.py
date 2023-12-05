@@ -46,18 +46,6 @@ class unstructured_FVCOM(_BaseReader):
 
         return grid
 
-    def setup_water_velocity(self,nc,grid):
-        # tweak to fit variables
-
-        fm = self.params['field_variable_map']
-
-        if nc.is_var(fm['water_velocity'][0]):
-            # check if vertical vel variable in file
-            if not nc.is_var(fm['water_velocity'][1]):
-                fm['water_velocity'] = [fm['water_velocity'][0]]
-        else:
-            # is depth averaged run
-            fm['water_velocity'] = fm['water_velocity_depth_averaged']
 
 
 

@@ -1,9 +1,9 @@
-from oceantracker.fields._base_field import UserFieldBase
+from oceantracker.fields._base_field import CustomFieldBase
 import numpy as np
 from numba import njit
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
-class VerticalGradient(UserFieldBase):
+class VerticalGradient(CustomFieldBase):
 
     def __init__(self):
         super().__init__()
@@ -18,14 +18,13 @@ class VerticalGradient(UserFieldBase):
     def initial_setup(self):
         si = self.shared_info
         # get fields prop from named field
-
-        named_field= si.classes['fields'][self.params['name_of_field']]
-        self.params.update({'is_time_varying': named_field.params['is_time_varying'],
-                               'is_time_varying': named_field.params['is_time_varying'],
-                               'is3D': True})
+        params= self.params
+        field_name = params['name_of_field']
+        if field_name not in si.classes['fields']:
+            si.msg_logger.msg(f'Field vertical gradient >> annot find field {field_name} to setup its vertical gradient class', fatal_error=True, exit_now=True)
 
         super().initial_setup()  # set up self.data with above params
-        a=1
+        pass
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True,

@@ -28,7 +28,10 @@ class PointRelease(ParameterBaseClass):
                                  'user_release_group_name' : PVC(None,str,doc_str= 'User given name/label to attached to this release groups to make it easier to distinguish.'),
                                  'allow_release_in_dry_cells': PVC(False, bool,
                                               doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.'),
-                                 'z_range': PLC([],[float, int], min_length=2, doc_str='z range = [zmin, zmax] to randomly release in 3D, overrides any given release z value'),
+                                 'z_range': PLC([],[float, int], min_length=2, obsolete='use z_min and/or z_max'),
+
+                                'z_min': PVC(None, [float, int],doc_str='min/ deepest z value to release for to randomly release in 3D, overrides any given release z value'),
+                                'z_max': PVC(None, [float, int], doc_str='max/ highest z vale release for to randomly release in 3D, overrides any given release z value'),
                                 'release_offset_above_bottom': PVC(False, [float, int], min= 0., doc_str=' 3D release particles at fixed give height above the bottom at the release location ', units='m'),
                                 #'water_depth_min': PVC(None, float,doc_str='min water depth to release in, useful for releases with a depth rage, eg larvae from inter-tidal shellfish', units='m'),
                                 #'water_depth_max': PVC(None, float, doc_str='max water depth to release in', units='m'),
@@ -146,6 +149,7 @@ class PointRelease(ParameterBaseClass):
         si = self.shared_info
         grid = si.classes['reader'].grid
         info= self.info
+        params=self.params
         fields= si.classes['fields']
 
         n_required = self.get_number_required()
@@ -191,11 +195,16 @@ class PointRelease(ParameterBaseClass):
 
         info['number_released'] += n  # count number released in this group
 
-        if si.is3D_run and (len(self.params['z_range']) > 0 or x0.shape[1] < 3):
+        info['z_range'] = None
+        if si.is3D_run:
+            info['z_range']=[-1.0E30, 1.0E30]
+            if params['z_min'] is not None : info['z_range'][0] = params['z_min']
+            if params['z_max'] is not None: info['z_range'][1] = params['z_max']
 
-            if len(self.params['z_range']) == 0:  self.params['z_range']= [-1.0E30,1.0E30]
+            if info['z_range'][0]  >  info['z_range'][1]:
+                si.msg_logger.msg(f'Release group-"{self.info["name"]}", zmin > zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ',fatal_error=True)
 
-            z = self.get_z_release_in_depth_range(np.asarray(self.params['z_range']), n_cell_guess,
+            z = self.get_z_release_in_depth_range(np.asarray(info['z_range']), n_cell_guess,
                                             fields['water_depth'].data.ravel() , fields['tide'].data ,
                                             grid['triangles'],
                                             si.classes['field_group_manager'].n_buffer)

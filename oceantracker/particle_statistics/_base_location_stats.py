@@ -55,14 +55,20 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         info['status_range'] = np.asarray([si.particle_status_flags[params['status_min']], si.particle_status_flags[params['status_max']]])
 
         #set particle depth and water depth limits for counting particles
+
         f = 1.0E32
         info['z_range'] = np.asarray([-f, f])
         if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
         if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
+        if info['z_range'][0] > info['z_range'][1]:
+            si.msg_logger.msg(f'Particle statistics-"{self.info["name"]}", zmin > zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', fatal_error=True,
+                              hint ='z=0 is mean water level, so z is mostly < 0')
 
         info['water_depth_range'] = np.asarray([-f, f])
         if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
         if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
+        if info['water_depth_range'][0]> info['water_depth_range'][1]:
+            si.msg_logger.msg(f'Particle statistics-"{self.info["name"]}", water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ', fatal_error=True)
 
     def check_part_prop_list(self):
         si = self.shared_info
@@ -182,9 +188,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         num_in_buffer = si.classes['particle_group_manager'].info['particles_in_buffer']
 
         # first select those to count based on status and z location
-        sel = self.sel_status_and_z(part_prop['status'].data, part_prop['x'].data,part_prop['water_depth'].data.ravel(),
-                                    info['status_range'], info['z_range'],info['water_depth_range'],
-                                    num_in_buffer,  self.get_partID_buffer('B1'))
+        sel = self.sel_status_waterdepth_and_z(part_prop['status'].data, part_prop['x'].data, part_prop['water_depth'].data.ravel(),
+                                               info['status_range'], info['z_range'], info['water_depth_range'],
+                                               num_in_buffer, self.get_partID_buffer('B1'))
 
         # any overloaded sub-selection of particles given in child classes
         sel = self.select_particles_to_count(sel)
@@ -204,7 +210,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     @staticmethod
     @njit
-    def sel_status_and_z(status, x, water_depth, status_range, z_range, water_depth_range, num_in_buffer, out):
+    def sel_status_waterdepth_and_z(status, x, water_depth, status_range, z_range, water_depth_range, num_in_buffer, out):
         n_found = 0
         if x.shape[1] == 3:
             # 3D selection

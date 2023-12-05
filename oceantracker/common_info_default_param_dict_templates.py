@@ -18,8 +18,10 @@ shared_settings_defaults ={
                 'time_step': PVC(3600., float, min=0.01, units='sec',doc_str='Time step in seconds for all cases'),
                 'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
                 'backtracking':        PVC(False, bool, doc_str='Run model backwards in time'),
-                'regrid_z_to_uniform_sigma_levels': PVC(True, bool, doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),
-                 'debug':               PVC(False, bool,doc_str='Gives more useful numba code error messages'),
+               'regrid_z_to_uniform_sigma_levels': PVC(True, bool, doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),
+                 'debug_level':               PVC(0, int,min=0, max=10, doc_str='Gives  diferent levels of debug, in development'),
+                'debug_plots': PVC(False, bool, doc_str='show any debug plot generated at give dbug_level'),
+                'debug': PVC(False, bool, obsolete=' use integer debug_level'),
                 'minimum_total_water_depth': PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
                 'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
                 'max_run_duration':    PVC(max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration
@@ -46,7 +48,9 @@ case_settings_defaults ={
             'z0':                       PVC(0.005, float, units='m', doc_str='Bottom roughness in meters, used for tolerance and log layer calcs. ', min=0.0001),  # default bottom roughness
             'open_boundary_type' :  PVC(0, int, min=0, max=1,doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS '),
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
-              }
+            'use_AZ_profile': PVC(False, bool, doc_str='Use the hydro-model vertical turbulent diffusivity for vertical random walk (more realistic) instead of constant value (faster), if present in the file'),
+
+}
 
 
 core_classes= { 'reader': {},
