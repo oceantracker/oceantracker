@@ -28,8 +28,8 @@ class TerminalVelocity(VelocityModiferBase):
         if self.params['variance'] is not None:
            # set up individual particle terminal velocties
            particle.add_particle_property('terminal_velocity','user',dict(
-                                                          class_name='oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution',
-                                             value=self.params['value'], variance=self.params['variance']))
+                                            class_name='oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution',
+                                                    value=self.params['value'], variance=self.params['variance']))
 
     def update(self, time_sec, active):
         # modify vertical velocity, if backwards, make negative

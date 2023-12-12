@@ -110,7 +110,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         nc.create_a_variable('time', ['time_dim'],  np.float64, description= 'time in seconds')
 
         # other output common to all types of stats
-        nc.create_a_variable('num_released', ['time_dim'], np.int64, description='total number released')
+        nc.create_a_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
 
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
@@ -229,8 +229,17 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def write_time_varying_stats(self, n, time):
         # write nth step in file
+        si = self.shared_info
         fh = self.nc.file_handle
         fh['time'][n] = time
+        release_groups = si.classes['release_groups']
+
+        # add up number released
+        num_released = 0
+        for rg in release_groups.values():
+            num_released += rg.info['number_released']
+        fh['num_released_total'][n] = num_released
+
         fh['count'][n, ...] = self.count_time_slice[:, ...]
         fh['count_all_particles'][n, ...] = self.count_all_particles_time_slice[:, ...]
 

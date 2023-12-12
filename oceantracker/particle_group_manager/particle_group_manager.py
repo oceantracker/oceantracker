@@ -97,12 +97,12 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # initial values  part prop derived from fields
         for name, i  in si.classes['particle_properties'].items():
-            if i.info['group'] =='from_fields':
+            if i.info['type'] =='from_fields':
                 i.initial_value_at_birth(new_buffer_indices)
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
         for name, i  in si.classes['particle_properties'].items():
-            if i.info['group'] == 'user':
+            if i.info['type'] == 'user':
                 i.initial_value_at_birth(new_buffer_indices)
 
         # update new particles props
@@ -143,7 +143,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # important for prop, for which initial values is meaning full, eg polygon events writer, where initial -1 means in no polygon
 
         for name, i in si.classes['particle_properties'].items():  # catch any not manually updated with their initial value
-            if i.info['group'] == 'manual_update':
+            if i.info['type'] == 'manual_update':
                 i.initial_value_at_birth(new_buffer_indices)
 
         #  set initial conditions/properties of new particles
@@ -270,12 +270,12 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # first interpolate to give particle properties from reader derived  fields
         for key,i in si.classes['particle_properties'].items():
-            if i.info['group'] == 'from_fields':
+            if i.info['type'] == 'from_fields':
                 si.classes['field_group_manager'].interp_field_at_particle_locations(key, active)
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for key, i in si.classes['particle_properties'].items():
-            if i.info['group'] == 'user':
+            if i.info['type'] == 'user':
                 i.update(active)
         si.block_timer('Update particle properties',t0)
 

@@ -5,26 +5,41 @@ from oceantracker.post_processing.plotting import plot_statistics, plot_tracks
 from oceantracker.post_processing.read_output_files import load_output_files
 from os import path
 import argparse
+from datetime import datetime, timedelta
 from oceantracker.util.cord_transforms import WGS84_to_NZTM
 
+import platform
+
+hostname = platform.node()
+print("Hostname:", hostname)
 
 if __name__ == '__main__':
 
 
     # settings
     pulse_size = 10
-    year= 2020
+    year= 2022
     start_month=3
-    season_length =3 # months
-    max_age = 100 # days
+    season_length =3*30. # days
+    max_age = 18*7*24*3600. # days
 
     # release_locations
     x0= [[-41.2700912590534, 174.7977062393547],  # wellington
-         [-39.47149746318145, 176.9126477054031]  # napier
+         [-39.47149746318145, 176.9126477054031],  # napier
+         [-41.25759866044785, 173.2719552441583],# nelson
+         [-43.61488245307373, 172.7176249482729], # lyttleton
+         [-36.836259721057125, 174.78007793498807], # auckland
          ]
 
-    root_input_dir=r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022'
-    root_output_dir= 'F:\\OceanTrackerOuput\\OceanNum\\test'
+    hostname = platform.node()
+    print("Hostname:", hostname)
+    if hostname =='2006d10148w':
+        root_input_dir=f'G:\\Hindcasts_large\\OceanNumNZ-2022-06-20\\final_version\\{year}'
+        root_output_dir= 'F:\\OceanTrackerOutput\\test'
+    else:
+        # HPC
+        root_input_dir = f'/hpcfreenas/hindcast/OceanNumNZ-2022-06-20/final_version/{year}'
+        root_output_dir = '/hpcfreenas/kyleh'
 
 
     # convert to NZTM as (lon, lat)
@@ -46,20 +61,26 @@ if __name__ == '__main__':
 
     # add  release locations            (ie locations where particles are released at the same times and locations)
     # note : can add multiple release groups
+    t0 =datetime(year,start_month,1,)
     for n, x in enumerate(x0):
         ot.add_class('release_groups', name=f'P{n:02d}',  # user must provide a name for group first
                  points=[x],  # must be an N by 2 or 3 or list, convertible to a numpy array
-                 release_interval=3600,  # seconds between releasing particles
+                 release_interval=3600.,  # seconds between releasing particles
                  pulse_size=pulse_size,  # number of particles released each release_interval
+                 release_start_date=t0.isoformat(),
+                 release_end_date=(t0+timedelta(days=season_length)).isoformat(),
+                 max_age=max_age
                  )
 
     ot.add_class('particle_statistics',
                 class_name='oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
                  name=f'heat_maps',  # user must provide a name for group first
                  release_group_centered_grids=True,
-                 update_interval=60*60,  # seconds between counts
+                 update_interval=3600.,  # seconds between counts
                  grid_size = [220, 221],
                  grid_span= [25000., 25000.], # meters around release point
+                 age_bin_size= 7*24*3600.,
+                 max_age_to_bin = max_age
                  )
 
     # run oceantracker
@@ -67,11 +88,11 @@ if __name__ == '__main__':
 
 
     # do plot
-    if False:
+    if True:
 
-        stats_data = load_output_files.load_stats_data(caseInfoFile)
+        stats_data = load_output_files.load_stats_data(case_info_file_name)
         plot_statistics.animate_heat_map(stats_data,  title='OceanNum Schism, time based particle count heatmaps, built on the fly,  log scale', logscale=True)
 
-        plot_statistics.plot_heat_map(stats_data, axis_lims=ax, var='water_depth', title='Water_depth, Time based Heat maps built on the fly, no tracks recorded')
+        plot_statistics.plot_heat_map(stats_data,release_group='',   title='Test hea map')
 
 

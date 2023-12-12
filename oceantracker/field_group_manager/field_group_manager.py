@@ -19,10 +19,11 @@ class FieldGroupManager(ParameterBaseClass):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
         self.n_buffer = np.zeros((2, ), dtype=np.int32)
+        self.fields={}
 
     def initial_setup(self):
-
-        self._setup_primary_hydro_reader()
+        si= self.shared_info
+        self._setup_hydro_reader(si.working_params['core_roles']['reader'])
 
     def final_setup(self):
         si = self.shared_info
@@ -78,11 +79,11 @@ class FieldGroupManager(ParameterBaseClass):
                                                                         output=output, n_cell=n_cell)
         return output
 
-    def _setup_primary_hydro_reader(self):
+    def _setup_hydro_reader(self,reader_params):
         si = self.shared_info
+        si.working_params['core_roles']['reader']
 
-
-        reader = si.add_core_class('reader', si.working_params['core_roles']['reader'],   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
+        reader = si.add_core_class('reader', reader_params,   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
         reader.initial_setup()
         nc = reader.open_first_file()
 
@@ -110,7 +111,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         # add core total water depth property
         i = self.add_custom_field('total_water_depth',
-                dict( class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',
+                dict(class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',
                       time_varying=True,write_interp_particle_prop_to_tracks_file =False),
                                            crumbs='initializing core TotalWaterDepth class ')
 
@@ -134,7 +135,8 @@ class FieldGroupManager(ParameterBaseClass):
     def add_reader_field(self, name,field_params,nc, reader,interp):
         si = self.shared_info
         field_params['class_name'] = 'oceantracker.fields._base_field.ReaderField'
-        i = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs=f' creating reader feild  field setup > "{name}"')
+        i = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs=f' creating reader field setup > "{name}"')
+
         i.initial_setup()
 
         i.reader = reader
