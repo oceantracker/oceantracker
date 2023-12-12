@@ -454,7 +454,7 @@ class _BaseReader(ParameterBaseClass):
             # do this in order set above
             for name in si.classes['fields'].keys():
                 field = fields[name]
-                if not field.is_time_varying() or field.info['group'] != 'reader_field': continue
+                if not field.is_time_varying() or field.info['type'] != 'reader_field': continue
 
                 data = self.assemble_field_components(nc, name, file_index=file_index)
                 data = self.preprocess_field_variable(nc, name, data)  # in place tweaks, eg zero vel at bottom
@@ -496,7 +496,7 @@ class _BaseReader(ParameterBaseClass):
             # now all  data has been read from file, now
             # update user fields from newly read fields and data
             for name, field in fields.items():
-                if field.is_time_varying() and field.info['group'] == 'custom_field':
+                if field.is_time_varying() and field.info['type'] == 'custom_field':
                     field.update(buffer_index)
 
             total_read += num_read

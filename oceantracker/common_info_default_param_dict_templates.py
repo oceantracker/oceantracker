@@ -75,7 +75,7 @@ class_dicts={ # class dicts which replace lists
             'trajectory_modifiers': {},  # change particle paths, eg. re-suspension
             'particle_statistics': {},  # heat map inside polygon statistics calculated on the fly
             'particle_concentrations': {},  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
-
+    'nested_readers': {},
     'event_loggers': {},  # writes events files ,eg PolygonEntryExit
     # below still to be developed
     # 'post_processing':      PDLdefaults({}), #todo after run post processing not implemented yet

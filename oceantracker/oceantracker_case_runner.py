@@ -303,8 +303,15 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # start with setting up field gropus, which set up readers
         # as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
+        # chose fiel manager for normal or nested readers
+        if len(si.working_params['role_dicts']['nested_readers']) > 0:
+            # use devopment nested readers class
+            si.working_params['core_roles']['field_group_manager'].update(dict(class_name='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields'))
+
+        # set up feilds
         fgm = si.add_core_class('field_group_manager', si.working_params['core_roles']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
+
 
        
 
@@ -385,7 +392,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # create prop particle properties derived from fields loaded from reader on the fly
         t0= perf_counter()
         for name, i in si.classes['fields'].items():
-            if i.info['group'] == 'reader_field':
+            if i.info['type'] == 'reader_field':
                 pgm.add_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
                                                     write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
 

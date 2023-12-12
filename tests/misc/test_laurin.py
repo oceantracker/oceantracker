@@ -490,11 +490,11 @@ if __name__ == '__main__':
                    'file_mask': 'schout_*.nc', 'input_dir': input_dir,
                    'hgrid_file_name': path.join(input_dir, 'hgrid.gr3'),
                    # fields to track at particle locations
-                   'load_fields': {'ECO_no3': 'ECO_no3', 'A_Z': 'diffusivity'},
+                   'load_fields': ['ECO_no3'],
                    },
 
         'tracks_writer': {
-                'write_time_interval': 3600
+                'update_interval': 3600
                     },
         'solver': {
                 'RK_order': 2,

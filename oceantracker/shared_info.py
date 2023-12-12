@@ -47,7 +47,7 @@ class SharedInfoClass(object):
 
         # now add to class lists and interators
 
-        i.info['group'] = group
+        i.info['type'] = group
 
         # needed for release group identification info etc, zero based
         i.info['instanceID'] =  instanceID

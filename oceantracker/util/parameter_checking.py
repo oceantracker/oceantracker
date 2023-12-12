@@ -206,7 +206,7 @@ class ParameterListChecker(object):
             return None
 
         if user_list is not None and type(user_list) != list:
-            msg_logger.msg('ParameterListChecker: param "' + crumb_trail + '" must be a list ', fatal_error=True)
+            msg_logger.msg(f'ParameterListChecker: param "{crumb_trail}" must be a list, not type={str(type(user_list))} ', fatal_error=True)
 
         if self.info['is_required'] and user_list is None:
             msg_logger.msg('ParameterListChecker: param "' + crumb_trail + '" is required ', fatal_error=True)

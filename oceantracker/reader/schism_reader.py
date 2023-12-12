@@ -103,11 +103,25 @@ class SCHISMSreaderNCDF(_BaseReader):
 
     def get_field_params(self,nc, name, crumbs=''):
         # work out if feild is 3D ,etc
-        fmap = self.params['field_variable_map'][name]
-        if type(fmap) != list: fmap =[fmap]
-        f_params = dict(time_varying = nc.is_var_dim(fmap[0], 'time'),
-                        is3D = nc.is_var_dim(fmap[0],'nSCHISM_vgrid_layers'),
-                        is_vector = nc.is_var_dim(fmap[0],'two') or len(fmap) > 1
+        si = self.shared_info
+        fmap = self.params['field_variable_map']
+        # if no field map given to use given name as field map
+        if name not in fmap:  fmap[name] = name
+
+
+        # make a list so all maps the same
+        if type(fmap[name]) != list: fmap[name] =[fmap[name]]
+
+        # check all variables are in file
+        for n in fmap[name]:
+            if not nc.is_var(n):
+                si.msg_logger.msg(f'Can not find variable named {n} in hydro file', crumbs=crumbs+'> getting field parameters to set up field class',
+                              fatal_error=True, exit_now=True)
+
+
+        f_params = dict(time_varying = nc.is_var_dim(fmap[name] [0], 'time'),
+                        is3D = nc.is_var_dim(fmap[name] [0],'nSCHISM_vgrid_layers'),
+                        is_vector = nc.is_var_dim(fmap[name] [0],'two') or len(fmap[name] ) > 1
                         )
         return f_params
 
@@ -191,7 +205,7 @@ class SCHISMSreaderNCDF(_BaseReader):
         n_nodes = int(vals[0])
         n_tri = int(vals[1])
 
-        n_line_open = n_nodes + n_tri + 3 - 1  # line with number of open boundries
+        n_line_open = n_nodes + n_tri + 3 - 1  # line with number of open boundaries
         n_open = int(lines[n_line_open].split()[0])
 
         if n_open > 0:
@@ -213,34 +227,70 @@ class SCHISMSreaderNCDF(_BaseReader):
 
         return is_open_boundary_node
 
+def decompose_lines(lines, dtype=np.float64):
+    cols= len(lines[0].split())
+    out= np.full((len(lines),cols),0,dtype=dtype)
+    for n , l in enumerate(lines):
+        #print(n,l)
+        vals = [float(x) for x in l.split()]
+        if len(vals) > out.shape[1]:
+            # add new cols if needed
+            out = np.stack((out,np.full((len(lines),len(vals) -out.shape[1]),0,dtype=dtype)), axis=1)
+
+        out[n,:] = np.asarray(vals)
+
+    return  out
+
+
 
 def read_hgrid_file(file_name):
 
     d={}
     with open(file_name) as f:
         lines = f.readlines()
+    d['file_name'] = lines[0]
+    d['n_tri'],  d['n_nodes']= [ int(x) for x in lines[1].split()]
 
-    n_nodes, n_tri = [ int(x) for x in lines[1].split()]
+    # node coords
+    l0 = 3-1
+    vals = decompose_lines(lines[l0: l0 + d['n_nodes']])
+    d['x'] = vals[:,1:3]
+    l0 = l0+d['n_nodes']
 
-    is_open_boundary_node = np.full((n_nodes,),False)
+    # triangulation
+    vals = decompose_lines(lines[l0: l0 + d['n_tri']],dtype=np.int32)
+    d['triangles'] = vals[:, 2:] - 1
+    l0 = l0 + d['n_tri']
 
-    n_line_open = n_nodes + n_tri + 3 - 1  # line with number of open boundaries
-    n_open = int(lines[n_line_open].split()[0])
+    # work out node types
+    d['node_type'] = np.full((d['n_nodes'],), 0, dtype=np.int32)
+    # open boundaries
+    d['n_open_boundaries'] = int(lines[l0].split()[0])
 
-    if n_open > 0:
+    # load segments of open boundaries
 
-        nl = n_line_open + 1
-        for n in range(n_open):
-            # get block of open node numbers
-            nl += 1  # move to line with number of nodes in this open boundary
-            n_open_nodes = int(lines[nl].split()[0])
-            open_nodes = []
-            for n in range(n_open_nodes):
-                nl += 1
-                l = lines[nl].strip('\n')
-                open_nodes.append(int(l))
-            open_nodes = np.asarray(open_nodes, dtype=np.int32) - 1
+    if  d['n_open_boundaries'] > 0:
+        l0 += 2
+        d['open_boundary_node_segments']=[]
+        for nb in range(d['n_open_boundaries']):
+            n_nodes =  int(lines[l0].split()[0])
+            nodes = np.squeeze(decompose_lines(lines[l0+1: l0 + 1 + n_nodes],dtype=np.int32)) - 1
+            d['open_boundary_node_segments'].append(nodes)
+            d['node_type'][nodes] = 2
+            l0 = l0 + nodes.size + 1
 
-            is_open_boundary_node[open_nodes] = True  # get zero based node number        with open(self.params['hgrid_file_name']) as f:
+    # land boundaries
+    d['n_land_boundaries'] = int(lines[l0].split()[0])
 
-    return is_open_boundary_node
+    # load segments of land boundaries
+    if d['n_land_boundaries'] > 0:
+        l0 += 2
+        d['land_boundary_node_segments'] = []
+        for nb in range(d['n_open_boundaries']):
+            n_nodes = int(lines[l0].split()[0])
+            nodes = np.squeeze(decompose_lines(lines[l0 + 1: l0 + 1 + n_nodes], dtype=np.int32)) - 1
+            d['land_boundary_node_segments'].append(nodes)
+            d['node_type'][nodes] = 1
+            l0 = l0 + nodes.size + 1
+
+    return d

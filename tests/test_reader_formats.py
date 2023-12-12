@@ -23,6 +23,7 @@ def run_params(d):
                    'input_dir': d['root_input_dir'],
                    # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                    },
+        'nested_readers': d['nested_readers'],
         'resuspension': {'critical_friction_velocity': 0.01}
         }
 
@@ -34,6 +35,8 @@ def run_params(d):
 def get_case(n):
     max_days = None
     ax = None
+
+    nested_readers={}
     match n:
         case 100:
             root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01'
@@ -74,11 +77,30 @@ def get_case(n):
             file_mask  =  'DopAnV2R3-ini2007_da_his.nc'
             output_file_base= 'ROMS'
             title = 'ROMS test'
+        case 1000:
+            # nested schisim
+            root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01'
+            output_file_base = 'NZnational'
+            file_mask = 'NZfinite*.nc'
+
+            x0 = [[1750624.1218, 5921952.0475],
+                  [1814445.5871, 5882261.7676],
+                  [1838293.4656, 5940629.8263],
+                  [1788021.4244, 5940860.2283]
+                  ]
+            ax = [1727860, 1823449, 5878821, 5957660]  # Auck
+            title = 'NZ national test'
+            nested_readers= dict(nest1=dict(
+                    class_name='oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
+                    input_dir = r'F:\Hindcasts\2023_Pelorus\Preliminary outputs',
+                    file_mask = 'schout*.nc',
+                   hgrid_file_name=r'F:\Hindcasts\2023_Pelorus\Preliminary outputs\hgrid.gr3'
+            ))
 
 
 
     return dict(x0=x0,root_input_dir=root_input_dir,output_file_base=output_file_base+f'_{n:02d}',title=title,
-                file_mask=file_mask,ax=ax,max_days=max_days)
+                file_mask=file_mask,ax=ax,max_days=max_days,nested_readers=nested_readers)
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -91,7 +113,7 @@ if __name__ == '__main__':
     parser.add_argument('-plot_file', action='store_true')
     args = parser.parse_args()
 
-    root_output_dir = r'F:\OceanTrackerOuput\test_reader_formats'
+    root_output_dir = r'F:\OceanTrackerOutput\test_reader_formats'
 
     if args.test is None:
         tests =[100]
