@@ -16,7 +16,7 @@ class RandomWalkVaryingAZ(RandomWalk):
     def initial_setup(self):
         super().initial_setup()
         si=self.shared_info
-        si.msg_logger.msg('RandomWalkVaryingAz: varying Az adds vertical velocity to dispersion to avoid particle accumulation at surface and bottom, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',note=True)
+        #si.msg_logger.msg('RandomWalkVaryingAz: varying Az adds vertical velocity to dispersion to avoid particle accumulation at surface and bottom, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',note=True)
 
     def check_requirements(self):
        self.check_class_required_fields_prop_etc(required_fields_list=['A_Z_profile','A_Z_profile_vertical_gradient'],

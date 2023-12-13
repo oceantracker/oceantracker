@@ -127,7 +127,6 @@ base_case = deepcopy(p2)
 del base_case['release_groups']
 base_case.update({'output_file_base' :'demo05_parallel',
             'processors': 2,
-           'advanced_settings':{ 'multiprocessing_case_start_delay' : 1.0}
           })
 case_list=[]
 for n in range(5):

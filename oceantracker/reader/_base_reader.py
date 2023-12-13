@@ -475,7 +475,7 @@ class _BaseReader(ParameterBaseClass):
                 # insert data
                 field.data[buffer_index, ...] = data
 
-                if False:
+                if si.settings['dev_debug_plots']:
                     # check overplots of regridding
                     from matplotlib import pyplot as plt
                     nn = 300  # for test hindcats

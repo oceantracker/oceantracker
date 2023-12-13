@@ -226,7 +226,7 @@ class Solver(ParameterBaseClass):
 
 
         # check bc coords correct
-        if si.settings['debug_level'] > 9:
+        if si.settings['dev_debug_opt'] ==10:
             from oceantracker.util import debug_util
             still_bad = debug_util.check_walk_step(si.classes['reader'].grid, part_prop, bad, msg_logger=si.msg_logger, crumbs='solver-post RK step')
 
