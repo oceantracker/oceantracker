@@ -28,7 +28,7 @@ class ReaderField(ParameterBaseClass):
         reader = si.classes['reader']
         ncomp = 1
         if params['is_vector']:
-            ncomp = 2 if params['is3D'] else 3
+            ncomp = 3 if params['is3D'] else 2
 
         s= [reader.params['time_buffer_size'] if params['time_varying'] else 1,
             reader.grid['x'].shape[0],

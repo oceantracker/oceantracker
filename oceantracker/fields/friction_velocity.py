@@ -85,6 +85,6 @@ class FrictionVelocityFromBottomStress(FrictionVelocityFromNearSeaBedVelocity):
         for nt in buffer_index:
             for n in np.arange(out.shape[1]):  # loop over nodes
 
-                stress_mag = np.sqrt(bottom_stress[nt, n, 1, 0] ** 2 + bottom_stress[nt, n, 1, 1] ** 2)
+                stress_mag = np.sqrt(bottom_stress[nt, n, 0, 0] ** 2 + bottom_stress[nt, n, 0, 1] ** 2)
                 out[nt, n, 0, 0] = np.sqrt(stress_mag/water_density)
 

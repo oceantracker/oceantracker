@@ -5,7 +5,7 @@ main:     >>> Note: run summary with case file names   "demo00_helper_class_test
     >>> Note: to help with debugging, parameters as given by user  are in "demo00_helper_class_test_raw_user_params.json"
     >>> Note: run summary with case file names   "demo00_helper_class_test_runInfo.json"
 main: --------------------------------------------------------------------------
-main: OceanTracker summary:  elapsed time =0:00:16.659431
+main: OceanTracker summary:  elapsed time =0:00:16.651408
 main:       Cases -   0 errors,   0 warnings,  10 notes, check above
 main:       Helper-   0 errors,   0 warnings,   0 notes, check above
 main:       Main  -   0 errors,   0 warnings,   3 notes, check above
