@@ -16,7 +16,6 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         self.add_default_params({'name_of_polygon_release_group':  PVC(None, str,is_required=True,
                                 doc_str='"name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time'),
                                  'role_output_file_tag': PVC('residence', str),
-                                 'z_range': PLC([], [float, int], min_length=2, doc_str='z range = [zmin, zmax] count particles in this z range in 3D'),
                                  })
 
     def initial_setup(self, **kwargs):
@@ -64,11 +63,6 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         self.set_up_binned_variables(self.nc)
         self.set_up_part_prop_lists()
 
-        #todo move to base location stats, so all can use depth range
-        if len(self.params['z_range'])==0:
-            self.params['z_range'] = [-1.0e30, 1.0e30]
-
-        self.params['z_range']= np.asarray(self.params['z_range'])
 
     def check_requirements(self):
         si= self.shared_info
@@ -116,7 +110,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                     part_prop['IDrelease_group'].data,
                                     part_prop['IDpulse'].data,
                                     self.info['release_group_ID_to_count'],
-                                    self.params['z_range'],
+                                    self.info['z_range'],
                                     part_prop['x'].data,
                                     self.count_time_slice, self.count_all_particles_time_slice,
                                     self.prop_list, self.sum_prop_list, sel)

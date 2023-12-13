@@ -134,19 +134,18 @@ class FieldGroupManager(ParameterBaseClass):
 
         if fmap['A_Z_profile'] is None:
             si.settings['use_A_Z_profile'] = False
-            ml.msg(' A_Z_profile field_variable_map not set, using  constant A_Z instead', note=True)
+            ml.msg('Not using A_Z_profile , using  constant A_Z instead', note=True)
             has_A_Z_profile=False
 
-        elif not nc.is_var(fmap['A_Z_profile']):
-            ml.msg(f'cannot find  hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile, using  constant A_Z instead', note=True)
+        elif not nc.is_var(fmap['A_Z_profile']) or not si.settings['use_A_Z_profile']:
+            ml.msg(f'Using constant vertical dispersion, A_Z, ie not using A_Z_profile as option set False or cannot find hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile, using  constant A_Z instead', note=True)
             has_A_Z_profile = False
         else:
             self.add_reader_field( 'A_Z_profile',nc, reader,interp)
-
             self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(class_name='oceantracker.fields.field_vertical_gradient.VerticalGradient', time_varying=True,
                                                                       name_of_field= 'A_Z_profile'  ),   crumbs='random walk > Adding A_Z_vertical_gradient field, for using_AZ_profile')
             has_A_Z_profile= True
-            si.msg_logger.msg('Found vertical diffusivity profile  in hydro-model files,  using profile for vertical for random walk', note=True)
+            si.msg_logger.msg('Found vertical diffusivity profile in hydro-model files,  using profile for vertical for random walk', note=True)
 
         self.info['has_A_Z_profile'] = has_A_Z_profile
 
@@ -184,8 +183,8 @@ class FieldGroupManager(ParameterBaseClass):
         # it not field map given then add a map based on name, so only works for scalars
         if name not in reader.params['field_variable_map']:
             reader.params['field_variable_map'][name] = name
-            si.msg_logger.msg(f'No  field map given for variable named "{name}" in reader load_fields parameter, assuming hydro-files have variable with this name, which is a scalar variable',
-                         hint='if not a scalar, or need to use another name internally, then  then add a map to reader field_variable_map parameter', note=True )
+            si.msg_logger.msg(f'No field map given for variable named "{name}" in reader "load_fields" parameter, assuming hydro-files have variable with this name, which is a scalar variable',
+                         hint='if not a scalar, or need to use another name internally, then  then add a map to reader "field_variable_map parameter"', note=True )
 
         i.reader = reader
         i.interpolator = interp

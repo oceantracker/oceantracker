@@ -9,7 +9,7 @@ import argparse
 
 def run_params(d):
     params = { 'user_note' : d['title'],
-        'debug_level' : 10,
+        'debug' : True,
         'debug_plots' :d['debug_plots'],
         'use_A_Z_profile': d['use_A_Z_profile'],
         'max_run_duration': 5. * 24 * 3600 if d['max_days'] is None else  d['max_days']*24*3600.,

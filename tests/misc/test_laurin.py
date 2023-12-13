@@ -451,7 +451,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-mode_debug', default=False, action='store_true')
+
     parser.add_argument('-doplots', default=False, action='store_true')
     parser.add_argument('-doconcentration', default=False, action='store_true')
     parser.add_argument('-dovertical', default=False, action='store_true')
@@ -480,12 +480,12 @@ if __name__ == '__main__':
         'output_file_base': 'Laurin_3d',
         'debug': True,
         'root_output_dir': output_dir,
-        'time_step' : 10*60,
+        'time_step' : 2*60,
         'open_boundary_type': 1,
         'block_dry_cells': True,
         'max_run_duration': 7. * 24 * 3600,
         'write_tracks': True,
-
+        'use_A_Z_profile': True,
         'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                    'file_mask': 'schout_*.nc', 'input_dir': input_dir,
                    'hgrid_file_name': path.join(input_dir, 'hgrid.gr3'),
@@ -551,8 +551,7 @@ if __name__ == '__main__':
                             }
     }
 
-    if args.mode_debug:
-        params['shared_params']['debug'] = True
+
 
 
 
@@ -583,7 +582,7 @@ if __name__ == '__main__':
 
 
 
-    if not args.doconcentration:
+    if False and not args.doconcentration:
 
         c = load_output_files.load_concentration_data(
             caseInfoFile, var_list=['particle_concentration']
