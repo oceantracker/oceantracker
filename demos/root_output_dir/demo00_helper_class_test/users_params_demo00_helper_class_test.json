@@ -23,9 +23,10 @@
     "case_output_file_tag": null,
     "write_tracks": null,
     "z0": null,
+    "water_density": null,
     "open_boundary_type": null,
     "block_dry_cells": null,
-    "use_AZ_profile": null,
+    "use_A_Z_profile": null,
     "dispersion": {
         "A_H": 1
     },
@@ -41,6 +42,7 @@
     "tracks_writer": {},
     "event_loggers": {},
     "fields": {},
+    "nested_readers": {},
     "particle_concentrations": {},
     "particle_properties": {},
     "particle_statistics": {},

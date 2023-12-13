@@ -112,12 +112,13 @@ class FieldGroupManager(ParameterBaseClass):
         reader.params['load_fields'] = list(set(['tide','water_depth', 'water_velocity'] + reader.params['load_fields'] ))
 
         for name in  reader.params['load_fields']:
-
             self.add_reader_field( name, nc, reader, interp)
 
 
         self.setup_dispersion(nc, reader,interp)
-        self.setup_resupension(nc, reader, interp)
+
+        if si.is3D_run:
+            self.setup_resupension(nc, reader, interp)
 
         nc.close()
 
@@ -142,6 +143,7 @@ class FieldGroupManager(ParameterBaseClass):
             self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(class_name='oceantracker.fields.field_vertical_gradient.VerticalGradient', time_varying=True,
                                                                       name_of_field= 'A_Z_profile'  ),   crumbs='random walk > Adding A_Z_vertical_gradient field, for using_AZ_profile')
             has_A_Z_profile= True
+            si.msg_logger.msg('Found vertical diffusivity profile  in hydro-model files,  using profile for vertical for random walk', note=True)
 
         self.info['has_A_Z_profile'] = has_A_Z_profile
 
