@@ -323,27 +323,18 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         fgm = si.add_core_class('field_group_manager', si.working_params['core_roles']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
 
-
+        dispersion_params = si.working_params['core_roles']['dispersion']
         if  si.is3D_run:
             if si.settings['use_A_Z_profile'] and fgm.info['has_A_Z_profile']:
                # use profile of AZ
-               params = si.working_params['core_roles']['dispersion']
-               #todo make it so user can add own Az profile class!!
-               # setup default claseses
-               params['class_name'] ='oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ'
-               si.add_core_class('dispersion', params, initialise=True)
 
-               si.msg_logger.msg('Using vertical profile of hydro-model vertical diffusivity for random walk', note=True)
+               dispersion_params['class_name'] ='oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ'
 
-            else:
-                # dispersion constant
-                si.add_core_class('dispersion', si.working_params['core_roles']['dispersion'], initialise=True)
-
-
-            # resuspension
+            # resuspension only in 3D
             si.add_core_class('resuspension', si.working_params['core_roles']['resuspension'], initialise=True)
 
-
+        # alawys add dispersion
+        si.add_core_class('dispersion', dispersion_params, initialise=True)
        
 
         if si.write_tracks:
