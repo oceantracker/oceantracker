@@ -231,7 +231,7 @@ params = {
         },
         "fields": [
             {
-                "class_name": "oceantracker.fields.friction_velocity.FrictionVelocity"
+                "class_name": "oceantracker.fields.friction_velocity.FrictionVelocityFromNearSeaBedVelocity"
             }
         ],
         "run_params": {

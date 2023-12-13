@@ -176,6 +176,7 @@ class _OceanTrackerRunner(object):
             # ensure message loggers are closed
 
             print(str(e))
+            traceback.print_exc()
             return None
 
         # check is case ran

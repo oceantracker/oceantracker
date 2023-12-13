@@ -14,7 +14,7 @@ def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0,
     if type(runInfo_fileName_or_runInfoDict) is str:
        case_info_file_name = json_util.read_JSON(runInfo_fileName_or_runInfoDict)
     else:
-        run_case_info = runInfo_fileName_or_runInfoDict
+        case_info_file_name = runInfo_fileName_or_runInfoDict
 
     if run_case_info is None:
         # file not found

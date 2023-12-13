@@ -129,5 +129,6 @@
         "critical_friction_velocity": 0.005
     },
     "backtracking": false,
+    "use_A_Z_profile": true,
     "root_output_dir": "output"
 }

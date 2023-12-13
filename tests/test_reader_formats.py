@@ -11,7 +11,7 @@ def run_params(d):
     params = { 'user_note' : d['title'],
         'debug_level' : 10,
         'debug_plots' :d['debug_plots'],
-        'use_AZ_profile': d['use_AZ_profile'],
+        'use_A_Z_profile': d['use_A_Z_profile'],
         'max_run_duration': 5. * 24 * 3600 if d['max_days'] is None else  d['max_days']*24*3600.,
         'write_tracks': True,
         'output_file_base': d['output_file_base'],
@@ -126,7 +126,7 @@ if __name__ == '__main__':
         d['root_output_dir'] = root_output_dir
         d['regrid_z_to_uniform_sigma_levels'] = args.uniform
         d['debug_plots'] = args.debug_plots
-        d['use_AZ_profile'] = False
+        d['use_A_Z_profile'] = False
 
         params=  run_params(d)
         params['open_boundary_type'] = 1 if args.open else 0

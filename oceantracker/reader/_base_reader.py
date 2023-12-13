@@ -85,10 +85,7 @@ class _BaseReader(ParameterBaseClass):
             fm['water_velocity'] =fm['water_velocity_depth_averaged']
 
 
-    def has_AZ_profile(self,nc):
-        params = self.params
-        fn = params['field_variable_map']['A_Z_profile']
-        return nc.is_var(fn)
+
 
 
 
