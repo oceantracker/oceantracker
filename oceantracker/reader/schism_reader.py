@@ -6,7 +6,7 @@ from datetime import  datetime, timedelta
 import numpy as np
 from oceantracker.util.triangle_utilities_code import split_quad_cells
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
-
+from copy import deepcopy
 
 class SCHISMSreaderNCDF(_BaseReader):
 
@@ -104,7 +104,7 @@ class SCHISMSreaderNCDF(_BaseReader):
     def get_field_params(self,nc, name, crumbs=''):
         # work out if feild is 3D ,etc
         si = self.shared_info
-        fmap = self.params['field_variable_map']
+        fmap = deepcopy(self.params['field_variable_map'])
         # if no field map given to use given name as field map
         if name not in fmap:  fmap[name] = name
 

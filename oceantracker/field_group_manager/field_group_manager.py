@@ -25,6 +25,7 @@ class FieldGroupManager(ParameterBaseClass):
     def initial_setup(self):
         si= self.shared_info
         self._setup_hydro_reader(si.working_params['core_roles']['reader'])
+        reader = self.reader
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['role_dicts']['fields'].items():
@@ -95,7 +96,8 @@ class FieldGroupManager(ParameterBaseClass):
         si = self.shared_info
         si.working_params['core_roles']['reader']
 
-        reader = si.add_core_class('reader', reader_params,   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
+        self.reader = si.add_core_class('reader', reader_params,   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
+        reader = self.reader
         reader.initial_setup()
         nc = reader.open_first_file()
 
@@ -113,6 +115,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         for name in  reader.params['load_fields']:
             self.add_reader_field( name, nc, reader, interp)
+
 
 
         self.setup_dispersion(nc, reader,interp)
@@ -165,7 +168,7 @@ class FieldGroupManager(ParameterBaseClass):
         else:
             self.add_custom_field('friction_velocity',{'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocityFromNearSeaBedVelocity',
                                                     'time_varying': True},
-                                                    crumbs='initializing friction velocitu field used by resuspension class  with near bottom velocity')
+                                                    crumbs='initializing friction velocity field used by resuspension class with near bottom velocity')
             has_bottom_stress = False
 
         self.info['has_bottom_stress'] = has_bottom_stress
@@ -176,8 +179,13 @@ class FieldGroupManager(ParameterBaseClass):
         field_params = reader.get_field_params(nc, name)
         field_params['class_name'] = 'oceantracker.fields._base_field.ReaderField'
         i = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs=f' creating reader field setup > "{name}"')
-
         i.initial_setup()
+
+        # it not field map given then add a map based on name, so only works for scalars
+        if name not in reader.params['field_variable_map']:
+            reader.params['field_variable_map'][name] = name
+            si.msg_logger.msg(f'No  field map given for variable named "{name}" in reader load_fields parameter, assuming hydro-files have variable with this name, which is a scalar variable',
+                         hint='if not a scalar, or need to use another name internally, then  then add a map to reader field_variable_map parameter', note=True )
 
         i.reader = reader
         i.interpolator = interp
@@ -189,7 +197,6 @@ class FieldGroupManager(ParameterBaseClass):
     def add_custom_field(self, name,  params, crumbs=''):
         # classname must be given
         si = self.shared_info
-
 
         if 'class_name' not in params:
             si.msg_logger.msg('field_group_manager> add_custom_field parameters must contain  "class_name" parameter')
