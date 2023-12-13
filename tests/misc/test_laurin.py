@@ -568,7 +568,7 @@ if __name__ == '__main__':
     ax = [440000, 600000, 5910000, 6010000]
 
     if not args.doplots:
-
+        # plot rtracks
         track_data = load_output_files.load_track_data(
             caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.9
         )
