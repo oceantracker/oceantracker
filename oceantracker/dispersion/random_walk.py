@@ -14,11 +14,10 @@ class RandomWalk(_BaseTrajectoryModifer):
 
     def check_requirements(self):
         si = self.shared_info
-        if si.settings['use_AZ_profile']:
+        if si.settings['use_A_Z_profile']:
                 self.check_class_required_fields_prop_etc(required_fields_list=['A_Z_profile','A_Z_profile_vertical_gradient'],
                                                              requires3D=True,
-                                                             required_props_list=['nz_cell', 'x', 'n_cell'],crumbs='random walk with use_AZ_profile')
-
+                                                             required_props_list=['nz_cell', 'x', 'n_cell'],crumbs='random walk with use_A_Z_profile')
 
     def initial_setup(self):
         si = self.shared_info
@@ -42,7 +41,7 @@ class RandomWalk(_BaseTrajectoryModifer):
 
         si= self.shared_info
         part_prop = si.classes['particle_properties']
-        if si.settings['use_AZ_profile']:
+        if si.settings['use_A_Z_profile']:
             prop = si.classes['particle_properties']
             self._add_random_walk_velocity_modifier_AZ_profile(part_prop['A_Z_profile'].data, part_prop['A_Z_profile_vertical_gradient'].data,
                                                     self.info['random_walk_velocity'],

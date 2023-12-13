@@ -522,38 +522,30 @@ if __name__ == '__main__':
         'particle_properties': {
             'total_waterdepth':  {'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth' }
                                 },
-        'particle_concentrations': {'c1':{'class_name': 'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
-                                            'output_step_count': 60,
-                                        }
-                                    },
-            'fields': { 'A_Z_vertical_gradient':
-
-                {
-                    'class_name': 'oceantracker.fields.field_vertical_gradient.VerticalGradient',
-                    'name_of_field': 'A_Z',
-                }
-            },
-
-            'velocity_modifiers': {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
+        #'particle_concentrations': {'c1':{'class_name': 'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
+        #                                    'update_interval': 60,
+        #                                }
+         #                           },
+         'velocity_modifiers': {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
                                                     'value': -0.00
                                                 }
             },
             "particle_statistics": {'P1': {
                                             "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
                                             "update_interval": 60,
-                                            "count_status_in_range": ["moving","moving"],
+                                            "status_min": "moving","status_max": "moving",
                                             "polygon_list": statistical_polygon_list
                                         },
                                     'P2': {
                                         "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
                                         "update_interval": 60,
-                                        "count_status_in_range": ["stranded_by_tide","stranded_by_tide"],
+                                        "status_min": "moving","status_max": "moving",
                                         "polygon_list": statistical_polygon_list
                                     },
                                'P3':     {
                                         "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
                                         "update_interval": 60,
-                                        "count_status_in_range": ["on_bottom","on_bottom"],
+                                        "status_min": "moving","status_max": "moving",
                                         "polygon_list": statistical_polygon_list
                                     }
                             }
@@ -565,32 +557,31 @@ if __name__ == '__main__':
 
 
     if not args.norun:
-        run_info_file, has_errors = run(params)
+        caseInfoFile = run(params)
     else:
-        run_info_file = path.join(
-            params['shared_params']['root_output_dir'],
-            params['shared_params']['output_file_base'],
-            params['shared_params']['output_file_base']+'_runInfo.json'
+        caseInfoFile = path.join(
+            params['root_output_dir'],
+            params['output_file_base'],
+            params['output_file_base']+'_caseInfo.json'
         )
 
     ax = [440000, 600000, 5910000, 6010000]
 
     if not args.doplots:
 
-        caseInfoFile = load_output_files.get_case_info_file_from_run_file(
-            run_info_file)
-
         track_data = load_output_files.load_track_data(
             caseInfoFile, var_list=['tide', 'water_depth'], fraction_to_read=.9
         )
-        m = load_output_files.load_stats_data(caseInfoFile, nsequence=0)
 
+        m = load_output_files.load_stats_data(caseInfoFile)
         plot_tracks.animate_particles(
             track_data, axis_lims=ax,
             title='Laurin 3D Schism test',
             polygon_list_to_plot=m['polygon_list'],
             show_grid=True, interval=0, show_dry_cells=False
         )
+
+
 
     if not args.doconcentration:
 

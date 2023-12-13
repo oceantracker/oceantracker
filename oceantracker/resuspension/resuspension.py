@@ -17,7 +17,6 @@ class BasicResuspension(_BaseResuspension):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({
                 'critical_friction_velocity': PVC(0., float, min=0., doc_str='Critical friction velocity, u_* in m/s defined in terms of bottom stress (this param is not the same as near seabed velocity)'),
-                'friction_velocity_field_class_name': PVC('oceantracker.fields.friction_velocity.FrictionVelocity', str)
                                  })
 
     # is 3D test of parent
@@ -30,14 +29,9 @@ class BasicResuspension(_BaseResuspension):
     def initial_setup(self, **kwargs):
         si = self.shared_info
         info = self.info
-        info['number_resupended'] = 0
-        # add required field and particle property for resuspension
+        pass
 
-        si.classes['field_group_manager'].add_custom_field('friction_velocity',  {'class_name':self.params['friction_velocity_field_class_name'],
-                                                           'time_varying' : True},
-                                                       crumbs='initializing resuspension class ')
-        si.classes['particle_group_manager'].add_particle_property('friction_velocity','from_fields', {}, crumbs='initializing resuspension class friction velocity')
-
+   
     def select_particles_to_resupend(self, active):
         # compare to single critical value
         # todo add comparison to  particles critical value from distribution, add new particle property to hold  individual critical values
@@ -58,19 +52,18 @@ class BasicResuspension(_BaseResuspension):
         si= self.shared_info
         info = self.info
         info['resuspension_factor']= 2.0*0.4*si.z0*si.settings['time_step']/(1. - 2./np.pi)
-        info['min_resuspension_jump_not_used']  = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
+        info['min_resuspension_jump_not_used'] = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
 
-        # redsuspend those on bottom and friction velocity exceeds critical value
+        # resuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.classes['particle_properties']
         resuspend = self.select_particles_to_resupend(active)
 
-        self.resuspension_jump(part_prop['friction_velocity'].data, self.info['resuspension_factor'], part_prop['x'].data, part_prop['water_depth'].data,si.z0, resuspend)
+        self.resuspension_jump(part_prop['friction_velocity'].data, info['resuspension_factor'], part_prop['x'].data, part_prop['water_depth'].data,si.z0, resuspend)
 
         #  don't adjust resupension distance for terminal velocity,
         #  Lynch (Particles in the Ocean Book, says don't adjust as a fall velocity  affects prior that particle resuspends)
 
         # any z out of bounds will  be fixed by find_depth cell at start of next time step
-        self.info['number_resupended'] += resuspend.shape[0]
         part_prop['status'].set_values(si.particle_status_flags['moving'], resuspend)
 
         self.stop_update_timer()

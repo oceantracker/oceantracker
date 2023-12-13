@@ -77,25 +77,30 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             self._do_pre_processing()
             self._make_core_classes_and_release_groups()
             self._make_and_initialize_user_classes()
+            # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
+
+
+
 
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
             si.msg_logger.msg(f' Case Funner graceful exit from case number [{si.caseID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+
+            if si.settings['debug']:
+                si.msg_logger.write_error_log_file(e)
+                si.msg_logger.write_error_log_file(traceback.print_exc())
+
             si.msg_logger.close()
             return None, return_msgs
 
         except Exception as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
+            si.msg_logger.write_error_log_file(traceback.print_exc())
             si.msg_logger.msg(f' Unexpected error in case number [{si.caseID:2}] ', fatal_error=True,hint='check above or .err file')
             si.msg_logger.close()
             return  None, return_msgs
-
-        # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
-        si.classes['dispersion'].initial_setup()
-        if si.is3D_run:
-            si.classes['resuspension'].initial_setup()
 
 
         # check particle properties have other particle properties, fields and other compatibles they require
@@ -117,13 +122,19 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
+
             si.msg_logger.msg(f' Case Funner graceful exit from case number [{si.caseID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+
+            if si.settings['debug']:
+                si.msg_logger.write_error_log_file(e)
+                si.msg_logger.write_error_log_file(traceback.print_exc())
             si.msg_logger.close()
             return None, return_msgs
 
         except Exception as e:
             si.msg_logger.show_all_warnings_and_errors()
             si.msg_logger.write_error_log_file(e)
+            si.msg_logger.write_error_log_file(traceback.print_exc())
             si.msg_logger.msg(f' Unexpected error in case number [{si.caseID:2}] ', fatal_error=True,hint='check above or .err file')
             si.msg_logger.close()
             return  None, return_msgs
@@ -313,6 +324,26 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         fgm.initial_setup()  # needed here to add reader fields inside reader build
 
 
+        if  si.is3D_run:
+            if si.settings['use_A_Z_profile'] and fgm.info['has_A_Z_profile']:
+               # use profile of AZ
+               params = si.working_params['core_roles']['dispersion']
+               #todo make it so user can add own Az profile class!!
+               # setup default claseses
+               params['class_name'] ='oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ'
+               si.add_core_class('dispersion', params, initialise=True)
+
+               si.msg_logger.msg('Using vertical profile of hydro-model vertical diffusivity for random walk', note=True)
+
+            else:
+                # dispersion constant
+                si.add_core_class('dispersion', si.working_params['core_roles']['dispersion'], initialise=True)
+
+
+            # resuspension
+            si.add_core_class('resuspension', si.working_params['core_roles']['resuspension'], initialise=True)
+
+
        
 
         if si.write_tracks:
@@ -327,7 +358,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # make other core classes, eg.
         core_role_params=si.working_params['core_roles']
-        for name in ['solver','dispersion']:
+        for name in ['solver']:
             si.add_core_class(name, core_role_params[name], crumbs=f'core class "{name}" ')
 
 
@@ -389,25 +420,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         pgm = si.classes['particle_group_manager']
 
-        # create prop particle properties derived from fields loaded from reader on the fly
+        # create prop particle properties derived from any field  reader ot user custom
         t0= perf_counter()
         for name, i in si.classes['fields'].items():
-            if i.info['type'] == 'reader_field':
-                pgm.add_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
+            pgm.add_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
                                                     write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
 
-        # initialize custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
-        for name, params in si.working_params['role_dicts']['fields'].items():
-            i = si.create_class_dict_instance(name,'fields', 'user', params, crumbs='Adding "fields" from user params')
-            i.initial_setup()
-            # now add custom prop based on  this field
-            pgm.add_particle_property(i.info['name'], 'from_fields',
-                                      dict(vector_dim=i.get_number_components(),
-                                            time_varying=True,
-                                            write= i.params['write_interp_particle_prop_to_tracks_file']))
 
-            # if not time varying can update once at start from other non-time varying fields
-            if not i.is_time_varying(): i.update()
         si.msg_logger.progress_marker('created particle properties for custom fields and derived from fields ', start_time=t0)
 
         # any custom particle properties added by user
@@ -425,6 +444,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             for name, params in si.working_params['role_dicts'][user_type].items():
                 i = si.create_class_dict_instance(name,user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
+        pass
 
     # ____________________________
     # internal methods below

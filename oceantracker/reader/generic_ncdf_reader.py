@@ -19,6 +19,7 @@ from oceantracker.util.triangle_utilities_code import split_quad_cells
 from oceantracker.fields._base_field import  CustomFieldBase , ReaderField
 from oceantracker.reader.util import reader_util
 from oceantracker.reader._base_reader import _BaseReader
+from copy import  deepcopy
 class GenericNCDFreader(_BaseReader):
 
     def __init__(self, shared_memory_info=None):
@@ -67,7 +68,7 @@ class GenericNCDFreader(_BaseReader):
 
     def get_field_params(self, nc, name, crumbs=''):
         # work out if feild is 3D ,etc
-        fmap = self.params['field_variable_map'][name]
+        fmap = deepcopy(self.params['field_variable_map'][name])
         dim_map = self.params['dimension_map']
 
         if type(fmap) != list: fmap = [fmap]

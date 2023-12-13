@@ -306,8 +306,9 @@ bc['release_groups']['P11']= pg1 # only point release
 
 params.append(s58)
 
-# schsim 3D, vertical section  with critical friction velocity
+# schsim 3D, vertical section  with critical friction velocity, A_z_profile
 s59 = deepcopy(s58)
+s59['use_A_Z_profile'] =True
 s59.update({'output_file_base' : 'demo59_crit_shear_resupension', 'backtracking': False})
 bc = s59
 bc['velocity_modifiers']['terminal_velocity']= {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002}
@@ -333,7 +334,6 @@ s61.update({'max_run_duration': 15*24*3600.,'output_file_base': 'demo61_concentr
 s61['write_tracks']= False
 s61['particle_concentrations']={'outfall_conc':{'class_name':'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
                                                           'case_output_file_tag': 'siteA','update_interval': 1800}}
-
 
 for rg in s61['release_groups'].values():
     rg.update({'pulse_size': 1000, 'release_interval': 3600})
