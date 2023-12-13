@@ -5,6 +5,7 @@ import numpy as np
 from oceantracker.util import time_util
 from oceantracker.util.profiling_util import function_profiler
 from time import  perf_counter
+from copy import deepcopy
 
 #TODO allow fields to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
@@ -25,6 +26,15 @@ class FieldGroupManager(ParameterBaseClass):
         si= self.shared_info
         self._setup_hydro_reader(si.working_params['core_roles']['reader'])
 
+        # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
+        for name, params in si.working_params['role_dicts']['fields'].items():
+            i = si.create_class_dict_instance(name, 'fields', 'user', params, crumbs='Adding "fields" from user params')
+            i.initial_setup()
+            # if not time varying can update once at start from other non-time varying fields
+            if not i.is_time_varying(): i.update()
+        pass
+
+
     def final_setup(self):
         si = self.shared_info
         si.classes['reader'].final_setup()
@@ -39,6 +49,8 @@ class FieldGroupManager(ParameterBaseClass):
         if not reader.are_time_steps_in_buffer(time_sec):
                 reader.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
         si.block_timer('Fill reader buffers',t0)
+
+
 
     def setup_time_step(self, time_sec, xq, active, fix_bad=True):
         # set up stuff needed by all fields before any  interpolation
@@ -91,7 +103,6 @@ class FieldGroupManager(ParameterBaseClass):
         reader.grid = grid
         reader.setup_water_velocity(nc,grid)
 
-
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
         interp = si.add_core_class('interpolator', si.working_params['core_roles']['interpolator'],  crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
@@ -106,31 +117,56 @@ class FieldGroupManager(ParameterBaseClass):
 
 
         self.setup_dispersion(nc, reader,interp)
+        self.setup_resupension(nc, reader, interp)
 
         nc.close()
 
-        # add core total water depth property
-        i = self.add_custom_field('total_water_depth',
-                dict(class_name= 'oceantracker.fields.total_water_depth.TotalWaterDepth',
-                      time_varying=True,write_interp_particle_prop_to_tracks_file =False),
-                                           crumbs='initializing core TotalWaterDepth class ')
-
-        i.reader = reader
-        i.interpolator = interp
 
     def setup_dispersion(self, nc, reader,interp):
         si = self.shared_info
         ml = si.msg_logger
+        params = reader.params
+        fmap = params['field_variable_map']
 
-        if  not (si.is3D_run and si.settings['use_AZ_profile']  ): return  # use constant given values
-        if not reader.has_AZ_profile(nc): return
+        if fmap['A_Z_profile'] is None:
+            si.settings['use_AZ_profile'] = False
+            ml.msg(' A_Z_profile field_variable_map not set, using  constant A_Z instead', note=True)
+            has_A_Z_profile=False
 
-        self.add_reader_field( 'A_Z_profile',dict(is3D=True,time_varying=True),nc, reader,interp)
+        elif not nc.is_var(fmap['A_Z_profile']):
+            ml.msg(f'cannot find  hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile, using  constant A_Z instead', note=True)
+            has_A_Z_profile = False
+        else:
+            self.add_reader_field( 'A_Z_profile',dict(is3D=True,time_varying=True),nc, reader,interp)
 
+            self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(class_name='oceantracker.fields.field_vertical_gradient.VerticalGradient', time_varying=True,
+                                                                      name_of_field= 'A_Z_profile'  ),   crumbs='random walk > Adding A_Z_vertical_gradient field, for using_AZ_profile')
+            has_A_Z_profile= True
 
-        self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(class_name='oceantracker.fields.field_vertical_gradient.VerticalGradient', is_time_varying=True,
-                                                                  name_of_field= 'A_Z_profile'  ),   crumbs='random walk > Adding A_Z_vertical_gradient field, for using_AZ_profile')
-        pass
+        self.info['has_A_Z_profile'] = has_A_Z_profile
+
+    def setup_resupension(self, nc, reader,interp):
+        # get fields needed to calulate friction velocity field, needed for resupension
+        si = self.shared_info
+        ml = si.msg_logger
+        params = reader.params
+        var_map = deepcopy(params['field_variable_map']['bottom_stress'])
+        if type(var_map) != list: var_map=[var_map]
+
+        if nc.is_var(var_map[0]):
+            self.add_custom_field('friction_velocity', {'class_name': self.params['friction_velocity_field_class_name'],
+                                                    'time_varying': True},
+                              crumbs='initializing resuspension class ')
+            has_bottom_stress = True
+
+        else:
+            self.add_custom_field('friction_velocity',{'class_name': 'oceantracker.fields.friction_velocity.FrictionVelocity',
+                                                    'time_varying': True},
+                                                    crumbs='initializing friction velocitu field used by resuspension class  with near bottom velocity')
+            has_bottom_stress = False
+
+        self.info['has_bottom_stress'] = has_bottom_stress
+
 
     def add_reader_field(self, name,field_params,nc, reader,interp):
         si = self.shared_info
@@ -152,7 +188,7 @@ class FieldGroupManager(ParameterBaseClass):
 
 
         if 'class_name' not in params:
-            si.msg_logger.msg('field_group_manager> add_custom_field parameters must contain  "class_name"')
+            si.msg_logger.msg('field_group_manager> add_custom_field parameters must contain  "class_name" parameter')
         i = si.create_class_dict_instance(name, 'fields', 'custom_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=True)
         i.known_field_types = self.known_field_types
         return i

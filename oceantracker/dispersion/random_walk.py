@@ -19,7 +19,6 @@ class RandomWalk(_BaseTrajectoryModifer):
                                                              requires3D=True,
                                                              required_props_list=['nz_cell', 'x', 'n_cell'],crumbs='random walk with use_AZ_profile')
 
-
     def initial_setup(self):
         si = self.shared_info
         info = self.info
