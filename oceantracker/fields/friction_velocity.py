@@ -7,7 +7,7 @@ import numpy as np
 class FrictionVelocity(CustomFieldBase):
     def __init__(self):
         super().__init__()
-        self.add_default_params({'is_time_varying': PVC(True,bool),
+        self.add_default_params({'time_varying': PVC(True,bool),
                                  'num_components': PVC(1, int),
                                  'is3D': PVC(False,bool)})
 
@@ -27,7 +27,7 @@ class FrictionVelocity(CustomFieldBase):
             # sigma model
             self.calc_friction_velocity_from_sigma_levels(buffer_index,
                                                           grid['sigma'],
-                                                          fields['total_water_depth'].data,
+                                                          fields['tide'].data,fields['water_depth'].data,
                                                           fields['water_velocity'].data,
                                                           si.z0, self.data)
         else:
@@ -37,14 +37,16 @@ class FrictionVelocity(CustomFieldBase):
 
     @staticmethod
     @njit()
-    def calc_friction_velocity_from_sigma_levels(buffer_index, sigma, total_water_depth,
+    def calc_friction_velocity_from_sigma_levels(buffer_index, sigma, tide,water_depth,
                                                  water_velocity, z0, out):
         # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
         # based on log layer  u= u_* log(z/z0)/kappa
         for nt in buffer_index:
             for n in np.arange(out.shape[1]):  # loop over nodes
                 # size of bottom cell from its fraction of the water depth
-                dz = (sigma[1] - sigma[0]) * total_water_depth[nt, n, 0, 0]
+                twd = abs(tide[nt,n, 0, 0] + water_depth[0, n, 0, 0])
+                if twd < 0.1: twd = 0.1
+                dz = (sigma[1] - sigma[0]) * twd
                 speed = np.sqrt(water_velocity[nt, n, 1, 0] ** 2 + water_velocity[nt, n, 1, 1] ** 2)
                 out[nt, n, 0, 0] = 0.4 * speed / np.log((dz + z0) / z0)
                 # will give np.inf for very thin lower layers, ie small total water depth

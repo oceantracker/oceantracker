@@ -522,38 +522,30 @@ if __name__ == '__main__':
         'particle_properties': {
             'total_waterdepth':  {'class_name': 'oceantracker.particle_properties.total_water_depth.TotalWaterDepth' }
                                 },
-        'particle_concentrations': {'c1':{'class_name': 'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
-                                            'output_step_count': 60,
-                                        }
-                                    },
-            'fields': { 'A_Z_vertical_gradient':
-
-                {
-                    'class_name': 'oceantracker.fields.field_vertical_gradient.VerticalGradient',
-                    'name_of_field': 'A_Z',
-                }
-            },
-
-            'velocity_modifiers': {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
+        #'particle_concentrations': {'c1':{'class_name': 'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
+        #                                    'update_interval': 60,
+        #                                }
+         #                           },
+         'velocity_modifiers': {'fall_vel':{'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
                                                     'value': -0.00
                                                 }
             },
             "particle_statistics": {'P1': {
                                             "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
                                             "update_interval": 60,
-                                            "count_status_in_range": ["moving","moving"],
+                                            "status_min": "moving","status_max": "moving",
                                             "polygon_list": statistical_polygon_list
                                         },
                                     'P2': {
                                         "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
                                         "update_interval": 60,
-                                        "count_status_in_range": ["stranded_by_tide","stranded_by_tide"],
+                                        "status_min": "moving","status_max": "moving",
                                         "polygon_list": statistical_polygon_list
                                     },
                                'P3':     {
                                         "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
                                         "update_interval": 60,
-                                        "count_status_in_range": ["on_bottom","on_bottom"],
+                                        "status_min": "moving","status_max": "moving",
                                         "polygon_list": statistical_polygon_list
                                     }
                             }

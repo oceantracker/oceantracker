@@ -107,7 +107,7 @@
     "velocity_modifiers": {
         "terminal_velocity": {
             "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
-            "value": -0.002
+            "value": -0.02
         }
     },
     "particle_statistics": {
@@ -129,5 +129,6 @@
         "critical_friction_velocity": 0.005
     },
     "backtracking": false,
+    "use_AZ_profile": true,
     "root_output_dir": "output"
 }

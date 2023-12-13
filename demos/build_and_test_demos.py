@@ -306,8 +306,9 @@ bc['release_groups']['P11']= pg1 # only point release
 
 params.append(s58)
 
-# schsim 3D, vertical section  with critical friction velocity
+# schsim 3D, vertical section  with critical friction velocity, A_z_profile
 s59 = deepcopy(s58)
+s59['use_AZ_profile'] =True
 s59.update({'output_file_base' : 'demo59_crit_shear_resupension', 'backtracking': False})
 bc = s59
 bc['velocity_modifiers']['terminal_velocity']= {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002}

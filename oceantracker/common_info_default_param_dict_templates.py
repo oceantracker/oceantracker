@@ -129,6 +129,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
 
     # TODO input checking
         #todo check class being added is child of given role
+        # todo make it so user can add own Az profile class!! setup default classes dict for different type beyond standard
 
     #TODO Nice to haves
         # todo get rid of info[points], just alter params points
