@@ -33,7 +33,6 @@ class Solver(ParameterBaseClass):
     def check_requirements(self):
 
         self.check_class_required_fields_prop_etc(
-            required_fields_list=['water_velocity'],
             required_props_list=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'],
             required_grid_var_list=[])
 

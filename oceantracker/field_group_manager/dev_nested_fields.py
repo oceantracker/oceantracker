@@ -18,10 +18,10 @@ class DevNestedFields(ParameterBaseClass):
         self.fgm_outer_grid = make_class_instance_from_params('field_group_manager_outer_grid',
                                 dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
                                 ml,   crumbs='adding outer grid field manager for nested grid run' )
-        self.fgm_outer_grid._setup_hydro_reader(si.working_params['core_roles']['reader'])
+        self.fgm_outer_grid._setup_hydro_reader(si.working_params['core_classes']['reader'])
         self.fgm_nested_grids=[]
         ml.progress_marker('Starting nested grid setup')
-        for name, params in si.working_params['role_dicts']['nested_readers'].items():
+        for name, params in si.working_params['class_dicts']['nested_readers'].items():
             t0= perf_counter()
             i =  make_class_instance_from_params(name,
                                 dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),

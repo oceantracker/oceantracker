@@ -22,7 +22,6 @@ class BasicResuspension(_BaseResuspension):
     # is 3D test of parent
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(
-                        required_fields_list=['water_velocity'],
                         required_props_list=['status','water_velocity'],
                         requires3D=True)
 

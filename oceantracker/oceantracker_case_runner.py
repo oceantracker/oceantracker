@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 from os import path, environ, remove
 from oceantracker.util.parameter_base_class import ParameterBaseClass
@@ -60,6 +61,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
         si.computer_info = get_versions_computer_info.get_computer_info()
 
+
+        # set numbas cache
+        os.environ['oceantracker_numba_caching'] =str( 1 if si.settings['numba_caching'] else 0)
 
 
         #set_num_threads(max(1, si.settings['max_threads']))
@@ -199,7 +203,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         info['model_run_started'] = datetime.now()
 
         solver = si.classes['solver']
-        p, reader, f = si.classes['particle_group_manager'], si.classes['reader'], si.classes['field_group_manager']  # for later use
 
         # fill and process buffer until there is less than 2 steps
         si.msg_logger.print_line()
@@ -239,7 +242,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si = self.shared_info
 
         case_params = si.working_params
-        for name, params in case_params['role_dicts']['pre_processing'].items():
+        for name, params in case_params['class_dicts']['pre_processing'].items():
             i = si.create_class_dict_instance(name, 'pre_processing', 'user', params, crumbs='Adding "fields" from user params')
             i.initial_setup()
 
@@ -257,11 +260,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         for name, pg_params in particle_release_groups_params_dict.items():
             # make instance
-            if 'class_name' not in pg_params: pg_params['class_name'] = 'oceantracker.release_groups.point_release.PointRelease'
 
             # make instance and initialise
 
-            i = si.create_class_dict_instance(name, 'release_groups', 'user', pg_params, crumbs='Adding release groups')
+            i = si.create_class_dict_instance(name, 'release_groups', 'user', pg_params, crumbs='Adding release groups', default_classID='release_groups')
             i.initial_setup()
 
             # set up release times so duration of run known
@@ -288,18 +290,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # time range in forwards order
         return t_first,t_last
 
-    def _make_core_class_instances(self):
-        # params are full merged by oceantracker main and instance making tested, so m=no parm merge needed
-        si = self.shared_info
-        case_params= si.working_params
-
-        # make core classes, eg. field group
-
-        for name, params in case_params['core_roles'].items():
-            if name in ['reader',  'resuspension']: continue
-            i = si.add_core_class(name, params, crumbs= f'core class "{name}" ')
-
-        si.particle_status_flags= si.classes['particle_group_manager'].status_flags
 
     def _make_core_classes_and_release_groups(self):
         # initialise all classes, order is important!
@@ -315,40 +305,39 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
         # chose fiel manager for normal or nested readers
-        if len(si.working_params['role_dicts']['nested_readers']) > 0:
+        if len(si.working_params['class_dicts']['nested_readers']) > 0:
             # use devopment nested readers class
-            si.working_params['core_roles']['field_group_manager'].update(dict(class_name='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields'))
+            si.working_params['core_classes']['field_group_manager'].update(dict(class_name='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields'))
 
         # set up feilds
-        fgm = si.add_core_class('field_group_manager', si.working_params['core_roles']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
+        fgm = si.add_core_class('field_group_manager', si.working_params['core_classes']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
 
-        dispersion_params = si.working_params['core_roles']['dispersion']
+        dispersion_params = si.working_params['core_classes']['dispersion']
         if  si.is3D_run:
-            if si.settings['use_A_Z_profile'] and fgm.info['has_A_Z_profile']:
-               # use profile of AZ
+            if si.settings['use_A_Z_profile'] and fgm.info['has_A_Z_profile']:               # use profile of AZ
 
                dispersion_params['class_name'] ='oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ'
 
             # resuspension only in 3D
-            si.add_core_class('resuspension', si.working_params['core_roles']['resuspension'], initialise=True)
+            si.add_core_class('resuspension', si.working_params['core_classes']['resuspension'], initialise=True)
 
         # alawys add dispersion
         si.add_core_class('dispersion', dispersion_params, initialise=True)
        
 
         if si.write_tracks:
-            si.add_core_class('tracks_writer',si.working_params['core_roles']['tracks_writer'], initialise=True)
+            si.add_core_class('tracks_writer',si.working_params['core_classes']['tracks_writer'], initialise=True)
         else:
             si.classes['tracks_writer'] = None
 
-        pgm = si.add_core_class('particle_group_manager', si.working_params['core_roles']['particle_group_manager'], crumbs=f'adding core class "particle_group_manager" ')
+        pgm = si.add_core_class('particle_group_manager', si.working_params['core_classes']['particle_group_manager'], crumbs=f'adding core class "particle_group_manager" ')
         pgm.initial_setup()  # needed here to add reader fields inside reader build
 
         fgm.final_setup()  # set up particle properties associated with fields
 
         # make other core classes, eg.
-        core_role_params=si.working_params['core_roles']
+        core_role_params=si.working_params['core_classes']
         for name in ['solver']:
             si.add_core_class(name, core_role_params[name], crumbs=f'core class "{name}" ')
 
@@ -363,7 +352,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # set up start time and duration based on particle releases
         t0 = perf_counter()
-        time_start, time_end = self._setup_particle_release_groups(si.working_params['role_dicts']['release_groups'])
+        time_start, time_end = self._setup_particle_release_groups(si.working_params['class_dicts']['release_groups'])
 
 
         #clip times to maximum duration in shared and case params
@@ -421,18 +410,18 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.progress_marker('created particle properties for custom fields and derived from fields ', start_time=t0)
 
         # any custom particle properties added by user
-        for name, p in si.working_params['role_dicts']['particle_properties'].items():
+        for name, p in si.working_params['class_dicts']['particle_properties'].items():
             pgm.add_particle_property(name, 'user',p)
 
         # add default classes, eg tidal stranding
         #todo this may be better else where
-        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.working_params['role_dicts']['status_modifiers']:
-            si.working_params['role_dicts']['status_modifiers']['tidal_stranding'] ={'class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'}
+        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.working_params['class_dicts']['status_modifiers']:
+            si.working_params['class_dicts']['status_modifiers']['tidal_stranding'] ={'class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'}
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for user_type in ['velocity_modifiers','trajectory_modifiers','status_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
-            for name, params in si.working_params['role_dicts'][user_type].items():
+            for name, params in si.working_params['class_dicts'][user_type].items():
                 i = si.create_class_dict_instance(name,user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
         pass

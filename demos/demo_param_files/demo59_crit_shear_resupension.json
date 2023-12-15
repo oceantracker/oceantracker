@@ -2,6 +2,7 @@
     "output_file_base": "demo59_crit_shear_resupension",
     "debug": true,
     "time_step": 120,
+    "numba_caching": true,
     "reader": {
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",

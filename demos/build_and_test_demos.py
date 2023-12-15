@@ -40,6 +40,7 @@ demo_base_params={'output_file_base' : None,
                 'time_buffer_size': 15,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
     'user_note':'test of notes',
+    'numba_caching': True,
     'dispersion_miss-spelt': {'A_H': .1},
     'dispersion': {'A_H': .1},
     #'pre_processing':{'my_polygons':{'class_name': 'oceantracker.pre_processing.read_geomerty.ReadCoordinates',
@@ -227,7 +228,7 @@ params.append(p10)
 
 # case 50 schism basic
 schsim_base_params=\
-{'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,
+{'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120, 'numba_caching': True,
  'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': 'demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',

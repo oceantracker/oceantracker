@@ -218,8 +218,8 @@ class ROMsNativeReader(_BaseReader):
             data = convert_layer_field_to_levels_from_fixed_depth_fractions(
                 data, grid['sigma_layer'], grid['sigma'])
 
-        # add dummy vector components axis, note in ROMS vectors are stored in netcdf as individual compoents,
-        # so  file_var_info['num_components'] is always 1
+        # add dummy vector components axis, note in ROMS vectors are stored in netcdf as individual components,
+
         data = data[:, :, :, np.newaxis]
 
         return data

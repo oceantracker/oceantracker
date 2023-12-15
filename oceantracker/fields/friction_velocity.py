@@ -7,17 +7,13 @@ import numpy as np
 class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
     def __init__(self):
         super().__init__()
-        self.add_default_params({'time_varying': PVC(True,bool),
-                                 'num_components': PVC(1, int),
-                                 'is3D': PVC(False,bool)})
+        self.add_default_params({'time_varying': PVC(True,bool), 'is3D': PVC(False,bool)})
 
 
     def check_requirements(self):
         si = self.shared_info
 
-        self.check_class_required_fields_prop_etc(
-            required_fields_list=['water_velocity'],
-            requires3D=True)
+        self.check_class_required_fields_prop_etc(requires3D=True)
 
     def update(self, buffer_index):
         si = self.shared_info

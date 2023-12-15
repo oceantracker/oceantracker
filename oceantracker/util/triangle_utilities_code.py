@@ -3,9 +3,10 @@ from numba import njit, prange
 from numba.typed import List as NumbaList
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.util import  basic_util
+from oceantracker.util.numba_util import is_caching
 
 # build node to cell map
-@njit()
+@njit(cache=is_caching())
 def build_node_to_triangle_map(tri, x):
     # build list  giving map from each node to list of cells which contain that node
 
@@ -13,7 +14,7 @@ def build_node_to_triangle_map(tri, x):
     # using arrays faster than appending to lists
     # need to expand array if needed to aviod crash
     n_block = 10
-    empty_block = np.full((x.shape[0],n_block), 0, dtype=np.int32)
+    empty_block = np.full((x.shape[0],n_block), -1, dtype=np.int32)
     node_to_tri_map =empty_block.copy()
 
     tri_per_node = np.full((x.shape[0],), 0, dtype=np.int32)

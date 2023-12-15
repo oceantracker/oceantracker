@@ -1,12 +1,11 @@
 - add_date_to_run_output_dir: false
-  advanced_settings:
-    multiprocessing_case_start_delay: 1.0
   block_dry_cells: true
   debug: true
   dispersion:
     A_H: 0.1
   dispersion_miss-spelt:
     A_H: 0.1
+  numba_caching: true
   output_file_base: demo05_parallel
   particle_properties:
     my_constant_prop:

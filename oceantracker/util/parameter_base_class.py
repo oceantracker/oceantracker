@@ -62,7 +62,7 @@ class ParameterBaseClass(object):
         self.check_class_required_fields_prop_etc()
 
 
-    def check_class_required_fields_prop_etc(self, required_props_list=[], required_fields_list=[],
+    def check_class_required_fields_prop_etc(self, required_props_list=[],
                                              required_grid_var_list=[], requires3D=None, crumbs=None):
         si = self.shared_info
         grid = si.classes['reader'].grid
@@ -72,10 +72,6 @@ class ParameterBaseClass(object):
                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.info['name']
                                 + ' requires grid variable  "' + name + '"' + ' to work', fatal_error=True,crumbs=crumbs )
 
-        for name in required_fields_list:
-            if name not in si.classes['fields']:
-                si.msg_logger.msg('     class ' + self.params['class_name'] + ', "' + self.info['name']
-                                + '" requires field  "' + name + '"' + ' to work, add to reader["fields_to_load"], or add a fields param class list', fatal_error=True,crumbs=crumbs)
 
         for name in required_props_list:
             if name not in si.classes['particle_properties']:

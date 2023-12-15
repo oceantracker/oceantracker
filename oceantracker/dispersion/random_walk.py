@@ -15,8 +15,7 @@ class RandomWalk(_BaseTrajectoryModifer):
     def check_requirements(self):
         si = self.shared_info
         if si.settings['use_A_Z_profile']:
-                self.check_class_required_fields_prop_etc(required_fields_list=['A_Z_profile','A_Z_profile_vertical_gradient'],
-                                                             requires3D=True,
+                self.check_class_required_fields_prop_etc(    requires3D=True,
                                                              required_props_list=['nz_cell', 'x', 'n_cell'],crumbs='random walk with use_A_Z_profile')
 
     def initial_setup(self):

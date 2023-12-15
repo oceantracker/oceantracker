@@ -12,7 +12,7 @@ class TotalWaterDepth(CustomFieldBase):
 
     def check_requirements(self):
         si = self.shared_info
-        self.check_class_required_fields_prop_etc(required_fields_list=['tide'])
+
 
     def update(self,active):
         si = self.shared_info

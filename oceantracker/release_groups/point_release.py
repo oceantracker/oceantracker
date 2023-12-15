@@ -154,7 +154,7 @@ class PointRelease(ParameterBaseClass):
 
         n_required = self.get_number_required()
 
-        x0           = np.full((0, info['points'].shape[1]), 0.)
+        x0           = np.full((0, info['points'].shape[1]), 0.,dtype=np.float64, order='C')
         n_cell_guess = np.full((0,), 0, dtype=np.int32)
         count = 0
         n_found = 0
@@ -265,7 +265,7 @@ class PointRelease(ParameterBaseClass):
         si= self.shared_info
         # use KD tree to find points those outside model domain
 
-        sel, n_cell ,bc  = si.classes['interpolator'].are_points_inside_domain(x[:,:2])
+        sel, n_cell, bc  = si.classes['interpolator'].are_points_inside_domain(x)
         grid = si.classes['reader'].grid
         # keep those inside domain
         x = x[sel, :]

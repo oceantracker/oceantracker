@@ -32,6 +32,7 @@
             "isodate_of_hindcast_time_zero": "2020-06-01"
         },
         "user_note": "test of notes",
+        "numba_caching": true,
         "dispersion_miss-spelt": {
             "A_H": 0.1
         },
@@ -60,9 +61,6 @@
         },
         "block_dry_cells": true,
         "processors": 2,
-        "advanced_settings": {
-            "multiprocessing_case_start_delay": 1.0
-        },
         "root_output_dir": "output"
     },
     [

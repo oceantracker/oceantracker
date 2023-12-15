@@ -27,6 +27,18 @@
     "open_boundary_type": null,
     "block_dry_cells": null,
     "use_A_Z_profile": null,
+    "event_loggers": {},
+    "fields": {},
+    "nested_readers": {},
+    "particle_concentrations": {},
+    "particle_properties": {},
+    "particle_statistics": {},
+    "pre_processing": {},
+    "release_groups": {},
+    "status_modifiers": {},
+    "time_varying_info": {},
+    "trajectory_modifiers": {},
+    "velocity_modifiers": {},
     "dispersion": {
         "A_H": 1
     },
@@ -39,17 +51,5 @@
     },
     "resuspension": {},
     "solver": {},
-    "tracks_writer": {},
-    "event_loggers": {},
-    "fields": {},
-    "nested_readers": {},
-    "particle_concentrations": {},
-    "particle_properties": {},
-    "particle_statistics": {},
-    "pre_processing": {},
-    "release_groups": {},
-    "status_modifiers": {},
-    "time_varying_info": {},
-    "trajectory_modifiers": {},
-    "velocity_modifiers": {}
+    "tracks_writer": {}
 }
