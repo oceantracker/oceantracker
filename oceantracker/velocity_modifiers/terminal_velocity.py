@@ -23,7 +23,7 @@ class TerminalVelocity(VelocityModiferBase):
         si = self.shared_info
         particle= si.classes['particle_group_manager']
 
-        si.msg_logger.msg('When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',warning=True)
+        si.msg_logger.msg('When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',note=True)
 
         if self.params['variance'] is not None:
            # set up individual particle terminal velocties

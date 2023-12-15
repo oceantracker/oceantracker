@@ -31,17 +31,13 @@ shared_settings_defaults ={
                 #'max_threads':   PVC(None, int, min=1,doc_str='maximum number of processors used for threading to process particles in parallel'),
                 'max_warnings':        PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps'),  # dont record more that this number of warnings, to keep caseInfo.json finite
                 'use_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
+                'numba_caching' :  PVC(False,  bool,doc_str='Caches numba functions in file system, for faster start up, as it does not have to compile numba code each time'),
                 'numba_function_cache_size' :  PVC(2048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB?'),
                 'multiprocessing_case_start_delay': PVC(None, float, min=0., doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file'),  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
-                 'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
+                'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
                                                        doc_str='Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
                  }
-                     # params needed for later scatch_tests work
-                     # 'list_paths_of_user_modules': PVC(None,list, contains = str), # todo not implemented yet
-                     # shared reader memory params for later scatch_tests.
-                     # 'shared_reader_memory' :PVC(False,  bool),
-                     # 'multiprocessing_start_method_spawn': PVC(True,  bool), # overide default of linux as fork
-                     #'loops_over_hindcast':  PVC(0, int, min=0),  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
+#  these setting can be different for each case
 case_settings_defaults ={
             'user_note': PVC('No user note', str,doc_str='Any run note to store in case info file'),
             'case_output_file_tag':     PVC(None, str,doc_str='insert this tag into output files name for each case, for parallel runs this is set to C000, C001...'), #todo make this only settable in a case, caselist params?
@@ -51,41 +47,47 @@ case_settings_defaults ={
             'open_boundary_type' :  PVC(0, int, min=0, max=1,doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS '),
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
             'use_A_Z_profile': PVC(True, bool, doc_str='Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file'),
+            #  #'loops_over_hindcast':  PVC(0, int, min=0),  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
 
-}
+            }
+core_class_list=['reader',
+                'solver',
+                'field_group_manager',
+               'interpolator',
+                'particle_group_manager',
+                'tracks_writer',
+                'dispersion',
+                'resuspension']
 
+default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
+                        field_group_manager='oceantracker.field_group_manager.field_group_manager.FieldGroupManager',
+                        particle_group_manager= 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager',
+                        tracks_writer = 'oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter',
+                        interpolator = 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid',
+                        dispersion = 'oceantracker.dispersion.random_walk.RandomWalk',
+                        resuspension = 'oceantracker.resuspension.resuspension.BasicResuspension',
+                        release_groups = 'oceantracker.release_groups.point_release.PointRelease',
+                        field_friction_velocity_from_bottom_stress='oceantracker.fields.friction_velocity.FrictionVelocityFromBottomStress',
+                        field_friction_velocity_from_near_sea_bed_velocity='oceantracker.fields.friction_velocity.FrictionVelocityFromNearSeaBedVelocity',
+                        field_A_Z_profile_vertical_gradient='oceantracker.fields.field_vertical_gradient.VerticalGradient'
+                        )
 
-core_classes= { 'reader': {},
-   'solver': {'class_name': 'oceantracker.solver.solver.Solver'},
-   'field_group_manager':{'class_name':'oceantracker.field_group_manager.field_group_manager.FieldGroupManager'},
-   'interpolator': {'class_name': 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'},
-    'particle_group_manager': {'class_name': 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager'},
-    'tracks_writer': {'class_name': 'oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter'},
-    'dispersion': {'class_name': 'oceantracker.dispersion.random_walk.RandomWalk'},
-    'resuspension': {'class_name':'oceantracker.resuspension.resuspension.BasicResuspension' }}
-
-reader_classes={'reader':{}} # in future wil have primary , secondary and acliary filed readers
-
-#'release_groups': 'oceantracker.release_groups.point_release.PointRelease',}
-class_dicts={ # class dicts which replace lists
-            'pre_processing': {},
-            'release_groups': {},
-            'fields': {},  # user fields calculated from other fields  on reading
-            'particle_properties': {},  # user added particle properties, eg DistanceTraveled
-            'status_modifiers': {},  # change status of particles, eg tidal stranding
-            'velocity_modifiers': {},  # user added velocity effects, eg TerminalVelocity
-            'trajectory_modifiers': {},  # change particle paths, eg. re-suspension
-            'particle_statistics': {},  # heat map inside polygon statistics calculated on the fly
-            'particle_concentrations': {},  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
-    'nested_readers': {},
-    'event_loggers': {},  # writes events files ,eg PolygonEntryExit
-    # below still to be developed
-    # 'post_processing':      PDLdefaults({}), #todo after run post processing not implemented yet
-    'time_varying_info': {}, # particle info,eg. time,or  tide at at tide gauge, core example is particle time
-
-}
-
-
+class_dicts_list=[ # class dicts which replace lists
+            'pre_processing',
+            'release_groups' ,
+            'fields',  # user fields calculated from other fields  on reading
+            'particle_properties',  # user added particle properties, eg DistanceTraveled
+            'status_modifiers',  # change status of particles, eg tidal stranding
+            'velocity_modifiers',  # user added velocity effects, eg TerminalVelocity
+            'trajectory_modifiers',  # change particle paths, eg. re-suspension
+            'particle_statistics',  # heat map inside polygon statistics calculated on the fly
+            'particle_concentrations',  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
+            'nested_readers',
+            'event_loggers',  # writes events files ,eg PolygonEntryExit
+            # below still to be developed
+            # 'post_processing':      PDLdefaults({}), #todo after run post processing not implemented yet
+            'time_varying_info', # particle info,eg. time,or  tide at at tide gauge, core example is particle time
+            ]
 
 default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
                 'name': PVC(None, str),
@@ -112,6 +114,8 @@ cell_search_status_flags = dict(ok =0, outside_domain=1 ,blocked_domain=-5, bloc
 default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                  'fvcom': 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
                  'roms': 'oceantracker.reader.ROMS_reader.ROMsNativeReader'}
+
+
 
 # TODO LIST
 # todo for version 0.41

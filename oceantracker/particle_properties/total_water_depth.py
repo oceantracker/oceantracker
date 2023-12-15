@@ -7,7 +7,6 @@ class TotalWaterDepth(ParticleProperty):
     def __init__(self):
         super().__init__()
         self.add_default_params({'time_varying': PVC(True,bool),
-                                 'num_components': PVC(1, bool),
                                  'is3D': PVC(False,bool)})
 
     def check_requirements(self):

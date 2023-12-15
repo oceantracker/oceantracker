@@ -11,7 +11,6 @@ class VerticalGradient(CustomFieldBase):
                                  # below are not required as acquired from named field
                                  'time_varying': PVC(True, bool, is_required=False),
                                  'is3D': PVC(True, bool, is_required=False),
-                                 'num_components': PVC(None, int, is_required=False)
                                  })
         self.class_doc(description='Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"')
 
@@ -28,8 +27,7 @@ class VerticalGradient(CustomFieldBase):
         pass
 
     def check_requirements(self):
-        self.check_class_required_fields_prop_etc(requires3D=True,
-                                    required_fields_list=[self.params['name_of_field']])
+        self.check_class_required_fields_prop_etc(requires3D=True,)
     def update(self,active):
         si = self.shared_info
         fields= si.classes['fields']
@@ -42,6 +40,7 @@ class VerticalGradient(CustomFieldBase):
             # z levels
             _calc_field_vert_grad_from_zlevels(fields[self.params['name_of_field']].data,grid['zlevel'],
                                     grid['bottom_cell_index'], si.z0, fields[self.info['name']].data)
+
 @njit
 def _calc_field_vert_grad_from_zlevels(field4D,zlevel,bottom_cell_index,z0,gradient_field):
 

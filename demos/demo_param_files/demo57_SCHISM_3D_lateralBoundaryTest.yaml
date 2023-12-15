@@ -40,6 +40,7 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
+numba_caching: true
 output_file_base: demo57_SCHISM_3D_lateralBoundaryTest
 particle_properties:
   age_decay:

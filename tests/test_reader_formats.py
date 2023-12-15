@@ -10,7 +10,8 @@ import argparse
 def run_params(d):
     params = { 'user_note' : d['title'],
         'debug' : True,
-        'debug_plots' :d['debug_plots'],
+        'time_step': d['time_step'],
+        'dev_debug_plots' :d['debug_plots'],
         'use_A_Z_profile': d['use_A_Z_profile'],
         'max_run_duration': 5. * 24 * 3600 if d['max_days'] is None else  d['max_days']*24*3600.,
         'write_tracks': True,
@@ -26,8 +27,11 @@ def run_params(d):
         'nested_readers': d['nested_readers'],
         'resuspension': {'critical_friction_velocity': 0.01}
         }
+    if d['hgrid_file'] is not None:
+        params['reader']['hgrid_file_name']= d['hgrid_file']
+        params['open_boundary_type'] = 1
 
-    params['velocity_modifiers'] = {'fall_vel': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': 0.000}}
+    params['velocity_modifiers'] = {'fall_vel': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -d['fall_vel']}}
 
     params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_cords'])
 
@@ -37,6 +41,9 @@ def get_case(n):
     ax = None
 
     nested_readers={}
+    hgrid_file=None
+    time_step=3600.
+    fall_vel=0.
     match n:
         case 100:
             root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01'
@@ -50,7 +57,7 @@ def get_case(n):
                   ]
             ax = [1727860, 1823449, 5878821, 5957660]  # Auck
             title = 'NZ national test'
-        case 110:
+        case 50:
             root_input_dir = r'F:\Hindcasts\2023_Pelorus\Preliminary outputs'
             output_file_base = 'Pelourus_prelim'
             file_mask = 'schout*.nc'
@@ -61,6 +68,21 @@ def get_case(n):
             x0=cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0),axis=1)).tolist()
             ax=None# ax = [1727860, 1823449, 5878821, 5957660]  # Auck
             title= 'Pelourus prelim test'
+
+        case 51:
+            root_input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\schism_standard'
+            output_file_base = 'WhangareiHarbour_test'
+            file_mask = 'schout*.nc'
+            hgrid_file = path.join(root_input_dir,'hgrid_Whangarei.gr3')
+
+            x0 = [[-35.774216807463354, 174.34478905226064],
+                  [-35.852727582604615, 174.50694708878515],
+                  [-35.95198585006545, 174.5637958642573]
+                    ]
+            x0=cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0),axis=1)).tolist()
+            ax=None# ax = [1727860, 1823449, 5878821, 5957660]  # Auck
+            title= 'Whangarei prelim test'
+            time_step = 300.
 
         case 200:
             root_input_dir=r'F:\Hindcasts\colaborations\LakeSuperior\historical_sample\2022'
@@ -99,8 +121,8 @@ def get_case(n):
 
 
 
-    return dict(x0=x0,root_input_dir=root_input_dir,output_file_base=output_file_base+f'_{n:02d}',title=title,
-                file_mask=file_mask,ax=ax,max_days=max_days,nested_readers=nested_readers)
+    return dict(x0=x0,root_input_dir=root_input_dir,output_file_base=output_file_base+f'_{n:02d}',title=title,time_step=time_step,
+                file_mask=file_mask,ax=ax,max_days=max_days,nested_readers=nested_readers,hgrid_file=hgrid_file,    fall_vel= fall_vel)
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -126,7 +148,7 @@ if __name__ == '__main__':
         d['root_output_dir'] = root_output_dir
         d['regrid_z_to_uniform_sigma_levels'] = args.uniform
         d['debug_plots'] = args.debug_plots
-        d['use_A_Z_profile'] = False
+        d['use_A_Z_profile'] = True
 
         params=  run_params(d)
         params['open_boundary_type'] = 1 if args.open else 0

@@ -172,20 +172,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
             # debug_util.plot_walk_step(xq, si.classes['reader'].grid, part_prop)
 
-    #@function_profiler(__name__)
-    def interp_field_at_current_particle_locations(self, field_name, active, output):
-        # interp reader field_name inplace to particle locations to same time and memory
-        # output can optionally be redirected to another particle property name different from  reader's field_name
-        # particle_prop_name
-       # in place evaluation of field interpolation
-        si = self.shared_info
-        field_instance = si.classes['fields'][field_name]
-
-        if field_instance.is3D():
-            self._interp_field3D(field_name, field_instance, output,active)
-        else:
-            self._interp_field2D(field_name,field_instance, output,active)
-            #print('xx interp',field_name, output[:5])
 
 
     # @function_profiler(__name__)
@@ -438,8 +424,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         nodes = nodes.astype(np.int32)  # KD tree gives int64,need for compatibility of types
 
         # look in triangles attached to each node for tri containing the point
-        n_cell= tri_interp_util.check_if_point_inside_triangle_connected_to_node(xq, nodes,
+        #t0= perf_counter()
+        n_cell= tri_interp_util.check_if_point_inside_triangle_connected_to_node(xq[:, :2], nodes,
                                      grid['node_to_tri_map'], grid['tri_per_node'],  grid['bc_transform'], self.params['bc_walk_tol'])
+        #print('node find ', perf_counter()-t0)
+
         # if x is nan dist is infinite
         n_cell[~np.isfinite(dist)] = -1
         si.block_timer('Initial cell guess', t0)
@@ -481,8 +470,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if si.is3D_run:
             info['average_vertical_walk_steps'] = info['total_vertical_steps_walked'] / max(1, info['particles_located_by_walking'])
 
-        f = f" Triangle walk summary: Of  {info['particles_located_by_walking']:6,d} particles located "
-        f += f" {info['triangle_walks_retried']:1d}, walks were too long and were retried, "
+        f = f" Triangle walk summary: Of  {info['particles_located_by_walking']:6,d} particles located, "
+        f += f" {info['triangle_walks_retried']:1d} walks were too long and were retried, "
         f += f" of these  {info['particles_killed_after_triangle_walk_retry_failed']:1d} failed after retrying and were discarded"
         si.msg_logger.progress_marker(f)
 

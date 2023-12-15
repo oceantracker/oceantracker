@@ -248,9 +248,7 @@ def build_param_ref():
     page.add_heading('Core "class" roles',level=2)
     page.add_lines('Only one core class per role. These have singular role names.')
     page.add_new_toc_to_page('core', maxdepth=1)
-    for key in sorted(common_info.core_classes.keys()):
-        #if key in ['run_params'] or  type(common_info.core_classes[key])==list: continue
-
+    for key in sorted(common_info.core_class_list):
         toc = make_class_sub_pages(key)
         page.add_toc_link('core', toc)
 
@@ -258,10 +256,10 @@ def build_param_ref():
 
     page.add_heading('Multiple classes for each role',level=2)
     page.add_lines('Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.')
-    page.add_new_toc_to_page('role_dicts', maxdepth=1, sort_body=True)
+    page.add_new_toc_to_page('class_dicts', maxdepth=1, sort_body=True)
 
     page.add_new_toc_to_page('user', maxdepth=1)
-    for key in sorted(common_info.class_dicts.keys()):
+    for key in sorted(common_info.class_dicts_list):
         toc = make_class_sub_pages(key)
         page.add_toc_link('user', toc)
 

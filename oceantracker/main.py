@@ -2,6 +2,8 @@
 # eg run(params)
 import sys
 
+#
+
 
 
 # todo kernal/numba based RK4 step
@@ -26,15 +28,19 @@ from time import perf_counter
 from copy import  copy
 import numpy as np
 import difflib
-from oceantracker.util.ncdf_util import NetCDFhandler
-from oceantracker.util import basic_util , get_versions_computer_info
-from oceantracker.util import json_util ,yaml_util
-
-from oceantracker.util.parameter_checking import merge_params_with_defaults
-
 
 from oceantracker import common_info_default_param_dict_templates as common_info
 
+
+# start with numba caching turned off
+from oceantracker.util import  numba_util
+numba_util.set_caching(False)
+
+
+from oceantracker.util.parameter_checking import merge_params_with_defaults
+from oceantracker.util.ncdf_util import NetCDFhandler
+from oceantracker.util import basic_util , get_versions_computer_info
+from oceantracker.util import json_util ,yaml_util
 from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import get_hydro_model_info
@@ -42,8 +48,11 @@ from oceantracker.util.package_util import get_all_classes
 from oceantracker.util import  spell_check_util
 
 import traceback
+import os
 OTname = common_info.package_fancy_name
 help_url_base = 'https://oceantracker.github.io/oceantracker/_build/html/info/'
+
+
 
 def run(params):
     ot= _OceanTrackerRunner()
@@ -74,7 +83,7 @@ class OceanTracker():
 
     def add_class(self, class_role =None,case=None, **kwargs):
         ml = self.msg_logger
-        known_class_roles = list(common_info.class_dicts.keys()) + list(common_info.core_classes.keys())
+        known_class_roles = common_info.class_dicts_list + common_info.core_class_list
         if class_role is None:
             ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True)
             return
@@ -89,11 +98,11 @@ class OceanTracker():
                    hint= 'Must be one of-' +str(known_class_roles))
             return
 
-        if class_role in common_info.core_classes:
+        if class_role in common_info.core_class_list:
             # single class
             self.params[class_role] = kwargs
 
-        elif class_role in common_info.class_dicts:
+        elif class_role in common_info.class_dicts_list:
             # can have more than one class
             if 'name' not in kwargs:
                 ml.msg(f'add_class_dict() : for class_role"{class_role}" must have a name parameter, eg. name=my_{class_role}1, ignoring this class' ,
@@ -293,30 +302,30 @@ class _OceanTrackerRunner(object):
                     working_params['case_settings'][key] = item if item is not None else common_info.case_settings_defaults[key].get_default()
 
             # copy over core classes
-            for key, item in working_bc['core_roles'].items():
+            for key, item in working_bc['core_classes'].items():
                 if key == 'reader':
-                    working_params['core_roles']['reader'] = item
+                    working_params['core_classes']['reader'] = item
                 else:
-                    working_params['core_roles'][key] = deepcopy(item)
+                    working_params['core_classes'][key] = deepcopy(item)
                     if key in p:
                         # update base case with any case key-value pairs
-                        working_params['core_roles'][key].update(p[key])
+                        working_params['core_classes'][key].update(p[key])
 
             # add class dict to full case
-            for role in working_bc['role_dicts'].keys():
+            for role in working_bc['class_dicts'].keys():
                 # add with base case names
-                for name, item in working_bc['role_dicts'][role].items():
-                    working_params['role_dicts'][role][name] = item
+                for name, item in working_bc['class_dicts'][role].items():
+                    working_params['class_dicts'][role][name] = item
 
                 # add case list named classes if role in p
-                for name, item in working_params['role_dicts'][role].items():
+                for name, item in working_params['class_dicts'][role].items():
                     if name in base_case_params_full[role]:
                         ml.msg(f'For the  class role "{role}", the named class "{name}" has been used in the base for case' , warning=True,
                                    hint= 'names should be unique, will ignore class in the base case', crumbs=msg_tag)
-                        working_params['role_dicts'][role][name] = item
+                        working_params['class_dicts'][role][name] = item
 
             # check at least one release group from base or case params
-            if len(working_params['role_dicts']['release_groups']) ==0:
+            if len(working_params['class_dicts']['release_groups']) ==0:
                 ml.msg(f'Must have at lest one release group from base case parms or case list', fatal_error=True,
                        hint='check "release_groups" key in both base and case list parameters', crumbs=msg_tag)
 
@@ -376,14 +385,15 @@ class _OceanTrackerRunner(object):
     def _decompose_params(self, params, full_checks=True, crumbs=None):
         ml = self.msg_logger
         w={'caseID':0, 'shared_settings':{},'case_settings':{},
-           'core_roles':deepcopy(common_info.core_classes), # insert full lis and defaults
-           'role_dicts': deepcopy(common_info.class_dicts),
+           'core_classes':{k: {} for k in common_info.core_class_list}, # insert full list and defaults
+           'class_dicts': {k: {} for k in common_info.class_dicts_list},
            }
+
 
         known_top_level_keys= list(common_info.shared_settings_defaults.keys())\
                             + list(common_info.case_settings_defaults.keys()) \
-                            + list(common_info.class_dicts.keys()) \
-                            +list(common_info.core_classes.keys())
+                            + common_info.class_dicts_list\
+                            + common_info.core_class_list
 
         # check for compulsory classes
         # check require classes are given
@@ -415,17 +425,19 @@ class _OceanTrackerRunner(object):
 
                 w['shared_settings'][k] = item
 
+            elif k in common_info.core_class_list:
+
+                w['core_classes'][k] = item
+
             elif k in common_info.case_settings_defaults.keys():
                     w['case_settings'][k] = item
-            elif k in common_info.core_classes.keys():
-                w['core_roles'][k].update(item)
 
-            elif k in common_info.class_dicts.keys():
+            elif k in common_info.class_dicts_list:
                 if type(item) is not dict:
                     ml.msg('class dict type "' + key +'" must contain a dictionary, where key is name of class, value is a dictionary of parameters',
                                      hint = ' for this key got type =' +str(type(item)),
                                    fatal_error=True, crumbs=crumbs)
-                w['role_dicts'][k] = item
+                w['class_dicts'][k] = item
 
             else:
                 spell_check_util.spell_check(key,known_top_level_keys,ml,' top level parm./key, ignoring')
@@ -443,7 +455,8 @@ class _OceanTrackerRunner(object):
         # created a dict which can be used to build a reader
         t0= perf_counter()
         ml = self.msg_logger
-        reader_params =  working_params['core_roles']['reader']
+
+        reader_params =  working_params['core_classes']['reader']
 
         if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
             ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',fatal_error=True, exit_now=True )
@@ -454,7 +467,7 @@ class _OceanTrackerRunner(object):
             # infer class name from netcdf files if possible
             reader_params= get_hydro_model_info.check_fileformat(reader_params,file_list, ml)
 
-        reader = make_class_instance_from_params('reader', reader_params, ml,  class_role_name='reader')
+        reader = make_class_instance_from_params('reader', reader_params, ml,  default_classID='reader')
         ml.exit_if_prior_errors() # class name missing or missing required variables
 
         working_params['file_info']  = reader.get_hindcast_files_info(file_list, ml) # get file lists
@@ -592,8 +605,8 @@ def param_template():
     for key in all_settings:
         d[key] = None
 
-    for key in sorted(common_info.core_classes.keys()):
+    for key in sorted(common_info.class_dicts_list):
         d[key] = {}
-    for key in sorted(common_info.class_dicts.keys()):
+    for key in sorted(common_info.core_class_list):
         d[key] = {}
     return deepcopy(d)

@@ -41,6 +41,7 @@ event_loggers:
         - 5489972.7479
       user_polygon_name: B
 max_run_duration: 1296000.0
+numba_caching: true
 output_file_base: demo61_concentration_test
 particle_concentrations:
   outfall_conc:
