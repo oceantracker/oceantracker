@@ -65,9 +65,9 @@ class _BaseReader(ParameterBaseClass):
 
     def get_field_params(self,nc, name):   nopass()
 
-    def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):   nopass()
+    def read_zlevel_as_float32(self, nc, grid,fields, file_index, zlevel_buffer, buffer_index):   nopass()
 
-    def read_dry_cell_data(self, nc,grid,  file_index, is_dry_cell_buffer, buffer_index):   nopass()
+    def read_dry_cell_data(self, nc,grid,fields,  file_index, is_dry_cell_buffer, buffer_index):   nopass()
 
     def set_up_uniform_sigma(self,nc, grid):nopass()
 
@@ -443,15 +443,15 @@ class _BaseReader(ParameterBaseClass):
 
             # read grid time, zlevel
             # do this after reading fields as some hindcasts required tide field to get zlevel, eg FVCOM
-            self.read_time_variable_grid_variables(nc,grid, buffer_index, file_index)
+            self.read_time_variable_grid_variables(nc,grid,fields, buffer_index, file_index)
 
             # read time varying vector and scalar reader fields
             # do this in order set above
-            for name in si.classes['fields'].keys():
-                field = fields[name]
+            for name, field in fields.items():
+
                 if not field.is_time_varying() or field.info['type'] != 'reader_field': continue
 
-                data = self.assemble_field_components(nc, name, file_index=file_index)
+                data = self.assemble_field_components(nc, name, field, file_index=file_index)
                 data = self.preprocess_field_variable(nc, name,grid, data)  # in place tweaks, eg zero vel at bottom
 
                 junk = data
@@ -507,10 +507,8 @@ class _BaseReader(ParameterBaseClass):
         # record useful info/diagnostics
         bi['n_filled'] = total_read
 
-    def assemble_field_components(self, nc, name, file_index=None):
+    def assemble_field_components(self, nc, name, field, file_index=None):
         # read scalar fields / join together the components which make vector from component list
-        si = self.shared_info
-        field = si.classes['fields'][name]
 
         params = self.params
 
@@ -534,7 +532,7 @@ class _BaseReader(ParameterBaseClass):
 
 
 
-    def read_time_variable_grid_variables(self, nc,grid, buffer_index, file_index):
+    def read_time_variable_grid_variables(self, nc,grid, fields, buffer_index, file_index):
         # read time and  grid variables, eg time,dry cell
         si = self.shared_info
 
@@ -543,14 +541,13 @@ class _BaseReader(ParameterBaseClass):
         # add date for convenience
         grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
 
-        self.read_dry_cell_data(nc,grid, file_index, grid['is_dry_cell'], buffer_index)
+        self.read_dry_cell_data(nc,grid, fields, file_index, grid['is_dry_cell'], buffer_index)
 
         if si.is3D_run:
-            # grid['total_water_depth'][buffer_index,:]= np.squeeze(si.classes['fields']['tide'].data[buffer_index,:] + si.classes['fields']['water_depth'].data)
             # read zlevel inplace to save memory?
             if 'sigma' not in grid:
                 # native zlevel grid and used for regidding in sigma
-                self.read_zlevel_as_float32(nc, file_index, grid['zlevel'], buffer_index)
+                self.read_zlevel_as_float32(nc,grid,fields, file_index, grid['zlevel'], buffer_index)
 
 
 
@@ -615,7 +612,7 @@ class _BaseReader(ParameterBaseClass):
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
-        nc.write_a_new_variable('water_depth', si.classes['fields']['water_depth'].data.ravel(), ('node_dim',))
+        nc.write_a_new_variable('water_depth', si.classes['field_group_manager'].fields['water_depth'].data.ravel(), ('node_dim',))
         nc.close()
 
         output_files['grid_outline'] = output_files['output_file_base'] + '_grid_outline.json'

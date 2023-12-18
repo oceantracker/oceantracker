@@ -104,12 +104,11 @@ class unstructured_FVCOM(_BaseReader):
     def number_hindcast_zlayers(self, nc):
         return nc.dim_size('siglev')
 
-    def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
+    def read_zlevel_as_float32(self, nc,grid,fields, file_index, zlevel_buffer, buffer_index):
         # calcuate zlevel from depth fractions, tide and water depth
         # FVCOM has fraction of depth < from free surface, with top value first in z dim of arrAy
         # todo check first value is the bottom or free surface+-, look like free surface??
-        grid = self.grid
-        fields = self.shared_info.classes['fields']
+
 
         # time varying zlevel from fixed water depth fractions and total water depth at nodes
         water_depth = fields['water_depth'].data[:, :, :, 0]
@@ -117,14 +116,13 @@ class unstructured_FVCOM(_BaseReader):
 
         zlevel_buffer[buffer_index, ...] = grid['zlevel_fractions'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
 
-    def read_dry_cell_data(self, nc,grid,  file_index,is_dry_cell_buffer,buffer_index):
+    def read_dry_cell_data(self, nc,grid, fields,  file_index,is_dry_cell_buffer,buffer_index):
         si = self.shared_info
         if nc.is_var('wet_cells'):
             wet_cells= nc.read_a_variable('wet_cells',sel=file_index)
             is_dry_cell_buffer[buffer_index,:] = wet_cells != 1
         else:
             # get dry cells from water depth and tide
-            fields = si.classes['fields']
             reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
                                                     si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
 

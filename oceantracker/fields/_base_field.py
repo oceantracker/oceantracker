@@ -21,7 +21,7 @@ class ReaderField(ParameterBaseClass):
         reader = None
         interp = None
 
-    def initial_setup(self,grid):
+    def initial_setup(self,grid, fields):
         si = self.shared_info
         params= self.params
         #todo attach reader to field

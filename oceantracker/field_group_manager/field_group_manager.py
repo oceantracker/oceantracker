@@ -38,10 +38,14 @@ class FieldGroupManager(ParameterBaseClass):
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['class_dicts']['fields'].items():
-            i = si.create_class_dict_instance(name, 'fields', 'user', params, crumbs='Adding "fields" from user params', initialise=False)
+            i = make_class_instance_from_params(name, params, si.msg_logger,
+                                                crumbs=f'Adding "fields" from user params for field "{name}"')
             i.initial_setup()
             # if not time varying can update once at start from other non-time varying fields
             if not i.is_time_varying(): i.update()
+            if name in self.fields:
+                si.msg_logger.msg(f'Custom field "{name}" is already a defined field ', hint='Use another unique name?', fatal_error= True, exit_now=True)
+            self.fields[name] = i
         pass
 
 
@@ -53,7 +57,10 @@ class FieldGroupManager(ParameterBaseClass):
         self.interpolator.final_setup(self.grid)
 
         # add tidal stranding class
-        i = si.add_core_class('tidal_stranding', si.working_params['core_classes']['tidal_stranding'], crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', initialise=False)
+        i = make_class_instance_from_params('tidal_stranding', si.working_params['core_classes']['tidal_stranding'], si.msg_logger,
+                                            default_classID='tidal_stranding',
+                                            crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ')
+
         i.initial_setup()
         self.tidal_stranding = i
 
@@ -80,31 +87,13 @@ class FieldGroupManager(ParameterBaseClass):
         info = self.info
         interp = self.interpolator
         grid = self.grid
-
-        fi = info['file_info']
-        bi = info['buffer_info']
+        fields= self.fields
 
 
         # set buffer index from this time and next inside stepinfo
         # get next two buffer time steps around the given time in reader ring buffer
         # plus global time step locations and time ftactions od timre step
         # put results in interpolators step info numpy structure
-        hindcast_fraction = (time_sec - fi['first_time']) / (fi['last_time']- fi['first_time'])
-        info['current_hydro_model_step'] = int((fi['n_time_steps_in_hindcast'] - 1) * hindcast_fraction)  # global hindcast time step
-
-        # ring buffer locations of surounding steps
-        info['current_buffer_steps'][0] = info['current_hydro_model_step'] %  bi['buffer_size']
-        info['current_buffer_steps'][1] = (info['current_hydro_model_step'] + int(si.model_direction)) %  bi['buffer_size']
-
-        time_hindcast = grid['time'][  info['current_buffer_steps'][0]]
-
-        # sets the fraction of time step that current time is between
-        # surrounding hindcast time steps
-        # abs makes it work when backtracking
-        s = abs(time_sec - time_hindcast) / fi['hydro_model_time_step']
-        info['fractional_time_steps'][0] = 1.0 - s
-        info['fractional_time_steps'][1] = s
-
         info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self.time_step_and_buffer_offsets(time_sec)
 
         if fix_bad:
@@ -112,7 +101,10 @@ class FieldGroupManager(ParameterBaseClass):
             part_prop['cell_search_status'].set_values(cell_search_status_flags['ok'], active)
 
         # find cell for xq, node list and weight for interp at calls
-        interp.find_cell(grid, xq,info['current_buffer_steps'],info['fractional_time_steps'], active)
+        interp.find_hori_cell(grid,fields, xq,info['current_buffer_steps'],info['fractional_time_steps'], active)
+
+        if si.is3D_run:
+            interp.find_vertical_cell(grid,fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
 
         if fix_bad:
             interp.fix_bad_cell_search(info['current_buffer_steps'],info['fractional_time_steps'],active)
@@ -218,7 +210,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         if field_instance.is3D():
             # fractions for water vel. are log layer in bottom cell
-            #todo 3D not working, needs nz cel and z fraction
+            #todo 3D not working, needs nz cell and z fraction
             z_fraction = junk if field_name == 'water_velocity' else junk
 
             self.interpolator._interp_field3D(field_name, field_instance, self.grid, current_buffer_steps, fractional_time_steps,
@@ -234,7 +226,9 @@ class FieldGroupManager(ParameterBaseClass):
     def _setup_hydro_reader(self,reader_params):
         si = self.shared_info
 
-        self.reader = si.add_core_class('reader', reader_params,   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
+        self.reader  = make_class_instance_from_params('reader', reader_params, si.msg_logger,
+                                            crumbs=f'field Group Manager>setup_hydro_fields> reader class  ')
+        #self.reader = si.add_core_class('reader', reader_params,   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
 
         reader = self.reader
         reader.initial_setup()
@@ -268,7 +262,9 @@ class FieldGroupManager(ParameterBaseClass):
 
     def set_up_interpolator(self):
         si = self.shared_info
-        i = si.add_core_class('interpolator', si.working_params['core_classes']['interpolator'], crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ', initialise=False)
+        i = make_class_instance_from_params('interpolator', si.working_params['core_classes']['interpolator'],si.msg_logger,
+                                                    default_classID='interpolator',
+                                                    crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
         i.initial_setup(self.grid)
         self.interpolator = i
 
@@ -324,10 +320,12 @@ class FieldGroupManager(ParameterBaseClass):
         si = self.shared_info
         reader= self.reader
         field_params = reader.get_field_params(nc, name)
-        field_params['class_name'] = 'oceantracker.fields._base_field.ReaderField'
 
-        i = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs=f' creating reader field setup > "{name}"', initialise=False)
-        i.initial_setup(self.grid)
+        i = make_class_instance_from_params(name, field_params, si.msg_logger,
+                                            default_classID='field_reader',
+                                            crumbs=f'Field Group Manager > adding reader field "{name}"')
+        i.info['type'] = 'reader_field'
+        i.initial_setup(self.grid, self.fields)
 
 
         # it not field map given then add a map based on name, so only works for scalars
@@ -338,15 +336,19 @@ class FieldGroupManager(ParameterBaseClass):
 
         # read data if not time varying
         if not i.is_time_varying():
-            i.data[0, ...] = reader.assemble_field_components(nc, name)
+            i.data[0, ...] = reader.assemble_field_components(nc, name, i)
 
         self.fields[name] = i
 
     def add_custom_field(self, name,  params={}, crumbs='', default_classID=None):
-        # classname must be given
+        # class name given or default_classID specified to get from defaults in common_info
         si = self.shared_info
-        i = si.create_class_dict_instance(name, 'fields', 'custom_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=False,default_classID=default_classID)
-        i.initial_setup(self.grid)
+
+        i = make_class_instance_from_params(name, params, si.msg_logger,
+                                            default_classID=default_classID,
+                                            crumbs=crumbs+ f'Field group manager > custom field setup > "{name}"')
+        i.info['type'] = 'custom_field'
+        i.initial_setup(self.grid, self.fields)
         self.fields[name] = i
         return i
 
@@ -359,18 +361,20 @@ class FieldGroupManager(ParameterBaseClass):
 
 
     def get_hydo_model_time_step(self):
-        return self.shared_info.classes['reader'].info['file_info']['hydro_model_time_step']
+        return self.reader.info['file_info']['hydro_model_time_step']
 
     def get_hindcast_range(self):
-        si = self.shared_info
         reader = self.reader
         r = [reader.info['file_info']['first_time'],reader.info['file_info']['last_time']]
         return np.asarray(r)
 
+    def get_hindcast_start_end_times(self):
+        reader = self.reader
+        return self.reader.info['file_info']['first_time'], reader.info['file_info']['last_time']
+
     def write_hydro_model_grids(self):
         si = self.shared_info
         self.reader.write_hydro_model_grid(self.grid)
-
 
 
     def screen_info(self):
@@ -395,4 +399,5 @@ class FieldGroupManager(ParameterBaseClass):
     
     def close(self):
         si = self.shared_info
+        self.info.update(self.reader.info)
 

@@ -78,7 +78,7 @@ class SCHISMSreaderNCDF(_BaseReader):
 
     def number_hindcast_zlayers(self, nc): return nc.dim_size('nSCHISM_vgrid_layers')
 
-    def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
+    def read_zlevel_as_float32(self, nc, grid,fields, file_index, zlevel_buffer, buffer_index):
         zlevel_buffer[buffer_index,...] = nc.read_a_variable('zcor', sel=file_index).astype(np.float32)
 
     def read_factional_zlevels(self, nc):
@@ -153,10 +153,9 @@ class SCHISMSreaderNCDF(_BaseReader):
              ]
         return data.reshape(s)
 
-    def read_dry_cell_data(self,nc,grid, file_index,is_dry_cell_buffer, buffer_index):
+    def read_dry_cell_data(self,nc,grid,fields, file_index,is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is then dry is_dry_cell_buffer=1
 
-        si = self.shared_info
         data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
         is_dry_cell_buffer[buffer_index, :] = reader_util.append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
