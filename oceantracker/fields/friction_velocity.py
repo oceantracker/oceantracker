@@ -1,6 +1,6 @@
 from oceantracker.fields._base_field import CustomFieldBase
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-
+from oceantracker.util.numba_util import njitOT
 from numba import njit
 import numpy as np
 
@@ -15,10 +15,9 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
 
         self.check_class_required_fields_prop_etc(requires3D=True)
 
-    def update(self, buffer_index):
+    def update(self, fields,grid,buffer_index):
         si = self.shared_info
-        grid = si.classes['reader'].grid
-        fields = si.classes['fields']
+
         if 'sigma' in grid:
             # sigma model
             self.calc_friction_velocity_from_sigma_levels(buffer_index,
@@ -32,7 +31,7 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
         pass
 
     @staticmethod
-    @njit()
+    @njitOT
     def calc_friction_velocity_from_sigma_levels(buffer_index, sigma, tide,water_depth,
                                                  water_velocity, z0, out):
         # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
@@ -48,7 +47,7 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
                 # will give np.inf for very thin lower layers, ie small total water depth
 
     @staticmethod
-    @njit()
+    @njitOT
     def calc_friction_velocity_from_native_zlevels(buffer_index, zlevel, bottom_cell_index, z0, water_velocity, out):
         # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
         # based on log layer  u= u_* log(z/z0)/kappa
@@ -66,15 +65,13 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
 class FrictionVelocityFromBottomStress(FrictionVelocityFromNearSeaBedVelocity):
 
 
-    def update(self, buffer_index):
+    def update(self, fields,grid, buffer_index):
         si = self.shared_info
-        grid = si.classes['reader'].grid
-        fields = si.classes['fields']
         self.calc_friction_velocity_from_bottom_stress(buffer_index,fields['bottom_stress'].data,  si.settings['water_density'],self.data)
 
 
     @staticmethod
-    @njit()
+    @njitOT
     def calc_friction_velocity_from_bottom_stress(buffer_index, bottom_stress, water_density,  out):
         # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
         # based on log layer  u= u_* log(z/z0)/kappa

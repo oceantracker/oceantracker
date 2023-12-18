@@ -7,6 +7,7 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from numba.typed import List as NumbaList
 from numba import  njit
+from oceantracker.util.numba_util import njitOT
 
 from oceantracker.util import time_util
 class _BaseParticleLocationStats(ParameterBaseClass):
@@ -209,7 +210,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.stop_update_timer()
 
     @staticmethod
-    @njit
+    @njitOT
     def sel_status_waterdepth_and_z(status, x, water_depth, status_range, z_range, water_depth_range, num_in_buffer, out):
         n_found = 0
         if x.shape[1] == 3:

@@ -7,18 +7,14 @@ import os
 def seed_numba_random(a):
     np.random.seed(a)
 
-def set_caching( b):
-   os.environ['oceantracker_numba_caching'] =str( 1 if b else 0)
+def set_caching(b):
+   os.environ['oceantracker_numba_caching'] =str(1 if b else 0)
 def is_caching():
     return  os.environ['oceantracker_numba_caching'] =='1'
 
+def njitOT(func):
+    return njit(func, cache=os.environ['oceantracker_numba_caching'] == '1')
 
-def njitter(f,signature,return_type=None, parallel=False, nogil=True):
-
-    custom_njit = njit( signature, parallel=parallel,nogil=nogil)
-    #return custom_njit(f)
-    #return f
-    return njit(f) #disabpel signatures
 
 
 # below not used

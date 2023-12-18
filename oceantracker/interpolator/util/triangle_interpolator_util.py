@@ -4,7 +4,7 @@ from oceantracker.util.profiling_util import function_profiler
 from oceantracker.common_info_default_param_dict_templates import particle_info, cell_search_status_flags
 # record variable to hold walk info/counts
 # to reduce number of args required in numba functions and be morr readable
-from oceantracker.util.numba_util import  is_caching
+from oceantracker.util.numba_util import  njitOT
 import os
 
 # globals
@@ -26,7 +26,7 @@ search_outside_domain= int(cell_search_status_flags['outside_domain'])
 search_failed= int(cell_search_status_flags['failed'])
 
 #below is called by another numba function which will work out signature on first call
-@njit(cache=is_caching())
+@njitOT
 def _get_single_BC_cord_numba(x, BCtransform, bc):
     # get BC cord of x for one triangle from DT transform matrix inverse, see scipy.spatial.Delaunay
     # also return index the smallest BC for walk and largest
@@ -46,7 +46,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
     return np.argmin(bc), np.argmax(bc)
 
 # ________ Barycentric triangle walk________
-@njit(cache=is_caching())
+@njitOT
 def BCwalk(xq, tri_walk_AOS, dry_cell_index,
                 n_cell, cell_search_status,bc_cords,
                 walk_counts,
@@ -122,7 +122,7 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
         walk_counts[1] += n_steps  # steps taken
         walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
 
-@njit(cache=is_caching())
+@njitOT
 def BCwalk_with_move_backsV1(xq,
                            tri_walk_AOS, dry_cell_index,
                            x_last_good, n_cell,n_cell_last_good,status,bc_cords,
@@ -203,18 +203,18 @@ def BCwalk_with_move_backsV1(xq,
         walk_counts[1] += n_steps  # steps taken
         walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
 
-@njit(cache=is_caching())
+@njitOT
 def _move_back(x, x_old):
     for i in range(x.shape[0]): x[i] = x_old[i]
 
-@njit(cache=is_caching())
-def get_BC_cords_numba(x, n_cells, BCtransform, bc):
+@njitOT
+def calc_BC_cords_numba(x, n_cells, BCtransform, bc):
     # get BC cords of set of points x inside given cells and return in bc
 
     for n in range(x.shape[0]):
         _get_single_BC_cord_numba(x[n, :], BCtransform[n_cells[n], :, :], bc[n, :])
 
-@njit(cache=is_caching())
+@njitOT
 def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tri_per_node, BCtransform, bc_walk_tol):
     # get BC cords of set of points x inside given cells and return in bc
     bc = np.zeros((3,), dtype=np.float64)  # working space
@@ -232,7 +232,7 @@ def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tr
                 continue
     return n_cell
 
-@njit(cache=is_caching())
+@njitOT
 def get_BC_transform_matrix(points, simplices):
     # pre-build barycectric tranforms for 2D triangles based in scipy spatial qhull as used by scipy.Delauny
 
@@ -284,7 +284,7 @@ def get_BC_transform_matrix(points, simplices):
     return Tinvs
 
 
-@njit(cache=is_caching())
+@njitOT
 def get_depth_cell_sigma_layers(xq,
                                 triangles, water_depth, tide, minimum_total_water_depth,
                                 sigma, sigma_map_nz,sigma_map_dz,
@@ -369,7 +369,7 @@ def get_depth_cell_sigma_layers(xq,
 
     pass
 
-@njit(cache=is_caching())
+@njitOT
 def _eval_z_at_nz_cell(tf, nz_cell, zlevel1, zlevel2, nodes, nz_bottom_nodes, nz_top_cell, BCcord):
     # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
     z = 0.
@@ -378,7 +378,9 @@ def _eval_z_at_nz_cell(tf, nz_cell, zlevel1, zlevel2, nodes, nz_bottom_nodes, nz
         z += BCcord[m] * (zlevel1[nodes[m],nz] *  tf[1] + zlevel2[nodes[m],nz] * tf[0])
     return z
 
-@njit(cache=is_caching())
+
+
+@njitOT
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                                   triangles, zlevel, bottom_cell_index,
                                                   n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,

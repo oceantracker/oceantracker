@@ -3,8 +3,11 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
-from oceantracker.util import time_util
+from oceantracker.util import time_util, ncdf_util
 from oceantracker.util.profiling_util import function_profiler
+from oceantracker.common_info_default_param_dict_templates import  cell_search_status_flags
+from os import path
+
 from time import  perf_counter
 from copy import deepcopy
 
@@ -23,48 +26,129 @@ class FieldGroupManager(ParameterBaseClass):
         self.n_buffer = np.zeros((2, ), dtype=np.int32)
         self.fields={}
 
+        info = self.info
+        info['current_hydro_model_step']= 0
+        info['fractional_time_steps']= np.zeros((2,), dtype=np.float64)
+        info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
+
     def initial_setup(self):
         si= self.shared_info
         self._setup_hydro_reader(si.working_params['core_classes']['reader'])
-        reader = self.reader
+        self.set_up_interpolator()
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['class_dicts']['fields'].items():
-            i = si.create_class_dict_instance(name, 'fields', 'user', params, crumbs='Adding "fields" from user params')
+            i = si.create_class_dict_instance(name, 'fields', 'user', params, crumbs='Adding "fields" from user params', initialise=False)
             i.initial_setup()
             # if not time varying can update once at start from other non-time varying fields
             if not i.is_time_varying(): i.update()
         pass
 
 
+
+
     def final_setup(self):
         si = self.shared_info
-        si.classes['reader'].final_setup()
+        self.reader.final_setup()
+        self.interpolator.final_setup(self.grid)
+
+        # add tidal stranding class
+        i = si.add_core_class('tidal_stranding', si.working_params['core_classes']['tidal_stranding'], crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', initialise=False)
+        i.initial_setup()
+        self.tidal_stranding = i
 
 
-    def update(self, time_sec):
+    def update_reader(self, time_sec):
         # check if all interpolators have the time steps they need
         si  = self.shared_info
         t0 = perf_counter()
         reader = self.reader
         if not reader.are_time_steps_in_buffer(time_sec):
-                reader.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
+                reader.fill_time_buffer(self.fields, self.grid, time_sec)  # get next steps into buffer if not in buffer
         si.block_timer('Fill reader buffers',t0)
 
+    def update_tidal_stranding_status(self, time_sec, alive):
+        self.tidal_stranding.update(self.grid, time_sec, alive)
 
     def setup_time_step(self, time_sec, xq, active, fix_bad=True):
-        # set up stuff needed by all fields before any  interpolation
+        # set up stuff needed by all fields before any 2D interpolation
         # eg query point and nt the current global time step, from which we are making nt+1
-        # currently only sets up primary interpolator
-        si =self.shared_info
-        si.classes['interpolator'].setup_interp_time_step(time_sec, xq, active,fix_bad=fix_bad)
+        # if fix bad, then blocked and cells are corrected, for RK steps want to delay this till sub-steps are complete, so set fix_bad = false
 
-        return active
+        si = self.shared_info
+        part_prop = si.classes['particle_properties']
+        info = self.info
+        interp = self.interpolator
+        grid = self.grid
+
+        fi = info['file_info']
+        bi = info['buffer_info']
+
+
+        # set buffer index from this time and next inside stepinfo
+        # get next two buffer time steps around the given time in reader ring buffer
+        # plus global time step locations and time ftactions od timre step
+        # put results in interpolators step info numpy structure
+        hindcast_fraction = (time_sec - fi['first_time']) / (fi['last_time']- fi['first_time'])
+        info['current_hydro_model_step'] = int((fi['n_time_steps_in_hindcast'] - 1) * hindcast_fraction)  # global hindcast time step
+
+        # ring buffer locations of surounding steps
+        info['current_buffer_steps'][0] = info['current_hydro_model_step'] %  bi['buffer_size']
+        info['current_buffer_steps'][1] = (info['current_hydro_model_step'] + int(si.model_direction)) %  bi['buffer_size']
+
+        time_hindcast = grid['time'][  info['current_buffer_steps'][0]]
+
+        # sets the fraction of time step that current time is between
+        # surrounding hindcast time steps
+        # abs makes it work when backtracking
+        s = abs(time_sec - time_hindcast) / fi['hydro_model_time_step']
+        info['fractional_time_steps'][0] = 1.0 - s
+        info['fractional_time_steps'][1] = s
+
+        info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self.time_step_and_buffer_offsets(time_sec)
+
+        if fix_bad:
+            # record current cell and location so they can be fixed
+            part_prop['cell_search_status'].set_values(cell_search_status_flags['ok'], active)
+
+        # find cell for xq, node list and weight for interp at calls
+        interp.find_cell(grid, xq,info['current_buffer_steps'],info['fractional_time_steps'], active)
+
+        if fix_bad:
+            interp.fix_bad_cell_search(info['current_buffer_steps'],info['fractional_time_steps'],active)
+
+    def time_step_and_buffer_offsets(self, time_sec):
+        si = self.shared_info
+        grid= self.grid
+        fi = self.info['file_info']
+        bi = self.info['buffer_info']
+
+        fractional_time_steps= np.zeros((2,), dtype=np.float64)
+        current_buffer_steps = np.zeros((2,), dtype=np.int32)
+
+        hindcast_fraction = (time_sec - fi['first_time']) / (fi['last_time'] - fi['first_time'])
+        current_hydro_model_step = int((fi['n_time_steps_in_hindcast'] - 1) * hindcast_fraction)  # global hindcast time step
+
+        # ring buffer locations of surounding steps
+        current_buffer_steps[0] = current_hydro_model_step % bi['buffer_size']
+        current_buffer_steps[1] = (current_hydro_model_step + int(si.model_direction)) % bi['buffer_size']
+
+        time_hindcast = grid['time'][current_buffer_steps[0]]
+
+        # sets the fraction of time step that current time is between
+        # surrounding hindcast time steps
+        # abs makes it work when backtracking
+        s = abs(time_sec - time_hindcast) / fi['hydro_model_time_step']
+        fractional_time_steps[0] = 1.0 - s
+        fractional_time_steps[1] = s
+
+        return current_hydro_model_step, current_buffer_steps, fractional_time_steps
+
     def fix_time_step(self, active):
         # fix any bad walks etc.
         # currently only sets up primary interpolator
-        si =self.shared_info
-        si.classes['interpolator'].fix_bad_cell_search(active)
+        info = self.info
+        self.interpolator.fix_bad_cell_search(info['current_buffer_steps'],info['fractional_time_steps'], active)
         return active
 
 
@@ -76,25 +160,75 @@ class FieldGroupManager(ParameterBaseClass):
         # particle_prop_name
 
         si = self.shared_info
+        info= self.info
+        grid = self.grid
+
+        part_prop = si.classes['particle_properties']
+        n_cell = part_prop['n_cell'].data
+        bc_cords = part_prop['bc_cords'].data
+
+
         if output is None:
             # over write current values
             output = si.classes['particle_properties'][field_name].used_buffer()
         field_instance = self.fields[field_name]
 
         if field_instance.is3D():
-            self.interpolator._interp_field3D(field_name, field_instance, output, active)
+            # fractions for water vel. are log layer in bottom cell
+            nz_cell = part_prop['nz_cell'].data
+            z_fraction = part_prop['z_fraction_water_velocity'].data if field_name == 'water_velocity' else part_prop['z_fraction'].data
+
+            self.interpolator._interp_field3D(field_name, field_instance,grid, info['current_buffer_steps'], info['fractional_time_steps'],
+                                              n_cell, nz_cell, z_fraction, bc_cords,
+                                              output, active)
         else:
-            self.interpolator._interp_field2D(field_name, field_instance, output, active)
+            self.interpolator._interp_field2D(field_name, field_instance,grid,info['current_buffer_steps'], info['fractional_time_steps'],
+                                              n_cell, bc_cords,
+                                              output, active)
             # print('xx interp',field_name, output[:5])
 
-    def interp_named_field_at_given_locations_and_time(self, field_name, x, time= None, n_cell=None,bc_cord=None, output=None):
+    def interp_named_field_at_given_locations_and_time(self, field_name, x, time_sec= None, n_cell=None,bc_cord=None, output=None):
         # interp reader field_name at specfied locations,  not particle locations
         # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
-
+        #todo move interp function into here
         si = self.shared_info
-        output = self.interpolator.eval_field_interpolation_at_given_locations(field_name, self.fields[field_name], x, time,
-                                                                               output=output, n_cell=n_cell)
+        info = self.info
+
+        field_instance = self.fields[field_name]
+
+
+        if time_sec is None:
+            # dummy time
+            time_sec= self.reader.info['file_info']['first_time']
+
+        current_hydro_model_step, current_buffer_steps, fractional_time_steps = self.time_step_and_buffer_offsets(time_sec)
+
+        part_prop = si.classes['particle_properties']
+
+        # is no output name given particle property for output is same as hindcast field_name
+        if output is None:
+            output = np.full((x.shape[0], field_instance.data.shape[3]), np.nan) if field_instance.data.shape[3] > 1 else np.full((x.shape[0],), np.nan)
+
+        if n_cell is None:
+            n_cell = self.interpolator.initial_horizontal_cell(self.grid, x)
+
+        bc_cords = self.interpolator.get_bc_cords(self.grid, x, n_cell)
+        active = np.arange(x.shape[0])
+
+        if field_instance.is3D():
+            # fractions for water vel. are log layer in bottom cell
+            #todo 3D not working, needs nz cel and z fraction
+            z_fraction = junk if field_name == 'water_velocity' else junk
+
+            self.interpolator._interp_field3D(field_name, field_instance, self.grid, current_buffer_steps, fractional_time_steps,
+                                              n_cell, nz_cell, z_fraction, bc_cords,
+                                              output, active)
+        else:
+            self.interpolator._interp_field2D(field_name, field_instance, self.grid, current_buffer_steps, fractional_time_steps,
+                                              n_cell, bc_cords,
+                                              output, active)
+
         return output
 
     def _setup_hydro_reader(self,reader_params):
@@ -104,19 +238,23 @@ class FieldGroupManager(ParameterBaseClass):
 
         reader = self.reader
         reader.initial_setup()
+        # give acces to reader info
+        self.info['file_info']= reader.info['file_info']
+        self.info['buffer_info']= reader.info['buffer_info']
+
         nc = reader.open_first_file()
 
-        grid,  si.is3D_run   = reader.set_up_grid(nc)
-        reader.grid = grid
+        self.grid, si.is3D_run   = reader.set_up_grid(nc)
+        grid = self.grid
         reader.setup_water_velocity(nc,grid)
 
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
-        self.interpolator = si.add_core_class('interpolator', si.working_params['core_classes']['interpolator'], crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
+
         #make_class_instance_from_params('interpolator', params, ml, default_classID=name,  crumbs=crumb_base + crumbs)
         # setup compulsory fields, plus others required
 
-        reader.params['load_fields'] = list(set(['tide','water_depth', 'water_velocity'] + reader.params['load_fields'] ))
+        reader.params['load_fields'] = list(set(['tide','water_depth', 'water_velocity'] + reader.params['load_fields']))
 
         for name in  reader.params['load_fields']:
             self.add_reader_field( name, nc)
@@ -127,6 +265,12 @@ class FieldGroupManager(ParameterBaseClass):
             self.setup_resupension(nc)
 
         nc.close()
+
+    def set_up_interpolator(self):
+        si = self.shared_info
+        i = si.add_core_class('interpolator', si.working_params['core_classes']['interpolator'], crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ', initialise=False)
+        i.initial_setup(self.grid)
+        self.interpolator = i
 
 
     def setup_dispersion(self, nc):
@@ -171,7 +315,7 @@ class FieldGroupManager(ParameterBaseClass):
             self.add_custom_field('friction_velocity',default_classID='field_friction_velocity_from_near_sea_bed_velocity',
                                                     crumbs='initializing friction velocity field used by resuspension class with near bottom velocity')
             has_bottom_stress = False
-            ml.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for suspension', note=True)
+            ml.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
 
         self.info['has_bottom_stress'] = has_bottom_stress
 
@@ -182,9 +326,9 @@ class FieldGroupManager(ParameterBaseClass):
         field_params = reader.get_field_params(nc, name)
         field_params['class_name'] = 'oceantracker.fields._base_field.ReaderField'
 
-        i = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs=f' creating reader field setup > "{name}"')
+        i = si.create_class_dict_instance(name, 'fields', 'reader_field', field_params, crumbs=f' creating reader field setup > "{name}"', initialise=False)
+        i.initial_setup(self.grid)
 
-        i.initial_setup()
 
         # it not field map given then add a map based on name, so only works for scalars
         if name not in reader.params['field_variable_map']:
@@ -201,19 +345,17 @@ class FieldGroupManager(ParameterBaseClass):
     def add_custom_field(self, name,  params={}, crumbs='', default_classID=None):
         # classname must be given
         si = self.shared_info
-
-        if 'class_name' not in params:
-            si.msg_logger.msg('field_group_manager> add_custom_field parameters must contain  "class_name" parameter')
-
-        #self.fields[name]= make_class_instance_from_params(name, params, si.msg_logger, default_classID=default_classID,       crumbs=crumbs, merge_params=True)
-        i = si.create_class_dict_instance(name, 'fields', 'custom_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=True,default_classID=default_classID)
+        i = si.create_class_dict_instance(name, 'fields', 'custom_field', params, crumbs=crumbs+ f' custom field setup > "{name}"', initialise=False,default_classID=default_classID)
+        i.initial_setup(self.grid)
         self.fields[name] = i
         return i
 
-    def update_dry_cells(self):
+    def update_dry_cell_index(self):
         # update 0-255 dry cell index for each interpolator
         si =self.shared_info
-        self.interpolator.update_dry_cells()
+        info= self.info
+        self.interpolator.update_dry_cell_index(self.grid, info['current_buffer_steps'], info['fractional_time_steps'],)
+
 
 
     def get_hydo_model_time_step(self):
@@ -227,4 +369,30 @@ class FieldGroupManager(ParameterBaseClass):
 
     def write_hydro_model_grids(self):
         si = self.shared_info
-        self.reader.write_hydro_model_grid()
+        self.reader.write_hydro_model_grid(self.grid)
+
+
+
+    def screen_info(self):
+        info = self.info
+        s = f':H{info["current_hydro_model_step"]:04d}b{info["current_buffer_steps"][0]:02d}-{info["current_buffer_steps"][1]:02d}'
+        return s
+
+    def are_points_inside_domain(self,x):
+        sel, n_cell, bc = self.interpolator.are_points_inside_domain(self.grid,x)
+        return sel, n_cell, bc
+
+    def get_grid_limits(self):
+        # extend of grid, eg used for outer bounds of gridded stats,
+        grid = self.grid
+        x = grid['x']
+        xlims = [np.amin(x[:, 0]), np.amax(x[:, 0]), np.amin(x[:, 1]), np.amax(x[:, 1])]
+        return  xlims
+
+    def are_dry_cells(self, n_cell):
+        sel = self.grid['dry_cell_index'][n_cell] > 128  # those dry
+        return sel
+    
+    def close(self):
+        si = self.shared_info
+

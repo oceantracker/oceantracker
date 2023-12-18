@@ -25,6 +25,8 @@ shared_settings_defaults ={
                 'dev_debug_opt': PVC(0, int,doc_str= 'does extra checks given by integer, not for general use'),
                 'minimum_total_water_depth': PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
                 'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
+                'write_dry_cell_flag': PVC(True, bool,
+                                doc_str='Write dry cell flag to all cells, which can be used to show dry cells on plots'),
                 'max_run_duration':    PVC(max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration
                 'max_particles': PVC(10**9, int, min=1,  doc_str='Maximum number of particles to release, useful in testing'),  # limit all cases to this number
                 'processors':          PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
@@ -57,6 +59,7 @@ core_class_list=['reader',
                 'particle_group_manager',
                 'tracks_writer',
                 'dispersion',
+                 'tidal_stranding',
                 'resuspension']
 
 default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
@@ -66,6 +69,7 @@ default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
                         interpolator = 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid',
                         dispersion = 'oceantracker.dispersion.random_walk.RandomWalk',
                         resuspension = 'oceantracker.resuspension.resuspension.BasicResuspension',
+                        tidal_stranding = 'oceantracker.tidal_stranding.tidal_stranding.TidalStranding',
                         release_groups = 'oceantracker.release_groups.point_release.PointRelease',
                         field_friction_velocity_from_bottom_stress='oceantracker.fields.friction_velocity.FrictionVelocityFromBottomStress',
                         field_friction_velocity_from_near_sea_bed_velocity='oceantracker.fields.friction_velocity.FrictionVelocityFromNearSeaBedVelocity',
@@ -77,7 +81,6 @@ class_dicts_list=[ # class dicts which replace lists
             'release_groups' ,
             'fields',  # user fields calculated from other fields  on reading
             'particle_properties',  # user added particle properties, eg DistanceTraveled
-            'status_modifiers',  # change status of particles, eg tidal stranding
             'velocity_modifiers',  # user added velocity effects, eg TerminalVelocity
             'trajectory_modifiers',  # change particle paths, eg. re-suspension
             'particle_statistics',  # heat map inside polygon statistics calculated on the fly
@@ -116,6 +119,7 @@ default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF
                  'roms': 'oceantracker.reader.ROMS_reader.ROMsNativeReader'}
 
 
+large_float=1.0E32
 
 # TODO LIST
 # todo for version 0.41

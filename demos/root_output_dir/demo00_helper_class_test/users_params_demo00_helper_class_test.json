@@ -16,6 +16,7 @@
     "processors": null,
     "max_warnings": null,
     "use_random_seed": null,
+    "numba_caching": null,
     "numba_function_cache_size": null,
     "multiprocessing_case_start_delay": null,
     "profiler": null,

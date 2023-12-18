@@ -84,7 +84,7 @@ class ParticleGroupManager(ParameterBaseClass):
             sel =  time_sec * si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
             num_pulses= np.count_nonzero(sel)
             for n in range(num_pulses):
-                x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations()
+                x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess = g.release_locations(time_sec)
                 new_index = self.release_a_particle_group_pulse(time_sec, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
                 ri['index_of_next_release'] += 1
@@ -199,7 +199,7 @@ class ParticleGroupManager(ParameterBaseClass):
         i = si.create_class_dict_instance(name,'time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
         i.initial_setup()
 
-        if si.write_tracks and i.params['write']:
+        if si.settings['write_tracks'] and i.params['write']:
             w = si.classes['tracks_writer']
             w.create_variable_to_write(name, 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
 
@@ -239,7 +239,7 @@ class ParticleGroupManager(ParameterBaseClass):
                                           crumbs=crumbs +' adding "particle_properties of type=' + prop_group)
         i.initial_setup()
 
-        if si.write_tracks:
+        if si.settings['write_tracks']:
             # tweak write flag if in param lists
             w = si.classes['tracks_writer']
             if name in w.params['turn_off_write_particle_properties_list']: i.params['write'] = False

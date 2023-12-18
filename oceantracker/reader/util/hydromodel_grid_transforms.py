@@ -2,8 +2,9 @@ import numpy as np
 from numba import njit
 from oceantracker.interpolator.util.interp_kernals import kernal_linear_interp1D
 from copy import copy
+from oceantracker.util.numba_util import njitOT
 
-@njit
+@njitOT
 def convert_zlevels_to_fractions(zlevels,bottom_cell_index,z0):
     # get zlevels as fraction of water depth
     z_fractions= np.full_like(zlevels,np.nan,dtype=np.float32)
@@ -19,7 +20,7 @@ def convert_zlevels_to_fractions(zlevels,bottom_cell_index,z0):
                 z_fractions[n, nz] = 0.
     return z_fractions
 
-@njit
+@njitOT
 def find_node_with_smallest_top_bot_layer(z_fractions,bottom_cell_index):
     # find the  profile with thinest bottom layer as fraction of water depth  from layer boundary zlevels
 
@@ -35,7 +36,7 @@ def find_node_with_smallest_top_bot_layer(z_fractions,bottom_cell_index):
 
     return node_min
 
-@njit()
+@njitOT
 def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,sigma,
                                            water_depth,tide,z0,minimum_total_water_depth,
                                            data,out, is_water_velocity):
@@ -86,7 +87,7 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
 
     return out
 
-@njit
+@njitOT
 def convert_layer_field_to_levels_from_fixed_depth_fractions(data, sigma_layer, sigma):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
     # used in FVCOM reader
@@ -106,7 +107,7 @@ def convert_layer_field_to_levels_from_fixed_depth_fractions(data, sigma_layer, 
 
     return data_levels
 
-@njit
+@njitOT
 def get_node_layer_field_values(data, node_to_tri_map, tri_per_node,cell_center_weights):
     # get nodal values from data in surrounding cells based in distance weighting
     # used in FVCOM reader
@@ -126,7 +127,7 @@ def get_node_layer_field_values(data, node_to_tri_map, tri_per_node,cell_center_
 
 
 
-@njit
+@njitOT
 def convert_layer_field_to_levels_from_depth_fractions_at_each_node(data, zfraction_layer, zfraction_level):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depths
     # used in FVCOM reader
@@ -146,7 +147,7 @@ def convert_layer_field_to_levels_from_depth_fractions_at_each_node(data, zfract
 
     return data_levels
 
-@njit()
+@njitOT
 def calculate_cell_center_weights_at_node_locations(x_node, x_cell, node_to_tri_map, tri_per_node):
     # calculate distance weights for values at cell centers, to be used in interploting cell center values to nodal values
     weights= np.full_like(node_to_tri_map, 0.,dtype=np.float32)

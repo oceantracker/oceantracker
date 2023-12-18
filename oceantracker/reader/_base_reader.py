@@ -67,7 +67,7 @@ class _BaseReader(ParameterBaseClass):
 
     def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):   nopass()
 
-    def read_dry_cell_data(self, nc, file_index, is_dry_cell_buffer, buffer_index):   nopass()
+    def read_dry_cell_data(self, nc,grid,  file_index, is_dry_cell_buffer, buffer_index):   nopass()
 
     def set_up_uniform_sigma(self,nc, grid):nopass()
 
@@ -85,8 +85,7 @@ class _BaseReader(ParameterBaseClass):
             fm['water_velocity'] =fm['water_velocity_depth_averaged']
 
 
-
-
+    def preprocess_field_variable(self, nc, name,grid, data): return data
 
 
 
@@ -386,17 +385,16 @@ class _BaseReader(ParameterBaseClass):
         return grid
 
     # @function_profiler(__name__)
-    def fill_time_buffer(self, time_sec):
+    def fill_time_buffer(self,fields, grid, time_sec):
         # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
         # fill buffer starting at hindcast time step nt0_buffer
         # todo change so does not read current step again after first fill of buffer
 
         si = self.shared_info
         params = self.params
-        fields = si.classes['fields']
+
         t0 = perf_counter()
 
-        grid = self.grid
         info = self.info
         fi = info['file_info']
         bi = info['buffer_info']
@@ -445,7 +443,7 @@ class _BaseReader(ParameterBaseClass):
 
             # read grid time, zlevel
             # do this after reading fields as some hindcasts required tide field to get zlevel, eg FVCOM
-            self.read_time_variable_grid_variables(nc, buffer_index, file_index)
+            self.read_time_variable_grid_variables(nc,grid, buffer_index, file_index)
 
             # read time varying vector and scalar reader fields
             # do this in order set above
@@ -454,7 +452,7 @@ class _BaseReader(ParameterBaseClass):
                 if not field.is_time_varying() or field.info['type'] != 'reader_field': continue
 
                 data = self.assemble_field_components(nc, name, file_index=file_index)
-                data = self.preprocess_field_variable(nc, name, data)  # in place tweaks, eg zero vel at bottom
+                data = self.preprocess_field_variable(nc, name,grid, data)  # in place tweaks, eg zero vel at bottom
 
                 junk = data
                 if field.is3D() and si.settings['regrid_z_to_uniform_sigma_levels']:
@@ -494,7 +492,7 @@ class _BaseReader(ParameterBaseClass):
             # update user fields from newly read fields and data
             for name, field in fields.items():
                 if field.is_time_varying() and field.info['type'] == 'custom_field':
-                    field.update(buffer_index)
+                    field.update(fields,grid,buffer_index)
 
             total_read += num_read
 
@@ -536,17 +534,16 @@ class _BaseReader(ParameterBaseClass):
 
 
 
-    def read_time_variable_grid_variables(self, nc, buffer_index, file_index):
+    def read_time_variable_grid_variables(self, nc,grid, buffer_index, file_index):
         # read time and  grid variables, eg time,dry cell
         si = self.shared_info
-        grid = self.grid
 
         grid['time'][buffer_index] = self.read_time_sec_since_1970(nc, file_index=file_index)
 
         # add date for convenience
         grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
 
-        self.read_dry_cell_data(nc, file_index, grid['is_dry_cell'], buffer_index)
+        self.read_dry_cell_data(nc,grid, file_index, grid['is_dry_cell'], buffer_index)
 
         if si.is3D_run:
             # grid['total_water_depth'][buffer_index,:]= np.squeeze(si.classes['fields']['tide'].data[buffer_index,:] + si.classes['fields']['water_depth'].data)
@@ -600,11 +597,11 @@ class _BaseReader(ParameterBaseClass):
             x_out = cord_transforms.WGS84_to_UTM(x, out=None)
         return x_out
 
-    def write_hydro_model_grid(self):
+    def write_hydro_model_grid(self, grid):
         # write a netcdf of the grid from first hindcast file
         si = self.shared_info
         output_files = si.output_files
-        grid = self.grid
+
 
         # write grid file
         output_files['grid'] = output_files['output_file_base'] + '_grid.nc'

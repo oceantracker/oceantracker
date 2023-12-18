@@ -27,12 +27,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
 
     #@function_profiler(__name__)
-    def initial_setup(self):
+    def initial_setup(self, grid):
         super().initial_setup()  # children must call this parent class to default shared_params etc
         params = self.params
         si= self.shared_info
-        reader=  si.classes['reader']
-        grid = reader.grid
+
 
         # make barcentric transform matrix for the grid,  typee to match numba signature
         t0 = perf_counter()
@@ -43,40 +42,31 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         #todo deleteself.KDtree = cKDTree(xy_centriod)
         self.KDtree = cKDTree(grid['x'])
 
+
+
+
+    def final_setup(self, grid):
+
+        # set up a grid class,part_prop and vertical cell find functions to minimise numba function arguments
+        si = self.shared_info
+        info = self.info
+
         # create particle properties to  store history of current triangle  for reuse
 
-        p = si.classes['particle_group_manager']
-        p.add_particle_property('n_cell', 'manual_update',dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
-        p.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
-        p.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=cell_search_status_flags['ok'], dtype=np.int8))
+        pgm = si.classes['particle_group_manager']
+        pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
+        pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
+        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=cell_search_status_flags['ok'], dtype=np.int8))
 
-        p.add_particle_property('bc_cords','manual_update',dict(  write=False, initial_value=0., vector_dim=3,dtype=np.float64))
+        pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype=np.float64))
 
         # BC walk info
         if si.is3D_run:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
-            p.add_particle_property('nz_cell', 'manual_update',dict( write=False, dtype=np.int32, initial_value=grid['nz']-2)) # todo  create  initial serach for vertical cell
-            p.add_particle_property('z_fraction','manual_update',dict( write=False, dtype=np.float32, initial_value=0.))
-            p.add_particle_property('z_fraction_water_velocity','manual_update', dict( write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
-
-
-        # attach a reader to this interpolator
-        self.reader = si.classes['reader']
-
-    def final_setup(self):
-
-        # set up a grid class,part_prop and vertical cell find functions to minimise numba function arguments
-        si = self.shared_info
-        reader = self.reader
-        self.grid = reader.grid
-        grid = self.grid
-        fi = reader.info['file_info']
-        bi = reader.info['buffer_info']
-        info = self.info
-        info['current_hydro_model_step']= 0
-        info['fractional_time_steps']= np.zeros((2,), dtype=np.float64)
-        info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
+            pgm.add_particle_property('nz_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=grid['nz'] - 2))  # todo  create  initial serach for vertical cell
+            pgm.add_particle_property('z_fraction', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0.))
+            pgm.add_particle_property('z_fraction_water_velocity', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
         # set up place for walk info failures
         info['tri_walk_full_failures'] = []
@@ -103,51 +93,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                         adjacency=  grid['adjacency']),
                                         )
 
-    def setup_interp_time_step(self, time_sec, xq, active, fix_bad=True):
-        # set up stuff needed by all fields before any 2D interpolation
-        # eg query point and nt the current global time step, from which we are making nt+1
-        # if fix bad, then blocked and cells are corrected, for RK steps want to delay this till sub-steps are complete, so set fix_bad = false
-
-        si = self.shared_info
-        part_prop = si.classes['particle_properties']
-        info = self.info
-        reader = self.reader
-        fi = reader.info['file_info']
-        bi = reader.info['buffer_info']
-        grid = reader.grid
 
 
-        # set buffer index from this time and next inside stepinfo
-        # get next two buffer time steps around the given time in reader ring buffer
-        # plus global time step locations and time ftactions od timre step
-        # put results in interpolators step info numpy structure
-        hindcast_fraction = (time_sec - fi['first_time']) / (fi['last_time']- fi['first_time'])
-        info['current_hydro_model_step'] = int((fi['n_time_steps_in_hindcast'] - 1) * hindcast_fraction)  # global hindcast time step
-
-        # ring buffer locations of surounding steps
-        info['current_buffer_steps'][0] = info['current_hydro_model_step'] %  bi['buffer_size']
-        info['current_buffer_steps'][1] = (info['current_hydro_model_step'] + int(si.model_direction)) %  bi['buffer_size']
-
-        time_hindcast = grid['time'][  info['current_buffer_steps'][0]]
-
-        # sets the fraction of time step that current time is between
-        # surrounding hindcast time steps
-        # abs makes it work when backtracking
-        s = abs(time_sec - time_hindcast) / fi['hydro_model_time_step']
-        info['fractional_time_steps'][0] = 1.0 - s
-        info['fractional_time_steps'][1] = s
-
-        if fix_bad:
-            # record current cell and location so they can be fixed
-            part_prop['cell_search_status'].set_values(cell_search_status_flags['ok'], active)
-
-        # find cell for xq, node list and weight for interp at calls
-        self.find_cell(xq, active)
-
-        if fix_bad:
-            self.fix_bad_cell_search(active)
-
-    def fix_bad_cell_search(self, active):
+    def fix_bad_cell_search(self, current_buffer_steps,fractional_time_steps, active):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
@@ -175,26 +123,19 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
 
     # @function_profiler(__name__)
-    def _interp_field2D(self,field_name, field_instance, output, active):
+    def _interp_field2D(self,field_name, field_instance,grid, current_buffer_steps, fractional_time_steps,
+                                n_cell, bc_cords,  output, active):
         # interp reader field_name inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
         # in place evaluation of field interpolation
         si = self.shared_info
-        grid = self.grid
+
         triangles = grid['triangles']
 
-        part_prop = si.classes['particle_properties']
-        n_cell = part_prop['n_cell'].data
-        bc_cords = part_prop['bc_cords'].data
-
-        info = self.info
-
-        nb = info['current_buffer_steps']
-        fractional_time_steps = info['fractional_time_steps']
 
         if field_instance.is_time_varying():
-            triangle_eval_interp.time_dependent_2Dfield(nb, fractional_time_steps,basic_util.atLeast_Nby1(output),
+            triangle_eval_interp.time_dependent_2Dfield(current_buffer_steps, fractional_time_steps,basic_util.atLeast_Nby1(output),
                                                    field_instance.data, triangles,
                                                    n_cell, bc_cords,
                                                    active)
@@ -205,13 +146,14 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                  active)
 
     # @function_profiler(__name__)
-    def _interp_field3D(self, field_name, field_instance, output,active):
+    def _interp_field3D(self, field_name, field_instance,grid, current_buffer_steps,fractional_time_steps,
+                         n_cell,nz_cell,z_fraction, bc_cords,output,active):
         # interp reader field_name inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
         # in place evaluation of field interpolation
         si = self.shared_info
-        grid = self.grid
+
         triangles = grid['triangles']
 
         part_prop = si.classes['particle_properties']
@@ -229,13 +171,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         if field_instance.is_time_varying():
             if 'sigma' in grid:
-                triangle_eval_interp.time_dependent_3Dfield_sigma_grid(info['current_buffer_steps'], info['fractional_time_steps'],
+                triangle_eval_interp.time_dependent_3Dfield_sigma_grid(current_buffer_steps, fractional_time_steps,
                                                     field_instance.data,
                            triangles,
                            n_cell, bc_cords, nz_cell, z_fraction,
                            basic_util.atLeast_Nby1(output), active)
             else:
-                triangle_eval_interp.time_dependent_3Dfield_LSC_grid(info['current_buffer_steps'], info['fractional_time_steps'],
+                triangle_eval_interp.time_dependent_3Dfield_LSC_grid(current_buffer_steps, fractional_time_steps,
                                                                      field_instance.data,
                                                                      triangles,  grid['bottom_cell_index'],
                                                                      n_cell, bc_cords, nz_cell, z_fraction,
@@ -246,32 +188,29 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             raise Exception('eval_field_interpolation_at_particle_locations : spatial interp using eval_interp3D_timeIndependent not implemented yet ')
 
     # @function_profiler(__name__)
-    def eval_field_interpolation_at_given_locations(self,field_name, field_instance, x, time=None, output=None, n_cell=None):
+    def eval_field_interpolation_at_given_locations(self,field_name, field_instance,grid, reader, x,
+                                                    current_buffer_steps, fractional_time_steps,time=None, output=None, n_cell=None):
         # in  evaluation of field interpolation at specific locations, ie not particle locations
         # todo only time_dependent_2Dfield  working - eval_field_interpolation_at_given_locations
         # todo add time dependence/ time fractions
         # does this over write paricle props??
         si = self.shared_info
         info = self.info
-        reader = si.classes['reader']
+
         part_prop = si.classes['particle_properties']
-        grid = self.grid
 
         # is no output name given particle property for output is same as hindcast field_name
         if output is None:
-            if field_instance.data.shape[3] > 1:
-                output = np.full((x.shape[0], field_instance.data.shape[3]), np.nan)
-            else:
-                output = np.full((x.shape[0],), np.nan)
+            output = np.full((x.shape[0], field_instance.data.shape[3]), np.nan)  if field_instance.data.shape[3] > 1else np.full((x.shape[0],), np.nan)
 
         if n_cell is None:
-            n_cell = self.initial_cell_guess(x)
+            n_cell = self.initial_horizontal_cell(grid, x)
 
         # get bc cords for the cells
-        bc_cords = self.get_bc_cords(x, n_cell)
+        bc_cords = self.get_bc_cords(grid, x, n_cell)
         active = np.arange(x.shape[0])
         if time is  None:
-            # not time varing
+            # not time varying
             nb = None
             nt = None
         else:
@@ -288,7 +227,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         else:
 
             if field_instance.is_time_varying():
-                triangle_eval_interp.time_dependent_2Dfield(nb,  info['fractional_time_steps'], basic_util.atLeast_Nby1(output),
+                triangle_eval_interp.time_dependent_2Dfield(nb,  fractional_time_steps, basic_util.atLeast_Nby1(output),
                                                             field_instance.data, grid['triangles'],
                                                             n_cell, bc_cords,
                                                             active)
@@ -299,23 +238,20 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                               active)
         return output
 
-    def find_cell(self, xq, active):
+    def find_cell(self, grid, xq, current_buffer_steps,fractional_time_steps, active):
         # locate cell in place
         # nt give but not needed in 2D
         si= self.shared_info
-        info = self.info
-        grid = self.grid
+
         fields = si.classes['fields']
 
         # used 2D or 3D walk chosen above
-        self._do_hori_walk(xq, active)
+        self._do_hori_walk(grid, xq, active)
         #retry any too long wallks
         part_prop = si.classes['particle_properties']
         n_cell= part_prop['n_cell_last_good'].data
         status = part_prop['status'].data
         bc_cords = part_prop['bc_cords'].data
-
-
 
         if si.is3D_run:
             t0 = perf_counter()
@@ -330,7 +266,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                             si.minimum_total_water_depth,
                                             grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],grid['sigma_map_dz'],
                                             n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
-                                            info['current_buffer_steps'], info['fractional_time_steps'],
+                                            current_buffer_steps, fractional_time_steps,
                                             active, si.z0)
 
             else:
@@ -339,12 +275,12 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                             grid['triangles'],grid['zlevel'],grid['bottom_cell_index'],
                                             #grid['triangles'], grid['zlevel_vertex'], grid['bottom_cell_index'],
                                             n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_water_velocity,
-                                            info['current_buffer_steps'],info['fractional_time_steps'],
+                                            current_buffer_steps,fractional_time_steps,
                                             self.walk_counts,
                                             active,  si.z0)
             si.block_timer('Find cell, vertical walk', t0)
 
-    def _do_hori_walk(self, xq, active):
+    def _do_hori_walk(self,grid, xq, active):
         si= self.shared_info
         t0= perf_counter()
         info = self.info
@@ -353,8 +289,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
         cell_search_status = part_prop['cell_search_status'].data
-
-        grid = self.grid
         params = self.params
 
         # used 2D or 3D walk chosen above
@@ -385,10 +319,10 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if sel.size > 0:
             # si.msg_logger.msg(f'Search retried for {sel.size} cells')
             info['triangle_walks_retried'] += sel.size
-            new_cell = self.initial_cell_guess(xq[sel, :])
+            new_cell = self.initial_horizontal_cell(grid, xq[sel, :])
             part_prop['n_cell'].set_values(new_cell, sel)
 
-            self._do_hori_walk(xq, sel)
+            self._do_hori_walk(grid, xq, sel)
             # recheck for additional failures
             #el = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_partID_subset_buffer('B1'))
             sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['failed'], out=self.get_partID_subset_buffer('B1'))
@@ -413,11 +347,10 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
 
     #@function_profiler(__name__)
-    def initial_cell_guess(self, xq):
+    def initial_horizontal_cell(self, grid, xq):
         # find nearest cell
         si=self.shared_info
         t0 = perf_counter()
-        grid = si.classes['reader'].grid
 
          # find nearest node
         dist, nodes = self.KDtree.query(xq[:, :2])
@@ -434,28 +367,25 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         si.block_timer('Initial cell guess', t0)
         return n_cell
 
-    def are_points_inside_domain(self, xq):
-        n_cell  = self.initial_cell_guess(xq)
-        bc = self.get_bc_cords(xq,n_cell)
+    def are_points_inside_domain(self,grid, xq):
+        n_cell  = self.initial_horizontal_cell(grid, xq)
+        bc = self.get_bc_cords(grid, xq,n_cell)
         is_inside=  np.all(np.logical_and(bc >= -self.params['bc_walk_tol'], bc  <= 1.+self.params['bc_walk_tol']),axis=1)
         return is_inside, n_cell, bc  # is inside if  magnitude of all BC < 1
 
 
 
-    def get_bc_cords(self,x,n_cells):
+    def get_bc_cords(self,grid, x,n_cells):
         # get BC cords for given x's
         si= self.shared_info
-        grid = si.classes['reader'].grid
         bc_cords = np.full((x.shape[0],3), 0.)
-        tri_interp_util.get_BC_cords_numba(x, n_cells, grid['bc_transform'], bc_cords)
+        tri_interp_util.calc_BC_cords_numba(x, n_cells, grid['bc_transform'], bc_cords)
         return bc_cords
 
-    def update_dry_cells(self):
+    def update_dry_cell_index(self,grid, current_buffer_steps, fractional_time_steps):
         # update 0-255 dry cell index
-        grid= self.grid
-        info= self.info
         triangle_eval_interp.update_dry_cell_index(grid['is_dry_cell'], grid['dry_cell_index'],
-                                                   info['current_buffer_steps'], info['fractional_time_steps'])
+                                                   current_buffer_steps, fractional_time_steps)
     def close(self):
         si=self.shared_info
         info = self.info

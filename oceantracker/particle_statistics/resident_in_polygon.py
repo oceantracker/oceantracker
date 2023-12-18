@@ -3,6 +3,7 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from copy import  deepcopy
 from oceantracker.release_groups.polygon_release import PolygonRelease
+from oceantracker.util.numba_util import njitOT
 
 import numpy as np
 from numba import njit
@@ -121,7 +122,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         nc.write_a_new_variable('release_times', self.release_group_to_count.info['release_info']['release_times'],['pulse_dim'], dtype=np.float64,attributes={'times_pulses_released': ' times in seconds since 1970'})
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(in_polgon,
                                     release_group_ID, pulse_ID, required_release_group,zrange, x, count,
                                     count_all_particles, prop_list, sum_prop_list, active):

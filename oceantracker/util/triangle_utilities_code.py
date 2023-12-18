@@ -3,10 +3,10 @@ from numba import njit, prange
 from numba.typed import List as NumbaList
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.util import  basic_util
-from oceantracker.util.numba_util import is_caching
+from oceantracker.util.numba_util import njitOT
 
 # build node to cell map
-@njit(cache=is_caching())
+@njitOT
 def build_node_to_triangle_map(tri, x):
     # build list  giving map from each node to list of cells which contain that node
 
@@ -39,7 +39,7 @@ def build_node_to_triangle_map(tri, x):
     return node_to_tri_map, tri_per_node
 
 # build adjacency matrix from node to triangles map
-@njit
+@njitOT
 def build_adjacency_from_node_tri_map(node_to_tri_map, tri_per_node, tri):
     # build adjacency matrix for use in triangle walk and as lateral boundary of model
     adjacency = np.full(tri.shape, -1, dtype=np.int32)
@@ -77,7 +77,7 @@ def get_boundary_triangles(adjacency_matrix):
 
 def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_map,x):
 
-    @njit
+    @njitOT
     def build_edge_node_pairs(triangles, adjacency_matrix, boundary_tri):
 
         # find triangles with edges ( but not those with 3 edges, which are not connected to the domain)
@@ -93,7 +93,7 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
 
         return edge_node_pairs[:nfound,:]
 
-    @njit
+    @njitOT
     def join_segments(edge_node_pairs):
         # join segments into lines based on common nodes in edge pairs of nodes
         # todo this is slow try with exapanding numpy array
@@ -174,7 +174,7 @@ def calcuate_triangle_areas(xy, tri):
 
 def convert_face_to_nodal_values(x, tri, face_data):
     # convert face values to nodal using inverse distance weight to face values of triangles surrounding each node
-    @njit
+    @njitOT
     def inverse_distance_weight_face_values(node_map,x,xtri, data):
         out = np.full((len(node_map[0]),), np.nan)
 

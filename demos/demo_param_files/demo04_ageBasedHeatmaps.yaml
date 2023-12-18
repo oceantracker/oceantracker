@@ -6,7 +6,7 @@ dispersion_miss-spelt:
   A_H: 0.1
 junk: h
 max_run_duration: 259200
-numba_caching: true
+numba_caching: false
 output_file_base: demo04_ageBasedHeatmaps
 particle_group_manager:
   particle_buffer_chunk_size: 20000
@@ -93,6 +93,6 @@ time_step: 900
 tracks_writer:
   turn_on_write_particle_properties_list:
   - n_cell
-  write_dry_cell_index: true
+  write_dry_cell_flag: true
 user_note: test of notes
 write_tracks: false

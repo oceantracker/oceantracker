@@ -31,7 +31,7 @@
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "user_note": "test of notes",
-    "numba_caching": true,
+    "numba_caching": false,
     "dispersion_miss-spelt": {
         "A_H": 0.1
     },
@@ -42,7 +42,7 @@
         "turn_on_write_particle_properties_list": [
             "n_cell"
         ],
-        "write_dry_cell_index": true
+        "write_dry_cell_flag": true
     },
     "release_groups": {
         "myP1": {

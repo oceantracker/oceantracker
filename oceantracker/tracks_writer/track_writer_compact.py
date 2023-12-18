@@ -15,7 +15,8 @@ class CompactTracksWriter(_BaseWriter):
                                  #'convert': PVC(False, bool, doc_str='convert compact tracks file to rectangular for at end of the run'),
                                  'retain_compact_files': PVC(False, bool,
                                                              doc_str='keep  compact tracks files after conversion to rectangular format'),
-                                 'role_output_file_tag': PVC('tracks_compact', str)
+                                 'role_output_file_tag': PVC('tracks_compact', str),
+                                 'write_dry_cell_index' : PVC(True,bool, obsolete='Use top level setting write_dry_cell_flag, instead')
                                  })
         self.nc = None
 
@@ -107,7 +108,7 @@ class CompactTracksWriter(_BaseWriter):
 
     def close(self):
         si = self.shared_info
-        if si.write_tracks:
+        if si.settings['write_tracks']:
             self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
 

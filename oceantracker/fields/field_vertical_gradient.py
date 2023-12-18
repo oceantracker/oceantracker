@@ -2,6 +2,7 @@ from oceantracker.fields._base_field import CustomFieldBase
 import numpy as np
 from numba import njit
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
+from oceantracker.util.numba_util import njitOT
 
 class VerticalGradient(CustomFieldBase):
 
@@ -14,7 +15,7 @@ class VerticalGradient(CustomFieldBase):
                                  })
         self.class_doc(description='Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"')
 
-    def initial_setup(self):
+    def initial_setup(self, grid):
         si = self.shared_info
         # get fields prop from named field
         params= self.params
@@ -23,15 +24,13 @@ class VerticalGradient(CustomFieldBase):
         if field_name not in si.classes['fields']:
             si.msg_logger.msg(f'Field vertical gradient >> can not find field {field_name} to setup its vertical gradient class', fatal_error=True, exit_now=True)
 
-        super().initial_setup()  # set up self.data with above params
+        super().initial_setup(grid)  # set up self.data with above params
         pass
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True,)
-    def update(self,active):
+    def update(self,fields,grid,active):
         si = self.shared_info
-        fields= si.classes['fields']
-        grid= si.classes['reader'].grid
         if 'sigma' in grid:
             _calc_field_vert_grad_from_sigma_levels(fields[self.params['name_of_field']].data, grid['sigma'],
                                                fields['tide'].data,fields['water_depth'].data,
@@ -41,7 +40,7 @@ class VerticalGradient(CustomFieldBase):
             _calc_field_vert_grad_from_zlevels(fields[self.params['name_of_field']].data,grid['zlevel'],
                                     grid['bottom_cell_index'], si.z0, fields[self.info['name']].data)
 
-@njit
+@njitOT
 def _calc_field_vert_grad_from_zlevels(field4D,zlevel,bottom_cell_index,z0,gradient_field):
 
     for nt in range(field4D.shape[0]):
@@ -57,7 +56,7 @@ def _calc_field_vert_grad_from_zlevels(field4D,zlevel,bottom_cell_index,z0,gradi
                 # top cell, assume gradient same as cell below
                 gradient_field[nt, node, -1, :] = gradient_field[nt, node, -2, :]
 
-@njit
+@njitOT
 def _calc_field_vert_grad_from_sigma_levels(field4D,sigma, tide, water_depth,bottom_cell_index,z0,gradient_field):
 
     for nt in range(field4D.shape[0]):

@@ -8,7 +8,7 @@ dispersion:
 dispersion_miss-spelt:
   A_H: 0.1
 max_run_duration: 172800.0
-numba_caching: true
+numba_caching: false
 output_file_base: demo90forward
 particle_properties:
   my_constant_prop:
@@ -57,5 +57,5 @@ release_groups:
 root_output_dir: output
 time_step: 60
 tracks_writer:
-  write_dry_cell_index: true
+  write_dry_cell_flag: true
 user_note: test of notes

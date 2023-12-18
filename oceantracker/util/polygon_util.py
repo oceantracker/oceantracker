@@ -5,6 +5,7 @@ from numba import njit, types as nbtypes
 import numpy as np
 import time
 import copy
+from oceantracker.util.numba_util import njitOT
 
 
 class InsidePolygon(object):
@@ -142,7 +143,7 @@ def make_inside_ray_tracing_indices(lb, slope_inv, bounds,sub_grid_x,sub_grid_y,
     sub_grid_dx = sub_grid_x[1] - sub_grid_x[0]
     sub_grid_dy = sub_grid_y[1] - sub_grid_y[0]
 
-    @njit()
+    @njitOT
     def inside_ray_tracing_indices(xq_vals, active, inside_IDs, outside_IDs):
         # finds if points indside polygon based on ray from point to +ve x
         # based on odd number of crossings of lines of polygon, resilt is in boolean working space, "inside"
