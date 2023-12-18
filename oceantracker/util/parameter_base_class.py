@@ -65,7 +65,7 @@ class ParameterBaseClass(object):
     def check_class_required_fields_prop_etc(self, required_props_list=[],
                                              required_grid_var_list=[], requires3D=None, crumbs=None):
         si = self.shared_info
-        grid = si.classes['reader'].grid
+        grid = si.classes['field_group_manager'].grid
 
         for name in required_grid_var_list:
             if name not in grid:

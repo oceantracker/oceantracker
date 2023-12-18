@@ -26,8 +26,7 @@ class _BaseWriter(ParameterBaseClass):
                                  'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
                                                             doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),
                                  'time_steps_per_per_file': PVC(None, int,min=1, doc_str='Split track output into files with given number of time integer steps'),
-                                 'write_dry_cell_index': PVC(True, bool,
-                                              doc_str = 'Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots'),
+
                                  })
         self.info.update({'output_file': []})
         self.total_time_steps_written = 0
@@ -41,7 +40,7 @@ class _BaseWriter(ParameterBaseClass):
 
     def initial_setup(self):
         si= self.shared_info
-        grid = si.classes['reader'].grid
+        grid = si.classes['field_group_manager'].grid
         params = self.params
 
         # find steps between wrtites, rounded to nearest model time step
@@ -52,7 +51,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.info['output_step_count'] = max(nt_step, 1)
 
-        if params['write_dry_cell_index']:
+        if si.settings['write_dry_cell_flag']:
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])
             self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])
@@ -142,7 +141,7 @@ class _BaseWriter(ParameterBaseClass):
     #  eg ID etc, releaseGroupID  etc
         si= self.shared_info
         writer = si.classes['tracks_writer']
-        if si.write_tracks and new_particleIDs.shape[0] > 0:
+        if si.settings['write_tracks'] and new_particleIDs.shape[0] > 0:
             for name, prop in si.classes['particle_properties'].items():
                 # parameters are not time varying, so done at ends in retangular writes, or on culling particles
                 if not prop.params['time_varying'] and prop.params['write']:
@@ -153,7 +152,7 @@ class _BaseWriter(ParameterBaseClass):
         # write particle data at current time step, if none the a forced write
 
         si= self.shared_info
-        grid = si.classes['reader'].grid
+        grid = si.classes['field_group_manager'].grid
         if si.run_info['time_steps_completed'] % self.info['output_step_count'] != 0: return
 
         # write time vary info , eg "time"
@@ -162,14 +161,14 @@ class _BaseWriter(ParameterBaseClass):
         # write group data
         for name,d in si.classes['time_varying_info'].items():
             if d.params['write']:
-
                 self.write_time_varying_info(name, d)
+
         part_prop=si.classes['particle_properties']
         for name,d in part_prop.items():
             if d.params['write'] and d.params['time_varying']:
                 self.write_time_varying_particle_prop(name, d.data)
 
-        if self.params['write_dry_cell_index']:
+        if si.settings['write_dry_cell_flag']:
             self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid['dry_cell_index'].reshape(1,-1)
 
         self.time_steps_written_to_current_file +=1 # time steps in current file
@@ -177,7 +176,7 @@ class _BaseWriter(ParameterBaseClass):
 
     def close(self):
         si= self.shared_info
-        if si.write_tracks:
+        if si.settings['write_tracks']:
             nc = self.nc
             # write properties only written at end
             self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])

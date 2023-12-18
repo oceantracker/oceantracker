@@ -1,10 +1,12 @@
 import numpy as np
-
 import oceantracker.particle_statistics.gridded_statistics as gridded_statistics
 from numba import njit
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
+from oceantracker.util.numba_util import njitOT
+
+
 class _CorePolygonMethods(ParameterBaseClass):
 
     def __init__(self):
@@ -113,7 +115,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
     def info_to_write_at_end(self):pass  # nothing extra to write
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list, active):
 
         # zero out counts in the count time slices
@@ -204,7 +206,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
             nc.write_a_new_variable('sum_' + key, item[:], ('age_bin_dim', 'release_group_dim', 'polygon_dim'), description= 'sum of particle property inside bin  ' + key)
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list,
                                      active, age_bin_edges, age):
 

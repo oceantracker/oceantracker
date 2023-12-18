@@ -6,7 +6,7 @@ from copy import copy,deepcopy
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.ncdf_util import  NetCDFhandler
 from oceantracker.util import  output_util
-
+from oceantracker.util.numba_util import njitOT
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 
 class _BaseEventLogger(ParameterBaseClass):
@@ -104,7 +104,7 @@ class _BaseEventLogger(ParameterBaseClass):
             self.time_steps_written += file_index.shape[0]
 
     @staticmethod
-    @njit
+    @njitOT
     def _find_particles_where_event_has_started_or_ended_numba(event_has_started, event_happening, event_has_started_IDbuffer, event_has_ended_IDbuffer):
         # loops over all particle in buffer to return views of event_has_started_IDbuffer
         # and event_has_ended_IDbuffer, which are indices of particles where event has just started or just ended

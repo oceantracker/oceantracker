@@ -17,6 +17,7 @@ from oceantracker.util.cord_transforms import WGS84_to_UTM
 from matplotlib import pyplot as plt, tri
 from oceantracker.reader.util.reader_util import append_split_cell_data
 from oceantracker.util.triangle_utilities_code import split_quad_cells
+from oceantracker.util.numba_util import njitOT
 
 
 from oceantracker.util.basic_util import  is_substring_in_list
@@ -147,10 +148,9 @@ class ROMsNativeReader(_BaseReader):
         zlevel_buffer[buffer_index, ...] = grid['z_fractions'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
         pass
 
-    def read_dry_cell_data(self, nc, file_index,is_dry_cell_buffer,buffer_index):
+    def read_dry_cell_data(self, nc, grid,  file_index,is_dry_cell_buffer,buffer_index):
         # get dry cells from water depth and tide
         si = self.shared_info
-        grid = self.grid
         fields = self.shared_info.classes['fields']
 
         reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
@@ -229,7 +229,7 @@ class ROMsNativeReader(_BaseReader):
 
 
 
-    def preprocess_field_variable(self, nc,name, data):
+    def preprocess_field_variable(self, nc,name,grid, data):
 
         if name =='water_velocity':
 
@@ -276,7 +276,7 @@ class ROMsNativeReader(_BaseReader):
         ax2.scatter(grid['lon_psi'][sel],grid['lat_psi'][sel] ,  c='g', marker='.', s=4)
         plt.show()
 
-@njit()
+@njitOT
 def u_grid_to_psi(data, mask):
     # data ins (time, row, col, depth),  mask is land  nodes
     # to convert to pis grid make mean of adajacet rows, but  use land masked values as zero
@@ -294,7 +294,7 @@ def u_grid_to_psi(data, mask):
                     out[nt, r, c, nd] = 0.5*(v1 + v2)
     return out
 
-@njit()
+@njitOT
 def v_grid_to_psi(data, mask):
     # data ins (time, row, col, depth),  mask is land  nodes
     # to convert to pis grid make mean of adajacet rows, but  use land masked values as zero
@@ -312,7 +312,7 @@ def v_grid_to_psi(data, mask):
                     out[nt, r, c, nd] = 0.5*(v1 + v2)
     return out
 
-@njit()
+@njitOT
 def rho_grid_to_psi(data, mask):
     # data ins (time, row, col, depth),  mask is land  nodes
     # to convert to psi grid make mean of adajacet rows andcolumns, but  use land masked values as zero

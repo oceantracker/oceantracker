@@ -55,8 +55,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.model_direction = -1 if si.backtracking else 1
 
         si.write_output_files = si.settings['write_output_files']
-        si.write_tracks = si.settings['write_tracks']
-
+     
         si.z0 = si.settings['z0']
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
         si.computer_info = get_versions_computer_info.get_computer_info()
@@ -217,21 +216,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
     def _do_run_integrity_checks(self):
         si=self.shared_info
-        grid = si.classes['reader'].grid
+
 
         # check all have required, fields, part props and grid data
         for i in si.all_class_instance_pointers_iterator():
             i.check_requirements()
-
-        # other checks and warnings
-        #todo move to set up fields
-        if si.settings['open_boundary_type'] > 0:
-            if not np.any(grid['node_type'] == 3):
-                si.msg_logger.msg('Open boundary requested, but no open boundary node data available, boundaries will be closed,',
-                                        hint='For Schism open boundaries requires hgrid file to named in reader params',warning=True)
-        else:
-            si.msg_logger.msg('No open boundaries requested, as run_params["open_boundary_type"] = 0',note=True,
-                                      hint='Requires list of open boundary nodes not in hydro model, eg for Schism this can be read from hgrid file to named in reader params and run_params["open_boundary_type"] = 1')
 
         si.msg_logger.exit_if_prior_errors()
 
@@ -326,7 +315,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.add_core_class('dispersion', dispersion_params, initialise=True)
        
 
-        if si.write_tracks:
+        if si.settings['write_tracks']:
             si.add_core_class('tracks_writer',si.working_params['core_classes']['tracks_writer'], initialise=True)
         else:
             si.classes['tracks_writer'] = None
@@ -383,14 +372,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         #todo below apply to all core classes, reader
         #todo alternative can they be intitlised on creation here?
         t0 = perf_counter()
-        for name in ['interpolator', 'solver'] : # order may matter?
+        for name in ['solver'] : # order may matter?
             si.classes[name].initial_setup()
         si.msg_logger.progress_marker('initial set up of core classes', start_time=t0)
 
         # do final setp which may depend on settingd from intitial st up
         t0= perf_counter()
         # order matters, must do interpolator after particle_group_manager, to get stucted arrays and solver last
-        for name in ['particle_group_manager', 'interpolator', 'solver'] :
+        for name in ['particle_group_manager', 'solver'] :
             si.classes[name].final_setup()
         si.msg_logger.progress_marker('final set up of core classes',start_time=t0)
 
@@ -413,13 +402,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for name, p in si.working_params['class_dicts']['particle_properties'].items():
             pgm.add_particle_property(name, 'user',p)
 
-        # add default classes, eg tidal stranding
-        #todo this may be better else where
-        if 'dry_cell_index' in si.classes['reader'].grid and 'tidal_stranding' not in  si.working_params['class_dicts']['status_modifiers']:
-            si.working_params['class_dicts']['status_modifiers']['tidal_stranding'] ={'class_name': 'oceantracker.status_modifiers.tidal_stranding.TidalStranding'}
+
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
-        for user_type in ['velocity_modifiers','trajectory_modifiers','status_modifiers',
+        for user_type in ['velocity_modifiers','trajectory_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
             for name, params in si.working_params['class_dicts'][user_type].items():
                 i = si.create_class_dict_instance(name,user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')

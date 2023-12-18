@@ -2,6 +2,8 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 import numpy as np
 from oceantracker.fields._base_field import CustomFieldBase
+from oceantracker.util.numba_util import njitOT
+
 class TotalWaterDepth(CustomFieldBase):
     def __init__(self):
         super().__init__()
@@ -14,11 +16,8 @@ class TotalWaterDepth(CustomFieldBase):
         si = self.shared_info
 
 
-    def update(self,active):
+    def update(self,fields,grid,active):
         si = self.shared_info
-        fields= si.classes['fields']
-        grid = si.classes['reader'].grid
-
         self.get_time_dependent_total_water_depth_from_tide_and_water_depth(
                 fields['tide'].data,
                 fields['water_depth'].data.ravel(),
@@ -26,7 +25,7 @@ class TotalWaterDepth(CustomFieldBase):
                 self.data)
 
     @staticmethod
-    @njit()
+    @njitOT
     def get_time_dependent_total_water_depth_from_tide_and_water_depth(tide, water_depth,
                                                                        min_total_water_depth, total_water_depth):
         # get total time dependent water depth as 4D field  from top and bottom cell of LSC grid zlevels

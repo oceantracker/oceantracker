@@ -40,13 +40,13 @@ demo_base_params={'output_file_base' : None,
                 'time_buffer_size': 15,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
     'user_note':'test of notes',
-    'numba_caching': True,
+    'numba_caching': False,
     'dispersion_miss-spelt': {'A_H': .1},
     'dispersion': {'A_H': .1},
     #'pre_processing':{'my_polygons':{'class_name': 'oceantracker.pre_processing.read_geomerty.ReadCoordinates',
     #                                 'file_name':'demo_hindcast/test.geojson',
     #                                 'type':'polygon'}},
-    'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_index': True},
+    'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_flag': True},
     'release_groups': {'mypoints1':{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}
                                 },
     'particle_properties ': {
@@ -76,7 +76,7 @@ p2['particle_properties'] = {'my_constant_prop': {'class_name': 'oceantracker.pa
                      'initial_value': 100, 'variance': 10.}}
 
 p2.update({'block_dry_cells': True,
-        'tracks_writer':{'write_dry_cell_index': True,
+        'tracks_writer':{'write_dry_cell_flag': True,
                                                }})
 p2.update({'output_file_base' :'demo02_animation' ,'time_step': 10*60})
 params.append(p2)
@@ -228,7 +228,7 @@ params.append(p10)
 
 # case 50 schism basic
 schsim_base_params=\
-{'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120, 'numba_caching': True,
+{'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120, 'numba_caching': False,
  'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
                     'input_dir': 'demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',

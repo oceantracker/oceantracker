@@ -1,6 +1,7 @@
 from oceantracker.particle_properties._base_properties import ParticleProperty
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
+from oceantracker.util.numba_util import njitOT
 import numpy as np
 
 class TotalWaterDepth(ParticleProperty):
@@ -23,7 +24,7 @@ class TotalWaterDepth(ParticleProperty):
 
 
     @staticmethod
-    @njit()
+    @njitOT
     def get_time_dependent_total_water_depth_from_tide_and_water_depth(tide, water_depth, total_water_depth, active):
         # get total time dependent water depth as 4D field  from top and bottom cell of LSC grid zlevels
         for n in active:

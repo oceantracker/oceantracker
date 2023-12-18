@@ -70,7 +70,7 @@ class Solver(ParameterBaseClass):
 
         t0_model = perf_counter()
         free_wheeling =False
-        fgm.update(model_times[0]) # initial buffer fill
+        fgm.update_reader(model_times[0]) # initial buffer fill
 
         # run forwards through model time variable, which for backtracking are backwards in time
         for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
@@ -94,7 +94,7 @@ class Solver(ParameterBaseClass):
             free_wheeling = False # has ended
            # alive partiles so do steps
             ri['total_alive_particles'] += num_alive
-            fgm.update(time_sec)
+            fgm.update_reader(time_sec)
 
 
             # do stats etc updates and write tracks
@@ -157,31 +157,26 @@ class Solver(ParameterBaseClass):
         # some may now have status dead so update
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
 
-        # modify status, eg tidal stranding
-        for name, i in si.classes['status_modifiers'].items():
-            i.update(time_sec, alive)
-
         # trajectory modifiers,
         for name, i in si.classes['trajectory_modifiers'].items():
             i.update(time_sec, alive)
+
+        # modify status, eg tidal stranding
+        fgm.update_dry_cell_index()
+
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
 
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
 
-
         # resuspension is a core trajectory modifier
         if si.is3D_run:
             # friction_velocity property  is now updated, so do resupension
             si.classes['resuspension'].update(time_sec, alive)
 
-        fgm.update_dry_cells()
 
-        if si.is3D_run:
-            # friction_velocity property  is now updated, so do resupension
-            si.classes['resuspension'].update(time_sec, alive)
-
+        fgm.update_tidal_stranding_status(time_sec, alive)
         # update particle properties
         pgm.update_PartProp(time_sec, alive)
 
@@ -191,7 +186,7 @@ class Solver(ParameterBaseClass):
         self._update_events(time_sec)
 
         # write tracks
-        if si.write_tracks:
+        if si.settings['write_tracks']:
             tracks_writer = si.classes['tracks_writer']
             tracks_writer.open_file_if_needed()
             if new_particleIDs.size > 0:
@@ -199,6 +194,7 @@ class Solver(ParameterBaseClass):
 
             # write tracks file
             tracks_writer.write_all_time_varying_prop_and_data()
+
 
     def do_time_step(self, time_sec, is_moving):
         si = self.shared_info
@@ -315,7 +311,9 @@ class Solver(ParameterBaseClass):
 
         fraction_done= abs((time_sec - si.run_info['model_start_time']) / si.run_info['model_duration'])
         s = f'{100* fraction_done:02.0f}%'
-        s += f' step {nt:04d}:H{interp_info["current_hydro_model_step"]:04d}b{interp_info["current_buffer_steps"][0]:02d}-{interp_info["current_buffer_steps"][1]:02d}'
+        s += f' step {nt:04d}'
+        s += si.classes['field_group_manager'].screen_info()
+
         t = abs(time_sec - si.run_info['model_start_time'])
         s += ' Day ' + ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)

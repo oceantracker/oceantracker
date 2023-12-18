@@ -21,18 +21,17 @@ class ReaderField(ParameterBaseClass):
         reader = None
         interp = None
 
-    def initial_setup(self):
+    def initial_setup(self,grid):
         si = self.shared_info
         params= self.params
         #todo attach reader to field
-        reader = si.classes['reader']
         ncomp = 1
         if params['is_vector']:
             ncomp = 3 if params['is3D'] else 2
 
-        s= [reader.params['time_buffer_size'] if params['time_varying'] else 1,
-            reader.grid['x'].shape[0],
-            reader.grid['nz'] if params['is3D'] else 1,
+        s= [grid['time'].size if params['time_varying'] else 1,
+            grid['x'].shape[0],
+            grid['nz'] if params['is3D'] else 1,
              ncomp]
 
         self.data = np.full(s, 0., dtype=np.float32, order='c')  # all fields are float 32
@@ -50,7 +49,7 @@ class ReaderField(ParameterBaseClass):
             return self.data[nb,...]
         else:
             return self.data[:] # give whole
-    def update(self): pass
+    def update(self, fields,grid): pass
 
 
 class CustomFieldBase(ReaderField):
@@ -59,7 +58,7 @@ class CustomFieldBase(ReaderField):
         super().__init__()  # required in children to get parent defaults and merge with given params
 
 
-    def update(self, active): basic_util.nopass('User fields must have update method')
+    def update(self,fields,grid, active): basic_util.nopass('User fields must have update method')
     # if buffer index None, this  allows update of non-time varying use fields
 
 

@@ -32,7 +32,7 @@
             "isodate_of_hindcast_time_zero": "2020-06-01"
         },
         "user_note": "test of notes",
-        "numba_caching": true,
+        "numba_caching": false,
         "dispersion_miss-spelt": {
             "A_H": 0.1
         },
@@ -40,7 +40,7 @@
             "A_H": 0.1
         },
         "tracks_writer": {
-            "write_dry_cell_index": true
+            "write_dry_cell_flag": true
         },
         "particle_properties ": {
             "Oxygen": {

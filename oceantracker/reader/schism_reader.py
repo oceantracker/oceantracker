@@ -153,9 +153,9 @@ class SCHISMSreaderNCDF(_BaseReader):
              ]
         return data.reshape(s)
 
-    def read_dry_cell_data(self,nc,file_index,is_dry_cell_buffer, buffer_index):
+    def read_dry_cell_data(self,nc,grid, file_index,is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is then dry is_dry_cell_buffer=1
-        grid = self.grid
+
         si = self.shared_info
         data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
         is_dry_cell_buffer[buffer_index, :] = reader_util.append_split_cell_data(grid, data_added_to_buffer, axis=1)
@@ -184,10 +184,10 @@ class SCHISMSreaderNCDF(_BaseReader):
 
         return grid
 
-    def preprocess_field_variable(self, nc,name, data):
+    def preprocess_field_variable(self, nc,name,grid, data):
         if name =='water_velocity' and data.shape[2] > 1:
             # for 3D schism velocity partial fix for  non-zero hvel at nodes where cells in LSC grid span a change in bottom_cell_index
-            data = reader_util.patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
+            data = reader_util.patch_bottom_velocity_to_make_it_zero(data, grid['bottom_cell_index'])
         return data
 
     def read_open_boundary_data_as_boolean(self, grid):

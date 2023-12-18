@@ -43,7 +43,7 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-numba_caching: true
+numba_caching: false
 output_file_base: demo07_inside_polygon_events
 particle_properties:
   age_decay:
@@ -89,5 +89,5 @@ release_groups:
 root_output_dir: output
 time_step: 600
 tracks_writer:
-  write_dry_cell_index: true
+  write_dry_cell_flag: true
 user_note: test of notes

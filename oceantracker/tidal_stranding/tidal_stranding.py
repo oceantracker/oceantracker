@@ -1,13 +1,14 @@
 from numba import njit
-from oceantracker.status_modifiers._base_status_modifers import _BaseStatusModifer
-
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+from oceantracker.util.numba_util import njitOT
 from oceantracker.common_info_default_param_dict_templates import particle_info
+
 # globals
 status_stranded_by_tide = int(particle_info['status_flags']['stranded_by_tide'])
 status_frozen = int(particle_info['status_flags']['frozen'])
 status_moving = int(particle_info['status_flags']['moving'])
 
-class TidalStranding(_BaseStatusModifer):
+class TidalStranding(_BaseTrajectoryModifier):
 
     def __init__(self):
         # set up info/attributes
@@ -19,19 +20,19 @@ class TidalStranding(_BaseStatusModifer):
         self.check_class_required_fields_prop_etc(required_grid_var_list=['dry_cell_index'])
 
 
-    def update(self, time_sec,sel):
+    def update(self,grid, time_sec,sel):
         si=self.shared_info
         part_prop  =  si.classes['particle_properties']
 
         tidal_stranding_from_dry_cell_index(
-            si.classes['reader'].grid['dry_cell_index'],
+            grid['dry_cell_index'],
             part_prop['n_cell'].data,
             sel,
             part_prop['status'].data)
         pass
 
 
-@njit
+@njitOT
 def tidal_stranding_from_dry_cell_index(dry_cell_index, n_cell, sel, status):
     # look at all particles in buffer to check total water depth < water_depth_min
     #  use  0-255 dry cell index updated at each interpolation update

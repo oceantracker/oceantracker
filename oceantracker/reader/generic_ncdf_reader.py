@@ -20,6 +20,7 @@ from oceantracker.fields._base_field import  CustomFieldBase , ReaderField
 from oceantracker.reader.util import reader_util
 from oceantracker.reader._base_reader import _BaseReader
 from copy import  deepcopy
+
 class GenericNCDFreader(_BaseReader):
 
     def __init__(self, shared_memory_info=None):
@@ -293,7 +294,7 @@ class GenericNCDFreader(_BaseReader):
 
 
 
-    def preprocess_field_variable(self, nc, name, data): return data
+
 
 
 
@@ -375,9 +376,8 @@ class GenericNCDFreader(_BaseReader):
         return data.reshape(s)
 
 
-    def read_dry_cell_data(self,nc,file_index,is_dry_cell_buffer, buffer_index):
+    def read_dry_cell_data(self,nc,grid, file_index,is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry
-        grid = self.grid
         si = self.shared_info
         fields = si.classes['fields']
 
@@ -443,30 +443,6 @@ class GenericNCDFreader(_BaseReader):
             #todo make it work with users transform?
             x_out = cord_transforms.WGS84_to_UTM(x, out=None)
         return x_out
-
-    def write_hydro_model_grid(self):
-        # write a netcdf of the grid from first hindcast file
-        si =self.shared_info
-        output_files = si.output_files
-        grid = self.grid
-
-        # write grid file
-        output_files['grid'] = output_files['output_file_base'] + '_grid.nc'
-        nc = NetCDFhandler(path.join(output_files['run_output_dir'], output_files['grid'] ), 'w')
-        nc.write_global_attribute('index_note', ' all indices are zero based')
-        nc.write_global_attribute('created', str(datetime.now().isoformat()))
-
-        nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
-        nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
-        nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
-        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
-        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
-        nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
-        nc.write_a_new_variable('water_depth', si.classes['fields']['water_depth'].data.ravel(), ('node_dim',))
-        nc.close()
-
-        output_files['grid_outline'] = output_files['output_file_base'] + '_grid_outline.json'
-        json_util.write_JSON(path.join(output_files['run_output_dir'], output_files['grid_outline']), grid['grid_outline'])
 
 
     def close(self):

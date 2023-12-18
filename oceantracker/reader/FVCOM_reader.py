@@ -117,14 +117,13 @@ class unstructured_FVCOM(_BaseReader):
 
         zlevel_buffer[buffer_index, ...] = grid['zlevel_fractions'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
 
-    def read_dry_cell_data(self, nc, file_index,is_dry_cell_buffer,buffer_index):
+    def read_dry_cell_data(self, nc,grid,  file_index,is_dry_cell_buffer,buffer_index):
         si = self.shared_info
         if nc.is_var('wet_cells'):
             wet_cells= nc.read_a_variable('wet_cells',sel=file_index)
             is_dry_cell_buffer[buffer_index,:] = wet_cells != 1
         else:
             # get dry cells from water depth and tide
-            grid = self.grid
             fields = si.classes['fields']
             reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
                                                     si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
@@ -191,7 +190,7 @@ class unstructured_FVCOM(_BaseReader):
 
         return data
 
-    def preprocess_field_variable(self, nc,name, data):
+    def preprocess_field_variable(self, nc,name,grid, data):
         if name =='water_velocity' and data.shape[2] > 1: # process if 3D velocity
             # linear extrapolation of 3D velocity to bottom zlevel, may not give zero vel at bottom so set to zero
             data[:, :, 0, :] = 0.

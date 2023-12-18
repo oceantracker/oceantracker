@@ -2,8 +2,8 @@ import numpy as np
 from numba import njit, float64, int32, float32, int8, int64, boolean, uint8
 from oceantracker.util import  basic_util
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.util.numba_util import is_caching
-@njit(cache=is_caching())
+from oceantracker.util.numba_util import njitOT
+@njitOT
 def time_independent_2Dfield(F_out, F_data, triangles, n_cell, bc_cords,  active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
     # time independent  2D fields, eg water_depth
@@ -22,7 +22,7 @@ def time_independent_2Dfield(F_out, F_data, triangles, n_cell, bc_cords,  active
             for c in range(n_comp):
                 F_out[n, c] += bc * F[n_node, c]
 
-@njit(cache=is_caching())
+@njitOT
 def time_dependent_2Dfield(nb, fractional_time_steps, F_out, F_data, triangles, n_cell, bc_cords,  active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
     # time dependent  fields from two time slices in hindcast
@@ -45,7 +45,7 @@ def time_dependent_2Dfield(nb, fractional_time_steps, F_out, F_data, triangles, 
                                    + fractional_time_steps[1] * F2[n_node[m], c])
 
 # do 3D interp evaluation
-@njit(cache=is_caching())
+@njitOT
 def time_independent_3Dfield_LSC_grid(F_out, F_data, grid, part_prop, active, step_info):
     #  non-time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
     # todo do not used yet?
@@ -72,7 +72,7 @@ def time_independent_3Dfield_LSC_grid(F_out, F_data, grid, part_prop, active, st
             for c in range(n_comp):
                 # add contributions from layer above and below particle, for each spatial component
                 F_out[n, c] += bc * (F[n_node, nz_below, c] * zf1 + F[n_node, nz_above, c] * zf)
-@njit(cache=is_caching())
+@njitOT
 def time_dependent_3Dfield_sigma_grid(nb,fractional_time_steps, F_data,
                             triangles,
                             n_cell, bc_cords, nz_cell, z_fraction,
@@ -105,7 +105,7 @@ def time_dependent_3Dfield_sigma_grid(nb,fractional_time_steps, F_data,
 
 
 #@function_profiler(__name__)
-@njit(cache=is_caching())
+@njitOT
 def time_dependent_3Dfield_LSC_grid(nb ,fractional_time_steps, F_data,
                             triangles,bottom_cell_index,
                             n_cell, bc_cords, nz_cell, z_fraction,
@@ -139,10 +139,11 @@ def time_dependent_3Dfield_LSC_grid(nb ,fractional_time_steps, F_data,
                 F_out[n, c] +=     bc_cords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*fractional_time_steps[0]  \
                                 +  bc_cords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step
 
-@njit(cache=is_caching())
+@njitOT
 def update_dry_cell_index(is_dry_cell,dry_cell_index, current_buffer_steps,fractional_time_steps):
-    # up date 0-255 dry cell index, used to determine if cell dry at this time
+    # update 0-255 dry cell index, used to determine if cell dry at this time
     # uses  reader buffer locations and time step fractions within step info structure
+    # vals > 127 are dry, vals <= 127 are wet
     for n in range(dry_cell_index.size):
         val  = fractional_time_steps[0]*is_dry_cell[current_buffer_steps[0], n]
         val += fractional_time_steps[1]*is_dry_cell[current_buffer_steps[1], n]

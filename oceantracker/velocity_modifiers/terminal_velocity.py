@@ -1,6 +1,7 @@
 from  oceantracker.velocity_modifiers._base_velocity_modifer import VelocityModiferBase
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
+from oceantracker.util.numba_util import njitOT
 
 class TerminalVelocity(VelocityModiferBase):
     # add terminal velocity to particle velocity  < 0 is downwards ie sinking
@@ -44,13 +45,13 @@ class TerminalVelocity(VelocityModiferBase):
             self._add_individual_vertical_vel(velocity_modifier.data, part_prop['terminal_velocity'].data,  si.model_direction, active)
 
     @staticmethod
-    @njit
+    @njitOT
     def _add_constant_vertical_vel(v, w, sel):
         for n in sel:
             v[n, 2] += w
 
     @staticmethod
-    @njit
+    @njitOT
     def _add_individual_vertical_vel(v, w, model_dir, sel):
         for n in sel:
             v[n, 2] += w[n]*model_dir

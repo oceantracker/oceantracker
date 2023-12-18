@@ -41,7 +41,7 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-numba_caching: true
+numba_caching: false
 output_file_base: demo59_crit_shear_resupension
 particle_properties:
   age_decay:

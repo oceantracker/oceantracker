@@ -5,7 +5,7 @@
     A_H: 0.1
   dispersion_miss-spelt:
     A_H: 0.1
-  numba_caching: true
+  numba_caching: false
   output_file_base: demo05_parallel
   particle_properties:
     my_constant_prop:
@@ -44,7 +44,7 @@
   root_output_dir: output
   time_step: 600
   tracks_writer:
-    write_dry_cell_index: true
+    write_dry_cell_flag: true
   user_note: test of notes
 - - release_groups: &id001
       point1:

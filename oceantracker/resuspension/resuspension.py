@@ -2,7 +2,7 @@
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 import numpy as np
 from oceantracker.resuspension._base_resuspension import _BaseResuspension
-
+from oceantracker.util.numba_util import njitOT
 
 from numba import  njit
 
@@ -68,7 +68,7 @@ class BasicResuspension(_BaseResuspension):
         self.stop_update_timer()
 
     @staticmethod
-    @njit
+    @njitOT
     def resuspension_jump(friction_velocity, resuspension_factor, x, water_depth, z0, sel):
         # add entrainment jump up to particle z, Book: Lynch(2015) book, Particles in the coastal ocean  eq 9.26 and 9.28
         for n in sel:

@@ -1,6 +1,6 @@
 import numpy as np
 from numba import njit
-
+from oceantracker.util.numba_util import njitOT
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 
 #  keeps particles at the free surface
@@ -13,7 +13,7 @@ class SurfaceFloat(_BaseTrajectoryModifier):
         part_prop= si.classes['particle_properties']
         self.move_to_free_surface(part_prop['x'], part_prop['tide'], active)
 
-@njit
+@njitOT
 def move_to_free_surface(self, x, tide, active):
     for n in active:
         x[n, 2] = tide[n]

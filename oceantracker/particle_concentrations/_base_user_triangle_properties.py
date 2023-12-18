@@ -34,7 +34,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
     def set_up_output_file(self):
         # set up output file
         si = self.shared_info
-        grid = si.classes['reader'].grid
+        grid = si.classes['field_group_manager'].grid
 
         self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_' + self.info['name'] + '.nc'
         si.msg_logger.progress_marker('opening concentrations output to : ' + self.info['output_file'])

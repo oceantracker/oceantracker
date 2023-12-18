@@ -1,5 +1,6 @@
 from oceantracker.particle_concentrations._base_user_triangle_properties import _BaseTriangleProperties
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
+from oceantracker.util.numba_util import njitOT
 from numba import njit
 import numpy as np
 
@@ -12,12 +13,13 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
         load_decay_time_scale = PVC(24 * 3600, float, doc_str='time scale of exponential decay of particle load', units='sec')
         ))
 
+
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_grid_var_list=['triangle_area', 'x'],
                                                             required_props_list=['tide','water_depth'])
     def set_up_data_buffers(self):
         si = self.shared_info
-        grid = si.classes['reader'].grid
+        grid = si.classes['field_group_manager'].grid
         # set up data buffer
         s = (grid['triangles'].shape[0],)
 
@@ -47,7 +49,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
     def update(self, time_sec):
         params= self.params
         si=self.shared_info
-        grid = si.classes['reader'].grid
+        grid = si.classes['field_group_manager'].grid
         part_prop =si.classes['particle_properties']
 
         if not params['update_values_every_time_step'] and abs(time_sec - self.info['time_last_stats_recorded']) < params['update_interval']: return
@@ -70,7 +72,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
             self.info['time_last_stats_recorded'] = time_sec
 
     @staticmethod
-    @njit()
+    @njitOT
     def calcuate_concentration2D(n_cell, tide, water_depth, age, triangle_area,particle_count, particle_concentration,
                                  load_concentration, initial_particle_load,load_decay_time_scale,
                                  sel_to_count):
