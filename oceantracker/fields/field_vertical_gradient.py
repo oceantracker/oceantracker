@@ -15,16 +15,17 @@ class VerticalGradient(CustomFieldBase):
                                  })
         self.class_doc(description='Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"')
 
-    def initial_setup(self, grid):
+    def initial_setup(self, grid, fields):
         si = self.shared_info
         # get fields prop from named field
         params= self.params
-        params['time_varying'] = si.classes['fields']['A_Z_profile'].is_time_varying() # match base field
         field_name = params['name_of_field']
-        if field_name not in si.classes['fields']:
+        params['time_varying'] =fields[field_name].is_time_varying() # match base field
+
+        if field_name not in fields:
             si.msg_logger.msg(f'Field vertical gradient >> can not find field {field_name} to setup its vertical gradient class', fatal_error=True, exit_now=True)
 
-        super().initial_setup(grid)  # set up self.data with above params
+        super().initial_setup(grid,fields)  # set up self.data with above params
         pass
 
     def check_requirements(self):

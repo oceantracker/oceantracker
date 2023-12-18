@@ -62,10 +62,8 @@ class PointRelease(ParameterBaseClass):
         si = self.shared_info
         ml = self.msg_logger
 
-        #todo for multiple readers, get  field group ot hold overlaping range
-        reader =  si.classes['reader']
-        hindcast_start = reader.info['file_info']['first_time']
-        hindcast_end   = reader.info['file_info']['last_time']
+        hindcast_start, hindcast_end  =  si.classes['field_group_manager'].get_hindcast_start_end_times()
+
         model_time_step = si.settings['time_step']
 
         self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,

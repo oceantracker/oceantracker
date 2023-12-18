@@ -388,10 +388,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si= self.shared_info
 
         pgm = si.classes['particle_group_manager']
-
+        fgm = si.classes['field_group_manager']
         # create prop particle properties derived from any field  reader ot user custom
         t0= perf_counter()
-        for name, i in si.classes['fields'].items():
+        for name, i in fgm.fields.items():
             pgm.add_particle_property(name, 'from_fields', dict( vector_dim=i.get_number_components(), time_varying=True,
                                                     write= True if i.params['write_interp_particle_prop_to_tracks_file'] else False))
 
@@ -420,7 +420,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         pgm= si.classes['particle_group_manager']
         info = self.info
         info['date_of_time_zero'] = time_util.seconds_to_datetime64(np.asarray([0.]))
-        r = si.classes['reader']
 
         info['backtracking'] = si.backtracking
         elapsed_time_sec = perf_counter() -t0
@@ -438,7 +437,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             'computer_info': get_versions_computer_info.get_computer_info(),
             'file_written': datetime.now().isoformat(),
              'run_info' : info,
-             'hindcast_info': r.info,
+             'hindcast_info': si.classes['field_group_manager'].info,
              'full_case_params': si.working_params,
              'particle_status_flags': si.particle_status_flags,
              'release_groups' : {},

@@ -307,8 +307,6 @@ class Solver(ParameterBaseClass):
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
         si= self.shared_info
-        interp_info= si.classes["interpolator"].info #todo more than one reader?
-
         fraction_done= abs((time_sec - si.run_info['model_start_time']) / si.run_info['model_duration'])
         s = f'{100* fraction_done:02.0f}%'
         s += f' step {nt:04d}'

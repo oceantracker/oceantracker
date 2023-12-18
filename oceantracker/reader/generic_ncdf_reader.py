@@ -322,11 +322,8 @@ class GenericNCDFreader(_BaseReader):
         return grid
 
 
-    def assemble_field_components(self,nc, name, file_index=None):
+    def assemble_field_components(self,nc, name, field, file_index=None):
         # read scalar fields / join together the components which make vector from component list
-        si = self.shared_info
-        field = si.classes['fields'][name]
-
         params = self.params
 
         s= list(field.data.shape)
@@ -376,10 +373,9 @@ class GenericNCDFreader(_BaseReader):
         return data.reshape(s)
 
 
-    def read_dry_cell_data(self,nc,grid, file_index,is_dry_cell_buffer, buffer_index):
+    def read_dry_cell_data(self,nc,grid, fields, file_index,is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry
         si = self.shared_info
-        fields = si.classes['fields']
 
         if self.params['grid_variable_map']['is_dry_cell'] is None:
             if grid['zlevel'] is None:
@@ -397,7 +393,7 @@ class GenericNCDFreader(_BaseReader):
 
 
 
-    def read_zlevel_as_float32(self, nc, file_index, zlevel_buffer, buffer_index):
+    def read_zlevel_as_float32(self, nc,grid,fields, file_index, zlevel_buffer, buffer_index):
         # read in place
         zlevel_buffer[buffer_index,...] = nc.read_a_variable('zcor', sel=file_index).astype(np.float32)
 

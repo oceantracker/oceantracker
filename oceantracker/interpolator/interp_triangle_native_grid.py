@@ -238,49 +238,46 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                               active)
         return output
 
-    def find_cell(self, grid, xq, current_buffer_steps,fractional_time_steps, active):
-        # locate cell in place
-        # nt give but not needed in 2D
+    
+    def find_vertical_cell(self, grid, fields, xq, current_buffer_steps,fractional_time_steps, active):
+        # locate vertical cell in place
+
         si= self.shared_info
 
-        fields = si.classes['fields']
-
-        # used 2D or 3D walk chosen above
-        self._do_hori_walk(grid, xq, active)
-        #retry any too long wallks
         part_prop = si.classes['particle_properties']
         n_cell= part_prop['n_cell_last_good'].data
         status = part_prop['status'].data
         bc_cords = part_prop['bc_cords'].data
 
-        if si.is3D_run:
-            t0 = perf_counter()
-            nz_cell = part_prop['nz_cell'].data
-            z_fraction = part_prop['z_fraction'].data
-            z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
-            if 'sigma' in grid:
-                    tri_interp_util.get_depth_cell_sigma_layers(xq,
-                                            grid['triangles'],
-                                            fields['water_depth'].data.ravel(),
-                                            fields['tide'].data,
-                                            si.minimum_total_water_depth,
-                                            grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],grid['sigma_map_dz'],
-                                            n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
-                                            current_buffer_steps, fractional_time_steps,
-                                            active, si.z0)
 
-            else:
-                # natve slayer option
-                tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
-                                            grid['triangles'],grid['zlevel'],grid['bottom_cell_index'],
-                                            #grid['triangles'], grid['zlevel_vertex'], grid['bottom_cell_index'],
-                                            n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_water_velocity,
-                                            current_buffer_steps,fractional_time_steps,
-                                            self.walk_counts,
-                                            active,  si.z0)
-            si.block_timer('Find cell, vertical walk', t0)
+        t0 = perf_counter()
+        nz_cell = part_prop['nz_cell'].data
+        z_fraction = part_prop['z_fraction'].data
+        z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
 
-    def _do_hori_walk(self,grid, xq, active):
+        if 'sigma' in grid:
+                tri_interp_util.get_depth_cell_sigma_layers(xq,
+                                        grid['triangles'],
+                                        fields['water_depth'].data.ravel(),
+                                        fields['tide'].data,
+                                        si.minimum_total_water_depth,
+                                        grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],grid['sigma_map_dz'],
+                                        n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
+                                        current_buffer_steps, fractional_time_steps,
+                                        active, si.z0)
+        else:
+            # natve slayer option
+            tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
+                                        grid['triangles'],grid['zlevel'],grid['bottom_cell_index'],
+                                        #grid['triangles'], grid['zlevel_vertex'], grid['bottom_cell_index'],
+                                        n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_water_velocity,
+                                        current_buffer_steps,fractional_time_steps,
+                                        self.walk_counts,
+                                        active,  si.z0)
+        si.block_timer('Find cell, vertical walk', t0)
+
+    def find_hori_cell(self,grid, fields,  xq, current_buffer_steps,fractional_time_steps, active):
+        # do cell walk
         si= self.shared_info
         t0= perf_counter()
         info = self.info
@@ -322,9 +319,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             new_cell = self.initial_horizontal_cell(grid, xq[sel, :])
             part_prop['n_cell'].set_values(new_cell, sel)
 
-            self._do_hori_walk(grid, xq, sel)
+            self.find_hori_cell(grid, fields, xq, sel)
             # recheck for additional failures
-            #el = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_partID_subset_buffer('B1'))
             sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['failed'], out=self.get_partID_subset_buffer('B1'))
 
             if sel.size > 0:
