@@ -331,7 +331,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         # read data if not time varying
         if not i.is_time_varying():
-            i.data[0, ...] = reader.assemble_field_components(nc, name, i)
+            i.data[0, ...] = reader.assemble_field_components(nc, self.grid, name, i)
 
         self.fields[name] = i
 

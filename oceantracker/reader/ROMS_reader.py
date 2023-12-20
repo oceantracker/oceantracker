@@ -24,7 +24,7 @@ from oceantracker.util.basic_util import  is_substring_in_list
 
 from oceantracker.reader.util import reader_util
 from oceantracker.reader.util.hydromodel_grid_transforms import convert_layer_field_to_levels_from_fixed_depth_fractions
-
+from oceantracker.util.ncdf_util import NetCDFhandler
 # todo use ROMs turbulent viscosity for dispersion
 #todo use  openbondary data to improve identifcation of open boundary nodes?
 #todo implement depth average mode using depth average variables in the file
@@ -42,11 +42,19 @@ class ROMsNativeReader(_BaseReader):
         self.add_default_params({ 'field_variable_map': {'water_velocity': PLC(['u','v','w'], [str], fixed_len=3),
                                                     'water_depth': PVC('h', str),
                                                     'tide': PVC('zeta', str),
-                                                    'water_temperature': PVC('temp', str)},
+                                                    'water_temperature': PVC('temp', str) ,
+                                                    'bottom_stress': PVC('not_known', str, doc_str='maps standard internal field name to file variable name'),
+                                                    'A_Z_profile': PVC('not_known', str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
                                                     'water_velocity_depth_averaged':PLC(['ubar','vbar'], [str], fixed_len=2),
-                                     })
+                                  }
+                                  })
 
 
+    def is_file_format(self, file_name):
+        nc = NetCDFhandler(file_name,'r')
+        is_file_type=  set(['ocean_time','mask_psi','lat_psi','lon_psi','h','zeta','u','v']).issubset(list(nc.variable_info.keys()))
+        nc.close()
+        return is_file_type
     def build_hori_grid(self, nc, grid):
 
         si = self.shared_info
@@ -168,10 +176,9 @@ class ROMsNativeReader(_BaseReader):
 
         return time_sec
 
-    def read_file_var_as_4D_nodal_values(self,nc,var_name, file_index=None):
+    def read_file_var_as_4D_nodal_values(self,nc, grid, var_name, file_index=None):
         # reformat file variable into 4D time,node,depth, components  form
         si =self.shared_info
-        grid = self.grid
 
         data = nc.read_a_variable(var_name, sel=file_index)
 

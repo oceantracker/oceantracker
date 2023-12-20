@@ -140,7 +140,7 @@ class SCHISMreaderNCDF(_BaseReader):
         return grid
 
 
-    def read_file_var_as_4D_nodal_values(self, nc, var_name, file_index=None):
+    def read_file_var_as_4D_nodal_values(self, nc, grid, var_name, file_index=None):
         # read variable into 4D ( time, node, depth, comp) format
         # assumes same variable order in the file
         data, data_dims = self.read_field_var(nc , var_name, sel=file_index)

@@ -1,7 +1,7 @@
 from oceantracker.reader._base_reader import _BaseReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
-
+from oceantracker.util.ncdf_util import NetCDFhandler
 import numpy as np
 from datetime import datetime
 from oceantracker.reader.util import hydromodel_grid_transforms
@@ -26,8 +26,18 @@ class unstructured_FVCOM(_BaseReader):
                                                 'tide': PVC('zeta', str,doc_str='maps standard internal field name to file variable name'),
                                                 'water_temperature': PVC('temp', str, doc_str='maps standard internal field name to file variable name'),
                                                  'salinity': PVC('salinity', str, doc_str='maps standard internal field name to file variable name'),
-                                                 'wind_velocity': PLC(['uwind_speed', 'vwind_speed'], [str], doc_str='maps standard internal field name to file variable name')},
-                                })
+                                                 'wind_velocity': PLC(['uwind_speed', 'vwind_speed'], [str], doc_str='maps standard internal field name to file variable name'),
+                                            'bottom_stress': PVC('not_known', str, doc_str='maps standard internal field name to file variable name'),
+                                            'A_Z_profile': PVC('not_known', str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
+                                }
+        })
+
+
+    def is_file_format(self, file_name):
+        nc = NetCDFhandler(file_name,'r')
+        is_file_type= set(['Times', 'nv', 'u', 'v', 'h']).issubset(list(nc.variable_info.keys()))
+        nc.close()
+        return is_file_type
 
     def build_vertical_grid(self, nc, grid):
 
@@ -150,11 +160,9 @@ class unstructured_FVCOM(_BaseReader):
                         )
         return f_params
 
-    def read_file_var_as_4D_nodal_values(self,nc,var_name, file_index=None):
+    def read_file_var_as_4D_nodal_values(self,nc,grid, var_name, file_index=None):
         # read variable into 4D ( time, node, depth, comp) format
         # assumes same variable order in the file
-
-        grid = self.grid
 
         data = nc.read_a_variable(var_name, sel=file_index)
 
