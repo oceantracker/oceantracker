@@ -120,7 +120,8 @@ cell_search_status_flags = dict(ok =0, outside_domain=1 ,blocked_domain=-5, bloc
 known_readers ={'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                 'schisim_v5':    'oceantracker.reader.schism_reader_v5.SCHISMreaderNCDFv5',
                  'fvcom': 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
-                 'roms': 'oceantracker.reader.ROMS_reader.ROMsNativeReader'}
+                 'roms': 'oceantracker.reader.ROMS_reader.ROMsNativeReader',
+                 'generic': 'oceantracker.reader.generic_ncdf_reader.GenericNCDFreader'}
 
 
 large_float=1.0E32

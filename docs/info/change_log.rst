@@ -17,7 +17,8 @@ New features
 
 #. Most expensive step in 3D finding vertical cell is not 5 times faster, so net 2-3 times faster, as by default regrids  3D data to uniform Sigma grid, to speed vertical cell search by factor of 5. Original native vertical grid short vertical walk search still available.
 #. By default uses diffusivity vertical profile for A_Z in random walk if variable mapped to A_Z_profile is found in the hydro file
-#. Uses bottom stress to calculate friction velocity field if variable mapped to bottom_stress is found in the hydro file
+#. Uses bottom stress to calculate friction velocity field if variable mapped to bottom_stress is found in the hydro file, if not uses near seabed velocity
+#. Now reads new Schism v5 multi-file output, where 3D fields in separate files
 #. Floating particle trajectory  modifier, forces particles to follow free surface
 #. Now exits if any the release group start time is outside time range of hindcast
 

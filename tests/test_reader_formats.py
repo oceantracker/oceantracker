@@ -73,8 +73,22 @@ def get_case(n):
             x0= cord_transforms.WGS84_to_UTM(np.flip(np.asarray(x0),axis=1)).tolist()
             ax = None # Auck
             title = 'test schisim v5 - auckland test'
-            reader = 'oceantracker.reader.schism_reader_v5.SCHISMreaderNCDFv5'
 
+
+        case 102:
+            #schism v5, WHOI, not working
+            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\WHOI_calvin\schism'
+            output_file_base = 'SchismV5 test Hauarki'
+            file_mask = '*.nc'
+
+            x0 = [[-36.81612195216445, 174.82731398519584],
+                  [-37.070731274878, 175.39302783837365],
+                  [-36.4051733326401, 174.7771263023033],
+                  [-36.85502113978176, 174.6807647189683]
+                  ]
+            x0= cord_transforms.WGS84_to_UTM(np.flip(np.asarray(x0),axis=1)).tolist()
+            ax = None # Auck
+            title = 'test schisim v5 - Calvin'
 
         case 150:
             root_input_dir = r'F:\Hindcasts\2023_Pelorus\Preliminary outputs'

@@ -67,6 +67,17 @@ class GenericNCDFreader(_BaseReader):
         self.info['field_variable_info'] = {}
         self.info['buffer_info'] ={}
 
+    def is_file_format(self,file_name):
+        # check if file matches this file format
+        nc = NetCDFhandler(file_name,'r')
+        gm = self.params['grid_variable_map']
+        fm  = self.params['field_variable_map']
+        dm = self.params['dimension_map']
+
+        is_file_type=  nc.is_dim(dm['time']) and nc.is_dim(dm['node']) and nc.is_var(gm['x'][0]) and nc.is_var(gm['x'][1]) and nc.is_var(fm['tide']) and nc.is_var(fm['water_depth'])
+        nc.close()
+        return is_file_type
+
     def get_field_params(self, nc, name, crumbs=''):
         # work out if feild is 3D ,etc
         fmap = deepcopy(self.params['field_variable_map'][name])

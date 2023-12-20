@@ -28,7 +28,9 @@ class NetCDFhandler(object):
             # get variable info
             v = self.file_handle.variables
             for name in v.keys():
-                    self.variable_info[name] ={'dimensions':v[name].dimensions, 'shape': v[name].shape,'dtype': v[name].datatype}
+                    self.variable_info[name] ={'dimensions':v[name].dimensions,
+                                               'shape': v[name].shape,'dtype': v[name].datatype,
+                                               'attributes': self.all_var_attr(name)}
 
 
     def add_dimension(self, name, dim_size=None):

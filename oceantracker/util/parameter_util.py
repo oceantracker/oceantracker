@@ -4,7 +4,7 @@ from oceantracker.util.module_importing_util  import import_module_from_string
 from oceantracker.util.parameter_checking import merge_params_with_defaults
 
 def make_class_instance_from_params(name, params,msg_logger, default_classID=None,
-                                     crumbs='', merge_params=True):
+                                     crumbs='', merge_params=True,check_for_unknown_keys=True):
     # make a class instance  dynamically,  get instance of class from string eg oceantracker.solver.Solver
     # assumes class_name param exists
     # add class sequence number, used for in class list
@@ -23,7 +23,7 @@ def make_class_instance_from_params(name, params,msg_logger, default_classID=Non
     i.info['class_role'] = default_classID
 
     if merge_params:
-        i.params  = merge_params_with_defaults(params, i.default_params, msg_logger, crumbs=crumbs)
+        i.params  = merge_params_with_defaults(params, i.default_params, msg_logger, crumbs=crumbs,check_for_unknown_keys=check_for_unknown_keys)
 
     # attach the current message loger
     i.msg_logger = msg_logger
