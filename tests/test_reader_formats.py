@@ -31,6 +31,8 @@ def run_params(d):
         params['reader']['hgrid_file_name']= d['hgrid_file']
         params['open_boundary_type'] = 1
 
+    if d['reader'] is not  None:  params['reader']['class_name'] = d['reader']
+
     params['velocity_modifiers'] = {'fall_vel': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -d['fall_vel']}}
 
     params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_cords'])
@@ -44,6 +46,7 @@ def get_case(n):
     hgrid_file=None
     time_step=3600.
     fall_vel=0.
+    reader = None
     match n:
         case 100:
             root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01'
@@ -57,7 +60,23 @@ def get_case(n):
                   ]
             ax = [1727860, 1823449, 5878821, 5957660]  # Auck
             title = 'NZ national test'
-        case 50:
+        case 101:
+            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\Auckland_uni_hauarki\new_format\01'
+            output_file_base = 'SchismV5 test Hauarki'
+            file_mask = '*.nc'
+
+            x0 = [[-36.81612195216445, 174.82731398519584],
+                  [-37.070731274878, 175.39302783837365],
+                  [-36.4051733326401, 174.7771263023033],
+                  [-36.85502113978176, 174.6807647189683]
+                  ]
+            x0= cord_transforms.WGS84_to_UTM(np.flip(np.asarray(x0),axis=1)).tolist()
+            ax = None # Auck
+            title = 'test schisim v5 - auckland test'
+            reader = 'oceantracker.reader.schism_reader_v5.SCHISMreaderNCDFv5'
+
+
+        case 150:
             root_input_dir = r'F:\Hindcasts\2023_Pelorus\Preliminary outputs'
             output_file_base = 'Pelourus_prelim'
             file_mask = 'schout*.nc'
@@ -69,7 +88,7 @@ def get_case(n):
             ax=None# ax = [1727860, 1823449, 5878821, 5957660]  # Auck
             title= 'Pelourus prelim test'
 
-        case 51:
+        case 151:
             root_input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\schism_standard'
             output_file_base = 'WhangareiHarbour_test'
             file_mask = 'schout*.nc'
@@ -113,15 +132,15 @@ def get_case(n):
             ax = [1727860, 1823449, 5878821, 5957660]  # Auck
             title = 'NZ national test'
             nested_readers= dict(nest1=dict(
-                    class_name='oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
-                    input_dir = r'F:\Hindcasts\2023_Pelorus\Preliminary outputs',
+                    class_name='oceantracker.reader.schism_reader.SCHISMreaderNCDF',
+                    input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\schism_standard',
                     file_mask = 'schout*.nc',
-                   hgrid_file_name=r'F:\Hindcasts\2023_Pelorus\Preliminary outputs\hgrid.gr3'
+                   hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\schism_standard\hgrid_Whangarei.gr3'
             ))
 
 
 
-    return dict(x0=x0,root_input_dir=root_input_dir,output_file_base=output_file_base+f'_{n:02d}',title=title,time_step=time_step,
+    return dict(x0=x0,root_input_dir=root_input_dir,output_file_base=output_file_base+f'_{n:02d}',title=title,time_step=time_step,reader= reader,
                 file_mask=file_mask,ax=ax,max_days=max_days,nested_readers=nested_readers,hgrid_file=hgrid_file,    fall_vel= fall_vel)
 if __name__ == '__main__':
 

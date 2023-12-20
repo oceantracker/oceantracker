@@ -94,6 +94,7 @@ class_dicts_list=[ # class dicts which replace lists
             'time_varying_info', # particle info,eg. time,or  tide at at tide gauge, core example is particle time
             ]
 
+
 default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
                 'name': PVC(None, str),
                 'points': PVC([], 'array', list_contains_type=float, is_required=True,
@@ -116,7 +117,8 @@ cell_search_status_flags = dict(ok =0, outside_domain=1 ,blocked_domain=-5, bloc
 
 # default reader classes used by auto dection of file type
 
-default_reader ={'schisim': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
+known_readers ={'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
+                'schisim_v5':    'oceantracker.reader.schism_reader_v5.SCHISMreaderNCDFv5',
                  'fvcom': 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
                  'roms': 'oceantracker.reader.ROMS_reader.ROMsNativeReader'}
 

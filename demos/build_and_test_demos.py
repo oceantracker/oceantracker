@@ -229,7 +229,7 @@ params.append(p10)
 # case 50 schism basic
 schsim_base_params=\
 {'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120, 'numba_caching': False,
- 'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
+ 'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                     'input_dir': 'demo_hindcast',
                              'file_mask': 'demoHindcastSchism3D.nc',
                      'load_fields':['water_temperature']

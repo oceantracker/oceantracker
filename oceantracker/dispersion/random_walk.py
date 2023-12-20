@@ -37,12 +37,10 @@ class RandomWalk(_BaseTrajectoryModifer):
     # apply random walk
     def update(self,time_sec, active):
         # add up 2D/3D diffusion coeff as random walk done using velocity_modifier
-        #todo remove nb param,  when changed to using arbitary time step, not substeping
-
         si= self.shared_info
         part_prop = si.classes['particle_properties']
-        if si.settings['use_A_Z_profile']:
-            prop = si.classes['particle_properties']
+
+        if si.settings['use_A_Z_profile'] and 'A_Z_profile' in part_prop:
             self._add_random_walk_velocity_modifier_AZ_profile(part_prop['A_Z_profile'].data, part_prop['A_Z_profile_vertical_gradient'].data,
                                                     self.info['random_walk_velocity'],
                                                     np.abs(si.settings['time_step']),

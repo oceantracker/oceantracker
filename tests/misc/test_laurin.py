@@ -487,7 +487,7 @@ if __name__ == '__main__':
         'max_run_duration': 7. * 24 * 3600,
         'write_tracks': True,
         'use_A_Z_profile': True,
-        'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
+        'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                    'file_mask': 'schout_*.nc', 'input_dir': input_dir,
                    'hgrid_file_name': path.join(input_dir, 'hgrid.gr3'),
                    # fields to track at particle locations

@@ -18,7 +18,7 @@ from oceantracker.util import triangle_utilities_code
 from oceantracker.util.triangle_utilities_code import split_quad_cells
 from oceantracker.fields._base_field import CustomFieldBase, ReaderField
 from oceantracker.reader.util import reader_util
-
+from pathlib import Path as pathlib_Path
 
 class _BaseReader(ParameterBaseClass):
 
@@ -65,11 +65,22 @@ class _BaseReader(ParameterBaseClass):
 
     def get_field_params(self,nc, name):   nopass()
 
+
+
     def read_zlevel_as_float32(self, nc, grid,fields, file_index, zlevel_buffer, buffer_index):   nopass()
 
     def read_dry_cell_data(self, nc,grid,fields,  file_index, is_dry_cell_buffer, buffer_index):   nopass()
 
     def set_up_uniform_sigma(self,nc, grid):nopass()
+
+    def get_file_list(self):
+
+        params = self.params
+        file_list = []
+        for fn in pathlib_Path(params['input_dir']).rglob(params['file_mask']):
+            file_list.append(path.abspath(fn))
+
+        return file_list
 
     # default setup
     def setup_water_velocity(self,nc,grid):
@@ -88,8 +99,6 @@ class _BaseReader(ParameterBaseClass):
     def preprocess_field_variable(self, nc, name,grid, data): return data
 
 
-
-
     # calculate dry cell flags, if any cell node is dry
     # not required but have defaults
     def read_bottom_cell_index_as_int32(self, nc, grid):
@@ -103,6 +112,10 @@ class _BaseReader(ParameterBaseClass):
         return is_open_boundary_node
 
     def read_file_var_as_4D_nodal_values(self, nc, var_name, file_index=None): nopass()
+    def read_field_var(self, nc, var_file_name, sel=None):
+        # read sel time steps of field variable
+        data = nc.read_a_variable(var_file_name, sel=sel)
+        return data, nc.all_var_dims(var_file_name)
 
     # optional methods
     #-------------------------------------
@@ -111,8 +124,6 @@ class _BaseReader(ParameterBaseClass):
 
     # -------------------------------------------------
     # core reader processes
-    def create_reader_field(self, nc, file_var_map):
-        nopass()
 
     def initial_setup(self):
         # map variable internal names to names in NETCDF file
@@ -169,6 +180,7 @@ class _BaseReader(ParameterBaseClass):
                     si.msg_logger.msg(f'Reader type error {name} must be dtype {np.int32} ', warning=True)
 
         return grid, is3D_hydro
+
 
     def sort_files_by_time(self, file_list, msg_logger):
         # get time sorted list of files matching mask
@@ -568,6 +580,7 @@ class _BaseReader(ParameterBaseClass):
     def hydro_model_index_to_buffer_offset(self, nt_hindcast):
         # ring buffer mapping
         return nt_hindcast % self.info['buffer_info']['buffer_size']
+
 
     def are_time_steps_in_buffer(self, time_sec):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
