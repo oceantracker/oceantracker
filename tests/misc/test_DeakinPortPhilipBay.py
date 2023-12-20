@@ -18,7 +18,7 @@ def set_params(args, x0, duration_sec= 5. * 24 * 3600):
 
     params = {'output_file_base': 'PPBtest','time_step': 1800,
               'root_output_dir': 'F:\\OceanTrackerOuput\\Deakin\\portPhillipBay',
-              'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
+              'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                          #'input_dir': 'F:\\Hindcasts\Deakin_EricT\\PPB_Hydro_netCDF',
                          'input_dir': r'F:\Hindcasts\PortPhillipBay\HUY2020\schism',
                          'file_mask': 'schout_*.nc',

@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     params={ 'output_file_base': 'jiliantest',
             'root_output_dir': 'F:\\OceanTrackerOuput\\Vims\\Jilian',
-            'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMSreaderNCDF',
+            'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                           'file_mask': 'schout_*.nc','input_dir': 'F:\\Hindcasts\\Hindcast_samples_tests\\VIMS\\Particle_ChesBay_Jilian_small',
                           'field_variables_to_depth_average': ['water_velocity'],
                           'load_fields': {}, # fields to track at particle locations

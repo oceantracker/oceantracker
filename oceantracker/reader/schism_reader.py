@@ -7,8 +7,9 @@ import numpy as np
 from oceantracker.util.triangle_utilities_code import split_quad_cells
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
 from copy import deepcopy
+from oceantracker.util.ncdf_util import  NetCDFhandler
 
-class SCHISMSreaderNCDF(_BaseReader):
+class SCHISMreaderNCDF(_BaseReader):
 
     def __init__(self, shared_memory_info=None):
         super().__init__()  # required in children to get parent defaults and merge with give params
@@ -32,6 +33,13 @@ class SCHISMSreaderNCDF(_BaseReader):
                                    },
             'hgrid_file_name': PVC(None, str),
              })
+
+    def is_file_format(self,file_name):
+        # check if file matches this file format
+        nc = NetCDFhandler(file_name,'r')
+        is_file_type= nc.is_var('SCHISM_hgrid_node_x') and (nc.is_var('hvel') or nc.is_var('dahv'))
+        nc.close()
+        return is_file_type
 
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
@@ -79,10 +87,8 @@ class SCHISMSreaderNCDF(_BaseReader):
     def number_hindcast_zlayers(self, nc): return nc.dim_size('nSCHISM_vgrid_layers')
 
     def read_zlevel_as_float32(self, nc, grid,fields, file_index, zlevel_buffer, buffer_index):
-        zlevel_buffer[buffer_index,...] = nc.read_a_variable('zcor', sel=file_index).astype(np.float32)
+        zlevel_buffer[buffer_index,...] = nc.read_a_variable(self.params['grid_variable_map']['zlevel'], sel=file_index).astype(np.float32)
 
-    def read_factional_zlevels(self, nc):
-        z_fractiosns = nc.read_a_variable('zcor').astype(np.float32)
 
     def read_time_sec_since_1970(self, nc, file_index=None):
         var_name=self.params['grid_variable_map']['time']
@@ -105,23 +111,16 @@ class SCHISMSreaderNCDF(_BaseReader):
         # work out if feild is 3D ,etc
         si = self.shared_info
         fmap = deepcopy(self.params['field_variable_map'])
+
         # if no field map given to use given name as field map
         if name not in fmap:  fmap[name] = name
-
 
         # make a list so all maps the same
         if type(fmap[name]) != list: fmap[name] =[fmap[name]]
 
-        # check all variables are in file
-        for n in fmap[name]:
-            if not nc.is_var(n):
-                si.msg_logger.msg(f'Can not find variable named {n} in hydro file', crumbs=crumbs+'> getting field parameters to set up field class',
-                              fatal_error=True, exit_now=True)
-
-
-        f_params = dict(time_varying = nc.is_var_dim(fmap[name] [0], 'time'),
-                        is3D = nc.is_var_dim(fmap[name] [0],'nSCHISM_vgrid_layers'),
-                        is_vector = nc.is_var_dim(fmap[name] [0],'two') or len(fmap[name] ) > 1
+        f_params = dict(time_varying = nc.is_var_dim(fmap[name][0], 'time'),
+                        is3D = nc.is_var_dim(fmap[name][0], 'nSCHISM_vgrid_layers'),
+                        is_vector = nc.is_var_dim(fmap[name][0], 'two') or len(fmap[name] ) > 1
                         )
         return f_params
 
@@ -135,7 +134,7 @@ class SCHISMSreaderNCDF(_BaseReader):
             vertical_grid_type = 'LSC'
         else:
             # Slayer grid, bottom cell index = zero
-            grid['bottom_cell_index'] = np.zeros((self.grid['x'].shape[0],),dtype=np.int32)
+            grid['bottom_cell_index'] = np.zeros((grid['x'].shape[0],),dtype=np.int32)
             grid['bottom_cell_index'] = 'Slayer'
         self.info['vertical_grid_type'] = vertical_grid_type
         return grid
@@ -144,12 +143,12 @@ class SCHISMSreaderNCDF(_BaseReader):
     def read_file_var_as_4D_nodal_values(self, nc, var_name, file_index=None):
         # read variable into 4D ( time, node, depth, comp) format
         # assumes same variable order in the file
-        data = nc.read_a_variable(var_name, sel=file_index)
+        data, data_dims = self.read_field_var(nc , var_name, sel=file_index)
         # get 4d size
-        s = [data.shape[0] if nc.is_var_dim(var_name, 'time') else 1,
+        s = [data.shape[0] if 'time' in data_dims else 1,
              nc.dim_size('nSCHISM_hgrid_node'),
-             nc.dim_size('nSCHISM_vgrid_layers') if  nc.is_var_dim(var_name,'nSCHISM_vgrid_layers') else 1,
-             2  if  nc.is_var_dim(var_name,'two') else 1
+             nc.dim_size('nSCHISM_vgrid_layers') if 'nSCHISM_vgrid_layers' in data_dims else 1,
+             2  if  'two' in data_dims else 1
              ]
         return data.reshape(s)
 
@@ -164,10 +163,9 @@ class SCHISMSreaderNCDF(_BaseReader):
         # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
         si= self.shared_info
         # read first zlevel time step
-        zlevel = nc.read_a_variable('zcor', sel=0)
+        zlevel, zlevel_dims =self.read_field_var(nc, self.params['grid_variable_map']['zlevel'], sel=0)
 
         # use node with thinest top/bot layers as template for all sigma levels
-
         grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.z0)
         node_min = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(grid['zlevel_fractions'],grid['bottom_cell_index'])
         # use layer fractions from this node to give layer fractions everywhere

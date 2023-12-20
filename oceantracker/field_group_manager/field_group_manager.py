@@ -38,8 +38,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['class_dicts']['fields'].items():
-            i = make_class_instance_from_params(name, params, si.msg_logger,
-                                                crumbs=f'Adding "fields" from user params for field "{name}"')
+            i = make_class_instance_from_params(name, params, si.msg_logger, crumbs=f'Adding "fields" from user params for field "{name}"')
             i.initial_setup()
             # if not time varying can update once at start from other non-time varying fields
             if not i.is_time_varying(): i.update()
@@ -47,9 +46,6 @@ class FieldGroupManager(ParameterBaseClass):
                 si.msg_logger.msg(f'Custom field "{name}" is already a defined field ', hint='Use another unique name?', fatal_error= True, exit_now=True)
             self.fields[name] = i
         pass
-
-
-
 
     def final_setup(self):
         si = self.shared_info
@@ -244,7 +240,6 @@ class FieldGroupManager(ParameterBaseClass):
 
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
-
         #make_class_instance_from_params('interpolator', params, ml, default_classID=name,  crumbs=crumb_base + crumbs)
         # setup compulsory fields, plus others required
 
@@ -284,8 +279,8 @@ class FieldGroupManager(ParameterBaseClass):
             ml.msg(f'Using constant vertical dispersion, A_Z, ie not using A_Z_profile as option set False or cannot find hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile, using  constant A_Z instead', note=True)
             has_A_Z_profile = False
         else:
-            self.add_reader_field( 'A_Z_profile',nc)
-            self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(name_of_field= 'A_Z_profile'),
+            self.add_reader_field( 'A_Z_profile',nc,write_interp_particle_prop_to_tracks_file=False)
+            self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(name_of_field= 'A_Z_profile',write_interp_particle_prop_to_tracks_file=False),
                                    default_classID='field_A_Z_profile_vertical_gradient',
                                    crumbs='random walk > Adding A_Z_vertical_gradient field, for using_AZ_profile')
             has_A_Z_profile= True
@@ -302,13 +297,13 @@ class FieldGroupManager(ParameterBaseClass):
         if type(var_map) != list: var_map=[var_map]
 
         if nc.is_var(var_map[0]):
-            self.add_reader_field('bottom_stress', nc) # set up reading from file
-            self.add_custom_field('friction_velocity', default_classID='field_friction_velocity_from_bottom_stress',
+            self.add_reader_field('bottom_stress', nc,write_interp_particle_prop_to_tracks_file=False) # set up reading from file
+            self.add_custom_field('friction_velocity',dict(write_interp_particle_prop_to_tracks_file=False), default_classID='field_friction_velocity_from_bottom_stress',
                               crumbs='initializing resuspension class using bottom stress')
             has_bottom_stress = True
             ml.msg('Found bottom stress in hydro-files, using it to calculate friction velocity for particle resuspension', note=True)
         else:
-            self.add_custom_field('friction_velocity',default_classID='field_friction_velocity_from_near_sea_bed_velocity',
+            self.add_custom_field('friction_velocity',dict(write_interp_particle_prop_to_tracks_file=False),default_classID='field_friction_velocity_from_near_sea_bed_velocity',
                                                     crumbs='initializing friction velocity field used by resuspension class with near bottom velocity')
             has_bottom_stress = False
             ml.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
@@ -316,11 +311,11 @@ class FieldGroupManager(ParameterBaseClass):
         self.info['has_bottom_stress'] = has_bottom_stress
 
 
-    def add_reader_field(self, name, nc):
+    def add_reader_field(self, name, nc,write_interp_particle_prop_to_tracks_file=True):
         si = self.shared_info
         reader= self.reader
         field_params = reader.get_field_params(nc, name)
-
+        field_params['write_interp_particle_prop_to_tracks_file'] =write_interp_particle_prop_to_tracks_file
         i = make_class_instance_from_params(name, field_params, si.msg_logger,
                                             default_classID='field_reader',
                                             crumbs=f'Field Group Manager > adding reader field "{name}"')
