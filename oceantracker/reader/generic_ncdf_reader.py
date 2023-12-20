@@ -322,7 +322,7 @@ class GenericNCDFreader(_BaseReader):
         return grid
 
 
-    def assemble_field_components(self,nc, name, field, file_index=None):
+    def assemble_field_components(self,nc, grid, name, field, file_index=None):
         # read scalar fields / join together the components which make vector from component list
         params = self.params
 
@@ -336,7 +336,7 @@ class GenericNCDFreader(_BaseReader):
 
         for var_name in var_names:
             if var_name is None: continue
-            data = self.read_file_var_as_4D_nodal_values(nc, var_name, file_index)
+            data = self.read_file_var_as_4D_nodal_values(nc, grid, var_name, file_index)
             comp_per_var = data.shape[3]
             m1 = m + comp_per_var
             # get view of where in buffer data is to be placed
@@ -344,7 +344,7 @@ class GenericNCDFreader(_BaseReader):
             m += comp_per_var
         return out
 
-    def read_file_var_as_4D_nodal_values(self,nc,var_name, file_index=None):
+    def read_file_var_as_4D_nodal_values(self,nc, grid, var_name, file_index=None):
         # read variable into 4D ( time, node, depth, comp) format
         # assumes same variable order in the file
         dm = self.params['dimension_map']

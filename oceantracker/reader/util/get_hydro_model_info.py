@@ -15,7 +15,7 @@ def find_file_format_and_file_list(reader_params,msg_logger):
         params['class_name'] = r
         reader = make_class_instance_from_params('reader', params, msg_logger, default_classID='reader')
         file_list = reader.get_file_list()
-        if reader.is_file_format(file_list[0]):
+        if len(file_list) > 0 and reader.is_file_format(file_list[0]):
             if 'class_name' not in reader_params: reader_params['class_name'] = r # dont overwrite user given class name
             break
 
