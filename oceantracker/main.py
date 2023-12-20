@@ -462,12 +462,7 @@ class _OceanTrackerRunner(object):
             ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',fatal_error=True, exit_now=True )
 
         reader_params, file_list = get_hydro_model_info.find_file_format_and_file_list(reader_params, ml)
-        if False:
-            file_list = get_hydro_model_info.get_hydro_file_list(reader_params['input_dir'],reader_params['file_mask'], ml)
 
-            if 'class_name' not in reader_params:
-                # infer class name from netcdf files if possible
-                reader_params= get_hydro_model_info.check_fileformat(reader_params,file_list, ml)
 
         reader = make_class_instance_from_params('reader', reader_params, ml,  default_classID='reader')
 

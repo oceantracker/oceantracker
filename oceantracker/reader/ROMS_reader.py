@@ -64,7 +64,6 @@ class ROMsNativeReader(_BaseReader):
         grid['v_land_mask'] = nc.read_a_variable('mask_v') != 1
         grid['rho_land_mask'] = nc.read_a_variable('mask_rho') != 1
 
-
         grid = super().build_hori_grid(nc, grid)
 
         return grid
