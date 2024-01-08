@@ -20,7 +20,8 @@ class DevNestedFields(ParameterBaseClass):
         self.fgm_outer_grid = make_class_instance_from_params('field_group_manager_outer_grid',
                                 dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
                                 ml,   crumbs='adding outer hydro-grid field manager for nested grid run' )
-        self.fgm_outer_grid._setup_hydro_reader(si.working_params[ 'reader_builder'])
+
+        self.fgm_outer_grid.initial_setup()
 
         # note es to check if all hidcasts have same required info
 
@@ -77,6 +78,9 @@ class DevNestedFields(ParameterBaseClass):
 
 
         pass
+
+    def update_reader(self, time_sec):
+        self.fgm_outer_grid.update_reader(time_sec)
 
     def get_hydo_model_time_step(self): return self.hydro_time_step # return the smallest time step
 

@@ -33,7 +33,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def initial_setup(self):
         si= self.shared_info
-        self._setup_hydro_reader(si.working_params['core_classes']['reader'])
+        self._setup_hydro_reader(si.working_params['reader_builder'])
         self.set_up_interpolator()
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
@@ -47,10 +47,9 @@ class FieldGroupManager(ParameterBaseClass):
             self.fields[name] = i
         pass
 
-    def add_interolator_book_keeping_particle_prop(self):
-        self.interpolator.add_interolator_book_keeping_particle_prop()
-    def add_tidal_standing(self):
+    def add_tidal_stranding(self):
         # add tidal stranding class
+        si = self.shared_info
         i = make_class_instance_from_params('tidal_stranding', si.working_params['core_classes']['tidal_stranding'], si.msg_logger,
                                             default_classID='tidal_stranding',
                                             crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ')
@@ -59,13 +58,28 @@ class FieldGroupManager(ParameterBaseClass):
         self.tidal_stranding = i
 
     def final_setup(self):
-        si = self.shared_info
         self.reader.final_setup()
-        self.add_interolator_book_keeping_particle_prop()
         self.interpolator.final_setup(self.grid)
-        self.add_tidal_standing()
+        self.add_interolator_book_keeping_particle_prop()
+        self.add_tidal_stranding()
 
 
+    def add_interolator_book_keeping_particle_prop(self):
+        si = self.shared_info
+        pgm = si.classes['particle_group_manager']
+        pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
+        pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
+        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=cell_search_status_flags['ok'], dtype=np.int8))
+
+        pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype=np.float64))
+
+        # BC walk info
+        if si.is3D_run:
+            # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
+            # used to do 3D time dependent interpolation
+            pgm.add_particle_property('nz_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=self.grid['nz'] - 2))  # todo  create  initial serach for vertical cell
+            pgm.add_particle_property('z_fraction', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0.))
+            pgm.add_particle_property('z_fraction_water_velocity', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
 
     def update_reader(self, time_sec):
@@ -365,10 +379,6 @@ class FieldGroupManager(ParameterBaseClass):
     def get_hydo_model_time_step(self):
         return self.reader.info['file_info']['hydro_model_time_step']
 
-    def get_hindcast_range(self):
-        reader = self.reader
-        r = [reader.info['file_info']['first_time'],reader.info['file_info']['last_time']]
-        return np.asarray(r)
 
     def get_hindcast_start_end_times(self):
         reader = self.reader
