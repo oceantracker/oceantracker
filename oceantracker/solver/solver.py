@@ -52,7 +52,9 @@ class Solver(ParameterBaseClass):
         ri['time_steps_completed'] = 0
 
         # get hindcast step range
-        time_span = fgm.get_hindcast_range()
+        time_span= fgm.get_hindcast_start_end_times()
+
+
         #todo simplify by dropping need to find model end time
         model_times = ri['model_start_time'] + si.model_direction*np.arange(0., abs(time_span[1]-time_span[0]),abs(si.settings['time_step']))
         # trim times to hindcast range
