@@ -23,7 +23,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.grid = {}
 
     def check_requirements(self):
-        self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'], required_grid_var_list=['x'])
+        self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'])
 
     def initial_setup(self):
         # set up regular grid for  stats

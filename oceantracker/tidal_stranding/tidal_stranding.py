@@ -17,7 +17,7 @@ class TidalStranding(_BaseTrajectoryModifier):
 
     def check_requirements(self):
         si = self.shared_info
-        self.check_class_required_fields_prop_etc(required_grid_var_list=['dry_cell_index'])
+        self.check_class_required_fields_prop_etc()
 
 
     def update(self,grid, time_sec,sel):

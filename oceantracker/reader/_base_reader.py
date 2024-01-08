@@ -125,13 +125,13 @@ class _BaseReader(ParameterBaseClass):
     # -------------------------------------------------
     # core reader processes
 
-    def initial_setup(self):
+    def initial_setup(self,file_info):
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         si = self.shared_info
         ml = si.msg_logger
         info = self.info
-        self.info['file_info'] = si.working_params['file_info']  # add file_info to reader info
+        self.info['file_info'] = file_info  # add file_info to reader info
 
         # set up ring buffer  info
         bi = self.info['buffer_info']
@@ -226,8 +226,7 @@ class _BaseReader(ParameterBaseClass):
         return fi
 
     def open_first_file(self):
-        si = self.shared_info
-        fi = si.working_params['file_info']
+        fi = self.info['file_info']
         nc = NetCDFhandler(fi['names'][0], 'r')
         return nc
 
@@ -593,8 +592,8 @@ class _BaseReader(ParameterBaseClass):
 
         return nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
-    def _open_first_file(self, file_info):
-        file_name = file_info['names'][0]
+    def _open_first_file(self):
+        file_name = self.file_info['names'][0]
         nc = NetCDFhandler(file_name, 'r')
         return nc
 

@@ -63,15 +63,8 @@ class ParameterBaseClass(object):
 
 
     def check_class_required_fields_prop_etc(self, required_props_list=[],
-                                             required_grid_var_list=[], requires3D=None, crumbs=None):
+                                             requires3D=None, crumbs=None):
         si = self.shared_info
-        grid = si.classes['field_group_manager'].grid
-
-        for name in required_grid_var_list:
-            if name not in grid:
-               si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.info['name']
-                                + ' requires grid variable  "' + name + '"' + ' to work', fatal_error=True,crumbs=crumbs )
-
 
         for name in required_props_list:
             if name not in si.classes['particle_properties']:

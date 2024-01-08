@@ -43,16 +43,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.KDtree = cKDTree(grid['x'])
 
 
-
-
-    def final_setup(self, grid):
-
-        # set up a grid class,part_prop and vertical cell find functions to minimise numba function arguments
+    def add_interolator_book_keeping_particle_prop(self):
         si = self.shared_info
-        info = self.info
-
-        # create particle properties to  store history of current triangle  for reuse
-
         pgm = si.classes['particle_group_manager']
         pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
         pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
@@ -67,6 +59,16 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             pgm.add_particle_property('nz_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=grid['nz'] - 2))  # todo  create  initial serach for vertical cell
             pgm.add_particle_property('z_fraction', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0.))
             pgm.add_particle_property('z_fraction_water_velocity', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
+
+
+    def final_setup(self, grid):
+
+        # set up a grid class,part_prop and vertical cell find functions to minimise numba function arguments
+        si = self.shared_info
+        info = self.info
+
+        # create particle properties to  store history of current triangle  for reuse
+
 
         # set up place for walk info failures
         info['tri_walk_full_failures'] = []

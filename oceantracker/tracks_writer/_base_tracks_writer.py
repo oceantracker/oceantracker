@@ -40,7 +40,7 @@ class _BaseWriter(ParameterBaseClass):
 
     def initial_setup(self):
         si= self.shared_info
-        grid = si.classes['field_group_manager'].grid
+
         params = self.params
 
         # find steps between wrtites, rounded to nearest model time step
@@ -52,6 +52,7 @@ class _BaseWriter(ParameterBaseClass):
         self.info['output_step_count'] = max(nt_step, 1)
 
         if si.settings['write_dry_cell_flag']:
+            grid = si.classes['field_group_manager'].grid
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])
             self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])

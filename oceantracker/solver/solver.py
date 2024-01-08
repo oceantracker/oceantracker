@@ -32,9 +32,7 @@ class Solver(ParameterBaseClass):
 
     def check_requirements(self):
 
-        self.check_class_required_fields_prop_etc(
-            required_props_list=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'],
-            required_grid_var_list=[])
+        self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'])
 
 
 
