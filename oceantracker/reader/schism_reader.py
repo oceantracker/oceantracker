@@ -190,37 +190,12 @@ class SCHISMreaderNCDF(_BaseReader):
     def read_open_boundary_data_as_boolean(self, grid):
         # make boolen of whether node is an open boundary node
         # read schisim  hgrid file for open boundary data
-        is_open_boundary_node = np.full((grid['x'].shape[0],), False)
 
-        if self.params['hgrid_file_name'] is None:
-            return is_open_boundary_node
+        if self.params['hgrid_file_name'] is None:    return  np.full((grid['x'].shape[0],), False)
 
-        with open(self.params['hgrid_file_name']) as f:
-            lines = f.readlines()
+        hgrid = read_hgrid_file(self.params['hgrid_file_name'])
 
-        vals = lines[1].split()
-        n_nodes = int(vals[0])
-        n_tri = int(vals[1])
-
-        n_line_open = n_nodes + n_tri + 3 - 1  # line with number of open boundaries
-        n_open = int(lines[n_line_open].split()[0])
-
-        if n_open > 0:
-
-            tri_open_bound_node_list = [[] for _ in range(grid['triangles'].shape[0])]
-            nl = n_line_open + 1
-            for n in range(n_open):
-                # get block of open node numbers
-                nl += 1  # move to line with number of nodes in this open boundary
-                n_nodes = int(lines[nl].split()[0])
-                nodes = []
-                for n in range(n_nodes):
-                    nl += 1
-                    l = lines[nl].strip('\n')
-                    nodes.append(int(l))
-                ob_nodes = np.asarray(nodes, dtype=np.int32) - 1
-
-                is_open_boundary_node[ob_nodes] = True  # get zero based node number
+        is_open_boundary_node = hgrid['node_type'] == 2  # get
 
         return is_open_boundary_node
 
@@ -237,8 +212,6 @@ def decompose_lines(lines, dtype=np.float64):
         out[n,:] = np.asarray(vals)
 
     return  out
-
-
 
 def read_hgrid_file(file_name):
 

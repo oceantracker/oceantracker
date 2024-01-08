@@ -47,11 +47,9 @@ class FieldGroupManager(ParameterBaseClass):
             self.fields[name] = i
         pass
 
-    def final_setup(self):
-        si = self.shared_info
-        self.reader.final_setup()
-        self.interpolator.final_setup(self.grid)
-
+    def add_interolator_book_keeping_particle_prop(self):
+        self.interpolator.add_interolator_book_keeping_particle_prop()
+    def add_tidal_standing(self):
         # add tidal stranding class
         i = make_class_instance_from_params('tidal_stranding', si.working_params['core_classes']['tidal_stranding'], si.msg_logger,
                                             default_classID='tidal_stranding',
@@ -59,6 +57,15 @@ class FieldGroupManager(ParameterBaseClass):
 
         i.initial_setup()
         self.tidal_stranding = i
+
+    def final_setup(self):
+        si = self.shared_info
+        self.reader.final_setup()
+        self.add_interolator_book_keeping_particle_prop()
+        self.interpolator.final_setup(self.grid)
+        self.add_tidal_standing()
+
+
 
 
     def update_reader(self, time_sec):
@@ -219,15 +226,15 @@ class FieldGroupManager(ParameterBaseClass):
 
         return output
 
-    def _setup_hydro_reader(self,reader_params):
+    def _setup_hydro_reader(self,reader_builder):
         si = self.shared_info
 
-        self.reader  = make_class_instance_from_params('reader', reader_params, si.msg_logger,
+        self.reader  = make_class_instance_from_params('reader', reader_builder['params'], si.msg_logger,
                                             crumbs=f'field Group Manager>setup_hydro_fields> reader class  ')
         #self.reader = si.add_core_class('reader', reader_params,   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
 
         reader = self.reader
-        reader.initial_setup()
+        reader.initial_setup(reader_builder['file_info'])
         # give acces to reader info
         self.info['file_info']= reader.info['file_info']
         self.info['buffer_info']= reader.info['buffer_info']

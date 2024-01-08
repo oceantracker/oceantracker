@@ -213,7 +213,7 @@ class _OceanTrackerRunner(object):
         params = deepcopy(user_given_params)
 
         working_params = self._decompose_params(params, full_checks=full_checks)
-        working_params, reader_params = self._get_hindcast_file_info(working_params)
+        working_params = self._get_hindcast_file_info(working_params)
         working_params = self._setup_output_folders(params, working_params)
         self._write_raw_user_params(working_params['output_files'],user_given_params, case_list=case_list_params)
 
@@ -464,15 +464,29 @@ class _OceanTrackerRunner(object):
         reader_params, file_list = get_hydro_model_info.find_file_format_and_file_list(reader_params, ml)
 
 
-        reader = make_class_instance_from_params('reader', reader_params, ml,  default_classID='reader')
+        reader = make_class_instance_from_params('reader', reader_params, ml,  default_classID='reader', crumbs='primary reader>')
 
         ml.exit_if_prior_errors() # class name missing or missing required variables
-
-        working_params['file_info']  = reader.get_hindcast_files_info(file_list, ml) # get file lists
+        working_params['reader_builder']=dict(params=reader_params,
+                                              file_info= reader.get_hindcast_files_info(file_list, ml)
+                                              )
 
         ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
 
-        return working_params, reader_params
+        # get file info for nested readers
+        working_params['nested_reader_builders']= {}
+        for name, params in working_params['class_dicts']['nested_readers'].items():
+            t0 = perf_counter()
+            nested_params, nested_file_list = get_hydro_model_info.find_file_format_and_file_list(params, ml)
+            nested_reader = make_class_instance_from_params('reader', nested_params, ml, default_classID='reader',crumbs=f'nested reader{name}>')
+
+            d= dict(params=nested_params,
+                    file_info= nested_reader.get_hindcast_files_info(nested_file_list, ml)
+                    )
+            working_params['nested_reader_builders'][name]=d
+            ml.progress_marker(f'sorted nested hyrdo-model files in time order{name}', start_time=t0)
+
+        return working_params
 
 
     def _setup_output_folders(self, user_given_params,working_params):

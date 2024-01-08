@@ -437,10 +437,6 @@ class GenericNCDFreader(_BaseReader):
 
         return  nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
-    def _open_first_file(self,file_info):
-        file_name= file_info['names'][0]
-        nc =NetCDFhandler(file_name, 'r')
-        return nc
 
     def convert_lon_lat_to_meters_grid(self, x):
 
