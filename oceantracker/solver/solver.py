@@ -31,7 +31,6 @@ class Solver(ParameterBaseClass):
 
 
     def check_requirements(self):
-
         self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'])
 
 
@@ -69,7 +68,7 @@ class Solver(ParameterBaseClass):
             nt_write_time_step_to_screen = max(1,int(write_tracks_time_step/si.settings['time_step']))
 
         t0_model = perf_counter()
-        free_wheeling =False
+        free_wheeling = False
         fgm.update_reader(model_times[0]) # initial buffer fill
 
         # run forwards through model time variable, which for backtracking are backwards in time
@@ -88,11 +87,12 @@ class Solver(ParameterBaseClass):
                 if not free_wheeling:
                     # at start note
                     ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(time_sec)}, skipping time steps until more are released', note=True)
-                free_wheeling =True
+                free_wheeling = True
                 continue
 
             free_wheeling = False # has ended
-           # alive partiles so do steps
+
+           # alive particles so do steps
             ri['total_alive_particles'] += num_alive
             fgm.update_reader(time_sec)
 

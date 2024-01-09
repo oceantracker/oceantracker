@@ -335,7 +335,8 @@ class _OceanTrackerRunner(object):
             working_params['caseID'] = n_case
             working_params['output_files'] = deepcopy(working_bc['output_files'])
             working_params['output_files']['output_file_base'] += '_C%03.0f' % (n_case)
-            working_params['file_info'] = working_bc['file_info']
+            working_params['reader_builder'] = working_bc['reader_builder']
+            working_params['nested_reader_builders'] = working_bc['nested_reader_builders']
 
             # now add to list to run
             working_case_list.append(deepcopy(working_params))

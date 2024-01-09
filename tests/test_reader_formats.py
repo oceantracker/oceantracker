@@ -134,7 +134,7 @@ def get_case(n):
             title = 'ROMS test'
         case 1000:
             # nested schisim
-            root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01'
+            root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2012\07'
             output_file_base = 'NZnational'
             file_mask = 'NZfinite*.nc'
 

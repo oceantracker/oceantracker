@@ -264,7 +264,7 @@ class ParticleGroupManager(ParameterBaseClass):
         part_prop =si.classes['particle_properties']
 
         self.screen_msg= ''
-        #  calculate age particle property = t-time_released
+        #  calculate age core particle property = t-time_released
         particle_operations_util.set_value_and_add(part_prop['age'].used_buffer(), t,
                                                    part_prop['time_released'].used_buffer(), active, scale= -1.)
 

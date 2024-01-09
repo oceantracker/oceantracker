@@ -135,12 +135,6 @@ class GenericNCDFreader(_BaseReader):
 
         return fi
 
-    def open_first_file(self):
-        si = self.shared_info
-
-        fi= si.working_params['file_info']
-        nc = NetCDFhandler(fi['names'][0], 'r')
-        return nc
 
     def get_hindcast_files_info(self, file_list, msg_logger):
         # read through files to get start and finish times of each file
