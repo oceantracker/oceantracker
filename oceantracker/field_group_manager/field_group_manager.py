@@ -36,6 +36,22 @@ class FieldGroupManager(ParameterBaseClass):
         self._setup_hydro_reader(si.working_params['reader_builder'])
         self.set_up_interpolator()
 
+
+
+    def final_setup(self):
+        self.reader.final_setup()
+        self.interpolator.final_setup(self.grid)
+
+
+        # add tidal stranding class
+        si = self.shared_info
+        i = make_class_instance_from_params('tidal_stranding', si.working_params['core_classes']['tidal_stranding'], si.msg_logger,
+                                            default_classID='tidal_stranding',
+                                            crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ')
+
+        i.initial_setup()
+        self.tidal_stranding = i
+
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['class_dicts']['fields'].items():
             i = make_class_instance_from_params(name, params, si.msg_logger, crumbs=f'Adding "fields" from user params for field "{name}"')
@@ -47,39 +63,19 @@ class FieldGroupManager(ParameterBaseClass):
             self.fields[name] = i
         pass
 
-    def add_tidal_stranding(self):
-        # add tidal stranding class
-        si = self.shared_info
-        i = make_class_instance_from_params('tidal_stranding', si.working_params['core_classes']['tidal_stranding'], si.msg_logger,
-                                            default_classID='tidal_stranding',
-                                            crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ')
 
-        i.initial_setup()
-        self.tidal_stranding = i
-
-    def final_setup(self):
-        self.reader.final_setup()
-        self.interpolator.final_setup(self.grid)
-        self.add_interolator_book_keeping_particle_prop()
-        self.add_tidal_stranding()
-
-
-    def add_interolator_book_keeping_particle_prop(self):
+    def add_part_prop_from_fields_plus_book_keeping(self):
         si = self.shared_info
         pgm = si.classes['particle_group_manager']
-        pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
-        pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
-        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=cell_search_status_flags['ok'], dtype=np.int8))
 
-        pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype=np.float64))
+        self.interpolator.add_part_prop_for_book_keeping()
 
-        # BC walk info
-        if si.is3D_run:
-            # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
-            # used to do 3D time dependent interpolation
-            pgm.add_particle_property('nz_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=self.grid['nz'] - 2))  # todo  create  initial serach for vertical cell
-            pgm.add_particle_property('z_fraction', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0.))
-            pgm.add_particle_property('z_fraction_water_velocity', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
+        # add part prop for reader and custom fields
+        for name, i in self.fields.items():
+            if i.params['create_particle_property_with_same_name']:
+                pgm.add_particle_property(name, 'from_fields', dict(write=i.params['write_interp_particle_prop_to_tracks_file'],
+                                                                    vector_dim = i.get_number_components(),
+                                                                    time_varying=True, dtype=np.float32, initial_value=0.))
 
 
     def update_reader(self, time_sec):
@@ -395,8 +391,8 @@ class FieldGroupManager(ParameterBaseClass):
         return s
 
     def are_points_inside_domain(self,x):
-        sel, n_cell, bc = self.interpolator.are_points_inside_domain(self.grid,x)
-        return sel, n_cell, bc
+        is_inside, n_cell, bc = self.interpolator.are_points_inside_domain(self.grid,x)
+        return is_inside, n_cell, bc
 
     def get_grid_limits(self):
         # extend of grid, eg used for outer bounds of gridded stats,

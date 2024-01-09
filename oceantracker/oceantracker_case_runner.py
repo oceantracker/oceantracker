@@ -318,14 +318,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         pgm = si.add_core_class('particle_group_manager', si.working_params['core_classes']['particle_group_manager'], crumbs=f'adding core class "particle_group_manager" ')
         pgm.initial_setup()  # needed here to add reader fields inside reader build
 
-        fgm.final_setup()  # set up particle properties associated with fields
+        fgm.final_setup()
+        # set up particle properties associated with fields etc
+        fgm.add_part_prop_from_fields_plus_book_keeping()
+        core_role_params = si.working_params['core_classes']
 
-        # make other core classes, eg.
-        core_role_params=si.working_params['core_classes']
-        for name in ['solver']:
-            si.add_core_class(name, core_role_params[name], crumbs=f'core class "{name}" ')
-
-
+        # make other core classes
+        si.add_core_class('solver', core_role_params['solver'], crumbs='core class solver ')
         if si.is3D_run:
             si.add_core_class('resuspension', core_role_params['resuspension'], crumbs= 'core class "resuspension" ')
 
@@ -337,7 +336,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up start time and duration based on particle releases
         t0 = perf_counter()
         time_start, time_end = self._setup_particle_release_groups(si.working_params['class_dicts']['release_groups'])
-
 
         #clip times to maximum duration in shared and case params
         duration = abs(time_end - time_start)
@@ -387,7 +385,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # any custom particle properties added by user
         for name, p in si.working_params['class_dicts']['particle_properties'].items():
             pgm.add_particle_property(name, 'user',p)
-
 
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters

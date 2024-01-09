@@ -255,18 +255,18 @@ class PointRelease(ParameterBaseClass):
         si= self.shared_info
         # use KD tree to find points those outside model domain
         fgm = si.classes['field_group_manager']
-        sel, n_cell, bc  = fgm.are_points_inside_domain(x)
+        is_inside, n_cell, bc  = fgm.are_points_inside_domain(x)
 
         # keep those inside domain
-        x = x[sel, :]
-        n_cell = n_cell[sel]
+        x = x[is_inside, :]
+        n_cell = n_cell[is_inside]
 
         # add keep only those in wet cells at this time
         if not self.params['allow_release_in_dry_cells']:
             # if not allowing dry cel release only keep those in wet cells
-            sel = ~fgm.are_dry_cells(n_cell)
-            x = x[sel, :]
-            n_cell = n_cell[sel]
+            is_inside = ~fgm.are_dry_cells(n_cell)
+            x = x[is_inside, :]
+            n_cell = n_cell[is_inside]
 
         return x, n_cell, bc
 
