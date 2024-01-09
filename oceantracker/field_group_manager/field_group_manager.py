@@ -192,7 +192,7 @@ class FieldGroupManager(ParameterBaseClass):
                                               output, active)
             # print('xx interp',field_name, output[:5])
 
-    def interp_named_field_at_given_locations_and_time(self, field_name, x, time_sec= None, n_cell=None,bc_cord=None, output=None):
+    def interp_named_field_at_given_locations_and_time(self, field_name, x, time_sec= None, n_cell=None,bc_cords=None, output=None, hydro_model_gridID=None):
         # interp reader field_name at specfied locations,  not particle locations
         # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
@@ -218,7 +218,9 @@ class FieldGroupManager(ParameterBaseClass):
         if n_cell is None:
             n_cell = self.interpolator.initial_horizontal_cell(self.grid, x)
 
-        bc_cords = self.interpolator.get_bc_cords(self.grid, x, n_cell)
+        if bc_cords is None:
+            bc_cords = self.interpolator.get_bc_cords(self.grid, x, n_cell)
+
         active = np.arange(x.shape[0])
 
         if field_instance.is3D():
@@ -390,9 +392,15 @@ class FieldGroupManager(ParameterBaseClass):
         s = f':H{info["current_hydro_model_step"]:04d}b{info["current_buffer_steps"][0]:02d}-{info["current_buffer_steps"][1]:02d}'
         return s
 
-    def are_points_inside_domain(self,x):
-        is_inside, n_cell, bc = self.interpolator.are_points_inside_domain(self.grid,x)
-        return is_inside, n_cell, bc
+    def are_points_inside_domain(self,x, include_dry_cells):
+        # onlyprimary/outer grid
+        is_inside, n_cell, bc, = self.interpolator.are_points_inside_domain(self.grid,x)
+        hydro_model_gridID = np.zeros((x.shape[0],), dtype=np.int8)
+
+        if not include_dry_cells:
+            # only  keep those in wet cells at this time
+            is_inside = np.logical_and(is_inside, ~self.are_dry_cells(n_cell))
+        return is_inside, n_cell, bc, hydro_model_gridID
 
     def get_grid_limits(self):
         # extend of grid, eg used for outer bounds of gridded stats,

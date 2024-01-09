@@ -315,11 +315,7 @@ def get_depth_cell_sigma_layers(xq,
             z_top += bc_cords[n, m] * tide[current_buffer_steps[1], nodes[m], 0, 0] * fractional_time_steps[1]
 
         # clip z into range
-        if zq >= z_top :
-            # put just below the surface to force into top depth bin
-            zq = z_top
-        elif zq < z_bot:
-            zq = z_bot
+        zq = min(max(zq, z_bot), z_top)
 
         twd = z_top - z_bot
         if twd < minimum_total_water_depth:

@@ -144,7 +144,7 @@ class PointRelease(ParameterBaseClass):
             ml.msg(f'Release group "{info["name"]}" >  start time {time_util.seconds_to_isostr(release_info["first_release_time"])}  is outside the range of hydro-model times for release_group instance #{info["instanceID"]:2d}, ',
                    fatal_error=True,hint=f' Check release start time is in hydro-model  range of  {time_util.seconds_to_isostr(hindcast_start)}  to {time_util.seconds_to_isostr(hindcast_start)} ')
 
-    def release_locations(self,time_sec):
+    def get_release_locations(self, time_sec):
         # set up full set of release locations inside  polygons
         si = self.shared_info
         info= self.info
@@ -153,7 +153,10 @@ class PointRelease(ParameterBaseClass):
         n_required = self.get_number_required()
 
         x0           = np.full((0, info['points'].shape[1]), 0.,dtype=np.float64, order='C')
-        n_cell0 = np.full((0,), 0, dtype=np.int32)
+        n_cell0 = np.full((0,), -1, dtype=np.int32)
+        hydro_model_gridID0 = np.full((0,), 0, dtype=np.int8)
+        bc_cords0 = np.full((0,3), 0, dtype=np.float64)
+
         count = 0
         n_found = 0
 
@@ -161,14 +164,17 @@ class PointRelease(ParameterBaseClass):
             # get 2D release candidates
             x_guess = self.get_release_location_candidates()
 
-            x_guess, n_cell_guess, bc = self.check_potential_release_locations_in_bounds(x_guess)
+            x_guess, n_cell_guess, bc_cords, hydro_model_gridID = self.check_potential_release_locations_in_bounds(x_guess)
 
             if x_guess.shape[0] > 0:
-                x_guess, n_cell_guess = self.filter_release_points(x_guess, n_cell_guess)
+                is_ok = self.filter_release_points(x_guess,  time_sec= time_sec, n_cell=n_cell_guess,
+                                                   bc_cords=bc_cords, hydro_model_gridID=hydro_model_gridID)
                 # if any ok then add to list
                 n_found += x_guess.shape[0]
-                x0          = np.concatenate((x0, x_guess), axis =0)
-                n_cell0= np.concatenate((n_cell0, n_cell_guess,))
+                x0          = np.concatenate((x0, x_guess[is_ok,:]), axis =0)
+                n_cell0 = np.concatenate((n_cell0, n_cell_guess[is_ok],))
+                bc_cords0 = np.concatenate((bc_cords0, bc_cords[is_ok,:],))
+                hydro_model_gridID0= np.concatenate((hydro_model_gridID0, hydro_model_gridID[is_ok],))
 
             # allow max_cycles_to_find_release_points cycles to find points
             count += 1
@@ -181,9 +187,11 @@ class PointRelease(ParameterBaseClass):
             n_required = n_found #
 
 
-        # trim initial location and cell  to required number
+        # trim initial location, cell  etc to required number
         x0 = x0[:n_required, :]
         n_cell0 = n_cell0[:n_required]
+        bc_cords0 = bc_cords0[:n_required,:]
+        hydro_model_gridID0= hydro_model_gridID0[:n_required]
 
         n = x0.shape[0]
         IDrelease_group = self.info['instanceID']
@@ -199,15 +207,15 @@ class PointRelease(ParameterBaseClass):
                 si.msg_logger.msg(f'Release group-"{self.info["name"]}", zmin >= zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ',fatal_error=True)
 
             fgm = si.classes['field_group_manager']
-            water_depth = fgm.interp_named_field_at_given_locations_and_time('water_depth', x0, time_sec=None, n_cell=n_cell0)
-            tide  = fgm.interp_named_field_at_given_locations_and_time('tide', x0, time_sec=time_sec, n_cell=n_cell0)
+            water_depth = fgm.interp_named_field_at_given_locations_and_time('water_depth', x0, time_sec=None,     n_cell=n_cell0, bc_cords=bc_cords0, hydro_model_gridID=hydro_model_gridID)
+            tide        = fgm.interp_named_field_at_given_locations_and_time('tide',        x0, time_sec=time_sec, n_cell=n_cell0, bc_cords=bc_cords0, hydro_model_gridID=hydro_model_gridID)
             if x0.shape[1] == 2:
                 # expand x0 to 3D if needed
                 x0 = np.concatenate((x0, np.zeros((x0.shape[0],1), dtype=x0.dtype)), axis=1)
 
             x0 = self.get_z_release_in_depth_range(x0,params['z_min'],params['z_max'],  water_depth, tide)
 
-        return x0, IDrelease_group, IDpulse, user_release_groupID, n_cell0
+        return x0, IDrelease_group, IDpulse, user_release_groupID, n_cell0, bc_cords0, hydro_model_gridID0
 
     @staticmethod
     @njitOT
@@ -247,26 +255,20 @@ class PointRelease(ParameterBaseClass):
         return x
 
 
-    def filter_release_points(self, xy, n_cell):
+    def filter_release_points(self, x, time_sec= None, n_cell=None,bc_cords=None, hydro_model_gridID=None):
         # user can filter release points by inheritance of this class and overriding this method
-        return xy, n_cell
+        return np.full((x.shape[0],), True)
 
     def check_potential_release_locations_in_bounds(self, x):
         si= self.shared_info
         # use KD tree to find points those outside model domain
         fgm = si.classes['field_group_manager']
-        is_inside, n_cell, bc  = fgm.are_points_inside_domain(x)
+        is_inside, n_cell, bc, hydro_model_gridID  = fgm.are_points_inside_domain(x, self.params['allow_release_in_dry_cells'])
 
         # keep those inside domain
         x = x[is_inside, :]
         n_cell = n_cell[is_inside]
-
-        # add keep only those in wet cells at this time
-        if not self.params['allow_release_in_dry_cells']:
-            # if not allowing dry cel release only keep those in wet cells
-            is_inside = ~fgm.are_dry_cells(n_cell)
-            x = x[is_inside, :]
-            n_cell = n_cell[is_inside]
-
-        return x, n_cell, bc
+        bc = bc[is_inside,:]
+        hydro_model_gridID= hydro_model_gridID[is_inside]
+        return x, n_cell, bc, hydro_model_gridID
 
