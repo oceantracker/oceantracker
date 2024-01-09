@@ -18,7 +18,7 @@ def run_params(d):
         'output_file_base': d['output_file_base'],
         'root_output_dir': d['root_output_dir'],
         'regrid_z_to_uniform_sigma_levels': d['regrid_z_to_uniform_sigma_levels'],
-        'release_groups': {'P1': {'points': d['x0'], 'pulse_size': 10, 'release_interval': 3600,'z_min':-1.}},
+        'release_groups': {'P1': {'points': d['x0'], 'pulse_size': d['pulse_size'], 'release_interval': 3600,'z_min':-1.}},
         'dispersion': {'A_H': 1.0, 'A_V': 0.001},
         'reader': {'file_mask': d['file_mask'],
                    'input_dir': d['root_input_dir'],
@@ -47,6 +47,7 @@ def get_case(n):
     time_step=3600.
     fall_vel=0.
     reader = None
+    pulse_size = 10
     match n:
         case 100:
             root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01'
@@ -134,15 +135,19 @@ def get_case(n):
             title = 'ROMS test'
         case 1000:
             # nested schisim
+            pulse_size = 1
             root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2012\07'
             output_file_base = 'NZnational'
             file_mask = 'NZfinite*.nc'
 
-            x0 = [[1750624.1218, 5921952.0475],
-                  [1814445.5871, 5882261.7676],
-                  [1838293.4656, 5940629.8263],
-                  [1788021.4244, 5940860.2283]
-                  ]
+
+            x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri
+                [-35.87936265079254, 174.52205865417034], # harbour jet
+                [-35.94290227656262, 174.4761188861907],  # nearshore brembay
+                [-35.922300421719214, 174.665532083399], # hen and chickes, in outer grid
+                ]
+            x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
+
             ax = [1727860, 1823449, 5878821, 5957660]  # Auck
             title = 'NZ national test'
             nested_readers= dict(nest1=dict(
@@ -155,7 +160,9 @@ def get_case(n):
 
 
     return dict(x0=x0,root_input_dir=root_input_dir,output_file_base=output_file_base+f'_{n:02d}',title=title,time_step=time_step,reader= reader,
-                file_mask=file_mask,ax=ax,max_days=max_days,nested_readers=nested_readers,hgrid_file=hgrid_file,    fall_vel= fall_vel)
+                file_mask=file_mask,ax=ax,max_days=max_days,nested_readers=nested_readers,hgrid_file=hgrid_file,    fall_vel= fall_vel,
+                pulse_size=pulse_size
+                )
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
