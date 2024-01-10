@@ -86,9 +86,6 @@ class DevNestedFields(ParameterBaseClass):
         for fgm in self.fgm_hydro_grids:
             fgm.final_setup()
 
-
-
-
     def update_reader(self, time_sec):
 
         for fgm in self.fgm_hydro_grids:
@@ -147,9 +144,25 @@ class DevNestedFields(ParameterBaseClass):
         return vals
 
     def setup_time_step(self, time_sec, xq, active, fix_bad=True):
-        # loop over hydro grids
-        for fgm in self.fgm_hydro_grids:
-            fgm.setup_time_step(time_sec, xq, active, fix_bad=fix_bad)
+        si= self.shared_info
+        part_prop=  si.classes['particle_properties']
+
+        # set up indrect of those not associated with a grid
+        outside_nested = np.full_like(active,False, dtype=bool)
+        # loop over nested grids to find those outside their domains
+        for n in range(1, len(self.fgm_hydro_grids)):
+            fgm = self.fgm_hydro_grids[n]
+            # get particles currently on this hydro grid
+            sel =np.flatnonzero(part_prop['hydro_model_gridID'].data == n)
+            fgm.setup_time_step(time_sec, xq, sel, fix_bad=fix_bad)
+            # find those outside that were on this grid but are now not outside the open boundary
+            outside_domain = part_prop['cell_search_status'].find_subset_where(sel, 'eq', si.particle_status_flags['outside_open_boundary'])
+            outside_nested[sel[outside_domain]] = True # tag those outside this nested grid
+
+        # move any outside the nested grids on to the outer grid
+        is_inside, n_cell, bc, hydro_model_gridID = self.fgm_hydro_grids[0].are_points_inside_domain(x, self.params['allow_release_in_dry_cells'])
+        pass
+
 
 
 
