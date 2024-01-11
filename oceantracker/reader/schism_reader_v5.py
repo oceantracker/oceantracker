@@ -38,6 +38,10 @@ class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
         for fn in pathlib_Path(params['input_dir']).rglob('*.nc'):
             if 'out2d' in path.basename(fn).lower(): file_list.append(path.abspath(fn))
 
+        if len(file_list) == 0:
+            # try using given mask , as may data al in one file
+            file_list = super(SCHISMreaderNCDFv5,self).get_file_list()
+
         return file_list
 
     def is_file_format(self,file_name):

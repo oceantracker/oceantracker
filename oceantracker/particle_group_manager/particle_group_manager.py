@@ -277,12 +277,12 @@ class ParticleGroupManager(ParameterBaseClass):
                                                    part_prop['time_released'].used_buffer(), active, scale= -1.)
 
         # first interpolate to give particle properties from reader derived  fields
-        for key,i in si.classes['particle_properties'].items():
+        for name,i in si.classes['particle_properties'].items():
             if i.info['type'] == 'from_fields':
-                si.classes['field_group_manager'].interp_field_at_particle_locations(key, active)
+                si.classes['field_group_manager'].interp_field_at_particle_locations(name, active)
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
-        for key, i in si.classes['particle_properties'].items():
+        for name, i in si.classes['particle_properties'].items():
             if i.info['type'] == 'user':
                 i.update(active)
         si.block_timer('Update particle properties',t0)

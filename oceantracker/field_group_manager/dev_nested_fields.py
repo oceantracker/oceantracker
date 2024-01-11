@@ -28,7 +28,6 @@ class DevNestedFields(ParameterBaseClass):
 
         # note es to check if all hidcasts have same required info
 
-        has_A_Z_profile = fgm_outer_grid.info['has_A_Z_profile']
         self.hydro_time_step = fgm_outer_grid.get_hydo_model_time_step()
         self.start_time, self.end_time  = fgm_outer_grid.get_hindcast_start_end_times()
 
@@ -44,15 +43,16 @@ class DevNestedFields(ParameterBaseClass):
                                                  dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
                                                  ml, crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
 
-
             i._setup_hydro_reader(params)
+
+            # todo check that all nested grids have open bc and set open to true
             i.set_up_interpolator()
 
 
             self.fgm_hydro_grids.append(i)
 
-            # record consitency info
-            has_A_Z_profile = has_A_Z_profile and i.info['has_A_Z_profile']
+            # note times
+
             self.hydro_time_step = min(self.hydro_time_step,i.get_hydo_model_time_step())
 
             # start and end times
@@ -61,15 +61,7 @@ class DevNestedFields(ParameterBaseClass):
 
             ml.progress_marker(f'Finished nested hydro-model grid setup #{len(self.fgm_hydro_grids)}, name= "{name}", from {seconds_to_isostr(times[0])} to  {seconds_to_isostr(times[1])}', start_time=t0)
 
-        #todo add check on overlaping
-
-        # consistency checks
-        # A_Z profile data
-        if si.settings['use_A_Z_profile'] and not has_A_Z_profile:
-            ml.msg(f'Not all hindcasts have A_Z profile variable, set "use_A_Z_profile" to False, to run with use constant dipersion A_Z',
-                   crumbs='Nested reader set up ',fatal_error=True, exit_now=True)
-
-        self.info['has_A_Z_profile'] = has_A_Z_profile # set
+        #todo add check times overlaping
 
         # dry cell flag
         if si.settings['write_dry_cell_flag']:
@@ -85,6 +77,50 @@ class DevNestedFields(ParameterBaseClass):
         # do final setup for each grid
         for fgm in self.fgm_hydro_grids:
             fgm.final_setup()
+
+    def setup_dispersion_and_resuspension(self):
+        # see if al files have the required variables
+        si = self.shared_info
+        ml = si.msg_logger
+        has_bottom_stress = []
+        has_A_Z_profile  = []
+
+        # check each file
+        for fgm in self.fgm_hydro_grids:
+            nc = fgm.reader.open_first_file()
+            fmap = fgm.reader.params['field_variable_map']
+
+            # see if A_z profile variablve present to use in vertical dispersion
+            has_A_Z_profile.append(si.is3D_run and si.settings['use_A_Z_profile'] and fmap['A_Z_profile'] is not None and nc.is_var(fmap['A_Z_profile']) )
+            # use bottom stres for resupension if in all files
+            if si.is3D_run:
+                # add friction velocity from bottom stress or near seabed vel
+                bs_map = fmap['bottom_stress'] if type(fmap['bottom_stress']) == list else [fmap['bottom_stress']]  # ensure map is a list
+                has_bottom_stress.append(nc.is_var(bs_map[0]))
+        pass
+
+        # acheck all hydro models have bootom stress
+        if all(has_bottom_stress):
+            # set up additional fields
+            has_bottom_stress = True
+        else:
+            has_bottom_stress = False
+            ml.msg('Not all hydro-models have bottom stress variable, using near seabed velocity to calculate friction velocity for resuspension ',note=True)
+
+        # check al have Az profile
+        if all(has_A_Z_profile):
+            # set up additional fields
+            has_A_Z_profile = True
+        else:
+            has_A_Z_profile = False
+            ml.msg('Not 3D run, or not all hydro-models have A_Z profile, using constant A_Z for vertical dispersion' , note=True)
+        self.info['has_A_Z_profile'] = has_A_Z_profile
+
+        for fgm in self.fgm_hydro_grids:
+            fgm._setup_resupension(nc, has_bottom_stress)
+            fgm._setup_dispersion(nc, has_A_Z_profile)
+
+        nc.close()
 
     def update_reader(self, time_sec):
 
@@ -147,23 +183,86 @@ class DevNestedFields(ParameterBaseClass):
         si= self.shared_info
         part_prop=  si.classes['particle_properties']
 
-        # set up indrect of those not associated with a grid
-        outside_nested = np.full_like(active,False, dtype=bool)
+        #todo make faster with id buffers
+
         # loop over nested grids to find those outside their domains
         for n in range(1, len(self.fgm_hydro_grids)):
             fgm = self.fgm_hydro_grids[n]
+
             # get particles currently on this hydro grid
             sel =np.flatnonzero(part_prop['hydro_model_gridID'].data == n)
             fgm.setup_time_step(time_sec, xq, sel, fix_bad=fix_bad)
             # find those outside that were on this grid but are now not outside the open boundary
             outside_domain = part_prop['cell_search_status'].find_subset_where(sel, 'eq', si.particle_status_flags['outside_open_boundary'])
-            outside_nested[sel[outside_domain]] = True # tag those outside this nested grid
 
-        # move any outside the nested grids on to the outer grid
-        is_inside, n_cell, bc, hydro_model_gridID = self.fgm_hydro_grids[0].are_points_inside_domain(x, self.params['allow_release_in_dry_cells'])
+            # try to move any outside the nested grids open boundary to the outer grid
+            is_inside, n_cell, bc, hydro_model_gridID = self.fgm_hydro_grids[0].are_points_inside_domain(xq[outside_domain,:], not si.settings['block_dry_cells'])
+            sel_outer = outside_domain[is_inside]
+            part_prop['hydro_model_gridID'].set_values(0,sel_outer)
+            part_prop['n_cell'].set_values(n_cell[is_inside], sel_outer)
+            part_prop['n_cell_last_good'].set_values(n_cell[is_inside], sel_outer)
+            part_prop['bc_cords'].set_values(bc[is_inside,:], sel_outer)
+
+            #todo move back those outside iand not inside outer domain
+            if np.any(~is_inside):
+                pass
+                print( f'xxxxx  particles {int(np.count_nonzero(~is_inside))} outside inner domain {n} are also outside outer grid')
+
+
+
+        # now setup those on outer grid, check hori cell and add vertical cell
+        sel = np.flatnonzero(part_prop['hydro_model_gridID'].data == 0)
+        self.fgm_hydro_grids[0].setup_time_step(time_sec, xq, sel, fix_bad=fix_bad)
+
+        #todo find those in outside grid now in inner grid
+
+        pass
+
+    def interp_field_at_particle_locations(self, field_name, active, output=None):
+
+        # loop over grids find interpolated values
+        si = self.shared_info
+        part_prop = si.classes['particle_properties']
+
+        for n, fgm in enumerate(self.fgm_hydro_grids):
+            # find particles in this hydro-grid
+            sel =  part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', n, out=self.get_partID_subset_buffer('gridID')) # those on this grid
+            fgm.interp_field_at_particle_locations(field_name, sel, output=output)
         pass
 
 
+    def update_dry_cell_index(self):
+        # loop over all hydro-models to update dry cellss
+        for n, fgm in enumerate(self.fgm_hydro_grids):
+            fgm.update_dry_cell_index()
+        pass
+
+    def update_tidal_stranding_status(self, time_sec, alive):
+        # loop over grids
+        si = self.shared_info
+        part_prop = si.classes['particle_properties']
+
+        for n, fgm in enumerate(self.fgm_hydro_grids):
+            # find particles in this hydro-grid
+            sel = part_prop['hydro_model_gridID'].find_subset_where(alive, 'eq', n, out=self.get_partID_subset_buffer('gridID'))  # those on this grid
+            fgm.tidal_stranding.update(fgm.grid, time_sec, sel)
 
 
+    def fix_time_step(self, alive):
+        # loop over grids
+        si = self.shared_info
+        part_prop = si.classes['particle_properties']
 
+        for n, fgm in enumerate(self.fgm_hydro_grids):
+            # find particles in this hydro-grid
+            sel = part_prop['hydro_model_gridID'].find_subset_where(alive, 'eq', n, out=self.get_partID_subset_buffer('gridID'))  # those on this grid
+            fgm.fix_time_step(sel)
+
+    def screen_info(self):
+        # only for outer grid
+        return self.fgm_hydro_grids[0].screen_info()
+
+    def write_hydro_model_grid(self):
+        # loop over all hydro-models to write grids
+        for n, fgm in enumerate(self.fgm_hydro_grids):
+            fgm.write_hydro_model_grid(gridID=n)

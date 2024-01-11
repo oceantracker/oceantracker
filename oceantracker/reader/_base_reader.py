@@ -603,29 +603,6 @@ class _BaseReader(ParameterBaseClass):
             x_out = cord_transforms.WGS84_to_UTM(x, out=None)
         return x_out
 
-    def write_hydro_model_grid(self, grid):
-        # write a netcdf of the grid from first hindcast file
-        si = self.shared_info
-        output_files = si.output_files
-
-
-        # write grid file
-        output_files['grid'] = output_files['output_file_base'] + '_grid.nc'
-        nc = NetCDFhandler(path.join(output_files['run_output_dir'], output_files['grid']), 'w')
-        nc.write_global_attribute('index_note', ' all indices are zero based')
-        nc.write_global_attribute('created', str(datetime.now().isoformat()))
-
-        nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
-        nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
-        nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
-        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
-        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
-        nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
-        nc.write_a_new_variable('water_depth', si.classes['field_group_manager'].fields['water_depth'].data.ravel(), ('node_dim',))
-        nc.close()
-
-        output_files['grid_outline'] = output_files['output_file_base'] + '_grid_outline.json'
-        json_util.write_JSON(path.join(output_files['run_output_dir'], output_files['grid_outline']), grid['grid_outline'])
 
     def detect_lonlat_grid(self, xgrid):
         # look at range to see if too small to be meters grid
