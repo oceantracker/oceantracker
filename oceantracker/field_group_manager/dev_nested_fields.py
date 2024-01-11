@@ -74,9 +74,27 @@ class DevNestedFields(ParameterBaseClass):
         pass
 
     def final_setup(self):
+        si = self.shared_info
+
         # do final setup for each grid
         for fgm in self.fgm_hydro_grids:
             fgm.final_setup()
+
+        # ensure nested grids have open boundary data and set open boundary type
+        if si.settings['open_boundary_type'] == 0:
+            si.msg_logger.msg('For nested grids must set "open_boundary_type" must be > to select an open boundary type', fatal_error=True, exit_now=True)
+
+        # check nested grids
+        for n, fgm in enumerate(self.fgm_hydro_grids[1:]):
+            if not fgm.info['has_open_boundary_nodes']:
+                si.msg_logger.msg(f'Nested grids must tag open boundary nodes, nested grid {n+1} " does not',
+                                  fatal_error=True, exit_now=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
+
+        # outer grid is not required to have open boundary nodes, but can if provided
+        fgm = self.fgm_hydro_grids[0]
+        if  not fgm.info['has_open_boundary_nodes']: fgm.info['open_boundary_type'] = 0
+        pass
+
 
     def setup_dispersion_and_resuspension(self):
         # see if al files have the required variables
@@ -193,7 +211,7 @@ class DevNestedFields(ParameterBaseClass):
             sel =np.flatnonzero(part_prop['hydro_model_gridID'].data == n)
             fgm.setup_time_step(time_sec, xq, sel, fix_bad=fix_bad)
             # find those outside that were on this grid but are now not outside the open boundary
-            outside_domain = part_prop['cell_search_status'].find_subset_where(sel, 'eq', si.particle_status_flags['outside_open_boundary'])
+            outside_domain = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['outside_open_boundary'])
 
             # try to move any outside the nested grids open boundary to the outer grid
             is_inside, n_cell, bc, hydro_model_gridID = self.fgm_hydro_grids[0].are_points_inside_domain(xq[outside_domain,:], not si.settings['block_dry_cells'])
@@ -202,11 +220,12 @@ class DevNestedFields(ParameterBaseClass):
             part_prop['n_cell'].set_values(n_cell[is_inside], sel_outer)
             part_prop['n_cell_last_good'].set_values(n_cell[is_inside], sel_outer)
             part_prop['bc_cords'].set_values(bc[is_inside,:], sel_outer)
+            part_prop['bc_cords'].set_values(bc[is_inside, :], sel_outer)
 
             #todo move back those outside iand not inside outer domain
             if np.any(~is_inside):
                 pass
-                print( f'xxxxx  particles {int(np.count_nonzero(~is_inside))} outside inner domain {n} are also outside outer grid')
+                print( f'xxxxx  particles {str(np.count_nonzero(~is_inside))} outside inner domain {n:3d} are also outside outer grid')
 
 
 

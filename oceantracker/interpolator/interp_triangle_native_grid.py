@@ -96,14 +96,14 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
 
 
-    def fix_bad_cell_search(self, current_buffer_steps,fractional_time_steps, active):
+    def fix_bad_cell_search(self, current_buffer_steps,fractional_time_steps, open_boundary_type,  active):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
         # deal with open boundary
         sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['outside_domain'], out=self.get_partID_subset_buffer('cell_status'))
         if sel.size > 0:
-            if si.settings['open_boundary_type'] > 0:
+            if open_boundary_type > 0:
                 part_prop['status'].set_values(particle_info['status_flags']['outside_open_boundary'], sel)
                 part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell, but not the location
             else:
@@ -277,7 +277,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                         active,  si.z0)
         si.block_timer('Find cell, vertical walk', t0)
 
-    def find_hori_cell(self,grid, fields,  xq, current_buffer_steps,fractional_time_steps, active):
+    def find_hori_cell(self,grid, fields,  xq, current_buffer_steps,fractional_time_steps,open_boundary_type, active):
         # do cell walk
         si= self.shared_info
         t0= perf_counter()
@@ -299,7 +299,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                            grid['tri_walk_AOS'], grid['dry_cell_index'],
                            x_last_good, n_cell, n_cell_last_good, status, bc_cords,
                            self.walk_counts,
-                           params['max_search_steps'], params['bc_walk_tol'], si.settings['open_boundary_type'],si.settings['block_dry_cells'],
+                           params['max_search_steps'], params['bc_walk_tol'], open_boundary_type,si.settings['block_dry_cells'],
                            active)
             sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_partID_subset_buffer('B1'))
 
@@ -309,7 +309,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 grid['tri_walk_AOS'], grid['dry_cell_index'],
                 n_cell, cell_search_status,bc_cords,
                 self.walk_counts,
-                params['max_search_steps'], params['bc_walk_tol'], si.settings['open_boundary_type'], si.settings['block_dry_cells'],
+                params['max_search_steps'], params['bc_walk_tol'], open_boundary_type, si.settings['block_dry_cells'],
                 active)
 
             sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['failed'], out=self.get_partID_subset_buffer('B1'))
@@ -320,7 +320,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             new_cell = self.initial_horizontal_cell(grid, xq[sel, :])
             part_prop['n_cell'].set_values(new_cell, sel)
 
-            self.find_hori_cell(grid, fields, xq, sel)
+            self.find_hori_cell(grid, fields, xq, self.info['open_boundary_type'], sel)
             # recheck for additional failures
             sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['failed'], out=self.get_partID_subset_buffer('B1'))
 

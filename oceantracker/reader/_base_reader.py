@@ -19,6 +19,7 @@ from oceantracker.util.triangle_utilities_code import split_quad_cells
 from oceantracker.fields._base_field import CustomFieldBase, ReaderField
 from oceantracker.reader.util import reader_util
 from pathlib import Path as pathlib_Path
+from oceantracker.common_info_default_param_dict_templates import node_types
 
 class _BaseReader(ParameterBaseClass):
 
@@ -317,9 +318,9 @@ class _BaseReader(ParameterBaseClass):
         # make island and domain nodes
         grid['node_type'] = np.zeros(grid['x'].shape[0], dtype=np.int8)
         for c in grid['grid_outline']['islands']:
-            grid['node_type'][c['nodes']] = 1
+            grid['node_type'][c['nodes']] = node_types['island_boundary']
 
-        grid['node_type'][grid['grid_outline']['domain']['nodes']] = 2
+        grid['node_type'][grid['grid_outline']['domain']['nodes']] = node_types['domain_boundary']
 
         t0 = perf_counter()
         grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
@@ -329,9 +330,10 @@ class _BaseReader(ParameterBaseClass):
         # adjust node type and adjacent for open boundaries
         # todo define node and adjacent type values in dict, for single definition and case info output?
         is_open_boundary_node = self.read_open_boundary_data_as_boolean(grid)
-        grid['node_type'][is_open_boundary_node] = 3
+        grid['node_type'][is_open_boundary_node] = node_types['open_boundary']
 
         is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'], grid['adjacency'], is_open_boundary_node)
+
         grid['adjacency'][is_open_boundary_adjacent] = -2
         grid['limits'] = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
 

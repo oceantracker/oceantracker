@@ -6,7 +6,7 @@ import numpy as np
 from oceantracker.util import time_util, ncdf_util, json_util
 from datetime import datetime
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.common_info_default_param_dict_templates import  cell_search_status_flags
+from oceantracker.common_info_default_param_dict_templates import  cell_search_status_flags, node_types
 from os import path
 
 from time import  perf_counter
@@ -40,8 +40,11 @@ class FieldGroupManager(ParameterBaseClass):
 
 
     def final_setup(self):
+        si = self.shared_info
         self.reader.final_setup()
         self.interpolator.final_setup(self.grid)
+        self.info['has_open_boundary_nodes'] = np.any(self.grid['node_type'] == node_types['open_boundary'])
+        self.info['open_boundary_type'] = si.settings['open_boundary_type']
 
 
         # add tidal stranding class
@@ -115,13 +118,13 @@ class FieldGroupManager(ParameterBaseClass):
             part_prop['cell_search_status'].set_values(cell_search_status_flags['ok'], active)
 
         # find cell for xq, node list and weight for interp at calls
-        interp.find_hori_cell(grid,fields, xq,info['current_buffer_steps'],info['fractional_time_steps'], active)
+        interp.find_hori_cell(grid,fields, xq,info['current_buffer_steps'],info['fractional_time_steps'],self.info['open_boundary_type'], active)
 
         if si.is3D_run:
             interp.find_vertical_cell(grid,fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
 
         if fix_bad:
-            interp.fix_bad_cell_search(info['current_buffer_steps'],info['fractional_time_steps'],active)
+            interp.fix_bad_cell_search(info['current_buffer_steps'],info['fractional_time_steps'],self.info['open_boundary_type'], active)
 
     def time_step_and_buffer_offsets(self, time_sec):
         si = self.shared_info
@@ -154,7 +157,8 @@ class FieldGroupManager(ParameterBaseClass):
         # fix any bad walks etc.
         # currently only sets up primary interpolator
         info = self.info
-        self.interpolator.fix_bad_cell_search(info['current_buffer_steps'],info['fractional_time_steps'], active)
+        #todo pass info as s
+        self.interpolator.fix_bad_cell_search(info['current_buffer_steps'],info['fractional_time_steps'],info['open_boundary_type'], active)
         return active
 
 
