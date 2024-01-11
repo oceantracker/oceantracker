@@ -8,6 +8,7 @@ from oceantracker.util.triangle_utilities_code import split_quad_cells
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
 from copy import deepcopy
 from oceantracker.util.ncdf_util import  NetCDFhandler
+from oceantracker.common_info_default_param_dict_templates import node_types
 
 class SCHISMreaderNCDF(_BaseReader):
 
@@ -195,7 +196,7 @@ class SCHISMreaderNCDF(_BaseReader):
 
         hgrid = read_hgrid_file(self.params['hgrid_file_name'])
 
-        is_open_boundary_node = hgrid['node_type'] == 2  # get
+        is_open_boundary_node = hgrid['node_type'] == 3
 
         return is_open_boundary_node
 
@@ -246,7 +247,7 @@ def read_hgrid_file(file_name):
             n_nodes =  int(lines[l0].split()[0])
             nodes = np.squeeze(decompose_lines(lines[l0+1: l0 + 1 + n_nodes],dtype=np.int32)) - 1
             d['open_boundary_node_segments'].append(nodes)
-            d['node_type'][nodes] = 2
+            d['node_type'][nodes] = 3
             l0 = l0 + nodes.size + 1
 
     # land boundaries

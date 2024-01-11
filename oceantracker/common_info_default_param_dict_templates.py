@@ -126,6 +126,9 @@ known_readers ={'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
 
 large_float=1.0E32
 
+# node types for hydro model
+node_types= dict(interior = 0,island_boundary = 1, domain_boundary= 2, open_boundary=3)
+
 # TODO LIST
 # todo for version 0.41
     #TODO BUGS

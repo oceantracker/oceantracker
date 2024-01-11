@@ -226,7 +226,7 @@ class Solver(ParameterBaseClass):
             still_bad = debug_util.check_walk_step(si.classes['reader'].grid, part_prop, bad, msg_logger=si.msg_logger, crumbs='solver-post RK step')
 
             if still_bad.size > 0:
-                si.msg_logger.msg(f'Cell search,  some stil bad after fixing step  {np.count_nonzero(still_bad)} of  {is_moving.size} ', warning=True)
+                si.msg_logger.msg(f'Cell search,  some still bad after fixing step  {np.count_nonzero(still_bad)} of  {is_moving.size} ', warning=True)
                 if si.settings['debug_plots']:
                     debug_util.plot_walk_step(part_prop['x'].data, si.classes['reader'].grid, part_prop, still_bad)
                 pass

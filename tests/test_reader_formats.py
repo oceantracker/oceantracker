@@ -7,37 +7,36 @@ import numpy as np
 import argparse
 
 
-def run_params(d):
-    params = { 'user_note' : d['title'],
+def default_params(x0):
+    params = { 'user_note' : '',
         'debug' : True,
-        'time_step': d['time_step'],
-        'dev_debug_plots' :d['debug_plots'],
-        'use_A_Z_profile': d['use_A_Z_profile'],
-        'max_run_duration': 5. * 24 * 3600 if d['max_days'] is None else  d['max_days']*24*3600.,
+        'time_step': 3600,
+        'dev_debug_plots' :False,
+        'use_A_Z_profile': True,
+        'max_run_duration': 5. * 24 * 3600,
         'write_tracks': True,
-        'output_file_base': d['output_file_base'],
-        'root_output_dir': d['root_output_dir'],
-        'regrid_z_to_uniform_sigma_levels': d['regrid_z_to_uniform_sigma_levels'],
-        'release_groups': {'P1': {'points': d['x0'], 'pulse_size': d['pulse_size'], 'release_interval': 3600,'z_min':-1.}},
+        'output_file_base': None,
+        'root_output_dir': None,
+        'regrid_z_to_uniform_sigma_levels': True,
+        'release_groups': {'P1': {'points': x0, 'pulse_size': 10, 'release_interval': 3600,'z_min':-1.}},
         'dispersion': {'A_H': 1.0, 'A_V': 0.001},
-        'reader': {'file_mask': d['file_mask'],
-                   'input_dir': d['root_input_dir'],
+        'reader': {'file_mask':None,
+                   'input_dir': None,
                    # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                    },
-        'nested_readers': d['nested_readers'],
+        'nested_readers': [],
         'resuspension': {'critical_friction_velocity': 0.01}
         }
-    if d['hgrid_file'] is not None:
-        params['reader']['hgrid_file_name']= d['hgrid_file']
-        params['open_boundary_type'] = 1
 
-    if d['reader'] is not  None:  params['reader']['class_name'] = d['reader']
 
-    params['velocity_modifiers'] = {'fall_vel': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -d['fall_vel']}}
+
+
+    params['velocity_modifiers'] = {'fall_vel': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value':0.}}
 
     params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_cords'])
 
     return  params
+
 def get_case(n):
     max_days = None
     ax = None
@@ -46,8 +45,9 @@ def get_case(n):
     hgrid_file=None
     time_step=3600.
     fall_vel=0.
-    reader = None
+    reader_class = None
     pulse_size = 10
+    open_boundary_type = 0
     match n:
         case 100:
             root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01'
@@ -140,7 +140,7 @@ def get_case(n):
             output_file_base = 'shared_reader'
             file_mask = 'NZfinite*.nc'
             max_days = 7
-
+            open_boundary_type = 1
 
             x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri
                 [-35.87936265079254, 174.52205865417034], # harbour jet
@@ -155,27 +155,38 @@ def get_case(n):
             title = 'NZ national test'
             nested_readers= dict(nest1=dict(
                     class_name='oceantracker.reader.schism_reader.SCHISMreaderNCDF',
-                    #input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard',
-                    #file_mask = 'schout*.nc',
-                    #hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard\hgrid_Whangarei.gr3',
-                    input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\resampled_outputs',
-                    file_mask = 'Whangarei*.nc',
-                   hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\resampled_outputs\hgrid_Whangarei.gr3'
+                   input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard',
+                    file_mask = 'schout*.nc',
+                    hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard\hgrid_Whangarei.gr3',
+                #          input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\resampled_outputs',
+                    #file_mask = 'Whangarei*.nc',
+                   #hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\resampled_outputs\hgrid_Whangarei.gr3'
+
             ))
 
+    params= default_params(x0)
+    params.update(note=title,output_file_base=output_file_base,
+                  max_run_duration= max_days*24*3600, time_step= time_step, open_boundary_type=open_boundary_type)
+    params['reader'].update(input_dir=root_input_dir, file_mask=file_mask, class_name=reader_class)
+    if params['reader']['class_name'] is  None:  del params['reader']['class_name']
+
+    params['release_groups']['P1'].update(pulse_size=pulse_size)
+    params['velocity_modifiers']['fall_vel'].update(value=fall_vel)
+
+    if hgrid_file is not None:
+        params['reader']['hgrid_file_name']= hgrid_file
+
+    if nested_readers is not None: params['nested_readers']=nested_readers
+
+    return params, ax
 
 
-    return dict(x0=x0,root_input_dir=root_input_dir,output_file_base=output_file_base+f'_{n:02d}',title=title,time_step=time_step,reader= reader,
-                file_mask=file_mask,ax=ax,max_days=max_days,nested_readers=nested_readers,hgrid_file=hgrid_file,    fall_vel= fall_vel,
-                pulse_size=pulse_size
-                )
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', default=None, type= int)
     parser.add_argument('-uniform', action='store_false')
     parser.add_argument('-noplots', action='store_true')
-    parser.add_argument('-open', action='store_true')
     parser.add_argument('-norun', action='store_true')
     parser.add_argument('-debug_plots', action='store_true')
     parser.add_argument('-plot_file', action='store_true')
@@ -190,14 +201,12 @@ if __name__ == '__main__':
 
 
     for n in tests:
-        d= get_case(n)
-        d['root_output_dir'] = root_output_dir
-        d['regrid_z_to_uniform_sigma_levels'] = args.uniform
-        d['debug_plots'] = args.debug_plots
-        d['use_A_Z_profile'] = True
-
-        params=  run_params(d)
-        params['open_boundary_type'] = 1 if args.open else 0
+        params, ax= get_case(n)
+        params.update( root_output_dir = root_output_dir,
+                    regrid_z_to_uniform_sigma_levels = args.uniform,
+                    debug_plots = args.debug_plots,
+                    use_A_Z_profile = True
+                    )
 
         if not args.norun:
             caseInfoFile= run(params)
@@ -213,7 +222,6 @@ if __name__ == '__main__':
             if False:
                 plot_utilities.display_grid(track_data['grid'], ginput=3, axis_lims=None)
 
-            ax= d['ax']
             plot_file = path.join(params['root_output_dir'],params['user_note'].replace(' ','_') + '.mp4' ) if args.plot_file else None
 
 
