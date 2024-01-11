@@ -117,7 +117,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if si.settings['write_output_files']:
                 # write grid if first case
                 if si.caseID == 0:
-                    si.classes['field_group_manager'].write_hydro_model_grids()
+                    si.classes['field_group_manager'].write_hydro_model_grid()
 
                 case_info_file = si.output_file_base + '_caseInfo.json'
                 json_util.write_JSON(path.join(si.run_output_dir, case_info_file), case_info)
@@ -296,6 +296,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up feilds
         fgm = si.add_core_class('field_group_manager', si.working_params['core_classes']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
+        fgm.setup_dispersion_and_resuspension() # setup depends on what variables are in the hydro-files
 
         dispersion_params = si.working_params['core_classes']['dispersion']
         if  si.is3D_run:

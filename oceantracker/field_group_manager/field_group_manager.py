@@ -3,7 +3,8 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
-from oceantracker.util import time_util, ncdf_util
+from oceantracker.util import time_util, ncdf_util, json_util
+from datetime import datetime
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.common_info_default_param_dict_templates import  cell_search_status_flags
 from os import path
@@ -175,7 +176,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         if output is None:
             # over write current values
-            output = si.classes['particle_properties'][field_name].used_buffer()
+            output = part_prop[field_name].used_buffer()
         field_instance = self.fields[field_name]
 
         if field_instance.is3D():
@@ -252,6 +253,8 @@ class FieldGroupManager(ParameterBaseClass):
         self.info['buffer_info']= reader.info['buffer_info']
 
         nc = reader.open_first_file()
+        reader.info['variables'] = nc.variable_info  # note all variable names
+        self.info['variables'] = nc.variable_info # note all variable names
 
         self.grid, si.is3D_run   = reader.set_up_grid(nc)
         grid = self.grid
@@ -267,10 +270,7 @@ class FieldGroupManager(ParameterBaseClass):
         for name in  reader.params['load_fields']:
             self.add_reader_field( name, nc)
 
-        self.setup_dispersion(nc)
 
-        if si.is3D_run:
-            self.setup_resupension(nc)
 
         nc.close()
 
@@ -282,52 +282,60 @@ class FieldGroupManager(ParameterBaseClass):
         i.initial_setup(self.grid)
         self.interpolator = i
 
+    def setup_dispersion_and_resuspension(self):
+        # these depend on which variables are available inb the hydro file
+        si = self.shared_info
+        reader = self.reader
+        fmap = reader.params['field_variable_map']
+        info = self.info
 
-    def setup_dispersion(self, nc):
+        nc = reader.open_first_file()
+
+        # set up dispersion using vertical profiles of A_Z if available
+        has_A_Z_profile =si.is3D_run and si.settings['use_A_Z_profile'] and fmap['A_Z_profile'] is not None and nc.is_var(fmap['A_Z_profile'])
+        self._setup_dispersion(nc, has_A_Z_profile )
+
+        # add resuspension based on friction velocity
+        if si.is3D_run:
+            # add friction velocity from botom stress or near seabed vel
+            has_bottom_stress = nc.is_var(fmap['bottom_stress'][0])
+            self._setup_resupension(nc,  has_bottom_stress)
+
+        nc.close()
+
+    def _setup_dispersion(self, nc, has_A_Z_profile):
         si = self.shared_info
         ml = si.msg_logger
-        params = self.reader.params
-        fmap = params['field_variable_map']
+        fmap = self.reader.params['field_variable_map']
 
-        if fmap['A_Z_profile'] is None:
-            si.settings['use_A_Z_profile'] = False
-            ml.msg('Not using A_Z_profile , using  constant A_Z instead', note=True)
-            has_A_Z_profile=False
-
-        elif not nc.is_var(fmap['A_Z_profile']) or not si.settings['use_A_Z_profile']:
-            ml.msg(f'Using constant vertical dispersion, A_Z, ie not using A_Z_profile as option set False or cannot find hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile, using  constant A_Z instead', note=True)
-            has_A_Z_profile = False
-        else:
+        if si.is3D_run:
             self.add_reader_field( 'A_Z_profile',nc,write_interp_particle_prop_to_tracks_file=False)
             self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(name_of_field= 'A_Z_profile',write_interp_particle_prop_to_tracks_file=False),
                                    default_classID='field_A_Z_profile_vertical_gradient',
                                    crumbs='random walk > Adding A_Z_vertical_gradient field, for using_AZ_profile')
-            has_A_Z_profile= True
             si.msg_logger.msg('Found vertical diffusivity profile in hydro-model files,  using profile for vertical random walk', note=True)
+
+        else:
+            ml.msg(f'Using constant vertical dispersion, as 2D hydro-model A_Z, ie not using A_Z_profile as option set False or cannot find hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile', note=True)
 
         self.info['has_A_Z_profile'] = has_A_Z_profile
 
-    def setup_resupension(self, nc):
-        # get fields needed to calulate friction velocity field, needed for resupension
+    def _setup_resupension(self, nc, has_bottom_stress):
+        # get fields needed to calculate friction velocity field, needed for suspension
         si = self.shared_info
         ml = si.msg_logger
-        params = self.reader.params
-        var_map = deepcopy(params['field_variable_map']['bottom_stress'])
-        if type(var_map) != list: var_map=[var_map]
 
-        if nc.is_var(var_map[0]):
+        if has_bottom_stress:
             self.add_reader_field('bottom_stress', nc,write_interp_particle_prop_to_tracks_file=False) # set up reading from file
             self.add_custom_field('friction_velocity',dict(write_interp_particle_prop_to_tracks_file=False), default_classID='field_friction_velocity_from_bottom_stress',
                               crumbs='initializing resuspension class using bottom stress')
-            has_bottom_stress = True
             ml.msg('Found bottom stress in hydro-files, using it to calculate friction velocity for particle resuspension', note=True)
         else:
             self.add_custom_field('friction_velocity',dict(write_interp_particle_prop_to_tracks_file=False),default_classID='field_friction_velocity_from_near_sea_bed_velocity',
                                                     crumbs='initializing friction velocity field used by resuspension class with near bottom velocity')
-            has_bottom_stress = False
             ml.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
 
-        self.info['has_bottom_stress'] = has_bottom_stress
+
 
 
     def add_reader_field(self, name, nc,write_interp_particle_prop_to_tracks_file=True):
@@ -382,10 +390,31 @@ class FieldGroupManager(ParameterBaseClass):
         reader = self.reader
         return self.reader.info['file_info']['first_time'], reader.info['file_info']['last_time']
 
-    def write_hydro_model_grids(self):
+    def write_hydro_model_grid(self, gridID=None):
+        # write a netcdf of the grid from first hindcast file
         si = self.shared_info
-        self.reader.write_hydro_model_grid(self.grid)
+        grid = self.grid
+        output_files = si.output_files
 
+        # write grid file
+        key = 'grid' if gridID is None or gridID < 1 else f'grid{gridID:02d}'
+        output_files[key] = output_files['output_file_base'] + '_'+  key +'.nc'
+
+        nc = ncdf_util.NetCDFhandler(path.join(output_files['run_output_dir'], output_files[key]), 'w')
+        nc.write_global_attribute('index_note', ' all indices are zero based')
+        nc.write_global_attribute('created', str(datetime.now().isoformat()))
+
+        nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
+        nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
+        nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
+        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
+        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
+        nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
+        nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
+        nc.close()
+
+        output_files['grid_outline'] = output_files['output_file_base'] + '_' + key + '_outline.json'
+        json_util.write_JSON(path.join(output_files['run_output_dir'], output_files['grid_outline']), grid['grid_outline'])
 
     def screen_info(self):
         info = self.info

@@ -137,24 +137,30 @@ def get_case(n):
             # nested schisim
             pulse_size = 1
             root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2012\07'
-            output_file_base = 'NZnational'
+            output_file_base = 'shared_reader'
             file_mask = 'NZfinite*.nc'
+            max_days = 7
 
 
             x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri
                 [-35.87936265079254, 174.52205865417034], # harbour jet
                 [-35.94290227656262, 174.4761188861907],  # nearshore brembay
+                [-35.91960370397214, 174.59610759097396],
                 [-35.922300421719214, 174.665532083399], # hen and chickes, in outer grid
                 ]
             x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
 
             ax = [1727860, 1823449, 5878821, 5957660]  # Auck
+            ax= None
             title = 'NZ national test'
             nested_readers= dict(nest1=dict(
                     class_name='oceantracker.reader.schism_reader.SCHISMreaderNCDF',
-                    input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\schism_standard',
-                    file_mask = 'schout*.nc',
-                   hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\schism_standard\hgrid_Whangarei.gr3'
+                    #input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard',
+                    #file_mask = 'schout*.nc',
+                    #hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard\hgrid_Whangarei.gr3',
+                    input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\resampled_outputs',
+                    file_mask = 'Whangarei*.nc',
+                   hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\resampled_outputs\hgrid_Whangarei.gr3'
             ))
 
 
