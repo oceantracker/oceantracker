@@ -237,15 +237,8 @@ def get_depth_cell_sigma_layers(xq,
         # clip z into range
         zq = min(max(zq, z_bot), z_top)
 
-        twd = z_top - z_bot
-        if twd < minimum_total_water_depth:
-            # hydro models typically have min water depth to operate
-            zf = 0.
-            twd = minimum_total_water_depth
-        else:
-            zf = (zq - z_bot)/twd
-
-        z0f = z0/twd # z0 as fraction of water depth
+        twd = max(z_top - z_bot, minimum_total_water_depth)
+        zf = (zq - z_bot) / twd
 
         # get  nz from evenly space sigma map, but zf always < 1, due to above
         ns = int(zf * sigma_map_nz.size) # find fraction of length of map
@@ -254,9 +247,8 @@ def get_depth_cell_sigma_layers(xq,
         # get approx nz from map
         nz = sigma_map_nz[ns]
 
-        if zf > sigma[nz+1]:
-            # correct if sigma[nz+1]  < zf < sigma_map_nz[ns+1], for approx nz is above next sigma level
-            nz += 1
+        # sigma_map_nz rounds down, so correct if zf is above sigma[nz+1]  by adding 1, as nz  is 1 above approx nz
+        nz += zf > sigma[nz+1]  # faster branch-less add one
 
         # get fraction within the sigma layer
         z_fraction[n] = (zf - sigma[nz])/(sigma[nz+1]- sigma[nz])
@@ -268,6 +260,7 @@ def get_depth_cell_sigma_layers(xq,
         # extra work if in bottom cell
         z_fraction_water_velocity[n] = z_fraction[n]
         if nz == 0:
+            z0f = z0 / twd  # z0 as fraction of water depth
             # set status if on the bottom set status
             if zf < z0f:
                 status[n] = status_on_bottom
