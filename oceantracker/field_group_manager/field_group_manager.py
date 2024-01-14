@@ -312,7 +312,7 @@ class FieldGroupManager(ParameterBaseClass):
         ml = si.msg_logger
         fmap = self.reader.params['field_variable_map']
 
-        if si.is3D_run:
+        if si.is3D_run and si.settings['use_A_Z_profile'] :
             self.add_reader_field( 'A_Z_profile',nc,write_interp_particle_prop_to_tracks_file=False)
             self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(name_of_field= 'A_Z_profile',write_interp_particle_prop_to_tracks_file=False),
                                    default_classID='field_A_Z_profile_vertical_gradient',
@@ -320,6 +320,7 @@ class FieldGroupManager(ParameterBaseClass):
             si.msg_logger.msg('Found vertical diffusivity profile in hydro-model files,  using profile for vertical random walk', note=True)
 
         else:
+            si.settings['use_A_Z_profile'] = False
             ml.msg(f'Using constant vertical dispersion, as 2D hydro-model A_Z, ie not using A_Z_profile as option set False or cannot find hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile', note=True)
 
         self.info['has_A_Z_profile'] = has_A_Z_profile

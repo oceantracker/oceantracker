@@ -13,55 +13,39 @@ from os import getpid
 from time import sleep
 from signal import SIGINT
 
-@contextmanager
-def perf_stat():
-    p = Popen(["perf", "stat", "-p", str(getpid())])
-    sleep(0.5)
-    yield
-    p.send_signal(SIGINT)
-
-
-@njit
-def sqdiff(x, y):
-    out = np.empty_like(x)
-    for i in range(x.shape[0]):
-        out[i] = (x[i] - y[i])**2
-    return out
-
-def find_instr(func, keyword, sig=0, limit=5):
-    count = 0
-    for l in func.inspect_asm(func.signatures[sig]).split('\n'):
-        if keyword in l:
-            count += 1
-            print(func.__name__,'found',l)
-            if count >= limit:
-                break
-    if count == 0:
-        print(func.__name__,'No instructions found')
 
 @njit
 def F1(x1,x2,out, sel, xmin):
     #
    for n in sel:
-        if x2[n] >= xmin:
-            out[n] = x2[n]
-        else:
+        if x1[n] >= xmin:
             out[n] = x1[n]
+        else:
+            out[n] = x2[n]
 
+@njit
+def F1a(x1,out, sel, xmin):
+    #
+   for n in sel:
+        if x1[n] >= xmin:
+            out[n] = x1[n]
 
 
 @njit
 def F2(x1,x2,out,sel, xmin):
    for n in sel:
         #out[n] = (x2[n] >= xmin)*x2[n] + (x2[n] < xmin)*x1[n]
-        s = x2[n] >= xmin
+        #s = x2[n] >= xmin
         #out[n] = s * x2[n] + (not s) * x1[n]
-        out[n] = s * x2[n] + (1-s) * x1[n]
-
+        #out[n] = s * x2[n] + (1-s) * x1[n]
+        out[n] = branchless_value_choice(x1[n],x2[n],x1[n] >= xmin)
+@njit()
+def branchless_value_choice(a,b,cond):
+    return cond*a + (not cond) *b
 @njit
 def F3(x1,x2,out,sel, xmin):
    for n in sel:
-        out[n]= x2[n] if x2[n] >= xmin else x1[n]
+        out[n]= x1[n] if x1[n] >= xmin else x2[n]
 
 
 def show_llvm(f):
@@ -71,10 +55,12 @@ def show_llvm(f):
 if __name__ == "__main__":
     N= 10**6
 
-    reps =5
-    x=np.random.random((N,))
+    reps =20
+    ty= np.float64
+    x=np.random.random((N,)).astype(ty)
 
-    y= np.random.random((N,))
+    y= np.random.random((N,)).astype(ty)
+
     out=np.empty_like(x)
     p=.1
     mask = np.random.choice(a=[False, True], size=(N,), p=[p, 1 - p])
@@ -82,20 +68,15 @@ if __name__ == "__main__":
 
     xmin = 0.1
     F1(x, y, out, sel, xmin)
-    print(F1.signatures)
-    find_instr(F1, keyword='subp', sig=0)
     F2(x, y, out, sel, xmin)
-    print(F2.signatures)
-    find_instr(F2, keyword='subp', sig=0)
-
     F3(x, y, out, sel, xmin)
-    print(F2.signatures)
-    find_instr(F3, keyword='subp', sig=0)
+    F1a(x, out, sel, xmin)
 
-    xmins=np.arange(0,1.2,.005)
+    xmins=np.arange(0.,1., .01)
     t1 = []
     t2 = []
     t3 = []
+    t1a =[]
 
     for xmin in xmins:
 
@@ -114,17 +95,25 @@ if __name__ == "__main__":
             F3(x, y, out, sel, xmin)
         t3.append(perf_counter() - t0)
 
+        t0= perf_counter()
+        for r in range(reps):
+            F1a(x, out, sel, xmin)
+        t1a.append(perf_counter() - t0)
+
     t1=np.asarray(t1)
     t2 = np.asarray(t2)
     t3 = np.asarray(t3)
+    t1a = np.asarray(t1a)
 
-    print('times',t1.mean(),t2.mean(),t3.mean())
-    plt.plot(xmins,t2/t1)
-    plt.plot(xmins, t3 / t1)
+    print('times',t1.mean(),t2.mean(),t3.mean(),t1a.mean())
+    plt.plot(xmins,t2/t1,label='branch less out= cond*x1 + (not cod) *b')
+    plt.plot(xmins, t3 / t1,label= 'out = x1 if () else x2')
+    plt.plot(xmins, t1a / t1,label='one sided condition')
 
     plt.xlabel('Probability of branching, ie x < xmin')
-    plt.ylabel('Time out = (a>xmin) * x1 + = (a>xmin) * x1  no branch/ time branching')
+    plt.ylabel('Relative time = run  time/ runtime branching')
     plt.grid()
+    plt.legend()
     plt.show(block=True)
 
     #with perf_stat():
