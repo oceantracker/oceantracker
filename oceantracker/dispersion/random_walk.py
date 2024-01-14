@@ -40,7 +40,7 @@ class RandomWalk(_BaseTrajectoryModifer):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
 
-        if si.settings['use_A_Z_profile'] and 'A_Z_profile' in part_prop:
+        if  si.is3D_run and si.settings['use_A_Z_profile'] and 'A_Z_profile' in part_prop:
             self._add_random_walk_velocity_modifier_AZ_profile(part_prop['A_Z_profile'].data, part_prop['A_Z_profile_vertical_gradient'].data,
                                                     self.info['random_walk_velocity'],
                                                     np.abs(si.settings['time_step']),

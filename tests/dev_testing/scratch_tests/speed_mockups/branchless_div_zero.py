@@ -13,31 +13,7 @@ from os import getpid
 from time import sleep
 from signal import SIGINT
 
-@contextmanager
-def perf_stat():
-    p = Popen(["perf", "stat", "-p", str(getpid())])
-    sleep(0.5)
-    yield
-    p.send_signal(SIGINT)
 
-
-@njit
-def sqdiff(x, y):
-    out = np.empty_like(x)
-    for i in range(x.shape[0]):
-        out[i] = (x[i] - y[i])**2
-    return out
-
-def find_instr(func, keyword, sig=0, limit=5):
-    count = 0
-    for l in func.inspect_asm(func.signatures[sig]).split('\n'):
-        if keyword in l:
-            count += 1
-            print(func.__name__,'found',l)
-            if count >= limit:
-                break
-    if count == 0:
-        print(func.__name__,'No instructions found')
 
 @njit
 def F1(x1,x2,out, sel, xmin):
@@ -74,12 +50,8 @@ if __name__ == "__main__":
 
     xmin = 0.1
     F1(x, y, out, sel, xmin)
-    print(F1.signatures)
-    find_instr(F1, keyword='subp', sig=0)
-    F2(x, y, out, sel, xmin)
-    print(F2.signatures)
-    find_instr(F2, keyword='subp', sig=0)
 
+    F2(x, y, out, sel, xmin)
     xmins=np.arange(-.1,1.2,.01)
     t1 = []
     t2=[]
@@ -104,6 +76,7 @@ if __name__ == "__main__":
 
     plt.xlabel('Probability of branching, ie x < xmin')
     plt.ylabel('Time no branch/ time branching')
+    plt.grid()
     plt.show(block=True)
 
     #with perf_stat():
