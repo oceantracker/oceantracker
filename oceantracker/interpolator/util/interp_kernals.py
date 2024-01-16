@@ -1,7 +1,7 @@
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 #todo faster with signature!
-@njitOT
+@njit
 def kernal_linear_interp1D(x1, y1, x2, y2, x):
     # linearly interpolate  to location x between (x1,y1), (x2,y2))
     dx = x2-x1

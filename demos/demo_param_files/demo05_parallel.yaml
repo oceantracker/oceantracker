@@ -5,7 +5,6 @@
     A_H: 0.1
   dispersion_miss-spelt:
     A_H: 0.1
-  numba_caching: false
   output_file_base: demo05_parallel
   particle_properties:
     my_constant_prop:

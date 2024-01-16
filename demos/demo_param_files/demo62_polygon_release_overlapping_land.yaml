@@ -40,7 +40,6 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-numba_caching: false
 output_file_base: demo62_polygon_release_overlapping_land
 particle_properties:
   age_decay:

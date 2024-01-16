@@ -368,7 +368,6 @@ class _BaseReader(ParameterBaseClass):
         else:
             # native  vertical grid option, could be  Schisim LCS vertical grid
 
-
             grid['nz'] = self.number_hindcast_zlayers(nc)  # used to size field data arrays
             s = [self.params['time_buffer_size'], grid['x'].shape[0], grid['nz']]
             grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
@@ -382,8 +381,8 @@ class _BaseReader(ParameterBaseClass):
 
         # build lookup map
         # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
-        # need to check if zq > ['sigma_map_z'][nz+1] to see if nz must be increased by 1 tp get sigma interval
-        dz = 0.66 * abs(np.diff(grid['sigma']).min())  # approx dz
+        # the smalest sigms later thickness is at the bottom
+        dz = 0.66 * abs(np.diff(grid['sigma'][:2]))  # smlated dz
         nz_map = int(np.ceil(1.0 / dz))  # number of cells in map
         grid['sigma_map_z'] = np.arange(nz_map) / (nz_map - 1)  # zlevels at the map intervals
         grid['sigma_map_dz'] = np.diff(grid['sigma_map_z']).mean()  # exact dz

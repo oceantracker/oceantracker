@@ -34,7 +34,7 @@ from oceantracker import common_info_default_param_dict_templates as common_info
 
 # start with numba caching turned off
 from oceantracker.util import  numba_util
-numba_util.set_caching(False)
+#numba_util.set_caching(False)
 
 
 from oceantracker.util.parameter_checking import merge_params_with_defaults

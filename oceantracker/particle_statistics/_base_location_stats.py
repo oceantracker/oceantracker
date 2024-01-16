@@ -210,7 +210,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.stop_update_timer()
 
     @staticmethod
-    @njitOT
+    @njit
     def sel_status_waterdepth_and_z(status, x, water_depth, status_range, z_range, water_depth_range, num_in_buffer, out):
         n_found = 0
         if x.shape[1] == 3:

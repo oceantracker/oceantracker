@@ -3,7 +3,7 @@ from copy import deepcopy
 from os import path, environ, remove
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_util import  make_class_instance_from_params
-from oceantracker.util.profiling_util import function_profiler
+
 from time import  perf_counter
 from oceantracker.util.messgage_logger import MessageLogger, GracefulError
 from oceantracker.util import profiling_util, get_versions_computer_info
@@ -61,7 +61,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
         # set numbas envionment varibles before first import
-        environ['oceantracker_numba_caching'] =str( 1 if si.settings['numba_caching'] else 0)
+        #environ['oceantracker_numba_caching'] =str( 1 if si.settings['numba_caching'] else 0)
         environ['numba_function_cache_size'] = str(si.settings['numba_function_cache_size'])
 
         if si.settings['debug']:
@@ -474,6 +474,30 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             l = f' {100*b[key]["time"]/elapsed_time_sec:5.1f}% {key} : calls {b[key]["calls"]:4d}, {time_util.seconds_to_pretty_duration_string(b[key]["time"])}'
             d['block_timings'].append(l)
         d['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
+
+        # get info about numba code
+        from oceantracker.util.numba_util import numba_func_info, find_simd_code
+        from oceantracker.util.module_importing_util import get_ref_from_string
+        ni= {}
+        ni_simid={}
+        for name, item in numba_func_info.items():
+            func=get_ref_from_string(name) # get reference to dispatch func from name
+            if func is not None:
+                simd_code = []
+                sig = func.signatures
+                # check for simd code
+                for n in range(len(sig)):
+                    simd_code.append(find_simd_code(func,n))
+            else:
+                simd_code = None
+                sig='nested code or not used, no signatures'
+
+            ni[name] = dict(signatures=sig,simd_code=simd_code)
+            if simd_code is not None:
+                ni_simid[name] =  ni[name]
+
+        d['numba_func_info'] = ni
+
         return d
 
     def close(self):

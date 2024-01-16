@@ -38,7 +38,7 @@ def default_params(x0):
     return  params
 
 def get_case(n):
-    max_days = None
+    max_days = 5
     ax = None
 
     nested_readers={}
@@ -76,10 +76,10 @@ def get_case(n):
             title = 'test schisim v5 - auckland test'
 
 
-        case 102:
-            #schism v5, WHOI, not working
-            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\WHOI_calvin\schism'
-            output_file_base = 'SchismV5 test Hauarki'
+        case 105:
+            #schism v5,
+            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\WHOI_calvin\SCHISM_v2'
+            output_file_base = 'Xlavin Schim v5'
             file_mask = '*.nc'
 
             x0 = [[-36.81612195216445, 174.82731398519584],

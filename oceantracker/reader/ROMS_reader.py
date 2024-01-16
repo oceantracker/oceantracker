@@ -278,7 +278,7 @@ class ROMsNativeReader(_BaseReader):
         ax2.scatter(grid['lon_psi'][sel],grid['lat_psi'][sel] ,  c='g', marker='.', s=4)
         plt.show()
 
-@njitOT
+@njit
 def u_grid_to_psi(data, mask):
     # data ins (time, row, col, depth),  mask is land  nodes
     # to convert to pis grid make mean of adajacet rows, but  use land masked values as zero
@@ -296,7 +296,7 @@ def u_grid_to_psi(data, mask):
                     out[nt, r, c, nd] = 0.5*(v1 + v2)
     return out
 
-@njitOT
+@njit
 def v_grid_to_psi(data, mask):
     # data ins (time, row, col, depth),  mask is land  nodes
     # to convert to pis grid make mean of adajacet rows, but  use land masked values as zero
@@ -314,7 +314,7 @@ def v_grid_to_psi(data, mask):
                     out[nt, r, c, nd] = 0.5*(v1 + v2)
     return out
 
-@njitOT
+@njit
 def rho_grid_to_psi(data, mask):
     # data ins (time, row, col, depth),  mask is land  nodes
     # to convert to psi grid make mean of adajacet rows andcolumns, but  use land masked values as zero

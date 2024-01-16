@@ -51,6 +51,9 @@ class SplitParticles(_BaseTrajectoryModifier):
         IDrelease_group    = part_prop['IDrelease_group'].get_values(split)
         n_cell_guess = part_prop['n_cell'].get_values(split)
         IDpulse      = part_prop['IDpulse'].get_values(split)
+        bc_cords = part_prop['bc_cords'].get_values(split)
         hydro_model_gridID = part_prop['hydro_model_gridID'].get_values(split)
 
-        si.classes['particle_group_manager'].release_a_particle_group_pulse(time_sec, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess,hydro_model_gridID)
+        si.classes['particle_group_manager'].release_a_particle_group_pulse(time_sec, x0,
+                                                IDrelease_group, IDpulse, user_release_groupID,
+                                                n_cell_guess,bc_cords, hydro_model_gridID)
