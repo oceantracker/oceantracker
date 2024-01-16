@@ -4,7 +4,7 @@ from oceantracker.interpolator.util import triangle_interpolator_util as tri_int
 from oceantracker.interpolator.util import triangle_eval_interp
 from oceantracker.util.numba_util import njitOT
 
-@njitOT
+@njit
 def RKsolver(time_sec,vel_field, grid, part_prop, interp_step_info, ksi, time_step,RK_order,  active):
     # integrated interploated hydro model
     # and any velocity_modifier applied, eg terminal velocity , random walk

@@ -16,7 +16,7 @@ class CompactTracksWriter(_BaseWriter):
                                  'retain_compact_files': PVC(False, bool,
                                                              doc_str='keep  compact tracks files after conversion to rectangular format'),
                                  'role_output_file_tag': PVC('tracks_compact', str),
-                                 'write_dry_cell_index' : PVC(True,bool, obsolete='Use top level setting write_dry_cell_flag, instead')
+                                 'write_dry_cell_flag' : PVC(True,bool, obsolete='Use top level setting write_dry_cell_flag, instead')
                                  })
         self.nc = None
 

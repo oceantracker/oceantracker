@@ -1,6 +1,5 @@
 
 from oceantracker.util.parameter_util import make_class_instance_from_params
-from oceantracker.util.module_importing_util import import_module_from_string
 from oceantracker import common_info_default_param_dict_templates as common_info
 from oceantracker.util.parameter_checking import merge_params_with_defaults
 from time import  perf_counter

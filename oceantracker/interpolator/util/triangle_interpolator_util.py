@@ -26,7 +26,7 @@ search_outside_domain= int(cell_search_status_flags['outside_domain'])
 search_failed= int(cell_search_status_flags['failed'])
 
 #below is called by another numba function which will work out signature on first call
-@njitOT
+@njit
 def _get_single_BC_cord_numba(x, BCtransform, bc):
     # get BC cord of x for one triangle from DT transform matrix inverse, see scipy.spatial.Delaunay
     # also return index the smallest BC for walk and largest
@@ -46,7 +46,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
     return np.argmin(bc), np.argmax(bc)
 
 # ________ Barycentric triangle walk________
-@njitOT
+@njit
 def BCwalk(xq, tri_walk_AOS, dry_cell_index,
                 n_cell, cell_search_status,bc_cords,
                 walk_counts,
@@ -123,18 +123,18 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
         walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
 
 
-@njitOT
+@njit
 def _move_back(x, x_old):
     for i in range(x.shape[0]): x[i] = x_old[i]
 
-@njitOT
+@njit
 def calc_BC_cords_numba(x, n_cells, BCtransform, bc):
     # get BC cords of set of points x inside given cells and return in bc
 
     for n in range(x.shape[0]):
         _get_single_BC_cord_numba(x[n, :], BCtransform[n_cells[n], :, :], bc[n, :])
 
-@njitOT
+@njit
 def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tri_per_node, BCtransform, bc_walk_tol):
     # get BC cords of set of points x inside given cells and return in bc
     bc = np.zeros((3,), dtype=np.float64)  # working space
@@ -152,7 +152,7 @@ def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tr
                 continue
     return n_cell
 
-@njitOT
+@njit
 def get_BC_transform_matrix(points, simplices):
     # pre-build barycectric tranforms for 2D triangles based in scipy spatial qhull as used by scipy.Delauny
 
@@ -204,7 +204,7 @@ def get_BC_transform_matrix(points, simplices):
     return Tinvs
 
 
-@njitOT
+@njit
 def get_depth_cell_sigma_layers(xq,
                                 triangles, water_depth, tide, minimum_total_water_depth,
                                 sigma, sigma_map_nz,sigma_map_dz,
@@ -278,7 +278,7 @@ def get_depth_cell_sigma_layers(xq,
 
     pass
 
-@njitOT
+@njit
 def _eval_z_at_nz_cell(tf, nz_cell, zlevel1, zlevel2, nodes, nz_bottom_nodes, nz_top_cell, BCcord):
     # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
     z = 0.
@@ -289,7 +289,7 @@ def _eval_z_at_nz_cell(tf, nz_cell, zlevel1, zlevel2, nodes, nz_bottom_nodes, nz
 
 
 
-@njitOT
+@njit
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                                   triangles, zlevel, bottom_cell_index,
                                                   n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,

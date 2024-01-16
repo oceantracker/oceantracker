@@ -5,20 +5,20 @@ import numpy as np
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 
-@njitOT
+@njit
 def is_eq(a, b): return a == b
-@njitOT
+@njit
 def is_noteq(a, b): return a != b
-@njitOT
+@njit
 def is_lt(a, b): return a < b
-@njitOT
+@njit
 def is_lteq(a, b): return a <= b
-@njitOT
+@njit
 def is_gt(a, b): return a > b
-@njitOT
+@njit
 def is_gteq(a, b): return a >= b
 
-@njitOT
+@njit
 def is_inrange(a, a1 ,a2): return  a1 <=a <= a2
 
 comparison_function_map= {  'eq'  : is_eq,
@@ -42,7 +42,7 @@ def compared_prop_to_value(part_prop, test, value, out=None):
 
     return _prop_compared_to_value(part_prop,comp , value, out)
 
-@njitOT
+@njit
 def _prop_compared_to_value(part_prop, comparison_func, value, out):
     #return a view of indices where   part_prop (test) is true fro all particles
    # now search for those where test is true
@@ -61,7 +61,7 @@ def prop_subset_compared_to_value(active, part_prop, test, value, out):
 
     return _prop_subset_compared_to_value(active, part_prop, _get_comparison(test), value, out)
 
-@njitOT
+@njit
 def _prop_subset_compared_to_value(active, part_prop,comparison_func,value, out):
     #return a view of indices where   part_prop (test) is true
    # now search for those where test is true
@@ -72,7 +72,7 @@ def _prop_subset_compared_to_value(active, part_prop,comparison_func,value, out)
             nfound += 1
     return out[:nfound]
 
-@njitOT
+@njit
 def random_selection(active, probability_of_selection, out):
     # from and array of active indices randomly select some indices
     # with probability of choosing any individual index of probability_of_selection
@@ -84,7 +84,7 @@ def random_selection(active, probability_of_selection, out):
     return out[:nfound]
 
 # dual comparisons
-@njitOT
+@njit
 def _find_all_in_range(part_prop, prop_value1, propvalue2, out):
     nfound = 0
     for n in range(part_prop.shape[0]):

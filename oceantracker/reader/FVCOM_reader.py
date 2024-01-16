@@ -68,7 +68,7 @@ class unstructured_FVCOM(_BaseReader):
         # first values in z axis is the top? so flip
 
         # get node with thineest bottom layer in non-uniform sigma layers
-        node_min = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(grid['zlevel_fractions'], grid['bottom_cell_index'])
+        node_min = hydromodel_grid_transforms.find_node_with_smallest_top_layer(grid['zlevel_fractions'], grid['bottom_cell_index'])
 
         # stretch sigma out to same number of depth cells,
         # needed for LSC grid if node_min profile is not full number of cells

@@ -29,7 +29,7 @@ class WaterDepthRangeStats(ParameterBaseClass):
         return sel
 
     @staticmethod
-    @njitOT
+    @njit
     def select_depth_range_status(status, depth,min_depth,max_depth, out):
         nfound = 0
         for n in range(status.shape[0]):

@@ -124,7 +124,9 @@ class ParticleGroupManager(ParameterBaseClass):
             si.msg_logger.msgg(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)),warning=True)
         return new_buffer_indices #indices of all new particles
 
-    def release_a_particle_group_pulse(self, t, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess,bc_cords, hydro_model_gridID):
+    def release_a_particle_group_pulse(self, t, x0,
+                                       IDrelease_group, IDpulse, user_release_groupID,
+                                       n_cell_guess,bc_cords, hydro_model_gridID):
         # release one pulse of particles from given group
         si = self.shared_info
 

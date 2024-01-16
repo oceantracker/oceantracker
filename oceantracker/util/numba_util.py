@@ -7,15 +7,34 @@ import os
 def seed_numba_random(a):
     np.random.seed(a)
 
-def set_caching(b):
-   os.environ['oceantracker_numba_caching'] =str(1 if b else 0)
-def is_caching():
-    return  os.environ['oceantracker_numba_caching'] =='1'
+#def set_caching(b):
+#   os.environ['oceantracker_numba_caching'] =str(1 if b else 0)
+#def is_caching():
+#    return  os.environ['oceantracker_numba_caching'] =='1'
 
+numba_func_info={}
 def njitOT(func):
+    # add abity to inspect the functions after compllation
+    key = func.__module__ +'.' + func.__name__
+    numba_func_info[key]=func
     return njit(func, cache=os.environ['oceantracker_numba_caching'] == '1')
 
+def find_simd_code(func, sig=0, limit=20):
 
+    count = 0
+    simd_lines=[]
+    keywords = ['addp', 'subp','andp','andnp']
+    keywords+=['ADDPS', 'SUBPS', 'MULPS', 'DIVPS', 'RCPPS', 'SQRTPS', 'MAXPS', 'MINPS', 'RSQRTPS']
+    keywords= [k.lower() for k in keywords]
+    for l in func.inspect_asm(func.signatures[sig]).split('\n'):
+        if any([(v in l.lower()) for v in keywords]):
+            count += 1
+            simd_lines.append(l.replace('\t',' '))
+            if count >= limit:
+                break
+    if count == 0:
+        simd_lines.append('No SIMD instructions found')
+    return simd_lines
 
 # below not used
 

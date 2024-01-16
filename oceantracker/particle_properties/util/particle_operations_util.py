@@ -11,7 +11,7 @@ def get_values(x1, active):
     # take looks slightly faster than numba
     return np.take(x1,active, axis=0)
 
-@njitOT
+@njit
 def set_value(x1, value, active):
     # set values ,  x1 = value for active
     if x1.ndim == 1:     # 1D
@@ -22,7 +22,7 @@ def set_value(x1, value, active):
             for m in range(x1.shape[1]):
                 x1[n, m] = value
 
-@njitOT
+@njit
 def set_values(x1, values, active, scale=1.0):
     # set values of active particles in working buffer,
     # values must be same size as active
@@ -38,7 +38,7 @@ def set_values(x1, values, active, scale=1.0):
             for m in range(x1.shape[1]):
                 x1[nn, m] = values[n, m]*scale
 
-@njitOT
+@njit
 def add_value_to(x1, value, active):
     # x1 += value
     if x1.ndim == 1:  # 1D
@@ -50,7 +50,7 @@ def add_value_to(x1, value, active):
                 x1[n, m] += value
 
 
-@njitOT
+@njit
 def add_values_to(x1, values, active, scale=1.0):
     # x1 += values*scale for active particles,values same size as active
     # this version adds a vector the same size as isActive to x1
@@ -69,7 +69,7 @@ def add_values_to(x1, values, active, scale=1.0):
 
 # below are currently only called directly using pointers
 # but are not used often, mainly in time step of solver
-@njitOT
+@njit
 def copy(x1, x2, active, scale=1.0):
     # x1 = x2*scale for active particles
     if dim_notMatching(x1, x2): raise Exception('copy: x1 and x2 must be the same size')
@@ -83,7 +83,7 @@ def copy(x1, x2, active, scale=1.0):
                 x1[n, m] = x2[n, m]*scale
 
 
-@njitOT
+@njit
 def add_to(x1, x2, active, scale=1.0):
     # x1 += x2*scale for active particles, x1 and values same size
 
@@ -98,7 +98,7 @@ def add_to(x1, x2, active, scale=1.0):
                  x1[n, m ] += x2[n,m]*scale
 
 
-@njitOT
+@njit
 def set_value_and_add(x1, value, x2, active, scale=1.0):
     # set x1= value, then  x1 += x2*scale for active particles, x1 and x2 same size
 
@@ -115,18 +115,18 @@ def set_value_and_add(x1, value, x2, active, scale=1.0):
                 x1[n, m] += x2[n,m]*scale
 
 # utility methods
-@njitOT
+@njit
 def firstDim_notMatching(d1, d2):
     # check first dim match
     return not (d1.shape[0] ==  d2.shape[0])
 
-@njitOT
+@njit
 def dim_notMatching(d1, d2):
     # check all dim match
     a=d1.shape != d2.shape
     return a
 
-@njitOT
+@njit
 def copy_indicies(ID1, ID2, out = None):
     # copy index array ID2  into ID1
     # ID1 must be at least the same size as ID2

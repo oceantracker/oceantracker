@@ -104,7 +104,7 @@ class _BaseEventLogger(ParameterBaseClass):
             self.time_steps_written += file_index.shape[0]
 
     @staticmethod
-    @njitOT
+    @njit
     def _find_particles_where_event_has_started_or_ended_numba(event_has_started, event_happening, event_has_started_IDbuffer, event_has_ended_IDbuffer):
         # loops over all particle in buffer to return views of event_has_started_IDbuffer
         # and event_has_ended_IDbuffer, which are indices of particles where event has just started or just ended

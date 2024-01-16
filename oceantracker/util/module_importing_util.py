@@ -2,7 +2,7 @@
 from importlib import import_module
 import traceback
 
-def import_module_from_string(s,msg_logger, crumbs=''):
+def import_class_from_string(s, msg_logger, crumbs=''):
     # module reference, with or without param dict
 
 # replace  short nclas namw with long name if possible
@@ -31,5 +31,15 @@ def import_module_from_string(s,msg_logger, crumbs=''):
     return instance
 
 
+def get_module_ref_from_string(s):
+    ss = s.rsplit('.', 1)
+    module_object = import_module(ss[0])
+    return module_object
 
-
+def get_ref_from_string(s):
+    mod = get_module_ref_from_string(s)
+    fn = s.rsplit('.',1)[1]
+    if hasattr(mod,fn):
+        return getattr(mod,fn)
+    else:
+        return None

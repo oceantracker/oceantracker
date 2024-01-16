@@ -4,7 +4,6 @@ import traceback
 from time import perf_counter
 from oceantracker.shared_info import SharedInfoClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
-from oceantracker.util.module_importing_util import import_module_from_string
 from oceantracker.util import spell_check_util
 # parameter dictionaries are nested dictionaries or lists of dictionaries
 

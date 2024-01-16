@@ -17,7 +17,7 @@ class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
                                   'triangles': PVC('SCHISM_hgrid_face_nodes', str),
                                   'bottom_cell_index': PVC('bottom_index_node', str),
                                   'is_dry_cell': PVC('dryFlagElement', np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-                                    'field_variable_map': {'water_velocity': PLC(['horizontalVelX','horizontalVelY', 'verticalVelocity'], [str], fixed_len=2),
+            'field_variable_map': {'water_velocity': PLC(['horizontalVelX','horizontalVelY', 'verticalVelocity'], [str], fixed_len=2),
                                    'tide': PVC('elevation', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('depth', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_temperature': PVC('temp', str, doc_str='maps standard internal field name to file variable name'),

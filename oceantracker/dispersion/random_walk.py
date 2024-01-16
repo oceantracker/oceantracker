@@ -49,7 +49,7 @@ class RandomWalk(_BaseTrajectoryModifer):
             self._add_random_walk_velocity_modifier_constantAZ(self.info['random_walk_velocity'], active, part_prop['velocity_modifier'].data )
 
     @staticmethod
-    @njitOT
+    @njit
     #@guvectorize([(float64[:],int32[:],float64[:,:])],' (m), (l)->(n,m)') #, does not work needs n on LHS
     def _add_random_walk_velocity_modifier_constantAZ(random_walk_velocity, active, velocity_modifier):
         for n in active:
@@ -59,7 +59,7 @@ class RandomWalk(_BaseTrajectoryModifer):
 
 
     @staticmethod
-    @njitOT
+    @njit
     def _add_random_walk_velocity_modifier_AZ_profile(A_Z,A_Z_vertical_gradient,random_walk_velocity,timestep, active, velocity_modifier):
         # add vertical advection effect of dispersion to random walk, see Lynch Particles in the Coastal Ocean: Theory and Applications
         # this avoids particle accumulating in areas of high vertical gradient of A_Z, ie top and bottom

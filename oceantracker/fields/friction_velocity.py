@@ -31,7 +31,7 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
         pass
 
     @staticmethod
-    @njitOT
+    @njit
     def calc_friction_velocity_from_sigma_levels(buffer_index, sigma, tide,water_depth,
                                                  water_velocity, z0, out):
         # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
@@ -47,7 +47,7 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
                 # will give np.inf for very thin lower layers, ie small total water depth
 
     @staticmethod
-    @njitOT
+    @njit
     def calc_friction_velocity_from_native_zlevels(buffer_index, zlevel, bottom_cell_index, z0, water_velocity, out):
         # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
         # based on log layer  u= u_* log(z/z0)/kappa
@@ -71,7 +71,7 @@ class FrictionVelocityFromBottomStress(FrictionVelocityFromNearSeaBedVelocity):
 
 
     @staticmethod
-    @njitOT
+    @njit
     def calc_friction_velocity_from_bottom_stress(buffer_index, bottom_stress, water_density,  out):
         # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
         # based on log layer  u= u_* log(z/z0)/kappa

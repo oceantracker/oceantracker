@@ -311,7 +311,7 @@ class GenericNCDFreader(_BaseReader):
         bottom_cell_index = self.read_bottom_cell_index_as_int32(nc).astype(np.int32)
         # use node with thinest top/bot layers as template for all sigma levels
 
-        node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_top_bot_layer(zlevel, bottom_cell_index, si.z0)
+        node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(zlevel, bottom_cell_index, si.z0)
 
         # use layer fractions from this node to give layer fractions everywhere
         # in LSC grid this requires stretching a bit to give same number max numb. of depth cells

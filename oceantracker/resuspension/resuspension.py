@@ -66,7 +66,7 @@ class BasicResuspension(_BaseResuspension):
         self.stop_update_timer()
 
     @staticmethod
-    @njitOT
+    @njit
     def resuspension_jump(friction_velocity, resuspension_factor, x, water_depth, z0, sel):
         # add entrainment jump up to particle z, Book: Lynch(2015) book, Particles in the coastal ocean  eq 9.26 and 9.28
         for n in sel:

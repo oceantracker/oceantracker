@@ -218,7 +218,7 @@ class PointRelease(ParameterBaseClass):
         return x0, IDrelease_group, IDpulse, user_release_groupID, n_cell0, bc_cords0, hydro_model_gridID0
 
     @staticmethod
-    @njitOT
+    @njit
     def get_z_release_in_depth_range(x,z_min, z_max, water_depth,tide):
         # get random release within zrange within bounds of water depth and tide
 

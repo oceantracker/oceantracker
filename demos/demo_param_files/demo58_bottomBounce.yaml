@@ -41,7 +41,6 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-numba_caching: false
 output_file_base: demo58_bottomBounce
 particle_properties:
   age_decay:
