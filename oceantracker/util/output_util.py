@@ -15,7 +15,7 @@ def add_release_group_ID_info_to_netCDF(nc, prg):
 
     # make array full on points with different lengths for each release group
     n_rel= len(prg)
-    points     = np.full((n_rel,max_points,3),np.nan,dtype= np.float64)
+    points     = np.full((n_rel,max_points,3),0.,dtype= np.float64)
     n_points   = np.full((n_rel, ), 0, dtype=np.int32)
     is_polygon = np.full((n_rel,), 0, dtype=np.int8)
     
