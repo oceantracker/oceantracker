@@ -21,7 +21,7 @@ class SCHISMSreaderNCDF(GenericUnstructuredReader):
                         'hgrid_file_name': PVC(None, str),
                         'field_variables': {'water_velocity': PLC([], [str], fixed_len=2),
                                             'water_depth': PVC('depth', str),
-                                            'A_Z' : PVC('diffusivity', str),
+                                            #'A_Z' : PVC('diffusivity', str),
                                             'tide': PVC('elev', str)},
                                 })
         self.class_doc(description='Reads SCHISM netCDF output files')
