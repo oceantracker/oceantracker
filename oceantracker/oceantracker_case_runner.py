@@ -17,6 +17,8 @@ from oceantracker.util.parameter_checking import merge_params_with_defaults
 from oceantracker import common_info_default_param_dict_templates as common_info
 # note do not import numba here as its enviroment  setting must ve done first, import done below
 
+from oceantracker.util.package_util import get_all_parameter_classes
+
 class OceanTrackerCaseRunner(ParameterBaseClass):
     # this class runs a single case
     def __init__(self):
@@ -59,6 +61,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
         si.computer_info = get_versions_computer_info.get_computer_info()
 
+        # build short names map and base clasess
+
+        #get_all_parameter_classes(path.dirname(__file__)) # look in oceantracker's module
 
         # set numbas envionment varibles before first import
         #environ['oceantracker_numba_caching'] =str( 1 if si.settings['numba_caching'] else 0)

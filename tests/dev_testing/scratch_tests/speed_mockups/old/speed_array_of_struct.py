@@ -13,7 +13,7 @@ def kernal(a,b):
 
 
 @njit()
-def F0(A,B,out,sel, work):
+def F_base(A,B,out,sel, work):
     for n in sel:
         for w in range(work):
             out[n] = kernal(A[n, ...],B[n, ...])
@@ -56,10 +56,10 @@ if __name__ == "__main__":
             np.copyto(S['A'], A)
             np.copyto(S['B'], B)
 
-            F0(A, B,out,ids, w)
+            F_base(A, B,out,ids, w)
             out = np.zeros((N,))
-            t0s[n, m] = timeit(lambda: F0(A, B, out, ids, w), number=num)
-            t0[n, m]= timeit(lambda: F0(A, B, out,id, w),number=num)
+            t0s[n, m] = timeit(lambda: F_base(A, B, out, ids, w), number=num)
+            t0[n, m]= timeit(lambda: F_base(A, B, out,id, w),number=num)
 
             FS(S, out, ids, w)
             t0AOSs[n, m] = timeit(lambda: FS(S, out, ids, w), number=num)

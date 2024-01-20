@@ -4,7 +4,7 @@ package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
 
-code_version = '0.4.1.000 2023-12-23'
+code_version = '0.4.1.201 2024-01-20'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 
@@ -125,6 +125,7 @@ known_readers ={'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
 
 
 large_float=1.0E32
+
 
 # node types for hydro model
 node_types= dict(interior = 0,island_boundary = 1, domain_boundary= 2, open_boundary=3)
