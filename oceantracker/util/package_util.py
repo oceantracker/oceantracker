@@ -2,14 +2,9 @@
 import pkgutil
 import inspect
 import traceback
-from os import path, walk, listdir
+from os import path, walk, listdir, scandir
 import glob
 from importlib import import_module
-from oceantracker.util.parameter_base_class import ParameterBaseClass
-
-from oceantracker.common_info_default_param_dict_templates import package_fancy_name
-
-
 import inspect
 import importlib
 import pkgutil
@@ -17,23 +12,50 @@ import pkgutil
 import os
 import importlib
 import inspect
-
+from oceantracker.util.parameter_base_class import ParameterBaseClass
 def get_all_classes(module_name):
+
+
     module = importlib.import_module(module_name)
     classes = []
 
     for loader, name, is_pkg in pkgutil.walk_packages(module.__path__):
         if is_pkg:
             sub_module = f"{module_name}.{name}"
-            classes.extend(get_all_classes(sub_module))
+            classes.append(get_all_classes(sub_module))
         else:
             sub_module = importlib.import_module(f"{module_name}.{name}")
             sub_module_classes = inspect.getmembers(sub_module, inspect.isclass)
-            classes.extend(sub_module_classes)
+            classes.append(sub_module_classes)
 
     return classes
 
+def get_all_parameter_classes(module_dir):
+    # serach top level packages
+    info=dict(base_class=dict(),short_name_map=dict())
+    base_module= path.basename(module_dir)
+    for pkg in[f.path for f in scandir(module_dir) if f.is_dir() and not path.basename(f).startswith('__') and not path.basename(f).startswith('util') ]:
+        pkg_name= path.basename(pkg)
+        if pkg_name not in info : info[pkg_name] = dict()
 
+        files = [f.path for f in scandir(pkg) if f.is_file() and not path.basename(f).startswith('__') ]
+
+        for file in scandir(pkg):
+            if file.is_file() and not path.basename(file).startswith('__') :
+                m = f'{base_module}.{path.basename(pkg)}.{path.basename(file.path).split(".")[0]}'
+
+                if pkg_name not in info: info[pkg_name] = dict()
+                sub_module = importlib.import_module(m)
+                for name, c in inspect.getmembers(sub_module, inspect.isclass):
+                                       pass
+        pass
+
+
+
+    classes = []
+
+
+    return classes
 
 
 # def get package name
@@ -84,19 +106,5 @@ def build_short_class_name_map(package_dir,msg_list):
 
     return out, msg_list
 
-def check_package(calling_file):
-    # calling file must be in the root dir of package ie oceantracker_main
-    package_dir = path.dirname(calling_file)
-    d= {'package_dir': package_dir,
-        'package_name': package_dir.split('\\')[-1],
-        'short_class_name_map':{}}
-    msg_list=[]
-    msg_base= package_fancy_name +'-package checks: '
-    print('____________________________________________________')
-    print(msg_base +' Started for package in ' + d['package_dir'])
 
-    d['short_class_name_map'] =  build_short_class_name_map(package_dir, msg_list)
-    print( msg_base + ' OK')
-
-    return d, msg_list
 

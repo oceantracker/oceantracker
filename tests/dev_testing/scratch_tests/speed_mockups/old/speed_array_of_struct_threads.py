@@ -50,9 +50,9 @@ if __name__ == "__main__":
                 np.copyto(S['A'], A)
                 np.copyto(S['B'], B)
 
-                F0 = njit(FS, parallel=False, nogil=True)
-                F0(S, out, ids, w)
-                t0[n, m] = timeit(lambda: F0(S, out, id, w), number=num)
+                F_base = njit(FS, parallel=False, nogil=True)
+                F_base(S, out, ids, w)
+                t0[n, m] = timeit(lambda: F_base(S, out, id, w), number=num)
 
                 Fp = njit(FS,parallel=True, nogil=True)
                 Fp(S, out, ids, w)

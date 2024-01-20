@@ -77,6 +77,10 @@ class MyEncoder(json.JSONEncoder):
             elif isinstance(obj,(np.int8, np.int16, np.int32,np.int64)):
                 # make single numpy int values
                 return int(obj)
+            elif isinstance(obj, (np.float32, np.float64)):
+                # make single numpy int values
+                return float(obj)
+
             elif  type(obj) in [np.bool_,bool]:
                 # make single numpy int values
                 return int(obj)
@@ -101,11 +105,19 @@ class MyEncoder(json.JSONEncoder):
             elif np.isnan(obj) or not np.isfinite(obj) :
                 return None
 
-            return json.JSONEncoder.default(self, obj)
-
-        except:
-            raise ValueError(' basic_util- catch JSON encode error- object type ' + str(type(obj))+ ' as ' + str(obj))
+        except Exception as e:
+            print(str(e))
+            raise ValueError(' basic_util- oceantracker catch JSON encode error- object type ' + str(type(obj)) + ' value=' + str(obj))
             return 'BadValue'
+
+        # lastly check if json can decode it
+        try:
+            obj_returned = json.JSONEncoder.default(self, obj)
+            return obj_returned
+        except Exception as e:
+            print(str(e))
+            raise ValueError(' basic_util-parent json.JSONEncoder.default could not decode object type ' + str(type(obj)) + ' value=' + str(obj))
+
 
 # geojson polygons
 #todo make reader to/from internal polygon format
@@ -130,7 +142,7 @@ geometries_template = {
 }
 
 def writegeojson(f,polygonlist):
-    features = [F0]
+    features = [F_base]
     for i in map['islands']:
         f = {
             "type": "Feature",

@@ -48,14 +48,14 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
             nz_data = nz_bottom
             # loop over new levels
             for nz in range(sigma.size-1):
+
                 # if the sigma is above next zlevel, move data zlevel index up one
-                if sigma[nz] > zlevel_fractions[node, nz_data+1]:
-                    nz_data += 1
-                    nz_data = min(nz_data, zlevel_fractions.shape[1] - 2)
+                nz_data +=  sigma[nz] > zlevel_fractions[node, nz_data+1] # branch-less increment
+                nz_data = min(nz_data, zlevel_fractions.shape[1] - 2) # bound it to be one less than top cell
 
                 # do vertical linear interp
                 # get fraction within zlevel layer to use in interp
-                dzf= zlevel_fractions[node, nz_data + 1] - zlevel_fractions[node, nz_data]
+                dzf= abs(zlevel_fractions[node, nz_data + 1] - zlevel_fractions[node, nz_data])
                 if dzf < .001:
                     f = 0.
                     dzf = 0.0
