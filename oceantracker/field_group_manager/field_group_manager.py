@@ -1,6 +1,6 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.util.parameter_util import make_class_instance_from_params
+
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
 from oceantracker.util import time_util, ncdf_util, json_util
@@ -49,16 +49,15 @@ class FieldGroupManager(ParameterBaseClass):
 
         # add tidal stranding class
         si = self.shared_info
-        i = make_class_instance_from_params('tidal_stranding', si.working_params['core_classes']['tidal_stranding'], si.msg_logger,
-                                            default_classID='tidal_stranding',
-                                            crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ')
+        i = si.class_importer.new_make_class_instance_from_params(si.working_params['core_classes']['tidal_stranding'],'tidal_stranding',                                                 default_classID='tidal_stranding',
+                                                crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ')
 
         i.initial_setup()
         self.tidal_stranding = i
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['class_dicts']['fields'].items():
-            i = make_class_instance_from_params(name, params, si.msg_logger, crumbs=f'Adding "fields" from user params for field "{name}"')
+            i = si.class_importer.new_make_class_instance_from_params(params,'fields', name=name,  crumbs=f'Adding "fields" from user params for field "{name}"')
             i.initial_setup()
             # if not time varying can update once at start from other non-time varying fields
             if not i.is_time_varying(): i.update()
@@ -246,9 +245,7 @@ class FieldGroupManager(ParameterBaseClass):
     def _setup_hydro_reader(self,reader_builder):
         si = self.shared_info
 
-        self.reader  = make_class_instance_from_params('reader', reader_builder['params'], si.msg_logger,
-                                            crumbs=f'field Group Manager>setup_hydro_fields> reader class  ')
-        #self.reader = si.add_core_class('reader', reader_params,   crumbs=f'field Group Manager>setup_hydro_fields> reader class  ', initialise=False)
+        self.reader  = si.class_importer.new_make_class_instance_from_params(reader_builder['params'],'reader',  crumbs=f'field Group Manager>setup_hydro_fields> reader class  ')
 
         reader = self.reader
         reader.initial_setup(reader_builder['file_info'])
@@ -266,7 +263,6 @@ class FieldGroupManager(ParameterBaseClass):
 
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
-        #make_class_instance_from_params('interpolator', params, ml, default_classID=name,  crumbs=crumb_base + crumbs)
         # setup compulsory fields, plus others required
 
         reader.params['load_fields'] = list(set(['tide','water_depth', 'water_velocity'] + reader.params['load_fields']))
@@ -280,9 +276,9 @@ class FieldGroupManager(ParameterBaseClass):
 
     def set_up_interpolator(self):
         si = self.shared_info
-        i = make_class_instance_from_params('interpolator', si.working_params['core_classes']['interpolator'],si.msg_logger,
-                                                    default_classID='interpolator',
-                                                    crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
+        i = si.class_importer.new_make_class_instance_from_params(si.working_params['core_classes']['interpolator'],'interpolator',
+                                                default_classID='interpolator',
+                                                crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
         i.initial_setup(self.grid)
         self.interpolator = i
 
@@ -348,9 +344,8 @@ class FieldGroupManager(ParameterBaseClass):
         reader= self.reader
         field_params = reader.get_field_params(nc, name)
         field_params['write_interp_particle_prop_to_tracks_file'] =write_interp_particle_prop_to_tracks_file
-        i = make_class_instance_from_params(name, field_params, si.msg_logger,
-                                            default_classID='field_reader',
-                                            crumbs=f'Field Group Manager > adding reader field "{name}"')
+        i = si.class_importer.new_make_class_instance_from_params(field_params,'fields', name=name, default_classID='field_reader',
+                                                crumbs=f'Field Group Manager > adding reader field "{name}"')
         i.info['type'] = 'reader_field'
         i.initial_setup(self.grid, self.fields)
 
@@ -371,9 +366,8 @@ class FieldGroupManager(ParameterBaseClass):
         # class name given or default_classID specified to get from defaults in common_info
         si = self.shared_info
 
-        i = make_class_instance_from_params(name, params, si.msg_logger,
-                                            default_classID=default_classID,
-                                            crumbs=crumbs+ f'Field group manager > custom field setup > "{name}"')
+        i = si.class_importer.new_make_class_instance_from_params(params,'fields', name,   default_classID=default_classID,
+                                                crumbs=crumbs+ f'Field group manager > custom field setup > "{name}"')
         i.info['type'] = 'custom_field'
         i.initial_setup(self.grid, self.fields)
         self.fields[name] = i

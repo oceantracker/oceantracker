@@ -1,45 +1,130 @@
-
-from importlib import import_module
-import traceback
-
-def import_class_from_string(s, msg_logger, crumbs=''):
-    # module reference, with or without param dict
-
-# replace  short nclas namw with long name if possible
-    #if s in package_info['short_class_name_map']: s= package_info['short_class_name_map'][s]
-
-    try:
-        ss = s.rsplit('.', 1)
-        module_object = import_module(ss[0])
-        #module_object = __import__(ss[0]) # not working but faster option but less checks???
-    except Exception as e:
-        msg_logger.msg('Failed to find/load module given by string in or before __init__() "' + str(s) + '"',
-                          hint='Class name does not match any in python path, Module names are case sensitive?, sytax error in module?, import error within module?',
-                          fatal_error=True, exit_now=True, traceback_str = traceback.print_exc())
-
-    # make instance
-    try:
-        instance = getattr(module_object, ss[1])()  # an instance
-
-    except Exception as e:
-
-        msg_logger.msg('Failed create instance from imported module given by string "' + s + '" ' ,
-                          hint='Sytax error in module or its imports? cannot find an import?',
-                       crumbs = crumbs,
-                              fatal_error=True, exit_now=True, traceback_str=traceback.print_exc())
-
-    return instance
+import pkgutil,inspect,importlib
+from os import path
+from oceantracker.util.parameter_base_class import ParameterBaseClass
+from oceantracker.common_info_default_param_dict_templates import default_classes_dict
+from copy import deepcopy
+from oceantracker.util.parameter_checking import merge_params_with_defaults
+from time import perf_counter
+from oceantracker.util import time_util, spell_check_util
+from oceantracker.util.package_util import  scan_package_for_param_classes
 
 
-def get_module_ref_from_string(s):
-    ss = s.rsplit('.', 1)
-    module_object = import_module(ss[0])
-    return module_object
+class ClassImporter(object):
+    def __init__(self,package_root_dir, msg_logger=None):
+        self.class_maps = scan_package_for_param_classes(package_root_dir,msg_logger=msg_logger)
+        self.msg_logger =msg_logger
+        msg_logger.exit_if_prior_errors()
 
-def get_ref_from_string(s):
-    mod = get_module_ref_from_string(s)
-    fn = s.rsplit('.',1)[1]
-    if hasattr(mod,fn):
-        return getattr(mod,fn)
-    else:
-        return None
+    def get_class_obj(self,class_role, name, params, default_classID=None):
+        ml = self.msg_logger
+        if 'class_name' in params and params['class_name'] is not None:
+            cls_obj = self.get_class_from_name(class_role, name,params['class_name'])
+            if cls_obj is None:
+                # try direct import from full string
+                try:
+                    s = params['class_name'].rsplit('.',1)
+                    mod = importlib.import_module(s[0])
+                    cls_obj = getattr(mod,s[1])
+
+                except Exception as e:
+                    spell_check_util.spell_check(params["class_name"], list(self.class_maps['full_name_map'].keys()), ml,
+                                        'checking known full class names',
+                                        crumbs=f'checking class_name "{params["class_name"]}"')
+                    spell_check_util.spell_check(params["class_name"], list(self.class_maps['short_name_map'].keys()), ml,
+                                        'checking known short class names',
+                                        crumbs=f'checking class_name "{params["class_name"]}"')
+
+                    ml.msg(f'For "{class_role}" named "{name}", could not find class_name "{params["class_name"]}"',
+                           fatal_error=True)
+
+        else:
+            # try default
+            cls_obj = self.get_default_class(default_classID)
+            if cls_obj is None:
+                ml.msg(f'No class_name param for "{name}" and no know default class for type  "{class_role}"')
+
+        # check class comes from expected type
+        if cls_obj is not None:
+            this_class_type = cls_obj.__module__.split('.')[1]
+            if this_class_type != class_role:
+                ml.msg(f'Class "{name}" of type "{this_class_type}", got "{cls_obj}", expected subclass of "{class_role} ',
+                       hint ='Has wrong class type or name been used for this type?')
+
+            pass
+
+        return cls_obj
+
+    def new_make_class_instance_from_params(self,params, class_role, name = None,  default_classID=None,
+                                        crumbs='', merge_params=True, check_for_unknown_keys=True):
+
+        if class_role not in self.class_maps['tree']:
+            self.msg_logger.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
+                                hint= f'possible values={self.class_maps["tree"].keys()}',
+                                fatal_error=True, exit_now=True)
+
+        if default_classID is None: default_classID = class_role
+        class_obj = self.get_class_obj(class_role, name, params, default_classID=default_classID)
+
+        if class_obj is None:
+            return None
+        i = class_obj() # make instance
+        i.info['name'] = name
+        i.info['class_role'] = class_role
+
+        if merge_params:
+            i.params  = merge_params_with_defaults(params, i.default_params, self.msg_logger, crumbs=crumbs,check_for_unknown_keys=check_for_unknown_keys)
+
+        # attach the current message loger
+        i.msg_logger = self.msg_logger
+        return i
+
+    def get_default_class(self,default_classID=None):
+
+        cls_name=  default_classes_dict[default_classID] if default_classID in  default_classes_dict else None
+        if cls_name is None:
+            return None
+        else:
+            return self.class_maps['full_name_map'][cls_name]['class_obj']
+
+    def get_class_from_name(self,class_type, name, class_name):
+
+        if class_name in self.class_maps['full_name_map']:
+            return self.class_maps['full_name_map'][class_name]['class_obj']
+
+        elif class_type +'.' + class_name in self.class_maps['short_name_map']:
+            return self.class_maps['short_name_map'][class_type +'.' + class_name]['class_obj']
+        else:
+            return None
+
+if __name__ == "__main__":
+    # test code for errors
+    from oceantracker.util.json_util import read_JSON
+    from oceantracker.util.messgage_logger import MessageLogger
+    ml =msg_logger=MessageLogger('Core developer:')
+    d =ClassImporter(path.dirname(__file__), ml)
+
+    params= read_JSON(r'C:\Work\oceantracker\demos\demo_param_files\demo56_SCHISM_3D_resupend_crtitical_friction_vel.json')
+    params['particle_statistics']['test1'] = deepcopy( params['particle_statistics']['grid1'])
+    params['particle_statistics']['test1']['class_name']   = params['particle_statistics']['test1']['class_name'].split('.')[-1]
+
+    params['particle_statistics']['test2'] = deepcopy( params['particle_statistics']['grid1'])
+    params['particle_statistics']['test2']['class_name']   = params['particle_statistics']['test1']['class_name'][2:]
+    params['release_groups']['p3'] = deepcopy(params['release_groups']['P1'])
+    params['release_groups']['p3']['class_name']   = 'PolygonRelease'
+
+    params['particle_statistics']['test3'] =  params['event_loggers']['inoutpoly']
+    # remove one map to test raw importing
+    del d.class_maps['full_name_map']['oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit']
+    del d.class_maps['short_name_map']['event_loggers.LogPolygonEntryAndExit']
+
+    print('--------------')
+    t0 = perf_counter()
+    for c in ['dispersion','resuspension']:
+        i = d.make_class_instance_from_params(c,c, params[c],default_classID=c)
+        print(c,i)
+
+    for c in ['particle_properties','particle_statistics','event_loggers','release_groups']:
+        for name, c_params in params[c].items():
+            i = d.make_class_instance_from_params(c,name, c_params, default_classID=c)
+            print(c,name,i)
+    print('time',perf_counter()-t0)

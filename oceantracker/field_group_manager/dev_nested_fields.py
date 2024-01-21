@@ -3,7 +3,6 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
-from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.time_util import seconds_to_isostr
 from time import  perf_counter
 from copy import copy
@@ -21,9 +20,8 @@ class DevNestedFields(ParameterBaseClass):
         # setup outer grid first
 
 
-        fgm_outer_grid = make_class_instance_from_params('field_group_manager_outer_grid',
-                                dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
-                                ml,   crumbs='adding outer hydro-grid field manager for nested grid run' )
+        fgm_outer_grid = si.class_importer.new_make_class_instance_from_params('field_group',dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
+                                                             crumbs='adding outer hydro-grid field manager for nested grid run')
         fgm_outer_grid.initial_setup()
 
         # note es to check if all hidcasts have same required info
@@ -39,9 +37,8 @@ class DevNestedFields(ParameterBaseClass):
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}, name= "{name}"')
 
             t0= perf_counter()
-            i =  make_class_instance_from_params(name,
-                                                 dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
-                                                 ml, crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
+            i =  si.class_importer.new_make_class_instance_from_params(dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),'reader',name=name,
+                                                     crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
 
             i._setup_hydro_reader(params)
 

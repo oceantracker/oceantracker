@@ -55,7 +55,7 @@ class MessageLogger(object):
     #todo add abilty to return excecption/traceback?
     def msg(self, msg_text, warning=False, note=False,
             hint=None, tag=None, tabs=0, crumbs=None, link=None,
-            fatal_error=False, exit_now=False, exception = None, traceback_str=None):
+            fatal_error=False, exit_now=False, exception = None, traceback_str=None, dev=False):
 
         if exception is not None:
             fatal_error = True
@@ -64,7 +64,7 @@ class MessageLogger(object):
         if fatal_error: self.fatal_error_count +=1
 
         m = ['']
-
+        if dev: m[0] +='Core developer '
         # first line of message
         if fatal_error:
             m[0] += msg_str( '>>> Error: ', tabs)
@@ -115,6 +115,7 @@ class MessageLogger(object):
         # todo add traceback to message?
         if exit_now:
             raise GracefulError('Fatal error cannot continue')
+
 
     def has_fatal_errors(self): return  self.fatal_error_count > 0
 

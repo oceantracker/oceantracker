@@ -8,11 +8,11 @@ dispersion_miss-spelt:
 output_file_base: demo01_plot_tracks
 'particle_properties ':
   Oxygen:
-    class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    class_name: AgeDecay
     decay_time_scale: 86400.0
     initial_value: 20.0
   distance_travelled:
-    class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+    class_name: DistanceTravelled
 reader:
   class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
   dimension_map:

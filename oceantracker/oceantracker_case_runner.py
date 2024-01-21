@@ -2,7 +2,6 @@ import os
 from copy import deepcopy
 from os import path, environ, remove
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_util import  make_class_instance_from_params
 
 from time import  perf_counter
 from oceantracker.util.messgage_logger import MessageLogger, GracefulError
@@ -14,6 +13,7 @@ from datetime import datetime
 from time import sleep
 import traceback
 from oceantracker.util.parameter_checking import merge_params_with_defaults
+from oceantracker.util.module_importing_util import ClassImporter
 from oceantracker import common_info_default_param_dict_templates as common_info
 # note do not import numba here as its enviroment  setting must ve done first, import done below
 
@@ -30,36 +30,49 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si=self.shared_info
         si.reset()  # clear out classes from class instance of SharedInfo if running series of mains
         d0 = datetime.now()
-        t0 = perf_counter()
-
+        t_start = perf_counter()
 
         # basic param shortcuts
+        si.caseID = working_params['caseID']
         si.working_params = working_params
+        si.settings = si.working_params['shared_settings']
 
         # merge shared and case setting ito one shared variable as distinction no longer important
-        si.settings = si.working_params['shared_settings']
         si.settings.update(si.working_params['case_settings'])
-
         si.output_files = si.working_params['output_files']
         si.run_output_dir = si.output_files['run_output_dir']
         si.output_file_base = si.output_files['output_file_base']
-        si.caseID = working_params['caseID']
 
         # set up message logging
         output_files = working_params['output_files']
         si.msg_logger = MessageLogger(f'C{si.caseID:03d}', si.settings['max_warnings'])
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
+        si.msg_logger.print_line()
+        si.msg_logger.msg('Starting case number %3.0f, ' % si.caseID + ' '
+                                      + si.output_files['output_file_base']
+                                      + ' at ' + time_util.iso8601_str(datetime.now()))
+        si.msg_logger.print_line()
+
+        # setup class importer
+        t0=perf_counter()
+        si.class_importer = ClassImporter(path.dirname(__file__), msg_logger=si.msg_logger)
+        si.msg_logger.progress_marker('Scanned OceanTracker to build short class map to full names', start_time=t0)
 
         # other useful shared values
         si.backtracking = si.settings['backtracking']
         si.model_direction = -1 if si.backtracking else 1
 
         si.write_output_files = si.settings['write_output_files']
-     
+
         si.z0 = si.settings['z0']
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
         si.computer_info = get_versions_computer_info.get_computer_info()
+
+
+
+
+
 
         # build short names map and base clasess
 
@@ -117,7 +130,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         try:
             self._do_a_run()
-            case_info = self._get_case_info(d0,t0)
+            case_info = self._get_case_info(d0,t_start)
 
             if si.settings['write_output_files']:
                 # write grid if first case
@@ -168,11 +181,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # from single run case_runner_params
         si =self.shared_info
 
-        si.msg_logger.print_line()
-        si.msg_logger.msg('Starting case number %3.0f, ' % si.caseID + ' '
-                                      + si.output_files['output_file_base']
-                                      + ' at ' + time_util.iso8601_str(datetime.now()))
-        si.msg_logger.print_line()
+
 
         # get short class names map
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
@@ -480,28 +489,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             d['block_timings'].append(l)
         d['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
 
-        # get info about numba code
-        from oceantracker.util.numba_util import numba_func_info, find_simd_code
-        from oceantracker.util.module_importing_util import get_ref_from_string
-        ni= {}
-        ni_simid={}
-        for name, item in numba_func_info.items():
-            func=get_ref_from_string(name) # get reference to dispatch func from name
-            if func is not None:
-                simd_code = []
-                sig = func.signatures
-                # check for simd code
-                for n in range(len(sig)):
-                    simd_code.append(find_simd_code(func,n))
-            else:
-                simd_code = None
-                sig='nested code or not used, no signatures'
-
-            ni[name] = dict(signatures=sig,simd_code=simd_code)
-            if simd_code is not None:
-                ni_simid[name] =  ni[name]
-
-        d['numba_func_info'] = ni
 
         return d
 

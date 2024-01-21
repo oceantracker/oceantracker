@@ -204,7 +204,6 @@ class ParticleGroupManager(ParameterBaseClass):
         # property for group of particles, ie not properties of individual particles, eg time, number released
         # **karwgs must have at least name
         params = kwargs
-        params['class_name'] = 'oceantracker.particle_properties._base_properties.TimeVaryingInfo'
         si = self.shared_info
         i = si.create_class_dict_instance(name,'time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
         i.initial_setup()
@@ -240,9 +239,6 @@ class ParticleGroupManager(ParameterBaseClass):
         if prop_group not in self.known_prop_types:    #todo move all raise exception to msglogger
             ml.msg('ParticleGroupManager.create_particle_property, unknown prop_group name',
                    hint='prop_group must be one of ' + str(self.known_prop_types),   fatal_error=True, exit_now=True)
-        # set default class
-        if 'class_name' not in prop_params:
-            prop_params['class_name'] = 'oceantracker.particle_properties._base_properties.ParticleProperty'
 
 
         i = si.create_class_dict_instance(name, 'particle_properties', prop_group, prop_params,

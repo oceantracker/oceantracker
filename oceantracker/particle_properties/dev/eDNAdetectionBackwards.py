@@ -1,4 +1,4 @@
-from oceantracker.particle_properties._base_properties import ParticleProperty
+from oceantracker.particle_properties._base_particle_properties import ParticleProperty
 import numpy as np
 
 class eDNAdetection(ParticleProperty):

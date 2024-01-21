@@ -1,4 +1,4 @@
-from oceantracker.particle_properties._base_properties import ParticleProperty
+from oceantracker.particle_properties._base_particle_properties import ParticleProperty
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 from oceantracker.util.numba_util import njitOT

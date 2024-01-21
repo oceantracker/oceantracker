@@ -1,5 +1,4 @@
 
-from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker import common_info_default_param_dict_templates as common_info
 from oceantracker.util.parameter_checking import merge_params_with_defaults
 from time import  perf_counter
@@ -17,16 +16,15 @@ class SharedInfoClass(object):
         for key in common_info.class_dicts_list:
             self.classes[key] = {}
 
-    def add_core_class(self, name, params, crumbs ='',initialise=False):
+    def add_core_class(self, class_role, params, crumbs ='',initialise=False):
 
         ml= self.msg_logger
-        crumb_base = f' >>> adding core class type >> "{name}" '
+        crumb_base = f' >>> adding core class type >> "{class_role}" '
 
         # make instance  and merge params
-        i = make_class_instance_from_params(name, params, ml, default_classID=name,
-                                            crumbs=crumb_base + crumbs )
+        i = self.class_importer.new_make_class_instance_from_params(params,class_role, default_classID=class_role, crumbs=crumb_base + crumbs)
 
-        self.classes[name] = i
+        self.classes[class_role] = i
         if initialise: i.initial_setup()
         return i
 
@@ -39,7 +37,7 @@ class SharedInfoClass(object):
         crumb_base = f' >>> adding_class type >> "{class_role}"  (name=  "{name}" instance #{instanceID: 1d}), '
 
         # make instance  and merge params
-        i = make_class_instance_from_params(name, params, self.msg_logger,   crumbs= crumb_base + crumbs,default_classID=default_classID)
+        i = self.class_importer.new_make_class_instance_from_params(params,class_role,name=name,crumbs=crumb_base + crumbs, default_classID=default_classID)
 
         if class_role not in common_info.class_dicts_list :
             ml.msg(f'Class type = "{class_role}": name is not a known class_role=' + class_role ,
