@@ -29,7 +29,7 @@ import numpy as np
 import difflib
 
 from oceantracker import common_info_default_param_dict_templates as common_info
-
+from oceantracker.util.module_importing_util import ClassImporter
 
 # start with numba caching turned off
 from oceantracker.util import  numba_util
@@ -40,7 +40,6 @@ from oceantracker.util.parameter_checking import merge_params_with_defaults
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import basic_util , get_versions_computer_info
 from oceantracker.util import json_util ,yaml_util
-from oceantracker.util.parameter_util import make_class_instance_from_params
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import get_hydro_model_info
 from oceantracker.util import  spell_check_util
@@ -452,16 +451,16 @@ class _OceanTrackerRunner(object):
         # created a dict which can be used to build a reader
         t0= perf_counter()
         ml = self.msg_logger
-
+        class_importer= ClassImporter(path.dirname(__file__), msg_logger=ml)
         reader_params =  working_params['core_classes']['reader']
 
         if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
             ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',fatal_error=True, exit_now=True )
 
-        reader_params, file_list = get_hydro_model_info.find_file_format_and_file_list(reader_params, ml)
+        reader_params, file_list = get_hydro_model_info.find_file_format_and_file_list(reader_params,class_importer, ml)
 
 
-        reader = make_class_instance_from_params('reader', reader_params, ml,  default_classID='reader', crumbs='primary reader>')
+        reader = class_importer.new_make_class_instance_from_params(reader_params,'reader',  default_classID='reader', crumbs='primary reader>')
 
         ml.exit_if_prior_errors() # class name missing or missing required variables
         working_params['reader_builder']=dict(params=reader_params,
@@ -474,8 +473,8 @@ class _OceanTrackerRunner(object):
         working_params['nested_reader_builders']= {}
         for name, params in working_params['class_dicts']['nested_readers'].items():
             t0 = perf_counter()
-            nested_params, nested_file_list = get_hydro_model_info.find_file_format_and_file_list(params, ml)
-            nested_reader = make_class_instance_from_params('reader', nested_params, ml, default_classID='reader',crumbs=f'nested reader{name}>')
+            nested_params, nested_file_list = get_hydro_model_info.find_file_format_and_file_list(params,class_importer, ml)
+            nested_reader = class_importer.new_make_class_instance_from_params( nested_params,'reader', default_classID='reader', crumbs=f'nested reader{name}>')
 
             d= dict(params=nested_params,
                     file_info= nested_reader.get_hindcast_files_info(nested_file_list, ml)

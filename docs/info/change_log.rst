@@ -7,7 +7,7 @@ Known issues
 __________________
 
 
-Version 0.4.1.000 2023-12-23
+Version 0.4.1.201 2024-01-20
 _________________________
 
 Faster and simplified internal structure
@@ -21,7 +21,8 @@ New features
 #. Now reads new Schism v5 multi-file output, where 3D fields in separate files
 #. Floating particle trajectory  modifier, forces particles to follow free surface
 #. Now exits if any the release group start time is outside time range of hindcast
-
+#  Use short class_names,eg 'PolygonRelease' instead of 'oceantracker.release_groups.point_release.PolygonRelease' for OTs inbuilt classes, can optionally
+#. Checks full class name is of the right type/role, to prevent using a class in the wrong role
 
 Known breaking changes- ask for help if needed to transition
 ______________________________________________________________

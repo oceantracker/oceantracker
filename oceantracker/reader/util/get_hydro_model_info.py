@@ -4,16 +4,15 @@ from os import path
 from oceantracker.common_info_default_param_dict_templates import known_readers
 from pathlib import Path as pathlib_Path
 from oceantracker.common_info_default_param_dict_templates import known_readers
-from oceantracker.util.parameter_util import make_class_instance_from_params
 from copy import deepcopy
 
-def find_file_format_and_file_list(reader_params, msg_logger):
+def find_file_format_and_file_list(reader_params, class_importer, msg_logger):
     found=False
     # first see if it matches known formats
     for r_name, r in known_readers.items():
         params= deepcopy(reader_params)
         params['class_name'] = r
-        reader = make_class_instance_from_params('reader', params, msg_logger, default_classID='reader',check_for_unknown_keys=False)
+        reader = class_importer.new_make_class_instance_from_params(params,'reader',  default_classID='reader', check_for_unknown_keys=False)
         file_list = reader.get_file_list()
         if len(file_list) > 0 and reader.is_file_format(file_list[0]):
             # found format

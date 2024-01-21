@@ -62,7 +62,25 @@ core_class_list=['reader',
                  'tidal_stranding',
                 'resuspension']
 
+class_dicts_list=[ # class dicts which replace lists
+            'pre_processing',
+            'release_groups' ,
+            'fields',  # user fields calculated from other fields  on reading
+            'particle_properties',  # user added particle properties, eg DistanceTraveled
+            'velocity_modifiers',  # user added velocity effects, eg TerminalVelocity
+            'trajectory_modifiers',  # change particle paths, eg. re-suspension
+            'particle_statistics',  # heat map inside polygon statistics calculated on the fly
+            'particle_concentrations',  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
+            'nested_readers',
+            'event_loggers',  # writes events files ,eg PolygonEntryExit
+            # below still to be developed
+            # 'post_processing':      PDLdefaults({}), #todo after run post processing not implemented yet
+            'time_varying_info', # particle info,eg. time,or  tide at at tide gauge, core example is particle time
+            ]
+
 default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
+                        particle_properties='oceantracker.particle_properties._base_particle_properties.ParticleProperty',
+                        time_varying_info='oceantracker.time_varying_info._base_time_varying_info.TimeVaryingInfo',
                         field_group_manager='oceantracker.field_group_manager.field_group_manager.FieldGroupManager',
                         particle_group_manager= 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager',
                         tracks_writer = 'oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter',
@@ -75,7 +93,8 @@ default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
                         field_custom='oceantracker.fields._base_field.CustomField',
                         field_friction_velocity_from_bottom_stress='oceantracker.fields.friction_velocity.FrictionVelocityFromBottomStress',
                         field_friction_velocity_from_near_sea_bed_velocity='oceantracker.fields.friction_velocity.FrictionVelocityFromNearSeaBedVelocity',
-                        field_A_Z_profile_vertical_gradient='oceantracker.fields.field_vertical_gradient.VerticalGradient'
+                        field_A_Z_profile_vertical_gradient='oceantracker.fields.field_vertical_gradient.VerticalGradient',
+
                         )
 
 class_dicts_list=[ # class dicts which replace lists

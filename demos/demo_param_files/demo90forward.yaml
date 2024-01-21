@@ -11,16 +11,15 @@ max_run_duration: 172800.0
 output_file_base: demo90forward
 particle_properties:
   my_constant_prop:
-    class_name: oceantracker.particle_properties.load_carrying.ParticleLoad
+    class_name: ParticleLoad
     initial_value: 100
-    variance: 10.0
 'particle_properties ':
   Oxygen:
-    class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    class_name: AgeDecay
     decay_time_scale: 86400.0
     initial_value: 20.0
   distance_travelled:
-    class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+    class_name: DistanceTravelled
 reader:
   class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
   dimension_map:

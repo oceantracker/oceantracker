@@ -1,4 +1,4 @@
-from oceantracker.particle_properties._base_properties import ParticleProperty
+from oceantracker.particle_properties._base_particle_properties import ParticleProperty
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.polygon_util import set_up_list_of_polygon_instances, InsidePolygon

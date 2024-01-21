@@ -6,7 +6,9 @@ from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.util import time_util
 
 
-class _BasePropertyInfo(ParameterBaseClass):
+class _BaseParticleProperty(ParameterBaseClass):
+    # property of each particle individually, eg x, time released etc , status
+    # or non-time varying parameter eg ID,
     # properties which are maintained in memory and may be written out, eg group and particle
 
     def __init__(self):
@@ -15,65 +17,20 @@ class _BasePropertyInfo(ParameterBaseClass):
 
         self.add_default_params({   'description': PVC(None,str),
                                     'time_varying':PVC(True, bool),
-                                    'write': PVC(True, bool),
                                     'vector_dim': PVC(1, int, min = 1 ),
                                     'prop_dim3': PVC(1, int, min=1),
                                     'dtype':PVC(np.float64, np.dtype),
                                     'initial_value':PVC(0.,float),
                                     'fill_value': PVC(None,[int,float]),
-                                    'update':PVC(True,bool)
+                                    'update':PVC(True,bool),
+                                    'write': PVC(True, bool, doc_str='Write particle property to tracks or event files file'),
+                                    'type': PVC('user', str,
+                                                doc_str='type of particle property, used to manage how to update particle property',
+                                                possible_values=particle_info['known_prop_types']),
+                                     'release_group_parameters':PVC([], list, doc_str='In development: release group specific particle prop params'),
               })
 
         self.class_doc(role='Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
-
-    def initial_setup(self, **kwargs): pass # stuff done after on creation of property
-    def final_setup(self, **kwargs): pass  # stuff done after intiail setup of all classes/properties
-
-    def initial_value_at_birth(self, released_IDs):  pass
-
-    def update(self,t,active): pass
-
-    def is_vector(self): return self.data.ndim > 1
-
-    def num_vector_dimensions(self):  return 0 if self.data.ndim == 1 else self.data.shape[1]
-
-    def get_dtype(self):  return self.params['dtype']
-
-
-class TimeVaryingInfo(_BasePropertyInfo):
-    # single valued time varying information, ie not a particle property
-    # eg  "time" data, numer released so far
-
-    def __init__(self):
-        # set up info/attributes
-        super().__init__()  # required in children to get parent defaults and merge with give params
-
-
-    def initial_setup(self, **kwargs):
-
-        s=(1,)
-        if self.params['vector_dim'] > 1:
-            s += (self.params['vector_dim'],)
-        self.data = self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype(),order='c')
-
-
-    def update(self): pass # manual update by default
-    def set_values(self, value): self.data[0]=value
-    def get_values(self): return self.data[0]
-
-class ParticleProperty(_BasePropertyInfo):
-    # property of each particle individually, eg x, time released etc , status
-    # or non-time varying parameter eg ID,
-
-    def __init__(self):
-        super().__init__()  # required in children to get parent defaults and merge with give params
-        self.add_default_params({'write': PVC(True, bool, doc_str='Write particle property to tracks or event files file'),
-                                 'type': PVC('user', str,
-                                            doc_str='type of particle property, used to manage how to update particle property',
-                                            possible_values=particle_info['known_prop_types']),
-                                 'release_group_parameters': {}}
-                                )
-
 
     def initial_setup(self):
         si = self.shared_info
@@ -87,19 +44,27 @@ class ParticleProperty(_BasePropertyInfo):
 
         self.info['array_size'] = s
         # set up data buffer
-        self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype(), order='c')
+        self.data = np.full(s, self.params['initial_value'], dtype=self.get_dtype(), order='c')
+
+    def final_setup(self, **kwargs): pass  # stuff done after intiail setup of all classes/properties
 
     def initial_value_at_birth(self, new_part_IDs):
         # need to set at birth, as in compact mode particle buffer changes,
         # so cant rely on value at matrix construction in initialize
-        value =self.params['initial_value']
+        value = self.params['initial_value']
 
-        if self.get_dtype() == np.dtype('<M8[s]'): # datetime64 in seconds
+        if self.get_dtype() == np.dtype('<M8[s]'):  # datetime64 in seconds
             value = time_util.seconds_to_datetime64(value)
 
         self.set_values(value, new_part_IDs)  # sets this properties values
 
-    def update(self, active): pass # manual update by default
+    def update(self,t,active): pass
+
+    def is_vector(self): return self.data.ndim > 1
+
+    def num_vector_dimensions(self):  return 0 if self.data.ndim == 1 else self.data.shape[1]
+
+    def get_dtype(self): return self.params['dtype']
 
     def set_values(self, values, active):
 
@@ -162,3 +127,7 @@ class ParticleProperty(_BasePropertyInfo):
 
         found= particle_comparisons_util._find_all_in_range(data, value1, value2, out)
         return found
+
+
+class ParticleProperty(_BaseParticleProperty):
+    pass
