@@ -130,11 +130,11 @@ def _read_compact_tracks(nc, var_list, release_groupID):
 
     return d
 
-@njit
+@njitOT
 def _insertMatrixValues(x,row,col,values):
     for n in range(values.shape[0]):
         x[row[n],col[n],...] = values[n]
-@njit
+@njitOT
 def _get_last_alive(status,status_notReleased, status_dead):
     # return last row/time when each  particle is alive
     ID = np.zeros((status.shape[1],),dtype=np.int32)
@@ -153,7 +153,7 @@ def _get_last_alive(status,status_notReleased, status_dead):
         ID[n]= nrow # need to use as start of  range
     return ID
 
-@njit
+@njitOT
 def _filIinDeadParticles(data, last_recordedID, missing_status):
     # fill in values after death with last good one
     for n in range(data.shape[1]):

@@ -36,7 +36,7 @@ def NZTM_to_WGS84(xy, out=None):
 def _get_WGS84_UTM_transformer(lon_lat):
     # (lat, lng) to NZTM for numpy arays
     # make row vector if needed
-    lon_lat[lon_lat[:,0]> 180., 0] -= 180
+    lon_lat[lon_lat[:,0] > 180., 0] -= 180
 
     utm_crs_list = query_utm_crs_info(
         datum_name="WGS 84",

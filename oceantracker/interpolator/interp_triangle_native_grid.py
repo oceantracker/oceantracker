@@ -118,12 +118,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
 
 
-
             # debug_util.plot_walk_step(xq, si.classes['reader'].grid, part_prop)
 
 
 
-    # @function_profiler(__name__)
+    #@function_profiler(__name__)
     def _interp_field2D(self,field_name, field_instance,grid, current_buffer_steps, fractional_time_steps,
                                 n_cell, bc_cords,  output, active):
         # interp reader field_name inplace to particle locations to same time and memory
@@ -146,7 +145,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                  n_cell, bc_cords,
                                                  active)
 
-    # @function_profiler(__name__)
+    #@function_profiler(__name__)
     def _interp_field3D(self, field_name, field_instance,grid, current_buffer_steps,fractional_time_steps,
                          n_cell,nz_cell,z_fraction, bc_cords,output,active):
         # interp reader field_name inplace to particle locations to same time and memory
@@ -188,7 +187,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             # todo eval_interp3D_timeIndependent not implented for 3D non-time varying fields
             raise Exception('eval_field_interpolation_at_particle_locations : spatial interp using eval_interp3D_timeIndependent not implemented yet ')
 
-    # @function_profiler(__name__)
+    #@function_profiler(__name__)
     def eval_field_interpolation_at_given_locations(self,field_name, field_instance,grid, reader, x,
                                                     current_buffer_steps, fractional_time_steps,time=None, output=None, n_cell=None):
         # in  evaluation of field interpolation at specific locations, ie not particle locations
@@ -309,8 +308,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 grid['tri_walk_AOS'], grid['dry_cell_index'],
                 n_cell, cell_search_status,bc_cords,
                 self.walk_counts,
-                params['max_search_steps'], params['bc_walk_tol'], open_boundary_type, si.settings['block_dry_cells'],
-                active)
+                params['max_search_steps'], params['bc_walk_tol'], open_boundary_type, si.settings['block_dry_cells'], active)
 
             sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['failed'], out=self.get_partID_subset_buffer('B1'))
 
@@ -319,8 +317,14 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             info['triangle_walks_retried'] += sel.size
             new_cell = self.initial_horizontal_cell(grid, xq[sel, :])
             part_prop['n_cell'].set_values(new_cell, sel)
+            tri_interp_util.BCwalk(
+                xq,
+                grid['tri_walk_AOS'], grid['dry_cell_index'],
+                n_cell, cell_search_status, bc_cords,
+                self.walk_counts,
+                params['max_search_steps'], params['bc_walk_tol'], open_boundary_type, si.settings['block_dry_cells'], sel)
 
-            self.find_hori_cell(grid, fields, xq, self.info['open_boundary_type'], sel)
+
             # recheck for additional failures
             sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['failed'], out=self.get_partID_subset_buffer('B1'))
 

@@ -14,7 +14,7 @@ from time import sleep
 from signal import SIGINT
 
 
-@njit
+@njitOT
 def F1(x1,sel, a):
     #  take x1 only if > xmin
    for n in sel:
@@ -22,7 +22,7 @@ def F1(x1,sel, a):
             x1[n] = a
 
 
-@njit
+@njitOT
 def F2(x1,sel, a):
    for n in sel:
         x1[n] = max(x1[n], a)

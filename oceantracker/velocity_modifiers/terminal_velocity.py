@@ -45,13 +45,13 @@ class TerminalVelocity(VelocityModiferBase):
             self._add_individual_vertical_vel(velocity_modifier.data, part_prop['terminal_velocity'].data,  si.model_direction, active)
 
     @staticmethod
-    @njit
+    @njitOT
     def _add_constant_vertical_vel(v, w, sel):
         for n in sel:
             v[n, 2] += w
 
     @staticmethod
-    @njit
+    @njitOT
     def _add_individual_vertical_vel(v, w, model_dir, sel):
         for n in sel:
             v[n, 2] += w[n]*model_dir

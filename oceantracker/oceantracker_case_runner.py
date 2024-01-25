@@ -7,7 +7,7 @@ from time import  perf_counter
 from oceantracker.util.messgage_logger import MessageLogger, GracefulError
 from oceantracker.util import profiling_util, get_versions_computer_info
 import numpy as np
-from oceantracker.util import time_util
+from oceantracker.util import time_util, numba_util
 from oceantracker.util import json_util
 from datetime import datetime
 from time import sleep
@@ -57,7 +57,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # setup class importer
         t0=perf_counter()
         si.class_importer = ClassImporter(path.dirname(__file__), msg_logger=si.msg_logger)
-        si.msg_logger.progress_marker('Scanned OceanTracker to build short class map to full names', start_time=t0)
+        si.msg_logger.progress_marker('Scanned OceanTracker to build short name map to full class_names', start_time=t0)
 
         # other useful shared values
         si.backtracking = si.settings['backtracking']
@@ -84,6 +84,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         if si.settings['debug']:
             # makes it easier to debug, particularly  in pycharm
+            import numba
+            #numba.core.config.FULL_TRACEBACKS = 1
+            #numba.core.config.BOUNDSCHECK = 1
             environ['NUMBA_BOUNDSCHECK'] = '1'
             environ['NUMBA_FULL_TRACEBACKS'] = '1'
 
@@ -222,6 +225,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # ------------------------------------------
         solver.solve()
         # ------------------------------------------
+        pass
+        if True:
+            from oceantracker.util.numba_util import find_all_numba_code
+            find_all_numba_code()
 
     def _do_run_integrity_checks(self):
         si=self.shared_info
@@ -490,6 +497,17 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         d['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
 
 
+        # check numba code for SIMD
+        if True:
+            d['numba_code_info'] = dict(signatures={},SMID_code = {})
+            for name, func in  numba_util.numba_func_info.items():
+                if hasattr(func,'signatures') : # only code that has been compiled has a sig
+                    sig = func.signatures
+                    d['numba_code_info']['signatures'][name] = sig
+                    d['numba_code_info']['SMID_code'][name] = []
+                    for nsig in range(len(sig)):
+                        d['numba_code_info']['SMID_code'][name].append(numba_util.find_simd_code(func, sig=nsig, limit=20, show=False))
+                    pass
         return d
 
     def close(self):

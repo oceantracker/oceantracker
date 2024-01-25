@@ -20,8 +20,9 @@ class DevNestedFields(ParameterBaseClass):
         # setup outer grid first
 
 
-        fgm_outer_grid = si.class_importer.new_make_class_instance_from_params('field_group',dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
-                                                             crumbs='adding outer hydro-grid field manager for nested grid run')
+        fgm_outer_grid = si.class_importer.new_make_class_instance_from_params(dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
+                                                                               'field_group_manager',
+                                                                                crumbs='adding outer hydro-grid field manager for nested grid run')
         fgm_outer_grid.initial_setup()
 
         # note es to check if all hidcasts have same required info
@@ -37,7 +38,7 @@ class DevNestedFields(ParameterBaseClass):
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}, name= "{name}"')
 
             t0= perf_counter()
-            i =  si.class_importer.new_make_class_instance_from_params(dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),'reader',name=name,
+            i =  si.class_importer.new_make_class_instance_from_params(dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),'field_group_manager',name=name,
                                                      crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
 
             i._setup_hydro_reader(params)

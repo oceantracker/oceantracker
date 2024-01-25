@@ -14,7 +14,7 @@ from time import sleep
 from signal import SIGINT
 
 
-@njit
+@njitOT
 def F1(x1,x2,out, sel, xmin):
     #
    for n in sel:
@@ -23,7 +23,7 @@ def F1(x1,x2,out, sel, xmin):
         else:
             out[n] = x2[n]
 
-@njit
+@njitOT
 def F1a(x1,out, sel, xmin):
     #
    for n in sel:
@@ -31,7 +31,7 @@ def F1a(x1,out, sel, xmin):
             out[n] = x1[n]
 
 
-@njit
+@njitOT
 def F2(x1,x2,out,sel, xmin):
    for n in sel:
         #out[n] = (x2[n] >= xmin)*x2[n] + (x2[n] < xmin)*x1[n]
@@ -39,10 +39,10 @@ def F2(x1,x2,out,sel, xmin):
         #out[n] = s * x2[n] + (not s) * x1[n]
         #out[n] = s * x2[n] + (1-s) * x1[n]
         out[n] = branchless_value_choice(x1[n],x2[n],x1[n] >= xmin)
-@njit()
+@njitOT()
 def branchless_value_choice(a,b,cond):
     return cond*a + (not cond) *b
-@njit
+@njitOT
 def F3(x1,x2,out,sel, xmin):
    for n in sel:
         out[n]= x1[n] if x1[n] >= xmin else x2[n]

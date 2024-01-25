@@ -23,7 +23,7 @@ def build_grid(grid):
                                                                        grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
     return  grid
 def triangles_have_node_of_another_grids_triangle_inside(x_grid,triangles, triangles_query,x_nodes_query ,bc_walk_tol =0.00):
-    @njit
+    @njitOT
     def _work(nis):
         bc = np.full((3,), -1, dtype=np.float64)
         for ntri in range(n_tri):
@@ -39,7 +39,7 @@ def triangles_have_node_of_another_grids_triangle_inside(x_grid,triangles, trian
                 if found: break
 
 def triangles_with_points_inside(x_grid, triangles, x_query,  bc_walk_tol=0.00):
-    @njit
+    @njitOT
     def _work(nis):
         bc = np.full((3,), -1, dtype=np.float64)
         for ntri in range(n_tri):
@@ -58,7 +58,7 @@ def triangles_with_points_inside(x_grid, triangles, x_query,  bc_walk_tol=0.00):
     return node_inside
 
 def find_points_inside_triangles(x_grid, triangles, x_query,  bc_walk_tol=0.00):
-    @njit
+    @njitOT
     def _work(nis):
         bc = np.full((3,), -1, dtype=np.float64)
         for ntri in range(n_tri):
@@ -76,7 +76,7 @@ def find_points_inside_triangles(x_grid, triangles, x_query,  bc_walk_tol=0.00):
 
     return are_inside
 
-@njit
+@njitOT
 def find_triangles_with_nodes(tri,nodes):
     out= np.full((tri.shape[0],), False)
     found=0

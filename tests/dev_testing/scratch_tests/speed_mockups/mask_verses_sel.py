@@ -18,7 +18,7 @@ def find_instr(func, keyword, sig=0, limit=5):
     if count == 0:
         print(func.__name__,'No instructions found')
 
-@njit
+@njitOT
 def F1(x1,x2,out, sel):
     #
    for n in sel:
@@ -27,7 +27,7 @@ def F1(x1,x2,out, sel):
 
 
 
-@njit
+@njitOT
 def F2(x1,x2,out,mask):
    for n in range(mask.size):
        if mask[n]:

@@ -9,6 +9,13 @@ from copy import deepcopy
 def find_file_format_and_file_list(reader_params, class_importer, msg_logger):
     found=False
     # first see if it matches known formats
+
+    if 'class_name' in reader_params:
+        reader = class_importer.new_make_class_instance_from_params(reader_params, 'reader', default_classID='reader', check_for_unknown_keys=False)
+        file_list = reader.get_file_list()
+        return reader_params, file_list
+
+    # search
     for r_name, r in known_readers.items():
         params= deepcopy(reader_params)
         params['class_name'] = r

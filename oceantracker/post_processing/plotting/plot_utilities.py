@@ -18,16 +18,21 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
                   show_grid=False, back_ground_color_map='Blues', title=None, text1=None, credit=None):
 
     # get grid bounds to fill a recgtangle
+    xbounds = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0])])
+    ybounds = np.asarray([np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
     bounds= [np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])]
-    dx,dy = bounds[1]- bounds[0], bounds[3]- bounds[2]
+    dx,dy = xbounds[1]- xbounds[0], ybounds[1]- ybounds[0]
     f= 0.05
-    bounds =np.asarray([ [bounds[0]-f*dx, bounds[1]+f*dx], [bounds[2]-f*dy,  bounds[3]+f*dy]]) # l
-    b = np.asarray([bounds[0,:], [bounds[1,0], bounds[0,1] ], bounds[1, :], [bounds[0,0],bounds[1,1] ], bounds[0,:] ] )
+    b = np.asarray([ [xbounds[0], ybounds[0]],
+                    [xbounds[1], ybounds[0]],
+                   [xbounds[1], ybounds[1]],
+                    [xbounds[0], ybounds[1]],
+                        [xbounds[0], ybounds[0]]] )
 
     # fill background land retangle
     ax.fill(b[:,0] , b[:, 1],  facecolor=color_palette['land'],  zorder=0)
 
-    if axis_lims is None: axis_lims= bounds.flatten().tolist()
+    if axis_lims is None: axis_lims=np.concatenate((xbounds, ybounds))
     ax.set_xlim(axis_lims[:2])
     ax.set_ylim(axis_lims[2:])
 
@@ -41,7 +46,7 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
                     facecolor=color_palette['land'], linewidth= 0.5, zorder= 3)
     ax.plot(grid['grid_outline']['domain']['points'][:, 0], grid['grid_outline']['domain']['points'][:, 1], c=color_palette['land_edge'], linewidth=0.5, zorder=3)
 
-    if  back_ground_depth:
+    if 'water_depth' in grid and back_ground_depth:
         plot_coloured_depth(grid, ax=ax,color_map= back_ground_color_map,zorder=1)
 
     if show_grid:
@@ -89,9 +94,12 @@ def plot_coloured_depth(grid, ax=plt.gca(), color_map=None, zorder=3):
     # find depth range inside axes to set max  and min depth
 
     # plot colored depth, but dilute deepest colour but setting vmax 20% larger, to set colormap limits based on nodes inside axies
-    sel =  np.logical_and(grid['x'][:,0] >= ax.get_xlim()[0],  grid['x'][:,0] <= ax.get_xlim()[1])
+    sel =  np.logical_and(grid['x'][:, 0] >= ax.get_xlim()[0],  grid['x'][:,0] <= ax.get_xlim()[1])
     sel = np.logical_and(sel, grid['x'][:, 1] >= ax.get_ylim()[0])
     sel = np.logical_and(sel, grid['x'][:, 1] <= ax.get_ylim()[1])
+
+    sel = np.logical_and(sel, grid['node_type']== 0) # only look at water nodes, as in regular grid some nodes are not used in triagle grod
+
     depth = grid['water_depth']
     vmax = np.nanmax(depth[sel])
 

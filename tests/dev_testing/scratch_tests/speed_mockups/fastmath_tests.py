@@ -1,15 +1,11 @@
 import os
-os.environ['NUMBA_ENABLE_AVX']= str(-1)
+os.environ['NUMBA_ENABLE_AVX']= str(1)
 os.environ['NUMBA_DEBUG_CACHE']=str(1)
 
 #os.environ['NUMBA_CPU_FEATURES'] = '-avx,-avx2,-sse'
 from numba import njit, vectorize,float64, bool_,guvectorize, boolean, jit
-
-import numba
-
 import numpy as np
 from timeit import timeit
-from time import perf_counter
 
 
 

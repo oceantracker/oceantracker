@@ -115,7 +115,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
     def info_to_write_at_end(self):pass  # nothing extra to write
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list, active):
 
         # zero out counts in the count time slices
@@ -206,7 +206,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
             nc.write_a_new_variable('sum_' + key, item[:], ('age_bin_dim', 'release_group_dim', 'polygon_dim'), description= 'sum of particle property inside bin  ' + key)
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list,
                                      active, age_bin_edges, age):
 

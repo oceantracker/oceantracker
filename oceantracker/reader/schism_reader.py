@@ -142,6 +142,7 @@ class SCHISMreaderNCDF(_BaseReader):
 
 
     def read_file_var_as_4D_nodal_values(self, nc, grid, var_name, file_index=None):
+        #todo add name to params!!
         # read variable into 4D ( time, node, depth, comp) format
         # assumes same variable order in the file
         data, data_dims = self.read_field_var(nc , var_name, sel=file_index)
@@ -255,6 +256,7 @@ def read_hgrid_file(file_name):
 
     # work out node types
     d['node_type'] = np.full((d['n_nodes'],), 0, dtype=np.int32)
+
     # open boundaries
     d['n_open_boundaries'] = int(lines[l0].split()[0])
 

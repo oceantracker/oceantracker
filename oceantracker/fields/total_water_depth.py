@@ -25,7 +25,7 @@ class TotalWaterDepth(CustomFieldBase):
                 self.data)
 
     @staticmethod
-    @njit
+    @njitOT
     def get_time_dependent_total_water_depth_from_tide_and_water_depth(tide, water_depth,
                                                                        min_total_water_depth, total_water_depth):
         # get total time dependent water depth as 4D field  from top and bottom cell of LSC grid zlevels
