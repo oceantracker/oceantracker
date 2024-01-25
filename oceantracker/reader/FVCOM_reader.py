@@ -125,7 +125,7 @@ class unstructured_FVCOM(_BaseReader):
 
         zlevel_buffer[buffer_index, ...] = grid['zlevel_fractions'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
 
-    def read_dry_cell_data(self, nc,grid, fields,  file_index,is_dry_cell_buffer,buffer_index):
+    def read_dry_cell_data(self, nc,grid, fields,  file_index, is_dry_cell_buffer,buffer_index):
         si = self.shared_info
         if nc.is_var('wet_cells'):
             wet_cells= nc.read_a_variable('wet_cells',sel=file_index)

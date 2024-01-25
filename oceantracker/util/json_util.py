@@ -3,7 +3,7 @@ import numpy as np
 import json
 from os import path
 from datetime import datetime,date, timedelta
-
+import numba.core.types
 
 def write_JSON(file_name,d, indent=4):
     # aviod changing given file name
@@ -100,14 +100,16 @@ class MyEncoder(json.JSONEncoder):
                 return str(obj)
             elif type(obj) == timedelta:
                 return str(obj)
+            elif isinstance(numba.core.types.npytypes.Array):
+                pass
 
             elif np.isnan(obj) or not np.isfinite(obj) :
                 return None
 
         except Exception as e:
-            print(str(e))
+            #print(str(e))
             print(' warning  basic_util- oceantracker catch JSON encode error- object type ' + str(type(obj)) + ' value=' + str(obj))
-            return 'BadValue'
+            return f'Bad json Value, not json decodable type {str(type(obj))}  values= {str(obj)}'
 
         # lastly check if json can decode it
         try:
