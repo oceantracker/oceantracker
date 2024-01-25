@@ -383,20 +383,19 @@ class GenericNCDFreader(_BaseReader):
         si = self.shared_info
 
         if self.params['grid_variable_map']['is_dry_cell'] is None:
-            if grid['zlevel'] is None:
+            if grid['zlevel'] is None and 'tide' in fields and 'water_depth' in fields:
+                # calc dry cell from min water depth
                 reader_util.set_dry_cell_flag_from_tide( grid['triangles'],
                                                         fields['tide'].data, fields['water_depth'].data,
                                                         si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
             else:
+                # from bottom zlevel
                 reader_util.set_dry_cell_flag_from_zlevel( grid['triangles'],
                                                           grid['zlevel'], grid['bottom_cell_index'],
                                                           si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
         else:
-            # get dry cells for each triangle allowing for splitting quad cells
-            data_added_to_buffer = nc.read_a_variable(self.params['grid_variable_map']['is_dry_cell'], file_index)
-            is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
-
-
+            # get dry cells from hydro file for each triangle allowing for splitting quad cells
+            self.read_dry_cell_data(self, nc, grid, fields, file_index, is_dry_cell_buffer, buffer_index)
 
     def read_zlevel_as_float32(self, nc,grid,fields, file_index, zlevel_buffer, buffer_index):
         # read in place

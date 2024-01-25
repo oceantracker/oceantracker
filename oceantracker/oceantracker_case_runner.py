@@ -503,7 +503,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             for name, func in  numba_util.numba_func_info.items():
                 if hasattr(func,'signatures') : # only code that has been compiled has a sig
                     sig = func.signatures
-                    d['numba_code_info']['signatures'][name] = sig
+                    d['numba_code_info']['signatures'][name] = str(sig)
                     d['numba_code_info']['SMID_code'][name] = []
                     for nsig in range(len(sig)):
                         d['numba_code_info']['SMID_code'][name].append(numba_util.find_simd_code(func, sig=nsig, limit=20, show=False))

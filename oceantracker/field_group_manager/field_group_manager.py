@@ -261,7 +261,13 @@ class FieldGroupManager(ParameterBaseClass):
         if si.is3D_run:
             # request load of water depth and tide fields which are required  in 3D
             reader.params['load_fields'] = list(set(['tide', 'water_depth'] + reader.params['load_fields']))
+        else:
+            # add tide and water depth if available which may be used in dry cell claculation
+            fm = reader.params['field_variable_map']
+            if nc.is_var(fm['tide']) and nc.is_var(fm['water_depth']):
+                reader.params['load_fields'] = list(set(['tide', 'water_depth'] + reader.params['load_fields']))
 
+        # add all reader
         for name in  reader.params['load_fields']:
             self.add_reader_field( name, nc)
 
@@ -344,11 +350,21 @@ class FieldGroupManager(ParameterBaseClass):
 
 
         # it not field map given then add a map based on name, so only works for scalars
-        if name not in reader.params['field_variable_map']:
+        fm = reader.params['field_variable_map']
+        if name not in fm:
             reader.params['field_variable_map'][name] = name
             si.msg_logger.msg(f'No field map given for variable named "{name}" in reader "load_fields" parameter, assuming hydro-files have variable with this name, which is a scalar variable',
-                         hint='if not a scalar, or need to use another name internally, then  then add a map to reader "field_variable_map parameter"', note=True )
+                         hint='if not a scalar, or need to use another name internally, then  then add a map to reader "field_variable_map parameter"',
+                         crumbs ='field_group_manager> adding reader fields',
+                              note=True )
 
+        # check if variables are in file
+        for file_var_name in fm[name] if type(fm[name]) == list else [fm[name]]:
+            if not nc.is_var(file_var_name):
+                si.msg_logger.msg(f'Cannot find field variable named "{file_var_name}" in hydro-file mapped to  field "{name}" ',
+                                hint=f'variable is not in file, currently variable map is = "{fm[name]}"',
+                                  fatal_error=True)
+        si.msg_logger.exit_if_prior_errors()
         # read data if not time varying
         if not i.is_time_varying():
             i.data[0, ...] = reader.assemble_field_components(nc, self.grid, name, i)
