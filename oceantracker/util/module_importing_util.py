@@ -11,14 +11,36 @@ from oceantracker.util.package_util import  scan_package_for_param_classes
 
 class ClassImporter(object):
     def __init__(self,package_root_dir, msg_logger=None):
-        self.class_maps = scan_package_for_param_classes(package_root_dir,msg_logger=msg_logger)
+
+        self.class_tree= scan_package_for_param_classes(package_root_dir)
         self.msg_logger =msg_logger
-        msg_logger.exit_if_prior_errors()
+
+        # build short and full name maps to oceantracker's parameter classes
+        self.short_name_class_map = {}
+        self.full_name_class_map = {}
+        for class_role, classes in self.class_tree.items():
+            for name, info in classes.items():
+
+                mod_str = info['mod_str']
+                short_name = class_role + '.' + name
+
+                if short_name in self.short_name_class_map:
+                    msg_logger.msg(f'short name of "{name}" of "{short_name}" is already found at "{self.short_name_class_map[short_name]["mod_str"]}", duplicate class names',
+                                   fatal_error= True, hint= 'class names must be unique in core OceanTracker code')
+                self.short_name_class_map[short_name] = info
+
+                if class_role in self.full_name_class_map:
+                    msg_logger.msg(f'full name of "{name}" is already found at "{self.short_to_full_name_map[mod_str]["mod_str"]}", duplicate class names',
+                                      fatal_error=True, hint= 'class names must be unique in core OceanTracker code'
+                                      )
+                self.full_name_class_map[mod_str] = info
+
+        msg_logger.exit_if_prior_errors('"class_name" errors')
 
     def get_class_obj(self,class_role, name, params, default_classID=None):
         ml = self.msg_logger
         if 'class_name' in params and params['class_name'] is not None:
-            cls_obj = self.get_class_from_name(class_role, name,params['class_name'])
+            cls_obj = self.get_class_obj_from_class_name(class_role, params['class_name'])
             if cls_obj is None:
                 # try direct import from full string
                 try:
@@ -30,9 +52,9 @@ class ClassImporter(object):
                     spell_check_util.spell_check(params["class_name"], list(self.class_maps['full_name_map'].keys()), ml,
                                         'checking known full class names',
                                         crumbs=f'checking class_name "{params["class_name"]}"')
-                    spell_check_util.spell_check(params["class_name"], list(self.class_maps['short_name_map'].keys()), ml,
+                    spell_check_util.spell_check(params["class_name"], list(self.short_name_class_map.keys()), ml,
                                         'checking known short class names',
-                                        crumbs=f'checking class_name "{params["class_name"]}"')
+                                                 crumbs=f'checking class_name "{params["class_name"]}"')
 
                     ml.msg(f'For "{class_role}" named "{name}", could not find class_name "{params["class_name"]}"',
                            fatal_error=True)
@@ -47,8 +69,8 @@ class ClassImporter(object):
         if cls_obj is not None:
             this_class_type = cls_obj.__module__.split('.')[1]
             if this_class_type != class_role:
-                ml.msg(f'Class "{name}" of type "{this_class_type}", got "{cls_obj}", expected subclass of "{class_role} ',
-                       hint ='Has wrong class type or name been used for this type?')
+                ml.msg(f'Class "{name}" of type "{this_class_type}", got "{cls_obj}", expected class with role "{class_role} ',
+                       hint ='Has wrong class type or name been used for this type, or typo in "class_name" param?',fatal_error=True)
 
             pass
 
@@ -57,9 +79,9 @@ class ClassImporter(object):
     def new_make_class_instance_from_params(self,params, class_role, name = None,  default_classID=None,
                                         crumbs='', merge_params=True, check_for_unknown_keys=True):
 
-        if class_role not in self.class_maps['tree']:
+        if class_role not in self.class_tree:
             self.msg_logger.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
-                                hint= f'possible values={self.class_maps["tree"].keys()}',
+                                hint= f'possible values={self.class_tree.keys()}',
                                 fatal_error=True, exit_now=True)
 
         if default_classID is None: default_classID = class_role
@@ -84,15 +106,15 @@ class ClassImporter(object):
         if cls_name is None:
             return None
         else:
-            return self.class_maps['full_name_map'][cls_name]['class_obj']
+            return self.full_name_class_map[cls_name]['class_obj']
 
-    def get_class_from_name(self,class_type, name, class_name):
+    def get_class_obj_from_class_name(self, class_type, class_name):
+        short_name = class_type + '.' + class_name
+        if class_name in self.full_name_class_map:
+            return  self.full_name_class_map[class_name]['class_obj']
 
-        if class_name in self.class_maps['full_name_map']:
-            return self.class_maps['full_name_map'][class_name]['class_obj']
-
-        elif class_type +'.' + class_name in self.class_maps['short_name_map']:
-            return self.class_maps['short_name_map'][class_type +'.' + class_name]['class_obj']
+        elif short_name in self.short_name_class_map:
+            return self.short_name_class_map[short_name]['class_obj']
         else:
             return None
 

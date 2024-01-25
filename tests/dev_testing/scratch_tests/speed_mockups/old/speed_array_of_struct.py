@@ -3,7 +3,7 @@ import numpy as np
 from timeit import timeit
 from matplotlib import  pyplot as plt
 
-@njit()
+@njitOT()
 def kernal(a,b):
     out =0.
     for m in range(a.shape[0]):
@@ -12,13 +12,13 @@ def kernal(a,b):
     return  out
 
 
-@njit()
+@njitOT()
 def F_base(A,B,out,sel, work):
     for n in sel:
         for w in range(work):
             out[n] = kernal(A[n, ...],B[n, ...])
 
-@njit(parallel=True, nogil=True)
+@njitOT(parallel=True, nogil=True)
 def FS(S,out, sel, work):
     for nn in prange(sel.size):
         n= sel[nn]

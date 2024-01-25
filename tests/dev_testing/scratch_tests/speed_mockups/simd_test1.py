@@ -8,7 +8,7 @@ import numpy as np
 from timeit import timeit
 from matplotlib import pyplot as plt
 
-@njit
+@njitOT
 def sqdiff(x, y):
     out = np.empty_like(x)
     for i in range(x.shape[0]):
@@ -30,25 +30,25 @@ def find_instr(func, sig=0, limit=5):
         print(func.__name__,'No instructions found')
 
 
-@njit
+@njitOT
 def F1(x1,x2,out):
     for n in range(x1.shape[0]):
         out[n] = x1[n]**2 + x2[n]**2
 
 
-@njit
+@njitOT
 def F2(x1,x2,out,mask):
  for n in range(x1.size):
      if mask[n]:
          out[n] = x1[n] ** 2 + x2[n] ** 2
 
 
-@njit
+@njitOT
 def F3(x1,x2,out, sel):
     for n in sel:
         out[n] = x1[n]**2+ x2[n]**2
 
-@njit
+@njitOT
 def F4(x1,x2,out, sel):
     for nn in range(sel.size):
         n = sel[nn]

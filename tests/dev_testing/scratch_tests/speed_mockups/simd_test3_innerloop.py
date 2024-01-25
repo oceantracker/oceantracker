@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 from oceantracker.util.numba_util import find_simd_code, time_numba_code
 
 
-@njit
+@njitOT
 def F_base(x1,x2,out, sel):
     # base case, only given indicies
     for n in sel:
@@ -19,7 +19,7 @@ def F_base(x1,x2,out, sel):
         for m in range(x1.shape[1]):
             out[n] += x1[n, m]*x2[n,m]
 
-@njit
+@njitOT
 def F1(x1,x2,out,mask):
     # masked all
  for n in range(x1.shape[0]):
@@ -29,7 +29,7 @@ def F1(x1,x2,out,mask):
             out[n] += x1[n, m]*x2[n,m]
 
 
-@njit
+@njitOT
 def F2(x1,x2,out, sel):
     # split index
      for n in sel:
@@ -37,13 +37,13 @@ def F2(x1,x2,out, sel):
         for m in range(x1.shape[1]):
             out[n] += x1[n][m]*x2[n][m]
 
-@njit
+@njitOT
 def F5(x1,x2,out, sel):
     # 1D kernal
      for n in sel:
         out[n] = F5s(x1[n,:], x2[n,:])
 
-@njit()
+@njitOT()
 def F5s(x1,x2):
     out = 0.
     for m in range(x1.shape[0]):

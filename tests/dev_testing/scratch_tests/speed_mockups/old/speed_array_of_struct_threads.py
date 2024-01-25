@@ -3,7 +3,7 @@ import numpy as np
 from timeit import timeit
 from matplotlib import  pyplot as plt
 
-@njit()
+@njitOT()
 def kernal(a,b):
     out =0.
     for m in range(a.shape[0]):

@@ -41,7 +41,7 @@ class VerticalGradient(CustomFieldBase):
             _calc_field_vert_grad_from_zlevels(fields[self.params['name_of_field']].data,grid['zlevel'],
                                     grid['bottom_cell_index'], si.z0, fields[self.info['name']].data)
 
-@njit
+@njitOT
 def _calc_field_vert_grad_from_zlevels(field4D,zlevel,bottom_cell_index,z0,gradient_field):
 
     for nt in range(field4D.shape[0]):
@@ -57,7 +57,7 @@ def _calc_field_vert_grad_from_zlevels(field4D,zlevel,bottom_cell_index,z0,gradi
                 # top cell, assume gradient same as cell below
                 gradient_field[nt, node, -1, :] = gradient_field[nt, node, -2, :]
 
-@njit
+@njitOT
 def _calc_field_vert_grad_from_sigma_levels(field4D,sigma, tide, water_depth,bottom_cell_index,z0,gradient_field):
 
     for nt in range(field4D.shape[0]):

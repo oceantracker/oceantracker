@@ -26,7 +26,7 @@ search_outside_domain= int(cell_search_status_flags['outside_domain'])
 search_failed= int(cell_search_status_flags['failed'])
 
 #below is called by another numba function which will work out signature on first call
-@njit
+@njitOT
 def _get_single_BC_cord_numba(x, BCtransform, bc):
     # get BC cord of x for one triangle from DT transform matrix inverse, see scipy.spatial.Delaunay
     # also return index the smallest BC for walk and largest
@@ -36,8 +36,8 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
     # do (2x2) matrix multiplication of  bc[:2]=BCtransform[:2,:2]*(x-transform[:,2]
     # for i in range(2): bc[i] = 0.
     for i in range(2):
-        # for j in range(2):
-        #  bc[i] +=  BCtransform[i,j]*(x[j]-BCtransform[2,j])
+        #for j in range(2):
+        #    bc[i] +=  BCtransform[i,j]*(x[j]-BCtransform[2,j])
         # replace loop with faster explicit adds, as no need to zero bc[:] above
         bc[i] = BCtransform[i, 0] * (x[0] - BCtransform[2, 0]) + BCtransform[i, 1] * (x[1] - BCtransform[2, 1])
 
@@ -46,7 +46,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
     return np.argmin(bc), np.argmax(bc)
 
 # ________ Barycentric triangle walk________
-@njit
+@njitOT
 def BCwalk(xq, tri_walk_AOS, dry_cell_index,
                 n_cell, cell_search_status,bc_cords,
                 walk_counts,
@@ -62,7 +62,7 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
     for nn in prange(active.size):
         n= active[nn]
 
-        if cell_search_status[n] != search_ok : continue # if already outside domain, bad or blocked, wil be fixed in solver
+        if cell_search_status[n] != search_ok : continue # if already outside domain or bad, bad or blocked, wil be fixed in solver
 
         if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
             # if any is nan copy all and move on
@@ -123,18 +123,18 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
         walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
 
 
-@njit
+@njitOT
 def _move_back(x, x_old):
     for i in range(x.shape[0]): x[i] = x_old[i]
 
-@njit
+@njitOT
 def calc_BC_cords_numba(x, n_cells, BCtransform, bc):
     # get BC cords of set of points x inside given cells and return in bc
 
     for n in range(x.shape[0]):
         _get_single_BC_cord_numba(x[n, :], BCtransform[n_cells[n], :, :], bc[n, :])
 
-@njit
+@njitOT
 def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tri_per_node, BCtransform, bc_walk_tol):
     # get BC cords of set of points x inside given cells and return in bc
     bc = np.zeros((3,), dtype=np.float64)  # working space
@@ -152,7 +152,7 @@ def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tr
                 continue
     return n_cell
 
-@njit
+@njitOT
 def get_BC_transform_matrix(points, simplices):
     # pre-build barycectric tranforms for 2D triangles based in scipy spatial qhull as used by scipy.Delauny
 
@@ -203,14 +203,14 @@ def get_BC_transform_matrix(points, simplices):
 
     return Tinvs
 
-#@njit
+#@njitOT
 #def _eval_water_depth_kernel(water_depth, bc_cords,nodes):
  #   z_bot = 0.
  #   for m in range(3):
  #       z_bot -= bc_cords[m] * water_depth[nodes[m]]
  #   return z_bot
 
-@njit
+@njitOT
 def get_depth_cell_sigma_layers(xq,
                                 triangles, water_depth, tide, minimum_total_water_depth,
                                 sigma, sigma_map_nz,sigma_map_dz,
@@ -244,21 +244,25 @@ def get_depth_cell_sigma_layers(xq,
         # clip z into range
         zq = min(max(zq, z_bot), z_top)
 
-        twd = max(z_top - z_bot, minimum_total_water_depth)
-        zf = (zq - z_bot) / twd
+        twd = max(abs(z_top - z_bot), minimum_total_water_depth)
+        zf = max(0., min(abs(zq - z_bot) / twd, 0.9999)) #  with rounding keep, it just below surface, and at or above bottom
 
         # get  nz from evenly space sigma map, but zf always < 1, due to above
-        ns = int(zf * sigma_map_nz.size) # find fraction of length of map
-        ns = min(ns, sigma_map_nz.size - 1)  # put just below the surface to force into top depth bin
+        ns = int(zf * (sigma_map_nz.size-1)) # find fraction of length of map index
 
         # get approx nz from map
         nz = sigma_map_nz[ns]
+        if nz > sigma.size - 2:
+            print('nz bounds error 1 >>>>',zf, nz,ns, nz,sigma.size,sigma,sigma_map_nz.size, sigma_map_nz)
 
         # sigma_map_nz rounds down, so correct if zf is above sigma[nz+1]  by adding 1, as nz  is 1 above approx nz
         nz += zf > sigma[nz+1]  # faster branch-less add one
 
+        if nz > sigma.size - 2:
+            print('nz bounds error 2 >>>>',zf, zf > sigma[nz-1],int(zf > sigma[nz-1]),  ns, nz,sigma.size,sigma,sigma_map_nz.size, sigma_map_nz)
+
         # get fraction within the sigma layer
-        z_fraction[n] = (zf - sigma[nz])/(sigma[nz+1]- sigma[nz])
+        z_fraction[n] = (zf - sigma[nz])/(sigma[nz+1] - sigma[nz])
 
         # make any already on bottom active, may be flagged on bottom if found on bottom, below
         if status[n] == status_on_bottom:
@@ -285,7 +289,7 @@ def get_depth_cell_sigma_layers(xq,
 
     pass
 
-@njit
+@njitOT
 def _eval_z_at_nz_cell(tf, nz_cell, zlevel1, zlevel2, nodes, nz_bottom_nodes, nz_top_cell, BCcord):
     # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
     z = 0.
@@ -296,7 +300,7 @@ def _eval_z_at_nz_cell(tf, nz_cell, zlevel1, zlevel2, nodes, nz_bottom_nodes, nz
 
 
 
-@njit
+@njitOT
 def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                                   triangles, zlevel, bottom_cell_index,
                                                   n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,

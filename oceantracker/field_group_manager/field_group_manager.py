@@ -264,8 +264,12 @@ class FieldGroupManager(ParameterBaseClass):
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
         # setup compulsory fields, plus others required
-
-        reader.params['load_fields'] = list(set(['tide','water_depth', 'water_velocity'] + reader.params['load_fields']))
+        reader.params['load_fields'] = list(set(['water_velocity'] + reader.params['load_fields']))
+        if si.is3D_run:
+            # water depth and tide required in 3D
+            if 'water_depth' not in reader.params['load_fields'] or 'tide' not in reader.params['load_fields']:
+                si.msg_logger.msg('For 3D run water depth and tide must be loaded from hydro-model files', fatal_error=True, hint='Use reader load_fields param')
+            reader.params['load_fields'] = list(set(['tide', 'water_depth'] + reader.params['load_fields']))
 
         for name in  reader.params['load_fields']:
             self.add_reader_field( name, nc)
@@ -409,7 +413,9 @@ class FieldGroupManager(ParameterBaseClass):
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
-        nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
+
+        if 'water_depth' in self.fields:
+            nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
         nc.close()
 
         output_files['grid_outline'] = output_files['output_file_base'] + '_' + key + '_outline.json'

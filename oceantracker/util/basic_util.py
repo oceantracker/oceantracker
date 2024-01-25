@@ -6,7 +6,8 @@ import platform
 from psutil import  cpu_count, cpu_freq
 
 
-from numba import  njit
+from numba import njit
+from oceantracker.util.numba_util import njitOT
 
 class OceanTrackerDummyClass(object): pass
 
@@ -61,7 +62,7 @@ def atLeast_Nby1(y):
 
 
 
-@njit
+@njitOT
 def testNumbaRangeChecking():
     x= np.full((10,1),0.)
     x[x.shape[0]] = 1. # out of bounds test

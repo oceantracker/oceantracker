@@ -286,8 +286,12 @@ params.append (s56)
 
 # schsim 3D, dont resupend lateral boundary test
 s57 = deepcopy(s50)
+s57.update(dict(use_A_Z_profile=True,use_random_seed= False))
 s57.update({'output_file_base' : 'demo57_SCHISM_3D_lateralBoundaryTest'})
-s57['dispersion'].update({'A_H':10})
+s57['dispersion'].update({'A_H':10,'A_V': 10})
+s57['velocity_modifiers']= {'terminal_velocity':
+                                {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': .000}
+                            }
 s57['release_groups']={
                 'P1':{'points': [[1599750, 5485600, -1]], 'pulse_size': 20, 'release_interval': 3600}
                              }

@@ -2,6 +2,7 @@ from oceantracker.particle_concentrations._base_user_triangle_properties import 
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.util.numba_util import njitOT
 from numba import njit
+from oceantracker.util.numba_util import njitOT
 import numpy as np
 
 class  ParticleConcentrations2D(_BaseTriangleProperties):
@@ -71,7 +72,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
             self.info['time_last_stats_recorded'] = time_sec
 
     @staticmethod
-    @njit
+    @njitOT
     def calcuate_concentration2D(n_cell, tide, water_depth, age, triangle_area,particle_count, particle_concentration,
                                  load_concentration, initial_particle_load,load_decay_time_scale,
                                  sel_to_count):

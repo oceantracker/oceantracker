@@ -8,7 +8,7 @@ import numpy as np
 from timeit import timeit
 from matplotlib import pyplot as plt
 
-@njit
+@njitOT
 def sqdiff(x, y):
     out = np.empty_like(x)
     for i in range(x.shape[0]):
@@ -29,13 +29,13 @@ def find_instr(func, sig=0, limit=2):
     if count == 0:
         print(func.__name__,'No instructions found')
 
-@njit
+@njitOT
 def F1(x1,x2,out):
     for n in range(x1.shape[0]):
         for m in range(x1.shape[1]):
             out[n, m] = x1[n, m]**2+ x2[n,m]**2
 
-@njit
+@njitOT
 def F2(x1,x2,out,mask):
  for n in range(x1.shape[0]):
      if mask[n]:
@@ -43,27 +43,27 @@ def F2(x1,x2,out,mask):
             out[n, m] = x1[n, m]**2+ x2[n,m]**2
 
 
-@njit
+@njitOT
 def F3(x1,x2,out, sel):
     for n in sel:
         for m in range(x1.shape[1]):
             out[n, m] = x1[n, m]**2+ x2[n,m]**2
 
-@njit
+@njitOT
 def F4(x1,x2,out, mask):
     # run on transpose
      for m in range(x1.shape[0]):
          F4s(x1[m,:],x2[m,:],out[m,:],mask)
-@njit
+@njitOT
 def F4s(x1,x2,out,mask):
       for n in range(x1.shape[0]):
                 if mask[n]:
                     out[n] = x1[n]**2+ x2[n]**2
-@njit
+@njitOT
 def F5(x1,x2,out, mask):
      for m in range(x1.shape[1]):
          F5s(x1[:, m],x2[:, m],out[:, m],mask)
-@njit
+@njitOT
 def F5s(x1,x2,out,mask):
       for n in range(x1.shape[0]):
                 if mask[n]:

@@ -15,7 +15,7 @@ from signal import SIGINT
 
 
 
-@njit
+@njitOT
 def F1(x1,x2,out, sel, xmin):
     #
    for n in sel:
@@ -26,7 +26,7 @@ def F1(x1,x2,out, sel, xmin):
 
 
 
-@njit
+@njitOT
 def F2(x1,x2,out,sel, xmin):
    for n in sel:
         out[n] = x2[n]/max(x1[n], xmin)

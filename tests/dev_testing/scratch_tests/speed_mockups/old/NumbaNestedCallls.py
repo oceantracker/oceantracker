@@ -3,39 +3,39 @@ import  numpy as np
 from time import perf_counter
 
 para= False
-@njit(parallel=para)
+@njitOT(parallel=para)
 def F1a(a, b,c, out):
     # work on nth row view
     for m in prange(a.shape[0]):
         for i in range(a.shape[1]):
             out[m,i] = a[ m,i] + b[m,i]*c[i,m]
 
-@njit()
+@njitOT()
 def F1b(a,b,c, out,n):
     for m in range(a.shape[1]):
         for i in range(a.shape[2]):
             out[n, m,i] = a[n, m,i] + b[n, m,i]*c[n,i,m]
 
-@njit()
+@njitOT()
 def F1c(n,m,a,b,c, out):
     for i in range(a.shape[2]):
         out[n,m,i] = a[n,m,i] + b[n,m,i]*c[n,i,m]
     #out[n, m] = F1(a[n, m],b[n, m])
 
-@njit()
+@njitOT()
 def F2a(a,b,c, out):
     for n in range(a.shape[0]):
         F1a(a[n, :], b[n, :], c[n, :], out[n, :])
-@njit()
+@njitOT()
 def F2b(a,b,c, out):
     for n in range(a.shape[0]):
         F1b(a, b,c, out,n)
-@njit()
+@njitOT()
 def F2c(a,b,c, out):
     for n in range(a.shape[0]):
         for m in range(a.shape[1]):
                F1c(n,m,a,b,c, out)
-@njit()
+@njitOT()
 def F2d(a,b,c,out):
     for n in range(a.shape[0]):
         for m in range(a.shape[1]):

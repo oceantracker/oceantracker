@@ -58,7 +58,6 @@ class unstructured_FVCOM(_BaseReader):
 
 
 
-
     def set_up_uniform_sigma(self, nc, grid):
 
         # add time invariant vertical grid variables needed for transformations

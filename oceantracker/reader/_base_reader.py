@@ -12,11 +12,8 @@ from oceantracker.reader.util.reader_util import append_split_cell_data
 import oceantracker.reader.util.hydromodel_grid_transforms as hydromodel_grid_transforms
 
 from oceantracker.util import cord_transforms
-from oceantracker.reader.util import shared_reader_memory_util
-from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util import triangle_utilities_code
-from oceantracker.util.triangle_utilities_code import split_quad_cells
-from oceantracker.fields._base_field import CustomFieldBase, ReaderField
+
 from oceantracker.reader.util import reader_util
 from pathlib import Path as pathlib_Path
 from oceantracker.common_info_default_param_dict_templates import node_types
@@ -61,16 +58,26 @@ class _BaseReader(ParameterBaseClass):
 
     def read_grid_coords(self, nc, grid):   nopass()
 
+    def read_water_depth(self, nc, grid):   nopass()
+
     def read_triangles_as_int32(self, nc, grid):     nopass()
 
 
-    def get_field_params(self,nc, name):   nopass()
+    # work out if field varible is ti depennt, 3D or a vector
+    def get_field_params(self,nc, name):
+        # returns    dict(time_varying= True/False,
+        #                         is3D=True/False,
+        #                         is_vector= True/False,
+        #                         )
+        nopass()
 
 
 
     def read_zlevel_as_float32(self, nc, grid,fields, file_index, zlevel_buffer, buffer_index):   nopass()
 
-    def read_dry_cell_data(self, nc,grid,fields,  file_index, is_dry_cell_buffer, buffer_index):   nopass()
+    def read_dry_cell_data(self, nc,grid,fields,  file_index, is_dry_cell_buffer, buffer_index):
+        # read dry cell as =1 wet = 0
+        nopass()
 
     def set_up_uniform_sigma(self,nc, grid):nopass()
 
@@ -153,6 +160,14 @@ class _BaseReader(ParameterBaseClass):
         grid = self.build_hori_grid(nc, grid)
         grid = self.construct_grid_variables(grid)
         is3D_hydro = self.is_hindcast3D(nc)
+
+        if si.settings['display_grid_at start']:
+            from oceantracker.post_processing.plotting.plot_utilities import  display_grid
+            display_grid(grid,1)
+
+            pass
+
+
         if is3D_hydro:
             grid = self.build_vertical_grid(nc, grid)
 
@@ -247,9 +262,9 @@ class _BaseReader(ParameterBaseClass):
             msg_logger.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']), fatal_error=True, exit_now=True)
 
 
-        t = np.concatenate((fi['time_start'], fi['time_end']))
-        fi['first_time'] = np.min(t)
-        fi['last_time'] = np.max(t)
+        t = np.stack((fi['time_start'], fi['time_end']), axis=1)
+        fi['first_time'] = np.min(t[:,0])
+        fi['last_time'] = np.max(t[:,1])
         fi['duration'] = fi['last_time'] - fi['first_time']
         fi['hydro_model_time_step'] = fi['duration'] / (fi['n_time_steps_in_hindcast']-1)
 
@@ -259,18 +274,20 @@ class _BaseReader(ParameterBaseClass):
         fi['first_date'] = time_util.seconds_to_datetime64(fi['first_time'])
         fi['last_date'] = time_util.seconds_to_datetime64(fi['last_time'])
         fi['hydro_model_timedelta'] = time_util.seconds_to_pretty_duration_string(fi['hydro_model_time_step'])
-
-
+        fi['start_end_times'] = t
+        fi['start_end_dates'] = time_util.seconds_to_datetime64(t)
 
         # check for large time gaps between files
         # check if time diff between starts of file and end of last are larger than average time step
         if len(fi['time_start']) > 1:
             dt_gaps = fi['time_start'][1:] - fi['time_end'][:-1]
-            sel = np.abs(dt_gaps) > 2.5 * fi['hydro_model_time_step']
+            sel = np.abs(dt_gaps) > 3. * fi['hydro_model_time_step']
+
             if np.any(sel):
                 msg_logger.msg('Some time gaps between hydro-model files is are > 2.5 times average time step, check hindcast files are all present??', hint='check hindcast files are all present and times in files consistent', warning=True)
                 for n in np.flatnonzero(sel):
-                    msg_logger.msg(' large time gaps between file ' + fi['names'][n] + ' and ' + fi['names'][n + 1], tabs=1)
+                    msg_logger.msg(' large time gaps between file ' + fi['names'][n] + ' and ' + fi['names'][n + 1], tabs=1, warning=True,
+                                   hint =f' first {1} ')
 
         msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
         return fi
@@ -283,7 +300,9 @@ class _BaseReader(ParameterBaseClass):
         # read nodal x's
 
         grid = self.read_grid_coords(nc, grid)
+        #grid = self.read_water_depth(nc, grid) # needed in 3D
         grid = self.read_triangles_as_int32(nc, grid)
+
 
         return grid
 
@@ -315,8 +334,13 @@ class _BaseReader(ParameterBaseClass):
 
         msg_logger.progress_marker('built domain and island outlines', start_time=t0)
 
-        # make island and domain nodes
-        grid['node_type'] = np.zeros(grid['x'].shape[0], dtype=np.int8)
+        # make island and domain nodes, not in regular grid some nodes may be unsed so mark as land
+        grid['node_type'] = np.full(grid['x'].shape[0],  node_types['land'],dtype=np.int8) # mark all as land
+
+        # now mark all active nodes, those in a triangle,  as inside model
+        grid['node_type'][np.unique(grid['triangles'])] = node_types['interior']
+
+        # now mark boundary nodes
         for c in grid['grid_outline']['islands']:
             grid['node_type'][c['nodes']] = node_types['island_boundary']
 
@@ -349,6 +373,10 @@ class _BaseReader(ParameterBaseClass):
         # reader working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
 
+        # make nodal version of water depth for faster interpolation in vertical cell search
+        #grid['water_depth_at_nodes'] = np.full((grid['x'].shape[0],3), 0, dtype=np.float32)
+        for n  in range(3):
+            pass
         return grid
 
     def build_vertical_grid(self, nc, grid):
@@ -377,8 +405,6 @@ class _BaseReader(ParameterBaseClass):
     def _make_sigma_depth_cell_search_map(self,nc, grid):
         grid = self.set_up_uniform_sigma(nc, grid)
 
-
-
         # build lookup map
         # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
         # the smalest sigms later thickness is at the bottom
@@ -396,7 +422,7 @@ class _BaseReader(ParameterBaseClass):
         grid['sigma_map_nz_interval_with_sigma'] = grid['sigma_map_nz_interval_with_sigma'].cumsum()
         return grid
 
-    # @function_profiler(__name__)
+    #@function_profiler(__name__)
     def fill_time_buffer(self,fields, grid, time_sec):
         # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
         # fill buffer starting at hindcast time step nt0_buffer

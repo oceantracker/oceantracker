@@ -5,7 +5,7 @@ from oceantracker.util.numba_util import njitOT
 status_frozen = int(particle_info['status_flags']['frozen'])
 status_dead = int(particle_info['status_flags']['dead'])
 
-@njit
+@njitOT
 def _status_counts_and_kill_old_particles(age, status, IDrelease_group,max_age_for_each_release_group,status_counts,num_in_buffer):
     # fast way to kill off old particles, bactracking?
     for m in range(status_counts.size): status_counts[m] = 0

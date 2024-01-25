@@ -1,7 +1,7 @@
 debug: true
 dispersion:
   A_H: 10
-  A_V: 0.001
+  A_V: 10
 event_loggers:
   inoutpoly:
     class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
@@ -60,3 +60,9 @@ release_groups:
     release_interval: 3600
 root_output_dir: output
 time_step: 120
+use_A_Z_profile: true
+use_random_seed: false
+velocity_modifiers:
+  terminal_velocity:
+    class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
+    value: 0.0

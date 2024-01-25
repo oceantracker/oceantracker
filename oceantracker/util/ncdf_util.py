@@ -194,3 +194,4 @@ class NetCDFhandler(object):
         self.file_handle.close()
         self.file_handle = None  # parallel pool cant pickle nc so void
 
+pass

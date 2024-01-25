@@ -151,7 +151,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, count, count_all_particles, prop_list, sum_prop_list, sel):
         # for time based heatmaps zero counts for one time slice
         count[:]=0
@@ -260,7 +260,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, count, count_all_particles, prop_list, sum_prop_list,
                                     age_bin_edges, age, active):
 

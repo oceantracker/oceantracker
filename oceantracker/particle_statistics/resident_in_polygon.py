@@ -122,7 +122,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         nc.write_a_new_variable('release_times', self.release_group_to_count.info['release_info']['release_times'],['pulse_dim'], dtype=np.float64,attributes={'times_pulses_released': ' times in seconds since 1970'})
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(in_polgon,
                                     release_group_ID, pulse_ID, required_release_group,zrange, x, count,
                                     count_all_particles, prop_list, sum_prop_list, active):

@@ -21,14 +21,14 @@ def find_instr(func, keyword, sig=0, limit=5):
 
 
 
-@njit
+@njitOT
 def sqdiff(x, y):
     out = np.empty_like(x)
     for i in range(x.shape[0]):
         out[i] = (x[i] - y[i])**2
     return out
 
-@njit
+@njitOT
 def F1a(x,y,out,mask):
     out = np.empty_like(x)
     for i in range(x.shape[0]):
@@ -36,7 +36,7 @@ def F1a(x,y,out,mask):
             out[i] = x[i] - y[i]
 
 
-@njit
+@njitOT
 def F1(x,y,out, mask):
     for n in range(x.shape[0]):
         if mask[n]:
@@ -45,7 +45,7 @@ def F1(x,y,out, mask):
 
 
 
-@njit
+@njitOT
 def F3(x,y,out,sel):
     for n in sel:
         for m in range(x.shape[1]):

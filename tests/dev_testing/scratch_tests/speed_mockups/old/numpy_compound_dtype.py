@@ -2,7 +2,7 @@ import numpy as np
 from time import perf_counter
 from numba import njit
 
-@njit()
+@njitOT()
 def M1a(A,sel):
     s=0.
     for n in sel:
@@ -11,7 +11,7 @@ def M1a(A,sel):
                 s += A['x'][n, m ,l] + A['y'][n, m ,l]+ A['z'][n, m ,l]
     return  s/A['x'].size
 
-@njit()
+@njitOT()
 def M1b(A,sel):
     s=0.
     for n in sel:
@@ -20,7 +20,7 @@ def M1b(A,sel):
                 s += A['x'][n,  m ,l] + A['y'][n, m ,l]+ A['z'][n, m ,l]
     return  s/A['x'].size
 
-@njit()
+@njitOT()
 def M2(x,y, z, sel):
     s=0.
     for n in sel:
@@ -29,7 +29,7 @@ def M2(x,y, z, sel):
                 s += x[n,m,l] + y[n,m,l] + z[n,m,l]
     return  s/x.size/3.
 
-@njit()
+@njitOT()
 def M3(x, sel):
     s=0.
     for n in sel:

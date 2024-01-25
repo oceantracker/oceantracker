@@ -4,7 +4,7 @@ package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
 
-code_version = '0.4.1.201 2024-01-20'
+code_version = '0.4.1.202 2024-01-20'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 
@@ -20,6 +20,7 @@ shared_settings_defaults ={
                 'backtracking':        PVC(False, bool, doc_str='Run model backwards in time'),
                'regrid_z_to_uniform_sigma_levels': PVC(True, bool, doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),
                # 'debug_level':               PVC(0, int,min=0, max=10, doc_str='Gives  diferent levels of debug, in development'),
+                'display_grid_at start' : PVC(False, bool, doc_str='Pause during strat up to plot the grid for checking using matplotlib, clicking om image will print a coord'),
                 'dev_debug_plots': PVC(False, bool, doc_str='show any debug plot generated at give dbug_level, not for general use'),
                 'debug': PVC(False, bool, doc_str= 'more info on errors'),
                 'dev_debug_opt': PVC(0, int,doc_str= 'does extra checks given by integer, not for general use'),
@@ -147,7 +148,7 @@ large_float=1.0E32
 
 
 # node types for hydro model
-node_types= dict(interior = 0,island_boundary = 1, domain_boundary= 2, open_boundary=3)
+node_types= dict(interior = 0,island_boundary = 1, domain_boundary= 2, open_boundary=3, land = 4)
 
 # TODO LIST
 # todo for version 0.41
