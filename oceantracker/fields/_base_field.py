@@ -57,9 +57,9 @@ class CustomFieldBase(ReaderField):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params
 
-
-    def update(self,fields,grid, active): basic_util.nopass('User fields must have update method')
+    def update(self,fields,grid, buffer_index=None): basic_util.nopass(' Custom User fields must have update method')
     # if buffer index None, this  allows update of non-time varying use fields
+
 
 
 

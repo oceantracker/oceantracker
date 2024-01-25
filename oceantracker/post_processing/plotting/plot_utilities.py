@@ -211,7 +211,7 @@ def show_output(plot_file_name=None, ):
     plt.show()
     plt.close()  # prevents over plotting
 
-def animation_output(anim, movie_file, fps = 15, dpi=300,show=True):
+def animation_output(anim, movie_file, fps = 15, dpi=600,show=True):
 
     if show :    plt.show()
     if movie_file is not None:

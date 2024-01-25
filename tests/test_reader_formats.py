@@ -140,7 +140,7 @@ def get_case(n):
             output_file_base= 'ROMS'
             title = 'ROMS test'
         case 400:
-            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\Glorys\Ross_sea2D'
+
             x0 =  [
                 #[-73.48272505246274, -173.7097571108972],
                    [-70., -130],
@@ -168,12 +168,13 @@ def get_case(n):
             file_mask  =  'RossSea*.nc'
             output_file_base= 'GLORYS'
             title = 'GLORYS test'
-            reader = 'oceantracker.reader.dev.dev_GLORYS_reader.GLORYSreaderSurface'
+            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\Glorys\Antartica'
+            reader = 'oceantracker.reader.dev.dev_ross_sea_GLORYS_reader.GLORYSreaderSurface'
             is3D = False
             show_grid = False
             water_depth_file = r'F:\Hindcasts\Hindcast_samples_tests\Glorys\Ross_sea2D\static.nc'
             open_boundary_type = 1
-            max_days = 90
+            max_days = 60
             time_step = 3600.
             pulse_size = 5
 
