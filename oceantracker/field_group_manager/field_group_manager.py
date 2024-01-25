@@ -57,15 +57,8 @@ class FieldGroupManager(ParameterBaseClass):
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['class_dicts']['fields'].items():
-            i = si.class_importer.new_make_class_instance_from_params(params,'fields', name=name,  crumbs=f'Adding "fields" from user params for field "{name}"')
-            i.initial_setup()
-            # if not time varying can update once at start from other non-time varying fields
-            if not i.is_time_varying(): i.update()
-            if name in self.fields:
-                si.msg_logger.msg(f'Custom field "{name}" is already a defined field ', hint='Use another unique name?', fatal_error= True, exit_now=True)
-            self.fields[name] = i
+            self.add_custom_field(name, params, crumbs=f'adding custom field {name}')
         pass
-
 
     def add_part_prop_from_fields_plus_book_keeping(self):
         si = self.shared_info
@@ -263,18 +256,14 @@ class FieldGroupManager(ParameterBaseClass):
 
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
 
-        # setup compulsory fields, plus others required
+        # setup request to load compulsory fields
         reader.params['load_fields'] = list(set(['water_velocity'] + reader.params['load_fields']))
         if si.is3D_run:
-            # water depth and tide required in 3D
-            if 'water_depth' not in reader.params['load_fields'] or 'tide' not in reader.params['load_fields']:
-                si.msg_logger.msg('For 3D run water depth and tide must be loaded from hydro-model files', fatal_error=True, hint='Use reader load_fields param')
+            # request load of water depth and tide fields which are required  in 3D
             reader.params['load_fields'] = list(set(['tide', 'water_depth'] + reader.params['load_fields']))
 
         for name in  reader.params['load_fields']:
             self.add_reader_field( name, nc)
-
-
 
         nc.close()
 

@@ -12,7 +12,7 @@ class RandomWalk(_BaseTrajectoryModifer):
     def __init__(self):
         # set up default params
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'A_H': PVC(1.0,float,min=0.), 'A_V': PVC(0.001,float,min=0.),
+        self.add_default_params({'A_H': PVC(0.1,float,min=0.), 'A_V': PVC(0.01,float,min=0.),
                                    } )
 
     def check_requirements(self):
