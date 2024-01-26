@@ -460,7 +460,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     input_dir = 'F:\\Hindcasts\\Hindcast_samples_tests\\LaurinGermany'
-    output_dir = 'F:\\OceanTrackerOuput\\Laurin'
+    output_dir = 'F:\\OceanTrackerOtuput\\Laurin'
 
     x0 = [
         [502096, 5968781, -2],

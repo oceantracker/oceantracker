@@ -69,9 +69,10 @@ class FieldGroupManager(ParameterBaseClass):
         # add part prop for reader and custom fields
         for name, i in self.fields.items():
             if i.params['create_particle_property_with_same_name']:
-                pgm.add_particle_property(name, 'from_fields', dict(write=i.params['write_interp_particle_prop_to_tracks_file'],
-                                                                    vector_dim = i.get_number_components(),
-                                                                    time_varying=True, dtype=np.float32, initial_value=0.))
+                pgm.add_particle_property(name, 'from_fields', dict(
+                                            write=i.params['write_interp_particle_prop_to_tracks_file'],
+                                            vector_dim = i.get_number_components(),
+                                            time_varying=True, dtype=np.float64, initial_value=0.))
 
 
     def update_reader(self, time_sec):
@@ -267,7 +268,7 @@ class FieldGroupManager(ParameterBaseClass):
             if nc.is_var(fm['tide']) and nc.is_var(fm['water_depth']):
                 reader.params['load_fields'] = list(set(['tide', 'water_depth'] + reader.params['load_fields']))
 
-        # add all reader
+        # add file fields all reader
         for name in  reader.params['load_fields']:
             self.add_reader_field( name, nc)
 

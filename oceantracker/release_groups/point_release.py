@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import time_util
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC, ParameterCoordsChecker as PCC
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 from oceantracker.common_info_default_param_dict_templates import large_float
@@ -15,7 +15,7 @@ class PointRelease(ParameterBaseClass):
         # set up info/attributes
         super().__init__()
         self.add_default_params({
-                                 'points':          PVC([],'array', is_required=True, doc_str='A N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array'),
+                                 'points':          PCC(None,is_required=True, doc_str='A N by 2 or 3 list or numpy array of locations where particles are released. eg for 2D [[25,10],[23,2],....] '),
                                  'release_radius':  PVC(0., float, min= 0., doc_str= 'Particles are released from random locations in circle of given radius around each point.'),
                                  'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles released in a single pulse, this number is released every release_interval.'),
                                  'release_interval':PVC(0., float, min =0.,units='sec', doc_str= 'Time interval between released pulses. To release at only one time use release_interval=0.'),

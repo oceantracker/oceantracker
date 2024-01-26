@@ -35,7 +35,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',  
 
         if key not in params: params[key] = None  # add default key to params if not present
 
-        if type(item) == ParamValueChecker:
+        if type(item) in [ParamValueChecker, ParameterCoordsChecker]:
             params[key] = CheckParameterValues(key, item, params[key], crumbs, msg_logger)
 
         elif type(item) == ParameterListChecker:
@@ -73,15 +73,21 @@ def  CheckParameterValues(key,value_checker, user_param, crumbs, msg_logger):
             value = value_checker.get_default()
     else:
         # check the user given
-        value = value_checker.check_value(crumb_trail, user_param, msg_logger)
+        try:
+            value = value_checker.check_value(crumb_trail, user_param, msg_logger)
+        except Exception as e:
+            msg_logger.msg('unexpected error',key,crumbs)
+            raise(e)
+
 
     return value
 
 class ParamValueChecker(object):
-    def __init__(self, default_value, dtype, is_required=False, list_contains_type=None,
-                 min=None, max=None,units=None,  possible_values=None,
+    #todo change dtype to a list of possible types, and if not a list make a list
+
+    def __init__(self, default_value, required_type, is_required=False,
+                 min=None, max=None, units=None, possible_values=None,
                  doc_str=None,
-                 class_doc_feature=None,
                  obsolete = None):
 
         # todo add crumb trail param
@@ -91,17 +97,15 @@ class ParamValueChecker(object):
 
         i = dict(default_value=default_value,
                  doc_str=doc_str,
-                 class_doc_feature=class_doc_feature,
-                 type=dtype,
+                 type=required_type,
                  min=min,
                  max=max,
                  units=units,
                  possible_values=possible_values,
                  is_required=is_required,
-                 list_contains_type=list_contains_type,
                  obsolete = obsolete)
 
-        if dtype == bool: i['possible_values'] = [True, False]  # set possible values for boolean
+        if required_type == bool: i['possible_values'] = [True, False]  # set possible values for boolean
 
         self.info = i
 
@@ -180,6 +184,73 @@ class ParamValueChecker(object):
 
         return value  # value may be None if default or given value is None
 
+class ParameterCoordsChecker(object):
+    # checks input cords or array is a set of N by 2 or 3 values
+    def __init__(self,default_value, dtype=np.float64, is3D=False, single_cord=False, doc_str=None,
+                  is_required=False, units='meters or , degrees if long_lat codes detected'):
+        self.info={}
+        info = self.info
+        info['default_value'] = default_value
+        info['dtype']= dtype
+        info['is3D'] = is3D
+        info['single_cord'] = single_cord
+        info['is_required'] = is_required
+        info['units'] = units
+
+    def get_default(self):
+        return self.info['default_value']
+
+    def check_value(self, crumbs, value, msg_logger):
+        # check given value against defaults  in class instance info
+        info = self.info
+        crumbs= crumbs + '> coordinate checker'
+        # a position, eg release location, needs to be a numpy array
+
+        if type(value) not in [list, np.ndarray]:
+            msg_logger.msg(f' expected param of type list or numppy array got type {type(value)}', fatal_error=True, crumbs= crumbs)
+            return None
+
+        if type(value) == list:
+            try:
+                # attemp array conversion
+                value = np.asarray(value)
+
+            except Exception as e:
+                msg_logger.msg(f'Coordinate vector must be a rectangular list convertible to a numpy array ',
+                               hint = f'got values {str(value)}', crumbs = crumbs, fatal_error=True)
+                return  None
+        # now have an array
+        if not np.issubdtype(value.dtype, np.integer) and not np.issubdtype(value.dtype, np.float):
+            msg_logger.msg(f'Coordinates must only contain floats ot ints, got type "{str(value.dtype)}" ',
+                           hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
+            return None
+
+        # make int float
+        if np.issubdtype(value.dtype, np.integer):     value= value.astype(np.float64)
+
+        # now have double array, so check shape
+        if info['single_cord']:
+            # only expecting 2 or 3 cord values
+            if value.dim > 1 or value.shape[0] <2 or  value.shape[0] > 3 :
+                msg_logger.msg(f'expecting coordinates with only 2 or 3 values',
+                               hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
+                return None
+            else:
+                return value
+
+        # now expect an N by 2 03 3 array
+        if value.ndim == 1:
+                msg_logger.msg(f'expecting N by 2 or 3 array, eg. [[2.4,4.5],[6.2,7.8],[6.6,9.]]',
+                        hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
+                return None
+
+        if value.shape[1] < 2 or value.shape[1] > 3:
+            msg_logger.msg(f'Expected and  vector N by 2 or 3 list or numpy array"{crumbs}" must be a list of coordinate pairs or triples, eg [[ 34., 56.]], ',
+                   hint =f'got size "{str(value.shape)}"', fatal_error=True)
+            return None
+
+        return value
+
 class ParameterListChecker(object):
     # checks parameter list values
     # if default_list is None then list wil be None if user_list is not given
@@ -188,6 +259,7 @@ class ParameterListChecker(object):
                   fixed_len =None, min_length=None, max_length=None, doc_str=None, make_list_unique=None, obsolete = None,
                  possible_values=None, units=None,
                  ):
+        if default_list is None: default_list =[]
 
         self.info= dict(locals()) # get keyword args as dict
         self.info.pop('self') # dont want self param
@@ -254,6 +326,7 @@ class ParameterListChecker(object):
                     #todo add possible values checks
 
         return complete_list
+
 
 # old versions
 

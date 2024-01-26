@@ -2,7 +2,7 @@ import numpy as np
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 
-from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC
+from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 
@@ -14,12 +14,12 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         super().__init__()
         # set up info/attributes
         self.add_default_params({
-                                 'grid_size':           PLC([100, 99],[int], fixed_len=2),
-                                 'release_group_centered_grids': PVC(False, bool),
-                                 'grid_center':         PLC([], [float, int], fixed_len=2),
-                                 'grid_span': PLC([], [float, int], fixed_len=2),
-                                 'role_output_file_tag' :    PVC('stats_gridded_time',str),
-                                 })
+                 'grid_size':           PLC([100, 99],[int], fixed_len=2),
+                 'release_group_centered_grids': PVC(False, bool),
+                 'grid_center':         PCC(None,single_cord=True),
+                 'grid_span': PLC([], [float, int], fixed_len=2),
+                 'role_output_file_tag' :    PVC('stats_gridded_time',str),
+                    })
         self.grid = {}
 
     def check_requirements(self):
@@ -63,7 +63,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         # if not given choose grid center/bounds based on extent of the grid
 
-        if len(params['grid_center'])==0:
+        if params['grid_center'] is None:
             params['grid_center']= np.array([np.mean(xlims[:2]), np.mean(xlims[2:])])
 
         # get grid span as (2,) array

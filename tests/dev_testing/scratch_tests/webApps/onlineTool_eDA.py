@@ -255,7 +255,7 @@ if __name__ == '__main__':
     #emit_method = OTreRunner.no_emit
 
     #test_root_output_dir = None
-    test_root_output_dir=   'F:/OceanTrackerOuput/Bio_toolBox/Northland2021'
+    test_root_output_dir=   'F:/OceanTrackerOtuput/Bio_toolBox/Northland2021'
 
     engines=[]
 

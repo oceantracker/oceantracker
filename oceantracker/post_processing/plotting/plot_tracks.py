@@ -37,7 +37,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
                       polygon_list_to_plot = None, min_status=0,
                       back_ground_depth=True, back_ground_color_map = None, credit=None, heading= None,
                       size_using_data= None,  part_color_map=None,
-                      vmin=None, vmax=None,
+                      vmin=None, vmax=None, aspect_ratio=None,
                       release_group=None, show_dry_cells = False, show=True):
     def draw_frame(nt):
         if show_dry_cells:
@@ -50,9 +50,13 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
         sc.set_offsets(x)
         sc.set_array(colour_using_data[nt, :].astype(np.float64))
         sc.set_zorder(5)
+        # force release points on top
+        for rp in release_pts:
+            rp.set_zorder(9)
+
         if size_using_data is not None: sc.set_sizes(scaled_marker_size[nt, :])
         time_text.set_text(time_util.seconds_to_pretty_str(track_data['time'][nt], seconds=False))
-        return  sc,time_text, dry_cell_plot
+        return  (sc,time_text, dry_cell_plot) + tuple(release_pts)
 
     if max_duration is  None:
         num_frames = track_data['time'].shape[0]
@@ -60,8 +64,12 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
         num_frames = min(int( track_data['time'].shape[0]*max_duration /abs(track_data['time'][-1]-track_data['time'][0]) ),track_data['time'].shape[0])
 
     fig = plt.gcf()
-
     ax = plt.gca()
+    if aspect_ratio is not None:
+        ax.set_aspect(aspect_ratio)
+        fig.set_size_inches(3, 6)
+        plt.axis('scaled')
+
     plot_utilities.draw_base_map(track_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
                   back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
@@ -93,7 +101,13 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
         sc = ax.scatter(track_data['x'][nt, :, 0], track_data['x'][nt, :, 1], c=colour_using_data[nt, :], vmin=0,
                         vmax=len(status_list), s=s0, edgecolors=None, cmap=cmap, zorder=5)
 
-    plot_utilities.plot_release_points_and_polygons(track_data, ax= ax, release_group=release_group)
+    release_points_obj = plot_utilities.plot_release_points_and_polygons(track_data, ax=ax, release_group=release_group)
+    release_pts= []
+    for rp in release_points_obj:
+        for rpi in rp:
+           release_pts.append((rpi))
+    release_pts=tuple(release_pts)
+
     plot_utilities.draw_polygon_list(polygon_list_to_plot, ax=ax)
 
     if size_using_data is not None:

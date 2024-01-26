@@ -18,7 +18,7 @@ if __name__ == '__main__':
     root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\Auckland_uni_hauarki\new_converted_to_old_ format'
 
 
-    root_output_dir= 'F:\\OceanTrackerOuput\\Auckland_uni_hauarki'
+    root_output_dir= 'F:\\OceanTrackerOtuput\\Auckland_uni_hauarki'
     output_file_base='test_old_format'
 
     x0 =[[1780846.7742,       5938985.617],

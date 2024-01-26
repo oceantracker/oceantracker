@@ -5,7 +5,7 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as font_manager
 from oceantracker.common_info_default_param_dict_templates import node_types
 from oceantracker.util.triangle_utilities_code import convert_face_to_nodal_values
-
+from time import perf_counter
 from oceantracker.post_processing.read_output_files import load_output_files
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
@@ -136,14 +136,16 @@ def plot_release_points_and_polygons(d, release_group=None, ax = plt.gca(), colo
 
     else:
         sel= [release_group]
-
+    objs=[]
     for name in sel:
         rg = d['release_locations'][name]
         p = rg['points'][:,:2]
         if rg['is_polygon']:
-            ax.plot(p[:, 0], p[:, 1], '-', color=color,zorder=8, linewidth=1)
+            o = ax.plot(p[:, 0], p[:, 1], '-', color=color,zorder=8, linewidth=1)
         else:
-            ax.plot(p[:, 0], p[:, 1], '.', color=color, markersize=10,zorder=14)
+            o = ax.plot(p[:, 0], p[:, 1], '.', color=color, markersize=14,zorder=9)
+        objs.append(o)
+    return objs
 
 def draw_polygon_list(polylist, ax=plt.gca(), color =[.2, .8, .2]):
     if polylist is not None:
@@ -215,6 +217,7 @@ def animation_output(anim, movie_file, fps = 15, dpi=600,show=True):
 
     if show :    plt.show()
     if movie_file is not None:
+        t0 = perf_counter()
         print('Building movie:  ' + movie_file)
         try:
             FFMpegWriter = animation.writers['ffmpeg']
@@ -229,4 +232,5 @@ def animation_output(anim, movie_file, fps = 15, dpi=600,show=True):
         anim.save(movie_file, writer=writer, dpi=dpi)
 
         plt.close() # prevents over plotting
+        print(f'finished writing file, time={(perf_counter()-t0)/60} minutes')
 

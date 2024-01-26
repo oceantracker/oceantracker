@@ -20,7 +20,7 @@ def get_params(datasource=1):
         output_file_base= 'Sounds'
         input_dir =  r'G:\Hindcasts_large\MalbroughSounds_10year_benPhD'
         file_mask  = 'schism_marl200801*.nc'
-        root_output_dir = 'F:\\OceanTrackerOuput\\OceanTrackerProfiling'
+        root_output_dir = 'F:\\OceanTrackerOtuput\\OceanTrackerProfiling'
 
     elif datasource==2:
         output_file_base= 'Sounds'
