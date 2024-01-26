@@ -19,7 +19,7 @@ if __name__ == '__main__':
         case 1:
 
             root_input_dir= r'F:\Hindcasts\Hindcast_samples_tests\WHOI_calvin\schism_old_format'
-            root_output_dir= 'F:\\OceanTrackerOuput\\WHOI\\schism'
+            root_output_dir= 'F:\\OceanTrackerOtuput\\WHOI\\schism'
             output_file_base='WHOIschism'
             file_mask = 'sc*.nc'
             x0 =[[1780846.7742,       5938985.617],

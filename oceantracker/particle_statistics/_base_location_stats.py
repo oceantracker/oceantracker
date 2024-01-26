@@ -85,7 +85,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 si.msg_logger.msg('On the fly statistical Binning of vector particle property  "' + name + '" not yet implemented', warning=True)
 
             elif part_prop[name].get_dtype() != np.float64:
-                si.msg_logger.msg(f'On the fly statistics can currently only track float64 particle properties, ignoring property  "{name}", of type "{str(part_prop[name].get_dtype())}"',
+                si.msg_logger.msg(f'On the fly statistics can currently only track np.float64 particle properties, ignoring property  "{name}", of type "{str(part_prop[name].get_dtype())}"',
                                   warning=True)
             else:
                 names.append(name)

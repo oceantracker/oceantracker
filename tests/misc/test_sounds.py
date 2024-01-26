@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
 
     params={'output_file_base': 'soundstest',
-            'root_output_dir': 'F:\\OceanTrackerOuput\\Sounds\\test',
+            'root_output_dir': 'F:\\OceanTrackerOtuput\\Sounds\\test',
             'max_run_duration': 5*24*3600.,
             'write_tracks': True,
             'reader': {'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',

@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser.add_argument('-norun', action='store_true')
     args = parser.parse_args()
     root_input_dir=r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022'
-    root_output_dir= 'F:\\OceanTrackerOuput\\OceanNum\\test'
+    root_output_dir= 'F:\\OceanTrackerOtuput\\OceanNum\\test'
     output_file_base='NZnational'
 
     x0 =[[1780846.7742,       5938985.617],

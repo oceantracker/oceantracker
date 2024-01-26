@@ -1,4 +1,4 @@
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.util.profiling_util import available_profile_types
 package_fancy_name= 'OceanTracker'
 import numpy as np
@@ -117,8 +117,7 @@ class_dicts_list=[ # class dicts which replace lists
 
 default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
                 'name': PVC(None, str),
-                'points': PVC([], 'array', list_contains_type=float, is_required=True,
-                 doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
+                'points': PCC( None,is_required=True, doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
                                }
 
 particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search_failed': -19,

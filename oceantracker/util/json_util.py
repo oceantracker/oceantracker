@@ -109,7 +109,7 @@ class MyEncoder(json.JSONEncoder):
         except Exception as e:
             #print(str(e))
             print(' warning  basic_util- oceantracker catch JSON encode error- object type ' + str(type(obj)) + ' value=' + str(obj))
-            return f'Bad json Value, not json decodable type {str(type(obj))}  values= {str(obj)}'
+            return f'Bad json value, not json decodable type {str(type(obj))}  values= {str(obj)}'
 
         # lastly check if json can decode it
         try:

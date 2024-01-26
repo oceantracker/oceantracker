@@ -13,7 +13,7 @@ match ncase:
                                 hgrid_file_name= path.join(hindcast_dir,'hgrid.gr3'),
                                 #file_mask= 'schout_29.nc'
                                 )
-        params['root_output_dir'] = r'F:\OceanTrackerOuput\bug_hunting'
+        params['root_output_dir'] = r'F:\OceanTrackerOtuput\bug_hunting'
         params['output_file_base'] += '_remy_bluff'
         del params['release_groups']['clay']['custom_release']
         params['resuspension']['critical_friction_velocity'] = params['resuspension']['critical_friction_velocity'][0]
