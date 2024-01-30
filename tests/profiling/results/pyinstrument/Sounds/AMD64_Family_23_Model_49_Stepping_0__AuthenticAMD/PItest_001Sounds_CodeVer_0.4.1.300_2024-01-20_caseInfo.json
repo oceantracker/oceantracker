@@ -38,10 +38,10 @@
             "nz_cell": null,
             "z_fraction": null,
             "z_fraction_water_velocity": null,
-            "tide": null,
             "water_velocity": null,
-            "water_temperature": null,
             "water_depth": null,
+            "water_temperature": null,
+            "tide": null,
             "A_Z_profile": null,
             "A_Z_profile_vertical_gradient": null,
             "friction_velocity": null,
@@ -77,19 +77,19 @@
     },
     "caseID": 0,
     "block_timings": [
-        "  89.8% Time stepping : calls 1729, 0 days 0 hrs 10 min 59 sec",
-        "  32.3% Fill reader buffers : calls 1730, 0 days 0 hrs 3 min 57 sec",
-        "  15.4% Update particle properties : calls 3459, 0 days 0 hrs 1 min 53 sec",
-        "  10.9% Find cell, vertical walk : calls 17291, 0 days 0 hrs 1 min 20 sec",
-        "   7.1% Find cell, horizontal walk : calls 17291, 0 days 0 hrs 0 min 52 sec",
+        "  89.2% Time stepping : calls 1729, 0 days 0 hrs 11 min 3 sec",
+        "  31.9% Fill reader buffers : calls   13, 0 days 0 hrs 3 min 57 sec",
+        "  15.5% Update particle properties : calls 3459, 0 days 0 hrs 1 min 55 sec",
+        "  10.7% Find cell, vertical walk : calls 17291, 0 days 0 hrs 1 min 20 sec",
+        "   7.0% Find cell, horizontal walk : calls 17291, 0 days 0 hrs 0 min 52 sec",
         "   0.9% Update statistics : calls 1730, 0 days 0 hrs 0 min 7 sec",
         "   0.8% Update event loggers : calls 1730, 0 days 0 hrs 0 min 6 sec",
-        "   0.5% Initial cell guess : calls  356, 0 days 0 hrs 0 min 4 sec",
+        "   0.5% Initial cell guess : calls  358, 0 days 0 hrs 0 min 4 sec",
         "   0.0% Update concentrations : calls 1730, 0 days 0 hrs 0 min 0 sec",
-        "--- Total time 0 days 0 hrs 12 min 14 sec"
+        "--- Total time 0 days 0 hrs 12 min 23 sec"
     ],
     "version_info": {
-        "version": "0.4.1.202 2024-01-20",
+        "version": "0.4.1.300 2024-01-20",
         "git_revision": "0403e05b4fc4361de4ea7c54152ce0dd14325cb8",
         "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]",
         "python_major_version": 3,
@@ -105,20 +105,20 @@
         "CPUs_logical": 64,
         "Freq_Mhz": 3.693
     },
-    "file_written": "2024-01-29T08:47:55.196530",
+    "file_written": "2024-01-29T17:08:54.386177",
     "run_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2024-01-29T08:36:34.319126",
+        "model_run_started": "2024-01-29T16:57:29.576614",
         "date_of_time_zero": [
             "1970-01-01T00:00:00"
         ],
         "backtracking": false,
-        "started": "2024-01-29 08:35:40.629559",
-        "ended": "2024-01-29 08:47:55.134453",
-        "duration": "0:12:14.504894",
-        "elapsed_time_sec": 734.4930758000119,
+        "started": "2024-01-29 16:56:31.190812",
+        "ended": "2024-01-29 17:08:54.325191",
+        "duration": "0:12:23.134379",
+        "elapsed_time_sec": 743.117556000012,
         "number_particles_released": 507500,
         "is_lon_lat": false,
         "model_start_time": 1199147400.0,
@@ -134,9 +134,9 @@
         "current_model_time_step": 1728,
         "current_model_time": 1199666100.0,
         "model_run_duration": 518700.0,
-        "computation_started": "2024-01-29T08:36:34.319126",
-        "computation_ended": "2024-01-29T08:47:55.134453",
-        "computation_duration": "0:11:20.815327"
+        "computation_started": "2024-01-29T16:57:29.576614",
+        "computation_ended": "2024-01-29T17:08:54.325191",
+        "computation_duration": "0:11:24.748577"
     },
     "hindcast_info": {
         "time_spent_updating": 0.0,
@@ -1354,10 +1354,10 @@
                 "input_dir": "G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD",
                 "file_mask": "schism_marl200801*.nc",
                 "load_fields": [
-                    "tide",
                     "water_velocity",
+                    "water_depth",
                     "water_temperature",
-                    "water_depth"
+                    "tide"
                 ],
                 "class_name": "oceantracker.reader.schism_reader.SCHISMreaderNCDF",
                 "user_note": null,
@@ -1715,10 +1715,10 @@
                 "input_dir": "G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD",
                 "file_mask": "schism_marl200801*.nc",
                 "load_fields": [
-                    "tide",
                     "water_velocity",
+                    "water_depth",
                     "water_temperature",
-                    "water_depth"
+                    "tide"
                 ],
                 "class_name": "oceantracker.reader.schism_reader.SCHISMreaderNCDF",
                 "user_note": null,
@@ -2324,10 +2324,10 @@
                 "nz_cell": null,
                 "z_fraction": null,
                 "z_fraction_water_velocity": null,
-                "tide": null,
                 "water_velocity": null,
-                "water_temperature": null,
                 "water_depth": null,
+                "water_temperature": null,
+                "tide": null,
                 "A_Z_profile": null,
                 "A_Z_profile_vertical_gradient": null,
                 "friction_velocity": null,
@@ -7271,18 +7271,6 @@
                     500000
                 ]
             },
-            "tide": {
-                "time_spent_updating": 0.0,
-                "update_calls": 0,
-                "time_first_update_call": 0.0,
-                "name": "tide",
-                "class_role": "particle_properties",
-                "type": "from_fields",
-                "instanceID": 19,
-                "array_size": [
-                    500000
-                ]
-            },
             "water_velocity": {
                 "time_spent_updating": 0.0,
                 "update_calls": 0,
@@ -7290,10 +7278,22 @@
                 "name": "water_velocity",
                 "class_role": "particle_properties",
                 "type": "from_fields",
-                "instanceID": 20,
+                "instanceID": 19,
                 "array_size": [
                     500000,
                     3
+                ]
+            },
+            "water_depth": {
+                "time_spent_updating": 0.0,
+                "update_calls": 0,
+                "time_first_update_call": 0.0,
+                "name": "water_depth",
+                "class_role": "particle_properties",
+                "type": "from_fields",
+                "instanceID": 20,
+                "array_size": [
+                    500000
                 ]
             },
             "water_temperature": {
@@ -7308,11 +7308,11 @@
                     500000
                 ]
             },
-            "water_depth": {
+            "tide": {
                 "time_spent_updating": 0.0,
                 "update_calls": 0,
                 "time_first_update_call": 0.0,
-                "name": "water_depth",
+                "name": "tide",
                 "class_role": "particle_properties",
                 "type": "from_fields",
                 "instanceID": 22,
@@ -7434,9 +7434,9 @@
         "trajectory_modifiers": {},
         "particle_statistics": {
             "statas1": {
-                "time_spent_updating": 5.821826799947303,
+                "time_spent_updating": 9.595189299900085,
                 "update_calls": 98,
-                "time_first_update_call": 2.43833849998191,
+                "time_first_update_call": 4.3479644999606535,
                 "output_file": "Sounds_stats_gridded_age_statas1.nc",
                 "name": "statas1",
                 "class_role": "particle_statistics",
@@ -7459,9 +7459,9 @@
                 ]
             },
             "statas2": {
-                "time_spent_updating": 7.574135299830232,
+                "time_spent_updating": 4.327963200514205,
                 "update_calls": 98,
-                "time_first_update_call": 3.5023978000390343,
+                "time_first_update_call": 1.8799787000752985,
                 "output_file": "Sounds_stats_polygon_age_statas2.nc",
                 "name": "statas2",
                 "class_role": "particle_statistics",
@@ -7489,22 +7489,22 @@
         "nested_readers": {},
         "event_loggers": {
             "event1": {
-                "time_spent_updating": 11.73087549972115,
+                "time_spent_updating": 11.824642695719376,
                 "update_calls": 3460,
-                "time_first_update_call": 0.649564899969846,
+                "time_first_update_call": 0.6597596000647172,
                 "name": "event1",
                 "class_role": "event_loggers",
                 "type": "user",
                 "instanceID": 0,
                 "prop_to_write": [
-                    "age",
-                    "IDrelease_group",
-                    "IDpulse",
-                    "user_release_groupID",
-                    "event_polygon",
                     "ID",
+                    "age",
                     "x",
-                    "status"
+                    "event_polygon",
+                    "status",
+                    "IDrelease_group",
+                    "user_release_groupID",
+                    "IDpulse"
                 ],
                 "output_file": "Sounds_inside_polygon_events_event1.nc"
             }
@@ -8697,9 +8697,9 @@
             "open_boundary_type": 0
         },
         "resuspension": {
-            "time_spent_updating": 6.042462498531677,
+            "time_spent_updating": 6.519265999086201,
             "update_calls": 1730,
-            "time_first_update_call": 5.316186500014737,
+            "time_first_update_call": 5.797417799942195,
             "name": null,
             "class_role": "resuspension",
             "resuspension_factor": 3.3023260726609305,
@@ -8752,8 +8752,8 @@
             "oceantracker.dispersion.random_walk._add_random_walk_velocity_modifier_AZ_profile": "[]",
             "oceantracker.dispersion.random_walk_varyingAz._add_random_walk_velocity_modifier": "[(array(float64, 1d, C), array(float64, 1d, C), array(float64, 1d, C), float64, array(int32, 1d, C), array(float64, 2d, C))]",
             "oceantracker.event_loggers._base_event_loggers._find_particles_where_event_has_started_or_ended_numba": "[(array(bool, 1d, C), array(bool, 1d, C), array(int32, 1d, C), array(int32, 1d, C))]",
-            "oceantracker.particle_properties.util.particle_operations_util.set_value": "[(array(float64, 2d, C), float64, array(int32, 1d, C)), (array(int8, 1d, C), float64, array(int32, 1d, C)), (array(float64, 1d, C), float64, array(int32, 1d, C)), (array(int32, 1d, C), float64, array(int32, 1d, C)), (array(float32, 1d, C), float64, array(int32, 1d, C)), (array(int32, 1d, C), int64, array(int32, 1d, C)), (array(bool, 1d, C), bool, array(int32, 1d, C)), (array(int16, 1d, C), float64, array(int32, 1d, C)), (array(int8, 1d, C), int64, array(int32, 1d, C)), (array(int16, 1d, C), int64, array(int32, 1d, C))]",
-            "oceantracker.particle_properties.util.particle_operations_util.set_values": "[(array(float64, 2d, C), array(float64, 2d, C), array(int32, 1d, C), omitted(default=1.0)), (array(int32, 1d, C), array(int32, 1d, C), array(int32, 1d, C), omitted(default=1.0)), (array(int8, 1d, C), array(int8, 1d, C), array(int32, 1d, C), omitted(default=1.0)), (array(float64, 1d, C), array(float64, 1d, C), array(int32, 1d, C), omitted(default=1.0))]",
+            "oceantracker.particle_properties.util.particle_operations_util.set_value": "[(array(float64, 2d, C), float64, array(int32, 1d, C)), (array(int8, 1d, C), float64, array(int32, 1d, C)), (array(float64, 1d, C), float64, array(int32, 1d, C)), (array(int32, 1d, C), float64, array(int32, 1d, C)), (array(float32, 2d, C), float64, array(int32, 1d, C)), (array(float32, 1d, C), float64, array(int32, 1d, C)), (array(int32, 1d, C), int64, array(int32, 1d, C)), (array(bool, 1d, C), bool, array(int32, 1d, C)), (array(int16, 1d, C), float64, array(int32, 1d, C)), (array(int8, 1d, C), int64, array(int32, 1d, C)), (array(int16, 1d, C), int64, array(int32, 1d, C))]",
+            "oceantracker.particle_properties.util.particle_operations_util.set_values": "[(array(float64, 2d, C), array(float64, 2d, C), array(int32, 1d, C), omitted(default=1.0)), (array(int32, 1d, C), array(int32, 1d, C), array(int32, 1d, C), omitted(default=1.0)), (array(float32, 2d, C), array(float64, 2d, C), array(int32, 1d, C), omitted(default=1.0)), (array(int8, 1d, C), array(int8, 1d, C), array(int32, 1d, C), omitted(default=1.0)), (array(float64, 1d, C), array(float64, 1d, C), array(int32, 1d, C), omitted(default=1.0))]",
             "oceantracker.particle_properties.util.particle_operations_util.add_value_to": "[]",
             "oceantracker.particle_properties.util.particle_operations_util.add_values_to": "[]",
             "oceantracker.particle_properties.util.particle_operations_util.copy": "[(array(int16, 1d, C), array(int32, 1d, C), array(int32, 1d, C), omitted(default=1.0)), (array(float64, 2d, C), array(float64, 2d, C), array(int32, 1d, C), omitted(default=1.0)), (array(int32, 1d, C), array(int32, 1d, C), array(int32, 1d, C), omitted(default=1.0)), (array(float64, 2d, C), array(float64, 2d, C), array(int32, 1d, C), float64)]",
@@ -8769,18 +8769,19 @@
             "oceantracker.fields.friction_velocity.calc_friction_velocity_from_bottom_stress": "[]",
             "oceantracker.fields.total_water_depth.get_time_dependent_total_water_depth_from_tide_and_water_depth": "[]",
             "oceantracker.interpolator.util.triangle_interpolator_util._get_single_BC_cord_numba": "[(array(float64, 1d, A), array(float64, 2d, A), array(float64, 1d, C)), (array(float64, 1d, C), array(float64, 2d, A), array(float64, 1d, C)), (array(float64, 1d, C), nestedarray(float64, (3, 2)), array(float64, 1d, C))]",
-            "oceantracker.interpolator.util.triangle_interpolator_util.BCwalk": "[(array(float64, 2d, C), unaligned array(Record(bc_transform[type=nestedarray(float64, (3, 2));offset=0],adjacency[type=nestedarray(int32, (3,));offset=48];60;False), 1d, C), array(uint8, 1d, C), array(int32, 1d, C), array(int8, 1d, C), array(float64, 2d, C), array(int64, 1d, C), int64, float64, int64, bool, array(int32, 1d, C))]",
+            "oceantracker.interpolator.util.triangle_interpolator_util.BCwalk": "[(array(float64, 2d, C), unaligned array(Record(bc_transform[type=nestedarray(float64, (3, 2));offset=0],adjacency[type=nestedarray(int32, (3,));offset=48];60;False), 1d, C), array(uint8, 1d, C), array(int32, 1d, C), array(int8, 1d, C), array(float32, 2d, C), array(int64, 1d, C), int64, float64, int64, bool, array(int32, 1d, C))]",
             "oceantracker.interpolator.util.triangle_interpolator_util._move_back": "[]",
             "oceantracker.interpolator.util.triangle_interpolator_util.calc_BC_cords_numba": "[(array(float64, 2d, C), array(int32, 1d, C), array(float64, 3d, C), array(float64, 2d, C))]",
             "oceantracker.interpolator.util.triangle_interpolator_util.check_if_point_inside_triangle_connected_to_node": "[(array(float64, 2d, A), array(int32, 1d, C), array(int32, 2d, C), array(int32, 1d, C), array(float64, 3d, C), float64), (array(float64, 2d, C), array(int32, 1d, C), array(int32, 2d, C), array(int32, 1d, C), array(float64, 3d, C), float64)]",
             "oceantracker.interpolator.util.triangle_interpolator_util.get_BC_transform_matrix": "[(memoryview(float64, 2d, C), memoryview(int32, 2d, C))]",
-            "oceantracker.interpolator.util.triangle_interpolator_util.get_depth_cell_sigma_layers": "[(array(float64, 2d, C), array(int32, 2d, C), array(float32, 1d, C), array(float32, 4d, C), float64, array(float64, 1d, C), array(int32, 1d, C), float64, array(int32, 1d, C), array(int8, 1d, C), array(float64, 2d, C), array(int32, 1d, C), array(float32, 1d, C), array(float32, 1d, C), array(int32, 1d, C), array(float64, 1d, C), array(int32, 1d, C), float64)]",
+            "oceantracker.interpolator.util.triangle_interpolator_util.get_depth_cell_sigma_layers_V2": "[]",
+            "oceantracker.interpolator.util.triangle_interpolator_util.get_depth_cell_sigma_layers": "[(array(float64, 2d, C), array(int32, 2d, C), array(float32, 1d, C), array(float32, 4d, C), float64, array(float64, 1d, C), array(int32, 1d, C), array(int32, 1d, C), array(int8, 1d, C), array(float32, 2d, C), array(int32, 1d, C), array(float32, 1d, C), array(float32, 1d, C), array(int32, 1d, C), array(float64, 1d, C), array(int32, 1d, C), float64)]",
             "oceantracker.interpolator.util.triangle_interpolator_util._eval_z_at_nz_cell": "[]",
             "oceantracker.interpolator.util.triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid": "[]",
-            "oceantracker.interpolator.util.triangle_eval_interp.time_independent_2Dfield": "[(array(float64, 2d, C), array(float32, 4d, C), array(int32, 2d, C), array(int32, 1d, C), array(float64, 2d, C), array(int32, 1d, C))]",
-            "oceantracker.interpolator.util.triangle_eval_interp.time_dependent_2Dfield": "[(array(int32, 1d, C), array(float64, 1d, C), array(float64, 2d, C), array(float32, 4d, C), array(int32, 2d, C), array(int32, 1d, C), array(float64, 2d, C), array(int32, 1d, C))]",
+            "oceantracker.interpolator.util.triangle_eval_interp.time_independent_2Dfield": "[(array(float64, 2d, C), array(float32, 4d, C), array(int32, 2d, C), array(int32, 1d, C), array(float64, 2d, C), array(int32, 1d, C)), (array(float64, 2d, C), array(float32, 4d, C), array(int32, 2d, C), array(int32, 1d, C), array(float32, 2d, C), array(int32, 1d, C))]",
+            "oceantracker.interpolator.util.triangle_eval_interp.time_dependent_2Dfield": "[(array(int32, 1d, C), array(float64, 1d, C), array(float64, 2d, C), array(float32, 4d, C), array(int32, 2d, C), array(int32, 1d, C), array(float64, 2d, C), array(int32, 1d, C)), (array(int32, 1d, C), array(float64, 1d, C), array(float64, 2d, C), array(float32, 4d, C), array(int32, 2d, C), array(int32, 1d, C), array(float32, 2d, C), array(int32, 1d, C))]",
             "oceantracker.interpolator.util.triangle_eval_interp.time_independent_3Dfield_LSC_grid": "[]",
-            "oceantracker.interpolator.util.triangle_eval_interp.time_dependent_3Dfield_sigma_grid": "[(array(int32, 1d, C), array(float64, 1d, C), array(float32, 4d, C), array(int32, 2d, C), array(int32, 1d, C), array(float64, 2d, C), array(int32, 1d, C), array(float32, 1d, C), array(float64, 2d, C), array(int32, 1d, C))]",
+            "oceantracker.interpolator.util.triangle_eval_interp.time_dependent_3Dfield_sigma_grid": "[(array(int32, 1d, C), array(float64, 1d, C), array(float32, 4d, C), array(int32, 2d, C), array(int32, 1d, C), array(float32, 2d, C), array(int32, 1d, C), array(float32, 1d, C), array(float64, 2d, C), array(int32, 1d, C))]",
             "oceantracker.interpolator.util.triangle_eval_interp.time_dependent_3Dfield_LSC_grid": "[]",
             "oceantracker.interpolator.util.triangle_eval_interp.update_dry_cell_index": "[(array(int8, 2d, C), array(uint8, 1d, C), array(int32, 1d, C), array(float64, 1d, C))]",
             "oceantracker.particle_concentrations.particle_concentrations.calcuate_concentration2D": "[]",
@@ -8792,8 +8793,8 @@
             "oceantracker.particle_properties.util.particle_comparisons_util.is_gt": "[]",
             "oceantracker.particle_properties.util.particle_comparisons_util.is_gteq": "[(int8, int64), (float64, float64)]",
             "oceantracker.particle_properties.util.particle_comparisons_util.is_inrange": "[]",
-            "oceantracker.particle_properties.util.particle_comparisons_util._prop_compared_to_value": "[(array(int8, 1d, C), type(CPUDispatcher(<function is_gteq at 0x000002C451367EB0>)), int64, array(int32, 1d, C)), (array(int8, 1d, C), type(CPUDispatcher(<function is_eq at 0x000002C4513677F0>)), int64, array(int32, 1d, C))]",
-            "oceantracker.particle_properties.util.particle_comparisons_util._prop_subset_compared_to_value": "[(array(int32, 1d, C), array(int8, 1d, C), type(CPUDispatcher(<function is_eq at 0x000002C4513677F0>)), int64, array(int32, 1d, C)), (array(int32, 1d, C), array(int8, 1d, C), type(CPUDispatcher(<function is_lt at 0x000002C4513679A0>)), int64, array(int32, 1d, C)), (array(int32, 1d, C), array(float64, 1d, C), type(CPUDispatcher(<function is_gteq at 0x000002C451367EB0>)), float64, array(int32, 1d, C))]",
+            "oceantracker.particle_properties.util.particle_comparisons_util._prop_compared_to_value": "[(array(int8, 1d, C), type(CPUDispatcher(<function is_gteq at 0x0000020A18FE45E0>)), int64, array(int32, 1d, C)), (array(int8, 1d, C), type(CPUDispatcher(<function is_eq at 0x0000020A18F83EB0>)), int64, array(int32, 1d, C))]",
+            "oceantracker.particle_properties.util.particle_comparisons_util._prop_subset_compared_to_value": "[(array(int32, 1d, C), array(int8, 1d, C), type(CPUDispatcher(<function is_eq at 0x0000020A18F83EB0>)), int64, array(int32, 1d, C)), (array(int32, 1d, C), array(int8, 1d, C), type(CPUDispatcher(<function is_lt at 0x0000020A18FE40D0>)), int64, array(int32, 1d, C)), (array(int32, 1d, C), array(float64, 1d, C), type(CPUDispatcher(<function is_gteq at 0x0000020A18FE45E0>)), float64, array(int32, 1d, C))]",
             "oceantracker.particle_properties.util.particle_comparisons_util.random_selection": "[]",
             "oceantracker.particle_properties.util.particle_comparisons_util._find_all_in_range": "[]",
             "oceantracker.particle_properties.total_water_depth.get_time_dependent_total_water_depth_from_tide_and_water_depth": "[]",
@@ -8840,349 +8841,369 @@
             "oceantracker.dispersion.random_walk._add_random_walk_velocity_modifier_AZ_profile": [],
             "oceantracker.dispersion.random_walk_varyingAz._add_random_walk_velocity_modifier": [
                 {
-                    "%ymm": 32,
                     "%xmm": 245,
-                    "vaddsd": 15,
+                    "%ymm": 32,
                     "movaps": 53,
-                    "vxorpd": 2,
+                    "movups": 26,
                     "orps": 7,
-                    "vmulsd": 13,
-                    "xorps": 7,
-                    "vmovapd": 12,
-                    "vzeroupper": 9,
+                    "vaddsd": 15,
                     "vandpd": 1,
-                    "movups": 26
+                    "vmovapd": 12,
+                    "vmulsd": 13,
+                    "vxorpd": 2,
+                    "vzeroupper": 9,
+                    "xorps": 7
                 }
             ],
             "oceantracker.event_loggers._base_event_loggers._find_particles_where_event_has_started_or_ended_numba": [
                 {
-                    "%ymm": 48,
                     "%xmm": 47,
+                    "%ymm": 48,
                     "movaps": 36,
+                    "movups": 34,
                     "orps": 7,
-                    "xorps": 7,
                     "vzeroupper": 11,
-                    "movups": 34
+                    "xorps": 7
                 }
             ],
             "oceantracker.particle_properties.util.particle_operations_util.set_value": [
                 {
+                    "%xmm": 25,
                     "%ymm": 12,
-                    "%xmm": 25,
                     "movaps": 11,
+                    "movups": 10,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 10
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
                     "%xmm": 25,
+                    "%ymm": 10,
                     "movaps": 10,
+                    "movups": 11,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 11
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
                     "%xmm": 27,
+                    "%ymm": 10,
                     "movaps": 10,
+                    "movups": 11,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 11
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
                     "%xmm": 25,
+                    "%ymm": 10,
                     "movaps": 10,
+                    "movups": 11,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 11
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
+                    "%xmm": 28,
+                    "%ymm": 12,
+                    "movaps": 11,
+                    "movss": 1,
+                    "movups": 10,
+                    "orps": 3,
+                    "vzeroupper": 5,
+                    "xorps": 3
+                },
+                {
                     "%xmm": 30,
+                    "%ymm": 10,
                     "movaps": 10,
                     "movss": 1,
+                    "movups": 11,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 11
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 12,
                     "%xmm": 15,
+                    "%ymm": 12,
                     "movaps": 6,
+                    "movups": 12,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 12
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
                     "%xmm": 17,
-                    "movaps": 7,
-                    "orps": 3,
-                    "xorps": 3,
-                    "vzeroupper": 5,
-                    "movups": 11
-                },
-                {
                     "%ymm": 10,
+                    "movaps": 7,
+                    "movups": 11,
+                    "orps": 3,
+                    "vzeroupper": 5,
+                    "xorps": 3
+                },
+                {
                     "%xmm": 25,
+                    "%ymm": 10,
                     "movaps": 10,
+                    "movups": 11,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 11
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 12,
                     "%xmm": 15,
+                    "%ymm": 12,
                     "movaps": 6,
+                    "movups": 12,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 12
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 12,
                     "%xmm": 15,
+                    "%ymm": 12,
                     "movaps": 6,
+                    "movups": 12,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 12
+                    "xorps": 3
                 }
             ],
             "oceantracker.particle_properties.util.particle_operations_util.set_values": [
                 {
-                    "%ymm": 12,
                     "%xmm": 16,
+                    "%ymm": 12,
                     "movaps": 11,
+                    "movups": 5,
                     "orps": 4,
-                    "xorps": 4,
                     "vzeroupper": 5,
-                    "movups": 5
+                    "xorps": 4
                 },
                 {
-                    "%ymm": 12,
                     "%xmm": 16,
+                    "%ymm": 12,
                     "movaps": 7,
+                    "movups": 9,
                     "orps": 4,
-                    "xorps": 4,
                     "vzeroupper": 5,
-                    "movups": 9
+                    "xorps": 4
                 },
                 {
+                    "%xmm": 21,
                     "%ymm": 12,
-                    "%xmm": 16,
-                    "movaps": 7,
+                    "movaps": 11,
+                    "movss": 1,
+                    "movups": 5,
                     "orps": 4,
-                    "xorps": 4,
                     "vzeroupper": 5,
-                    "movups": 9
+                    "xorps": 4
                 },
                 {
-                    "%ymm": 12,
                     "%xmm": 16,
+                    "%ymm": 12,
                     "movaps": 7,
+                    "movups": 9,
                     "orps": 4,
-                    "xorps": 4,
                     "vzeroupper": 5,
-                    "movups": 9
+                    "xorps": 4
+                },
+                {
+                    "%xmm": 16,
+                    "%ymm": 12,
+                    "movaps": 7,
+                    "movups": 9,
+                    "orps": 4,
+                    "vzeroupper": 5,
+                    "xorps": 4
                 }
             ],
             "oceantracker.particle_properties.util.particle_operations_util.add_value_to": [],
             "oceantracker.particle_properties.util.particle_operations_util.add_values_to": [],
             "oceantracker.particle_properties.util.particle_operations_util.copy": [
                 {
-                    "%ymm": 12,
                     "%xmm": 16,
+                    "%ymm": 12,
                     "movaps": 7,
+                    "movups": 9,
                     "orps": 4,
-                    "xorps": 4,
                     "vzeroupper": 5,
-                    "movups": 9
+                    "xorps": 4
                 },
                 {
-                    "%ymm": 12,
                     "%xmm": 16,
+                    "%ymm": 12,
                     "movaps": 11,
+                    "movups": 5,
                     "orps": 4,
-                    "xorps": 4,
                     "vzeroupper": 5,
-                    "movups": 5
+                    "xorps": 4
                 },
                 {
-                    "%ymm": 12,
                     "%xmm": 16,
+                    "%ymm": 12,
                     "movaps": 7,
+                    "movups": 9,
                     "orps": 4,
-                    "xorps": 4,
                     "vzeroupper": 5,
-                    "movups": 9
+                    "xorps": 4
                 },
                 {
-                    "%ymm": 20,
                     "%xmm": 26,
+                    "%ymm": 20,
                     "movaps": 14,
+                    "movups": 11,
                     "orps": 4,
                     "vmulsd": 1,
-                    "xorps": 4,
                     "vzeroupper": 6,
-                    "movups": 11
+                    "xorps": 4
                 }
             ],
             "oceantracker.particle_properties.util.particle_operations_util.add_to": [
                 {
-                    "%ymm": 20,
                     "%xmm": 28,
-                    "vaddsd": 1,
+                    "%ymm": 20,
                     "movaps": 14,
+                    "movups": 11,
                     "orps": 4,
+                    "vaddsd": 1,
                     "vmulsd": 1,
-                    "xorps": 4,
                     "vzeroupper": 6,
-                    "movups": 11
+                    "xorps": 4
                 }
             ],
             "oceantracker.particle_properties.util.particle_operations_util.set_value_and_add": [
                 {
-                    "%ymm": 16,
                     "%xmm": 46,
-                    "vaddsd": 1,
+                    "%ymm": 16,
                     "movaps": 16,
+                    "movups": 14,
                     "orps": 4,
+                    "vaddsd": 1,
                     "vmulsd": 1,
-                    "xorps": 4,
                     "vzeroupper": 6,
-                    "movups": 14
+                    "xorps": 4
                 }
             ],
             "oceantracker.particle_properties.util.particle_operations_util.firstDim_notMatching": [
                 {
-                    "%ymm": 12,
                     "%xmm": 15,
+                    "%ymm": 12,
                     "movaps": 7,
+                    "movups": 11,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 11
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
                     "%xmm": 17,
+                    "%ymm": 10,
                     "movaps": 6,
+                    "movups": 12,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 12
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
                     "%xmm": 17,
+                    "%ymm": 10,
                     "movaps": 6,
+                    "movups": 12,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 12
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
                     "%xmm": 17,
+                    "%ymm": 10,
                     "movaps": 6,
+                    "movups": 12,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 12
+                    "xorps": 3
                 }
             ],
             "oceantracker.particle_properties.util.particle_operations_util.dim_notMatching": [
                 {
-                    "%ymm": 10,
                     "%xmm": 17,
+                    "%ymm": 10,
                     "movaps": 6,
+                    "movups": 12,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 12
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
                     "%xmm": 17,
+                    "%ymm": 10,
                     "movaps": 6,
+                    "movups": 12,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 12
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 16,
                     "%xmm": 11,
+                    "%ymm": 16,
                     "movaps": 9,
+                    "movups": 9,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 6,
-                    "movups": 9
+                    "xorps": 3
                 },
                 {
-                    "%ymm": 10,
                     "%xmm": 17,
+                    "%ymm": 10,
                     "movaps": 6,
+                    "movups": 12,
                     "orps": 3,
-                    "xorps": 3,
                     "vzeroupper": 5,
-                    "movups": 12
+                    "xorps": 3
                 }
             ],
             "oceantracker.particle_properties.util.particle_operations_util.copy_indicies": [],
             "oceantracker.fields.field_vertical_gradient._calc_field_vert_grad_from_zlevels": [],
             "oceantracker.fields.field_vertical_gradient._calc_field_vert_grad_from_sigma_levels": [
                 {
-                    "%ymm": 64,
                     "%xmm": 121,
-                    "movaps": 60,
-                    "vxorpd": 1,
-                    "movss": 3,
-                    "orps": 7,
-                    "vmulsd": 1,
-                    "xorps": 7,
+                    "%ymm": 64,
+                    "addss": 1,
                     "andps": 1,
-                    "vmovapd": 4,
-                    "vbroadcastss": 1,
-                    "subss": 1,
-                    "vzeroupper": 17,
                     "cvtss2s": 2,
-                    "vsubsd": 1,
+                    "movaps": 60,
+                    "movss": 3,
                     "movups": 37,
-                    "addss": 1
+                    "orps": 7,
+                    "subss": 1,
+                    "vbroadcastss": 1,
+                    "vmovapd": 4,
+                    "vmulsd": 1,
+                    "vsubsd": 1,
+                    "vxorpd": 1,
+                    "vzeroupper": 17,
+                    "xorps": 7
                 }
             ],
             "oceantracker.fields.friction_velocity.calc_friction_velocity_from_sigma_levels": [
                 {
-                    "%ymm": 62,
                     "%xmm": 148,
-                    "mulss": 2,
-                    "vaddsd": 1,
-                    "movaps": 61,
-                    "sqrtss": 1,
-                    "vxorpd": 1,
-                    "movss": 4,
-                    "orps": 7,
-                    "vmulsd": 2,
-                    "xorps": 7,
+                    "%ymm": 62,
+                    "addss": 2,
                     "andps": 1,
-                    "vmovapd": 5,
-                    "vbroadcastss": 1,
-                    "vzeroupper": 10,
                     "cvtss2s": 2,
-                    "vsubsd": 1,
+                    "movaps": 61,
+                    "movss": 4,
                     "movups": 37,
-                    "addss": 2
+                    "mulss": 2,
+                    "orps": 7,
+                    "sqrtss": 1,
+                    "vaddsd": 1,
+                    "vbroadcastss": 1,
+                    "vmovapd": 5,
+                    "vmulsd": 2,
+                    "vsubsd": 1,
+                    "vxorpd": 1,
+                    "vzeroupper": 10,
+                    "xorps": 7
                 }
             ],
             "oceantracker.fields.friction_velocity.calc_friction_velocity_from_native_zlevels": [],
@@ -9190,219 +9211,248 @@
             "oceantracker.fields.total_water_depth.get_time_dependent_total_water_depth_from_tide_and_water_depth": [],
             "oceantracker.interpolator.util.triangle_interpolator_util._get_single_BC_cord_numba": [
                 {
-                    "%ymm": 18,
                     "%xmm": 96,
-                    "vaddsd": 2,
+                    "%ymm": 18,
                     "movaps": 14,
+                    "movups": 15,
                     "orps": 7,
-                    "vmulsd": 4,
-                    "xorps": 7,
+                    "vaddsd": 2,
                     "vmovapd": 3,
-                    "vzeroupper": 6,
+                    "vmulsd": 4,
                     "vsubsd": 6,
-                    "movups": 15
+                    "vzeroupper": 6,
+                    "xorps": 7
                 },
                 {
-                    "%ymm": 18,
                     "%xmm": 96,
-                    "vaddsd": 2,
+                    "%ymm": 18,
                     "movaps": 14,
+                    "movups": 15,
                     "orps": 7,
-                    "vmulsd": 4,
-                    "xorps": 7,
+                    "vaddsd": 2,
                     "vmovapd": 3,
-                    "vzeroupper": 6,
+                    "vmulsd": 4,
                     "vsubsd": 6,
-                    "movups": 15
+                    "vzeroupper": 6,
+                    "xorps": 7
                 },
                 {
-                    "%ymm": 18,
                     "%xmm": 96,
-                    "vaddsd": 2,
+                    "%ymm": 18,
                     "movaps": 14,
+                    "movups": 15,
                     "orps": 7,
-                    "vmulsd": 4,
-                    "xorps": 7,
+                    "vaddsd": 2,
                     "vmovapd": 3,
-                    "vzeroupper": 6,
+                    "vmulsd": 4,
                     "vsubsd": 6,
-                    "movups": 15
+                    "vzeroupper": 6,
+                    "xorps": 7
                 }
             ],
             "oceantracker.interpolator.util.triangle_interpolator_util.BCwalk": [
                 {
+                    "%xmm": 192,
                     "%ymm": 64,
-                    "%xmm": 177,
-                    "vaddsd": 3,
                     "movaps": 53,
-                    "vxorpd": 2,
+                    "movss": 3,
+                    "movups": 48,
                     "orps": 10,
-                    "vmulsd": 4,
-                    "xorps": 10,
+                    "vaddsd": 3,
                     "vmovapd": 7,
-                    "vzeroupper": 17,
+                    "vmulsd": 4,
                     "vsubsd": 6,
-                    "movups": 48
+                    "vxorpd": 2,
+                    "vzeroupper": 17,
+                    "xorps": 10
                 }
             ],
             "oceantracker.interpolator.util.triangle_interpolator_util._move_back": [],
             "oceantracker.interpolator.util.triangle_interpolator_util.calc_BC_cords_numba": [
                 {
-                    "%ymm": 32,
                     "%xmm": 95,
-                    "vaddsd": 2,
+                    "%ymm": 32,
                     "movaps": 24,
+                    "movups": 22,
                     "orps": 6,
-                    "vmulsd": 4,
-                    "xorps": 6,
+                    "vaddsd": 2,
                     "vmovapd": 3,
-                    "vzeroupper": 8,
+                    "vmulsd": 4,
                     "vsubsd": 6,
-                    "movups": 22
+                    "vzeroupper": 8,
+                    "xorps": 6
                 }
             ],
             "oceantracker.interpolator.util.triangle_interpolator_util.check_if_point_inside_triangle_connected_to_node": [
                 {
-                    "%ymm": 48,
                     "%xmm": 150,
-                    "vaddsd": 3,
+                    "%ymm": 48,
                     "movaps": 45,
-                    "vxorpd": 3,
+                    "movups": 33,
                     "orps": 8,
-                    "vmulsd": 4,
-                    "xorps": 8,
+                    "vaddsd": 3,
                     "vmovapd": 8,
-                    "vzeroupper": 11,
+                    "vmulsd": 4,
                     "vsubsd": 6,
-                    "movups": 33
+                    "vxorpd": 3,
+                    "vzeroupper": 11,
+                    "xorps": 8
                 },
                 {
-                    "%ymm": 48,
                     "%xmm": 150,
-                    "vaddsd": 3,
+                    "%ymm": 48,
                     "movaps": 45,
-                    "vxorpd": 3,
+                    "movups": 33,
                     "orps": 8,
-                    "vmulsd": 4,
-                    "xorps": 8,
+                    "vaddsd": 3,
                     "vmovapd": 8,
-                    "vzeroupper": 11,
+                    "vmulsd": 4,
                     "vsubsd": 6,
-                    "movups": 33
+                    "vxorpd": 3,
+                    "vzeroupper": 11,
+                    "xorps": 8
                 }
             ],
             "oceantracker.interpolator.util.triangle_interpolator_util.get_BC_transform_matrix": [
                 {
-                    "%ymm": 52,
                     "%xmm": 87,
-                    "vpermilpd": 2,
+                    "%ymm": 52,
                     "movaps": 31,
-                    "vxorpd": 3,
+                    "movups": 25,
                     "orps": 7,
-                    "xorps": 7,
                     "vmovapd": 2,
-                    "vzeroupper": 12,
-                    "vsubsd": 5,
                     "vmulpd": 1,
-                    "movups": 25
+                    "vpermilpd": 2,
+                    "vsubsd": 5,
+                    "vxorpd": 3,
+                    "vzeroupper": 12,
+                    "xorps": 7
                 }
             ],
+            "oceantracker.interpolator.util.triangle_interpolator_util.get_depth_cell_sigma_layers_V2": [],
             "oceantracker.interpolator.util.triangle_interpolator_util.get_depth_cell_sigma_layers": [
                 {
-                    "%ymm": 108,
-                    "%xmm": 384,
-                    "vaddsd": 8,
-                    "movaps": 82,
-                    "vxorpd": 3,
-                    "movss": 11,
-                    "orps": 16,
-                    "vmulsd": 17,
-                    "xorps": 16,
-                    "vmovapd": 20,
-                    "vzeroupper": 19,
-                    "vandpd": 2,
+                    "%xmm": 357,
+                    "%ymm": 100,
                     "cvtss2s": 10,
+                    "movaps": 82,
+                    "movss": 5,
+                    "movups": 76,
+                    "mulss": 9,
+                    "orps": 16,
+                    "vaddsd": 8,
+                    "vandpd": 2,
+                    "vmovapd": 14,
+                    "vmulsd": 8,
                     "vsubsd": 10,
-                    "movups": 76
+                    "vxorpd": 2,
+                    "vzeroupper": 18,
+                    "xorps": 16
                 }
             ],
             "oceantracker.interpolator.util.triangle_interpolator_util._eval_z_at_nz_cell": [],
             "oceantracker.interpolator.util.triangle_interpolator_util.get_depth_cell_time_varying_Slayer_or_LSCgrid": [],
             "oceantracker.interpolator.util.triangle_eval_interp.time_independent_2Dfield": [
                 {
-                    "%ymm": 46,
                     "%xmm": 80,
-                    "vaddsd": 3,
+                    "%ymm": 46,
+                    "cvtss2s": 3,
                     "movaps": 35,
                     "movss": 3,
+                    "movups": 31,
                     "orps": 7,
+                    "vaddsd": 3,
                     "vmulsd": 3,
-                    "xorps": 7,
                     "vzeroupper": 9,
+                    "xorps": 7
+                },
+                {
+                    "%xmm": 74,
+                    "%ymm": 46,
                     "cvtss2s": 3,
-                    "movups": 31
+                    "movaps": 35,
+                    "movss": 3,
+                    "movups": 31,
+                    "mulss": 3,
+                    "orps": 7,
+                    "vaddsd": 3,
+                    "vzeroupper": 9,
+                    "xorps": 7
                 }
             ],
             "oceantracker.interpolator.util.triangle_eval_interp.time_dependent_2Dfield": [
                 {
-                    "%ymm": 58,
                     "%xmm": 135,
-                    "vaddsd": 6,
+                    "%ymm": 58,
+                    "cvtss2s": 6,
                     "movaps": 48,
                     "movss": 6,
+                    "movups": 42,
                     "orps": 9,
+                    "vaddsd": 6,
                     "vmulsd": 9,
-                    "xorps": 9,
                     "vzeroupper": 11,
-                    "cvtss2s": 6,
-                    "movups": 42
+                    "xorps": 9
+                },
+                {
+                    "%xmm": 144,
+                    "%ymm": 58,
+                    "cvtss2s": 9,
+                    "movaps": 48,
+                    "movss": 9,
+                    "movups": 42,
+                    "orps": 9,
+                    "vaddsd": 6,
+                    "vmulsd": 9,
+                    "vzeroupper": 11,
+                    "xorps": 9
                 }
             ],
             "oceantracker.interpolator.util.triangle_eval_interp.time_independent_3Dfield_LSC_grid": [],
             "oceantracker.interpolator.util.triangle_eval_interp.time_dependent_3Dfield_sigma_grid": [
                 {
+                    "%xmm": 140,
                     "%ymm": 70,
-                    "%xmm": 137,
-                    "mulss": 2,
-                    "vaddsd": 4,
+                    "cvtss2s": 6,
                     "movaps": 55,
-                    "movss": 3,
+                    "movss": 4,
+                    "movups": 52,
+                    "mulss": 2,
                     "orps": 11,
-                    "vmulsd": 6,
-                    "xorps": 11,
+                    "vaddsd": 4,
                     "vmovapd": 1,
-                    "vzeroupper": 13,
-                    "cvtss2s": 5,
+                    "vmulsd": 6,
                     "vsubsd": 1,
-                    "movups": 52
+                    "vzeroupper": 13,
+                    "xorps": 11
                 }
             ],
             "oceantracker.interpolator.util.triangle_eval_interp.time_dependent_3Dfield_LSC_grid": [],
             "oceantracker.interpolator.util.triangle_eval_interp.update_dry_cell_index": [
                 {
-                    "%ymm": 24,
                     "%xmm": 44,
-                    "vaddsd": 1,
+                    "%ymm": 24,
                     "movaps": 14,
+                    "movups": 22,
                     "orps": 5,
+                    "vaddsd": 1,
                     "vmulsd": 3,
-                    "xorps": 5,
                     "vzeroupper": 7,
-                    "movups": 22
+                    "xorps": 5
                 }
             ],
             "oceantracker.particle_concentrations.particle_concentrations.calcuate_concentration2D": [],
             "oceantracker.particle_group_manager.util.pgm_util._status_counts_and_kill_old_particles": [
                 {
-                    "%ymm": 30,
                     "%xmm": 41,
+                    "%ymm": 30,
                     "movaps": 18,
+                    "movups": 26,
                     "orps": 6,
-                    "xorps": 6,
+                    "vandpd": 1,
                     "vmovapd": 1,
                     "vzeroupper": 8,
-                    "vandpd": 1,
-                    "movups": 26
+                    "xorps": 6
                 }
             ],
             "oceantracker.particle_properties.util.particle_comparisons_util.is_eq": [
@@ -9424,51 +9474,51 @@
             "oceantracker.particle_properties.util.particle_comparisons_util.is_inrange": [],
             "oceantracker.particle_properties.util.particle_comparisons_util._prop_compared_to_value": [
                 {
-                    "%ymm": 26,
                     "%xmm": 24,
+                    "%ymm": 26,
                     "movaps": 13,
+                    "movups": 21,
                     "orps": 5,
-                    "xorps": 5,
                     "vzeroupper": 8,
-                    "movups": 21
+                    "xorps": 5
                 },
                 {
-                    "%ymm": 26,
                     "%xmm": 24,
+                    "%ymm": 26,
                     "movaps": 13,
+                    "movups": 21,
                     "orps": 5,
-                    "xorps": 5,
                     "vzeroupper": 8,
-                    "movups": 21
+                    "xorps": 5
                 }
             ],
             "oceantracker.particle_properties.util.particle_comparisons_util._prop_subset_compared_to_value": [
                 {
-                    "%ymm": 32,
                     "%xmm": 29,
+                    "%ymm": 32,
                     "movaps": 16,
+                    "movups": 26,
                     "orps": 6,
-                    "xorps": 6,
                     "vzeroupper": 9,
-                    "movups": 26
+                    "xorps": 6
                 },
                 {
-                    "%ymm": 32,
                     "%xmm": 29,
+                    "%ymm": 32,
                     "movaps": 16,
+                    "movups": 26,
                     "orps": 6,
-                    "xorps": 6,
                     "vzeroupper": 9,
-                    "movups": 26
+                    "xorps": 6
                 },
                 {
-                    "%ymm": 30,
                     "%xmm": 43,
+                    "%ymm": 30,
                     "movaps": 19,
+                    "movups": 26,
                     "orps": 6,
-                    "xorps": 6,
                     "vzeroupper": 9,
-                    "movups": 26
+                    "xorps": 6
                 }
             ],
             "oceantracker.particle_properties.util.particle_comparisons_util.random_selection": [],
@@ -9476,61 +9526,61 @@
             "oceantracker.particle_properties.total_water_depth.get_time_dependent_total_water_depth_from_tide_and_water_depth": [],
             "oceantracker.particle_statistics._base_location_stats.sel_status_waterdepth_and_z": [
                 {
-                    "%ymm": 58,
                     "%xmm": 86,
+                    "%ymm": 58,
                     "movaps": 43,
+                    "movups": 47,
                     "orps": 10,
-                    "xorps": 10,
                     "vzeroupper": 13,
-                    "movups": 47
+                    "xorps": 10
                 }
             ],
             "oceantracker.particle_statistics.gridded_statistics.do_counts_and_summing_numba": [
                 {
-                    "%ymm": 89,
                     "%xmm": 152,
-                    "vroundsd": 3,
-                    "vaddsd": 2,
+                    "%ymm": 89,
                     "movaps": 57,
-                    "vxorpd": 4,
+                    "movups": 58,
                     "orps": 10,
-                    "xorps": 10,
+                    "vaddsd": 2,
                     "vmovapd": 12,
-                    "vzeroupper": 17,
+                    "vroundsd": 3,
                     "vsubsd": 6,
-                    "movups": 58
+                    "vxorpd": 4,
+                    "vzeroupper": 17,
+                    "xorps": 10
                 }
             ],
             "oceantracker.particle_statistics.polygon_statistics.do_counts_and_summing_numba": [
                 {
-                    "%ymm": 73,
                     "%xmm": 122,
-                    "vroundsd": 1,
-                    "vaddsd": 2,
+                    "%ymm": 73,
                     "movaps": 50,
-                    "vxorpd": 4,
+                    "movups": 57,
                     "orps": 9,
-                    "xorps": 9,
+                    "vaddsd": 2,
                     "vmovapd": 9,
-                    "vzeroupper": 16,
+                    "vroundsd": 1,
                     "vsubsd": 2,
-                    "movups": 57
+                    "vxorpd": 4,
+                    "vzeroupper": 16,
+                    "xorps": 9
                 }
             ],
             "oceantracker.release_groups.point_release.get_z_release_in_depth_range": [
                 {
-                    "%ymm": 34,
                     "%xmm": 124,
-                    "vaddsd": 4,
+                    "%ymm": 34,
                     "movaps": 40,
-                    "vxorpd": 1,
+                    "movups": 22,
                     "orps": 6,
-                    "vmulsd": 6,
-                    "xorps": 6,
+                    "vaddsd": 4,
                     "vmovapd": 6,
-                    "vzeroupper": 9,
+                    "vmulsd": 6,
                     "vsubsd": 1,
-                    "movups": 22
+                    "vxorpd": 1,
+                    "vzeroupper": 9,
+                    "xorps": 6
                 }
             ],
             "oceantracker.particle_statistics.resident_in_polygon.do_counts_and_summing_numba": [],
@@ -9538,19 +9588,19 @@
             "oceantracker.reader.util.reader_util.set_dry_cell_flag_from_tide": [],
             "oceantracker.reader.util.reader_util.find_open_boundary_faces": [
                 {
-                    "%ymm": 114,
                     "%xmm": 142,
+                    "%ymm": 114,
+                    "movaps": 40,
+                    "movups": 24,
+                    "orps": 7,
+                    "vaddsd": 1,
+                    "vextracti128": 1,
                     "vpbroadcastq": 1,
                     "vpermilpd": 1,
-                    "vaddsd": 1,
-                    "movaps": 40,
-                    "vxorpd": 1,
-                    "orps": 7,
-                    "xorps": 7,
-                    "vzeroupper": 16,
-                    "vextracti128": 1,
                     "vsubpd": 1,
-                    "movups": 24
+                    "vxorpd": 1,
+                    "vzeroupper": 16,
+                    "xorps": 7
                 }
             ],
             "oceantracker.reader.util.reader_util.get_values_at_bottom": [],
@@ -9559,97 +9609,97 @@
             "oceantracker.reader.util.reader_util.zlevel_node_to_vertex": [],
             "oceantracker.reader.util.reader_util.patch_bottom_velocity_to_make_it_zero": [
                 {
-                    "%ymm": 40,
                     "%xmm": 23,
+                    "%ymm": 40,
                     "movaps": 29,
+                    "movups": 19,
                     "orps": 5,
-                    "xorps": 5,
                     "vzeroupper": 8,
-                    "movups": 19
+                    "xorps": 5
                 }
             ],
             "oceantracker.interpolator.util.interp_kernals.kernal_linear_interp1D": [],
             "oceantracker.util.triangle_utilities_code.build_node_to_triangle_map": [
                 {
-                    "%ymm": 60,
                     "%xmm": 24,
+                    "%ymm": 60,
                     "movaps": 34,
+                    "movups": 34,
                     "orps": 5,
-                    "xorps": 5,
                     "vzeroupper": 10,
-                    "movups": 34
+                    "xorps": 5
                 }
             ],
             "oceantracker.util.triangle_utilities_code.build_adjacency_from_node_tri_map": [
                 {
-                    "%ymm": 38,
                     "%xmm": 27,
+                    "%ymm": 38,
                     "movaps": 27,
+                    "movups": 19,
                     "orps": 6,
-                    "xorps": 6,
                     "vzeroupper": 9,
-                    "movups": 19
+                    "xorps": 6
                 }
             ],
             "oceantracker.reader.util.hydromodel_grid_transforms.convert_zlevels_to_fractions": [
                 {
-                    "%ymm": 33,
                     "%xmm": 58,
+                    "%ymm": 33,
+                    "andps": 1,
+                    "comiss": 1,
+                    "cvtss2s": 1,
                     "divss": 1,
                     "movaps": 24,
                     "movss": 4,
-                    "orps": 6,
-                    "xorps": 6,
-                    "ucomiss": 1,
-                    "andps": 1,
-                    "vmovapd": 1,
-                    "vbroadcastss": 2,
-                    "subss": 2,
-                    "vzeroupper": 12,
-                    "cvtss2s": 1,
                     "movups": 12,
-                    "comiss": 1
+                    "orps": 6,
+                    "subss": 2,
+                    "ucomiss": 1,
+                    "vbroadcastss": 2,
+                    "vmovapd": 1,
+                    "vzeroupper": 12,
+                    "xorps": 6
                 }
             ],
             "oceantracker.reader.util.hydromodel_grid_transforms.find_node_with_smallest_bot_layer": [
                 {
-                    "%ymm": 12,
                     "%xmm": 33,
+                    "%ymm": 12,
+                    "comiss": 1,
+                    "cvtss2s": 1,
                     "movaps": 7,
                     "movss": 1,
+                    "movups": 11,
                     "orps": 4,
-                    "xorps": 4,
+                    "subss": 1,
                     "ucomiss": 1,
                     "vmovapd": 2,
-                    "subss": 1,
                     "vzeroupper": 5,
-                    "cvtss2s": 1,
-                    "movups": 11,
-                    "comiss": 1
+                    "xorps": 4
                 }
             ],
             "oceantracker.reader.util.hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values": [
                 {
-                    "%ymm": 90,
                     "%xmm": 241,
-                    "vaddsd": 3,
-                    "movaps": 91,
-                    "vxorpd": 6,
-                    "movss": 7,
-                    "orps": 12,
-                    "vmulsd": 3,
-                    "xorps": 12,
-                    "ucomiss": 1,
+                    "%ymm": 90,
+                    "addss": 1,
                     "andps": 2,
-                    "vmovapd": 12,
-                    "vbroadcastss": 1,
-                    "subss": 1,
-                    "vzeroupper": 13,
-                    "cvtss2s": 6,
-                    "vsubsd": 4,
-                    "movups": 45,
                     "comiss": 1,
-                    "addss": 1
+                    "cvtss2s": 6,
+                    "movaps": 91,
+                    "movss": 7,
+                    "movups": 45,
+                    "orps": 12,
+                    "subss": 1,
+                    "ucomiss": 1,
+                    "vaddsd": 3,
+                    "vbroadcastss": 1,
+                    "vmovapd": 12,
+                    "vmulsd": 3,
+                    "vsubsd": 4,
+                    "vxorpd": 6,
+                    "vzeroupper": 13,
+                    "xorps": 12
                 }
             ],
             "oceantracker.reader.util.hydromodel_grid_transforms.convert_layer_field_to_levels_from_fixed_depth_fractions": [],
@@ -9661,30 +9711,30 @@
             "oceantracker.reader.ROMS_reader.rho_grid_to_psi": [],
             "oceantracker.resuspension.resuspension.resuspension_jump": [
                 {
-                    "%ymm": 24,
                     "%xmm": 209,
-                    "vaddsd": 9,
+                    "%ymm": 24,
                     "movaps": 46,
-                    "vxorpd": 3,
+                    "movups": 22,
                     "orps": 6,
-                    "vmulsd": 11,
-                    "xorps": 6,
-                    "vmovapd": 14,
-                    "vzeroupper": 7,
+                    "vaddsd": 9,
                     "vandpd": 1,
+                    "vmovapd": 14,
+                    "vmulsd": 11,
                     "vsubsd": 1,
-                    "movups": 22
+                    "vxorpd": 3,
+                    "vzeroupper": 7,
+                    "xorps": 6
                 }
             ],
             "oceantracker.tidal_stranding.tidal_stranding.tidal_stranding_from_dry_cell_index": [
                 {
-                    "%ymm": 22,
                     "%xmm": 30,
+                    "%ymm": 22,
                     "movaps": 13,
+                    "movups": 23,
                     "orps": 5,
-                    "xorps": 5,
                     "vzeroupper": 7,
-                    "movups": 23
+                    "xorps": 5
                 }
             ],
             "oceantracker.tracks_writer.dev_convert_compact_tracks._insertMatrixValues": [],
@@ -9694,53 +9744,53 @@
             "oceantracker.velocity_modifiers.terminal_velocity._add_individual_vertical_vel": [],
             "oceantracker.util.triangle_utilities_code.build_edge_node_pairs": [
                 {
-                    "%ymm": 109,
                     "%xmm": 179,
+                    "%ymm": 109,
+                    "movaps": 36,
+                    "movups": 21,
+                    "orps": 6,
+                    "vaddsd": 1,
+                    "vextracti128": 5,
+                    "vinserti128": 2,
+                    "vpbroadcastd": 1,
                     "vpbroadcastq": 1,
                     "vpermilpd": 1,
-                    "vaddsd": 1,
-                    "movaps": 36,
-                    "vxorpd": 1,
-                    "orps": 6,
-                    "xorps": 6,
-                    "vinserti128": 2,
-                    "vzeroupper": 17,
-                    "vextracti128": 5,
                     "vpermq": 1,
-                    "vpbroadcastd": 1,
                     "vsubpd": 1,
-                    "movups": 21
+                    "vxorpd": 1,
+                    "vzeroupper": 17,
+                    "xorps": 6
                 }
             ],
             "oceantracker.util.triangle_utilities_code.join_segments": [
                 {
-                    "%ymm": 71,
                     "%xmm": 176,
+                    "%ymm": 71,
+                    "movaps": 16,
+                    "movups": 3,
+                    "orps": 5,
+                    "vaddsd": 1,
+                    "vextracti128": 3,
                     "vpbroadcastq": 3,
                     "vpermilpd": 1,
-                    "vaddsd": 1,
-                    "movaps": 16,
-                    "vxorpd": 1,
-                    "orps": 5,
-                    "xorps": 5,
-                    "vzeroupper": 12,
-                    "vextracti128": 3,
                     "vsubpd": 1,
-                    "movups": 3
+                    "vxorpd": 1,
+                    "vzeroupper": 12,
+                    "xorps": 5
                 }
             ],
             "oceantracker.util.polygon_util.inside_ray_tracing_indices": [
                 {
-                    "%ymm": 48,
                     "%xmm": 179,
-                    "vaddsd": 10,
+                    "%ymm": 48,
                     "movaps": 51,
+                    "movups": 33,
                     "orps": 7,
-                    "vmulsd": 4,
-                    "xorps": 7,
+                    "vaddsd": 10,
                     "vmovapd": 10,
+                    "vmulsd": 4,
                     "vzeroupper": 11,
-                    "movups": 33
+                    "xorps": 7
                 }
             ]
         }

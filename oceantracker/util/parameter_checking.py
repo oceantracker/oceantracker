@@ -203,11 +203,12 @@ class ParameterCoordsChecker(object):
     def check_value(self, crumbs, value, msg_logger):
         # check given value against defaults  in class instance info
         info = self.info
-        crumbs= crumbs + '> coordinate checker'
+        crumb_trail= crumbs + '> coordinate checker'
         # a position, eg release location, needs to be a numpy array
 
         if type(value) not in [list, np.ndarray]:
-            msg_logger.msg(f' expected param of type list or numppy array got type {type(value)}', fatal_error=True, crumbs= crumbs)
+            msg_logger.msg(f' expected param of type list or numppy array got type {type(value)}',
+                           fatal_error=True, crumbs= crumb_trail)
             return None
 
         if type(value) == list:
@@ -217,12 +218,14 @@ class ParameterCoordsChecker(object):
 
             except Exception as e:
                 msg_logger.msg(f'Coordinate vector must be a rectangular list convertible to a numpy array ',
-                               hint = f'got values {str(value)}', crumbs = crumbs, fatal_error=True)
+                               hint = f'got values {str(value)}',
+                               crumbs = crumb_trail, fatal_error=True)
                 return  None
         # now have an array
         if not np.issubdtype(value.dtype, np.integer) and not np.issubdtype(value.dtype, np.float):
             msg_logger.msg(f'Coordinates must only contain floats ot ints, got type "{str(value.dtype)}" ',
-                           hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
+                           hint=f'got values {str(value)}',
+                           crumbs=crumb_trail, fatal_error=True)
             return None
 
         # make int float
@@ -233,7 +236,8 @@ class ParameterCoordsChecker(object):
             # only expecting 2 or 3 cord values
             if value.dim > 1 or value.shape[0] <2 or  value.shape[0] > 3 :
                 msg_logger.msg(f'expecting coordinates with only 2 or 3 values',
-                               hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
+                               hint=f'got values {str(value)}',
+                               crumbs=crumbs, fatal_error=True)
                 return None
             else:
                 return value
