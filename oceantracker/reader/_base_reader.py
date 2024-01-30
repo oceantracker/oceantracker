@@ -523,8 +523,8 @@ class _BaseReader(ParameterBaseClass):
                     # plt.show(block= True)
                     plt.savefig('\myfig.png')
 
-
             nc.close()
+
 
             # now all  data has been read from file, now
             # update user fields from newly read fields and data

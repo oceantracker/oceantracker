@@ -226,9 +226,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         solver.solve()
         # ------------------------------------------
         pass
-        if True:
-            from oceantracker.util.numba_util import find_all_numba_code
-            find_all_numba_code()
 
     def _do_run_integrity_checks(self):
         si=self.shared_info
@@ -506,7 +503,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                     d['numba_code_info']['signatures'][name] = str(sig)
                     d['numba_code_info']['SMID_code'][name] = []
                     for nsig in range(len(sig)):
-                        d['numba_code_info']['SMID_code'][name].append(numba_util.find_simd_code(func, sig=nsig, limit=20, show=False))
+                        d['numba_code_info']['SMID_code'][name].append(numba_util.count_simd_intructions(func, sig=nsig))
                     pass
         return d
 

@@ -34,7 +34,12 @@ class FieldGroupManager(ParameterBaseClass):
 
     def initial_setup(self):
         si= self.shared_info
+
         self._setup_hydro_reader(si.working_params['reader_builder'])
+
+        #todo dev test code,
+        grid = self.grid
+        grid['water_depth_triangles'] = self.fields['water_depth'].data[0,grid['triangles'],0,0]
         self.set_up_interpolator()
 
 
@@ -46,19 +51,16 @@ class FieldGroupManager(ParameterBaseClass):
         self.info['has_open_boundary_nodes'] = np.any(self.grid['node_type'] == node_types['open_boundary'])
         self.info['open_boundary_type'] = si.settings['open_boundary_type']
 
-
         # add tidal stranding class
         si = self.shared_info
         i = si.class_importer.new_make_class_instance_from_params(si.working_params['core_classes']['tidal_stranding'],'tidal_stranding',                                                 default_classID='tidal_stranding',
                                                 crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ')
-
         i.initial_setup()
         self.tidal_stranding = i
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['class_dicts']['fields'].items():
             self.add_custom_field(name, params, crumbs=f'adding custom field {name}')
-        pass
 
     def add_part_prop_from_fields_plus_book_keeping(self):
         si = self.shared_info
@@ -73,16 +75,15 @@ class FieldGroupManager(ParameterBaseClass):
                                             write=i.params['write_interp_particle_prop_to_tracks_file'],
                                             vector_dim = i.get_number_components(),
                                             time_varying=True, dtype=np.float64, initial_value=0.))
-
-
     def update_reader(self, time_sec):
         # check if all interpolators have the time steps they need
         si  = self.shared_info
-        t0 = perf_counter()
+
         reader = self.reader
         if not reader.are_time_steps_in_buffer(time_sec):
-                reader.fill_time_buffer(self.fields, self.grid, time_sec)  # get next steps into buffer if not in buffer
-        si.block_timer('Fill reader buffers',t0)
+            t0 = perf_counter()
+            reader.fill_time_buffer(self.fields, self.grid, time_sec)  # get next steps into buffer if not in buffer
+            si.block_timer('Fill reader buffers',t0)
 
     def update_tidal_stranding_status(self, time_sec, alive):
         self.tidal_stranding.update(self.grid, time_sec, alive)

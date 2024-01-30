@@ -50,7 +50,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
         pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=cell_search_status_flags['ok'], dtype=np.int8))
 
-        pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype=np.float64))
+        pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype=np.float32))
 
         # BC walk info
         if si.is3D_run:
@@ -258,10 +258,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         if 'sigma' in grid:
                 tri_interp_util.get_depth_cell_sigma_layers(xq,
                                         grid['triangles'],
+                                        #grid['water_depth_triangles'],
                                         fields['water_depth'].data.ravel(),
                                         fields['tide'].data,
                                         si.minimum_total_water_depth,
-                                        grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],grid['sigma_map_dz'],
+                                        grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],
                                         n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                         current_buffer_steps, fractional_time_steps,
                                         active, si.z0)
