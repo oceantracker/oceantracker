@@ -57,7 +57,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # setup class importer
         t0=perf_counter()
         si.class_importer = ClassImporter(path.dirname(__file__), msg_logger=si.msg_logger)
-        si.msg_logger.progress_marker('Scanned OceanTracker to build short name map to full class_names', start_time=t0)
+        si.msg_logger.progress_marker('Scanned OceanTracker to build short name map to the full class_names', start_time=t0)
 
         # other useful shared values
         si.backtracking = si.settings['backtracking']
