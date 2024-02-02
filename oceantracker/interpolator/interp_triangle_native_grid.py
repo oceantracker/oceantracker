@@ -135,15 +135,42 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
 
         if field_instance.is_time_varying():
-            triangle_eval_interp.time_dependent_2Dfield(current_buffer_steps, fractional_time_steps,basic_util.atLeast_Nby1(output),
-                                                   field_instance.data, triangles,
-                                                   n_cell, bc_cords,
-                                                   active)
+            self._time_dependent_2Dfield(current_buffer_steps, fractional_time_steps,output,
+                                                   field_instance, triangles,
+                                                   n_cell, bc_cords, active)
         else:
-            triangle_eval_interp.time_independent_2Dfield(basic_util.atLeast_Nby1(output),
-                                                 field_instance.data, triangles,
+            self._time_independent_2Dfield(output, field_instance, triangles,
                                                  n_cell, bc_cords,
                                                  active)
+
+    def _time_independent_2Dfield(self,output, field_instance, triangles, n_cell, bc_cords, active):
+        data =  field_instance.data
+        if data.shape[3] ==1:
+            #scalar, eg water depth
+            triangle_eval_interp.time_independent_2Dfield_scalar(output,data, triangles, n_cell, bc_cords, active)
+        elif data.shape[3] == 2:
+                # vector, is this used?
+                triangle_eval_interp.time_independent_2Dfield_vector(output, data, triangles, n_cell, bc_cords, active)
+
+    def _time_dependent_2Dfield(self,current_buffer_steps, fractional_time_steps,output,
+                                                   field_instance, triangles,
+                                                   n_cell, bc_cords, active):
+        si = self.shared_info
+        data =  field_instance.data
+
+        if data.shape[3] ==1:
+            #scalar, eg water depth
+            triangle_eval_interp.time_dependent_2Dfield_scalar(current_buffer_steps, fractional_time_steps,output,
+                                                   data, triangles,
+                                                   n_cell, bc_cords, active)
+        elif data.shape[3] == 2:
+                # vector, eg 2D water velocity
+                triangle_eval_interp.time_dependent_2Dfield_vector(current_buffer_steps, fractional_time_steps,output,
+                                                   data, triangles,
+                                                   n_cell, bc_cords, active)
+        else:
+            si.msg_logger.msg(f'2D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
+                              fatal_error=True, exit_now=True)
 
     #@function_profiler(__name__)
     def _interp_field3D(self, field_name, field_instance,grid, current_buffer_steps,fractional_time_steps,
@@ -167,15 +194,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         else:
             z_fraction = part_prop['z_fraction'].data
 
-        info = self.info
 
         if field_instance.is_time_varying():
             if 'sigma' in grid:
-                triangle_eval_interp.time_dependent_3Dfield_sigma_grid(current_buffer_steps, fractional_time_steps,
-                                                    field_instance.data,
-                           triangles,
+                self._time_dependent_3Dfield_sigma_grid(current_buffer_steps, fractional_time_steps,
+                            field_instance, triangles,
                            n_cell, bc_cords, nz_cell, z_fraction,
-                           basic_util.atLeast_Nby1(output), active)
+                          output, active)
             else:
                 triangle_eval_interp.time_dependent_3Dfield_LSC_grid(current_buffer_steps, fractional_time_steps,
                                                                      field_instance.data,
@@ -186,6 +211,28 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
             # 3D non-time varying
             # todo eval_interp3D_timeIndependent not implented for 3D non-time varying fields
             raise Exception('eval_field_interpolation_at_particle_locations : spatial interp using eval_interp3D_timeIndependent not implemented yet ')
+
+    def _time_dependent_3Dfield_sigma_grid(self,current_buffer_steps, fractional_time_steps,
+                            field_instance,       triangles,
+                           n_cell, bc_cords, nz_cell, z_fraction,
+                           output, active):
+        si = self.shared_info
+
+        data = field_instance.data
+        if data.shape[3] == 1:            # scalar
+            triangle_eval_interp.time_dependent_3Dfield_scalar_sigma_grid(current_buffer_steps, fractional_time_steps,
+                                                           data, triangles,
+                                                           n_cell, bc_cords, nz_cell, z_fraction,
+                                                           output, active)
+        elif data.shape[3] == 3:
+            # scalar
+            triangle_eval_interp.time_dependent_3Dfield_vector_sigma_grid(current_buffer_steps, fractional_time_steps,
+                                                                          data, triangles,
+                                                                          n_cell, bc_cords, nz_cell, z_fraction,
+                                                                          output, active)
+        else:
+            si.msg_logger.msg(f'3D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
+                              fatal_error=True, exit_now=True)
 
     #@function_profiler(__name__)
     def eval_field_interpolation_at_given_locations(self,field_name, field_instance,grid, reader, x,
@@ -232,10 +279,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                             n_cell, bc_cords,
                                                             active)
             else:
-                triangle_eval_interp.time_independent_2Dfield(basic_util.atLeast_Nby1(output),
-                                                              field_instance.data, grid['triangles'],
-                                                              n_cell, bc_cords,
-                                                              active)
+                self._time_independent_2Dfield(output,field_instance, grid['triangles'],
+                                                    n_cell, bc_cords, active)
         return output
 
     
