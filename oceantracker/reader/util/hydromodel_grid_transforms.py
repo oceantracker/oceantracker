@@ -92,10 +92,9 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
 
                 # if in bottom data cell use log interp if water velocity
                 # by adjusting f
-                if nz_data == nz_bottom and is_water_velocity:
+                if is_water_velocity and nz_data == nz_bottom:
                     # get total water depth
-                    twd = abs(tide[nt, node, 0, 0] + water_depth[0, node, 0, 0])
-                    if twd < minimum_total_water_depth: twd = minimum_total_water_depth
+                    twd = max( abs(tide[nt, node, 0, 0] + water_depth[0, node, 0, 0]), minimum_total_water_depth)
 
                     # dz is  bottom layer thickness in metres, in original hydro model data
                     dz =  twd*dzf
@@ -107,6 +106,7 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
 
                 for m in range(out.shape[3]):
                     out[nt,node,nz,m] = (1-f) *data[nt,node,nz_data,m] + f *data[nt,node,nz_data+1,m]
+
         # do top value at sigma= 1
             for m in range(out.shape[3]):
                 out[nt, node, -1, m] = data[nt, node, -1, m]

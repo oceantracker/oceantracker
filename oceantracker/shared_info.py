@@ -16,13 +16,13 @@ class SharedInfoClass(object):
         for key in common_info.class_dicts_list:
             self.classes[key] = {}
 
-    def add_core_class(self, class_role, params, crumbs ='',initialise=False):
+    def add_core_class(self, class_role, params, crumbs ='',initialise=False,default_classID=None):
 
         ml= self.msg_logger
         crumb_base = f' >>> adding core class type >> "{class_role}" '
 
         # make instance  and merge params
-        i = self.class_importer.new_make_class_instance_from_params(params,class_role, default_classID=class_role, crumbs=crumb_base + crumbs)
+        i = self.class_importer.new_make_class_instance_from_params(params,class_role, default_classID=default_classID, crumbs=crumb_base + crumbs)
 
         self.classes[class_role] = i
         if initialise: i.initial_setup()

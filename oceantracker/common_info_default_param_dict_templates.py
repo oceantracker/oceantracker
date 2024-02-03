@@ -4,7 +4,7 @@ package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
 
-code_version = '0.4.1.301 2024-01-20'
+code_version = '0.4.1.302 2024-01-20'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 
@@ -93,8 +93,9 @@ default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
                         particle_group_manager= 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager',
                         tracks_writer = 'oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter',
                         interpolator = 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid',
-                        dispersion = 'oceantracker.dispersion.random_walk.RandomWalk',
-                        resuspension = 'oceantracker.resuspension.resuspension.BasicResuspension',
+                        dispersion_random_walk = 'oceantracker.dispersion.random_walk.RandomWalk',
+                        dispersion_random_walk_varyingAz ='oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ',
+                        resuspension_basic = 'oceantracker.resuspension.resuspension.BasicResuspension',
                         tidal_stranding = 'oceantracker.tidal_stranding.tidal_stranding.TidalStranding',
                         release_groups = 'oceantracker.release_groups.point_release.PointRelease',
                         field_reader='oceantracker.fields._base_field.ReaderField',

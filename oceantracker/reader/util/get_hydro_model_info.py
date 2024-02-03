@@ -27,10 +27,11 @@ def find_file_format_and_file_list(reader_params, class_importer, msg_logger):
             found = True
             break
     if found:
-        msg_logger.progress_marker('found hydro-model files of type ' + r_name.upper())
+        msg_logger.progress_marker(f'found hydro-model files of type  "{r_name.upper()}"')
     else:
-        msg_logger.msg(f'Could not set up reader, no files found matching mask = "{reader_params["file_mask"]}"  or "out2d*.nc" for schism v5, or files do no match known format',
-                                   fatal_error=True,  exit_now=True)
+        msg_logger.msg(f'Could not set up reader, no files in dir = "{reader_params["input_dir"]} found matching mask = "{reader_params["file_mask"]}"  (or "out2d*.nc" if schism v5), or files do no match known format',
+                        hint='Check given input_dir and  file_mask params, check if any non-hydro netcdf files in the dir, otherwise may not be known format',
+                        fatal_error=True,  exit_now=True)
     return reader_params, file_list
 
 

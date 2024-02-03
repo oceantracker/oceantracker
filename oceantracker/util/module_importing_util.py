@@ -63,7 +63,7 @@ class ClassImporter(object):
             # try default
             cls_obj = self.get_default_class(default_classID)
             if cls_obj is None:
-                ml.msg(f'No class_name param for "{name}" and no know default class for type  "{class_role}"')
+                ml.msg(f'No class_name param for "{name}" given, and no known default class for type  "{class_role}"', fatal_error=True)
 
         # check class comes from expected type
         if cls_obj is not None:

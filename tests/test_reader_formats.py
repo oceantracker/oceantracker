@@ -127,6 +127,20 @@ def get_case(n):
             title= 'Whangarei prelim test'
             time_step = 300.
 
+        case 152:
+            root_input_dir = r'G:\Hindcasts_large\2024_hauraki_gulf_auck_uni\2020'
+            output_file_base = 'test_Hauarki'
+            file_mask = 'schout*.nc'
+
+            x0 = [[-36.81612195216445, 174.82731398519584],
+                  [-37.070731274878, 175.39302783837365],
+                  [-36.4051733326401, 174.7771263023033],
+                  [-36.85502113978176, 174.6807647189683]
+                  ]
+            x0= cord_transforms.WGS84_to_UTM(np.flip(np.asarray(x0),axis=1)).tolist()
+            ax = None # Auck
+            title = 'test_ Hauarki'
+
         case 200:
             root_input_dir=r'F:\Hindcasts\colaborations\LakeSuperior\historical_sample\2022'
             x0 = [[439094.44415005075, 5265627.962025132, -10]]
