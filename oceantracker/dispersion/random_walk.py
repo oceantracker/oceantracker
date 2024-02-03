@@ -18,7 +18,7 @@ class RandomWalk(_BaseTrajectoryModifer):
     def check_requirements(self):
         si = self.shared_info
         if si.settings['use_A_Z_profile']:
-                self.check_class_required_fields_prop_etc(    requires3D=True,
+                self.check_class_required_fields_prop_etc(requires3D=True,
                                                              required_props_list=['nz_cell', 'x', 'n_cell'],crumbs='random walk with use_A_Z_profile')
 
     def initial_setup(self):
@@ -42,39 +42,26 @@ class RandomWalk(_BaseTrajectoryModifer):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
 
-        if  si.is3D_run and si.settings['use_A_Z_profile'] and 'A_Z_profile' in part_prop:
-            self._add_random_walk_velocity_modifier_AZ_profile(part_prop['A_Z_profile'].data, part_prop['A_Z_profile_vertical_gradient'].data,
-                                                    self.info['random_walk_velocity'],
-                                                    np.abs(si.settings['time_step']),
-                                                    active, part_prop['velocity_modifier'].data)
+        if  si.is3D_run:
+            self._add_random_walk_velocity3D_modifier_constantAZ(self.info['random_walk_velocity'],
+                                                                 active, part_prop['velocity_modifier'].data )
         else:
-            self._add_random_walk_velocity_modifier_constantAZ(self.info['random_walk_velocity'], active, part_prop['velocity_modifier'].data )
+            self._add_random_walk_velocity2D_modifier_constantAZ(self.info['random_walk_velocity'],
+                                                                 active, part_prop['velocity_modifier'].data )
 
     @staticmethod
     @njitOT
-    #@guvectorize([(float64[:],int32[:],float64[:,:])],' (m), (l)->(n,m)') #, does not work needs n on LHS
-    def _add_random_walk_velocity_modifier_constantAZ(random_walk_velocity, active, velocity_modifier):
+    def _add_random_walk_velocity2D_modifier_constantAZ(random_walk_velocity, active, velocity_modifier):
         for n in active:
-            for m in range(velocity_modifier.shape[1]):
+            for m in range(2):
                 # todo below slow? is allocating memory??, try math.random random.Genetaor.normal  and get 2-3 at same time above?
                 velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
 
-
     @staticmethod
     @njitOT
-    def _add_random_walk_velocity_modifier_AZ_profile(A_Z,A_Z_vertical_gradient,random_walk_velocity,timestep, active, velocity_modifier):
-        # add vertical advection effect of dispersion to random walk, see Lynch Particles in the Coastal Ocean: Theory and Applications
-        # this avoids particle accumulating in areas of high vertical gradient of A_Z, ie top and bottom
-
+    def _add_random_walk_velocity3D_modifier_constantAZ(random_walk_velocity, active, velocity_modifier):
         for n in active:
-
-            # random walk velocity in horizontal
-            for m in range(2):
+            for m in range(3):
+                # todo below slow? is allocating memory??, try math.random random.Genetaor.normal  and get 2-3 at same time above?
                 velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
 
-            # pseudo-advection required by random walk to avoid accumulation
-            velocity_modifier[n, 2] += A_Z_vertical_gradient[n]  # todo limit excursion by this velocity ?
-
-            # random walk in vertical
-            random_walk_size= np.sqrt(2. * timestep * np.abs(A_Z[n]))
-            velocity_modifier[n, 2] += normalvariate(0.,  random_walk_size/timestep) # apply vertical walk as a velocity

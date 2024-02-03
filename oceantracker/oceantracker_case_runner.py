@@ -314,20 +314,23 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up feilds
         fgm = si.add_core_class('field_group_manager', si.working_params['core_classes']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
-        fgm.setup_dispersion_and_resuspension() # setup depends on what variables are in the hydro-files
+        fgm.setup_dispersion_and_resuspension() # setup files required for didpersion etc, depends on what variables are in the hydro-files
 
+        # set up dispersion ad resuspension calculation class
         dispersion_params = si.working_params['core_classes']['dispersion']
         if  si.is3D_run:
             if si.settings['use_A_Z_profile'] and fgm.info['has_A_Z_profile']:               # use profile of AZ
-
-               dispersion_params['class_name'] ='oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ'
+                si.add_core_class('dispersion', dispersion_params,
+                                  default_classID='dispersion_random_walk_varyingAz', initialise=True)
+            else: # constant random walk,  as default
+                si.add_core_class('dispersion', dispersion_params, default_classID='dispersion_random_walk', initialise=True)
 
             # resuspension only in 3D
-            si.add_core_class('resuspension', si.working_params['core_classes']['resuspension'], initialise=True)
-
-        # alawys add dispersion
-        si.add_core_class('dispersion', dispersion_params, initialise=True)
-       
+            si.add_core_class('resuspension', si.working_params['core_classes']['resuspension'],
+                              default_classID='resuspension_basic', initialise=True)
+        else:
+             # 2D constant random walk as default, no resupension
+            si.add_core_class('dispersion', dispersion_params, default_classID='dispersion_random_walk', initialise=True)
 
         if si.settings['write_tracks']:
             si.add_core_class('tracks_writer',si.working_params['core_classes']['tracks_writer'], initialise=True)
@@ -344,8 +347,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # make other core classes
         si.add_core_class('solver', core_role_params['solver'], crumbs='core class solver ')
-        if si.is3D_run:
-            si.add_core_class('resuspension', core_role_params['resuspension'], crumbs= 'core class "resuspension" ')
 
 
         if  si.settings['time_step'] > fgm.get_hydo_model_time_step():
