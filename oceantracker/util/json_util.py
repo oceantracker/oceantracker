@@ -38,87 +38,75 @@ def read_JSON(file_name):
 
 #Store as JSON a numpy.ndarray or any nested-list composition.
 class MyEncoder(json.JSONEncoder):
-    def _custom_preprocess_dict(self, val):
-
-        if isinstance(val,(float,np.float64,np.float32)) and not np.isfinite(val):
-            return 'not finite'
-        if isinstance(val, datetime):
-            return  val.isoformat()
-        else:
-           return val
-
-    def encode_notused(self, d):
-        if isinstance(d,dict):
-            for key in d.keys():
-                d[key]= self._custom_preprocess_dict(d[key])
-
-        return super().encode(d)
+    def __int__(self):
+        super().__int__(allow_nan=False)
 
     def default(self, obj):
-
+        val =  deepcopy(obj)
         try :
+
             # first numpy types
             if isinstance(obj, np.ndarray):
                 if np.all(np.isfinite(obj)):
                     if obj.dtype == np.datetime64:
-                        return str(obj)
+                        return  str(obj)
                     elif obj.dtype in [np.bool_,bool]:
-                        return obj.astype(np.int8).tolist()
+                        return   obj.astype(np.int8).tolist()
                     else:
-                        return  obj.tolist()
+                        return   obj.tolist()
                 else:
                     # fire fox cant read nan in json so make an object array, with nan as none
-                    r= np.full_like(obj, None, dtype=object)
-                    sel = np.isfinite(obj)
-                    r[sel]= obj[sel]
-                    return r.tolist()
+                    sel = ~np.isfinite(obj)
+                    val[sel]= 9.99999e32
+                    return  val.tolist()
 
             elif isinstance(obj,(np.int8, np.int16, np.int32,np.int64)):
                 # make single numpy int values
-                return int(obj)
-            elif isinstance(obj, (np.float16, np.float32, np.float64)):
-                # make single numpy int values
-                return float(obj)
+                return  int(obj)
+            elif type(obj) in (np.float16, np.float32, np.float64):
+                # make single numpy float values
+                if not np.isfinite(obj):
+                    return  None
+                else:
+                    return  float(obj)
+            elif type(obj) == float:
+                if not np.isfinite(obj):
+                    return  None
+                else:
+                    return  float(obj)
 
             elif  type(obj) in [np.bool_,bool]:
                 # make single numpy int values
-                return int(obj)
+                return  int(obj)
             # date/time strings
             elif isinstance(obj, (datetime, date)):
-                return obj.isoformat()
+                return  obj.isoformat()
 
             elif isinstance(obj,type):
-                return obj.__name__
+                return  obj.__name__
 
             elif type(obj) == np.datetime64:
-                return str(obj)
+                return  str(obj)
 
             elif type(obj) == np.timedelta64:
-                return str(obj.astype(timedelta)) # timedelta has better formating
+                return  str(obj.astype(timedelta)) # timedelta has better formating
 
             elif isinstance(obj,np.dtype):
-                return str(obj)
+                return  str(obj)
             elif type(obj) == timedelta:
-                return str(obj)
-            elif isinstance(numba.core.types.npytypes.Array):
-                pass
+                return  str(obj)
 
-            elif np.isnan(obj) or not np.isfinite(obj) :
-                return None
+            elif np.isnan(obj) or not np.isfinite(obj):
+                return  None
+            else:
+                return str(val)
+
+            return super().default(self, val)
 
         except Exception as e:
             #print(str(e))
             print(' warning  basic_util- oceantracker catch JSON encode error- object type ' + str(type(obj)) + ' value=' + str(obj))
             return f'Bad json value, not json decodable type {str(type(obj))}  values= {str(obj)}'
-
-        # lastly check if json can decode it
-        try:
-            obj_returned = json.JSONEncoder.default(self, obj)
-            return obj_returned
-        except Exception as e:
-            print(str(e))
-            raise ValueError(' basic_util-parent json.JSONEncoder.default could not decode object type ' + str(type(obj)) + ' value=' + str(obj))
-
 
 # geojson polygons
 #todo make reader to/from internal polygon format

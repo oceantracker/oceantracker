@@ -10,7 +10,7 @@ def seed_numba_random(a):
     np.random.seed(a)
 
 #def set_caching(b):
-#   os.environ['oceantracker_numba_caching'] =str(1 if b else 0)
+#   os.environ['oceantracker_numba_cac'] =str(1 if b else 0)
 #def is_caching():
 #    return  os.environ['oceantracker_numba_caching'] =='1'
 

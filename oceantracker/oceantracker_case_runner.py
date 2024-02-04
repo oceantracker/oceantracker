@@ -14,6 +14,7 @@ from time import sleep
 import traceback
 from oceantracker.util.parameter_checking import merge_params_with_defaults
 from oceantracker.util.module_importing_util import ClassImporter
+from oceantracker.util.setup_util import config_numba_environment
 from oceantracker import common_info_default_param_dict_templates as common_info
 # note do not import numba here as its enviroment  setting must ve done first, import done below
 
@@ -69,26 +70,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
         si.computer_info = get_versions_computer_info.get_computer_info()
 
+        # set numba config environment variables, before any import of numba,
+        config_numba_environment(si.settings)
 
-
-
-
-
-        # build short names map and base clasess
-
-        #get_all_parameter_classes(path.dirname(__file__)) # look in oceantracker's module
-
-        # set numbas envionment varibles before first import
-        #environ['oceantracker_numba_caching'] =str( 1 if si.settings['numba_caching'] else 0)
-        environ['numba_function_cache_size'] = str(si.settings['numba_function_cache_size'])
-
-        if si.settings['debug']:
-            # makes it easier to debug, particularly  in pycharm
-            import numba
-            #numba.core.config.FULL_TRACEBACKS = 1
-            #numba.core.config.BOUNDSCHECK = 1
-            environ['NUMBA_BOUNDSCHECK'] = '1'
-            environ['NUMBA_FULL_TRACEBACKS'] = '1'
 
         # set up profiling
         profiling_util.set_profile_mode(si.settings['profiler'])
@@ -193,8 +177,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.msg_logger.progress_marker('Delaying start by  ' + str(delay) + ' sec')
             sleep(delay)
             si.msg_logger.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
-
-
 
 
         if si.settings['use_random_seed']:
@@ -497,7 +479,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # check numba code for SIMD
         if True:
-            d['numba_code_info'] = dict(signatures={},SMID_code = {})
+            from numba.core import config
+            d['numba_code_info'] = dict(signatures={},SMID_code = {},
+                                        config={key:val for key, val in config.__dict__.items()
+                                                    if not key.startswith('_') and type(val) in [None,int,str,float]
+                                                }
+                                        )
             for name, func in  numba_util.numba_func_info.items():
                 if hasattr(func,'signatures') : # only code that has been compiled has a sig
                     sig = func.signatures
