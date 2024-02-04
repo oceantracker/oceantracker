@@ -30,7 +30,7 @@ import difflib
 
 from oceantracker import common_info_default_param_dict_templates as common_info
 from oceantracker.util.module_importing_util import ClassImporter
-
+from oceantracker.util.setup_util import config_numba_environment
 # start with numba caching turned off
 from oceantracker.util import  numba_util
 #numba_util.set_caching(False)
@@ -167,6 +167,7 @@ class _OceanTrackerRunner(object):
         ml = self.msg_logger
 
         working_params = self._main_run_set_up(user_given_params)
+
         # try catch is needed in notebooks to ensure mesage loger file is close,
         # which allows rerunning in notebook without  permission file errors
         try:
@@ -208,8 +209,16 @@ class _OceanTrackerRunner(object):
         params = deepcopy(user_given_params)
 
         working_params = self._decompose_params(params, full_checks=full_checks)
-        working_params = self._get_hindcast_file_info(working_params)
+
+
         working_params = self._setup_output_folders(params, working_params)
+
+        # set numba config environment variables, before any import of numba, eg by readers
+        config_numba_environment(working_params['shared_settings'])
+
+        # look for file type and list of files, in time sorted order
+        working_params = self._get_hindcast_file_info(working_params)
+
         self._write_raw_user_params(working_params['output_files'],user_given_params, case_list=case_list_params)
 
         o = working_params['output_files']

@@ -249,8 +249,8 @@ class FieldGroupManager(ParameterBaseClass):
         self.info['buffer_info']= reader.info['buffer_info']
 
         nc = reader.open_first_file()
-        reader.info['variables'] = nc.variable_info  # note all variable names
-        self.info['variables'] = nc.variable_info # note all variable names
+        #reader.info['variables'] = nc.variable_info  # note all variable names
+        #self.info['variables'] = nc.variable_info # note all variable names
 
         self.grid, si.is3D_run   = reader.set_up_grid(nc)
         grid = self.grid
