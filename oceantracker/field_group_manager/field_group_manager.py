@@ -293,23 +293,26 @@ class FieldGroupManager(ParameterBaseClass):
         nc = reader.open_first_file()
 
         # set up dispersion using vertical profiles of A_Z if available
-        has_A_Z_profile =si.is3D_run and si.settings['use_A_Z_profile'] and fmap['A_Z_profile'] is not None and nc.is_var(fmap['A_Z_profile'])
-        self._setup_dispersion(nc, has_A_Z_profile )
+        self._setup_dispersion(nc)
 
         # add resuspension based on friction velocity
         if si.is3D_run:
             # add friction velocity from botom stress or near seabed vel
-            has_bottom_stress = nc.is_var(fmap['bottom_stress'][0])
-            self._setup_resupension(nc,  has_bottom_stress)
+            self._setup_resupension(nc)
 
         nc.close()
 
-    def _setup_dispersion(self, nc, has_A_Z_profile):
+    def _setup_dispersion(self, nc):
         si = self.shared_info
         ml = si.msg_logger
         fmap = self.reader.params['field_variable_map']
 
-        if si.is3D_run and si.settings['use_A_Z_profile'] :
+        has_A_Z_profile = (si.is3D_run and si.settings['use_A_Z_profile'] \
+                            and 'A_Z_profile' in fmap \
+                            and (fmap['A_Z_profile'] is not None \
+                            and nc.is_var(fmap['A_Z_profile'])))
+
+        if has_A_Z_profile:
             self.add_reader_field( 'A_Z_profile',nc,write_interp_particle_prop_to_tracks_file=False)
             self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(name_of_field= 'A_Z_profile',write_interp_particle_prop_to_tracks_file=False),
                                    default_classID='field_A_Z_profile_vertical_gradient',
@@ -322,11 +325,15 @@ class FieldGroupManager(ParameterBaseClass):
 
         self.info['has_A_Z_profile'] = has_A_Z_profile
 
-    def _setup_resupension(self, nc, has_bottom_stress):
+    def _setup_resupension(self, nc):
         # get fields needed to calculate friction velocity field, needed for suspension
         si = self.shared_info
         ml = si.msg_logger
+        fmap = self.reader.params['field_variable_map']
 
+        has_bottom_stress = 'bottom_stress' in fmap \
+                                and fmap['bottom_stress'] is not None \
+                                and nc.is_var(fmap['bottom_stress'])
         if has_bottom_stress:
             self.add_reader_field('bottom_stress', nc,write_interp_particle_prop_to_tracks_file=False) # set up reading from file
             self.add_custom_field('friction_velocity',dict(write_interp_particle_prop_to_tracks_file=False), default_classID='field_friction_velocity_from_bottom_stress',

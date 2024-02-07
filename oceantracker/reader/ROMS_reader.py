@@ -44,8 +44,8 @@ class ROMsNativeReader(_BaseReader):
                                                     'water_depth': PVC('h', str),
                                                     'tide': PVC('zeta', str),
                                                     'water_temperature': PVC('temp', str) ,
-                                                    'bottom_stress': PVC('not_known', str, doc_str='maps standard internal field name to file variable name'),
-                                                    'A_Z_profile': PVC('not_known', str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
+                                                    'bottom_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+                                                    'A_Z_profile': PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
                                                     'water_velocity_depth_averaged':PLC(['ubar','vbar'], [str], fixed_len=2),
                                   }
                                   })
@@ -94,7 +94,7 @@ class ROMsNativeReader(_BaseReader):
         grid['lon_psi'] = nc.read_a_variable('lon_psi').astype(np.float64)
 
         grid['lon_lat_grid'] =  np.stack((grid['lon_psi'],grid['lat_psi']),  axis=2)
-        s=   grid['lon_lat'].shape
+        s=   grid['lon_lat_grid'].shape
         grid['lon_lat']=   grid['lon_lat_grid'].reshape(s[0]*s[1],s[2])
         grid['is_lon_lat'] = True
         grid['x'] = self.convert_lon_lat_to_meters_grid(grid['lon_lat'])
@@ -105,7 +105,7 @@ class ROMsNativeReader(_BaseReader):
 
     def read_triangles_as_int32(self, nc, grid):
         # build triangles from regular grid
-        grid = convert_regular_grid_to_triangles(grid, grid['psi_mask'] )
+        grid = convert_regular_grid_to_triangles(grid, grid['psi_land_mask'] )
         # get nodes for each corner of quad
 
         return grid
