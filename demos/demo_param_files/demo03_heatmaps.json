@@ -1,6 +1,7 @@
 {
     "output_file_base": "demo03_heatmaps",
     "add_date_to_run_output_dir": false,
+    "numba_cache_code": true,
     "time_step": 900,
     "debug": true,
     "reader": {

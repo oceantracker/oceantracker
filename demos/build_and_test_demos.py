@@ -28,6 +28,7 @@ poly_points_large=[[1597682.1237, 5489972.7479],
 import oceantracker.reader.generic_ncdf_reader
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
+    'numba_cache_code': True,
 
    'time_step' : 900,
     'debug': True,
@@ -229,6 +230,7 @@ params.append(p10)
 # case 50 schism basic
 schsim_base_params=\
 {'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,
+            'numba_cache_code': True,
                 #'numba_caching': False,
         'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                     'input_dir': 'demo_hindcast',

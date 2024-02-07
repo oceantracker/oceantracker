@@ -34,17 +34,13 @@ shared_settings_defaults ={
                 #'max_threads':   PVC(None, int, min=1,doc_str='maximum number of processors used for threading to process particles in parallel'),
                 'max_warnings':        PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps'),  # dont record more that this number of warnings, to keep caseInfo.json finite
                 'use_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
-                    'numba_function_cache_size' :  PVC(4048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB?'),
-                'multiprocessing_case_start_delay': PVC(None, float, min=0., doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file'),  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
+                'numba_function_cache_size' :  PVC(4048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB'),
+                'numba_cache_code': PVC(False, bool,  doc_str='Enable caching to disk of complied Numba code to sped start-up.?'),
+    'multiprocessing_case_start_delay': PVC(None, float, min=0., doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file'),  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
                 'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
                                                        doc_str='Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
                  }
 
-#not used yet
-advanced_settings= dict( numba_function_cache_size = PVC(4048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB?'),
-                         # 'numba_caching' :  PVC(False,  bool,doc_str='Caches numba functions in file system, for faster start up, as it does not have to compile numba code each time'),
-                         field_data_type= PVC('float32', str, possible_values=['float32','float64'], doc_str='Data type to store fields. float32 faster+less memory, float64 more precsion + slower'),
-                         )
 
 
 #  these setting can be different for each case

@@ -44,6 +44,7 @@ event_loggers:
         - 5489972.7479
       user_polygon_name: B
 max_particles: 1000
+numba_cache_code: true
 output_file_base: demo08_particle_splitting
 particle_buffer_size: 5000
 particle_properties:

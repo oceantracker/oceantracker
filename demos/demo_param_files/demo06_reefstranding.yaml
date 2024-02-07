@@ -6,6 +6,7 @@ dispersion:
   A_H: 0.1
 dispersion_miss-spelt:
   A_H: 0.1
+numba_cache_code: true
 output_file_base: demo06_reefstranding
 particle_properties:
   my_constant_prop:

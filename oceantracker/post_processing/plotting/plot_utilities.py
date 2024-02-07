@@ -4,9 +4,8 @@ import matplotlib.colors as clr
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as font_manager
 from oceantracker.common_info_default_param_dict_templates import node_types
-from oceantracker.util.triangle_utilities_code import convert_face_to_nodal_values
 from time import perf_counter
-from oceantracker.post_processing.read_output_files import load_output_files
+
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 from matplotlib import animation
