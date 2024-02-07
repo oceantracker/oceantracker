@@ -297,6 +297,11 @@ if __name__ == '__main__':
                 plot_utilities.display_grid(track_data['grid'], ginput=3, axis_lims=None)
             plot_base = path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base'])
 
+            plot_file = plot_base + '_tracks_01.mp4' if args.save_plot else None
+
+            plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
+                                          title=params['user_note'], movie_file=plot_file, aspect_ratio=.9,
+                                          show_grid=plot_opt['show_grid'])
 
             plot_file = plot_base + '_decay_01.mp4' if args.save_plot else None
             plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
@@ -309,10 +314,6 @@ if __name__ == '__main__':
                               aspect_ratio=.9,
                               interval=20, show_dry_cells=False)
 
-            plot_file = plot_base+'_tracks_01.mp4'  if args.save_plot else None
 
-            plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
-             title=params['user_note'], movie_file=plot_file,aspect_ratio=.9,
-            show_grid=plot_opt['show_grid'])
 
 
