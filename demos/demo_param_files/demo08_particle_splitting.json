@@ -1,6 +1,7 @@
 {
     "output_file_base": "demo08_particle_splitting",
     "add_date_to_run_output_dir": false,
+    "numba_cache_code": true,
     "time_step": 600,
     "debug": true,
     "reader": {

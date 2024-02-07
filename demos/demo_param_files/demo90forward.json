@@ -1,6 +1,7 @@
 {
     "output_file_base": "demo90forward",
     "add_date_to_run_output_dir": false,
+    "numba_cache_code": true,
     "time_step": 60,
     "debug": true,
     "reader": {

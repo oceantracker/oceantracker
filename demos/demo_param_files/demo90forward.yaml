@@ -8,6 +8,7 @@ dispersion:
 dispersion_miss-spelt:
   A_H: 0.1
 max_run_duration: 172800.0
+numba_cache_code: true
 output_file_base: demo90forward
 particle_properties:
   my_constant_prop:

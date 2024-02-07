@@ -1,16 +1,4 @@
 # utils for particle tracking
-from  copy import deepcopy, copy
-import time
-import numpy as np
-import platform
-from psutil import  cpu_count, cpu_freq
-
-
-from numba import njit
-from oceantracker.util.numba_util import njitOT
-
-class OceanTrackerDummyClass(object): pass
-
 def deep_dict_update(d, d_updates):
     # recursively update dictionary tree d, ie a dictionary which may contain dictionaries with d_updates or listes of dictionaries
     # with corressponding key values in dictionary d_updates, d_updates may be a dictionary of dictionaries
@@ -40,13 +28,6 @@ def deep_dict_update(d, d_updates):
     return d
 
 
-def is_substring_in_list(sub_str,str_list):
-    out= False
-    for s in str_list:
-        if sub_str in s: out = True
-    return out
-
-
 
 def nopass(msg=''):
     raise Exception("Missing method, base method must be overwritten" +msg)
@@ -61,8 +42,3 @@ def atLeast_Nby1(y):
         return y
 
 
-
-@njitOT
-def testNumbaRangeChecking():
-    x= np.full((10,1),0.)
-    x[x.shape[0]] = 1. # out of bounds test

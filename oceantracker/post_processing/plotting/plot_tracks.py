@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors, animation
-from oceantracker.util.triangle_utilities_code import convert_face_to_nodal_values
 from oceantracker.post_processing.plotting import plot_utilities
 
 from oceantracker.post_processing.read_output_files import load_output_files
