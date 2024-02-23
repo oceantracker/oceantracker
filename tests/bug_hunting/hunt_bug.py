@@ -2,7 +2,7 @@ from oceantracker import main
 from oceantracker.util import json_util
 from os import  path
 
-ncase=1
+ncase=2
 
 match ncase:
     case 1:
@@ -18,6 +18,10 @@ match ncase:
         del params['release_groups']['clay']['custom_release']
         params['resuspension']['critical_friction_velocity'] = params['resuspension']['critical_friction_velocity'][0]
         #params['shared_params']['processors'] = 1
+    case 2:
+        params = json_util.read_JSON(r'F:\OceanTrackerOutput\bug_hunting\LCS_oceantracker_traj_outputs\test.json')
+        params['root_output_dir'] = r'F:\OceanTrackerOutput\bug_hunting\LCS_oceantracker_traj_outputs'
+        params['output_file_base'] = r'test01'
 
 if __name__ == '__main__':
 

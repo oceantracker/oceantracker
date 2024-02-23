@@ -111,13 +111,7 @@ class SCHISMreaderNCDF(_BaseReader):
     def get_field_params(self,nc, name, crumbs=''):
         # work out if feild is 3D ,etc
         si = self.shared_info
-        fmap = deepcopy(self.params['field_variable_map'])
-
-        # if no field map given to use given name as field map
-        if name not in fmap:  fmap[name] = name
-
-        # make a list so all maps the same
-        if type(fmap[name]) != list: fmap[name] =[fmap[name]]
+        fmap = self.params['field_variable_map']
 
         f_params = dict(time_varying = nc.is_var_dim(fmap[name][0], 'time'),
                         is3D = nc.is_var_dim(fmap[name][0], 'nSCHISM_vgrid_layers'),
