@@ -72,6 +72,8 @@ class Solver(ParameterBaseClass):
         fgm.update_reader(model_times[0]) # initial buffer fill
 
         # run forwards through model time variable, which for backtracking are backwards in time
+        t2 = model_times[0]
+
         for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()
 
@@ -175,8 +177,8 @@ class Solver(ParameterBaseClass):
             # friction_velocity property  is now updated, so do resupension
             si.classes['resuspension'].update(time_sec, alive)
 
-
         fgm.update_tidal_stranding_status(time_sec, alive)
+
         # update particle properties
         pgm.update_PartProp(time_sec, alive)
 

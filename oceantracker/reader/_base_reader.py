@@ -490,7 +490,6 @@ class _BaseReader(ParameterBaseClass):
                 if not field.is_time_varying() or field.info['type'] != 'reader_field': continue
 
                 data = self.assemble_field_components(nc, grid, name, field, file_index=file_index)
-                data = self.preprocess_field_variable(nc, name,grid, data)  # in place tweaks, eg zero vel at bottom
 
                 junk = data
                 if field.is3D() and si.settings['regrid_z_to_uniform_sigma_levels']:
@@ -504,6 +503,9 @@ class _BaseReader(ParameterBaseClass):
                                         si.z0, si.minimum_total_water_depth,
                                         data, out,
                                         name == 'water_velocity')
+
+                # read dry cels which may need tide and water depth
+                self.read_dry_cell_data(nc, grid, fields, file_index, grid['is_dry_cell'], buffer_index)
 
                 # o = reader_util.get_values_at_bottom(junk, grid['bottom_cell_index'])
                 # pass
@@ -524,7 +526,6 @@ class _BaseReader(ParameterBaseClass):
                     plt.savefig('\myfig.png')
 
             nc.close()
-
 
             # now all  data has been read from file, now
             # update user fields from newly read fields and data
@@ -566,9 +567,12 @@ class _BaseReader(ParameterBaseClass):
             # get view of where in buffer data is to be placed
             out[:, :, :, m:m1] = data
             m += comp_per_var
+
+        # any tweaks required before use
+        out =  self.preprocess_field_variable(nc, name, grid, out)
+
+
         return out
-
-
 
     def read_time_variable_grid_variables(self, nc,grid, fields, buffer_index, file_index):
         # read time and  grid variables, eg time,dry cell
@@ -579,7 +583,6 @@ class _BaseReader(ParameterBaseClass):
         # add date for convenience
         grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
 
-        self.read_dry_cell_data(nc,grid, fields, file_index, grid['is_dry_cell'], buffer_index)
 
         if si.is3D_run:
             # read zlevel inplace to save memory?

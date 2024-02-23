@@ -46,7 +46,7 @@ class unstructured_FVCOM(_BaseReader):
         grid['zlevel_fractions_layer'] = 1. + np.flip(nc.read_a_variable('siglay', sel=None).astype(np.float32).T, axis=1)  # layer center fractions
 
         # make distance weighting matrix for triangle center values at nodal points
-        grid['cell_center_weights'] = hydromodel_grid_transforms.calculate_cell_center_weights_at_node_locations(
+        grid['cell_center_weights'] = hydromodel_grid_transforms.calculate_inv_dist_weights_at_node_locations(
             grid['x'], grid['x_center'], grid['node_to_tri_map'], grid['tri_per_node'])
         grid['vertical_grid_type'] = 'S-sigma'
 
@@ -177,7 +177,7 @@ class unstructured_FVCOM(_BaseReader):
         # some variables at nodes, some at cell center ( eg u,v,w)
         if nc.is_var_dim(var_name, 'nele'):
             # data is at cell center/element/triangle  move to nodes
-            data = hydromodel_grid_transforms.get_node_layer_field_values(data, grid['node_to_tri_map'], grid['tri_per_node'], grid['cell_center_weights'])
+            data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(data, grid['node_to_tri_map'], grid['tri_per_node'], grid['cell_center_weights'])
 
         # see if z or z water level  in variable and swap z and node dim
         if nc.is_var_dim(var_name,'siglay') :

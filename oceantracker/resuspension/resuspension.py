@@ -45,6 +45,7 @@ class BasicResuspension(_BaseResuspension):
     def update(self,time_sec, active):
         # do resupension
         #todo move 'resuspension_factor' calc to initialize() when substeping removed
+        #todo is friction velocity up to date?
         self.start_update_timer()
         si= self.shared_info
         info = self.info

@@ -1,7 +1,7 @@
 # reads rectangular or flat output into buffer, reads whole file
 from  oceantracker.util.ncdf_util import NetCDFhandler
 import numpy as np
-from numba import njit
+
 
 from oceantracker.util import json_util
 from oceantracker.util.numba_util import njitOT

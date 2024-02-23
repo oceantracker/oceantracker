@@ -136,24 +136,48 @@ def convert_layer_field_to_levels_from_fixed_depth_fractions(data, sigma_layer, 
     return data_levels
 
 @njitOT
-def get_node_layer_field_values(data, node_to_tri_map, tri_per_node,cell_center_weights):
-    # get nodal values from data in surrounding cells based in distance weighting
-    # used in FVCOM reader
-
-    data_nodes = np.full((data.shape[0],) + (len(node_to_tri_map),) +(data.shape[2],) , 0., dtype=np.float32)
+def get_nodal_values_from_weighted_data(data, node_to_tri_map, tri_per_node, cell_center_weights):
+    # get nodal values from 4D data in surrounding cells based in distance weighting
+    # used in FVCOM, DELFT3D FM  reader
+    #todo make this faster as works in 4D?
+    s = (data.shape[0],len(node_to_tri_map)) + data.shape[2:4]
+    data_nodes = np.full( s , 0., dtype=np.float32)
 
     for nt in range(data.shape[0]): # loop over time steps
         # loop over triangles
-        for node in range(node_to_tri_map.shape[0]):
-            for nz in range(data.shape[2]):
+        for node in range(s[1]):
+            for nz in range(s[2]):
                 # loop over cells containing this node
                 for m in range(tri_per_node[node]):
                     cell = node_to_tri_map[node, m]
-                    data_nodes[nt, node, nz] += data[nt, cell, nz]*cell_center_weights[node, m] # weight this cell value
+                    for n_comp in range(s[3]):
+                        data_nodes[nt, node, nz,n_comp] += data[nt, cell, nz,n_comp]*cell_center_weights[node, m] # weight this cell value
 
     return data_nodes
 
+def get_node_to_cell_map(cell_nodes, n_nodes):
+    # map nodes to the cells which connect to them
+    # works with mix of triangular and quad cells
+    # if 4th index < 0 then it is taken as a triangle, not quad
 
+    # expanding output to allow any number of cells per node
+    E =  np.full((n_nodes,5),-999,dtype=np.int32)
+    node_to_cell_map= E.copy()
+    cells_per_node = np.full((n_nodes, ), 0, dtype=np.int32)
+
+    for n_cell, en in enumerate(cell_nodes):
+
+        for m in range(cell_nodes.shape[1]):
+            node = en[m]
+            if node < 0 : break # if last one missing in mixed quad/tri cells
+
+            node_to_cell_map[node,cells_per_node[node]] = n_cell
+            cells_per_node[node] += 1
+
+            # expand map if more column needed
+            if cells_per_node[node] >= node_to_cell_map.shape[1]:
+                 node_to_cell_map= np.concatenate((node_to_cell_map,E),axis=1)
+    return node_to_cell_map, cells_per_node
 
 @njitOT
 def convert_layer_field_to_levels_from_depth_fractions_at_each_node(data, zfraction_layer, zfraction_level):
@@ -175,22 +199,25 @@ def convert_layer_field_to_levels_from_depth_fractions_at_each_node(data, zfract
 
     return data_levels
 
+
 @njitOT
-def calculate_cell_center_weights_at_node_locations(x_node, x_cell, node_to_tri_map, tri_per_node):
-    # calculate distance weights for values at cell centers, to be used in interploting cell center values to nodal values
-    weights= np.full_like(node_to_tri_map, 0.,dtype=np.float32)
+def calculate_inv_dist_weights_at_node_locations(x_node, x_data, node_to_data_map, data_per_node):
+    # calculate distance weights at nodes fot
+    # for the values assocaite with the node as given in node_to_data_map
+    weights= np.full_like(node_to_data_map, 0.,dtype=np.float32)
     dxy= np.full((2,), 0.,dtype=np.float32)
 
     for n in range(x_node.shape[0]):
         s= 0.
-        n_cells=tri_per_node[n]
-        for m in range(n_cells):
-            dxy[:] = x_cell[node_to_tri_map[n,m],:2] - x_node[n, :2]
+        n_data=data_per_node[n]
+        for m in range(n_data):
+            dxy[:] = x_data[node_to_data_map[n,m], :2] - x_node[n, :2]
             dist = np.sqrt(dxy[0]**2 + dxy[1]**2)
-            weights[n,m] = dist
-            s += dist
+            dist= max(1.0e-2, dist) # no less than 1cm, ie value at node
+            weights[n, m] = 1./dist
+            s += weights[n, m]
 
         # normalize weights
-        for m in range(n_cells): weights[n,m]=weights[n,m] /s
+        for m in range(n_data): weights[n,m]=weights[n,m] /s
 
-    return  weights
+    return weights

@@ -37,9 +37,11 @@ class FieldGroupManager(ParameterBaseClass):
 
         self._setup_hydro_reader(si.working_params['reader_builder'])
 
+
         #todo dev test code,
         grid = self.grid
-        grid['water_depth_triangles'] = self.fields['water_depth'].data[0,grid['triangles'],0,0]
+
+
         self.set_up_interpolator()
 
 
@@ -254,6 +256,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         self.grid, si.is3D_run   = reader.set_up_grid(nc)
         grid = self.grid
+
         reader.setup_water_velocity(nc,grid)
 
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
@@ -269,11 +272,12 @@ class FieldGroupManager(ParameterBaseClass):
             if nc.is_var(fm['tide']) and nc.is_var(fm['water_depth']):
                 reader.params['load_fields'] = list(set(['tide', 'water_depth'] + reader.params['load_fields']))
 
-        # add file fields all reader
+        # add all reader/file fields
         for name in  reader.params['load_fields']:
             self.add_reader_field( name, nc)
 
         nc.close()
+
 
     def set_up_interpolator(self):
         si = self.shared_info
@@ -297,20 +301,23 @@ class FieldGroupManager(ParameterBaseClass):
 
         # add resuspension based on friction velocity
         if si.is3D_run:
-            # add friction velocity from botom stress or near seabed vel
+            # add friction velocity from bottom stress or near seabed vel
             self._setup_resupension(nc)
 
         nc.close()
 
-    def _setup_dispersion(self, nc):
+    def _setup_dispersion(self, nc,  has_A_Z_profile=None):
         si = self.shared_info
         ml = si.msg_logger
         fmap = self.reader.params['field_variable_map']
 
-        has_A_Z_profile = (si.is3D_run and si.settings['use_A_Z_profile'] \
+        # has_A_Z_profile can optinaly be set by nested readers if all
+        # hindcasts have A_Z_profile
+        if has_A_Z_profile is None:
+            has_A_Z_profile = si.is3D_run and si.settings['use_A_Z_profile'] \
                             and 'A_Z_profile' in fmap \
                             and (fmap['A_Z_profile'] is not None \
-                            and nc.is_var(fmap['A_Z_profile'])))
+                            and nc.is_var(fmap['A_Z_profile']))
 
         if has_A_Z_profile:
             self.add_reader_field( 'A_Z_profile',nc,write_interp_particle_prop_to_tracks_file=False)
@@ -318,20 +325,22 @@ class FieldGroupManager(ParameterBaseClass):
                                    default_classID='field_A_Z_profile_vertical_gradient',
                                    crumbs='random walk > Adding A_Z_vertical_gradient field, for using_AZ_profile')
             si.msg_logger.msg('Found vertical diffusivity profile in hydro-model files,  using profile for vertical random walk', note=True)
-
         else:
             si.settings['use_A_Z_profile'] = False
             ml.msg(f'Using constant vertical dispersion, as 2D hydro-model A_Z, ie not using A_Z_profile as option set False or cannot find hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile', note=True)
 
         self.info['has_A_Z_profile'] = has_A_Z_profile
 
-    def _setup_resupension(self, nc):
+    def _setup_resupension(self, nc, has_bottom_stress=None):
         # get fields needed to calculate friction velocity field, needed for suspension
         si = self.shared_info
         ml = si.msg_logger
         fmap = self.reader.params['field_variable_map']
 
-        has_bottom_stress = 'bottom_stress' in fmap \
+        # has_bottom_stress can optinaly be set by nested readers if all
+        # hindcasts have botton stress data
+        if has_bottom_stress is None:
+            has_bottom_stress = 'bottom_stress' in fmap \
                                 and fmap['bottom_stress'] is not None \
                                 and nc.is_var(fmap['bottom_stress'])
         if has_bottom_stress:
@@ -344,12 +353,15 @@ class FieldGroupManager(ParameterBaseClass):
                                                     crumbs='initializing friction velocity field used by resuspension class with near bottom velocity')
             ml.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
 
-
-
-
     def add_reader_field(self, name, nc,write_interp_particle_prop_to_tracks_file=True):
         si = self.shared_info
         reader= self.reader
+
+        # ensure all field maps are lists, and if not given use name as the field map
+        fmap = reader.params['field_variable_map']
+        if name not in fmap or fmap[name] is None:  fmap[name] = name  # if no field map given to use given name as field map
+        if type(fmap[name]) != list: fmap[name] = [fmap[name]]  # make a list so all maps the same
+
         field_params = reader.get_field_params(nc, name)
         field_params['write_interp_particle_prop_to_tracks_file'] =write_interp_particle_prop_to_tracks_file
         i = si.class_importer.new_make_class_instance_from_params(field_params,'fields', name=name, default_classID='field_reader',

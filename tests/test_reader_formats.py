@@ -142,6 +142,7 @@ def get_case(n):
             title = 'test_ Hauarki'
 
         case 200:
+            # FVCOM
             root_input_dir=r'F:\Hindcasts\colaborations\LakeSuperior\historical_sample\2022'
             x0 = [[439094.44415005075, 5265627.962025132, -10]]
             file_mask = 'nos.lsofs.fields.n000*.nc'
@@ -150,14 +151,28 @@ def get_case(n):
             max_days=30
             title = 'FVCOM test'
         case 300:
+            #ROMS
             root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\ROMS_samples'
             x0 =  [[616042, 4219971, -1], [616042, 4729971, -1], [616042, 4910000, -1],
                    [387649.9416260512, 4636593.611571449, -1], [-132118.97253055905, 4375233.36585782, -1], [-178495.6601573273, 4132294.9876834783, -1]]
             file_mask  =  'DopAnV2R3-ini2007_da_his.nc'
             output_file_base= 'ROMS'
             title = 'ROMS test'
-        case 400:
 
+        case 400:
+            # DELFT FM
+            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\Delft3D\DELF3DFM_silawasi'
+
+            x0=[[212521.82627785322, 269631.238901636],
+                [70859.17768674984, -72539.71235443512]]
+            file_mask = 'NSulawesi_*.nc'
+            output_file_base = 'DELF3D-FM'
+            title = 'DELF3D-FM test'
+            reader = 'oceantracker.reader.dev.dev_delft_fm.DELFTFM'
+            is3D = False
+
+        case 1100:
+            #OCEANUM GLORYS
             x0 =  [
                 #[-73.48272505246274, -173.7097571108972],
                    [-70., -130],
@@ -231,7 +246,7 @@ def get_case(n):
 
     params.update(note=title,output_file_base=output_file_base,
                   max_run_duration= max_days*24*3600, time_step= time_step, open_boundary_type=open_boundary_type)
-    params['reader'].update(input_dir=root_input_dir, file_mask=file_mask, class_name=reader_class)
+    params['reader'].update(input_dir=root_input_dir, file_mask=file_mask, class_name=reader)
     if water_depth_file is not None:
         params['reader']['water_depth_file'] = water_depth_file
         params['reader']['load_fields'] = ['water_depth']
@@ -239,9 +254,7 @@ def get_case(n):
     if params['reader']['class_name'] is  None:   del params['reader']['class_name']
 
 
-    if reader is not None:  params['reader']['class_name'] = reader
 
-    #params['display_grid_at start'] = True
     params['release_groups']['P1'].update(pulse_size=pulse_size)
 
     if is3D:
@@ -276,6 +289,7 @@ if __name__ == '__main__':
 
     for n in tests:
         params, plot_opt= get_case(n)
+        #params['display_grid_at start'] = True # ti use giput to get cords
         params.update( root_output_dir = root_output_dir,
                     regrid_z_to_uniform_sigma_levels = args.uniform,
                     debug_plots = args.debug_plots,
@@ -300,7 +314,7 @@ if __name__ == '__main__':
             plot_file = plot_base + '_tracks_01.mp4' if args.save_plot else None
 
             plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
-                                          title=params['user_note'], movie_file=plot_file, aspect_ratio=.9,
+                                          title=params['user_note'], movie_file=plot_file, aspect_ratio=None,
                                           show_grid=plot_opt['show_grid'])
 
             plot_file = plot_base + '_decay_01.mp4' if args.save_plot else None
@@ -311,7 +325,7 @@ if __name__ == '__main__':
                               vmax=1.0, vmin=0,
                               movie_file=plot_file,
                               fps=24,
-                              aspect_ratio=.9,
+                              aspect_ratio=None,
                               interval=20, show_dry_cells=False)
 
 
