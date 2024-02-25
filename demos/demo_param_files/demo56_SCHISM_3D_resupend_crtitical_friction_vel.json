@@ -2,7 +2,8 @@
     "output_file_base": "demo56_SCHISM_3D_resupend_crtitical_friction_vel",
     "debug": true,
     "time_step": 120,
-    "numba_cache_code": true,
+    "numba_cache_code": false,
+    "regrid_z_to_uniform_sigma_levels": true,
     "reader": {
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",
@@ -15,27 +16,6 @@
         "A_V": 0.001
     },
     "release_groups": {
-        "P1": {
-            "points": [
-                [
-                    1594500,
-                    5487000,
-                    -1
-                ],
-                [
-                    1594500,
-                    5483000,
-                    -1
-                ],
-                [
-                    1598000,
-                    5486100,
-                    -1
-                ]
-            ],
-            "pulse_size": 10,
-            "release_interval": 3600
-        },
         "poly1": {
             "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
             "points": [
@@ -64,9 +44,28 @@
                     5489972.7479
                 ]
             ],
-            "z_range": [
-                -2,
-                -4.0
+            "z_min": -1,
+            "z_max": -1,
+            "pulse_size": 10,
+            "release_interval": 3600
+        },
+        "P1": {
+            "points": [
+                [
+                    1594500,
+                    5487000,
+                    -1
+                ],
+                [
+                    1594500,
+                    5483000,
+                    -1
+                ],
+                [
+                    1598000,
+                    5486100,
+                    -1
+                ]
             ],
             "pulse_size": 10,
             "release_interval": 3600
@@ -153,7 +152,7 @@
     "velocity_modifiers": {
         "terminal_velocity": {
             "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
-            "value": -0.001
+            "value": -0.002
         }
     },
     "particle_statistics": {

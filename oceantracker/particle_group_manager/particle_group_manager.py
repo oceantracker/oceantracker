@@ -38,6 +38,10 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # core particle props. , write at each required time step
         self.add_particle_property('x','manual_update',dict(vector_dim=nDim))  # particle location
+        self.add_particle_property('x0', 'manual_update', dict(write=True, time_varying= False, vector_dim=nDim))  # location when last moving
+
+        self.add_particle_property('x_last_good', 'manual_update', dict(write=False, vector_dim=nDim))  # location when last moving
+
         self.add_particle_property('particle_velocity','manual_update',dict(vector_dim=nDim))
         self.add_particle_property('velocity_modifier','manual_update', dict(vector_dim=nDim))
 
@@ -58,7 +62,6 @@ class ParticleGroupManager(ParameterBaseClass):
                                          description='ID for which grid, outer (ID=0) or nested (ID >0),  each particle resides in '))
 
         self.add_particle_property('time_released', 'manual_update',dict(time_varying= False, description='time (sec) each particle was released'))
-        self.add_particle_property('x_last_good','manual_update',dict( write=True, vector_dim=nDim))  # location when last moving
 
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
@@ -88,8 +91,8 @@ class ParticleGroupManager(ParameterBaseClass):
             sel =  time_sec * si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
             num_pulses= np.count_nonzero(sel)
             for n in range(num_pulses):
-                x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess, bc_cords,hydro_model_gridID = g.get_release_locations(time_sec)
-                new_index = self.release_a_particle_group_pulse(time_sec, x0, IDrelease_group, IDpulse, user_release_groupID, n_cell_guess,bc_cords,hydro_model_gridID)
+                release_data = g.get_release_locations(time_sec)
+                new_index = self.release_a_particle_group_pulse(time_sec,release_data)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
                 ri['index_of_next_release'] += 1
             pass
@@ -124,15 +127,13 @@ class ParticleGroupManager(ParameterBaseClass):
             si.msg_logger.msgg(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)),warning=True)
         return new_buffer_indices #indices of all new particles
 
-    def release_a_particle_group_pulse(self, t, x0,
-                                       IDrelease_group, IDpulse, user_release_groupID,
-                                       n_cell_guess,bc_cords, hydro_model_gridID):
+    def release_a_particle_group_pulse(self, t, release_data):
         # release one pulse of particles from given group
         si = self.shared_info
 
         info= self.info
 
-        smax = info['particles_in_buffer'] + x0.shape[0]
+        smax = info['particles_in_buffer'] + release_data['x'].shape[0]
 
         if smax > si.settings['max_particles']: return
 
@@ -155,12 +156,13 @@ class ParticleGroupManager(ParameterBaseClass):
         #  set initial conditions/properties of new particles
         # do manual_update updates
         part_prop = si.classes['particle_properties']
-        part_prop['x'].set_values(x0, new_buffer_indices)
-        part_prop['x_last_good'].set_values(x0, new_buffer_indices)
+        part_prop['x'].set_values(release_data['x'], new_buffer_indices)
+        part_prop['x0'].set_values(release_data['x'], new_buffer_indices)
+        part_prop['x_last_good'].set_values(release_data['x'], new_buffer_indices)
 
-        part_prop['n_cell'].set_values(n_cell_guess, new_buffer_indices)  # use x0's best guess  for starting point cell
-        part_prop['n_cell_last_good'].set_values(n_cell_guess, new_buffer_indices)
-        part_prop['bc_cords'].set_values(bc_cords, new_buffer_indices)
+        part_prop['n_cell'].set_values(release_data['n_cell'], new_buffer_indices)  # use x0's best guess  for starting point cell
+        part_prop['n_cell_last_good'].set_values(release_data['n_cell'], new_buffer_indices)
+        part_prop['bc_cords'].set_values(release_data['bc_cords'], new_buffer_indices)
 
         part_prop['status'].set_values(si.particle_status_flags['moving'], new_buffer_indices)  # set  status of released particles
 
@@ -169,12 +171,10 @@ class ParticleGroupManager(ParameterBaseClass):
 
         part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
 
-        part_prop['user_release_groupID'].set_values(user_release_groupID, new_buffer_indices)  # ID of release location
-        part_prop['IDrelease_group'].set_values(IDrelease_group, new_buffer_indices)  # ID of release location
-        part_prop['IDpulse'].set_values(IDpulse, new_buffer_indices)  # gives a unique release ID, so that each pulse can be tracked
-        part_prop['hydro_model_gridID'].set_values(hydro_model_gridID, new_buffer_indices) # which of outer and nested grid particles are in
-
-
+        part_prop['user_release_groupID'].set_values(release_data['user_release_groupID'], new_buffer_indices)  # ID of release location
+        part_prop['IDrelease_group'].set_values(release_data['IDrelease_group'], new_buffer_indices)  # ID of release location
+        part_prop['IDpulse'].set_values(release_data['IDpulse'], new_buffer_indices)  # gives a unique release ID, so that each pulse can be tracked
+        part_prop['hydro_model_gridID'].set_values(release_data['hydro_model_gridID'], new_buffer_indices) # which of outer and nested grid particles are in
 
         # set interp memory properties if present
         info['particles_released'] += num_released # total released

@@ -2,7 +2,7 @@
     {
         "output_file_base": "demo05_parallel",
         "add_date_to_run_output_dir": false,
-        "numba_cache_code": true,
+        "numba_cache_code": false,
         "time_step": 600,
         "debug": true,
         "reader": {

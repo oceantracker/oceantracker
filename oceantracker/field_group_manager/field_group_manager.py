@@ -8,6 +8,7 @@ from datetime import datetime
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.common_info_default_param_dict_templates import  cell_search_status_flags, node_types
 from os import path
+from  oceantracker.interpolator.util.triangle_eval_interp import time_independent_2Dfield_scalar, time_dependent_2Dfield_scalar
 
 from time import  perf_counter
 from copy import deepcopy
@@ -454,13 +455,16 @@ class FieldGroupManager(ParameterBaseClass):
 
     def are_points_inside_domain(self,x, include_dry_cells):
         # onlyprimary/outer grid
-        is_inside, n_cell, bc, = self.interpolator.are_points_inside_domain(self.grid,x)
-        hydro_model_gridID = np.zeros((x.shape[0],), dtype=np.int8)
+        release_data = self.interpolator.are_points_inside_domain(self.grid,x)
+        n = x.shape[0]
+        release_data['hydro_model_gridID'] = np.zeros((n,), dtype=np.int8)
+
+        # get tide and water depth at particle locations
 
         if not include_dry_cells:
             # only  keep those in wet cells at this time
-            is_inside = np.logical_and(is_inside, ~self.are_dry_cells(n_cell))
-        return is_inside, n_cell, bc, hydro_model_gridID
+            release_data['is_inside'] = np.logical_and(release_data['is_inside'] , ~self.are_dry_cells(release_data['n_cell'] ))
+        return release_data
 
     def get_grid_limits(self):
         # extend of grid, eg used for outer bounds of gridded stats,

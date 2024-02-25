@@ -132,7 +132,7 @@ def time_dependent_3Dfield_vector_sigma_grid(nb,fractional_time_steps, F_data,
                 # slightly faster with temp variable, as allows more LLVM optimisations?
                 temp  = (F1[n_nodes[m], nz, c] * zf1 + F1[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[0]
                 temp += (F2[n_nodes[m], nz, c] * zf1 + F2[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[1]
-                F_out[n, c] = bc_cords[n, m] * temp
+                F_out[n, c] += bc_cords[n, m] * temp
                 #F_out[n, c] += bc_cords[n, m] * (F1[n_nodes[m], nz, c] * zf1 + F1[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[0]  \
                 #            +  bc_cords[n, m] * (F2[n_nodes[m], nz, c] * zf1 + F2[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[1]  # second time step
 

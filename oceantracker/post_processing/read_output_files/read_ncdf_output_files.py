@@ -45,7 +45,6 @@ def read_particle_tracks_file(file_name, var_list=None, release_group= None, fra
                 if len(item.shape) > 1 and item.shape[1] == n0:
                     d[key] = item[:, sel_particles, ...]
 
-
     return d
 
 def _read_rectangular_tracks(nc,var_list, release_group):

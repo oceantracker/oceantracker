@@ -418,7 +418,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         n_cell  = self.initial_horizontal_cell(grid, xq)
         bc = self.get_bc_cords(grid, xq,n_cell)
         is_inside=  np.all(np.logical_and(bc >= -self.params['bc_walk_tol'], bc  <= 1.+self.params['bc_walk_tol']),axis=1)
-        return is_inside, n_cell, bc  # is inside if  magnitude of all BC < 1
+
+        out = dict(x = xq,
+                    n_cell=n_cell,
+                    bc_cords=bc,
+                    is_inside=is_inside)
+        # todo add interploted water depth, tide
+        return out # is inside if  magnitude of all BC < 1
 
 
 
