@@ -1,7 +1,7 @@
 {
     "output_file_base": "demo07_inside_polygon_events",
     "add_date_to_run_output_dir": false,
-    "numba_cache_code": true,
+    "numba_cache_code": false,
     "time_step": 600,
     "debug": true,
     "reader": {

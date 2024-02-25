@@ -2,7 +2,8 @@
     "output_file_base": "demo60_SCHISM_3D_decaying_particle",
     "debug": true,
     "time_step": 120,
-    "numba_cache_code": true,
+    "numba_cache_code": false,
+    "regrid_z_to_uniform_sigma_levels": true,
     "reader": {
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcastSchism3D.nc",

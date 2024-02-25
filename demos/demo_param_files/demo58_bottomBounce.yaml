@@ -41,7 +41,7 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-numba_cache_code: true
+numba_cache_code: false
 output_file_base: demo58_bottomBounce
 particle_properties:
   age_decay:
@@ -63,6 +63,7 @@ reader:
   input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   load_fields:
   - water_temperature
+regrid_z_to_uniform_sigma_levels: true
 release_groups:
   P1: &id001
     points:
@@ -70,6 +71,7 @@ release_groups:
       - 5486000.0
       - -1
     pulse_size: 10
+    release_at_surface: true
     release_interval: 0
   P11: *id001
   poly1:
@@ -89,9 +91,8 @@ release_groups:
       - 5489972.7479
     pulse_size: 10
     release_interval: 3600
-    z_range:
-    - -2
-    - -4.0
+    z_max: -1
+    z_min: -1
 resuspension:
   critical_friction_velocity: 0.005
 root_output_dir: output

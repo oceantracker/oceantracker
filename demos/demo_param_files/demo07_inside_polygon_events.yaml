@@ -43,7 +43,7 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-numba_cache_code: true
+numba_cache_code: false
 output_file_base: demo07_inside_polygon_events
 particle_properties:
   age_decay:

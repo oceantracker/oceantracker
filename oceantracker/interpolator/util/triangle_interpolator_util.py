@@ -6,7 +6,7 @@ from oceantracker.common_info_default_param_dict_templates import particle_info,
 # to reduce number of args required in numba functions and be morr readable
 from oceantracker.util.numba_util import  njitOT
 import os
-
+from copy import copy
 # globals
 # todo make numpy structure?
 status_moving = int(particle_info['status_flags']['moving'])
@@ -496,6 +496,7 @@ def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
         # step count stats, tidal stranded particles are not counted
         walk_counts[6] += n_vertical_steps
         walk_counts[7] = max(walk_counts[7], n_vertical_steps)  # record max number of steps
+
 
 # Below is numpy version of numba BC cord code, now only used as check
 #________________________________________________

@@ -28,7 +28,7 @@ poly_points_large=[[1597682.1237, 5489972.7479],
 import oceantracker.reader.generic_ncdf_reader
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
-    'numba_cache_code': True,
+    'numba_cache_code': False,
 
    'time_step' : 900,
     'debug': True,
@@ -230,7 +230,8 @@ params.append(p10)
 # case 50 schism basic
 schsim_base_params=\
 {'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,
-            'numba_cache_code': True,
+            'numba_cache_code': False,
+            'regrid_z_to_uniform_sigma_levels': True,
                 #'numba_caching': False,
         'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                     'input_dir': 'demo_hindcast',
@@ -264,14 +265,20 @@ params.append (s50)
 s56 = deepcopy(schsim_base_params)
 
 s56['release_groups']={
-            'P1':{'points': [[1594500, 5487000, -1], [1594500, 5483000, -1], [1598000, 5486100, -1]],
-                                                     'pulse_size': 10, 'release_interval': 3600},
             'poly1': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
-                                    'points': poly_points, 'z_range' :[-2, -4.],
-                                    'pulse_size': 10, 'release_interval':  3600}
-            }
+                                    'points': poly_points,
+                       'z_min': -1,
+                        'z_max': -1,
+                        'pulse_size': 10, 'release_interval':  3600},
+            'P1': {'points': [[1594500, 5487000, -1],
+                              [1594500, 5483000, -1],
+                              [1598000, 5486100, -1]
+                                ],
+                'pulse_size': 10, 'release_interval': 3600},
+
+}
 s56['velocity_modifiers']={'terminal_velocity':
-       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.001}
+       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.000}
                            }
 s56['particle_statistics']= {'grid1':
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
@@ -280,13 +287,15 @@ s56['particle_statistics']= {'grid1':
 
 
 s56['resuspension'] = {'critical_friction_velocity': .005}
-s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel'})
+#s56['resuspension'] = {'critical_friction_velocity': 1000.}
+s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel',
+            })
 s56['velocity_modifiers']= {'terminal_velocity':
-                                {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.001}
+                                {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002}
                             }
 params.append (s56)
 
-# schsim 3D, dont resupend lateral boundary test
+# schsim 3D, don't resupend lateral boundary test
 s57 = deepcopy(s50)
 s57.update(dict(use_A_Z_profile=True,use_random_seed= False))
 s57.update({'output_file_base' : 'demo57_SCHISM_3D_lateralBoundaryTest'})
@@ -295,7 +304,9 @@ s57['velocity_modifiers']= {'terminal_velocity':
                                 {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': .000}
                             }
 s57['release_groups']={
-                'P1':{'points': [[1599750, 5485600, -1]], 'pulse_size': 20, 'release_interval': 3600}
+                'P1':{'points': [[1599750, 5485600, -1]], 'pulse_size': 20,
+                      'release_interval': 3600,
+                      }
                              }
 
 params.append(s57)
@@ -308,7 +319,8 @@ bc = s58
 
 bc['velocity_modifiers']={'terminal_velocity':{'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002,'variance': 0.0002}}
 pg1= bc['release_groups']['P1']
-pg1.update({'pulse_size':10,'release_interval':0, 'points': [[1593000., 5484000.+2000, -1]] }) # 1 release only
+pg1.update({'pulse_size':10,'release_interval':0, 'points': [[1593000., 5484000.+2000, -1]] ,
+            'release_at_surface':True}) # 1 release only
 bc['release_groups']['P11']= pg1 # only point release
 
 params.append(s58)
