@@ -197,7 +197,7 @@ p8['release_groups']={
 p8['trajectory_modifiers']={'part_spliting':
            {'class_name': 'oceantracker.trajectory_modifiers.split_particles.SplitParticles',
              'splitting_interval':6*3600,
-                'split_status_greater_than' : 'frozen',
+                'split_status_greater_than' : 'stationary',
                     },
         'part_culling': {'class_name': 'oceantracker.trajectory_modifiers.cull_particles.CullParticles',
              'cull_interval': 6 * 3600,

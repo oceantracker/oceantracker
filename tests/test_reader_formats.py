@@ -17,21 +17,26 @@ def default_params():
         'write_tracks': True,
         'output_file_base': None,
         'root_output_dir': None,
+         'EPSG_code_metres_grid': None,
         'regrid_z_to_uniform_sigma_levels': True,
         'particle_properties': {'part_decay':
                                     {'class_name': 'AgeDecay', 'decay_time_scale': 1. * 3600 * 24}},
-        'release_groups': {'P1': {'points': [], 'pulse_size': 10, 'release_interval': 3600,'z_min':-1.}},
+        'release_groups': {'P1': {'points': [], 'pulse_size': 10,
+                                  'coords_allowed_in_lat_lon_order': True, # only used if hydro-model is in
+                                  'release_interval': 3600,'z_min':-1.},
+                        'Poly1': {'class_name':'PolygonRelease',
+                                            'points': [], 'pulse_size': 10,
+                                         'coords_allowed_in_lat_lon_order': True,  # only used if hydro-model is in
+                                         'release_interval': 3600, 'z_min': -1.}},
         'dispersion': {'A_H': 1.0, 'A_V': 0.001},
         'reader': {'file_mask':None,
                    'input_dir': None,
                    # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                    },
         'nested_readers': [],
-        'resuspension': {'critical_friction_velocity': 0.01}
+
+        'resuspension': {'critical_friction_velocity': 0.00}
         }
-
-
-
 
 
 
@@ -53,8 +58,11 @@ def get_case(n):
     reader= None
     is3D=True
     water_depth_file = None
+    poly_points=None
+
     params= default_params()
     show_grid = True
+    geo_cords= False
   
 
     match n:
@@ -70,22 +78,23 @@ def get_case(n):
                   ]
             ax = [1727860, 1823449, 5878821, 5957660]  # Auck
             title = 'NZ national test'
-        case 101:
-            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\Auckland_uni_hauarki\new_format\01'
-            output_file_base = 'SchismV5 test Hauarki'
-            file_mask = '*.nc'
 
-            x0 = [[-36.81612195216445, 174.82731398519584],
-                  [-37.070731274878, 175.39302783837365],
-                  [-36.4051733326401, 174.7771263023033],
-                  [-36.85502113978176, 174.6807647189683]
-                  ]
-            x0= cord_transforms.WGS84_to_UTM(np.flip(np.asarray(x0),axis=1)).tolist()
+        case 120:
+            root_input_dir = r'G:\Hindcasts_large\2024_hauraki_gulf_auck_uni\2020\01'
+            output_file_base = 'Test Hauraki'
+            file_mask = 'schout*.nc'
+            params['EPSG_code_metres_grid'] = 2193
+            x0=[[-36.832885812299395, 174.76309434822716],
+                [-36.70276297564815, 174.81729496997661]]
             ax = None # Auck
-            title = 'test schisim v5 - auckland test'
+            title = 'Auckland test'
+            poly_points=[[-36.80778038251076, 175.17304722424294],
+                        [-36.78224101024911, 175.19670975597626],
+                         [-36.78141701777142, 175.16790319560525],
+                         [-36.80778038251076, 175.17304722424294]]
+            geo_cords = True
 
-
-        case 105:
+        case 141:
             #schism v5,
             root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\WHOI_calvin\SCHISM_v2'
             output_file_base = 'Xlavin Schim v5'
@@ -243,17 +252,37 @@ def get_case(n):
             ))
 
     params['release_groups']['P1']['points'] = x0
+    params['release_groups']['Poly1']['points'] = poly_points
+
+    params['particle_statistics'] = {'grid1':
+                                      {'class_name': 'GriddedStats2D_timeBased',
+                                       'grid_center': x0[0],
+                                       'coords_allowed_in_lat_lon_order': True,
+                                       'grid_span' : [.1,.15] if geo_cords else [10000,10000],
+                                       'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min': 'moving', 'z_min': -2,
+                                       'grid_size': [120, 121]},
+                                     'poly1':
+                                         {'class_name': 'PolygonStats2D_timeBased',
+                                          'coords_allowed_in_lat_lon_order': True,
+                                          'polygon_list':[dict(points=poly_points)],
+                                            'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min': 'moving', 'z_min': -2,
+                                          'grid_size': [120, 121]}
+                                     }
 
     params.update(note=title,output_file_base=output_file_base,
                   max_run_duration= max_days*24*3600, time_step= time_step, open_boundary_type=open_boundary_type)
-    params['reader'].update(input_dir=root_input_dir, file_mask=file_mask, class_name=reader)
+    params['reader'].update(input_dir=root_input_dir,
+                            file_mask=file_mask,
+                            class_name=reader)
     if water_depth_file is not None:
         params['reader']['water_depth_file'] = water_depth_file
         params['reader']['load_fields'] = ['water_depth']
 
     if params['reader']['class_name'] is  None:   del params['reader']['class_name']
 
-
+    if poly_points is None:
+        del params['release_groups']['Poly1']
+        del params['particle_statistics']['poly1']
 
     params['release_groups']['P1'].update(pulse_size=pulse_size)
 
@@ -293,7 +322,8 @@ if __name__ == '__main__':
         params.update( root_output_dir = root_output_dir,
                     regrid_z_to_uniform_sigma_levels = args.uniform,
                     debug_plots = args.debug_plots,
-                    use_A_Z_profile = True
+                    use_A_Z_profile = True,
+                    #numba_cache_code=True
                     )
 
         if not args.skip_run:

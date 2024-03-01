@@ -4,11 +4,11 @@ TimeVaryingInfo
 
 **Description:** 
 
-**class_name:** oceantracker.particle_properties._base_properties.TimeVaryingInfo
+**class_name:** oceantracker.time_varying_info._base_time_varying_info.TimeVaryingInfo
 
-**File:** oceantracker/particle_properties/_base_properties.py
+**File:** oceantracker/time_varying_info/_base_time_varying_info.py
 
-**Inheritance:** _BasePropertyInfo> TimeVaryingInfo
+**Inheritance:** _BaseTimeVaringInfo> TimeVaryingInfo
 
 
 Parameters:
@@ -34,10 +34,6 @@ Parameters:
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
-
-	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
-		- possible_values: ``[True, False]``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``

@@ -120,7 +120,7 @@ class ParticleGroupManager(ParameterBaseClass):
         if si.settings['open_boundary_type'] > 0:
             bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['outside_open_boundary'], out=self.get_partID_buffer('B1'))
         else:
-            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
+            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags['stationary'], out=self.get_partID_buffer('B1'))
 
         if bad.shape[0] > 0:
             si.msg_logger.msg(str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain',warning=True)
@@ -156,13 +156,21 @@ class ParticleGroupManager(ParameterBaseClass):
         #  set initial conditions/properties of new particles
         # do manual_update updates
         part_prop = si.classes['particle_properties']
+
+        # copy over release data
         part_prop['x'].set_values(release_data['x'], new_buffer_indices)
+        part_prop['user_release_groupID'].set_values(release_data['user_release_groupID'], new_buffer_indices)  # ID of release location
+        part_prop['IDrelease_group'].set_values(release_data['IDrelease_group'], new_buffer_indices)  # ID of release location
+        part_prop['IDpulse'].set_values(release_data['IDpulse'], new_buffer_indices)  # gives a unique release ID, so that each pulse can be tracked
+        part_prop['hydro_model_gridID'].set_values(release_data['hydro_model_gridID'], new_buffer_indices)  # which of outer and nested grid particles are in
+        part_prop['bc_cords'].set_values(release_data['bc_cords'], new_buffer_indices)
+        part_prop['n_cell'].set_values(release_data['n_cell'], new_buffer_indices)  # use x0's best guess  for starting point cell
+
+        # record needed copies
         part_prop['x0'].set_values(release_data['x'], new_buffer_indices)
         part_prop['x_last_good'].set_values(release_data['x'], new_buffer_indices)
-
-        part_prop['n_cell'].set_values(release_data['n_cell'], new_buffer_indices)  # use x0's best guess  for starting point cell
         part_prop['n_cell_last_good'].set_values(release_data['n_cell'], new_buffer_indices)
-        part_prop['bc_cords'].set_values(release_data['bc_cords'], new_buffer_indices)
+
 
         part_prop['status'].set_values(si.particle_status_flags['moving'], new_buffer_indices)  # set  status of released particles
 
@@ -171,10 +179,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
         part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
 
-        part_prop['user_release_groupID'].set_values(release_data['user_release_groupID'], new_buffer_indices)  # ID of release location
-        part_prop['IDrelease_group'].set_values(release_data['IDrelease_group'], new_buffer_indices)  # ID of release location
-        part_prop['IDpulse'].set_values(release_data['IDpulse'], new_buffer_indices)  # gives a unique release ID, so that each pulse can be tracked
-        part_prop['hydro_model_gridID'].set_values(release_data['hydro_model_gridID'], new_buffer_indices) # which of outer and nested grid particles are in
 
         # set interp memory properties if present
         info['particles_released'] += num_released # total released
@@ -306,7 +310,7 @@ class ParticleGroupManager(ParameterBaseClass):
         info = self.info
         part_prop = si.classes['particle_properties']
 
-        ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
+        ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['stationary'], out=self.get_partID_buffer('B1'))
         num_alive = ID_alive.shape[0]
         nDead = info['particles_in_buffer'] - num_alive
 

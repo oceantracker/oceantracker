@@ -14,7 +14,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         super().__init__()
         # set up info/attributes
         self.add_default_params({'class_name' : PVC(None, str,is_required=True),
-                                 'particle_properties_to_track': PLC([],[str],  make_list_unique=True),
+                                 'particle_properties_to_track': PLC(None,[str],  make_list_unique=True),
                                  'write': PVC(True, bool),
                                  'role_output_file_tag': PVC('_concentrations_', str),
                                  'count_status_equal_to': PVC(None, str, possible_values=particle_info['status_flags'].keys()),
@@ -53,7 +53,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
     def select_particles_to_count(self):
         si= self.shared_info
         part_prop =  si.classes['particle_properties']
-        return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
+        return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['stationary'], out=self.get_partID_buffer('B1'))
 
     def write(self, time_sec): nopass()
 

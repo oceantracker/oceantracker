@@ -35,7 +35,24 @@ Parameters:
 		- default: ``None``
 
 	* ``debug`` :   ``<class 'bool'>``   *<optional>*
-		Description: Gives more useful numba code error messages
+		Description: more info on errors
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``dev_debug_opt`` :   ``<class 'int'>``   *<optional>*
+		Description: does extra checks given by integer, not for general use
+
+		- default: ``0``
+
+	* ``dev_debug_plots`` :   ``<class 'bool'>``   *<optional>*
+		Description: show any debug plot generated at give dbug_level, not for general use
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``display_grid_at start`` :   ``<class 'bool'>``   *<optional>*
+		Description: Pause during strat up to plot the grid for checking using matplotlib, clicking om image will print a coord
 
 		- default: ``False``
 		- possible_values: ``[True, False]``
@@ -71,10 +88,16 @@ Parameters:
 		- default: ``None``
 		- min: ``0.0``
 
-	* ``numba_function_cache_size`` :   ``<class 'int'>``   *<optional>*
-		Description: Size of memory cache for compiled numba functions in kB?
+	* ``numba_cache_code`` :   ``<class 'bool'>``   *<optional>*
+		Description: Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."
 
-		- default: ``2048``
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``numba_function_cache_size`` :   ``<class 'int'>``   *<optional>*
+		Description: Size of memory cache for compiled numba functions in kB
+
+		- default: ``4048``
 		- min: ``128``
 
 	* ``open_boundary_type`` :   ``<class 'int'>``   *<optional>*
@@ -96,21 +119,21 @@ Parameters:
 		- min: ``1``
 
 	* ``profiler`` :   ``<class 'str'>``   *<optional>*
-		Description: Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules
+		Description: in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules
 
 		- default: ``oceantracker``
 		- possible_values: ``['none', 'oceantracker', 'cprofiler', 'line_profiler', 'scalene']``
+
+	* ``regrid_z_to_uniform_sigma_levels`` :   ``<class 'bool'>``   *<optional>*
+		Description: much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS
+
+		- default: ``True``
+		- possible_values: ``[True, False]``
 
 	* ``root_output_dir`` :   ``<class 'str'>``   *<optional>*
 		Description: base dir for all output files
 
 		- default: ``root_output_dir``
-
-	* ``run_as_depth_averaged`` :   ``<class 'bool'>``   *<optional>*
-		Description: in development; Force a run using 2D velocity  if available in files or  to allow 3D hydro-model to be depth averaged on the fly to run faster
-
-		- default: ``False``
-		- possible_values: ``[True, False]``
 
 	* ``screen_output_time_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: Time in seconds between writing progress to the screen/log file
@@ -120,9 +143,15 @@ Parameters:
 	* ``time_step`` :   ``<class 'float'>``   *<optional>*
 		Description: Time step in seconds for all cases
 
-		- default: ``None``
+		- default: ``3600.0``
 		- min: ``0.01``
 		- units: ``sec``
+
+	* ``use_A_Z_profile`` :   ``<class 'bool'>``   *<optional>*
+		Description: Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file
+
+		- default: ``True``
+		- possible_values: ``[True, False]``
 
 	* ``use_random_seed`` :   ``<class 'bool'>``   *<optional>*
 		Description: Makes results reproducible, only use for testing developments give the same results!
@@ -134,6 +163,19 @@ Parameters:
 		Description: Any run note to store in case info file
 
 		- default: ``No user note``
+
+	* ``water_density`` :   ``<class 'float'>``   *<optional>*
+		Description: Water density, default is seawater, an example of use is in calculating friction velocity from bottom stress,
+
+		- default: ``1025.0``
+		- min: ``900.0``
+		- units: ``kg/m^3``
+
+	* ``write_dry_cell_flag`` :   ``<class 'bool'>``   *<optional>*
+		Description: Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots, currently cannot be used with nested grids
+
+		- default: ``True``
+		- possible_values: ``[True, False]``
 
 	* ``write_output_files`` :   ``<class 'bool'>``   *<optional>*
 		Description: Set to False if no output files are to be written, eg. for output sent to web

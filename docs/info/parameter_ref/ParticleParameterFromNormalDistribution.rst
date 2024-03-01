@@ -8,7 +8,7 @@ ParticleParameterFromNormalDistribution
 
 **File:** oceantracker/particle_properties/particle_parameter_from_normal_distribution.py
 
-**Inheritance:** _BasePropertyInfo> ParticleProperty> ParticleParameterFromNormalDistribution
+**Inheritance:** _BaseParticleProperty> ParticleProperty> ParticleParameterFromNormalDistribution
 
 
 Parameters:
@@ -35,7 +35,11 @@ Parameters:
 		- default: ``1``
 		- min: ``1``
 
-	* ``release_group_parameters``: nested parameter dictionary
+	* ``release_group_parameters`` :   ``<class 'list'>``   *<optional>*
+		Description: In development: release group specific particle prop params
+
+		- default: ``[]``
+
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- possible_values: ``[True, False]``

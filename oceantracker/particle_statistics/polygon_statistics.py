@@ -1,10 +1,11 @@
 import numpy as np
 import oceantracker.particle_statistics.gridded_statistics as gridded_statistics
 from numba import njit
-from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC,merge_params_with_defaults
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from oceantracker.util.numba_util import njitOT
+
 
 
 class _CorePolygonMethods(ParameterBaseClass):
@@ -12,7 +13,7 @@ class _CorePolygonMethods(ParameterBaseClass):
     def __init__(self):
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'polygon_list': PLC([], [dict], default_value= default_polygon_dict_params,doc_str='List of dict with polygon cords and optional nmmes, min is  {"points": [[2.,3.],....]}',
+        self.add_default_params({'polygon_list': PLC(None, [dict], default_value= default_polygon_dict_params,doc_str='List of dict with polygon cords and optional nmmes, min is  {"points": [[2.,3.],....]}',
                                                      can_be_empty_list=True),
                                  'use_release_group_polygons': PVC(False, bool,doc_str = 'Omit polygon_list param and use all polygon release polygons as statistics/counting polygons, useful for building release group polygon to polygon connectivity matrix.'),
                                  })
@@ -30,10 +31,19 @@ class _CorePolygonMethods(ParameterBaseClass):
             for name, i in si.classes['release_groups'].items():
                 if i.info['release_type'] == 'polygon':
                     params['polygon_list'].append({'name': name, 'points':i.params['points']})
+
             if len(params['polygon_list']) == 0:
                 si.msg_logger.msg('There are no polygon releases to use as statistic polygons',
                                   hint='must have at least one polygon release defined to use the use_release_group_polygons parameter, or use statistics polygon_list parameter',
                                   crumbs=f'Polygon statistic "{i.info["name"]}" ', fatal_error=True, exit_now=True)
+        else:
+            # use give polygon list
+            for p in params['polygon_list']:
+                p = merge_params_with_defaults(p,  default_polygon_dict_params,
+                                si.msg_logger, crumbs='polygon_statistics_merging polygon list')
+                if si.hydro_model_cords_in_lat_long:
+                    p['points_lon_lat'] = p['points'].copy()
+                    p['points'] = si.transform_lon_lat_to_meters(p['points_lon_lat'], in_lat_lon_order=params['coords_allowed_in_lat_lon_order'])
 
         if len(params['polygon_list'])==0:
             si.msg_logger.msg('Must have polygon_list parameter  with at least one polygon dictionary',

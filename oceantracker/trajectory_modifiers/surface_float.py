@@ -3,8 +3,7 @@ from numba import njit
 from oceantracker.util.numba_util import njitOT
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 
-#  keeps particles at the free surface
-#todo add wind stress/stokes drift to motion
+#  keeps particles at the free surface/tide height
 
 class SurfaceFloat(_BaseTrajectoryModifier):
 

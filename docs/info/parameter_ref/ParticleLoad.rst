@@ -8,7 +8,7 @@ ParticleLoad
 
 **File:** oceantracker/particle_properties/load_carrying.py
 
-**Inheritance:** _BasePropertyInfo> ParticleProperty> ParticleLoad
+**Inheritance:** _BaseParticleProperty> ParticleProperty> ParticleLoad
 
 
 Parameters:
@@ -37,7 +37,11 @@ Parameters:
 		- default: ``1``
 		- min: ``1``
 
-	* ``release_group_parameters``: nested parameter dictionary
+	* ``release_group_parameters`` :   ``<class 'list'>``   *<optional>*
+		Description: In development: release group specific particle prop params
+
+		- default: ``[]``
+
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``

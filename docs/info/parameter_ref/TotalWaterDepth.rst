@@ -8,7 +8,7 @@ TotalWaterDepth
 
 **File:** oceantracker/particle_properties/total_water_depth.py
 
-**Inheritance:** _BasePropertyInfo> ParticleProperty> TotalWaterDepth
+**Inheritance:** _BaseParticleProperty> ParticleProperty> TotalWaterDepth
 
 
 Parameters:
@@ -35,19 +35,15 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``is_time_varying`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
-		- possible_values: ``[True, False]``
-
-	* ``num_components`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``1``
-		- possible_values: ``[True, False]``
-
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
 		- min: ``1``
 
-	* ``release_group_parameters``: nested parameter dictionary
+	* ``release_group_parameters`` :   ``<class 'list'>``   *<optional>*
+		Description: In development: release group specific particle prop params
+
+		- default: ``[]``
+
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``

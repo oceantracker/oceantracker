@@ -15,7 +15,7 @@
 # 
 # See next notebook for more details on the process.
 # 
-# This example uses helper methods of OceanTracker class to build parameters. The example is part of a a 3D Schisim model, where particles always re-suspend if the land on the bottom. Particles stranded by the falling tide in dry cells are frozen, until the cell becomes wet.  
+# This example uses helper methods of OceanTracker class to build parameters. The example is part of a a 3D Schisim model, where particles always re-suspend if the land on the bottom. Particles stranded by the falling tide in dry cells are stationary, until the cell becomes wet.  
 
 # In[1]:
 
@@ -56,7 +56,7 @@ print(case_info_file_name)
 # 
 #   A first basic plot of particle tracks
 
-# In[2]:
+# In[4]:
 
 
 # read output files
@@ -69,7 +69,7 @@ print(tracks.keys()) # show what is in tracks dictionary holds
 from oceantracker.post_processing.plotting.plot_tracks import plot_tracks
 
 ax= [1591000, 1601500, 5478500, 5491000]  # area to plot
-plot_tracks(tracks, axis_lims=ax)
+plot_tracks(tracks, axis_lims=ax, show_grid=True)
 
 
 # ## Add aminations 

@@ -23,12 +23,12 @@ Parameters:
 		- default: ``None``
 
 	* ``count_end_date`` :   ``iso8601date``   *<optional>*
-		Description: Stop particle counting from this date
+		Description: Stop particle counting from this iso date-time
 
 		- default: ``None``
 
 	* ``count_start_date`` :   ``iso8601date``   *<optional>*
-		Description: Start particle counting from this date
+		Description: Start particle counting from this iso date-time
 
 		- default: ``None``
 
@@ -41,28 +41,8 @@ Parameters:
 	* ``max_age_to_bin`` :   ``<class 'float'>``   *<optional>*
 		- default: ``2592000.0``
 
-	* ``max_water_depth`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles in water depths less than this value
-
-		- default: ``None``
-
-	* ``max_z`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position <= to this value
-
-		- default: ``None``
-
 	* ``min_age_to_bin`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
-
-	* ``min_water_depth`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles in water depths greater than this value
-
-		- default: ``None``
-
-	* ``min_z`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position >=  to this value
-
-		- default: ``None``
 
 	* ``particle_property_list``:  *<optional>*
 		Description: - Create statistics for these named particle properties, list = ["water_depth"], for statics on water depth at particle locations inside the counted regions
@@ -88,7 +68,7 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``status_min`` :   ``[<class 'str'>]``   *<optional>*
-		Description: Count only those particles with status >= to thsi value
+		Description: Count only those particles with status >= to this value
 
 		- default: ``frozen``
 		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving']``
@@ -108,9 +88,29 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
+	* ``water_depth_max`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths less than this value
+
+		- default: ``None``
+
+	* ``water_depth_min`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths greater than this value
+
+		- default: ``None``
+
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write statistcs to disk
 
 		- default: ``True``
 		- possible_values: ``[True, False]``
+
+	* ``z_max`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position <= to this value
+
+		- default: ``None``
+
+	* ``z_min`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position >=  to this value
+
+		- default: ``None``
 

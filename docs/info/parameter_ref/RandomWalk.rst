@@ -15,11 +15,11 @@ Parameters:
 ************
 
 	* ``A_H`` :   ``<class 'float'>``   *<optional>*
-		- default: ``1.0``
+		- default: ``0.1``
 		- min: ``0.0``
 
 	* ``A_V`` :   ``<class 'float'>``   *<optional>*
-		- default: ``0.001``
+		- default: ``0.01``
 		- min: ``0.0``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*

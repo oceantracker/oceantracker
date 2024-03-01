@@ -25,18 +25,18 @@ class _BaseReader(ParameterBaseClass):
         self.add_default_params({
             'input_dir': PVC(None, str, is_required=True),
             'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-            'cords_in_lat_long': PVC(False, bool, doc_str='Convert given nodal lat longs to a UTM metres grid, only used if lat long not auto detected'),
+            'hydro_model_cords_in_lat_long': PVC(False, bool, doc_str='Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected'),
             'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
             'time_buffer_size': PVC(24, int, min=2),
-            'load_fields': PLC([], [str],
+            'load_fields': PLC(None, [str],
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
-            'field_variables': PLC([], [str], obsolete=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',                              make_list_unique=True),
-            'field_variable_map': {'water_velocity': PLC([], [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
+            'field_variables': PLC(None, [str], obsolete=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',                              make_list_unique=True),
+            'field_variable_map': {'water_velocity': PLC(None, [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
                                    'tide': PVC('elev', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('depth', str, is_required=True, doc_str='maps standard internal field name to file variable name'),
                                    'A_Z_profile': PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                   'water_velocity_depth_averaged': PLC([], [str], fixed_len=2,
+                                   'water_velocity_depth_averaged': PLC(None, [str], fixed_len=2,
                                                                         doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'EPSG': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
@@ -176,7 +176,6 @@ class _BaseReader(ParameterBaseClass):
             grid['zlevel'] = None
             grid['nz'] = 1  # only one z
 
-        si.run_info['is_lon_lat'] = grid['is_lon_lat']
         # check key data types, so that numba runs cleanly
         for name in ['x']:
             v= grid[name]
@@ -265,7 +264,7 @@ class _BaseReader(ParameterBaseClass):
         t = np.stack((fi['time_start'], fi['time_end']), axis=1)
         fi['first_time'] = np.min(t[:,0])
         fi['last_time'] = np.max(t[:,1])
-        fi['duration'] = fi['last_time'] - fi['first_time']
+        fi['duration'] = abs(fi['last_time'] - fi['first_time'])
         fi['hydro_model_time_step'] = fi['duration'] / (fi['n_time_steps_in_hindcast']-1)
 
         # datetime versions for reference
@@ -294,6 +293,7 @@ class _BaseReader(ParameterBaseClass):
 
     def build_hori_grid(self, nc, grid):
         # read nodal values and triangles
+        si = self.shared_info
         params = self.params
         ml = self.shared_info.msg_logger
 
@@ -622,16 +622,6 @@ class _BaseReader(ParameterBaseClass):
 
         return nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
-
-
-    def convert_lon_lat_to_meters_grid(self, x):
-
-        if self.params['EPSG'] is None:
-            x_out = cord_transforms.WGS84_to_UTM(x, out=None)
-        else:
-            # todo make it work with users transform?
-            x_out = cord_transforms.WGS84_to_UTM(x, out=None)
-        return x_out
 
 
     def detect_lonlat_grid(self, xgrid):

@@ -11,7 +11,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
     def __init__(self):
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'polygon_list': PLC([], [dict], can_be_empty_list=False,
+        self.add_default_params({'polygon_list': PLC(None, [dict], can_be_empty_list=False,
                                                      default_value= default_polygon_dict_params),
                                     'role_output_file_tag': PVC('inside_polygon_events',str)
                                                             })

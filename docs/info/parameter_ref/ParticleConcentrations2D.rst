@@ -21,13 +21,21 @@ Parameters:
 		- default: ``None``
 		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
 
-	* ``only_update_concentrations_on_write`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
+	* ``initial_particle_load`` :   ``<class 'float'>``   *<optional>*
+		Description: initial load of particles on release
 
-	* ``output_step_count`` :   ``<class 'int'>``   *<optional>*
-		- default: ``1``
-		- min: ``1``
+		- default: ``1.0``
+		- units: ``non-dimensional``
+
+	* ``load_decay_time_scale`` :   ``<class 'float'>``   *<optional>*
+		Description: time scale of exponential decay of particle load
+
+		- default: ``86400``
+		- units: ``sec``
+
+	* ``only_update_concentrations_on_write`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- possible_values: ``[True, False]``
 
 	* ``particle_properties_to_track``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``
@@ -35,16 +43,23 @@ Parameters:
 		- can_be_empty_list: ``True``
 		- make_list_unique: ``True``
 
-	* ``release_group_to_track`` :   ``<class 'int'>``   *<optional>*
-		- default: ``None``
-		- min: ``0``
-
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``_concentrations_``
 
-	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
-		- default: ``1``
+	* ``update_interval`` :   ``<class 'int'>``   *<optional>*
+		Description: the time in model seconds between writes (will be rounded to model time step)
+
+		- default: ``3600.0``
 		- min: ``1``
+		- units: ``sec``
+
+	* ``update_values_every_time_step`` :   ``<class 'bool'>``   *<optional>*
+		Description: update values in memory every time step, needed if using concentrations within modelling to change particle behaviour or properties. Output interval still sep by update_interval
+
+		- default: ``False``
+		- min: ``1``
+		- units: ``sec``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

@@ -8,7 +8,7 @@ VerticalGradient
 
 **File:** oceantracker/fields/field_vertical_gradient.py
 
-**Inheritance:** _BaseField> UserFieldBase> VerticalGradient
+**Inheritance:** ReaderField> CustomFieldBase> VerticalGradient
 
 
 Parameters:
@@ -19,19 +19,24 @@ Parameters:
 
 		- default: ``None``
 
+	* ``create_particle_property_with_same_name`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- possible_values: ``[True, False]``
+
 	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``
 
-	* ``is_time_varying`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
+	* ``is_vector`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``name_of_field`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
 
-	* ``num_components`` :   ``<class 'int'>``   *<optional>*
-		- default: ``None``
+	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

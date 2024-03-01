@@ -4,11 +4,11 @@ ParticleProperty
 
 **Description:** 
 
-**class_name:** oceantracker.particle_properties._base_properties.ParticleProperty
+**class_name:** oceantracker.particle_properties._base_particle_properties.ParticleProperty
 
-**File:** oceantracker/particle_properties/_base_properties.py
+**File:** oceantracker/particle_properties/_base_particle_properties.py
 
-**Inheritance:** _BasePropertyInfo> ParticleProperty
+**Inheritance:** _BaseParticleProperty> ParticleProperty
 
 
 Parameters:
@@ -35,7 +35,11 @@ Parameters:
 		- default: ``1``
 		- min: ``1``
 
-	* ``release_group_parameters``: nested parameter dictionary
+	* ``release_group_parameters`` :   ``<class 'list'>``   *<optional>*
+		Description: In development: release group specific particle prop params
+
+		- default: ``[]``
+
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``

@@ -13,7 +13,6 @@ from oceantracker.util import time_util
 import numpy as np
 from datetime import datetime
 from numba import njit
-from oceantracker.util.cord_transforms import WGS84_to_UTM
 from matplotlib import pyplot as plt, tri
 from oceantracker.reader.util.reader_util import append_split_cell_data
 from oceantracker.reader.util.hydromodel_grid_transforms import convert_regular_grid_to_triangles
@@ -96,7 +95,7 @@ class ROMsNativeReader(_BaseReader):
         grid['lon_lat_grid'] =  np.stack((grid['lon_psi'],grid['lat_psi']),  axis=2)
         s=   grid['lon_lat_grid'].shape
         grid['lon_lat']=   grid['lon_lat_grid'].reshape(s[0]*s[1],s[2])
-        grid['is_lon_lat'] = True
+        grid['hydro_model_cords_in_lat_long'] = True
         grid['x'] = self.convert_lon_lat_to_meters_grid(grid['lon_lat'])
 
         # get land mask

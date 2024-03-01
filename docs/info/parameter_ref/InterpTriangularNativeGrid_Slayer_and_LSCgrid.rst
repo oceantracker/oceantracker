@@ -15,13 +15,19 @@ Parameters:
 ************
 
 	* ``bc_walk_tol`` :   ``<class 'float'>``   *<optional>*
-		- default: ``1e-05``
+		- default: ``0.0001``
 		- min: ``0.0``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+
+	* ``debug_check_cell`` :   ``<class 'bool'>``   *<optional>*
+		Description: checks particles are inside the cell found by interp
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``max_search_steps`` :   ``<class 'int'>``   *<optional>*
 		- default: ``500``

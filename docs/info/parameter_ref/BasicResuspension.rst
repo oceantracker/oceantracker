@@ -25,9 +25,6 @@ Parameters:
 		- default: ``0.0``
 		- min: ``0.0``
 
-	* ``friction_velocity_field_class_name`` :   ``<class 'str'>``   *<optional>*
-		- default: ``oceantracker.fields.friction_velocity.FrictionVelocity``
-
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

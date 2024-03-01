@@ -70,9 +70,3 @@ Parameters:
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``write_dry_cell_index`` :   ``<class 'bool'>``   *<optional>*
-		Description: Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots
-
-		- default: ``True``
-		- possible_values: ``[True, False]``
-

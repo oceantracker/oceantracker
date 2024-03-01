@@ -8,9 +8,10 @@ reader
 .. toctree::
 	:maxdepth: 1
 
-	GenericUnstructuredReader.rst
+	GenericNCDFreader.rst
 	ROMsNativeReader.rst
-	SCHISMSreaderNCDF.rst
+	SCHISMreaderNCDF.rst
+	SCHISMreaderNCDFv5.rst
 	unstructured_FVCOM.rst
 
 **Role:** 

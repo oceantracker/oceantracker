@@ -3,7 +3,6 @@ from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.release_groups.point_release import PointRelease
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 
-
 class PolygonRelease(PointRelease):
     # random polygon release in 2D or 3D
 
@@ -22,14 +21,19 @@ class PolygonRelease(PointRelease):
         # sort out list  polygon from points
         info = self.info
         si= self.shared_info
+        params= self.params
 
-
-        info['points'] = np.asarray( self.params['points']).astype(np.float64)[:,:2] # make sure i is 2D
-        info['release_type'] = 'polygon'
-        if info['points'].shape[0] < 3:
+        if params['points'].shape[0] < 3:
             si.msg_logger.msg('For polygon release group  "points" parameter have at least 3 points, given ' + str(info['points']), fatal_error=True)
 
-        self.polygon = InsidePolygon(verticies = info['points'])
+        # ensure points are  meters
+        if si.hydro_model_cords_in_lat_long:
+            params['points_lon_lat'] = params['points'].copy()
+            params['points'] = si.transform_lon_lat_to_meters(params['points_lon_lat'], in_lat_lon_order=self.params['coords_allowed_in_lat_lon_order'])
+
+        info['release_type'] = 'polygon'
+
+        self.polygon = InsidePolygon(verticies = params['points'])
 
         info['polygon_area'] = self.polygon.get_area()
         b = self.polygon.polygon_bounds
@@ -40,7 +44,7 @@ class PolygonRelease(PointRelease):
                                     + ', a Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
 
         info['number_released'] = 0
-        info['pulse_count'] = 0
+        info['pulseID'] = 0
 
 
     def get_release_location_candidates(self):

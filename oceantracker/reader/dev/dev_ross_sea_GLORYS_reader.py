@@ -66,7 +66,7 @@ class GLORYSreaderSurface(_BaseReader):
 
         s=   grid['lon_lat_grid'].shape
         grid['lon_lat']=   grid['lon_lat_grid'].reshape(s[0]*s[1],s[2])
-        grid['is_lon_lat'] = True
+        grid['hydro_model_cords_in_lat_long'] = True
         grid['x'] = self.convert_lon_lat_to_meters_grid(grid['lon_lat'])
 
         return grid

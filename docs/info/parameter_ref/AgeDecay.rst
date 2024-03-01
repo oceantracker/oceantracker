@@ -8,7 +8,7 @@ AgeDecay
 
 **File:** oceantracker/particle_properties/age_decay.py
 
-**Inheritance:** _BasePropertyInfo> ParticleProperty> AgeDecay
+**Inheritance:** _BaseParticleProperty> ParticleProperty> AgeDecay
 
 
 Parameters:
@@ -40,7 +40,11 @@ Parameters:
 		- default: ``1``
 		- min: ``1``
 
-	* ``release_group_parameters``: nested parameter dictionary
+	* ``release_group_parameters`` :   ``<class 'list'>``   *<optional>*
+		Description: In development: release group specific particle prop params
+
+		- default: ``[]``
+
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``

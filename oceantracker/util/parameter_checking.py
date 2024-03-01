@@ -211,16 +211,13 @@ class ParameterCoordsChecker(object):
                            fatal_error=True, crumbs= crumb_trail)
             return None
 
-        if type(value) == list:
-            try:
-                # attemp array conversion
-                value = np.asarray(value)
-
-            except Exception as e:
-                msg_logger.msg(f'Coordinate vector must be a rectangular list convertible to a numpy array ',
-                               hint = f'got values {str(value)}',
-                               crumbs = crumb_trail, fatal_error=True)
-                return  None
+        # attempt array conversion
+        try:
+            value = np.asarray(value)
+        except Exception as e:
+            msg_logger.msg(f'Coordinates must be numpy array or a list convertible to a numpy array ',
+                           hint = f'got values {str(value)}',
+                           crumbs = crumb_trail, fatal_error=True)
         # now have an array
         if not np.issubdtype(value.dtype, np.integer) and not np.issubdtype(value.dtype, np.float):
             msg_logger.msg(f'Coordinates must only contain floats ot ints, got type "{str(value.dtype)}" ',
@@ -229,20 +226,21 @@ class ParameterCoordsChecker(object):
             return None
 
         # make int float
-        if np.issubdtype(value.dtype, np.integer):     value= value.astype(np.float64)
+        value= value.astype(np.float64)
 
         # now have double array, so check shape
         if info['single_cord']:
             # only expecting 2 or 3 cord values
-            if value.dim > 1 or value.shape[0] <2 or  value.shape[0] > 3 :
+            if value.shape[0] <2 or  value.shape[0] > 3 :
                 msg_logger.msg(f'expecting coordinates with only 2 or 3 values',
-                               hint=f'got values {str(value)}',
-                               crumbs=crumbs, fatal_error=True)
-                return None
-            else:
-                return value
+                               hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
 
-        # now expect an N by 2 03 3 array
+            if not info['is3D'] and value.shape[0] == 3:
+                msg_logger.msg(f'expecting coordinates as 2D pair of values',
+                               hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
+            return value
+
+        # must be a vector of coords and expect an N by 2 or 3 array
         if value.ndim == 1:
                 msg_logger.msg(f'expecting N by 2 or 3 array, eg. [[2.4,4.5],[6.2,7.8],[6.6,9.]]',
                         hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
@@ -288,10 +286,11 @@ class ParameterListChecker(object):
             msg_logger.msg('ParameterListChecker: param "' + crumb_trail + '" is required ', fatal_error=True)
             
         # check default_value type
-        for v in self.info['default_list']:
-            if v is not None and type(v) not in info['acceptable_types']:
-                msg_logger.msg('ParameterListChecker: param "' + crumb_trail + '" in default list, type of item  ' + str(v) + ', must match list_type ' ,
-                               hint = 'acceptable types within are list= '+ str(info['acceptable_types']), fatal_error=True)
+        if self.info['default_list'] is not None:
+            for v in self.info['default_list']:
+                if v is not None and type(v) not in info['acceptable_types']:
+                    msg_logger.msg('ParameterListChecker: param "' + crumb_trail + '" in default list, type of item  ' + str(v) + ', must match list_type ' ,
+                                   hint = 'acceptable types within are list= '+ str(info['acceptable_types']), fatal_error=True)
 
         # merge non vector lists, user, base and default lists
         # two types of list merge, appendable or required max size

@@ -53,7 +53,7 @@ def time_dependent_2Dfield_scalar(nb, fractional_time_steps, F_out, F_data, tria
         for m in range(3):
             # loop over vector components
             F_out[n] += bc[m] * (fractional_time_steps[0] * F1[n_nodes[m]]
-                                   + fractional_time_steps[1] * F2[n_nodes[m]])
+                               + fractional_time_steps[1] * F2[n_nodes[m]])
 
 @njitOT
 def time_dependent_2Dfield_vector(nb, fractional_time_steps, F_out, F_data, triangles, n_cell, bc_cords,  active):

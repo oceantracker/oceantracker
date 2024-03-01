@@ -82,18 +82,18 @@ class unstructured_FVCOM(_BaseReader):
         grid['x_center'] = np.stack((nc.read_a_variable('xc'), nc.read_a_variable('yc')), axis=1).astype(np.float64)
 
         if  np.all(nc.read_a_variable('x')==0): #  use lat long? as x may sometimes be all be zeros
-            grid['is_lon_lat'] = True
+            grid['hydro_model_cords_in_lat_long'] = True
             grid['x'] =   np.stack((nc.read_a_variable('lon'), nc.read_a_variable('lat')), axis=1).astype(np.float64)
             grid['x_center'] = np.stack((nc.read_a_variable('lonc'), nc.read_a_variable('latc')), axis=1).astype(np.float64)
 
         elif self.detect_lonlat_grid(grid['x']):
             # try auto detection
-            grid['is_lon_lat'] = True
+            grid['hydro_model_cords_in_lat_long'] = True
 
         else:
-            grid['is_lon_lat'] = self.params['cords_in_lat_long']
+            grid['hydro_model_cords_in_lat_long'] = self.params['hydro_model_cords_in_lat_long']
 
-        if grid['is_lon_lat']:
+        if grid['hydro_model_cords_in_lat_long']:
             grid['lon_lat'] = grid['x']
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
             grid['lon_lat_center'] = grid['x_center']

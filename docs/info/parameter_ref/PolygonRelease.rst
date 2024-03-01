@@ -34,23 +34,32 @@ Parameters:
 	* ``max_cycles_to_find_release_points`` :   ``<class 'int'>``   *<optional>*
 		Description: Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc
 
-		- default: ``50``
-		- min: ``50``
+		- default: ``200``
+		- min: ``100``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
-	* ``points`` :   ``array`` **<isrequired>**
-		Description: Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array
 
-		- default: ``[]``
-		- list_contains_type: ``<class 'float'>``
+points: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterCoordsChecker'>
 
 	* ``pulse_size`` :   ``<class 'int'>``   *<optional>*
 		Description: Number of particles released in a single pulse, this number is released every release_interval.
 
 		- default: ``1``
 		- min: ``1``
+
+	* ``release_at_bottom`` :   ``<class 'bool'>``   *<optional>*
+		Description: 3D release particles at bottom, with  offset given by release_offset_from_surface_or_bottom param, overrides any given release z value
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``release_at_surface`` :   ``<class 'bool'>``   *<optional>*
+		Description: 3D release particles at free surface, ie tide height, with  offset given by release_offset_from_surface_or_bottom param, overrides any given release z value
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``release_duration`` :   ``<class 'float'>``   *<optional>*
 		Description: Time in seconds particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "release_end_date"
@@ -69,6 +78,13 @@ Parameters:
 		- default: ``0.0``
 		- min: ``0.0``
 		- units: ``sec``
+
+	* ``release_offset_from_surface_or_bottom`` :   ``[<class 'float'>, <class 'int'>]``   *<optional>*
+		Description: 3D release particles at offset from free surface or bottom, if release_at_surface or  release_at_bottom = True
+
+		- default: ``0.0``
+		- min: ``0.0``
+		- units: ``m``
 
 	* ``release_start_date`` :   ``iso8601date``   *<optional>*
 		Description: Must be an ISO date as string eg. "2017-01-01T00:30:00"
@@ -92,11 +108,20 @@ Parameters:
 
 		- default: ``None``
 
-	* ``z_range``:  *<optional>*
-		Description: - z range = [zmin, zmax] to randomly release in 3D, overrides any given release z value
+	* ``z_max`` :   ``<class 'float'>``   *<optional>*
+		Description: max/ highest z vale release for to randomly release in 3D, overrides any given release z value
 
+		- default: ``None``
+
+	* ``z_min`` :   ``<class 'float'>``   *<optional>*
+		Description: min/ deepest z value to release for to randomly release in 3D, overrides any given release z value
+
+		- default: ``None``
+
+	* ``z_range``:  *<optional>*
 		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
 		- min_length: ``2``
+		- obsolete: ``use z_min and/or z_max``
 

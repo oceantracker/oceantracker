@@ -8,7 +8,7 @@ DistanceTravelled
 
 **File:** oceantracker/particle_properties/distance_travelled.py
 
-**Inheritance:** _BasePropertyInfo> ParticleProperty> DistanceTravelled
+**Inheritance:** _BaseParticleProperty> ParticleProperty> DistanceTravelled
 
 
 Parameters:
@@ -35,7 +35,11 @@ Parameters:
 		- default: ``1``
 		- min: ``1``
 
-	* ``release_group_parameters``: nested parameter dictionary
+	* ``release_group_parameters`` :   ``<class 'list'>``   *<optional>*
+		Description: In development: release group specific particle prop params
+
+		- default: ``[]``
+
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- possible_values: ``[True, False]``

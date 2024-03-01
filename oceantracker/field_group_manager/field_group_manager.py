@@ -38,11 +38,13 @@ class FieldGroupManager(ParameterBaseClass):
 
         self._setup_hydro_reader(si.working_params['reader_builder'])
 
+        si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
+        if  si.hydro_model_cords_in_lat_long:
+            si.msg_logger.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid', warning=True)
+        else:
+            si.msg_logger.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid', warning=True)
 
-        #todo dev test code,
-        grid = self.grid
-
-
+        si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
         self.set_up_interpolator()
 
 
@@ -257,10 +259,11 @@ class FieldGroupManager(ParameterBaseClass):
 
         self.grid, si.is3D_run   = reader.set_up_grid(nc)
         grid = self.grid
+        si.hydro_model_cords_in_lat_long = grid['hydro_model_cords_in_lat_long']
 
         reader.setup_water_velocity(nc,grid)
 
-        si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
+
 
         # setup request to load compulsory fields
         reader.params['load_fields'] = list(set(['water_velocity'] + reader.params['load_fields']))
@@ -420,6 +423,8 @@ class FieldGroupManager(ParameterBaseClass):
         reader = self.reader
         return self.reader.info['file_info']['first_time'], reader.info['file_info']['last_time']
 
+
+
     def write_hydro_model_grid(self, gridID=None):
         # write a netcdf of the grid from first hindcast file
         si = self.shared_info
@@ -454,7 +459,7 @@ class FieldGroupManager(ParameterBaseClass):
         return s
 
     def are_points_inside_domain(self,x, include_dry_cells):
-        # onlyprimary/outer grid
+        # only primary/outer grid
         release_data = self.interpolator.are_points_inside_domain(self.grid,x)
         n = x.shape[0]
         release_data['hydro_model_gridID'] = np.zeros((n,), dtype=np.int8)

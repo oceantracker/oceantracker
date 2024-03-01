@@ -16,8 +16,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.add_default_params({
                  'grid_size':           PLC([100, 99],[int], fixed_len=2),
                  'release_group_centered_grids': PVC(False, bool),
-                 'grid_center':         PCC(None,single_cord=True),
-                 'grid_span': PLC([], [float, int], fixed_len=2),
+                 'grid_center':         PCC(None,single_cord=True, is3D=False),
+                 'grid_span':           PCC(None, single_cord=True, is3D=False),
                  'role_output_file_tag' :    PVC('stats_gridded_time',str),
                     })
         self.grid = {}
@@ -58,27 +58,40 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         si = self.shared_info
         stats_grid= self.grid
         params= self.params
+        info = self.info
+
+        # xlims in meters
         xlims= si.classes['field_group_manager'].get_grid_limits()
 
 
         # if not given choose grid center/bounds based on extent of the grid
 
         if params['grid_center'] is None:
-            params['grid_center']= np.array([np.mean(xlims[:2]), np.mean(xlims[2:])])
+            info['grid_center']= np.array([np.mean(xlims[:2]), np.mean(xlims[2:])])
+        else:
+            if si.hydro_model_cords_in_lat_long:
+                info['grid_center_lon_lat'] = params['grid_center'].copy()
+                info['grid_center']= si.transform_lon_lat_to_meters( info['grid_center_lon_lat'], in_lat_lon_order=self.params['coords_allowed_in_lat_lon_order'])
+            else:
+                info['grid_center'] =   params['grid_center']
 
         # get grid span as (2,) array
-        if len(params['grid_span']) ==0:
-            params['grid_span'] = np.hstack((np.diff(xlims[:2]), np.diff(xlims[2:])))
+        if params['grid_span'] is None:
+            info['grid_span'] = np.hstack((np.diff(xlims[:2]), np.diff(xlims[2:])))
         else:
-            params['grid_span'] = np.asarray(params['grid_span'])
+            if si.hydro_model_cords_in_lat_long:
+                info['grid_span_lon_lat'] = params['grid_span'].copy()
+                info['grid_span'] = si.transform_lon_lat_deltas(info['grid_span_lon_lat'], info['grid_center_lon_lat'], deltas_in_lat_lon_order=self.params['coords_allowed_in_lat_lon_order'])
+            else:
+                info['grid_span'] = params['grid_span']
 
         # ensure grid sizes are odd, so grid center is in middle of center cell
         for n in range(len(params['grid_size'])):
             if params['grid_size'][n] %2 != 0: params['grid_size'][n]+=1
 
         # uncentered bin edges as N by 1 to allow replication
-        base_x = np.linspace(-params['grid_span'][0]/2., params['grid_span'][0]/2., params['grid_size'][1]).reshape(-1,1)
-        base_y = np.linspace(-params['grid_span'][1]/2., params['grid_span'][1]/2., params['grid_size'][0]).reshape(-1,1)
+        base_x = np.linspace(-info['grid_span'][0]/2., info['grid_span'][0]/2., params['grid_size'][1]).reshape(-1,1)
+        base_y = np.linspace(-info['grid_span'][1]/2., info['grid_span'][1]/2., params['grid_size'][0]).reshape(-1,1)
 
         # center of grid cells
         ngroups= len(si.classes['release_groups'])
@@ -98,8 +111,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         else:
             # used same grid with single  given center for all particle release groups
-            stats_grid['x_bin_edges'] = np.tile(base_x.T, (ngroups, 1)) + params['grid_center'][0]
-            stats_grid['y_bin_edges'] = np.tile(base_y.T, (ngroups, 1)) + params['grid_center'][1]
+            stats_grid['x_bin_edges'] = np.tile(base_x.T, (ngroups, 1)) + info['grid_center'][0]
+            stats_grid['y_bin_edges'] = np.tile(base_y.T, (ngroups, 1)) + info['grid_center'][1]
 
         #  bin centers for each release group
         stats_grid['x'] = (stats_grid['x_bin_edges'][:, 1:] + stats_grid['x_bin_edges'][:, 0:-1]) / 2.

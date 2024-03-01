@@ -45,6 +45,7 @@ class SCHISMreaderNCDF(_BaseReader):
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
     def read_grid_coords(self, nc, grid):
+        si= self.shared_info
         x_var ='SCHISM_hgrid_node_x'
         x =  nc.read_a_variable(x_var)
         y = nc.read_a_variable('SCHISM_hgrid_node_y')
@@ -52,16 +53,18 @@ class SCHISMreaderNCDF(_BaseReader):
 
         # test if lat long
         if nc.is_var_attr(x_var,'units') and 'degree' in nc.var_attr(x_var,'units').lower():
-            grid['is_lon_lat'] = True
+            grid['hydro_model_cords_in_lat_long'] = True
 
         elif self.detect_lonlat_grid(grid['x']):
             # try auto detection
-            grid['is_lon_lat'] = True
+            grid['hydro_model_cords_in_lat_long'] = True
         else:
-            grid['is_lon_lat'] = self.params['cords_in_lat_long']
+            grid['hydro_model_cords_in_lat_long'] = self.params['hydro_model_cords_in_lat_long']
 
-        if grid['is_lon_lat']:
-            grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
+        if grid['hydro_model_cords_in_lat_long']:
+            si.setup_lon_lat_to_meters_grid_tranforms(grid['x'])
+            grid['lon_lat'] = grid['x'].copy()
+            grid['x'] = si.transform_lon_lat_to_meters( grid['lon_lat'])
 
 
         return  grid

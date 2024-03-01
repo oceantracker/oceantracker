@@ -11,6 +11,7 @@ trajectory_modifiers
 	CullParticles.rst
 	SettleInPolygon.rst
 	SplitParticles.rst
+	SurfaceFloat.rst
 
 **Role:** 
 
