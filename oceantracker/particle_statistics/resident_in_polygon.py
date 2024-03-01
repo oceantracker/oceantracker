@@ -41,12 +41,9 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         self.info['release_group_ID_to_count'] = rg.info['instanceID']
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-
-
         polygon =merge_params_with_defaults({'name': 'residence_for_release_group' + params['name_of_polygon_release_group'],
-                                             'points': self.release_group_to_count.info['points']},default_polygon_dict_params ,
+                                             'points': self.release_group_to_count.params['points']},default_polygon_dict_params ,
                                              si.msg_logger)
-
         # create resident in polygon for single release group
         particles = si.classes['particle_group_manager']
         self.info['inside_polygon_particle_prop'] = f'resident_in_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'

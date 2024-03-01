@@ -225,10 +225,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # do pre-processing, eg read polygons from files
         si = self.shared_info
 
-        case_params = si.working_params
-        for name, params in case_params['class_dicts']['pre_processing'].items():
-            i = si.create_class_dict_instance(name, 'pre_processing', 'user', params, crumbs='Adding "fields" from user params')
-            i.initial_setup()
+        #case_params = si.working_params
+        #for name, params in case_params['class_dicts']['pre_processing'].items():
+        #    i = si.create_class_dict_instance(name, 'pre_processing', 'user', params, crumbs='Adding "fields" from user params')
+        #    i.initial_setup()
 
     def _setup_particle_release_groups(self, particle_release_groups_params_dict):
         # particle_release groups setup and instances,

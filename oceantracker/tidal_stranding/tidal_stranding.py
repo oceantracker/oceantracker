@@ -5,7 +5,7 @@ from oceantracker.common_info_default_param_dict_templates import particle_info
 
 # globals
 status_stranded_by_tide = int(particle_info['status_flags']['stranded_by_tide'])
-status_frozen = int(particle_info['status_flags']['frozen'])
+status_stationary = int(particle_info['status_flags']['stationary'])
 status_moving = int(particle_info['status_flags']['moving'])
 
 class TidalStranding(_BaseTrajectoryModifier):
@@ -37,7 +37,7 @@ def tidal_stranding_from_dry_cell_index(dry_cell_index, n_cell, sel, status):
     # look at all particles in buffer to check total water depth < water_depth_min
     #  use  0-255 dry cell index updated at each interpolation update
     for n in sel:
-        if status[n] >= status_frozen:
+        if status[n] >= status_stationary:
 
             if dry_cell_index[n_cell[n]] > 128: # more than 50% dry
                 status[n] = status_stranded_by_tide

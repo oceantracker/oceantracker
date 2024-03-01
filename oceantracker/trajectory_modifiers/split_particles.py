@@ -45,15 +45,13 @@ class SplitParticles(_BaseTrajectoryModifier):
 
         # split given fraction
         split = self.select_particles_to_split(time_sec, active)
-
-        x0           = part_prop['x'].get_values(split)
-        user_release_groupID   = part_prop['user_release_groupID'].get_values(split)
-        IDrelease_group    = part_prop['IDrelease_group'].get_values(split)
-        n_cell_guess = part_prop['n_cell'].get_values(split)
-        IDpulse      = part_prop['IDpulse'].get_values(split)
-        bc_cords = part_prop['bc_cords'].get_values(split)
-        hydro_model_gridID = part_prop['hydro_model_gridID'].get_values(split)
-
-        si.classes['particle_group_manager'].release_a_particle_group_pulse(time_sec, x0,
-                                                IDrelease_group, IDpulse, user_release_groupID,
-                                                n_cell_guess,bc_cords, hydro_model_gridID)
+        release_data= dict(
+                x = part_prop['x'].get_values(split),
+                user_release_groupID = part_prop['user_release_groupID'].get_values(split),
+                IDrelease_group = part_prop['IDrelease_group'].get_values(split),
+                n_cell = part_prop['n_cell'].get_values(split),
+                IDpulse = part_prop['IDpulse'].get_values(split),
+                bc_cords = part_prop['bc_cords'].get_values(split),
+                hydro_model_gridID = part_prop['hydro_model_gridID'].get_values(split),
+                )
+        si.classes['particle_group_manager'].release_a_particle_group_pulse(time_sec, release_data)

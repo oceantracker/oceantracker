@@ -15,7 +15,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         self.polygons = []
 
     def check_requirements(self):
-        self.check_class_required_fields_prop_etc(required_props_list=['is_frozen_in_polygon', 'time_of_settlement', 'status'])
+        self.check_class_required_fields_prop_etc(required_props_list=['is_stationary_in_polygon', 'time_of_settlement', 'status'])
 
 
 
@@ -36,7 +36,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
 
         # add particle prop to track which are inside polygon, which will be automatically written to output
         particle= si.classes['particle_group_manager']
-        particle.add_particle_property('is_frozen_in_polygon', 'manual_update',dict( dtype=np.int8))
+        particle.add_particle_property('is_stationary_in_polygon', 'manual_update',dict( dtype=np.int8))
 
         # ad a parameter to record when last released
         particle.add_particle_property('time_of_settlement','manual_update',dict(  initial_value=0.))
@@ -46,21 +46,21 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 
-        # find those inside and freeze, only if they haven't been recently frozen
+        # find those inside and freeze, only if they haven't been recently stationary
         those_inside = self.polygon.inside_indices(part_prop['x'].used_buffer(), out= self.get_partID_buffer('B1'), active=active)
         if those_inside.shape[0] > 0:
 
-            not_frozen = part_prop['status'].find_subset_where(those_inside, 'eq', si.particle_status_flags['moving'])
-            rand = np.random.rand(not_frozen.shape[0])
-            settling = not_frozen[rand < self.params['probability_of_settlement']]
-            part_prop['status'].set_values(si.particle_status_flags['frozen'], settling)
-            part_prop['is_frozen_in_polygon'].set_values(1, settling)
+            not_stationary = part_prop['status'].find_subset_where(those_inside, 'eq', si.particle_status_flags['moving'])
+            rand = np.random.rand(not_stationary.shape[0])
+            settling = not_stationary[rand < self.params['probability_of_settlement']]
+            part_prop['status'].set_values(si.particle_status_flags['stationary'], settling)
+            part_prop['is_stationary_in_polygon'].set_values(1, settling)
             part_prop['time_of_settlement'].set_values(time_sec, settling)
 
-        # now look at all those frozen
-        frozen = part_prop['status'].compare_all_to_a_value( 'eq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('B1'))
-        time_settled = np.abs(time_sec - part_prop['time_of_settlement'].get_values(frozen)) # abs works even if backtracking
-        release =  frozen[ time_settled > self.params['settlement_duration'] ]
+        # now look at all those stationary
+        stationary = part_prop['status'].compare_all_to_a_value( 'eq', si.particle_status_flags['stationary'], out=self.get_partID_buffer('B1'))
+        time_settled = np.abs(time_sec - part_prop['time_of_settlement'].get_values(stationary)) # abs works even if backtracking
+        release =  stationary[ time_settled > self.params['settlement_duration'] ]
         part_prop['status'].set_values(si.particle_status_flags['moving'], release)
-        part_prop['is_frozen_in_polygon'].set_values(0, release)
+        part_prop['is_stationary_in_polygon'].set_values(0, release)
         part_prop['time_of_settlement'].set_values(0, release)

@@ -31,7 +31,6 @@ shared_settings_defaults ={
                 'max_run_duration':    PVC(max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration
                 'max_particles': PVC(10**9, int, min=1,  doc_str='Maximum number of particles to release, useful in testing'),  # limit all cases to this number
                 'processors':          PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
-                #'max_threads':   PVC(None, int, min=1,doc_str='maximum number of processors used for threading to process particles in parallel'),
                 'max_warnings':        PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps'),  # dont record more that this number of warnings, to keep caseInfo.json finite
                 'use_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
                 'numba_function_cache_size' :  PVC(4048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB'),
@@ -39,7 +38,10 @@ shared_settings_defaults ={
                 'multiprocessing_case_start_delay': PVC(None, float, min=0., doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file'),  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
                 'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
                                                        doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
-                 }
+                'EPSG_code_metres_grid': PVC(None, int,
+                                 doc_str='If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM'),
+
+                }
 
 
 
@@ -66,22 +68,6 @@ core_class_list=['reader',
                  'tidal_stranding',
                 'resuspension']
 
-class_dicts_list=[ # class dicts which replace lists
-            'pre_processing',
-            'release_groups' ,
-            'fields',  # user fields calculated from other fields  on reading
-            'particle_properties',  # user added particle properties, eg DistanceTraveled
-            'velocity_modifiers',  # user added velocity effects, eg TerminalVelocity
-            'trajectory_modifiers',  # change particle paths, eg. re-suspension
-            'particle_statistics',  # heat map inside polygon statistics calculated on the fly
-            'particle_concentrations',  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
-            'nested_readers',
-            'event_loggers',  # writes events files ,eg PolygonEntryExit
-            # below still to be developed
-            # 'post_processing':      PDLdefaults({}), #todo after run post processing not implemented yet
-            'time_varying_info', # particle info,eg. time,or  tide at at tide gauge, core example is particle time
-            ]
-
 default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
                         particle_properties='oceantracker.particle_properties._base_particle_properties.ParticleProperty',
                         time_varying_info='oceantracker.time_varying_info._base_time_varying_info.TimeVaryingInfo',
@@ -103,7 +89,7 @@ default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
                         )
 
 class_dicts_list=[ # class dicts which replace lists
-            'pre_processing',
+            #'pre_processing',
             'release_groups' ,
             'fields',  # user fields calculated from other fields  on reading
             'particle_properties',  # user added particle properties, eg DistanceTraveled
@@ -128,7 +114,7 @@ particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search
                                   'notReleased': -10,
                                   'dead': -2,
                                   'outside_open_boundary': -1,
-                                  'frozen': 0,
+                                  'stationary': 0,
                                   'stranded_by_tide': 3,  'on_bottom': 6,  'moving': 10},
                  'known_prop_types': ['manual_update', 'from_fields','user']
 

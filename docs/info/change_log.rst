@@ -15,19 +15,36 @@ Faster and simplified internal structure
 New features
 --------------------
 
-#. Most expensive step in 3D finding vertical cell is not 5 times faster, so net 2-3 times faster, as by default regrids  3D data to uniform Sigma grid, to speed vertical cell search by factor of 5. Original native vertical grid short vertical walk search still available.
+#. Most expensive step in 3D finding vertical cell is now 5 times faster, so code net 2-3 times faster, as by default regrids  3D data to uniform Sigma grid, to speed vertical cell search by factor of 5. Original slower native vertical grid short vertical walk search still available.
+
 #. By default uses diffusivity vertical profile for A_Z in random walk if variable mapped to A_Z_profile is found in the hydro file
+
 #. Uses bottom stress to calculate friction velocity field if variable mapped to bottom_stress is found in the hydro file, if not uses near seabed velocity
-#. Now reads new Schism v5 multi-file output, where 3D fields in separate files
+
+#. Now reads new Schism v5 multi-file output, where 3D fields are in separate files
+
+#. Can auto detect if hydro-model has lat lng cords, by looking at bounds of grid coordinates,
+
+#. Release group now has options to release at bottom or sea surface, with optional offset.These override any given z release values.
+
 #. Floating particle trajectory  modifier, forces particles to follow free surface
-#. Now exits if any the release group start time is outside time range of hindcast
-#  Use short class_names,eg 'PolygonRelease' instead of 'oceantracker.release_groups.point_release.PolygonRelease' for OTs inbuilt classes, can optionally
+
+#. Can now use short class_names,eg 'PolygonRelease' instead of 'oceantracker.release_groups.point_release.PolygonRelease' for OTs inbuilt classes
+
 #. Checks full class name is of the right type/role, to prevent using a class in the wrong role
+
+#. All on the fly stats. can restrict particle counting within given z range and also a given water depth range
+
+#. Now exits with error if any the release group start time is outside time range of hindcast
 
 Known breaking changes- ask for help if needed to transition
 ______________________________________________________________
 
-#. reader param load_fields replaces 'field_variables' param, to load variables to names used internally. These internal names may be mapped to file variables in  new  'field_variable_map'. If a special variable, eg concentration field, no map is needed.
+#. Reader param load_fields replaces 'field_variables' param, to load variables to names used internally. These internal names may be mapped to file variables in  new  'field_variable_map'. If a special variable, eg concentration field, no map is needed.
+
+#. z range paramter for release and sats, replaced by z_min and z_max, warning is given
+
+#. the frozen paticle status name is now stationary, the numerical value remains the same, it is rarely used and is not the same status as stranded by tide
 
 Internal changes
 _________________

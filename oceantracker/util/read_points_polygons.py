@@ -13,7 +13,7 @@ def read_polygons_KML(fn, EPSG= None,tag=None):
         ll = np.fromstring(child.text.strip(child.tail).replace(',', ' '),sep=' ')
         ll = ll.reshape(( int(ll.size / 3), 3))[:, :2]
         if EPSG is not None:
-            ll = cord_transforms.convert_cords(ll, cord_transforms.ID_WGS84,EPSG)
+            ll = cord_transforms.convert_cords(ll, cord_transforms.EPSG_WGS84,EPSG)
         p= dict(points= ll)
         if tag is not None: p['tag'] = f'{tag}{n:03d}'
         polygon_list.append(p)

@@ -82,7 +82,7 @@ class Solver(ParameterBaseClass):
             # release particles
             new_particleIDs  = pgm.release_particles(time_sec)
 
-            # count particles of each status and count number >= frozen status
+            # count particles of each status and count number >= stationary status
             num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
             if num_alive == 0:
                 #freewheel until more are released or end of run/hindcast
@@ -157,7 +157,7 @@ class Solver(ParameterBaseClass):
         pgm.remove_dead_particles_from_memory()
 
         # some may now have status dead so update
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['stationary'], out=self.get_partID_buffer('ID1'))
 
         # trajectory modifiers,
         for name, i in si.classes['trajectory_modifiers'].items():
@@ -167,7 +167,7 @@ class Solver(ParameterBaseClass):
         fgm.update_dry_cell_index()
 
 
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['frozen'], out=self.get_partID_buffer('ID1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['stationary'], out=self.get_partID_buffer('ID1'))
 
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)

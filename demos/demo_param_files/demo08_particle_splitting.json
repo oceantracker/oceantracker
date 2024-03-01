@@ -152,7 +152,7 @@
         "part_spliting": {
             "class_name": "oceantracker.trajectory_modifiers.split_particles.SplitParticles",
             "splitting_interval": 21600,
-            "split_status_greater_than": "frozen"
+            "split_status_greater_than": "stationary"
         },
         "part_culling": {
             "class_name": "oceantracker.trajectory_modifiers.cull_particles.CullParticles",

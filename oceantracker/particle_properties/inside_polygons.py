@@ -15,7 +15,7 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
 
         self.class_doc(description= 'Index of polygon a particle is inside',)
 
-        self.add_default_params({'polygon_list':PLC([], [dict], default_value=default_polygon_dict_params,
+        self.add_default_params({'polygon_list':PLC(None, [dict], default_value=default_polygon_dict_params,
                                                     can_be_empty_list=False)
                                  })
 

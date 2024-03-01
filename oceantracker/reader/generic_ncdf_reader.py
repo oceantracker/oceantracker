@@ -26,21 +26,14 @@ class GenericNCDFreader(_BaseReader):
     def __init__(self, shared_memory_info=None):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
-            'input_dir': PVC(None, str, is_required=True),
             'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-            'time_zone': PVC(None, int, min=-12, max=12, units='hours', doc_str='time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12'),
-            'cords_in_lat_long': PVC(False, bool, doc_str='Convert given nodal lat longs to a UTM metres grid'),
-            'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels'),
-            'time_buffer_size': PVC(24, int, min=2),
             'grid_variable_map': {'time': PVC('time',str, doc_str='time variable nae in file' ),
                                'x': PLC(['x', 'y'], [str], fixed_len=2),
                                'zlevel': PVC(None, str),
                                'triangles': PVC(None, str),
                                'bottom_cell_index': PVC(None, str),
                                'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-            'load_fields': PLC([], [str], doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
-                                   make_list_unique=True),
-            'field_variable_map': {'water_velocity': PLC(['u', 'v', 'w'], [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
+             'field_variable_map': {'water_velocity': PLC(['u', 'v', 'w'], [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
                                 'tide': PVC('elev', str, doc_str='maps standard internal field name to file variable name'),
                                 'water_depth': PVC('depth', str, is_required=True,doc_str='maps standard internal field name to file variable name'),
                                 'water_temperature': PVC('temp', str,doc_str='maps standard internal field name to file variable name'),
@@ -57,11 +50,8 @@ class GenericNCDFreader(_BaseReader):
                               'z_water_velocity': PVC('z', str, doc_str='z dimension of water velocity'),
                               'vector2D': PVC(None, str),
                               'vector3D': PVC(None, str)},
-            'CRS_transform_code':  PVC(None, int, doc_str='CRY code for coordinate conversion of hydro-model lon-lat to a meters grid , eg. CRS for NZTM is 2193'),
-
             'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
             'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
-            'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
              })  # list of normal required dimensions
 
         self.info['field_variable_info'] = {}
@@ -272,7 +262,7 @@ class GenericNCDFreader(_BaseReader):
         var_name = params['grid_variable_map']['x']
         grid['x'] = np.column_stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1]))).astype(np.float64)
 
-        if self.params['cords_in_lat_long']:
+        if self.params['hydro_model_cords_in_lat_long']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
 
         return grid
@@ -291,9 +281,9 @@ class GenericNCDFreader(_BaseReader):
 
         if self.detect_lonlat_grid(grid['x']):
             # try auto detection
-            grid['is_lon_lat'] = True
+            grid['hydro_model_cords_in_lat_long'] = True
         else:
-            grid['is_lon_lat'] = self.params['cords_in_lat_long']
+            grid['hydro_model_cords_in_lat_long'] = self.params['hydro_model_cords_in_lat_long']
 
         return grid
 
@@ -430,15 +420,6 @@ class GenericNCDFreader(_BaseReader):
 
         return  nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
-
-    def convert_lon_lat_to_meters_grid(self, x):
-
-        if self.params['CRS_transform_code'] is None:
-            x_out = cord_transforms.WGS84_to_UTM( x, out=None)
-        else:
-            #todo make it work with users transform?
-            x_out = cord_transforms.WGS84_to_UTM(x, out=None)
-        return x_out
 
 
     def close(self):

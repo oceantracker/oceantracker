@@ -22,7 +22,7 @@ class _BaseWriter(ParameterBaseClass):
                                 'role_output_file_tag': PVC('tracks', str),
                                 'update_interval': PVC(None, int, min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
                                 'output_step_count': PVC(None,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
-                                'turn_on_write_particle_properties_list': PLC([], [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
+                                'turn_on_write_particle_properties_list': PLC(None, [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                                  'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
                                                             doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),
                                  'time_steps_per_per_file': PVC(None, int,min=1, doc_str='Split track output into files with given number of time integer steps'),
@@ -160,14 +160,16 @@ class _BaseWriter(ParameterBaseClass):
         self.pre_time_step_write_book_keeping()
 
         # write group data
-        for name,d in si.classes['time_varying_info'].items():
-            if d.params['write']:
-                self.write_time_varying_info(name, d)
+        for name,i in si.classes['time_varying_info'].items():
+            if i.params['write']:
+                self.write_time_varying_info(name, i)
 
         part_prop=si.classes['particle_properties']
-        for name,d in part_prop.items():
-            if d.params['write'] and d.params['time_varying']:
-                self.write_time_varying_particle_prop(name, d.data)
+        for name,i in part_prop.items():
+            if i.params['write'] and i.params['time_varying']:
+                if si.hydro_model_cords_in_lat_long and name in ['x','x_last_good']:
+                    pass
+                self.write_time_varying_particle_prop(name, i.data)
 
         if si.settings['write_dry_cell_flag']:
             # wont run if nested grids

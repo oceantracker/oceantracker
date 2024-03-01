@@ -22,7 +22,7 @@ def set_params(args, x0, duration_sec= 5. * 24 * 3600):
                          #'input_dir': 'F:\\Hindcasts\Deakin_EricT\\PPB_Hydro_netCDF',
                          'input_dir': r'F:\Hindcasts\PortPhillipBay\HUY2020\schism',
                          'file_mask': 'schout_*.nc',
-                         'cords_in_lat_long': True,
+                         'hydro_model_cords_in_lat_long': True,
                          # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                          },
             'release_groups' :rg,

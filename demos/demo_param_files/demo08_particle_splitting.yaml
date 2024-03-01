@@ -100,6 +100,6 @@ trajectory_modifiers:
     probability_of_culling: 0.05
   part_spliting:
     class_name: oceantracker.trajectory_modifiers.split_particles.SplitParticles
-    split_status_greater_than: frozen
+    split_status_greater_than: stationary
     splitting_interval: 21600
 user_note: test of notes

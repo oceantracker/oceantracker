@@ -89,7 +89,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
         colour_using_data = np.full_like(track_data['status'], -127)
 
         stat_types = track_data['particle_status_flags']
-        status_list = [stat_types['outside_open_boundary'],stat_types['dead'],  stat_types['frozen'], stat_types['stranded_by_tide'], stat_types['on_bottom'], stat_types['moving']]
+        status_list = [stat_types['outside_open_boundary'],stat_types['dead'],  stat_types['stationary'], stat_types['stranded_by_tide'], stat_types['on_bottom'], stat_types['moving']]
         for n, val in enumerate(status_list):
             colour_using_data[track_data['status']==val] = n # replace status with range(status_list)
 

@@ -52,7 +52,7 @@ class DELFTFM(_BaseReader):
     def read_grid_coords(self, nc, grid):
         var_names = self.params['grid_variable_map']['x']
 
-        grid['is_lon_lat'] = True
+        grid['hydro_model_cords_in_lat_long'] = True
 
         lon = nc.read_a_variable(var_names[0])
         lat = nc.read_a_variable(var_names[1])

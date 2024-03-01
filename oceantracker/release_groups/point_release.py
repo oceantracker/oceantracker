@@ -15,7 +15,11 @@ class PointRelease(ParameterBaseClass):
         # set up info/attributes
         super().__init__()
         self.add_default_params({
-                 'points':          PCC(None,is_required=True, doc_str='A N by 2 or 3 list or numpy array of locations where particles are released. eg for 2D [[25,10],[23,2],....] '),
+                 'points':          PCC(None, is_required=True,
+                                        doc_str='A N by 2 or 3 list or numpy array of locations where particles are released. eg for 2D [[25,10],[23,2],....] ',
+                                        units='Meters, unless hydro-model coords are in (lon, lat) then points must be given in  (lon, lat) order in decimal degrees.'),
+                 'coords_allowed_in_lat_lon_order': PVC(False, bool,
+                              doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
                  'release_radius':  PVC(0., float, min= 0., doc_str= 'Particles are released from random locations in circle of given radius around each point.'),
                  'pulse_size' :     PVC(1, int, min=1, doc_str= 'Number of particles released in a single pulse, this number is released every release_interval.'),
                  'release_interval':PVC(0., float, min =0.,units='sec', doc_str= 'Time interval between released pulses. To release at only one time use release_interval=0.'),
@@ -30,8 +34,7 @@ class PointRelease(ParameterBaseClass):
                  'user_release_group_name' : PVC(None,str,doc_str= 'User given name/label to attached to this release groups to make it easier to distinguish.'),
                  'allow_release_in_dry_cells': PVC(False, bool,
                               doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.'),
-
-                 'z_range': PLC([],[float, int], min_length=2, obsolete='use z_min and/or z_max'),
+                 'z_range': PLC(None,[float, int], min_length=2, obsolete='use z_min and/or z_max'),
                 'z_min': PVC(None, float,doc_str='min/ deepest z value to release for to randomly release in 3D, overrides any given release z value'),
                 'z_max': PVC( None,float, doc_str='max/ highest z vale release for to randomly release in 3D, overrides any given release z value'),
                 'release_offset_from_surface_or_bottom': PVC(0., [float, int], min=0.,
@@ -50,13 +53,19 @@ class PointRelease(ParameterBaseClass):
     def initial_setup(self):
         # must be called after unpack_x0
         # tidy up parameters to make them numpy arrays with first dimension equal to number of locations
+        si =self.shared_info
+        params = self.params
+        info = self.info
 
-        info=self.info
-        info['points'] =   np.array(self.params['points']).astype(np.float64)
+        # ensure points are  meters
+        if si.hydro_model_cords_in_lat_long:
+            params['points_lon_lat'] = params['points'].copy()
+            params['points'] =  si.transform_lon_lat_to_meters(params['points_lon_lat'], in_lat_lon_order=params['coords_allowed_in_lat_lon_order'])
 
         info['number_released'] = 0 # count of particles released in this group
-        info['pulse_count'] = 0
+        info['pulseID'] = 0
         info['release_type'] = 'point'
+
 
     def set_up_release_times(self):
         # get release times based on release_start_date, duration
@@ -154,13 +163,11 @@ class PointRelease(ParameterBaseClass):
         params=self.params
 
         n_required = self.get_number_required()
+
+        # minimal data
         release_data =dict(
-            x= np.full((0, info['points'].shape[1]), 0.,dtype=np.float64, order='C'),
-            n_cell = np.full((0,), -1, dtype=np.int32),
-            hydro_model_gridID = np.full((0,), 0, dtype=np.int8),
-            bc_cords = np.full((0,3), 0, dtype=np.float32),
-            is_inside=np.full((0, ), False, dtype=bool),
-            )
+                        x= np.full((0, params['points'].shape[1]), 0.,dtype=np.float64, order='C'),
+                        )
         count = 0
         while release_data['x'].shape[0] < n_required:
             # get 2D release candidates
@@ -169,15 +176,40 @@ class PointRelease(ParameterBaseClass):
             # get candiate locations inside domain
             rd  = self.check_potential_release_locations_in_bounds(x0)
 
-            # keep those inside:
-            for key in release_data.keys():
-                rd[key] = np.concatenate((rd[key], rd[key][rd['is_inside'], ...]), axis=0)
+            # only keep those inside domain:
+            sel = rd['is_inside'].copy()
+            del rd['is_inside']  # not needed anymore now we have got the good ones
+            for key in rd.keys():
+                rd[key] = rd[key][sel, ...]
 
 
-            if len(rd) > 0 :
+            # get water depth and tide at particle locations, which may be needed to filter particle releases
+            fgm = si.classes['field_group_manager']
+            rd['water_depth'] = fgm.interp_named_field_at_given_locations_and_time(
+                                                'water_depth', rd['x'], time_sec=None,
+                                                n_cell=rd['n_cell'],
+                                                bc_cords=rd['bc_cords'],
+                                                hydro_model_gridID=rd['hydro_model_gridID'])
+            rd['tide'] = fgm.interp_named_field_at_given_locations_and_time(
+                                                'tide', rd['x'], time_sec=time_sec,
+                                                n_cell=rd['n_cell'],
+                                                bc_cords=rd['bc_cords'],
+                                                hydro_model_gridID=rd['hydro_model_gridID'])
+            # if any data concatenate it
+
+            if rd['x'].shape[0] > 0:
                 is_ok = self.filter_release_points(rd,  time_sec= time_sec)
-                # if any add to list
-                for key in release_data.keys():
+                # if any to list so far
+                for key, item in rd.items():
+                    # add keys  if not there as 0, by whats is needed add to
+                    if key not in release_data:
+                        s = [0]
+                        if item.ndim ==2:
+                            s += [item.shape[1]]
+                        elif item.ndim > 2:
+                            s += list(item.shape[1:])
+                        release_data[key]=np.zeros(s, dtype=item.dtype)
+                    # add on new release data to existing data
                     release_data[key] = np.concatenate((release_data[key], rd[key][is_ok, ...]), axis=0)
 
             # allow max_cycles_to_find_release_points cycles to find points
@@ -195,27 +227,16 @@ class PointRelease(ParameterBaseClass):
         for key in release_data.keys():
             release_data[key] = release_data[key][:n_required, ...]
 
-        # add release IDs
-        release_data['IDrelease_group'] = self.info['instanceID']
-        release_data['IDpulse'] = info['pulse_count']
-        info['pulse_count'] += 1
-        release_data['user_release_groupID'] = self.params['user_release_groupID']
+        # add release IDs as full arrays
+        n = release_data['x'].shape[0]
+        release_data['IDrelease_group'] = np.full((n,),info['instanceID'], dtype=np.int32)
+        release_data['IDpulse'] = np.full((n,), info['pulseID'], dtype=np.int32)
+        release_data['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)
 
+        info['pulseID'] += 1
         info['number_released'] += release_data['x'].shape[0]  # count number released in this group
 
-        # get water depth and tide
-        fgm = si.classes['field_group_manager']
-        release_data['water_depth'] = fgm.interp_named_field_at_given_locations_and_time(
-                                        'water_depth', release_data['x'], time_sec=None,
-                                         n_cell=release_data['n_cell'],
-                                         bc_cords=release_data['bc_cords'],
-                                         hydro_model_gridID=release_data['hydro_model_gridID'])
-        release_data['tide'] = fgm.interp_named_field_at_given_locations_and_time(
-                                        'tide',  release_data['x'], time_sec=time_sec,
-                                          n_cell=release_data['n_cell'],
-                                          bc_cords=release_data['bc_cords'],
-                                          hydro_model_gridID=release_data['hydro_model_gridID'])
-        # if z data not given in 3D
+
         if si.is3D_run:
             if release_data['x'].shape[1] <= 2:
                 # expand x0 to 3D if needed
@@ -250,11 +271,11 @@ class PointRelease(ParameterBaseClass):
         return x
 
     def get_number_required(self):
-        return self.params['pulse_size']*self.info['points'].shape[0]
+        return self.params['pulse_size']*self.params['points'].shape[0]
 
     def get_release_location_candidates(self):
         si = self.shared_info
-        x = np.repeat(self.info['points'], self.params['pulse_size'], axis=0)
+        x = np.repeat(self.params['points'], self.params['pulse_size'], axis=0)
 
         if self.params['release_radius']> 0.:
             rr = abs(float(self.params['release_radius']))

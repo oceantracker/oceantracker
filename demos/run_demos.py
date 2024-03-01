@@ -218,7 +218,7 @@ if __name__ == "__main__":
                 plt.show()
 
 
-                plt.scatter(t,np.sum(track_data['status'] >= track_data['particle_status_flags']['frozen'], axis=1), label='alive')
+                plt.scatter(t,np.sum(track_data['status'] >= track_data['particle_status_flags']['stationary'], axis=1), label='alive')
                 plt.plot(t,np.sum(track_data['status']==track_data['particle_status_flags']['dead'],axis=1),label='dead')
                 plt.plot(t, track_data['num_part_released_so_far'], label='released')
                 plt.ylabel('Number of part.')
