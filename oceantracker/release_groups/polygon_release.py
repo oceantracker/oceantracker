@@ -24,13 +24,14 @@ class PolygonRelease(PointRelease):
         params= self.params
 
         if params['points'].shape[0] < 3:
-            si.msg_logger.msg('For polygon release group  "points" parameter have at least 3 points, given ' + str(info['points']), fatal_error=True)
+            self.msg('"points" parameter have at least 3 points, given ' + str(info['points']), fatal_error=True)
 
         # ensure points are  meters
         if si.hydro_model_cords_in_lat_long:
             params['points_lon_lat'] = params['points'].copy()
-            params['points'] = si.transform_lon_lat_to_meters(params['points_lon_lat'], in_lat_lon_order=self.params['coords_allowed_in_lat_lon_order'])
-
+            params['points'] = si.transform_lon_lat_to_meters(params['points_lon_lat'],
+                                        in_lat_lon_order=self.params['coords_allowed_in_lat_lon_order'],
+                                       crumbs=f'Polygon release {self.IDstr()}')
         info['release_type'] = 'polygon'
 
         self.polygon = InsidePolygon(verticies = params['points'])
@@ -40,8 +41,7 @@ class PolygonRelease(PointRelease):
         info['bounding_box_area'] = (b[1]-b[0]) * (b[3]-b[2])
 
         if info['polygon_area']  < 1:
-            si.msg_logger.msg('Release group = ' +self.info['name']
-                                    + ', a Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
+            self.msg('Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
 
         info['number_released'] = 0
         info['pulseID'] = 0

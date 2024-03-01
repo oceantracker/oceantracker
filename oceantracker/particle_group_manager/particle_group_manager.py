@@ -157,14 +157,16 @@ class ParticleGroupManager(ParameterBaseClass):
         # do manual_update updates
         part_prop = si.classes['particle_properties']
 
-        # copy over release data
-        part_prop['x'].set_values(release_data['x'], new_buffer_indices)
-        part_prop['user_release_groupID'].set_values(release_data['user_release_groupID'], new_buffer_indices)  # ID of release location
-        part_prop['IDrelease_group'].set_values(release_data['IDrelease_group'], new_buffer_indices)  # ID of release location
-        part_prop['IDpulse'].set_values(release_data['IDpulse'], new_buffer_indices)  # gives a unique release ID, so that each pulse can be tracked
-        part_prop['hydro_model_gridID'].set_values(release_data['hydro_model_gridID'], new_buffer_indices)  # which of outer and nested grid particles are in
-        part_prop['bc_cords'].set_values(release_data['bc_cords'], new_buffer_indices)
-        part_prop['n_cell'].set_values(release_data['n_cell'], new_buffer_indices)  # use x0's best guess  for starting point cell
+        # copy over release data to part props
+        for name in release_data.keys():
+            part_prop[name].set_values(release_data[name], new_buffer_indices)
+        #part_prop['x'].set_values(release_data['x'], new_buffer_indices)
+        #part_prop['user_release_groupID'].set_values(release_data['user_release_groupID'], new_buffer_indices)  # ID of release location
+        #part_prop['IDrelease_group'].set_values(release_data['IDrelease_group'], new_buffer_indices)  # ID of release location
+        #part_prop['IDpulse'].set_values(release_data['IDpulse'], new_buffer_indices)  # gives a unique release ID, so that each pulse can be tracked
+        #part_prop['hydro_model_gridID'].set_values(release_data['hydro_model_gridID'], new_buffer_indices)  # which of outer and nested grid particles are in
+        #part_prop['bc_cords'].set_values(release_data['bc_cords'], new_buffer_indices)
+        #part_prop['n_cell'].set_values(release_data['n_cell'], new_buffer_indices)  # use x0's best guess  for starting point cell
 
         # record needed copies
         part_prop['x0'].set_values(release_data['x'], new_buffer_indices)
@@ -218,30 +220,29 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def add_particle_property(self, name, prop_group, prop_params, crumbs=''):
         si = self.shared_info
-        ml= si.msg_logger
 
         # todo make name first compulsory argument of this function and create_class_dict_instance
         if name is None:
-            ml.msg('ParticleGroupManager.create_particle_property, prop name cannot be None, must be unique str',
+            self.msg('ParticleGroupManager.create_particle_property, prop name cannot be None, must be unique str',
                    hint='got prop_type of type=' + str(type(prop_group)),
                    fatal_error=True, exit_now=True)
 
         if name in si.classes['particle_properties']:
-            ml.msg(f'particle property  name "{name}"is already in use',
+            self.msg(f'particle property  name "{name}"is already in use',
                    hint='got prop_type of type=' + str(type(prop_group)), crumbs= crumbs+'ParticleGroupManager.create_particle_property' + name,
                    fatal_error=True)
 
         if type(prop_group) != str :
-            ml.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str',
+            self.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str',
                    hint='got prop_type of type=' + str(type(prop_group)),
                    fatal_error=True, exit_now=True)
 
         if type(prop_params) != dict:
-            ml.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ',
+            self.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ',
                     hint= 'got parameters of type=' + str(type(prop_params)) +',  values='+str(prop_params), fatal_error=True, exit_now=True)
 
         if prop_group not in self.known_prop_types:    #todo move all raise exception to msglogger
-            ml.msg('ParticleGroupManager.create_particle_property, unknown prop_group name',
+            self.msg('ParticleGroupManager.create_particle_property, unknown prop_group name',
                    hint='prop_group must be one of ' + str(self.known_prop_types),   fatal_error=True, exit_now=True)
 
 

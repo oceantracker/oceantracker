@@ -11,12 +11,10 @@ from math import floor
 EPSG_WGS84 = 4326
 EPSG_NZTM  = 2193
 
-# set up class instances once to speed computation,
-# xy=True will assume (lon,lat) input output
 transformerNZTM_to_WGS84 = Transformer.from_crs(EPSG_NZTM , EPSG_WGS84, always_xy = True)
 transformerWGS84_to_NZTM = Transformer.from_crs(EPSG_WGS84, EPSG_NZTM , always_xy = True)
 
-#todo make latlong entry as columns in that order
+
 def WGS84_to_NZTM(lon_lat, out=None):
     # (lng,lat ) to NZTM for numpy arays
     if out is None: out = np.full_like(lon_lat,0.)
@@ -38,7 +36,7 @@ def get_tansformer(EPSG_in,EPSG_out):
 
 def get_utm_epsg(lon_lat):
     # uses mean latlon to work out UTM zone
-    lon_lat[lon_lat[:, 0] > 180., 0] -= 180
+    lon_lat[lon_lat[:, 0] > 180., 0] -= 360
 
     utm_crs_list = query_utm_crs_info(
         datum_name="WGS 84",
@@ -77,4 +75,29 @@ def convert_cords(xy, EPSG_in, EPSG_out):
     out = np.full_like(xy, 0.)
     out[:, 0], out[:, 1], = T.transform(xy[:, 0], xy[:, 1])
     return out
+
+
+# dev code to test use of mercator for use in global lon_lat particle tracking
+EPSG_Mercator = 'ESRI:53004'
+
+
+# dev transforms to operate in native (lon, lat) coords
+
+def WGS84_to_to_Mercator(lon_lat, out=None):
+    # (lng,lat ) to NZTM for numpy arays
+    if out is None: out = np.full_like(lon_lat,0.)
+    # put lon between -180 and 180
+    sel = lon_lat[:,0] > 180
+    lon_lat[sel, 0] -= 360
+    out[:,0],out[:,1] = transformerWGS84_to_Mercator.transform(lon_lat[:, 0], lon_lat[:, 1])
+    return out
+def get_Metcator_info(lon_lat):
+    x_mercator = WGS84_to_to_Mercator(lon_lat)
+
+    return None,x_mercator
+
+
+# set up class instances once to speed computation,
+# xy=True will assume (lon,lat) input output
+transformerWGS84_to_Mercator = Transformer.from_crs(EPSG_WGS84, EPSG_Mercator, always_xy = True)
 

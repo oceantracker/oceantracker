@@ -65,14 +65,14 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
         if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
         if info['z_range'][0] > info['z_range'][1]:
-            si.msg_logger.msg(f'Particle statistics-"{self.info["name"]}", zmin > zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', fatal_error=True,
+            self.msg(f'Require zmin > zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', fatal_error=True,
                               hint ='z=0 is mean water level, so z is mostly < 0')
 
         info['water_depth_range'] = np.asarray([-f, f])
         if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
         if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
         if info['water_depth_range'][0]> info['water_depth_range'][1]:
-            si.msg_logger.msg(f'Particle statistics-"{self.info["name"]}", water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ', fatal_error=True)
+            self.msg(f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ', fatal_error=True)
 
     def check_part_prop_list(self):
         si = self.shared_info

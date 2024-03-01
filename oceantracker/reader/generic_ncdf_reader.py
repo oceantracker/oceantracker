@@ -14,8 +14,8 @@ import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_t
 from oceantracker.util import  cord_transforms
 from oceantracker.reader.util import shared_reader_memory_util
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.util import triangle_utilities_code
-from oceantracker.util.triangle_utilities_code import split_quad_cells
+from oceantracker.util import triangle_utilities
+from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.fields._base_field import  CustomFieldBase , ReaderField
 from oceantracker.reader.util import reader_util
 from oceantracker.reader._base_reader import _BaseReader
@@ -23,7 +23,7 @@ from copy import  deepcopy
 
 class GenericNCDFreader(_BaseReader):
 
-    def __init__(self, shared_memory_info=None):
+    def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
             'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
@@ -81,97 +81,6 @@ class GenericNCDFreader(_BaseReader):
         return f_params
 
 
-
-    def sort_files_by_time(self,file_list, msg_logger):
-        # get time sorted list of files matching mask
-
-        fi = {'names': file_list, 'n_time_steps': [], 'time_start': [], 'time_end': []}
-        for n, fn in enumerate(file_list):
-            # get first/second/last time from each file,
-            nc = NetCDFhandler(fn, 'r')
-            time = self.read_time_sec_since_1970(nc)
-            nc.close()
-            fi['time_start'].append(time[0])
-            fi['time_end'].append(time[-1]) # -1 guards against there being only one time step in the file
-            fi['n_time_steps'].append(time.shape[0])
-            if n + 1 >= self.params['max_numb_files_to_load']: break
-
-        # check some files found
-        if len(fi['names']) == 0:
-            msg_logger.msg('reader: cannot find any files matching mask "' + self.params['file_mask']
-                           + '"  in input_dir : "' + self.params['input_dir'] + '"', fatal_error=True)
-
-        # convert file info to numpy arrays for sorting
-        keys = ['names', 'n_time_steps', 'time_start', 'time_end']
-        for key in keys:
-            fi[key] = np.asarray(fi[key])
-
-        # sort files into order based on start time
-        s = np.argsort(fi['time_start'])
-        for key in fi.keys():
-            if isinstance(fi[key],np.ndarray):
-                fi[key] = fi[key][s]
-
-        # tidy up file info
-        fi['names'] =    fi['names'].tolist()
-
-        # get time step index at start and end on files
-        cs = np.cumsum(fi['n_time_steps'])
-        fi['nt_starts'] = cs - fi['n_time_steps']
-        fi['n_time_steps_in_hindcast'] = np.sum(fi['n_time_steps'], axis=0)
-        fi['nt_ends'] = fi['nt_starts'] + fi['n_time_steps'] - 1
-
-        self.info['file_info'] = fi
-
-        return fi
-
-
-    def get_hindcast_files_info(self, file_list, msg_logger):
-        # read through files to get start and finish times of each file
-        # create a time sorted list of files given by file mask in file_info dictionary
-        # note this is only called once by OceantrackRunner to form file info list,
-        # which is then passed to  OceanTrackerCaseRunner
-
-        # build a dummy non-initialise reader to get some methods and full params
-        # add defaults from template, ie get reader class_name default, no warnings, but get these below
-        # check cals name
-        fi = self.sort_files_by_time(file_list, msg_logger)
-
-
-        t =  np.concatenate((fi['time_start'],   fi['time_end']))
-        fi['first_time'] = np.min(t)
-        fi['last_time'] = np.max(t)
-        fi['duration'] = fi['last_time'] - fi['first_time']
-        fi['hydro_model_time_step'] = fi['duration'] / fi['n_time_steps_in_hindcast']
-
-        # datetime versions for reference
-        fi['date_start'] = time_util.seconds_to_datetime64(fi['time_start'])
-        fi['date_end'] = time_util.seconds_to_datetime64(fi['time_end'])
-        fi['first_date'] = time_util.seconds_to_datetime64(fi['first_time'])
-        fi['last_date'] = time_util.seconds_to_datetime64(fi['last_time'])
-        fi['hydro_model_timedelta'] = time_util.seconds_to_pretty_duration_string(fi['hydro_model_time_step'] )
-
-        # checks on hindcast
-        if fi['n_time_steps_in_hindcast'] < 2:
-            msg_logger.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']), fatal_error=True)
-
-        # check for large time gaps between files
-        # check if time diff between starts of file and end of last are larger than average time step
-        if len(fi['time_start']) > 1:
-            dt_gaps = fi['time_start'][1:] - fi['time_end'][:-1]
-            sel = np.abs(dt_gaps) > 2.5* fi['hydro_model_time_step']
-            if np.any(sel):
-                msg_logger.msg('Some time gaps between hydro-model files is are > 2.5 times average time step, check hindcast files are all present??', hint='check hindcast files are all present and times in files consistent', warning=True)
-                for n in np.flatnonzero(sel):
-                    msg_logger.msg(' large time gaps between file ' + fi['names'][n] + ' and ' + fi['names'][n + 1], tabs=1)
-
-        msg_logger.exit_if_prior_errors('exiting from _get_hindcast_files_info, in setting up readers')
-        return fi
-
-
-
-
-
     def is_3D_variable(self,nc, var_name):
         # is variable 3D
         return  nc.is_var_dim(var_name,self.params['dimension_map']['z'])
@@ -180,12 +89,11 @@ class GenericNCDFreader(_BaseReader):
     def build_hori_grid(self, nc, grid):
         # read nodal values and triangles
         params = self.params
-        ml = self.shared_info.msg_logger
         grid_map= params['grid_variable_map']
 
         for v in grid_map['x'] + [grid_map['triangles'], grid_map['time']]:
             if not nc.is_var(v):
-                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in grid set', fatal_error=True)
+                self.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in grid set', fatal_error=True)
                 return
         grid =  {}
 
@@ -205,9 +113,6 @@ class GenericNCDFreader(_BaseReader):
         si = self.shared_info
         params = self.params
         dim_map= params['dimension_map']
-        grid = self.grid
-        info = self.info
-        ml = si.msg_logger
 
         # get dim sized from  vectors and scalers
         if type(file_var_map) != list : file_var_map = [file_var_map]
@@ -216,7 +121,7 @@ class GenericNCDFreader(_BaseReader):
         is_vector = len(var_list) > 1
         for v in var_list:
             if not nc.is_var(v):
-                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in reader set up fields', fatal_error=True)
+                self.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in reader set up fields', fatal_error=True)
                 continue
             if dim_map['vector2D'] in nc.all_var_dims(v) or dim_map['vector3D'] in nc.all_var_dims(v):
                 is_vector = True

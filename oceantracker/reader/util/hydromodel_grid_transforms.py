@@ -3,7 +3,7 @@ from numba import njit
 from oceantracker.interpolator.util.interp_kernals import kernal_linear_interp1D
 from copy import copy
 from oceantracker.util.numba_util import njitOT
-from oceantracker.util.triangle_utilities_code import split_quad_cells
+from oceantracker.util.triangle_utilities import split_quad_cells
 
 def convert_regular_grid_to_triangles(grid,mask):
     # get nodes for each corner of quad

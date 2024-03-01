@@ -7,7 +7,7 @@ from datetime import  datetime
 from oceantracker.util.ncdf_util import NetCDFhandler
 class GLORYSreaderSurface(_BaseReader):
 
-    def __init__(self, shared_memory_info=None):
+    def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
             'dimension_map': {'time': PVC('time', str),

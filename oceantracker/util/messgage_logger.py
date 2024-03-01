@@ -91,7 +91,7 @@ class MessageLogger(object):
         if crumbs is not None:
             m.append(msg_str('in: ' + crumbs, tabs + 3))
         if hint is not None:
-            m.append(msg_str('Hint: ' + hint, tabs + 3))
+            m.append(msg_str('hint: ' + hint, tabs + 3))
         if link is not None:
             m.append(msg_str('see user documentation: ' + self.links[link], tabs + 3))
 
