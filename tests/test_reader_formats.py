@@ -170,16 +170,49 @@ def get_case(n):
 
         case 400:
             # DELFT FM
-            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\Delft3D\DELF3DFM_silawasi'
+            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\DELF3DFM_silawasi'
+            x0= [[-0.4876992148036644, 129.18935660697986],
+                 [-2.788645108730445, 123.88768495956097]]
 
-            x0=[[212521.82627785322, 269631.238901636],
-                [70859.17768674984, -72539.71235443512]]
             file_mask = 'NSulawesi_*.nc'
             output_file_base = 'DELF3D-FM'
             title = 'DELF3D-FM test'
-            reader = 'oceantracker.reader.dev.dev_delft_fm.DELFTFM'
             is3D = False
 
+        case 401:
+            # DELFT FM exmouth
+            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\AIMS_Exmouth'
+
+            x0=[[230372.0534805571, 7581341.601568772]]
+            file_mask = 'Exmouth_FlowFM*.nc'
+            output_file_base = 'DELF3D-FM_Exmouth'
+            title = 'DELF3D-FM test'
+            #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
+            is3D = False
+            show_grid = False
+
+        case 402:
+            # DELFT FM AIMS_Grenvelingen
+            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\AIMS_Grenvelingen'
+
+            x0=[[57706.375512704304, 421967.24984360463]]
+            file_mask = 'Grevelingen-FM_*_map.nc'
+            output_file_base = 'DELF3D-FM_Grevelingen'
+            title = 'DELF3D-FM test'
+            #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
+            is3D = True
+            show_grid = False
+        case 403:
+            # DELFT FM AIMS_Uralia
+            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\AIMS_Uralia'
+
+            x0=[[230372.0534805571, 7581341.601568772]]
+            file_mask = 'Uralia_FlowFM_map*.nc'
+            output_file_base = 'DELF3D-FM_Uralia'
+            title = 'DELF3D-FM AIMS_Uralia'
+            #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
+            is3D = False
+            show_grid = False
         case 1100:
             #OCEANUM GLORYS
             x0 =  [
@@ -213,7 +246,6 @@ def get_case(n):
             root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\Glorys\Antartica'
             reader = 'oceantracker.reader.dev.dev_ross_sea_GLORYS_reader.GLORYSreaderSurface'
             is3D = False
-            show_grid = False
             water_depth_file = r'F:\Hindcasts\Hindcast_samples_tests\Glorys\Ross_sea2D\static.nc'
             open_boundary_type = 1
             max_days = 90
@@ -318,13 +350,15 @@ if __name__ == '__main__':
 
     for n in tests:
         params, plot_opt= get_case(n)
-        #params['display_grid_at start'] = True # ti use giput to get cords
+        #params['display_grid_at_start'] = True # ti use giput to get cords
         params.update( root_output_dir = root_output_dir,
                     regrid_z_to_uniform_sigma_levels = args.uniform,
                     debug_plots = args.debug_plots,
                     use_A_Z_profile = True,
+                    debug=True,
                     #numba_cache_code=True
-                    )
+                    #display_grid_at_start=True
+                       )
 
         if not args.skip_run:
             caseInfoFile= run(params)
@@ -332,7 +366,6 @@ if __name__ == '__main__':
         else:
             caseInfoFile= path.join(params['root_output_dir'],params['output_file_base'],
                                     params['output_file_base']+'_caseInfo.json')
-
 
         # do plot
         if not args.noplots:

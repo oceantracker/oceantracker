@@ -50,7 +50,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
         si.msg_logger.print_line()
-        si.msg_logger.msg('Starting case number %3.0f, ' % si.caseID + ' '
+        self.msg = si.msg_logger.msg
+        self.msg('Starting case number %3.0f, ' % si.caseID + ' '
                                       + si.output_files['output_file_base']
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
         si.msg_logger.print_line()
@@ -265,7 +266,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         if len(si.classes['release_groups']) == 0:
             # guard against there being no release groups
-            si.msg_logger.msg('No valid release groups, exiting' , fatal_error=True, exit_now=True)
+            self.msg('No valid release groups, exiting' , fatal_error=True, exit_now=True)
 
         # find first release, and last ime alive
         t_first = np.min(np.asarray(first_release_time)*si.model_direction)*si.model_direction
@@ -498,7 +499,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def close(self):
         # close all instances, eg their files if not close etc
         si=self.shared_info
-        ml = si.msg_logger
 
         for i in si.all_class_instance_pointers_iterator():
             try:
@@ -506,4 +506,4 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             except Exception as e:
 
-                ml.msg(f'Unexpected error closing class ="{ i.info["name"]}"', fatal_error= True, exception=e)
+                self.msg(f'Unexpected error closing class ="{ i.info["name"]}"', fatal_error= True, exception=e)

@@ -11,8 +11,8 @@ from oceantracker.util.basic_util import nopass
 from oceantracker.reader.util.reader_util import append_split_cell_data
 import oceantracker.reader.util.hydromodel_grid_transforms as hydromodel_grid_transforms
 
-from oceantracker.util import cord_transforms
-from oceantracker.util import triangle_utilities_code
+from oceantracker.util.cord_transforms import get_Metcator_info
+from oceantracker.util import triangle_utilities
 
 from oceantracker.reader.util import reader_util
 from pathlib import Path as pathlib_Path
@@ -20,7 +20,7 @@ from oceantracker.common_info_default_param_dict_templates import node_types
 
 class _BaseReader(ParameterBaseClass):
 
-    def __init__(self, shared_memory_info=None):
+    def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
             'input_dir': PVC(None, str, is_required=True),
@@ -58,7 +58,7 @@ class _BaseReader(ParameterBaseClass):
 
     def read_grid_coords(self, nc, grid):   nopass()
 
-    def read_water_depth(self, nc, grid):   nopass()
+
 
     def read_triangles_as_int32(self, nc, grid):     nopass()
 
@@ -157,11 +157,12 @@ class _BaseReader(ParameterBaseClass):
     def set_up_grid(self, nc):
         si = self.shared_info
         grid={}
+        is3D_hydro = self.is_hindcast3D(nc)
         grid = self.build_hori_grid(nc, grid)
         grid = self.construct_grid_variables(grid)
-        is3D_hydro = self.is_hindcast3D(nc)
 
-        if si.settings['display_grid_at start']:
+
+        if si.settings['display_grid_at_start']:
             from oceantracker.post_processing.plotting.plot_utilities import  display_grid
             display_grid(grid,1)
 
@@ -213,7 +214,7 @@ class _BaseReader(ParameterBaseClass):
 
         # check some files found
         if len(fi['names']) == 0:
-            msg_logger.msg('reader: cannot find any files matching mask "' + self.params['file_mask']
+            self.msg('reader: cannot find any files matching mask "' + self.params['file_mask']
                            + '"  in input_dir : "' + self.params['input_dir'] + '"', fatal_error=True)
 
         # convert file info to numpy arrays for sorting
@@ -258,7 +259,7 @@ class _BaseReader(ParameterBaseClass):
 
         # checks on hindcast
         if fi['n_time_steps_in_hindcast'] < 2:
-            msg_logger.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']), fatal_error=True, exit_now=True)
+            self.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']), fatal_error=True, exit_now=True)
 
 
         t = np.stack((fi['time_start'], fi['time_end']), axis=1)
@@ -300,8 +301,25 @@ class _BaseReader(ParameterBaseClass):
         # read nodal x's
 
         grid = self.read_grid_coords(nc, grid)
-        #grid = self.read_water_depth(nc, grid) # needed in 3D
         grid = self.read_triangles_as_int32(nc, grid)
+
+        # get dergees per m at mercator coords for triangle area calcs
+        #dev code testing global lon_lat particle converting delta in m to degrees
+        if  False and grid['hydro_model_cords_in_lat_long']:
+            grid['deg_per_m'], grid['x_mercator'] = get_Metcator_info((grid['lon_lat']))
+
+            # checks on area calac
+            from oceantracker.util.triangle_utilities  import calcuate_triangle_areas
+            a1= calcuate_triangle_areas(grid['x'], grid['triangles'])
+            a2 = calcuate_triangle_areas(grid['x_mercator'], grid['triangles'])
+            rm = a2 / a1
+
+            xutm = si.transform_lon_lat_to_meters(grid['lon_lat'])
+            a3= calcuate_triangle_areas(xutm, grid['triangles'])
+            ru = a3 / a1
+            pass
+
+
 
 
         return grid
@@ -316,20 +334,20 @@ class _BaseReader(ParameterBaseClass):
 
         # node to cell map
         t0 = perf_counter()
-        grid['node_to_tri_map'], grid['tri_per_node'] = triangle_utilities_code.build_node_to_triangle_map(grid['triangles'], grid['x'])
+        grid['node_to_tri_map'], grid['tri_per_node'] = triangle_utilities.build_node_to_triangle_map(grid['triangles'], grid['x'])
         msg_logger.progress_marker('built node to triangles map', start_time=t0)
 
         # adjacency map
         t0 = perf_counter()
-        grid['adjacency'] = triangle_utilities_code.build_adjacency_from_node_tri_map(grid['node_to_tri_map'], grid['tri_per_node'], grid['triangles'])
+        grid['adjacency'] = triangle_utilities.build_adjacency_from_node_tri_map(grid['node_to_tri_map'], grid['tri_per_node'], grid['triangles'])
         msg_logger.progress_marker('built triangle adjacency matrix', start_time=t0)
 
         # boundary triangles
         t0 = perf_counter()
-        grid['is_boundary_triangle'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
+        grid['is_boundary_triangle'] = triangle_utilities.get_boundary_triangles(grid['adjacency'])
         msg_logger.progress_marker('found boundary triangles', start_time=t0)
         t0 = perf_counter()
-        grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid['triangles'], grid['adjacency'],
+        grid['grid_outline'] = triangle_utilities.build_grid_outlines(grid['triangles'], grid['adjacency'],
                                                                            grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
 
         msg_logger.progress_marker('built domain and island outlines', start_time=t0)
@@ -347,7 +365,7 @@ class _BaseReader(ParameterBaseClass):
         grid['node_type'][grid['grid_outline']['domain']['nodes']] = node_types['domain_boundary']
 
         t0 = perf_counter()
-        grid['triangle_area'] = triangle_utilities_code.calcuate_triangle_areas(grid['x'], grid['triangles'])
+        grid['triangle_area'] = triangle_utilities.calcuate_triangle_areas(grid['x'], grid['triangles'])
         msg_logger.progress_marker('calculated triangle areas', start_time=t0)
         msg_logger.progress_marker('Finished grid setup')
 
@@ -632,6 +650,7 @@ class _BaseReader(ParameterBaseClass):
         if islatlong:
             si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so not a meters grid ', warning=True)
         return islatlong
+
 
     def close(self):
         pass

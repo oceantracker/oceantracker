@@ -40,9 +40,9 @@ class FieldGroupManager(ParameterBaseClass):
 
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
         if  si.hydro_model_cords_in_lat_long:
-            si.msg_logger.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid', warning=True)
+            self.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid', warning=True)
         else:
-            si.msg_logger.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid', warning=True)
+            self.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid', warning=True)
 
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
         self.set_up_interpolator()
@@ -386,7 +386,7 @@ class FieldGroupManager(ParameterBaseClass):
         # check if variables are in file
         for file_var_name in fm[name] if type(fm[name]) == list else [fm[name]]:
             if not nc.is_var(file_var_name):
-                si.msg_logger.msg(f'Cannot find field variable named "{file_var_name}" in hydro-file mapped to  field "{name}" ',
+                self.msg(f'Cannot find field variable named "{file_var_name}" in hydro-file mapped to  field "{name}" ',
                                 hint=f'variable is not in file, currently variable map is = "{fm[name]}"',
                                   fatal_error=True)
         si.msg_logger.exit_if_prior_errors()

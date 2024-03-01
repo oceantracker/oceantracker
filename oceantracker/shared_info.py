@@ -4,6 +4,8 @@ from oceantracker.util.parameter_checking import merge_params_with_defaults
 from time import  perf_counter
 from oceantracker.util import cord_transforms
 import numpy as np
+
+
 class SharedInfoClass(object):
     # allows working classes access to instances of other classes to use their methods
     def __init__(self):
@@ -87,7 +89,7 @@ class SharedInfoClass(object):
 
     def setup_lon_lat_to_meters_grid_tranforms(self,grid_lon_lat):
         #todo add user given meters grid option
-        if self.settings['EPSG_code_metres_grid']:
+        if self.settings['EPSG_code_metres_grid'] is None:
             epsg = cord_transforms.get_utm_epsg(grid_lon_lat)
         else:
             epsg =  self.settings['EPSG_code_metres_grid']
@@ -96,7 +98,7 @@ class SharedInfoClass(object):
         self.Transformer_to_lon_lat = cord_transforms.get_tansformer(epsg, cord_transforms.EPSG_WGS84)
 
 
-    def transform_lon_lat_to_meters(self, lon_lat, in_lat_lon_order=False):
+    def transform_lon_lat_to_meters(self, lon_lat, in_lat_lon_order=False, crumbs=None):
         # transform 2D/3D vector of points or single point to meters
         # also swaps input data to lon_lat if in_lat_lon_order
         out= lon_lat.copy() # keep anz z cord
@@ -111,6 +113,9 @@ class SharedInfoClass(object):
             if in_lat_lon_order: lon_lat[:, 0], lon_lat[:, 1]  = out[:, 1].copy(), out[:, 0].copy()
             out[:, 0], out[:, 1], = self.Transformer_to_meters.transform(lon_lat[:, 0], lon_lat[:, 1])
 
+        if np.any(~np.isfinite(out.ravel())):
+            self.msg_logger.msg('Could not convert some lon_lat to meters, values out of bounds, or values in lat lon order?',
+                            crumbs=crumbs,fatal_error=True,exit_now=True)
         return out
 
     def transform_lon_lat_deltas(self,ll_deltas, ref_lon_lat,  deltas_in_lat_lon_order=False):

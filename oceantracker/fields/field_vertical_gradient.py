@@ -23,7 +23,7 @@ class VerticalGradient(CustomFieldBase):
         params['time_varying'] =fields[field_name].is_time_varying() # match base field
 
         if field_name not in fields:
-            si.msg_logger.msg(f'Field vertical gradient >> can not find field {field_name} to setup its vertical gradient class', fatal_error=True, exit_now=True)
+            self.msg(f'Field vertical gradient >> can not find field {field_name} to setup its vertical gradient class', fatal_error=True, exit_now=True)
 
         super().initial_setup(grid,fields)  # set up self.data with above params
         pass

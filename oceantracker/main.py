@@ -75,11 +75,11 @@ class OceanTracker():
         ml = self.msg_logger
         known_class_roles = common_info.class_dicts_list + common_info.core_class_list
         if class_role is None:
-            ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True)
+            self.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True)
             return
 
         if type(class_role) != str:
-            ml.msg(f'oceantracker.add_class, class_role must be a string', fatal_error=True,
+            self.msg(f'oceantracker.add_class, class_role must be a string', fatal_error=True,
                    hint='Given type =' + str(type(class_role)))
             return
 

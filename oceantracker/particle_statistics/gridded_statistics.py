@@ -224,11 +224,11 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
         # check age order and length
         if age_min >  si.run_info['model_duration']:
-            si.msg_logger.msg(' parameter min_age_to_bin must be > duration of model run (min,max) = '
+            self.msg(' parameter min_age_to_bin must be > duration of model run (min,max) = '
                                     + str([age_min, age_max]) + ', duration=' + str(si.run_info['model_duration']), fatal_error=True)
 
         if age_max <= age_min:
-            si.msg_logger.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
+            self.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
                                     + str([age_min,age_max ]) + ', duration=' + str(si.run_info['model_duration']),fatal_error=True)
 
         # arange requites one mere step beyong required max_age
@@ -236,7 +236,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         stats_grid['age_bin_edges'] =  float(si.model_direction) * np.arange(int(age_min), int(age_max+dage), dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
-            si.msg_logger.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative', fatal_error=True)
+            self.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative', fatal_error=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 

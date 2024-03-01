@@ -37,6 +37,7 @@ New features
 
 #. Now exits with error if any the release group start time is outside time range of hindcast
 
+#. Setting display_grid_at_start plots grid as a check, clicking on image will print coords in console to use as release points
 Known breaking changes- ask for help if needed to transition
 ______________________________________________________________
 

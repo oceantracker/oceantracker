@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from oceantracker.util import  ncdf_util, triangle_utilities_code, polygon_util
+from oceantracker.util import  ncdf_util, triangle_utilities, polygon_util
 from oceantracker.interpolator.util import triangle_interpolator_util
 from oceantracker.reader.schism_reader import read_hgrid_file
 from numba import njit
@@ -16,10 +16,10 @@ def read_hydo_model(file_name, hgrid_file):
 
 
 def build_grid(grid):
-    grid['node_to_tri_map'], grid['tri_per_node'] = triangle_utilities_code.build_node_to_triangle_map(grid['triangles'][:,:3], grid['x'])
-    grid['adjacency'] = triangle_utilities_code.build_adjacency_from_node_tri_map(grid['node_to_tri_map'], grid['tri_per_node'], grid['triangles'][:,:3])
-    grid['is_boundary_triangle'] = triangle_utilities_code.get_boundary_triangles(grid['adjacency'])
-    grid['grid_outline'] = triangle_utilities_code.build_grid_outlines(grid['triangles'][:,:3], grid['adjacency'],
+    grid['node_to_tri_map'], grid['tri_per_node'] = triangle_utilities.build_node_to_triangle_map(grid['triangles'][:,:3], grid['x'])
+    grid['adjacency'] = triangle_utilities.build_adjacency_from_node_tri_map(grid['node_to_tri_map'], grid['tri_per_node'], grid['triangles'][:,:3])
+    grid['is_boundary_triangle'] = triangle_utilities.get_boundary_triangles(grid['adjacency'])
+    grid['grid_outline'] = triangle_utilities.build_grid_outlines(grid['triangles'][:,:3], grid['adjacency'],
                                                                        grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
     return  grid
 def triangles_have_node_of_another_grids_triangle_inside(x_grid,triangles, triangles_query,x_nodes_query ,bc_walk_tol =0.00):

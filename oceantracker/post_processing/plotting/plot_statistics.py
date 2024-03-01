@@ -2,7 +2,7 @@
 # most require dict returned by readOutputFiles.read_runCaseInfo as input,
 import numpy as np
 import matplotlib.pyplot as plt
-from oceantracker.util.triangle_utilities_code import convert_face_to_nodal_values
+from oceantracker.util.triangle_utilities import convert_face_to_nodal_values
 import oceantracker.post_processing.plotting.plot_utilities as plot_utilities
 
 from matplotlib import animation

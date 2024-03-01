@@ -5,17 +5,18 @@ import  oceantracker.util.time_util as time_util
 import numpy as np
 from datetime import  datetime,timezone
 from oceantracker.util.ncdf_util import NetCDFhandler
-from oceantracker.util.triangle_utilities_code import split_quad_cells
+from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.reader.util import  reader_util
 from oceantracker.reader.util import  hydromodel_grid_transforms
 class DELFTFM(_BaseReader):
 
-    def __init__(self, shared_memory_info=None):
+    def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
             'load_fields' : PLC(['water_depth'], [str], doc_str='always load tide and water depth, for dry cells id 2D'),
             'grid_variable_map': {'time': PVC('time', str),
                                   'x': PLC(['mesh2d_node_x', 'mesh2d_node_y'], [str], fixed_len=2),
+                                  'x_cell': PLC(['mesh2d_face_x', 'mesh2d_face_y'], [str], fixed_len=2),
                                   'zlevel': PVC(None, str),
                                   'triangles': PVC('mesh2d_face_nodes', str),
                                   'bottom_cell_index': PVC(None, str),
@@ -28,11 +29,23 @@ class DELFTFM(_BaseReader):
                                    'wind_stress': PVC('wind_stress', str, doc_str='maps standard internal field name to file variable name'),
                                    'bottom_stress': PVC('bottom_stress', str, doc_str='maps standard internal field name to file variable name'),
                                    'A_Z_profile': PVC('diffusivity', str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                   'water_velocity_depth_averaged': PLC(['mesh2d_ucxa','mesh2d_ucya'], [str], fixed_len=2,
+                                   'water_velocity_depth_averaged': PLC(['mesh2d_ucx','mesh2d_ucy'], [str], fixed_len=2,
                                                                         doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
 
         })
+
+    def is_file_format(self,file_name):
+        # check if file matches this file format
+        nc = NetCDFhandler(file_name,'r')
+        is_file_type= nc.is_var('mesh2d_node_x') and nc.is_var('mesh2d_face_nodes')
+
+        mesh2d_face_nodes = nc.read_a_variable('mesh2d_face_nodes')
+        if mesh2d_face_nodes.shape[1] > 4:
+            self.msg(f'Reader currently only works with triangle and quad cells, not cells with {mesh2d_face_nodes.shape[1]} sides',
+                     fatal_error=True, exit_now= True)
+        nc.close()
+        return is_file_type
 
     def read_time_sec_since_1970(self, nc, file_index=None):
         var_name = self.params['grid_variable_map']['time']
@@ -50,22 +63,30 @@ class DELFTFM(_BaseReader):
         return time
 
     def read_grid_coords(self, nc, grid):
+        si = self.shared_info
         var_names = self.params['grid_variable_map']['x']
+        x = np.stack((nc.read_a_variable(var_names[0]), nc.read_a_variable(var_names[1])), axis=1).astype(np.float64)
+        var_names_cell = self.params['grid_variable_map']['x_cell']
+        x_cell = np.stack((nc.read_a_variable(var_names_cell[0]), nc.read_a_variable(var_names_cell[1])), axis=1).astype(np.float64)
 
-        grid['hydro_model_cords_in_lat_long'] = True
+        if 'degree' in nc.var_attr(var_names[0],'units').lower() :
+            grid['hydro_model_cords_in_lat_long'] = True
+            grid['lon_lat'] = x.copy()
+            si.setup_lon_lat_to_meters_grid_tranforms(grid['lon_lat'])
+            grid['x'] = si.transform_lon_lat_to_meters(grid['lon_lat'])
+            grid['lon_lat_cell'] = x_cell.copy()
+            grid['x_cell'] = si.transform_lon_lat_to_meters(grid['lon_lat_cell'])
 
-        lon = nc.read_a_variable(var_names[0])
-        lat = nc.read_a_variable(var_names[1])
-        grid['lon_lat'] = np.stack((lon,lat), axis=1)
-        grid['x'] = self.convert_lon_lat_to_meters_grid(grid['lon_lat'])
+        else:
+            grid['hydro_model_cords_in_lat_long'] = False
+            grid['x'] = x
+            grid['x_cell'] = x_cell
 
         return grid
 
     def read_triangles_as_int32(self, nc, grid):
 
-
         grid['quad_face_nodes'] = nc.read_a_variable(self.params['grid_variable_map']['triangles']).astype(np.int32)
-
         grid['quad_face_nodes'] -= 1 # make zero based
 
         # split quad cells aby adding new triangles
@@ -73,31 +94,34 @@ class DELFTFM(_BaseReader):
 
         # split quad grids buy making new triangles
         # -1000 values are triangles not quad cells < 0 so will be split
-        grid['quad_cells_to_split'] = np.flatnonzero(grid['quad_face_nodes'][:, 3] > 0).astype(np.int32)
-        grid['triangles'] = split_quad_cells(grid['quad_face_nodes'], grid['quad_cells_to_split'])
-
+        if grid['quad_face_nodes'].shape[1] == 4:
+            grid['quad_cells_to_split'] = np.flatnonzero(grid['quad_face_nodes'][:, 3] > 0).astype(np.int32)
+            grid['triangles'] = split_quad_cells(grid['quad_face_nodes'], grid['quad_cells_to_split'])
+        else:
+            grid['triangles'] = grid['quad_face_nodes']
+            grid['quad_cells_to_split'] = np.arange(0).astype(np.int32)
         return grid
 
     def is_hindcast3D(self, nc):
-        return False # #TD get working for 2D first
-        return nc.is_var(self.params['field_variable_map']['water_velocity'][0])
-
-
+        uname=self.params['field_variable_map']['water_velocity'][0]
+        is3D = nc.is_var_dim(uname,'nmesh2d_layer')
+        is3D = is3D or nc.is_var_dim(uname,'mesh2d_nLayers')
+        if is3D:
+            self.msg('reading DELFT3D 3D hincasts is under development, contact developer for update ',
+                     fatal_error=True, exit_now=True)
+        return is3D
     def setup_water_velocity(self, nc,grid):
-        # tweak to be depth avearged
-
+        # tweak to be depth averaged
         fm = self.params['field_variable_map']
         var_file_name=fm['water_velocity'][0]
 
-        if False:# TODO get working for 2D first
-            # var_file_name is not None:
+        if self.shared_info.is3D_run:#
+            # todo 3D not working yet
             #  3D velocity, check if vertical vel file exits
             if self.get_3D_var_file_name(nc,fm['water_velocity'][2]) is not None:
                 # drop vertical velocity varaible
                 fm['water_velocity'] = fm['water_velocity'][:2]
         else:
-            # is depth averaged schism run
-            #todo don't have exmaple of this yet to test
             fm['water_velocity'] =fm['water_velocity_depth_averaged']
         pass
 
@@ -133,19 +157,14 @@ class DELFTFM(_BaseReader):
         # setp up node to face map and weights needed
         # to gret nodal values from face values
 
-        grid['node_to_edge_map'],grid['edges_per_node'] = hydromodel_grid_transforms.get_node_to_cell_map(grid['quad_face_nodes'], grid['x'].shape[0])
+        grid['node_to_quad_cell_map'],grid['quad_cells_per_node'] = hydromodel_grid_transforms.get_node_to_cell_map(grid['quad_face_nodes'], grid['x'].shape[0])
 
         # get weights based on inverse distance between node
-        # and data inside cell interior
-
-        lon = nc.read_a_variable('mesh2d_face_x')
-        lat = nc.read_a_variable('mesh2d_face_y')
-        grid['lon_lat_cell'] = np.stack((lon,lat), axis=1)
-        grid['x_cell'] = self.convert_lon_lat_to_meters_grid(grid['lon_lat_cell'])
+        # and data inside quad cell interior
 
         grid['edge_val_weights'] =hydromodel_grid_transforms.calculate_inv_dist_weights_at_node_locations(
                                             grid['x'], grid['x_cell'],
-                                            grid['node_to_edge_map'], grid['edges_per_node'])
+                                            grid['node_to_quad_cell_map'], grid['quad_cells_per_node'])
 
         return  grid
 
@@ -175,7 +194,7 @@ class DELFTFM(_BaseReader):
         # some variables at nodes, some at edge mid points ( eg u,v,w)
         if nc.is_var_dim(var_name, 'mesh2d_nFaces'):
             # data is at cell center/element/triangle  move to nodes
-            data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(data, grid['node_to_edge_map'], grid['edges_per_node'], grid['edge_val_weights'])
+            data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
 
         return data
 

@@ -4,7 +4,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC,Parame
 from oceantracker.util import  time_util
 from datetime import  datetime, timedelta
 import numpy as np
-from oceantracker.util.triangle_utilities_code import split_quad_cells
+from oceantracker.util.triangle_utilities import split_quad_cells
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
 from copy import deepcopy
 from oceantracker.util.ncdf_util import  NetCDFhandler
@@ -12,7 +12,7 @@ from oceantracker.common_info_default_param_dict_templates import node_types
 
 class SCHISMreaderNCDF(_BaseReader):
 
-    def __init__(self, shared_memory_info=None):
+    def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
              'grid_variable_map': {'time': PVC('time', str),

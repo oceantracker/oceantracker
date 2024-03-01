@@ -20,7 +20,7 @@ shared_settings_defaults ={
                 'backtracking':        PVC(False, bool, doc_str='Run model backwards in time'),
                'regrid_z_to_uniform_sigma_levels': PVC(True, bool, doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),
                # 'debug_level':               PVC(0, int,min=0, max=10, doc_str='Gives  diferent levels of debug, in development'),
-                'display_grid_at start' : PVC(False, bool, doc_str='Pause during strat up to plot the grid for checking using matplotlib, clicking om image will print a coord'),
+                'display_grid_at_start' : PVC(False, bool, doc_str='Pause during strat up to plot the grid for checking using matplotlib, clicking om image will print a coord'),
                 'dev_debug_plots': PVC(False, bool, doc_str='show any debug plot generated at give dbug_level, not for general use'),
                 'debug': PVC(False, bool, doc_str= 'more info on errors'),
                 'dev_debug_opt': PVC(0, int,doc_str= 'does extra checks given by integer, not for general use'),
@@ -130,7 +130,9 @@ known_readers ={'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                 'schisim_v5':    'oceantracker.reader.schism_reader_v5.SCHISMreaderNCDFv5',
                  'fvcom': 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
                  'roms': 'oceantracker.reader.ROMS_reader.ROMsNativeReader',
-                 'generic': 'oceantracker.reader.generic_ncdf_reader.GenericNCDFreader'}
+                 'delft3d_fm': 'oceantracker.reader.dev_delft_fm.DELFTFM',
+                 'generic': 'oceantracker.reader.generic_ncdf_reader.GenericNCDFreader',
+                }
 
 
 large_float=1.0E32

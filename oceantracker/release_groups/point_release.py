@@ -60,7 +60,8 @@ class PointRelease(ParameterBaseClass):
         # ensure points are  meters
         if si.hydro_model_cords_in_lat_long:
             params['points_lon_lat'] = params['points'].copy()
-            params['points'] =  si.transform_lon_lat_to_meters(params['points_lon_lat'], in_lat_lon_order=params['coords_allowed_in_lat_lon_order'])
+            params['points'] =  si.transform_lon_lat_to_meters(params['points_lon_lat'], in_lat_lon_order=params['coords_allowed_in_lat_lon_order'],
+                                                    crumbs=f'Point release #[{info["instanceID"]}] : {info["name"]}')
 
         info['number_released'] = 0 # count of particles released in this group
         info['pulseID'] = 0
@@ -72,7 +73,6 @@ class PointRelease(ParameterBaseClass):
         params = self.params
         info = self.info
         si = self.shared_info
-        ml = self.msg_logger
 
         hindcast_start, hindcast_end  =  si.classes['field_group_manager'].get_hindcast_start_end_times()
 
@@ -129,7 +129,7 @@ class PointRelease(ParameterBaseClass):
         release_info['release_times'] = release_info['release_times'][sel]
 
         if release_info['release_times'].size ==0:
-            ml.msg(f'No release times in range of hydro-model for release_group {info["instanceID"]:2d}, ',
+            self.msg(f'No release times in range of hydro-model for release_group {info["instanceID"]:2d}, ',
                    fatal_error=True,
                    hint=' Check hydro-model date range and release dates  ')
 
@@ -153,7 +153,7 @@ class PointRelease(ParameterBaseClass):
         release_info['index_of_next_release'] =  0
 
         if not   hindcast_start <= release_info['first_release_time'] <= hindcast_end :
-            ml.msg(f'Release group "{info["name"]}" >  start time {time_util.seconds_to_isostr(release_info["first_release_time"])}  is outside the range of hydro-model times for release_group instance #{info["instanceID"]:2d}, ',
+            self.msg(f'Release group "{info["name"]}" >  start time {time_util.seconds_to_isostr(release_info["first_release_time"])}  is outside the range of hydro-model times for release_group instance #{info["instanceID"]:2d}, ',
                    fatal_error=True,hint=f' Check release start time is in hydro-model  range of  {time_util.seconds_to_isostr(hindcast_start)}  to {time_util.seconds_to_isostr(hindcast_start)} ')
 
     def get_release_locations(self, time_sec):
@@ -217,11 +217,10 @@ class PointRelease(ParameterBaseClass):
             if count > self.params["max_cycles_to_find_release_points"]: break
 
         if release_data['x'].shape[0] < n_required:
-            si.msg_logger.msg(f'Release group-"{self.info["name"]}", only found {release_data["x"].shape[0]} of {n_required} required points inside domain after {self.params["max_cycles_to_find_release_points"]} cycles',
-                              warning=True,
+            self.msg(f'Only found {release_data["x"].shape[0]} of {n_required} required points inside domain after {self.params["max_cycles_to_find_release_points"]} cycles',
+                           fatal_error=True, exit_now=True,
                            hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  max_cycles_to_find_release_points, current value = {self.params["max_cycles_to_find_release_points"]:3}' )
             n_required = release_data['x'].shape[0] #
-
 
         # trim initial location, cell  etc to required number
         for key in release_data.keys():
@@ -252,7 +251,7 @@ class PointRelease(ParameterBaseClass):
                 z_max =  large_float if params['z_max'] is None else params['z_max']
 
                 if z_min > z_max:
-                    si.msg_logger.msg(f'Release group-"{self.info["name"]}", zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
+                    self.msg(f'Must have zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
                                       hint='z=0 is mean tide level and z < 0 below the mean tide level',
                                       fatal_error=True, exit_now=True)
                 release_data['x']  = self.get_z_release_in_depth_range(release_data['x'] ,z_min,z_max,

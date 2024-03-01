@@ -8,7 +8,7 @@ from copy import  deepcopy, copy
 from glob import  glob
 class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
 
-    def __init__(self, shared_memory_info=None):
+    def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
             'grid_variable_map': {'time': PVC('time', str),
@@ -104,7 +104,7 @@ class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
                 nc_var.close()
             else:
                 # cant find variable
-                self.shared_info.msg_logger(f'Schism v5 reader > Cannot find variable{name} mapped to {fmap[name][0]} in file',
+                self.msg(f'Schism v5 reader > Cannot find variable{name} mapped to {fmap[name][0]} in file',
                                             fatal_error=True, exit_now=True)
         f_params = dict(time_varying='time' in var_dim,
                         is3D='nSCHISM_vgrid_layers' in var_dim,

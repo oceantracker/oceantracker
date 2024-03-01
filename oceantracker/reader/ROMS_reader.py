@@ -16,7 +16,7 @@ from numba import njit
 from matplotlib import pyplot as plt, tri
 from oceantracker.reader.util.reader_util import append_split_cell_data
 from oceantracker.reader.util.hydromodel_grid_transforms import convert_regular_grid_to_triangles
-from oceantracker.util.triangle_utilities_code import split_quad_cells
+from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.util.numba_util import njitOT
 
 
@@ -191,7 +191,7 @@ class ROMsNativeReader(_BaseReader):
 
         # check if rows/cols now  consistent with Psi grid
         if not (grid['psi_land_mask'].shape == s[1:3]):
-            si.msg_logger.msg('not all ROMS variables consisted and cannot map all to psi grid, may be in-correctly formed subset of full model domain , try with full model domain, files variable "' + var_name +'"',
+            self.msg('not all ROMS variables consisted and cannot map all to psi grid, may be in-correctly formed subset of full model domain , try with full model domain, files variable "' + var_name +'"',
                               fatal_error=True,exit_now=True)
 
         data = data.reshape( (s[0],s[1]*s[2], s[3])) # this should match flatten in "C" order

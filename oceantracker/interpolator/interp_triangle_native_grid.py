@@ -169,7 +169,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                    data, triangles,
                                                    n_cell, bc_cords, active)
         else:
-            si.msg_logger.msg(f'2D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
+            self.msg(f'2D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
                               fatal_error=True, exit_now=True)
 
     #@function_profiler(__name__)
@@ -231,7 +231,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                                           n_cell, bc_cords, nz_cell, z_fraction,
                                                                           output, active)
         else:
-            si.msg_logger.msg(f'3D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
+            self.msg(f'3D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
                               fatal_error=True, exit_now=True)
 
     #@function_profiler(__name__)
@@ -407,8 +407,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         #t0= perf_counter()
         n_cell= tri_interp_util.check_if_point_inside_triangle_connected_to_node(xq[:, :2], nodes,
                                      grid['node_to_tri_map'], grid['tri_per_node'],  grid['bc_transform'], self.params['bc_walk_tol'])
-        #print('node find ', perf_counter()-t0)
-
         # if x is nan dist is infinite
         n_cell[~np.isfinite(dist)] = -1
         si.block_timer('Initial cell guess', t0)
