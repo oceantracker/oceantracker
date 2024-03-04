@@ -44,7 +44,7 @@ class SCHISMreaderNCDF(_BaseReader):
 
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
-    def read_grid_coords(self, nc, grid):
+    def read_horizontal_grid_coords(self, nc, grid):
         si= self.shared_info
         x_var ='SCHISM_hgrid_node_x'
         x =  nc.read_a_variable(x_var)
@@ -65,7 +65,6 @@ class SCHISMreaderNCDF(_BaseReader):
             si.setup_lon_lat_to_meters_grid_tranforms(grid['x'])
             grid['lon_lat'] = grid['x'].copy()
             grid['x'] = si.transform_lon_lat_to_meters( grid['lon_lat'])
-
 
         return  grid
 

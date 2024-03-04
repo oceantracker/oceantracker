@@ -55,9 +55,11 @@ class ParameterBaseClass(object):
         # deep update to defaults
         basic_util.deep_dict_update(self.default_params, d)
 
-    def class_doc(self,description=None, role= None):
+    def role_doc(self,role):
+        self.docs['role'] = role  # only in base class
+    def class_doc(self,description):
         self.docs['description']=description
-        self.docs['role'] = role # only in base class
+
 
 
     def check_requirements(self):

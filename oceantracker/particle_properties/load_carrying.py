@@ -8,7 +8,7 @@ class ParticleLoad(ParticleProperty):
         super().__init__()
         #todo extend to allow for decaying load and replace decaying particle class, with this more general property
 
-        self.class_doc(description='Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass')
+        self.class_doc('Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass')
 
         self.add_default_params({'initial_value': PVC(1., float,doc_str='Value of the particle property when it is released') })
 

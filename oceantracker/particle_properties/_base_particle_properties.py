@@ -30,7 +30,7 @@ class _BaseParticleProperty(ParameterBaseClass):
                                      'release_group_parameters':PVC([], list, doc_str='In development: release group specific particle prop params'),
               })
 
-        self.class_doc(role='Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
+        self.role_doc('Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
 
     def initial_setup(self):
         si = self.shared_info

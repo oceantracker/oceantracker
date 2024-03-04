@@ -86,7 +86,7 @@ class ROMsNativeReader(_BaseReader):
 
     def set_up_uniform_sigma(self, nc, grid): return grid
 
-    def read_grid_coords(self, nc, grid):
+    def read_horizontal_grid_coords(self, nc, grid):
 
         # record useful grid info
         grid['lat_psi'] = nc.read_a_variable('lat_psi').astype(np.float64)

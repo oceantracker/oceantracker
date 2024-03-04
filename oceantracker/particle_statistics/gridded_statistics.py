@@ -14,7 +14,9 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         super().__init__()
         # set up info/attributes
         self.add_default_params({
-                 'grid_size':           PLC([100, 99],[int], fixed_len=2),
+                 'grid_size':           PLC([100, 99],[int], fixed_len=2,
+                                            min=1, max=10 ** 6,
+                                            doc_str='number of rows and colums in grid'),
                  'release_group_centered_grids': PVC(False, bool),
                  'grid_center':         PCC(None,single_cord=True, is3D=False),
                  'grid_span':           PCC(None, single_cord=True, is3D=False),

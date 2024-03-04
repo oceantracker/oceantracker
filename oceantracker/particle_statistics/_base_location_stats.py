@@ -35,7 +35,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                 } )
         self.sum_binned_part_prop = {}
         self.info['output_file'] = None
-        self.class_doc(role='Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
+        self.role_doc('Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
 
     def initial_setup(self):
         si =self.shared_info

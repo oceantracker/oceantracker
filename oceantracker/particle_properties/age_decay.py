@@ -7,7 +7,7 @@ class AgeDecay(ParticleProperty):
         super().__init__()
         self.add_default_params({ 'initial_value': PVC(1., float,doc_str='Particle property at the time of release'),
                                  'decay_time_scale': PVC( 1.*3600*24, float)})
-        self.class_doc(description='Exponentially decaying particle property based on age.')
+        self.class_doc('Exponentially decaying particle property based on age.')
 
     def check_requirements(self):
       self.check_class_required_fields_prop_etc(required_props_list=['age'])
