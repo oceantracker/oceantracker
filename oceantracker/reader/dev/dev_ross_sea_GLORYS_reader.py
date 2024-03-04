@@ -52,7 +52,7 @@ class GLORYSreaderSurface(_BaseReader):
         time += sec
         return time
 
-    def read_grid_coords(self, nc, grid):
+    def read_horizontal_grid_coords(self, nc, grid):
         gm = self.params['grid_variable_map']
         # get x and y grid
 

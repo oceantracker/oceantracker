@@ -13,7 +13,7 @@ class VerticalGradient(CustomFieldBase):
                                  'time_varying': PVC(True, bool, is_required=False),
                                  'is3D': PVC(True, bool, is_required=False),
                                  })
-        self.class_doc(description='Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"')
+        self.class_doc('Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"')
 
     def initial_setup(self, grid, fields):
         si = self.shared_info

@@ -111,6 +111,25 @@
                     ],
                     "pulse_size": 10,
                     "release_interval": 10800
+                },
+                "G1": {
+                    "class_name": "GridRelease",
+                    "grid_size": [
+                        3,
+                        4
+                    ],
+                    "coords_ll_ur": [
+                        [
+                            1592500,
+                            5486000
+                        ],
+                        [
+                            1593200,
+                            5485000
+                        ]
+                    ],
+                    "pulse_size": 2,
+                    "release_interval": 3600
                 }
             }
         },
@@ -162,6 +181,25 @@
                     ],
                     "pulse_size": 10,
                     "release_interval": 10800
+                },
+                "G1": {
+                    "class_name": "GridRelease",
+                    "grid_size": [
+                        3,
+                        4
+                    ],
+                    "coords_ll_ur": [
+                        [
+                            1592500,
+                            5486000
+                        ],
+                        [
+                            1593200,
+                            5485000
+                        ]
+                    ],
+                    "pulse_size": 2,
+                    "release_interval": 3600
                 }
             }
         },
@@ -213,6 +251,25 @@
                     ],
                     "pulse_size": 10,
                     "release_interval": 10800
+                },
+                "G1": {
+                    "class_name": "GridRelease",
+                    "grid_size": [
+                        3,
+                        4
+                    ],
+                    "coords_ll_ur": [
+                        [
+                            1592500,
+                            5486000
+                        ],
+                        [
+                            1593200,
+                            5485000
+                        ]
+                    ],
+                    "pulse_size": 2,
+                    "release_interval": 3600
                 }
             }
         },
@@ -264,6 +321,25 @@
                     ],
                     "pulse_size": 10,
                     "release_interval": 10800
+                },
+                "G1": {
+                    "class_name": "GridRelease",
+                    "grid_size": [
+                        3,
+                        4
+                    ],
+                    "coords_ll_ur": [
+                        [
+                            1592500,
+                            5486000
+                        ],
+                        [
+                            1593200,
+                            5485000
+                        ]
+                    ],
+                    "pulse_size": 2,
+                    "release_interval": 3600
                 }
             }
         },
@@ -315,6 +391,25 @@
                     ],
                     "pulse_size": 10,
                     "release_interval": 10800
+                },
+                "G1": {
+                    "class_name": "GridRelease",
+                    "grid_size": [
+                        3,
+                        4
+                    ],
+                    "coords_ll_ur": [
+                        [
+                            1592500,
+                            5486000
+                        ],
+                        [
+                            1593200,
+                            5485000
+                        ]
+                    ],
+                    "pulse_size": 2,
+                    "release_interval": 3600
                 }
             }
         }

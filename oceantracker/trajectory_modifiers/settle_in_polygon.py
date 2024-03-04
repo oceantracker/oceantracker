@@ -1,6 +1,6 @@
 import numpy as np
 from  oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
-from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC
+from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParamValueChecker as PVC
 from oceantracker.util.polygon_util import  InsidePolygon
 
 class SettleInPolygon(_BaseTrajectoryModifier):
@@ -8,7 +8,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'polygon': {'points': PVC(None,'array', is_required=True)},
+        self.add_default_params({'polygon': {'points': PCC(None, is_required=True,is3D=False)},
                                  'probability_of_settlement': PVC(0.,float),
                                  'settlement_duration': PVC(0., float,min=0.),  #  time block stranding after stranding has occured
                                  })

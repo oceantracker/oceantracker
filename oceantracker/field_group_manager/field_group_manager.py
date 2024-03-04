@@ -38,13 +38,19 @@ class FieldGroupManager(ParameterBaseClass):
 
         self._setup_hydro_reader(si.working_params['reader_builder'])
 
-        si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
-        if  si.hydro_model_cords_in_lat_long:
-            self.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid', warning=True)
-        else:
-            self.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid', warning=True)
+        grid = self.grid
+        bounds = [grid['x'].min(axis=0), grid['x'].max(axis=0)]
 
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
+        if  si.hydro_model_cords_in_lat_long:
+            self.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid', warning=True,
+                    hint = f'bounds ={np.array2string(bounds[0], precision=4, floatmode="fixed") } to {np.array2string(bounds[1], precision=2, floatmode="fixed") }'
+                     )
+        else:
+            self.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid', warning=True,
+                        hint = f'bounds ={np.array2string(bounds[0], precision=1, floatmode="fixed") } to {np.array2string(bounds[1], precision=1, floatmode="fixed") }'
+                     )
+
         self.set_up_interpolator()
 
 
@@ -460,16 +466,16 @@ class FieldGroupManager(ParameterBaseClass):
 
     def are_points_inside_domain(self,x, include_dry_cells):
         # only primary/outer grid
-        release_data = self.interpolator.are_points_inside_domain(self.grid,x)
+        is_inside, part_data = self.interpolator.are_points_inside_domain(self.grid,x)
         n = x.shape[0]
-        release_data['hydro_model_gridID'] = np.zeros((n,), dtype=np.int8)
+        part_data['hydro_model_gridID'] = np.zeros((n,), dtype=np.int8)
 
         # get tide and water depth at particle locations
 
         if not include_dry_cells:
             # only  keep those in wet cells at this time
-            release_data['is_inside'] = np.logical_and(release_data['is_inside'] , ~self.are_dry_cells(release_data['n_cell'] ))
-        return release_data
+            is_inside = np.logical_and(is_inside , ~self.are_dry_cells(part_data['n_cell'] ))
+        return is_inside, part_data
 
     def get_grid_limits(self):
         # extend of grid, eg used for outer bounds of gridded stats,

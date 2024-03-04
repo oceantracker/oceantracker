@@ -23,7 +23,9 @@ New features
 
 #. Now reads new Schism v5 multi-file output, where 3D fields are in separate files
 
-#. Can auto detect if hydro-model has lat lng cords, by looking at bounds of grid coordinates,
+#. Can auto detect if hydro-model has lat lng cords, by looking at bounds of grid coordinates.
+
+#. If hydro model is in geographic coords all inputs can now be in lon, lat, eg release locations, stats grid location and size. Currently outputs are in a meters grid, UTM or user given ESPG code. Future versions will work natively geographic coords, ie both inputs and outputs.
 
 #. Release group now has options to release at bottom or sea surface, with optional offset.These override any given z release values.
 
@@ -38,12 +40,13 @@ New features
 #. Now exits with error if any the release group start time is outside time range of hindcast
 
 #. Setting display_grid_at_start plots grid as a check, clicking on image will print coords in console to use as release points
+
 Known breaking changes- ask for help if needed to transition
 ______________________________________________________________
 
 #. Reader param load_fields replaces 'field_variables' param, to load variables to names used internally. These internal names may be mapped to file variables in  new  'field_variable_map'. If a special variable, eg concentration field, no map is needed.
 
-#. z range paramter for release and sats, replaced by z_min and z_max, warning is given
+#. z range parameter for release and sats, replaced by z_min and z_max, warning is given
 
 #. the frozen paticle status name is now stationary, the numerical value remains the same, it is rarely used and is not the same status as stranded by tide
 

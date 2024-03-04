@@ -62,7 +62,7 @@ class DELFTFM(_BaseReader):
         time += sec
         return time
 
-    def read_grid_coords(self, nc, grid):
+    def read_horizontal_grid_coords(self, nc, grid):
         si = self.shared_info
         var_names = self.params['grid_variable_map']['x']
         x = np.stack((nc.read_a_variable(var_names[0]), nc.read_a_variable(var_names[1])), axis=1).astype(np.float64)

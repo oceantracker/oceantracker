@@ -71,7 +71,12 @@ p2['release_groups']={
             'points': two_points, 'pulse_size': 10, 'release_interval': 3 * 3600},
     'poly1':{'class_name': 'PolygonRelease',
             'points': deepcopy(poly_points),
-            'pulse_size': 10, 'release_interval': 3 * 3600}
+            'pulse_size': 10, 'release_interval': 3 * 3600},
+    'G1': {'class_name': 'GridRelease',
+           'grid_size': [3, 4],
+           'coords_ll_ur': [[1592500, 5486000],
+                            [1593200, 5485000]],
+           'pulse_size': 2, 'release_interval': 3600},
 }
 p2['particle_properties'] = {'my_constant_prop': {'class_name': 'ParticleLoad',
                      'initial_value': 100}}
@@ -275,6 +280,7 @@ s56['release_groups']={
                               [1598000, 5486100, -1]
                                 ],
                 'pulse_size': 10, 'release_interval': 3600},
+
 
 }
 s56['velocity_modifiers']={'terminal_velocity':

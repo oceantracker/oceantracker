@@ -56,7 +56,7 @@ class _BaseReader(ParameterBaseClass):
 
     def read_time_sec_since_1970(self, nc, file_index=None):    nopass()
 
-    def read_grid_coords(self, nc, grid):   nopass()
+    def read_horizontal_grid_coords(self, nc, grid):   nopass()
 
 
 
@@ -300,7 +300,7 @@ class _BaseReader(ParameterBaseClass):
 
         # read nodal x's
 
-        grid = self.read_grid_coords(nc, grid)
+        grid = self.read_horizontal_grid_coords(nc, grid)
         grid = self.read_triangles_as_int32(nc, grid)
 
         # get dergees per m at mercator coords for triangle area calcs

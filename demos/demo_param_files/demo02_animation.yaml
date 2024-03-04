@@ -40,6 +40,18 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   time_buffer_size: 15
 release_groups:
+  G1:
+    class_name: GridRelease
+    coords_ll_ur:
+    - - 1592500
+      - 5486000
+    - - 1593200
+      - 5485000
+    grid_size:
+    - 3
+    - 4
+    pulse_size: 2
+    release_interval: 3600
   point1:
     allow_release_in_dry_cells: true
     points:

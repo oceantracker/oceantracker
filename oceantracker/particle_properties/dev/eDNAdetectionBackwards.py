@@ -11,7 +11,7 @@ class eDNAdetection(ParticleProperty):
                                 'sample_collector_area': .05**2,  # number of animals shedding dna [1, 10, 100]
                                 'retained_sample_size_ml': 100.,  # sabella
                                 'detection_limit_copies_per_ml': 0.14})
-        self.class_doc(description= 'eDNAdetection')
+        self.class_doc('eDNAdetection')
 
 
     def initial_value_at_birth(self, new_part_IDs):

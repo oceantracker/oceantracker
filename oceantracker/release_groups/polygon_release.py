@@ -11,7 +11,7 @@ class PolygonRelease(PointRelease):
         super().__init__()
         self.add_default_params(default_polygon_dict_params)
 
-        self.class_doc(description='Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.')
+        self.class_doc('Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.')
 
         # below are not needed for polygons
         self.remove_default_params(['release_radius'])

@@ -99,7 +99,7 @@ class GenericNCDFreader(_BaseReader):
 
         # read nodal x's
 
-        grid = self.read_grid_coords(nc, grid)
+        grid = self.read_horizontal_grid_coords(nc, grid)
         grid['x'] = grid['x'].astype(np.float64)
 
         grid = self.read_triangles_as_int32(nc, grid)
@@ -162,7 +162,7 @@ class GenericNCDFreader(_BaseReader):
             time += time_util.isostr_to_seconds(self.params['isodate_of_hindcast_time_zero'])
         return time
 
-    def read_grid_coords(self, nc, grid):
+    def read_horizontal_grid_coords(self, nc, grid):
         params= self.params
         var_name = params['grid_variable_map']['x']
         grid['x'] = np.column_stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1]))).astype(np.float64)
