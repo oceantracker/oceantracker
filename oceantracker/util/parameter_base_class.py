@@ -130,13 +130,3 @@ class ParameterBaseClass(object):
         # note effect of any numba compilation on first call
         if self.info['update_calls'] == 1: self.info['time_first_update_call'] = dt
 
-    def IDstr(self):
-        return  f' {self.__class__.__name__} "{self.info["name"]}", instance #[{self.info["instanceID"]}]  class= {self.__class__.__module__}.{self.__class__.__name__} '
-
-    def msg(self,*args,**kwargs):
-        # wrapper on msg logger to add class info to crumbs
-        # if  error
-        if ('fatal_error' in kwargs and kwargs['fatal_error'] ) :
-            if 'crumbs' not in kwargs : kwargs['crumbs'] =''
-            kwargs['crumbs'] += self.IDstr()
-        self.msg_logger.msg(*args, **kwargs)

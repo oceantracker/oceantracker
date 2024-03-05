@@ -66,7 +66,9 @@ core_class_list=['reader',
                 'tracks_writer',
                 'dispersion',
                  'tidal_stranding',
-                'resuspension']
+                'resuspension',
+                 'integrated_model' # this is here as ther can be only one at a time
+                 ]
 
 default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
                         particle_properties='oceantracker.particle_properties._base_particle_properties.ParticleProperty',
@@ -102,6 +104,7 @@ class_dicts_list=[ # class dicts which replace lists
             # below still to be developed
             # 'post_processing':      PDLdefaults({}), #todo after run post processing not implemented yet
             'time_varying_info', # particle info,eg. time,or  tide at at tide gauge, core example is particle time
+
             ]
 
 
@@ -124,8 +127,7 @@ particle_info['status_keys_list']= list(particle_info['status_flags'].keys()) # 
 
 cell_search_status_flags = dict(ok =0, outside_domain=1 ,blocked_domain=-5, blocked_dry_cell=-4, bad_cord=-20, failed=-30)
 
-# default reader classes used by auto dection of file type
-
+# default reader classes used by auto-detection of file type
 known_readers ={'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                 'schisim_v5':    'oceantracker.reader.schism_reader_v5.SCHISMreaderNCDFv5',
                  'fvcom': 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
@@ -136,7 +138,6 @@ known_readers ={'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
 
 
 large_float=1.0E32
-
 
 # node types for hydro model
 node_types= dict(interior = 0,island_boundary = 1, domain_boundary= 2, open_boundary=3, land = 4)
@@ -205,12 +206,11 @@ node_types= dict(interior = 0,island_boundary = 1, domain_boundary= 2, open_boun
     # todo show defauls on param eros?
     # todo move writing to first case and make it a fieldgroup method
     # todo move particle comparison methods to wrapper methods
-    # todo always give all non core part prop two buffers?
     # todo full use of initial setup, final set up and update with timers
     # todo get rid of used nseq in favour of instanceID
     # todo add check for use of known class prop types, eg 'maunal_update'
     # todo compact model only with self expanding buffer??
-    # todo enable on the fly depth avering of fieds if running depth avearged,
+    # todo enable on the fly depth avering of fields if running depth avearged,
     #  currently disabled in base reader.setup_reader_fields
     # todo only have compact mode tracks, and add a convert at end if requested
     # todo remove depth range stats and make depth range part of stats

@@ -35,7 +35,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def initial_setup(self):
         si= self.shared_info
-
+        ml = si.msg_logger
         self._setup_hydro_reader(si.working_params['reader_builder'])
 
         grid = self.grid
@@ -43,11 +43,11 @@ class FieldGroupManager(ParameterBaseClass):
 
         si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
         if  si.hydro_model_cords_in_lat_long:
-            self.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid', warning=True,
+            ml.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid', warning=True,
                     hint = f'bounds ={np.array2string(bounds[0], precision=4, floatmode="fixed") } to {np.array2string(bounds[1], precision=2, floatmode="fixed") }'
                      )
         else:
-            self.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid', warning=True,
+            ml.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid', warning=True,
                         hint = f'bounds ={np.array2string(bounds[0], precision=1, floatmode="fixed") } to {np.array2string(bounds[1], precision=1, floatmode="fixed") }'
                      )
 
@@ -365,6 +365,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def add_reader_field(self, name, nc,write_interp_particle_prop_to_tracks_file=True):
         si = self.shared_info
+        ml = si.msg_logger
         reader= self.reader
 
         # ensure all field maps are lists, and if not given use name as the field map
@@ -384,7 +385,7 @@ class FieldGroupManager(ParameterBaseClass):
         fm = reader.params['field_variable_map']
         if name not in fm:
             reader.params['field_variable_map'][name] = name
-            si.msg_logger.msg(f'No field map given for variable named "{name}" in reader "load_fields" parameter, assuming hydro-files have variable with this name, which is a scalar variable',
+            ml.msg(f'No field map given for variable named "{name}" in reader "load_fields" parameter, assuming hydro-files have variable with this name, which is a scalar variable',
                          hint='if not a scalar, or need to use another name internally, then  then add a map to reader "field_variable_map parameter"',
                          crumbs ='field_group_manager> adding reader fields',
                               note=True )
@@ -392,7 +393,7 @@ class FieldGroupManager(ParameterBaseClass):
         # check if variables are in file
         for file_var_name in fm[name] if type(fm[name]) == list else [fm[name]]:
             if not nc.is_var(file_var_name):
-                self.msg(f'Cannot find field variable named "{file_var_name}" in hydro-file mapped to  field "{name}" ',
+                ml.msg(f'Cannot find field variable named "{file_var_name}" in hydro-file mapped to  field "{name}" ',
                                 hint=f'variable is not in file, currently variable map is = "{fm[name]}"',
                                   fatal_error=True)
         si.msg_logger.exit_if_prior_errors()

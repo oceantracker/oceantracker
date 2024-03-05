@@ -200,7 +200,6 @@ class _BaseReader(ParameterBaseClass):
 
     def sort_files_by_time(self, file_list, msg_logger):
         # get time sorted list of files matching mask
-
         fi = {'names': file_list, 'n_time_steps': [], 'time_start': [], 'time_end': []}
         for n, fn in enumerate(file_list):
             # get first/second/last time from each file,
@@ -214,8 +213,9 @@ class _BaseReader(ParameterBaseClass):
 
         # check some files found
         if len(fi['names']) == 0:
-            self.msg('reader: cannot find any files matching mask "' + self.params['file_mask']
-                           + '"  in input_dir : "' + self.params['input_dir'] + '"', fatal_error=True)
+            msg_logger.msg('reader: cannot find any files matching mask "' + self.params['file_mask']
+                           + '"  in input_dir : "' + self.params['input_dir'] + '"',
+                   caller=self, fatal_error=True)
 
         # convert file info to numpy arrays for sorting
         keys = ['names', 'n_time_steps', 'time_start', 'time_end']
@@ -255,11 +255,13 @@ class _BaseReader(ParameterBaseClass):
         # build a dummy non-initialise reader to get some methods and full params
         # add defaults from template, ie get reader class_name default, no warnings, but get these below
         # check cals name
+
         fi = self.sort_files_by_time(file_list, msg_logger)
 
         # checks on hindcast
         if fi['n_time_steps_in_hindcast'] < 2:
-            self.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']), fatal_error=True, exit_now=True)
+            msg_logger.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']),
+                     fatal_error=True, exit_now=True, caller=self)
 
 
         t = np.stack((fi['time_start'], fi['time_end']), axis=1)
@@ -329,7 +331,7 @@ class _BaseReader(ParameterBaseClass):
         # add to reader build info
         si = self.shared_info
         info = self.info
-        msg_logger = self.msg_logger
+        msg_logger = si.msg_logger
         msg_logger.progress_marker('Starting grid setup')
 
         # node to cell map

@@ -156,6 +156,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                    field_instance, triangles,
                                                    n_cell, bc_cords, active):
         si = self.shared_info
+        ml = si.msg_logger
         data =  field_instance.data
 
         if data.shape[3] ==1:
@@ -169,7 +170,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                    data, triangles,
                                                    n_cell, bc_cords, active)
         else:
-            self.msg(f'2D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
+            ml.msg(f'2D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
                               fatal_error=True, exit_now=True)
 
     #@function_profiler(__name__)
@@ -217,6 +218,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                            n_cell, bc_cords, nz_cell, z_fraction,
                            output, active):
         si = self.shared_info
+        ml = si.msg_logger
 
         data = field_instance.data
         if data.shape[3] == 1:            # scalar
@@ -231,8 +233,8 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                                                           n_cell, bc_cords, nz_cell, z_fraction,
                                                                           output, active)
         else:
-            self.msg(f'3D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
-                              fatal_error=True, exit_now=True)
+            ml.msg(f'3D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
+                              fatal_error=True, exit_now=True, caller=self)
 
     #@function_profiler(__name__)
     def eval_field_interpolation_at_given_locations(self,field_name, field_instance,grid, reader, x,

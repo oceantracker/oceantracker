@@ -82,6 +82,7 @@ class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
     def get_field_params(self, nc, name, crumbs=''):
         # work out if feild is 3D ,etc
         si = self.shared_info
+        ml = si.msg_logger
         fmap = deepcopy(self.params['field_variable_map'])
 
         # if no field map given to use given name as field map
@@ -104,8 +105,8 @@ class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
                 nc_var.close()
             else:
                 # cant find variable
-                self.msg(f'Schism v5 reader > Cannot find variable{name} mapped to {fmap[name][0]} in file',
-                                            fatal_error=True, exit_now=True)
+                ml.msg(f'Schism v5 reader > Cannot find variable{name} mapped to {fmap[name][0]} in file',
+                                            fatal_error=True, exit_now=True, caller=self)
         f_params = dict(time_varying='time' in var_dim,
                         is3D='nSCHISM_vgrid_layers' in var_dim,
                         is_vector= len(fmap[name]) > 1

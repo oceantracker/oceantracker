@@ -28,7 +28,7 @@ def build_node_to_triangle_map(tri, x):
             tri_per_node[node] += 1
             max_cells_per_node = max(tri_per_node[node], max_cells_per_node)
 
-            # if not enough space add colums to matrix
+            # if not enough space add columns to matrix
             if tri_per_node[node] >= node_to_tri_map.shape[1]:
                 # add another block
                 node_to_tri_map = np.concatenate((node_to_tri_map, empty_block.copy()),axis=1)

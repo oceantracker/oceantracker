@@ -220,29 +220,29 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def add_particle_property(self, name, prop_group, prop_params, crumbs=''):
         si = self.shared_info
-
+        ml = si.msg_logger
         # todo make name first compulsory argument of this function and create_class_dict_instance
         if name is None:
-            self.msg('ParticleGroupManager.create_particle_property, prop name cannot be None, must be unique str',
-                   hint='got prop_type of type=' + str(type(prop_group)),
+            ml.msg('ParticleGroupManager.create_particle_property, prop name cannot be None, must be unique str',
+                   hint='got prop_type of type=' + str(type(prop_group)), caller=self,
                    fatal_error=True, exit_now=True)
 
         if name in si.classes['particle_properties']:
-            self.msg(f'particle property  name "{name}"is already in use',
+            ml.msg(f'particle property  name "{name}"is already in use',caller=self,
                    hint='got prop_type of type=' + str(type(prop_group)), crumbs= crumbs+'ParticleGroupManager.create_particle_property' + name,
                    fatal_error=True)
 
         if type(prop_group) != str :
-            self.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str',
+            ml.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str', caller=self,
                    hint='got prop_type of type=' + str(type(prop_group)),
                    fatal_error=True, exit_now=True)
 
         if type(prop_params) != dict:
-            self.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ',
+            ml.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ',caller=self,
                     hint= 'got parameters of type=' + str(type(prop_params)) +',  values='+str(prop_params), fatal_error=True, exit_now=True)
 
         if prop_group not in self.known_prop_types:    #todo move all raise exception to msglogger
-            self.msg('ParticleGroupManager.create_particle_property, unknown prop_group name',
+            ml.msg('ParticleGroupManager.create_particle_property, unknown prop_group name', caller=self,
                    hint='prop_group must be one of ' + str(self.known_prop_types),   fatal_error=True, exit_now=True)
 
 

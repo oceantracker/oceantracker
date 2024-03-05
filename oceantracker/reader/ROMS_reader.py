@@ -159,6 +159,7 @@ class ROMsNativeReader(_BaseReader):
     def read_file_var_as_4D_nodal_values(self,nc, grid, var_name, file_index=None):
         # reformat file variable into 4D time,node,depth, components  form
         si =self.shared_info
+        ml = si.msg_logger
 
         data = nc.read_a_variable(var_name, sel=file_index)
 
@@ -191,8 +192,8 @@ class ROMsNativeReader(_BaseReader):
 
         # check if rows/cols now  consistent with Psi grid
         if not (grid['psi_land_mask'].shape == s[1:3]):
-            self.msg('not all ROMS variables consisted and cannot map all to psi grid, may be in-correctly formed subset of full model domain , try with full model domain, files variable "' + var_name +'"',
-                              fatal_error=True,exit_now=True)
+            ml.msg('not all ROMS variables consisted and cannot map all to psi grid, may be in-correctly formed subset of full model domain , try with full model domain, files variable "' + var_name +'"',
+                              fatal_error=True,exit_now=True, caller=self)
 
         data = data.reshape( (s[0],s[1]*s[2], s[3])) # this should match flatten in "C" order
 

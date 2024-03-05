@@ -16,7 +16,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # set up info/attributes
         super().__init__()
         #todo add depth range for count
-        self.add_default_params({ 'update_interval':       PVC(60*60.,float, doc_str='Time in seconds between calculating statistics', units='sec'),
+        self.add_default_params({ 'update_interval':       PVC(60*60.,float,
+                                                               doc_str='Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step',
+                                                               units='sec'),
                                   'count_start_date': PVC(None, 'iso8601date',doc_str= 'Start particle counting from this iso date-time'),
                                   'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this iso date-time'),
                                   'role_output_file_tag' :           PVC('stats_base',str),
@@ -25,8 +27,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                                                  doc_str=' Count only those particles with status >= to this value'),
                                   'status_max': PVC('moving', [str], possible_values=particle_info['status_keys_list'],
                                                     doc_str=' Count only those particles with status  <= to this value'),
-                                  'z_min': PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value'),
-                                  'z_max': PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value'),
+                                  'z_min': PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value', units='meters above mean water level, so is < 0 at depth'),
+                                  'z_max': PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value', units='meters above mean water level, so is < 0 at depth'),
                                   'water_depth_min': PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
                                   'water_depth_max': PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
                                   'particle_property_list': PLC(None, [str], make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
@@ -39,6 +41,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def initial_setup(self):
         si =self.shared_info
+        ml = si.msg_logger
         info = self.info
         params = self.params
        # used to create boolean of those to count
@@ -65,14 +68,15 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
         if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
         if info['z_range'][0] > info['z_range'][1]:
-            self.msg(f'Require zmin > zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', fatal_error=True,
+            ml.msg(f'Require zmin > zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', fatal_error=True, caller=self,
                               hint ='z=0 is mean water level, so z is mostly < 0')
 
         info['water_depth_range'] = np.asarray([-f, f])
         if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
         if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
         if info['water_depth_range'][0]> info['water_depth_range'][1]:
-            self.msg(f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ', fatal_error=True)
+            ml.msg(f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
+                     caller=self,fatal_error=True)
 
     def check_part_prop_list(self):
         si = self.shared_info

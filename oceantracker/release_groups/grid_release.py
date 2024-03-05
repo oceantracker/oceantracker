@@ -12,7 +12,7 @@ class GridRelease(_BaseReleaseGroup):
                             doc_str='Coordinates of lower left and upper right of grid release,, ie [[x_ll,y_ll],[x_ur,y_ur]]'),
               grid_size= PLC([100, 99], [int], fixed_len=2,
                              min =1,max=10**6,
-                             doc_str='number of rows and colums in grid'),
+                             doc_str='number of rows and columns in grid'),
                 ))
         self.class_doc('Release pules of particles on a regular grid.')
 
@@ -20,6 +20,7 @@ class GridRelease(_BaseReleaseGroup):
         info['release_type'] = 'grid'
 
     def initial_setup(self):
+        si = self.shared_info
         params = self.params
         info = self.info
 
@@ -36,6 +37,12 @@ class GridRelease(_BaseReleaseGroup):
         ri, ci = np.meshgrid(range(y.size),  range(x.size))
         info['map_grid_index_to_row_column'] = np.stack((ri.ravel(), ci.ravel()),axis=1)
 
+        # add particle prop fort row column only if nor already added by another grid release
+        if 'grid_release_row_col' not in si.classes['particle_properties']:
+            pgm = si.classes['particle_group_manager']
+            pgm.add_particle_property('grid_release_row_col','manual_update', dict(write=True, time_varying= False, vector_dim=2,dtype=np.int32,
+                                                                                  description='(row , column) of grid point which released the particle' ))
+            pass
 
         pass
 
@@ -45,3 +52,10 @@ class GridRelease(_BaseReleaseGroup):
     def get_release_location_candidates(self):
         x = np.repeat(self.params['points'], self.params['pulse_size'], axis=0)
         return x
+    
+    def add_bookeeping_particle_prop_data(self,release_part_prop):
+        super().add_bookeeping_particle_prop_data(release_part_prop) # get standard release bookeeping prop
+
+        # add row column origin part prop data, for each pulse
+        release_part_prop['grid_release_row_col'] = np.repeat(self.info['map_grid_index_to_row_column'], self.params['pulse_size'], axis=0)
+        return release_part_prop

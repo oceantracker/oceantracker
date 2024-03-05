@@ -396,6 +396,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             for name, params in si.working_params['class_dicts'][user_type].items():
                 i = si.create_class_dict_instance(name,user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
+
+        # last load any model models which may depend on the other classes
+        # there can only be one model added
+        params =  si.working_params['core_classes']['integrated_model']
+        i = si.add_core_class('integrated_model', params, crumbs='adding  "integrated_model" class')
+        i.initial_setup()  # some require instanceID from above add class to initialise
         pass
 
     # ____________________________

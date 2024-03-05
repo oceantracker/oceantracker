@@ -273,7 +273,7 @@ class ParameterListChecker(object):
 
 class ParameterCoordsChecker(object):
     # checks input cords or array is a set of N by 2 or 3 values
-    def __init__(self,default_value, dtype=np.float64, is3D=False, single_cord=False, doc_str=None,
+    def __init__(self,default_value, dtype=np.float64, is3D=False, single_cord=False, doc_str=None,one_or_more_points=False,
                   is_required=False, units='meters or , degrees if long_lat codes detected'):
         self.info={}
         info = self.info
@@ -284,6 +284,7 @@ class ParameterCoordsChecker(object):
         info['is_required'] = is_required
         info['units'] = units
         info['doc_str'] = doc_str
+        info['one_or_more_points'] = one_or_more_points
         info['type'] = 'coordinates'
 
     def get_default(self):
@@ -316,6 +317,11 @@ class ParameterCoordsChecker(object):
 
         # make int float
         value= value.astype(np.float64)
+
+        # if one or more expected make 1 by n
+        if info['one_or_more_points'] and value.ndim==1:
+            value= value.reshape((1,-1))
+            info['single_cord'] = False
 
         # now have double array, so check shape
         if info['single_cord']:

@@ -381,6 +381,17 @@ p62['release_groups']={
 
 params.append(p62)
 
+# test polygon release overlying land
+p100 = deepcopy(schsim_base_params)
+p100.update({'output_file_base' :'demo100_LCS',  })
+p100['integrated_model']={'class_name': 'LagarangianCoherentStructures',
+           'grid_size': [25, 50],
+            'grid_span' : [ 1000, 2000],
+           'grid_center': [1592500, 5486000],
+           'pulse_size': 2, 'release_interval': 3600}
+
+params.append(p100)
+
 # back tracking test
 p90= deepcopy(p2)
 
@@ -420,7 +431,7 @@ p91['release_groups']['r4']['release_start_date']='2020-06-03T03:00:00'
 params.append(p91)
 
 
-# demo 100 ROMS test
+# demo  ROMS test
 # Sample data subset
 # https://www.seanoe.org/data/00751/86286/
 

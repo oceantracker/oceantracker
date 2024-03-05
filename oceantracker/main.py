@@ -5,10 +5,6 @@ import sys
 #
 
 
-
-# todo kernal/numba based RK4 step
-# todo short name map requires unique class names in package, this is checked on startup,add checks of uniqueness of user classes added from outside package
-
 # Dev notes
 # line debug?? python3.6 -m pyinstrument --show-all plasticsTrackOnLine_Main.py
 # python -m cProfile
@@ -75,11 +71,11 @@ class OceanTracker():
         ml = self.msg_logger
         known_class_roles = common_info.class_dicts_list + common_info.core_class_list
         if class_role is None:
-            self.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True)
+            ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True, caller =self)
             return
 
         if type(class_role) != str:
-            self.msg(f'oceantracker.add_class, class_role must be a string', fatal_error=True,
+            ml.msg(f'oceantracker.add_class, class_role must be a string', fatal_error=True, caller=self,
                    hint='Given type =' + str(type(class_role)))
             return
 

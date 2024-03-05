@@ -22,9 +22,9 @@ class PolygonRelease(PointRelease):
         info = self.info
         si= self.shared_info
         params= self.params
-
+        ml = si.msg_logger
         if params['points'].shape[0] < 3:
-            self.msg('"points" parameter have at least 3 points, given ' + str(info['points']), fatal_error=True)
+            ml.msg('"points" parameter have at least 3 points, given ' + str(params['points']), fatal_error=True, caller=self)
 
         # ensure points are  meters
         if si.hydro_model_cords_in_lat_long:
@@ -41,7 +41,7 @@ class PolygonRelease(PointRelease):
         info['bounding_box_area'] = (b[1]-b[0]) * (b[3]-b[2])
 
         if info['polygon_area']  < 1:
-            self.msg('Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
+            ml.msg('Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
 
         info['number_released'] = 0
         info['pulseID'] = 0

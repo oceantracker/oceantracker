@@ -37,13 +37,15 @@ class DELFTFM(_BaseReader):
 
     def is_file_format(self,file_name):
         # check if file matches this file format
+        si = self.shared_info
+        ml = si.msg_logger
         nc = NetCDFhandler(file_name,'r')
         is_file_type= nc.is_var('mesh2d_node_x') and nc.is_var('mesh2d_face_nodes')
 
         mesh2d_face_nodes = nc.read_a_variable('mesh2d_face_nodes')
         if mesh2d_face_nodes.shape[1] > 4:
-            self.msg(f'Reader currently only works with triangle and quad cells, not cells with {mesh2d_face_nodes.shape[1]} sides',
-                     fatal_error=True, exit_now= True)
+            ml.msg(f'Reader currently only works with triangle and quad cells, not cells with {mesh2d_face_nodes.shape[1]} sides',
+                     fatal_error=True, exit_now= True, caller=self)
         nc.close()
         return is_file_type
 
@@ -103,12 +105,14 @@ class DELFTFM(_BaseReader):
         return grid
 
     def is_hindcast3D(self, nc):
+        si = self.shared_info
+        ml = si.msg_logger
         uname=self.params['field_variable_map']['water_velocity'][0]
         is3D = nc.is_var_dim(uname,'nmesh2d_layer')
         is3D = is3D or nc.is_var_dim(uname,'mesh2d_nLayers')
         if is3D:
-            self.msg('reading DELFT3D 3D hincasts is under development, contact developer for update ',
-                     fatal_error=True, exit_now=True)
+            ml.msg('reading DELFT3D 3D hincasts is under development, contact developer for update ',
+                     fatal_error=True, exit_now=True, caller=self)
         return is3D
     def setup_water_velocity(self, nc,grid):
         # tweak to be depth averaged

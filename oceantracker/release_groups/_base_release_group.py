@@ -34,7 +34,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
                # 'water_depth_max': PVC(None, float, doc_str='max water depth to release in', units='m'),
 
                # Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}
-               'max_cycles_to_find_release_points': PVC(200, int, min=100, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
+               'max_cycles_to_find_release_points': PVC(1000, int, min=100, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
                 })
 
         self.role_doc('Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.')
@@ -66,6 +66,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         params = self.params
         info = self.info
         si = self.shared_info
+        ml = si.msg_logger
 
 
         hindcast_start, hindcast_end  =  si.classes['field_group_manager'].get_hindcast_start_end_times()
@@ -122,8 +123,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
         release_info['release_times'] = release_info['release_times'][sel]
 
         if release_info['release_times'].size ==0:
-            self.msg(f'No release times in range of hydro-model for release_group {info["instanceID"]:2d}, ',
-                   fatal_error=True,
+            ml.msg(f'No release times in range of hydro-model for release_group {info["instanceID"]:2d}, ',
+                   fatal_error=True, caller=self,
                    hint=' Check hydro-model date range and release dates  ')
 
         # get time steps when released, used to determine when to release
@@ -146,8 +147,9 @@ class _BaseReleaseGroup(ParameterBaseClass):
         release_info['index_of_next_release'] =  0
 
         if not   hindcast_start <= release_info['first_release_time'] <= hindcast_end :
-            self.msg(f'Release group "{info["name"]}" >  start time {time_util.seconds_to_isostr(release_info["first_release_time"])}  is outside the range of hydro-model times for release_group instance #{info["instanceID"]:2d}, ',
-                   fatal_error=True,hint=f' Check release start time is in hydro-model  range of  {time_util.seconds_to_isostr(hindcast_start)}  to {time_util.seconds_to_isostr(hindcast_start)} ')
+            ml.msg(f'Release group "{info["name"]}" >  start time {time_util.seconds_to_isostr(release_info["first_release_time"])}  is outside the range of hydro-model times for release_group instance #{info["instanceID"]:2d}, ',
+                   fatal_error=True, caller=self,
+                   hint=f' Check release start time is in hydro-model  range of  {time_util.seconds_to_isostr(hindcast_start)}  to {time_util.seconds_to_isostr(hindcast_start)} ')
 
     def _check_potential_release_locations_in_bounds(self, x):
         # check cadiated in bound
@@ -163,6 +165,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
     def get_release_locations(self, time_sec):
         # set up full set of release locations inside  polygons
         si = self.shared_info
+        ml = si.msg_logger
         info= self.info
         params=self.params
 
@@ -214,9 +217,9 @@ class _BaseReleaseGroup(ParameterBaseClass):
             if count > self.params["max_cycles_to_find_release_points"]: break
 
         if release_part_prop['x'].shape[0] < n_required:
-            self.msg(f'Only found {release_part_prop["x"].shape[0]} of {n_required} required points inside domain after {self.params["max_cycles_to_find_release_points"]} cycles',
-                           fatal_error=True, exit_now=True,
-                           hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  max_cycles_to_find_release_points, current value = {self.params["max_cycles_to_find_release_points"]:3}' )
+            ml.msg(f'Only found {release_part_prop["x"].shape[0]} of {n_required} required points inside domain after {self.params["max_cycles_to_find_release_points"]} cycles',
+                           fatal_error=True, exit_now=True, caller=self,
+                           hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  "max_cycles_to_find_release_points", current value = {self.params["max_cycles_to_find_release_points"]:3}' )
             n_required = release_part_prop['x'].shape[0] #
 
         # trim initial location, cell  etc to required number
@@ -243,9 +246,9 @@ class _BaseReleaseGroup(ParameterBaseClass):
                 z_max =  large_float if params['z_max'] is None else params['z_max']
 
                 if z_min > z_max:
-                    self.msg(f'Must have zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
+                    ml.msg(f'Must have zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
                                       hint='z=0 is mean tide level and z < 0 below the mean tide level',
-                                      fatal_error=True, exit_now=True)
+                                      fatal_error=True, exit_now=True, caller=self)
                 release_part_prop['x']  = self.get_z_release_in_depth_range(release_part_prop['x'] ,z_min,z_max,
                                                                    release_part_prop['water_depth'],release_part_prop['tide'])
         return release_part_prop
