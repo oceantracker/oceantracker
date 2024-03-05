@@ -23,6 +23,7 @@ class _CorePolygonMethods(ParameterBaseClass):
 
     def initial_setup(self, **kwargs):
         si = self.shared_info
+        ml = si.msg_logger
         params = self.params
 
         # pre fill  polygon list from release groups if requested
@@ -33,9 +34,9 @@ class _CorePolygonMethods(ParameterBaseClass):
                     params['polygon_list'].append({'name': name, 'points':i.params['points']})
 
             if len(params['polygon_list']) == 0:
-                self.msg('There are no polygon releases to use as statistic polygons',
+                ml.msg('There are no polygon releases to use as statistic polygons',
                                   hint='must have at least one polygon release defined to use the use_release_group_polygons parameter, or use statistics polygon_list parameter',
-                                   fatal_error=True, exit_now=True)
+                                   fatal_error=True, exit_now=True, caller=self)
         else:
             # use give polygon list
             for p in params['polygon_list']:
@@ -46,7 +47,7 @@ class _CorePolygonMethods(ParameterBaseClass):
                     p['points'] = si.transform_lon_lat_to_meters(p['points_lon_lat'], in_lat_lon_order=params['coords_allowed_in_lat_lon_order'])
 
         if len(params['polygon_list'])==0:
-            self.msg('Must have polygon_list parameter  with at least one polygon dictionary',
+            ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
                         fatal_error=True, exit_now=True,hint= 'eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
 
         # do standard stats initialize

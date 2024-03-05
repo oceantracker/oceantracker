@@ -15,11 +15,11 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         # set up info/attributes
         self.add_default_params({
                  'grid_size':           PLC([100, 99],[int], fixed_len=2,
-                                            min=1, max=10 ** 6,
-                                            doc_str='number of rows and colums in grid'),
+                                            min=1, max=10 ** 5,
+                                            doc_str='number of rows and columns in grid'),
                  'release_group_centered_grids': PVC(False, bool),
-                 'grid_center':         PCC(None,single_cord=True, is3D=False),
-                 'grid_span':           PCC(None, single_cord=True, is3D=False),
+                 'grid_center':         PCC(None, single_cord=True, is3D=False, doc_str='center of the statitics grid as (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
+                 'grid_span':           PCC(None, single_cord=True, is3D=False,doc_str='(width, height)  of the statistics grid', units='meters or decimal degrees'),
                  'role_output_file_tag' :    PVC('stats_gridded_time',str),
                     })
         self.grid = {}
@@ -218,6 +218,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
     def set_up_time_bins(self,nc):
         # this set up age bins, not time
         si= self.shared_info
+        ml = si.msg_logger
         stats_grid = self.grid
 
         # ages to bin particle ages into,  equal bins in given range
@@ -226,25 +227,29 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
         # check age order and length
         if age_min >  si.run_info['model_duration']:
-            self.msg(' parameter min_age_to_bin must be > duration of model run (min,max) = '
-                                    + str([age_min, age_max]) + ', duration=' + str(si.run_info['model_duration']), fatal_error=True)
+            ml.msg(' parameter min_age_to_bin must be > duration of model run (min,max) = '
+                                    + str([age_min, age_max]) + ', duration=' + str(si.run_info['model_duration']),
+                   caller=self, fatal_error=True)
 
         if age_max <= age_min:
-            self.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
-                                    + str([age_min,age_max ]) + ', duration=' + str(si.run_info['model_duration']),fatal_error=True)
+            ml.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
+                                    + str([age_min,age_max ]) + ', duration=' + str(si.run_info['model_duration']),
+                   caller=self,   fatal_error=True)
 
         # arange requites one mere step beyong required max_age
         dage= abs(int(self.params['age_bin_size']))
         stats_grid['age_bin_edges'] =  float(si.model_direction) * np.arange(int(age_min), int(age_max+dage), dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
-            self.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative', fatal_error=True)
+            ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
+                     caller=self, fatal_error=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 
     def set_up_binned_variables(self, nc):
         # set up space for requested particle properties based on asge
         si =self.shared_info
+        ml = si.msg_logger
         stats_grid = self.grid
 
         dim_sizes= (stats_grid['age_bins'].shape[0], len(si.classes['release_groups']), stats_grid['y'].shape[1], stats_grid['x'].shape[1])
@@ -258,7 +263,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
             if p_name in si.classes['particle_properties']:
                 self.sum_binned_part_prop[p_name] = np.full(dim_sizes, 0.)  # zero fro summing
             else:
-                self.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
+                ml.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True, caller=self)
 
     def do_counts(self, time_sec, sel):
         # do counts for each release  location and grid cell, over rides parent

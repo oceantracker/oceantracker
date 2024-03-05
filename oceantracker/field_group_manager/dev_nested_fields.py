@@ -73,19 +73,19 @@ class DevNestedFields(ParameterBaseClass):
 
     def final_setup(self):
         si = self.shared_info
-
+        ml = si.msg_logger
         # do final setup for each grid
         for fgm in self.fgm_hydro_grids:
             fgm.final_setup()
 
         # ensure nested grids have open boundary data and set open boundary type
         if si.settings['open_boundary_type'] == 0:
-            self.msg('For nested grids must set "open_boundary_type" must be > to select an open boundary type', fatal_error=True, exit_now=True)
+            ml.msg('For nested grids must set "open_boundary_type" must be > to select an open boundary type', fatal_error=True, exit_now=True)
 
         # check nested grids
         for n, fgm in enumerate(self.fgm_hydro_grids[1:]):
             if not fgm.info['has_open_boundary_nodes']:
-                self.msg(f'Nested grids must tag open boundary nodes, nested grid {n+1} " does not',
+                ml.msg(f'Nested grids must tag open boundary nodes, nested grid {n+1} " does not',
                                   fatal_error=True, exit_now=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
 
         # outer grid is not required to have open boundary nodes, but can if provided

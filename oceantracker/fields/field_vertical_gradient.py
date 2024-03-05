@@ -17,13 +17,14 @@ class VerticalGradient(CustomFieldBase):
 
     def initial_setup(self, grid, fields):
         si = self.shared_info
+        ml = si.msg_logger
         # get fields prop from named field
         params= self.params
         field_name = params['name_of_field']
         params['time_varying'] =fields[field_name].is_time_varying() # match base field
 
         if field_name not in fields:
-            self.msg(f'Field vertical gradient >> can not find field {field_name} to setup its vertical gradient class', fatal_error=True, exit_now=True)
+            ml.msg(f'Field vertical gradient >> can not find field {field_name} to setup its vertical gradient class', fatal_error=True, exit_now=True)
 
         super().initial_setup(grid,fields)  # set up self.data with above params
         pass

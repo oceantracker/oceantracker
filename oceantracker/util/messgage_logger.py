@@ -2,6 +2,8 @@ from os import path, remove
 import traceback
 from time import  perf_counter
 from oceantracker.common_info_default_param_dict_templates import docs_base_url
+
+from oceantracker.util.parameter_base_class import ParameterBaseClass
 class GracefulError(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
@@ -54,7 +56,7 @@ class MessageLogger(object):
         return  log_file_name, error_file_name
     #todo add abilty to return excecption/traceback?
     def msg(self, msg_text, warning=False, note=False,
-            hint=None, tag=None, tabs=0, crumbs=None, link=None,
+            hint=None, tag=None, tabs=0, crumbs=None, link=None,caller=None,
             fatal_error=False, exit_now=False, exception = None, traceback_str=None, dev=False):
 
         if exception is not None:
@@ -87,6 +89,13 @@ class MessageLogger(object):
         m[0] +=  msg_text
 
         # first line complete
+        # make crumb trail
+        if caller is not None:
+            if hasattr(caller,'__class__') and isinstance(caller,ParameterBaseClass):
+                origin=  f' {caller.__class__.__name__} "{caller.info["name"]}", instance #[{caller.info["instanceID"]}]  class= {caller.__class__.__module__}.{caller.__class__.__name__} '
+            else:
+                origin = caller.__name__
+            crumbs = origin if crumbs is None else crumbs + origin
 
         if crumbs is not None:
             m.append(msg_str('in: ' + crumbs, tabs + 3))
