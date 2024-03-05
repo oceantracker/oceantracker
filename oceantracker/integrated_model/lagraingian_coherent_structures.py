@@ -32,7 +32,7 @@ class LagarangianCoherentStructures(_BaseModel):
         # remove any existing release groups
         if len(si.classes['release_groups']):
             si.classes['release_groups']= {}
-            ml.msg('Lagarangian Coherent Structures cannot be run with other release groups, removing existing ones ', warning=True, caller=self)
+            ml.msg('Lagarangian Coherent Structures cannot be run with other release groups, removed existing release groups', warning=True, caller=self)
 
         # set
         pass
