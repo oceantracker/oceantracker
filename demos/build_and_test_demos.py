@@ -382,15 +382,19 @@ p62['release_groups']={
 params.append(p62)
 
 # test polygon release overlying land
-p100 = deepcopy(schsim_base_params)
-p100.update({'output_file_base' :'demo100_LCS',  })
-p100['integrated_model']={'class_name': 'LagarangianCoherentStructures',
-           'grid_size': [25, 50],
-            'grid_span' : [ 1000, 2000],
-           'grid_center': [1592500, 5486000],
-           'pulse_size': 2, 'release_interval': 3600}
+p70 = deepcopy(schsim_base_params)
+p70.update({'output_file_base' :'demo70_LCS',
+            #'numba_cache_code': True,
+            'time_step':600 })
+p70['integrated_model']={'class_name': 'LagarangianCoherentStructures',
+           'grid_size': [5, 15],
+            'grid_span' : [ 6000, 3000],
+           'grid_center': [1595500, 5485000],
+            'update_interval': 705,
+           'lags': [ 3600*24+20],
+            }
 
-params.append(p100)
+params.append(p70)
 
 # back tracking test
 p90= deepcopy(p2)

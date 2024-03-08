@@ -4,7 +4,7 @@ package_fancy_name= 'OceanTracker'
 import numpy as np
 from copy import deepcopy
 
-code_version = '0.4.1.303 2024-02-04'
+code_version = '0.5.0.000 2024-03-07'
 
 max_timedelta_in_seconds = 1000*365*24*3600
 
@@ -51,11 +51,13 @@ case_settings_defaults ={
             'case_output_file_tag':     PVC(None, str,doc_str='insert this tag into output files name for each case, for parallel runs this is set to C000, C001...'), #todo make this only settable in a case, caselist params?
             'write_tracks':             PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes'),
             'z0':                       PVC(0.005, float, units='m', doc_str='Bottom roughness in meters, used for tolerance and log layer calcs. ', min=0.0001),  # default bottom roughness
-            'water_density':  PVC(1025., float, units='kg/m^3', doc_str='Water density, default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900.),
+            'water_density':  PVC(1025., float, units='kg/m^3', doc_str='Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900.),
             'open_boundary_type' :  PVC(0, int, min=0, max=1,doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS '),
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
             'use_A_Z_profile': PVC(True, bool, doc_str='Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file'),
-            #  #'loops_over_hindcast':  PVC(0, int, min=0),  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
+            'include_dispersion': PVC(True, bool, doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures '),
+
+    #  #'loops_over_hindcast':  PVC(0, int, min=0),  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
 
             }
 core_class_list=['reader',

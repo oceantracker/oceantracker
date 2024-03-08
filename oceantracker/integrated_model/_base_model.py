@@ -10,15 +10,16 @@ class _BaseModel(ParameterBaseClass):
                                 ))
 
         self.role_doc('Models are ')
-
-    def initial_setup(self):
         self.add_shared_info_access()
+
+    def initial_setup(self): pass
+
 
     def add_shared_info_access(self):
         si = self.shared_info
-
+        self.time_step = si.settings['time_step']
+        self.settings = si.settings
         self.part_prop = si.classes['particle_properties']
-
 
 
 

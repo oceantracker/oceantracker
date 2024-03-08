@@ -23,7 +23,7 @@ class eDNAdetection(ParticleProperty):
         initial_conc= self.params['detection_limit_copies_per_ml']*1000 * sampling_volume/retained_sample_size_vol
         self.set_values(initial_conc, new_part_IDs) # sets this properties values
 
-    def update(self,active):
+    def update(self,n_time_step,time_sec,active):
         # update c, ie growth going backwards in time,  prop each time step
         age = self.shared_info.classes['particle_properties']['age'].get_values(active)
         conc = self.params['initial_value']*np.exp( np.abs(age) / abs(self.params['decay_time_scale']))

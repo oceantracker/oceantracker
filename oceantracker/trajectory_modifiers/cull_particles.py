@@ -41,7 +41,7 @@ class CullParticles(_BaseTrajectoryModifier):
 
         return culled
 
-    def update(self, time_sec, active):
+    def update(self,n_time_step, time_sec, active):
 
         if  abs(time_sec- self.time_of_last_cull ) <= self.params['cull_interval']: return
         self.time_of_last_cull = time_sec

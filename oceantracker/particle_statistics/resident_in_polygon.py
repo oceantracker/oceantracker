@@ -92,7 +92,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
     def set_up_spatial_bins(self,nc ): pass
 
-    def do_counts(self, time_sec, sel):
+    def do_counts(self,n_time_step, time_sec, sel):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
         rg  = self.release_group_to_count

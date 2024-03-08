@@ -18,4 +18,4 @@ class VelocityModiferBase(ParameterBaseClass):
 
 
     # prototype for velocity modification of v, at some space and time for isActive particles
-    def update(self, v, time, active): basic_util.nopass('velocity modify must have a  modify_velocity method ')
+    def update(self, n_time_step, time, active): basic_util.nopass('velocity modify must have a  modify_velocity method ')

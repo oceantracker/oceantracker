@@ -128,7 +128,7 @@ def plot_dry_cells(track_data,show_dry_cells=True, nt=0):
     return pc, dry_cell_data
 
 
-def plot_release_points_and_polygons(d, release_group=None, ax = plt.gca(), color =[.2, .8, .2]):
+def plot_release_points_and_polygons(d, release_group=None, ax = plt.gca(), color=[.3,.3,.3]):
     # release_group is 1 based
     if release_group is None :
         sel = list(d['release_locations'].keys()) # plot all release groups
@@ -142,7 +142,8 @@ def plot_release_points_and_polygons(d, release_group=None, ax = plt.gca(), colo
         if rg['is_polygon']:
             o = ax.plot(p[:, 0], p[:, 1], '-', color=color,zorder=8, linewidth=1)
         else:
-            o = ax.plot(p[:, 0], p[:, 1], '.', color=color, markersize=14,zorder=9)
+            o = ax.plot(p[:, 0], p[:, 1], 'x', color=color, markersize=6,zorder=9)
+
         objs.append(o)
     return objs
 

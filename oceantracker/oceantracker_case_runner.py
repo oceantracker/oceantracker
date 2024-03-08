@@ -236,7 +236,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # find extremes of  particle existence to calculate model start time and duration
         #todo move to particle group manager and run in main at set up to get reader range etc , better for shared reader development
         si = self.shared_info
-
+        pgm = si.classes['particle_group_manager']
         # set up to start end times based on release_groups
         # find earliest and last release times+life_duration ( if going forwards)
 
@@ -244,15 +244,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         last_time_alive = []
 
         for name, pg_params in particle_release_groups_params_dict.items():
-            # make instance
-
             # make instance and initialise
+            i = pgm.add_release_group(name, pg_params)
 
-            i = si.create_class_dict_instance(name, 'release_groups', 'user', pg_params, crumbs='Adding release groups', default_classID='release_groups')
-            i.initial_setup()
-
-            # set up release times so duration of run known
-            i.set_up_release_times()
             release_info = i.info['release_info']
 
             if release_info['release_times'].size == 0:
@@ -266,14 +260,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         if len(si.classes['release_groups']) == 0:
             # guard against there being no release groups
-            self.msg('No valid release groups, exiting' , fatal_error=True, exit_now=True)
+            self.msg('No valid release groups' , fatal_error=True, exit_now=True)
 
         # find first release, and last ime alive
         t_first = np.min(np.asarray(first_release_time)*si.model_direction)*si.model_direction
         t_last = np.max(np.asarray(last_time_alive) * si.model_direction) * si.model_direction
 
         # time range in forwards order
-        return t_first,t_last
+        return t_first, t_last
 
 
     def _make_core_classes_and_release_groups(self):
@@ -346,6 +340,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         time_end = time_start + duration* si.model_direction
 
         # note results
+        si.run_info['model_time_step'] = si.settings['time_step']
         si.run_info['model_start_time'] = time_start
         si.run_info['model_end_time'] = time_end
         si.run_info['model_duration'] = max(abs(time_end - time_start), si.settings['time_step']) # at least one time step
@@ -400,8 +395,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # last load any model models which may depend on the other classes
         # there can only be one model added
         params =  si.working_params['core_classes']['integrated_model']
-        i = si.add_core_class('integrated_model', params, crumbs='adding  "integrated_model" class')
-        i.initial_setup()  # some require instanceID from above add class to initialise
+        if len(params) > 0:
+            i = si.add_core_class('integrated_model', params, crumbs='adding  "integrated_model" class')
+            i.initial_setup()  # some require instanceID from above add class to initialise
+
         pass
 
     # ____________________________
@@ -456,8 +453,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
 
         # add basic release group info
+        #do do
         for key, item in si.classes['release_groups'].items():
-            rginfo={'points': item.params['points'],
+            # grid does not have points pararm
+            rginfo={'points': item.points,
                     'is_polygon': hasattr(item,'polygon')}
             d['release_groups'][key]= rginfo
 

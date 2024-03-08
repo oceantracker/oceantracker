@@ -183,7 +183,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         return out
 
 
-    def update(self, time_sec):
+    def update(self,n_time_step, time_sec):
         if not self.is_time_to_count(): return
         si= self.shared_info
         part_prop = si.classes['particle_properties']
@@ -209,7 +209,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
             self.prop_list[n]= part_prop[name].data
 
-        self.do_counts(time_sec,sel)
+        self.do_counts(n_time_step, time_sec,sel)
 
         self.write_time_varying_stats(self.nWrites, time_sec)
         self.nWrites += 1

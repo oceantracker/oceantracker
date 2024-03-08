@@ -42,7 +42,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         particle.add_particle_property('time_of_settlement','manual_update',dict(  initial_value=0.))
 
     # all particles checked to see if they need status changing
-    def update(self, time_sec, active):
+    def update(self,n_time_step, time_sec, active):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 

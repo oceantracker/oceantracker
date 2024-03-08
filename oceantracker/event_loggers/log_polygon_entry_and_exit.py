@@ -39,7 +39,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         # set up output file to also write event polygon property
         self.set_up_output_file(['event_polygon'] )
 
-    def update(self,**kwargs):
+    def update(self,n_time_step, time_sec):
         self.start_update_timer()
         si = self.shared_info
         part_prop = si.classes['particle_properties']

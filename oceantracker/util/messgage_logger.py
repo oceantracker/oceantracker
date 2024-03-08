@@ -92,7 +92,10 @@ class MessageLogger(object):
         # make crumb trail
         if caller is not None:
             if hasattr(caller,'__class__') and isinstance(caller,ParameterBaseClass):
-                origin=  f' {caller.__class__.__name__} "{caller.info["name"]}", instance #[{caller.info["instanceID"]}]  class= {caller.__class__.__module__}.{caller.__class__.__name__} '
+                origin=  f' {caller.__class__.__name__}'
+                # add internal name if not None
+                origin +=  ' ' if caller.info["name"] is None else f'"{caller.info["name"]}"'
+                origin += f', instance #[{caller.info["instanceID"]}]  class= {caller.__class__.__module__}.{caller.__class__.__name__} '
             else:
                 origin = caller.__name__
             crumbs = origin if crumbs is None else crumbs + origin

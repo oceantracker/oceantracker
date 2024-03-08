@@ -7,7 +7,7 @@ Known issues
 __________________
 
 
-Version 0.4.1.201 2024-01-20
+Version '0.5.0.000 2024-03-07'
 _________________________
 
 Faster and simplified internal structure
@@ -41,8 +41,17 @@ New features
 
 #. Setting display_grid_at_start plots grid as a check, clicking on image will print coords in console to use as release points
 
+Behaviour changes
+______________________________________________________________
+
+#. All user give intervals are now rounded to the an integer number of particle tracking  time steps, eg. release_interval, update_interval( particle statistics and others)
+As these updates can only happen at a model time step.
+
 Known breaking changes- ask for help if needed to transition
 ______________________________________________________________
+
+
+#.  For coders getting parameter  agmument mis-matches on update methods, all class update methods of part_prop and modifiers now have a n_time_step as the first parameter, the particle tracking time step starting at zero. This is the clock tick of the code, is used to more precisely take actions, and avoid situations such as the model time step in 3600sec, and the user request a 4000sec release interval, which currently result in periodic unequal release intervals and double pulses. So that methods like update(time_in_sec, active) become update(n_time_step, time_in_sec, active). Not all update methods will use these time syncing variables, but some variants may.
 
 #. Reader param load_fields replaces 'field_variables' param, to load variables to names used internally. These internal names may be mapped to file variables in  new  'field_variable_map'. If a special variable, eg concentration field, no map is needed.
 

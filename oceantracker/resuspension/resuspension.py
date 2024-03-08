@@ -42,7 +42,7 @@ class BasicResuspension(_BaseResuspension):
 
 
     # all particles checked to see if they need status changing
-    def update(self,time_sec, active):
+    def update(self,n_time_step, time_sec, active):
         # do resupension
         #todo move 'resuspension_factor' calc to initialize() when substeping removed
         #todo is friction velocity up to date?

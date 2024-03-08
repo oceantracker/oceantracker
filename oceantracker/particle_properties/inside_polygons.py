@@ -29,7 +29,7 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
 
         self.polygons, msg = set_up_list_of_polygon_instances(self.params['polygon_list'])
 
-    def update(self, active):
+    def update(self,n_time_step, time_sec, active):
         # find polygon each particle is inside
         part_prop = self.shared_info.classes['particle_properties']
 

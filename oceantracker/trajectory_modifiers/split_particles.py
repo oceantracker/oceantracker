@@ -35,7 +35,7 @@ class SplitParticles(_BaseTrajectoryModifier):
 
         return split
 
-    def update(self, time_sec, active):
+    def update(self,n_time_step, time_sec, active):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
 

@@ -69,7 +69,7 @@ class AsyncReaderManager():
             # wait for all tasks to finish
             #p.join()
 
-    def update(self, nt_model):
+    def update(self,n_time_step, nt_model):
 
         ca = self.control_array
         ca.set_current_hydro_step(nt_model)

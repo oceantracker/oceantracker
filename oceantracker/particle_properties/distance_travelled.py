@@ -22,7 +22,7 @@ class DistanceTravelled(ParticleProperty):
         # initial age is zero
         self.set_values(0., active)
 
-    def update(self, active):
+    def update(self,n_time_step,time_sec, active):
         # get total distance traveled
         part_prop = self.shared_info.classes['particle_properties']
         # faster in numba?

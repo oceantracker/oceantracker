@@ -46,7 +46,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
         self.nc.file_handle['load_concentration'][self.time_steps_written, ...] = self.load_concentration[:]
         self.time_steps_written += 1
 
-    def update(self, time_sec):
+    def update(self,n_time_step, time_sec):
         params= self.params
         si=self.shared_info
         grid = si.classes['field_group_manager'].grid

@@ -19,7 +19,8 @@ class RandomWalk(_BaseTrajectoryModifer):
         si = self.shared_info
         if si.settings['use_A_Z_profile']:
                 self.check_class_required_fields_prop_etc(requires3D=True,
-                                                             required_props_list=['nz_cell', 'x', 'n_cell'],crumbs='random walk with use_A_Z_profile')
+                                                            required_props_list=['nz_cell', 'x', 'n_cell'],
+                                                          crumbs='random walk with use_A_Z_profile')
 
     def initial_setup(self):
         si = self.shared_info
@@ -37,7 +38,7 @@ class RandomWalk(_BaseTrajectoryModifer):
         return np.sqrt(2. * np.abs(dt) * np.abs(A_turb))
 
     # apply random walk
-    def update(self,time_sec, active):
+    def update(self, n_time_step,time_sec, active):
         # add up 2D/3D diffusion coeff as random walk done using velocity_modifier
         si= self.shared_info
         part_prop = si.classes['particle_properties']

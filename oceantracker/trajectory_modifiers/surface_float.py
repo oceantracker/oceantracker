@@ -7,7 +7,7 @@ from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTra
 
 class SurfaceFloat(_BaseTrajectoryModifier):
 
-    def update(self, time_sec, active):
+    def update(self,n_time_step, time_sec, active):
         si = self.shared_info
         part_prop= si.classes['particle_properties']
         self.move_to_free_surface(part_prop['x'], part_prop['tide'], active)

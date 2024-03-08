@@ -17,7 +17,7 @@ class AgeDecay(ParticleProperty):
     def initial_value_at_birth(self, new_part_IDs):
         self.set_values(self.params['initial_value'], new_part_IDs) # sets this properties values
 
-    def update(self,active):
+    def update(self,n_time_step, time_sec,active):
         # update decay prop each time step
         age = self.shared_info.classes['particle_properties']['age'].get_values(active)
         val = self.params['initial_value']*np.exp(-np.abs(age) / self.params['decay_time_scale'])

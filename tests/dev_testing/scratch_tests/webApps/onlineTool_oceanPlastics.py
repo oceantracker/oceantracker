@@ -1,5 +1,5 @@
 def get_run_params():
-    a=1
+    pass
 
 def reponse_end(self):
 
