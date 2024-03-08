@@ -28,6 +28,8 @@ class ParticleGroupManager(ParameterBaseClass):
         info['particles_in_buffer'] = 0
         info['particles_released'] = 0
         info['num_alive'] = 0
+        info['max_age_for_each_release_group'] =np.zeros((0,),dtype=np.int32)
+
         nDim = 3 if si.is3D_run else  2
         info['current_particle_buffer_size'] = self.params['particle_buffer_chunk_size']
 
@@ -72,27 +74,37 @@ class ParticleGroupManager(ParameterBaseClass):
         si = self.shared_info
         info = self.info
 
-        # set up array with max age for each release group, for use in killing old particles
-        rg = si.classes['release_groups']
-        info['max_age_for_each_release_group']= np.zeros((len(rg),), dtype=np.float64)
-        for n, i in enumerate(rg.values()):
-            info['max_age_for_each_release_group'][n] = np.inf if i.params['max_age'] is None else i.params['max_age']
-
         pass
 
+    def add_release_group(self,name,params):
+        si = self.shared_info
+        i = si.create_class_dict_instance(name, 'release_groups', 'user', params,
+                                          crumbs='Adding release groups', default_classID='release_groups')
+        i.initial_setup()
+        # set up release times so duration of run known
+        i.set_up_release_times()
+        i.final_setup()
+
+        # max_ages needed for culling operations
+        max_age = np.inf if i.params['max_age'] is None else i.params['max_age']
+
+        self.info['max_age_for_each_release_group'] =np.append(self.info['max_age_for_each_release_group'],max_age)
+
+        return i
+
+
     #@function_profiler(__name__)
-    def release_particles(self, time_sec):
+    def release_particles(self,n_time_step, time_sec):
         # see if any group is ready to release
         si = self.shared_info
         new_buffer_indices = np.full((0,), 0, np.int32)
 
-        for name, g in si.classes['release_groups'].items():
-            ri = g.info['release_info']
+        for name, rg in si.classes['release_groups'].items():
+            ri = rg.info['release_info']
             sel =  time_sec * si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
             num_pulses= np.count_nonzero(sel)
             for n in range(num_pulses):
-                release_data = g.get_release_locations(time_sec)
-                new_index = self.release_a_particle_group_pulse(time_sec,release_data)
+                new_index = self.release_a_particle_group_pulse(rg, time_sec)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
                 ri['index_of_next_release'] += 1
             pass
@@ -114,7 +126,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # update new particles props
         # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
-        self.update_PartProp(time_sec, new_buffer_indices)
+        self.update_PartProp(n_time_step, time_sec, new_buffer_indices)
 
         # flag if any bad initial locations
         if si.settings['open_boundary_type'] > 0:
@@ -127,12 +139,11 @@ class ParticleGroupManager(ParameterBaseClass):
             si.msg_logger.msgg(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)),warning=True)
         return new_buffer_indices #indices of all new particles
 
-    def release_a_particle_group_pulse(self, t, release_data):
+    def release_a_particle_group_pulse(self, release_group, time_sec):
         # release one pulse of particles from given group
         si = self.shared_info
-
         info= self.info
-
+        release_data = release_group.get_release_locations(time_sec)
         smax = info['particles_in_buffer'] + release_data['x'].shape[0]
 
         if smax > si.settings['max_particles']: return
@@ -177,7 +188,7 @@ class ParticleGroupManager(ParameterBaseClass):
         part_prop['status'].set_values(si.particle_status_flags['moving'], new_buffer_indices)  # set  status of released particles
 
         # below two needed for reruns of same solver to prevent contamination by last run
-        part_prop['time_released'].set_values(t, new_buffer_indices)  # time released for each particle, needed to calculate age
+        part_prop['time_released'].set_values(time_sec, new_buffer_indices)  # time released for each particle, needed to calculate age
 
         part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
 
@@ -266,17 +277,17 @@ class ParticleGroupManager(ParameterBaseClass):
     def get_particle_time(self): return self.time_varying_group_info['time'].get_values()
 
     #@function_profiler(__name__)
-    def update_PartProp(self, t, active):
+    def update_PartProp(self,n_time_step, time_sec, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
         si = self.shared_info
         t0 = perf_counter()
-        si.classes['time_varying_info']['time'].set_values(t)
+        si.classes['time_varying_info']['time'].set_values(time_sec)
         si.classes['time_varying_info']['num_part_released_so_far'].set_values(self.info['particles_released'])
         part_prop =si.classes['particle_properties']
 
         self.screen_msg= ''
         #  calculate age core particle property = t-time_released
-        particle_operations_util.set_value_and_add(part_prop['age'].used_buffer(), t,
+        particle_operations_util.set_value_and_add(part_prop['age'].used_buffer(), time_sec,
                                                    part_prop['time_released'].used_buffer(), active, scale= -1.)
 
         # first interpolate to give particle properties from reader derived  fields
@@ -287,7 +298,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for name, i in si.classes['particle_properties'].items():
             if i.info['type'] == 'user':
-                i.update(active)
+                i.update(n_time_step, time_sec, active)
         si.block_timer('Update particle properties',t0)
 
     def status_counts_and_kill_old_particles(self, t):

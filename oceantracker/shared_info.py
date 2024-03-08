@@ -4,7 +4,7 @@ from oceantracker.util.parameter_checking import merge_params_with_defaults
 from time import  perf_counter
 from oceantracker.util import cord_transforms
 import numpy as np
-
+from oceantracker.util.scheduler import Scheduler
 
 class SharedInfoClass(object):
     # allows working classes access to instances of other classes to use their methods
@@ -130,3 +130,44 @@ class SharedInfoClass(object):
 
         out = np.asarray([float(x[1]-x[0]),float(y[1]-y[0])] )
         return out
+
+    def make_scheduler(self, start=None, end=None,
+                       interval =None, times=None,lags= None,
+                       caller=None, crumbs=None):
+        
+        s = Scheduler(self.run_info['model_start_time'], self.run_info['model_end_time'],
+                      self.run_info['model_time_step'],
+                      start=start, end=end,
+                      # add duration to go with start?
+                      interval =interval, times=times, lags=lags,
+                      caller=caller, msg_logger=self.msg_logger, crumbs=crumbs)
+        return s
+
+    def round_interval_to_model_time_step(self,time_interval,caller=None, crumbs=None):
+        # round to multiple of particle tracking model time step, for single value
+        #todo work backwards???
+        dt = self.settings['time_step']
+        n_steps, remainder = np.divmod(time_interval,dt )
+
+        if remainder > 0.05*dt:
+            self.msg_logger.msg('Update/interval rounded as they must be a multiple of the particle tracking time step, some differ by are more than 5%',
+                                caller=caller, crumbs=crumbs)
+        return time_interval - remainder
+
+    def round_times_to_model_times(self, times, lags=False, caller=None, crumbs=None):
+        # round times to steps since start of model run
+        #  if lags = True then fiest values are already relative to zero
+
+        # make relative to start time
+        t = times if lags else times-self.run_info['model_start_time']
+
+        dt = self.settings['time_step']
+        n_steps, remainders = np.divmod(t, dt)
+
+        if np.any(remainders > 0.05*dt):
+            self.msg_logger.msg('Update/interval rounded as they must be a multiple of the particle tracking time step, some differ by are more than 5%',
+                                caller=caller, crumbs=crumbs)
+        times_out = n_steps*dt
+        # if a time, then add back model start time
+        if not lags: times_out += self.run_info['model_start_time']
+        return times_out

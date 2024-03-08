@@ -32,6 +32,6 @@ class ParticleLoad(ParticleProperty):
             self.set_values(params['initial_value'], new_part_IDs)
 
 
-    def update(self,active):
+    def update(self,n_time_step,time_sec,active):
         # property constant with time so no update needed
         pass

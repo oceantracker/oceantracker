@@ -6,6 +6,7 @@ from copy import copy,deepcopy
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.ncdf_util import  NetCDFhandler
 from oceantracker.util import  output_util
+from oceantracker.util.basic_util import nopass
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 
@@ -18,6 +19,9 @@ class _BaseEventLogger(ParameterBaseClass):
                                  'write': PVC(True,bool),
                                  'chunk_size' : PVC(500_000, int, min= 1),
                                  'particle_prop_to_write_list': PLC([ 'ID','x','IDpulse', 'IDrelease_group', 'user_release_groupID', 'status', 'age'],[str])})
+
+    def update(self, n_time_step, time_sec): nopass()
+
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['event_has_started_boolean'])
 

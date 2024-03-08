@@ -14,7 +14,7 @@ class TotalWaterDepth(ParticleProperty):
         si = self.shared_info
         self.check_class_required_fields_prop_etc(required_props_list=['tide', 'water_depth'])
 
-    def update(self,active):
+    def update(self,n_time_step, time_sec, active):
         si = self.shared_info
         self.get_time_dependent_total_water_depth_from_tide_and_water_depth(
             si.classes['particle_properties']['tide'].data,

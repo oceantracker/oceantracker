@@ -150,7 +150,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             else:
                 si.msg_logger.msg('Part Prop "' + p + '" not a particle property, ignored and no stats calculated',warning=True)
 
-    def do_counts(self, time_sec, sel):
+    def do_counts(self,n_time_step, time_sec, sel):
         # do counts for each release  location and grid cell
         part_prop = self.shared_info.classes['particle_properties']
         stats_grid = self.grid
@@ -265,7 +265,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
             else:
                 ml.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True, caller=self)
 
-    def do_counts(self, time_sec, sel):
+    def do_counts(self,n_time_step, time_sec, sel):
         # do counts for each release  location and grid cell, over rides parent
 
         stats_grid = self.grid

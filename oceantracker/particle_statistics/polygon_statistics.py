@@ -103,7 +103,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
 
-    def do_counts(self, time_sec, sel):
+    def do_counts(self,n_time_step, time_sec, sel):
         si= self.shared_info
         part_prop = si.classes['particle_properties']
         g = self.grid
@@ -116,7 +116,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
 
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
-        inside_poly_prop.update(sel)
+        inside_poly_prop.update(n_time_step,time_sec,sel)
 
         # do counts
         self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
@@ -175,7 +175,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
-    def do_counts(self, time_sec, sel):
+    def do_counts(self,n_time_step, time_sec, sel):
 
         part_prop = self.shared_info.classes['particle_properties']
         stats_grid = self.grid
@@ -190,8 +190,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
-        inside_poly_prop.update(sel)
-
+        inside_poly_prop.update(n_time_step, time_sec, sel)
 
         # loop over statistics polygons
         self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(), p_groupID, p_x, self.count_age_bins,

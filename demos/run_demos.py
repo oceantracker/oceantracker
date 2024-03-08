@@ -52,7 +52,7 @@ if __name__ == "__main__":
     else:
         demo_list=[args.demo]
 
-    test_demo=70
+    test_demo=1000
     if  args.testing:
         demo_list=[test_demo] # ros ver
     else:

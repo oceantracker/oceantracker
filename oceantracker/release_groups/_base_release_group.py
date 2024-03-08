@@ -172,8 +172,13 @@ class _BaseReleaseGroup(ParameterBaseClass):
         n_required = self.get_number_required()
 
         # there must be a particle property set up for every release_part_prop must have a
+
+
+        if  'points' in params :
+            self.points  = params['points'] # grid release does not have points param
+
         release_part_prop =dict(
-                        x= np.full((0, params['points'].shape[1]), 0.,dtype=np.float64, order='C'),
+                        x= np.full((0, self.points.shape[1]), 0.,dtype=np.float64, order='C'),
                         )
         count = 0
         while release_part_prop['x'].shape[0] < n_required:

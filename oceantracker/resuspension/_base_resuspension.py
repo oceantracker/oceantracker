@@ -12,4 +12,4 @@ class _BaseResuspension(ParameterBaseClass):
         self.add_default_params({}) # must be 3D
 
     # all particles checked to see if they need status changing
-    def update(self, time_sec, active): pass
+    def update(self,n_time_step, time_sec, active): pass

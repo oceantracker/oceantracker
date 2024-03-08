@@ -74,13 +74,13 @@ class Solver(ParameterBaseClass):
         # run forwards through model time variable, which for backtracking are backwards in time
         t2 = model_times[0]
 
-        for nt  in range(model_times.size-1): # one less step as last step is initial condition for next block
+        for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()
 
-            time_sec = model_times[nt]
+            time_sec = model_times[n_time_step]
 
             # release particles
-            new_particleIDs  = pgm.release_particles(time_sec)
+            new_particleIDs  = pgm.release_particles(n_time_step, time_sec)
 
             # count particles of each status and count number >= stationary status
             num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
@@ -100,7 +100,7 @@ class Solver(ParameterBaseClass):
 
 
             # do stats etc updates and write tracks
-            self.pre_step_bookkeeping(nt, time_sec, new_particleIDs)
+            self.pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
@@ -109,10 +109,11 @@ class Solver(ParameterBaseClass):
             # update particle velocity modification
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
             for name, i in si.classes['velocity_modifiers'].items():
-                i.update(time_sec, is_moving)
+                i.update(n_time_step, time_sec, is_moving)
 
             # dispersion is done by random walk velocity modification prior to integration step
-            si.classes['dispersion'].update(time_sec, is_moving)
+            if si.settings['include_dispersion']:
+                si.classes['dispersion'].update(n_time_step, time_sec, is_moving)
 
             #  Main integration step
             #--------------------------------------
@@ -121,7 +122,7 @@ class Solver(ParameterBaseClass):
             #--------------------------------------
 
             # print progress to screen
-            if nt % nt_write_time_step_to_screen == 0:
+            if n_time_step % nt_write_time_step_to_screen == 0:
                 self.screen_output(ri['time_steps_completed'], time_sec, t0_model, t0_step)
 
             t2 = time_sec + si.settings['time_step'] * si.model_direction
@@ -132,8 +133,8 @@ class Solver(ParameterBaseClass):
             if abs(t2 - ri['model_start_time']) > ri['model_duration']:  break
 
         # write out props etc at last step
-        if nt > 0:# if more than on set completed
-            self.pre_step_bookkeeping(nt, t2)
+        if n_time_step > 0:# if more than on set completed
+            self.pre_step_bookkeeping(n_time_step, t2)
             self.screen_output(ri['time_steps_completed'], t2, t0_model,t0_step)
 
         ri['model_end_time'] = t2
@@ -143,7 +144,7 @@ class Solver(ParameterBaseClass):
         ri['computation_ended'] = datetime.now()
         ri['computation_duration'] = datetime.now() -computation_started
 
-    def pre_step_bookkeeping(self, nt,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
+    def pre_step_bookkeeping(self, n_time_step,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
@@ -151,7 +152,7 @@ class Solver(ParameterBaseClass):
 
         ri = si.run_info
         ri['current_model_date'] = time_util.seconds_to_datetime64(time_sec)
-        ri['current_model_time_step'] = nt
+        ri['current_model_time_step'] = n_time_step
         ri['current_model_time'] = time_sec
 
         pgm.remove_dead_particles_from_memory()
@@ -161,7 +162,7 @@ class Solver(ParameterBaseClass):
 
         # trajectory modifiers,
         for name, i in si.classes['trajectory_modifiers'].items():
-            i.update(time_sec, alive)
+            i.update(n_time_step, time_sec, alive)
 
         # modify status, eg tidal stranding
         fgm.update_dry_cell_index()
@@ -175,17 +176,21 @@ class Solver(ParameterBaseClass):
         # resuspension is a core trajectory modifier
         if si.is3D_run:
             # friction_velocity property  is now updated, so do resupension
-            si.classes['resuspension'].update(time_sec, alive)
+            si.classes['resuspension'].update(n_time_step,time_sec, alive)
 
         fgm.update_tidal_stranding_status(time_sec, alive)
 
         # update particle properties
-        pgm.update_PartProp(time_sec, alive)
+        pgm.update_PartProp(n_time_step, time_sec, alive)
 
         # update writable class lists and stats at current time step now props are up to date
-        self._update_stats(time_sec)
-        self._update_concentrations(time_sec)
-        self._update_events(time_sec)
+        self._update_stats(n_time_step, time_sec)
+        self._update_concentrations(n_time_step, time_sec)
+        self._update_events(n_time_step, time_sec)
+
+        # update integrated models, eg LCS
+        if 'integrated_model' in si.classes:
+            si.classes['integrated_model'].update(n_time_step,time_sec)
 
         # write tracks
         if si.settings['write_tracks']:
@@ -329,34 +334,34 @@ class Solver(ParameterBaseClass):
         si.msg_logger.msg(s)
 
 
-    def _update_stats(self,time_sec):
+    def _update_stats(self,n_time_step, time_sec):
         # update and write stats
         si= self.shared_info
         t0 = perf_counter()
         for name, i in si.classes['particle_statistics'].items():
             if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['update_interval']:
                 i.start_update_timer()
-                i.update(time_sec)
+                i.update(n_time_step, time_sec)
                 i.stop_update_timer()
         si.block_timer('Update statistics', t0)
 
-    def _update_concentrations(self, time_sec):
+    def _update_concentrations(self,n_time_step,  time_sec):
         # update triangle concentrations, these can optionally be done every time step, if concentrations values affect particle properties
         si = self.shared_info
         t0 = perf_counter()
         for name, i in si.classes['particle_concentrations'].items():
             i.start_update_timer()
-            i.update(time_sec)
+            i.update(n_time_step, time_sec)
             i.stop_update_timer()
         si.block_timer('Update concentrations', t0)
 
-    def _update_events(self, t):
+    def _update_events(self, n_time_step,  time_sec):
         # write events
         si = self.shared_info
         t0 = perf_counter()
         for name, i in si.classes['event_loggers'].items():
             i.start_update_timer()
-            i.update(time_sec=t)
+            i.update(n_time_step,time_sec)
             i.stop_update_timer()
         si.block_timer('Update event loggers', t0)
 

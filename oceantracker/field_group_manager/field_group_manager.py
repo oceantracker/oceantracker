@@ -36,28 +36,57 @@ class FieldGroupManager(ParameterBaseClass):
     def initial_setup(self):
         si= self.shared_info
         ml = si.msg_logger
+        params= self.params
+        info = self.info
+
         self._setup_hydro_reader(si.working_params['reader_builder'])
 
         grid = self.grid
+        # write info about reader grid
         bounds = [grid['x'].min(axis=0), grid['x'].max(axis=0)]
 
-        si.msg_logger.msg(f'Hydro files are "{"3D" if si.is3D_run else "2D"}"', note=True)
-        if  si.hydro_model_cords_in_lat_long:
-            ml.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid', warning=True,
-                    hint = f'bounds ={np.array2string(bounds[0], precision=4, floatmode="fixed") } to {np.array2string(bounds[1], precision=2, floatmode="fixed") }'
-                     )
+
+        reader= self.reader
+        ml.msg(f'Hydro-model is "{"3D" if si.is3D_run else "2D"}"  type "{reader.__class__.__name__}"', note=True,
+                          hint=f'Files found dir and sub-dirs of "{reader.params["input_dir"]}"')
+
+        # note coord system
+        if si.hydro_model_cords_in_lat_long:
+            b = f'{np.array2string(bounds[0], precision=4, floatmode="fixed")} to {np.array2string(bounds[1], precision=2, floatmode="fixed")}'
         else:
-            ml.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid', warning=True,
-                        hint = f'bounds ={np.array2string(bounds[0], precision=1, floatmode="fixed") } to {np.array2string(bounds[1], precision=1, floatmode="fixed") }'
-                     )
+            b = f'{np.array2string(bounds[0], precision=1, floatmode="fixed")} to {np.array2string(bounds[1], precision=1, floatmode="fixed")}'
+        ml.msg('grid bounding box = ' + b, tabs=2)
 
         self.set_up_interpolator()
 
 
-
     def final_setup(self):
         si = self.shared_info
-        self.reader.final_setup()
+        ml = si.msg_logger
+        info = self.info
+
+        reader = self.reader
+        fmap = reader.params["field_variable_map"]
+
+        reader.final_setup()
+
+        # note dispersion type
+        if info['has_A_Z_profile']:
+            ml.msg('Found vertical diffusivity profile in hydro-model files', note=True)
+
+        if si.settings['use_A_Z_profile']:
+            ml.msg('Using vertical diffusivity profile in hydro-model for vertical random walk', note=True)
+        else:
+            ml.msg(f'Using constant vertical dispersion, as 2D hydro-model A_Z, ie not using A_Z_profile as option set False or cannot find hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile', note=True)
+
+
+        if  si.hydro_model_cords_in_lat_long:
+            ml.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid',
+                   warning=True)
+        else:
+            ml.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid',
+                   warning=True)
+
         self.interpolator.final_setup(self.grid)
         self.info['has_open_boundary_nodes'] = np.any(self.grid['node_type'] == node_types['open_boundary'])
         self.info['open_boundary_type'] = si.settings['open_boundary_type']
@@ -72,6 +101,8 @@ class FieldGroupManager(ParameterBaseClass):
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
         for name, params in si.working_params['class_dicts']['fields'].items():
             self.add_custom_field(name, params, crumbs=f'adding custom field {name}')
+
+
 
     def add_part_prop_from_fields_plus_book_keeping(self):
         si = self.shared_info
@@ -319,13 +350,20 @@ class FieldGroupManager(ParameterBaseClass):
     def _setup_dispersion(self, nc,  has_A_Z_profile=None):
         si = self.shared_info
         ml = si.msg_logger
+        info = self.info
         fmap = self.reader.params['field_variable_map']
 
-        # has_A_Z_profile can optinaly be set by nested readers if all
+        # has_A_Z_profile can optionally be set by nested readers if all
         # hindcasts have A_Z_profile
+
+        info['has_A_Z_profile'] = False
+
+        if not si.is3D_run:
+            si.settings['use_A_Z_profile'] = False
+            return
+
         if has_A_Z_profile is None:
-            has_A_Z_profile = si.is3D_run and si.settings['use_A_Z_profile'] \
-                            and 'A_Z_profile' in fmap \
+            has_A_Z_profile = 'A_Z_profile' in fmap \
                             and (fmap['A_Z_profile'] is not None \
                             and nc.is_var(fmap['A_Z_profile']))
 
@@ -334,12 +372,13 @@ class FieldGroupManager(ParameterBaseClass):
             self.add_custom_field( 'A_Z_profile_vertical_gradient',  dict(name_of_field= 'A_Z_profile',write_interp_particle_prop_to_tracks_file=False),
                                    default_classID='field_A_Z_profile_vertical_gradient',
                                    crumbs='random walk > Adding A_Z_vertical_gradient field, for using_AZ_profile')
-            si.msg_logger.msg('Found vertical diffusivity profile in hydro-model files,  using profile for vertical random walk', note=True)
+            info['has_A_Z_profile'] = True
+            si.settings['use_A_Z_profile'] = si.settings['use_A_Z_profile'] and info['has_A_Z_profile']
         else:
             si.settings['use_A_Z_profile'] = False
-            ml.msg(f'Using constant vertical dispersion, as 2D hydro-model A_Z, ie not using A_Z_profile as option set False or cannot find hydro-file variable {fmap["A_Z_profile"]} mapped to A_Z_profile', note=True)
 
-        self.info['has_A_Z_profile'] = has_A_Z_profile
+
+        return
 
     def _setup_resupension(self, nc, has_bottom_stress=None):
         # get fields needed to calculate friction velocity field, needed for suspension

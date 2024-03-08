@@ -46,7 +46,7 @@ class RSTfileBuilder(object):
 
 
     def collapsable_code(self,file_name):
-        a=1
+        pass
         '''
             ..raw:: html
         

@@ -58,7 +58,7 @@ class _BaseParticleProperty(ParameterBaseClass):
 
         self.set_values(value, new_part_IDs)  # sets this properties values
 
-    def update(self,t,active): pass
+    def update(self,n_time_step,time_sec,active): pass
 
     def is_vector(self): return self.data.ndim > 1
 

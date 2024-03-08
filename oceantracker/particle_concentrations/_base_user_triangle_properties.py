@@ -58,7 +58,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
     def write(self, time_sec): nopass()
 
 
-    def update(self, time_sec):nopass()
+    def update(self,n_time_step, time_sec):nopass()
 
     def check_requirements(self): pass
 

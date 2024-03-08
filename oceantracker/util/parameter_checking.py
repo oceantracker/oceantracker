@@ -182,6 +182,7 @@ class ParameterListChecker(object):
     # checks parameter list values
     # if default_list is None then list wil be None if user_list is not given
     # todo do should default value be a PVC() instance, to get control over  possible values in list , max, min etc?
+    #todo do add option to allow appending to default only if requested
     def __init__(self, default_list, acceptable_types, is_required=False, can_be_empty_list= True, default_value=None,
                   fixed_len =None, min_length=None, max_length=None, doc_str=None, make_list_unique=None, obsolete = None,
                  possible_values=None, units=None,min=None, max=None,

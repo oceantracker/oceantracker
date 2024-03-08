@@ -143,7 +143,7 @@ class OceanTrackerReRunner(object):
 
 if __name__ == '__main__':
     # windows/linux  data source
-    a=1
+    pass
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-cookstrait', action='store_true')

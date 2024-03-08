@@ -31,7 +31,7 @@ class GridRelease(_BaseReleaseGroup):
         info['x_grid'] = np.stack((xi,yi),axis=2)
 
         # add points param for othe parts of code
-        params['points'] = np.stack((xi.ravel(),yi.ravel()),axis=1)
+        self.points = np.stack((xi.ravel(),yi.ravel()),axis=1)
 
         # build global grid index
         ri, ci = np.meshgrid(range(y.size),  range(x.size))
@@ -47,10 +47,10 @@ class GridRelease(_BaseReleaseGroup):
         pass
 
     def get_number_required(self):
-        return self.params['pulse_size'] * self.params['points'].shape[0]
+        return self.params['pulse_size'] * self.points.shape[0]
 
     def get_release_location_candidates(self):
-        x = np.repeat(self.params['points'], self.params['pulse_size'], axis=0)
+        x = np.repeat(self.points, self.params['pulse_size'], axis=0)
         return x
     
     def add_bookeeping_particle_prop_data(self,release_part_prop):
