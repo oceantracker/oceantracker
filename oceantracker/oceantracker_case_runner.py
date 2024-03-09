@@ -93,15 +93,35 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             self._set_up_run()
             self._do_pre_processing()
             self._make_core_classes()
+
+            # add any intergrated model, to get params changes, but don't initialise
+            # there can only be one model added
+            params = si.working_params['core_classes']['integrated_model']
+            if len(params) > 0:
+                i = si.add_core_class('integrated_model', params, crumbs='adding  "integrated_model" class',initialise=False)
+                # any changes to params by model,
+                # e.g. release groups from model which affect start and end times
+                i.add_settings_and_class_params()
+
+            #todo remerge/check settings changed by model here?
+
+            # now  params commlet cabn set up
+
+
             # set up start time and duration based on particle releases
-
-
             start, end = self._setup_particle_release_groups(si.working_params['class_dicts']['release_groups'])
             self._setup_times_and_solver(start, end)
 
             self._make_and_initialize_user_classes()
-             # includes any release groups added  by params or user classes
             self._finalize_classes()  # any setup actions that mus be done after other actions, eg shedulers
+
+            # model may depend on ther classes, so intilialise after all other claases are setup
+            if 'integrated_model' in si.classes:
+                si.classes['integrated_model'].initial_setup()
+
+             # includes any release groups added  by params or user classes
+
+
 
             # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
 
@@ -292,8 +312,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si = self.shared_info
         si.particle_status_flags = common_info.particle_info['status_flags']
 
-
-
         # start with setting up field gropus, which set up readers
         # as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
@@ -305,7 +323,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up feilds
         fgm = si.add_core_class('field_group_manager', si.working_params['core_classes']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
-        fgm.setup_dispersion_and_resuspension() # setup files required for didpersion etc, depends on what variables are in the hydro-files
+
+        fgm = si.classes['field_group_manager']
+        fgm.setup_dispersion_and_resuspension()  # setup files required for didpersion etc, depends on what variables are in the hydro-files
+        fgm.final_setup()
 
         si.hindcast_info = fgm.get_hydro_model_info()
 
@@ -318,7 +339,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         pgm = si.add_core_class('particle_group_manager', si.working_params['core_classes']['particle_group_manager'], crumbs=f'adding core class "particle_group_manager" ')
         pgm.initial_setup()  # needed here to add reader fields inside reader build
 
-        fgm.final_setup()
+
         # set up particle properties associated with fields etc
         fgm.add_part_prop_from_fields_plus_book_keeping()
         core_role_params = si.working_params['core_classes']
@@ -334,33 +355,29 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def _setup_times_and_solver(self, time_start, time_end ):
         #clip times to maximum duration in shared and case params
         si= self.shared_info
-        hi = si.hindcast_info
         fgm= si.classes['field_group_manager']
         t0 = perf_counter()
 
+        # clip to max duration of the run
         duration = abs(time_end - time_start)
         duration = min(duration, si.settings['max_run_duration'])
         time_end = time_start + duration* si.model_direction
 
-        # note results
-        a = time_util.get_regular_events(hi,si.backtracking, si.settings['time_step'],
-                                         si.msg_logger,
-                                         start=time_start, end= time_end)
-        si.run_info.update(a)
-
-        si.msg_logger.progress_marker('set up solver and model start/end times', start_time=t0)
-
-        # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
+        # make times steps for solver in run info
+        # this is the only regular event that does not have to begin on a model time step
+        si.run_info['time_step'] = si.settings['time_step'] # min 1 sec time steps
+        si.run_info['duration'] = abs(time_end - time_start)
+        si.run_info['times'] = time_start + si.model_direction*np.arange(0.,si.run_info['duration'], si.run_info['time_step'])
+        si.run_info['start_time'] =  si.run_info['times'][0]
+        si.run_info['end_time'] = si.run_info['times'][-1]
 
         # initialize the rest of the core classes
         #todo below apply to all core classes, reader
         #todo alternative can they be intitlised on creation here?
-        t0 = perf_counter()
-        for name in ['solver'] : # order may matter?
-            si.classes[name].initial_setup()
-        si.msg_logger.progress_marker('initial set up of core classes', start_time=t0)
+        si.classes['solver'].initial_setup()
+        si.msg_logger.progress_marker('set up solver and model start/end times', start_time=t0)
 
-        # do final setp which may depend on settingd from intitial st up
+        # do final setp which may depend on settings from intitial st up
         t0= perf_counter()
         # order matters, must do interpolator after particle_group_manager, to get stucted arrays and solver last
         for name in ['particle_group_manager', 'solver'] :
@@ -370,8 +387,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def _finalize_classes(self):
         si = self.shared_info
         #todo need to move other finialisers here??
-        if 'integrated_model' in si.classes:
-            si.classes[ 'integrated_model'].final_setup()
+        pass
 
 
     def _make_and_initialize_user_classes(self):
@@ -392,12 +408,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 i = si._create_class_dict_instance(name, user_type,'user', params,  crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
 
-        # last load any model models which may depend on the other classes
-        # there can only be one model added
-        params =  si.working_params['core_classes']['integrated_model']
-        if len(params) > 0:
-            i = si.add_core_class('integrated_model', params, crumbs='adding  "integrated_model" class')
-            i.initial_setup()  # some require instanceID from above add class to initialise
 
         pass
 

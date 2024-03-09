@@ -15,7 +15,7 @@ shared_settings_defaults ={
                 'root_output_dir':     PVC('root_output_dir', str, doc_str='base dir for all output files'),
                 'add_date_to_run_output_dir':  PVC(False, bool, doc_str='Append the date to the output dir. name to help in keeping output from different runs separate'),
                 'output_file_base':    PVC('output_file_base', str,doc_str= 'The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written'),
-                'time_step': PVC(3600., float, min=0.01, units='sec',doc_str='Time step in seconds for all cases'),
+                'time_step': PVC(3600., float, min=0.1, units='sec',doc_str='Time step in seconds for all cases'),
                 'screen_output_time_interval': PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file'),
                 'backtracking':        PVC(False, bool, doc_str='Run model backwards in time'),
                'regrid_z_to_uniform_sigma_levels': PVC(True, bool, doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),

@@ -68,7 +68,6 @@
                     -1
                 ]
             ],
-            "release_start_date": "2017-01-01T01:30:00",
             "pulse_size": 10,
             "release_interval": 3600
         }

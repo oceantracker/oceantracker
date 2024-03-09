@@ -73,7 +73,6 @@ release_groups:
     pulse_size: 10
     release_at_surface: true
     release_interval: 0
-    release_start_date: '2017-01-01T01:30:00'
   P11: *id001
   poly1:
     class_name: oceantracker.release_groups.polygon_release.PolygonRelease
