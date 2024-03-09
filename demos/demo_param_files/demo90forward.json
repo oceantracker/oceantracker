@@ -1,0 +1,86 @@
+{
+    "output_file_base": "demo90forward",
+    "add_date_to_run_output_dir": false,
+    "numba_cache_code": false,
+    "time_step": 60,
+    "debug": true,
+    "reader": {
+        "class_name": "oceantracker.reader.generic_ncdf_reader.GenericNCDFreader",
+        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "demoHindcast2D*.nc",
+        "dimension_map": {
+            "time": "time",
+            "node": "nodes"
+        },
+        "grid_variable_map": {
+            "time": "time_sec",
+            "x": [
+                "east",
+                "north"
+            ],
+            "triangles": "tri"
+        },
+        "field_variable_map": {
+            "water_velocity": [
+                "east_vel",
+                "north_vel"
+            ],
+            "water_depth": "depth",
+            "tide": "tide"
+        },
+        "time_buffer_size": 2,
+        "isodate_of_hindcast_time_zero": "2020-06-01"
+    },
+    "user_note": "test of notes",
+    "dispersion_miss-spelt": {
+        "A_H": 0.1
+    },
+    "dispersion": {
+        "A_H": 0.0,
+        "A_V": 0.0
+    },
+    "tracks_writer": {
+        "write_dry_cell_flag": true
+    },
+    "release_groups": {
+        "P1": {
+            "pulse_size": 1,
+            "release_interval": 0,
+            "points": [
+                [
+                    1594500,
+                    5486500
+                ],
+                [
+                    1596500,
+                    5489000
+                ],
+                [
+                    1595000,
+                    5483000
+                ]
+            ]
+        }
+    },
+    "particle_properties ": {
+        "Oxygen": {
+            "class_name": "AgeDecay",
+            "decay_time_scale": 86400.0,
+            "initial_value": 20.0
+        },
+        "distance_travelled": {
+            "class_name": "DistanceTravelled"
+        }
+    },
+    "particle_properties": {
+        "my_constant_prop": {
+            "class_name": "ParticleLoad",
+            "initial_value": 100
+        }
+    },
+    "block_dry_cells": true,
+    "max_run_duration": 172800.0,
+    "inculde_dispersion": false,
+    "backtracking": false,
+    "root_output_dir": "output"
+}
