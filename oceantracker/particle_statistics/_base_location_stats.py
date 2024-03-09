@@ -49,16 +49,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         self.check_part_prop_list()
 
-        if params['count_start_date'] is None:
-            info['start_time'] = si.run_info['model_start_time']
-        else:
-            info['start_time'] = time_util.isostr_to_seconds(params['count_start_date'])
-
-        if params['count_end_date'] is None:
-            info['end_time'] = si.run_info['model_end_time']
-        else:
-            info['end_time'] = time_util.isostr_to_seconds(params['count_end_date'])
-
         info['status_range'] = np.asarray([si.particle_status_flags[params['status_min']], si.particle_status_flags[params['status_max']]])
 
         #set particle depth and water depth limits for counting particles
@@ -163,12 +153,12 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         info=self.info
 
         if params['count_start_date'] is None:
-            info['start_time'] = si.run_info['model_start_time']
+            info['start_time'] = si.run_info['start_time']
         else:
             info['start_time'] = time_util.isostr_to_seconds(params['count_start_date'])
 
         if params['count_end_date'] is None:
-            info['end_time'] = si.run_info['model_end_time']
+            info['end_time'] = si.run_info['end_time']
         else:
             info['end_time'] = time_util.isostr_to_seconds(params['count_end_date'])
 

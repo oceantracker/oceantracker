@@ -338,16 +338,20 @@ class FieldGroupManager(ParameterBaseClass):
         nc = reader.open_first_file()
 
         # set up dispersion using vertical profiles of A_Z if available
-        self._setup_dispersion(nc)
+        self._setup_dispersion_params(nc)
+        si.add_core_class('dispersion',si.working_params['core_classes']['dispersion'],
+                            default_classID='dispersion_random_walk', initialise=True)
 
         # add resuspension based on friction velocity
         if si.is3D_run:
             # add friction velocity from bottom stress or near seabed vel
-            self._setup_resupension(nc)
+            self._setup_resupension_params(nc)
+            si.add_core_class('resuspension', si.working_params['core_classes']['resuspension'],
+                              default_classID='resuspension_basic', initialise=True)
 
         nc.close()
 
-    def _setup_dispersion(self, nc,  has_A_Z_profile=None):
+    def _setup_dispersion_params(self, nc,  has_A_Z_profile=None):
         si = self.shared_info
         ml = si.msg_logger
         info = self.info
@@ -380,7 +384,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         return
 
-    def _setup_resupension(self, nc, has_bottom_stress=None):
+    def _setup_resupension_params(self, nc, has_bottom_stress=None):
         # get fields needed to calculate friction velocity field, needed for suspension
         si = self.shared_info
         ml = si.msg_logger
@@ -459,17 +463,15 @@ class FieldGroupManager(ParameterBaseClass):
         info= self.info
         self.interpolator.update_dry_cell_index(self.grid, info['current_buffer_steps'], info['fractional_time_steps'],)
 
-
-
-    def get_hydo_model_time_step(self):
-        return self.reader.info['file_info']['hydro_model_time_step']
-
-
-    def get_hindcast_start_end_times(self):
-        reader = self.reader
-        return self.reader.info['file_info']['first_time'], reader.info['file_info']['last_time']
-
-
+    def get_hydro_model_info(self):
+        d = dict(start_time=self.reader.info['file_info']['first_time'],
+                 end_time =self.reader.info['file_info']['last_time'],
+                 time_step =self.reader.info['file_info']['hydro_model_time_step']
+                 )
+        d['duration'] = d['end_time']- d['start_time']
+        d['start_date'] = time_util.seconds_to_isostr(d['start_time'])
+        d['end_date'] = time_util.seconds_to_isostr(d['end_time'])
+        return d
 
     def write_hydro_model_grid(self, gridID=None):
         # write a netcdf of the grid from first hindcast file

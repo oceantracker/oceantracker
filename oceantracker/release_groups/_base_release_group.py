@@ -12,11 +12,11 @@ class _BaseReleaseGroup(ParameterBaseClass):
         self.add_default_params({
                 'pulse_size': PVC(1, int, min=1, doc_str='Number of particles released in a single pulse, this number is released every release_interval.'),
                'release_interval': PVC(0., float, min=0., units='sec', doc_str='Time interval between released pulses. To release at only one time use release_interval=0.'),
-               'release_start_date': PVC(None, 'iso8601date', doc_str='Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
+               'release_start_date': PVC(None, 'iso8601date',doc_str='start date of release, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
                # to do add ability to release on set dates/times 'release_dates': PLC([], 'iso8601date'),
                'release_duration': PVC(None, float, min=0.,
                                        doc_str='Time in seconds particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "release_end_date"'),
-               'release_end_date': PVC(None, 'iso8601date', doc_str='Date to stop releasing particles, ignored if release_duration give, must be an ISO date as string eg. "2017-01-01T00:30:00" '),
+               'release_end_date': PVC(None, 'iso8601date', doc_str='Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. "2017-01-01T00:30:00"',),
                'max_age': PVC(None, float, min=1.,
                               doc_str='Particles older than this age in seconds are culled,ie. status=dead, and removed from computation, very useful in reducing run time'),
                'user_release_groupID': PVC(0, int, doc_str='User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.'),
@@ -61,95 +61,42 @@ class _BaseReleaseGroup(ParameterBaseClass):
         release_part_prop['IDpulse'] = np.full((n,), info['pulseID'], dtype=np.int32)
         release_part_prop['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)
         return release_part_prop
+
     def set_up_release_times(self):
     # get release times based on release_start_date, duration
         params = self.params
         info = self.info
         si = self.shared_info
+        hi = si.hindcast_info
         ml = si.msg_logger
 
+        self.info['release_info'] = time_util.get_regular_events(
+                        hi, si.backtracking, params['release_interval'],
+                        si.msg_logger, self,
+                        start=params['release_start_date'],
+                        end=params['release_end_date'],
+                        duration=params['release_duration'],
+                        crumbs='Release Group: '
+                                         )
+        release_info = self.info['release_info']  # shortcut
 
-        hindcast_start, hindcast_end  =  si.classes['field_group_manager'].get_hindcast_start_end_times()
-
-        model_time_step = si.settings['time_step']
-
-        self.info['release_info'] ={'first_release_date': None, 'last_release_date':None,
-                                    'last_time_alive':None}
-        release_info = self.info['release_info'] #shortcut
-
-        if params['release_start_date'] is None:
-            # no user start date so use  model runs' start date
-            time_start= hindcast_start if not si.backtracking else hindcast_end
-        else:
-            # user given start date
-            time_start = time_util.isostr_to_seconds(params['release_start_date'])
-
-        # now check if start in range
-        n_groups_so_far =len(si.classes['release_groups'])
-        if not hindcast_start <= time_start <= hindcast_end:
-            si.msg_logger.msg('Release group= ' + str(n_groups_so_far + 1) + ', name= ' + self.info['name'] + ',  parameter release_start_time is ' +
-                                    time_util.seconds_to_isostr(time_start)
-                              + '  is outside hindcast range ' + time_util.seconds_to_isostr(hindcast_start)
-                                    + ' to ' + time_util.seconds_to_isostr(hindcast_end), warning=True)
-
-        # set max age of particles
-        release_interval = model_time_step if params['release_interval'] is None else params['release_interval']
-
-        # world out release times
-        if release_interval == 0.:
-            time_end = time_start
-        elif self.params['release_duration'] is not None:
-            time_end = time_start + si.model_direction*self.params['release_duration']
-
-        elif self.params['release_end_date'] is not None:
-            time_end = time_util.isostr_to_seconds(self.params['release_end_date'])
-        else:
-            # default is limit of hindcast
-            time_end = hindcast_start if si.backtracking else hindcast_end
-
-        # get time steps for release in a dow safe way
-        model_time_step = si.settings['time_step']
-
-
-        # get release times within the hindcast
-        if abs(time_end-time_start) < model_time_step:
-            # have only one release
-            release_info['release_times'] = np.asarray(time_start)
-        else:
-            release_info['release_times'] = time_start + np.arange(0., abs(time_end-time_start),release_interval )*si.model_direction
-
-        # trim releases to be within hindcast
-        sel = np.logical_and( release_info['release_times'] >= hindcast_start,  release_info['release_times']  <= hindcast_end)
-        release_info['release_times'] = release_info['release_times'][sel]
-
-        if release_info['release_times'].size ==0:
+        if release_info['times'].size ==0:
             ml.msg(f'No release times in range of hydro-model for release_group {info["instanceID"]:2d}, ',
                    fatal_error=True, caller=self,
                    hint=' Check hydro-model date range and release dates  ')
 
-        # get time steps when released, used to determine when to release
-        release_info['release_time_steps'] =  np.round(( release_info['release_times']- hindcast_start)/model_time_step).astype(np.int32)
-
         # find last time partiles alive
         max_age = 1.0E30 if params['max_age'] is None else params['max_age']
-        release_info['last_time_alive'] =  release_info['release_times'][-1] + si.model_direction*max_age
-        release_info['last_time_alive'] =  min(max(hindcast_start,release_info['last_time_alive']),hindcast_end) # trim to limits of hind cast
+        release_info['last_time_alive'] =  release_info['times'][-1] + si.model_direction*max_age
+        release_info['last_time_alive'] =  min(max(hi['start_time'],release_info['last_time_alive']),hi['end_time']) # trim to limits of hind cast
 
         # useful info
-        release_info['first_release_time'] = release_info['release_times'][0]
-        release_info['last_release_time'] = release_info['release_times'][-1]
 
-        release_info['release_dates'] = time_util.seconds_to_datetime64(release_info['release_times'])
-        release_info['first_release_date'] = time_util.seconds_to_datetime64(release_info['first_release_time'])
-        release_info['last_release_date'] = time_util.seconds_to_datetime64(release_info['last_release_time'])
 
         # index of release the  times to be released next
         release_info['index_of_next_release'] =  0
 
-        if not   hindcast_start <= release_info['first_release_time'] <= hindcast_end :
-            ml.msg(f'Release group "{info["name"]}" >  start time {time_util.seconds_to_isostr(release_info["first_release_time"])}  is outside the range of hydro-model times for release_group instance #{info["instanceID"]:2d}, ',
-                   fatal_error=True, caller=self,
-                   hint=f' Check release start time is in hydro-model  range of  {time_util.seconds_to_isostr(hindcast_start)}  to {time_util.seconds_to_isostr(hindcast_start)} ')
+        pass
 
     def _check_potential_release_locations_in_bounds(self, x):
         # check cadiated in bound
