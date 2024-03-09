@@ -282,7 +282,7 @@ s56['release_groups']={
                               [1594500, 5483000, -1],
                               [1598000, 5486100, -1]
                                 ],
-                'release_start_date': '2017-01-01T01:30:00',
+                #'release_start_date': '2017-01-01T01:30:00',
                 'pulse_size': 10, 'release_interval': 3600},
 
 
