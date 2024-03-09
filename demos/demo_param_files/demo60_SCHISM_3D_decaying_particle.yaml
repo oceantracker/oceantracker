@@ -1,0 +1,33 @@
+debug: true
+dispersion:
+  A_H: 0.2
+  A_V: 0.001
+numba_cache_code: false
+output_file_base: demo60_SCHISM_3D_decaying_particle
+particle_properties:
+  age_decay:
+    class_name: oceantracker.particle_properties.age_decay.AgeDecay
+    decay_time_scale: 25714.28571428571
+reader:
+  file_mask: demoHindcastSchism3D.nc
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  load_fields:
+  - water_temperature
+regrid_z_to_uniform_sigma_levels: true
+release_groups:
+  P1:
+    max_age: 17280.000000000004
+    points:
+    - - 1594500
+      - 5487000
+      - -1
+    - - 1594500
+      - 5483000
+      - -1
+    - - 1598000
+      - 5486100
+      - -1
+    pulse_size: 1
+    release_interval: 150.0
+root_output_dir: output
+time_step: 120
