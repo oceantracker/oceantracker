@@ -19,7 +19,7 @@ class SplitParticles(_BaseTrajectoryModifier):
 
         super().initial_setup()  # set up using regular grid for  stats
         si= self.shared_info
-        self.time_of_last_split = si.run_info['model_start_time']
+        self.time_of_last_split = si.run_info['start_time']
 
     def select_particles_to_split(self, time_sec, active):
         # get indices of particles to split
@@ -54,4 +54,4 @@ class SplitParticles(_BaseTrajectoryModifier):
                 bc_cords = part_prop['bc_cords'].get_values(split),
                 hydro_model_gridID = part_prop['hydro_model_gridID'].get_values(split),
                 )
-        si.classes['particle_group_manager'].release_a_particle_group_pulse(time_sec, release_data)
+        si.classes['particle_group_manager'].release_a_particle_group_pulse(release_data, time_sec )

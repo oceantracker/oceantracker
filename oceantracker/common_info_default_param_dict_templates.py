@@ -55,7 +55,7 @@ case_settings_defaults ={
             'open_boundary_type' :  PVC(0, int, min=0, max=1,doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS '),
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
             'use_A_Z_profile': PVC(True, bool, doc_str='Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file'),
-            'include_dispersion': PVC(True, bool, doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures '),
+            'include_dispersion': PVC(True, bool, doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures'),
 
     #  #'loops_over_hindcast':  PVC(0, int, min=0),  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
 

@@ -11,6 +11,8 @@ class LagarangianCoherentStructures(_BaseModel):
         # set up info/attributes
         super().__init__()
         self.add_default_params({
+            'start_date': PVC(None, 'iso8601date', doc_str='start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
+            'end_date': PVC(None, 'iso8601date', doc_str=' end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
             'update_interval': PVC(60*60.,float,units='sec',
                                     doc_str='Time in seconds between calculating statistics, will be rounded to be a multiple of the particle tracking time step'),
             'lags': PLC(None, [float,int], units='sec',
@@ -31,11 +33,9 @@ class LagarangianCoherentStructures(_BaseModel):
         info = self.info
 
         # remove any existing release groups
-        if len(si.classes['release_groups']):
-            si.classes['release_groups']= {}
+        if len(si.classes['release_groups']) > 0:
+            si.classes['release_groups']= dict()
             ml.msg('Lagarangian coherent structures cannot be run with other release groups, removed existing release groups', warning=True, caller=self)
-
-        # set
 
         if params['lags'] is None: params['lags']  = [24*3600.]
 
@@ -43,18 +43,33 @@ class LagarangianCoherentStructures(_BaseModel):
         params['update_interval'] = si.round_interval_to_model_time_step(params['update_interval'],caller=self, crumbs='update_interval param> ')
         params['lags'] = si.round_times_to_model_times(params['lags'], lags=True, caller=self, crumbs='lags param> ')
 
-        self._add_grid_releases()
-
-    def update(self,n_time_step, time_sec):
-        si = self.shared_info
-        pgm = si.classes['particle_group_manager']
-        info = self.info
         si.settings['include_dispersion'] = False
-        #self._add_grid_releases(n_time_step)
+
+
+
+    def final_setup(self):
+        # must be done last to that start end times are known to set up shedulers
+        self._add_grid_releases_and_scheduler()
+
+
+
+    def update(self, n_time_step, time_sec):
+        si = self.shared_info
+
+        for n, rg in enumerate(si.release_groups.values()):
+            if rg.calculation_scheduler.task[n_time_step]:
+                # cal LSC
+                pass
         pass
 
-    def _add_grid_releases(self):
+    def _calculate_LCS(self,n):
+        # for nth release
+        pass
+
+    def _add_grid_releases_and_scheduler(self):
         si = self.shared_info
+        info= self.info
+        hi = si.hindcast_info
         pgm = si.classes['particle_group_manager']
         params = self.params
 
@@ -64,8 +79,17 @@ class LagarangianCoherentStructures(_BaseModel):
                               release_interval=0.
                               )
         # make a release group at each time interval and grid
-        for nt,t in enumerate(np.arange(si.run_info['model_start_time'],si.run_info['model_end_time'],params['update_interval'])):
-
+        # get time for release
+        a= time_util.get_regular_events(
+            hi, si.backtracking, params['update_interval'],
+            si.msg_logger, self,
+            start=params['start_date'],
+            end=params['end_date'],
+            crumbs='LCS: '
+        )
+        info.update(a)
+        for nt, t in enumerate(info['times']):
+            t_lags = t + params['lags']
             for n_grid, (center,span)  in enumerate(zip(params['grid_center'], params['grid_span'])):
 
                 release_params['coords_ll_ur'] = center + np.asarray([[-span[0]/2, -span[1]/2],
@@ -73,6 +97,8 @@ class LagarangianCoherentStructures(_BaseModel):
                 release_params['release_start_date'] = time_util.seconds_to_isostr(t)
                 release_params['max_age'] = params['lags'][-1] # run each to largest lag
 
-                i = pgm.add_release_group(f'LCS_grid{n_grid:03d}_time_step{nt:04d}', release_params)
-                #i.calculation_scheduler = si.make_scheduler(interval=params['update_interval'], caller=self)
-        pass
+                i  = pgm.add_release_group(f'LCS_grid{n_grid:03d}_time_step{nt:04d}',  release_params)
+                # add a scheduler for the lag calculations to use in put date
+                i.calculation_scheduler = si.make_scheduler(times=t_lags, caller=self)
+                i.info['next_lag_to_calulate'] = 0  # used to move through each lag
+

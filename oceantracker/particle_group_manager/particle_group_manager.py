@@ -77,9 +77,10 @@ class ParticleGroupManager(ParameterBaseClass):
         pass
 
     def add_release_group(self,name,params):
+        #doto is this needed
         si = self.shared_info
-        i = si.create_class_dict_instance(name, 'release_groups', 'user', params,
-                                          crumbs='Adding release groups', default_classID='release_groups')
+        i = si._create_class_dict_instance(name, 'release_groups','user', params,
+                                           crumbs='Adding release groups', default_classID='release_groups')
         i.initial_setup()
         # set up release times so duration of run known
         i.set_up_release_times()
@@ -92,7 +93,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
         return i
 
-
     #@function_profiler(__name__)
     def release_particles(self,n_time_step, time_sec):
         # see if any group is ready to release
@@ -101,10 +101,11 @@ class ParticleGroupManager(ParameterBaseClass):
 
         for name, rg in si.classes['release_groups'].items():
             ri = rg.info['release_info']
-            sel =  time_sec * si.model_direction >= ri['release_times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
+            sel =  time_sec * si.model_direction >= ri['times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
             num_pulses= np.count_nonzero(sel)
             for n in range(num_pulses):
-                new_index = self.release_a_particle_group_pulse(rg, time_sec)
+                release_part_prop = rg.get_release_locations(time_sec)
+                new_index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
                 ri['index_of_next_release'] += 1
             pass
@@ -139,11 +140,10 @@ class ParticleGroupManager(ParameterBaseClass):
             si.msg_logger.msgg(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)),warning=True)
         return new_buffer_indices #indices of all new particles
 
-    def release_a_particle_group_pulse(self, release_group, time_sec):
+    def release_a_particle_group_pulse(self, release_data, time_sec):
         # release one pulse of particles from given group
         si = self.shared_info
         info= self.info
-        release_data = release_group.get_release_locations(time_sec)
         smax = info['particles_in_buffer'] + release_data['x'].shape[0]
 
         if smax > si.settings['max_particles']: return
@@ -222,43 +222,43 @@ class ParticleGroupManager(ParameterBaseClass):
         # **karwgs must have at least name
         params = kwargs
         si = self.shared_info
-        i = si.create_class_dict_instance(name,'time_varying_info', 'manual_update', params, crumbs=' setup time varing reader info')
+        i = si._create_class_dict_instance(name, 'time_varying_info','manual_update', params, crumbs=' setup time varing reader info')
         i.initial_setup()
 
         if si.settings['write_tracks'] and i.params['write']:
             w = si.classes['tracks_writer']
             w.create_variable_to_write(name, 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
 
-    def add_particle_property(self, name, prop_group, prop_params, crumbs=''):
+    def add_particle_property(self, name, prop_type, prop_params, crumbs=''):
         si = self.shared_info
         ml = si.msg_logger
         # todo make name first compulsory argument of this function and create_class_dict_instance
         if name is None:
             ml.msg('ParticleGroupManager.create_particle_property, prop name cannot be None, must be unique str',
-                   hint='got prop_type of type=' + str(type(prop_group)), caller=self,
+                   hint='got prop_type of type=' + str(type(prop_type)), caller=self,
                    fatal_error=True, exit_now=True)
 
         if name in si.classes['particle_properties']:
-            ml.msg(f'particle property  name "{name}"is already in use',caller=self,
-                   hint='got prop_type of type=' + str(type(prop_group)), crumbs= crumbs+'ParticleGroupManager.create_particle_property' + name,
+            ml.msg(f'particle property  name "{name}"is already in use', caller=self,
+                   hint='got prop_type of type=' + str(type(prop_type)), crumbs=crumbs + 'ParticleGroupManager.create_particle_property' + name,
                    fatal_error=True)
 
-        if type(prop_group) != str :
+        if type(prop_type) != str :
             ml.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str', caller=self,
-                   hint='got prop_type of type=' + str(type(prop_group)),
+                   hint='got prop_type of type=' + str(type(prop_type)),
                    fatal_error=True, exit_now=True)
 
         if type(prop_params) != dict:
             ml.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ',caller=self,
                     hint= 'got parameters of type=' + str(type(prop_params)) +',  values='+str(prop_params), fatal_error=True, exit_now=True)
 
-        if prop_group not in self.known_prop_types:    #todo move all raise exception to msglogger
+        if prop_type not in self.known_prop_types:    #todo move all raise exception to msglogger
             ml.msg('ParticleGroupManager.create_particle_property, unknown prop_group name', caller=self,
                    hint='prop_group must be one of ' + str(self.known_prop_types),   fatal_error=True, exit_now=True)
 
 
-        i = si.create_class_dict_instance(name, 'particle_properties', prop_group, prop_params,
-                                          crumbs=crumbs +' adding "particle_properties of type=' + prop_group)
+        i = si._create_class_dict_instance(name, 'particle_properties', prop_type, prop_params,
+                                           crumbs=crumbs +' adding "particle_properties of type=' + prop_type)
         i.initial_setup()
 
         if si.settings['write_tracks']:

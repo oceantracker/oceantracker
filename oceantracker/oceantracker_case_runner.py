@@ -28,7 +28,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
     def run_case(self, working_params):
-        si=self.shared_info
+        si = self.shared_info
         si.reset()  # clear out classes from class instance of SharedInfo if running series of mains
         d0 = datetime.now()
         t_start = perf_counter()
@@ -64,6 +64,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # other useful shared values
         si.backtracking = si.settings['backtracking']
         si.model_direction = -1 if si.backtracking else 1
+        si.time_of_nominal_first_occurrence = -si.model_direction * 1.0E36
+
+
 
         si.write_output_files = si.settings['write_output_files']
 
@@ -80,16 +83,31 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         case_info_file = None
         return_msgs = {'errors': si.msg_logger.errors_list, 'warnings': si.msg_logger.warnings_list, 'notes': si.msg_logger.notes_list}
+
+        # run info
+        si.run_info = dict(model_time_step = si.settings['time_step'])
+        ri = si.run_info
+
         # case set up
         try:
             self._set_up_run()
             self._do_pre_processing()
-            self._make_core_classes_and_release_groups()
+            self._make_core_classes()
+            # set up start time and duration based on particle releases
+
+
+            start, end = self._setup_particle_release_groups(si.working_params['class_dicts']['release_groups'])
+            self._setup_times_and_solver(start, end)
+
             self._make_and_initialize_user_classes()
+             # includes any release groups added  by params or user classes
+            self._finalize_classes()  # any setup actions that mus be done after other actions, eg shedulers
+
             # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
 
-
-
+            # for some reason these shortcuts must be done after set up, or they remeber values from before setup????
+            si.particle_properties = si.classes['particle_properties']
+            si.release_groups = si.classes['release_groups']
 
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
@@ -200,7 +218,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # fill and process buffer until there is less than 2 steps
         si.msg_logger.print_line()
-        si.msg_logger.progress_marker('Starting ' + si.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info['model_duration']))
+        si.msg_logger.progress_marker('Starting ' + si.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info['duration']))
 
         t0 = perf_counter()
         si.msg_logger.progress_marker('Initialized Solver Class', start_time=t0)
@@ -249,11 +267,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             release_info = i.info['release_info']
 
-            if release_info['release_times'].size == 0:
-                si.msg_logger.msg(f'Release group= {name} no release times in range of hindcast and given release duration', warning=True,crumbs='Setting up release groups')
-                continue
-            else:
-                first_release_time.append(release_info['first_release_time'])
+            if release_info['times'].size > 0:
+                first_release_time.append(release_info['start_time'])
                 last_time_alive.append(release_info['last_time_alive'])
 
         si.msg_logger.exit_if_prior_errors('Errors in release groups')
@@ -270,14 +285,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         return t_first, t_last
 
 
-    def _make_core_classes_and_release_groups(self):
+    def _make_core_classes(self):
         # initialise all classes, order is important!
         # shortcuts
         t0 = perf_counter()
         si = self.shared_info
         si.particle_status_flags = common_info.particle_info['status_flags']
 
-        si.run_info = {}
 
 
         # start with setting up field gropus, which set up readers
@@ -293,21 +307,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         fgm.initial_setup()  # needed here to add reader fields inside reader build
         fgm.setup_dispersion_and_resuspension() # setup files required for didpersion etc, depends on what variables are in the hydro-files
 
-        # set up dispersion ad resuspension calculation class
-        dispersion_params = si.working_params['core_classes']['dispersion']
-        if  si.is3D_run:
-            if si.settings['use_A_Z_profile'] and fgm.info['has_A_Z_profile']:               # use profile of AZ
-                si.add_core_class('dispersion', dispersion_params,
-                                  default_classID='dispersion_random_walk_varyingAz', initialise=True)
-            else: # constant random walk,  as default
-                si.add_core_class('dispersion', dispersion_params, default_classID='dispersion_random_walk', initialise=True)
+        si.hindcast_info = fgm.get_hydro_model_info()
 
-            # resuspension only in 3D
-            si.add_core_class('resuspension', si.working_params['core_classes']['resuspension'],
-                              default_classID='resuspension_basic', initialise=True)
-        else:
-             # 2D constant random walk as default, no resupension
-            si.add_core_class('dispersion', dispersion_params, default_classID='dispersion_random_walk', initialise=True)
 
         if si.settings['write_tracks']:
             si.add_core_class('tracks_writer',si.working_params['core_classes']['tracks_writer'], initialise=True)
@@ -326,38 +327,30 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.add_core_class('solver', core_role_params['solver'], crumbs='core class solver ')
 
 
-        if  si.settings['time_step'] > fgm.get_hydo_model_time_step():
-            si.msg_logger.msg(f'Results may not be accurate as, time step param={si.settings["time_step"]:2.0f} sec,  > hydo model time step = {fgm.get_hydo_model_time_step():2.0f}',
+        if  si.settings['time_step'] >  si.hindcast_info['time_step']:
+            si.msg_logger.msg(f'Results may not be accurate as, time step param={si.settings["time_step"]:2.0f} sec,  > hydo model time step = {si.hindcast_info["time_step"]:2.0f}',
                               warning=True)
 
-        # set up start time and duration based on particle releases
-        t0 = perf_counter()
-        time_start, time_end = self._setup_particle_release_groups(si.working_params['class_dicts']['release_groups'])
-
+    def _setup_times_and_solver(self, time_start, time_end ):
         #clip times to maximum duration in shared and case params
+        si= self.shared_info
+        hi = si.hindcast_info
+        fgm= si.classes['field_group_manager']
+        t0 = perf_counter()
+
         duration = abs(time_end - time_start)
         duration = min(duration, si.settings['max_run_duration'])
         time_end = time_start + duration* si.model_direction
 
         # note results
-        si.run_info['model_time_step'] = si.settings['time_step']
-        si.run_info['model_start_time'] = time_start
-        si.run_info['model_end_time'] = time_end
-        si.run_info['model_duration'] = max(abs(time_end - time_start), si.settings['time_step']) # at least one time step
+        a = time_util.get_regular_events(hi,si.backtracking, si.settings['time_step'],
+                                         si.msg_logger,
+                                         start=time_start, end= time_end)
+        si.run_info.update(a)
 
-        si.msg_logger.progress_marker('set up release_groups', start_time=t0)
-
-        # useful info
-        si.run_info['model_start_date'] = time_util.seconds_to_datetime64(time_start)
-        si.run_info['model_end_date'] = time_util.seconds_to_datetime64(time_end)
-        si.run_info['model_timedelta'] =time_util.seconds_to_pretty_duration_string(si.settings['time_step'])
-        si.run_info['model_duration_timedelta'] = time_util.seconds_to_pretty_duration_string(si.run_info['model_duration'] )
+        si.msg_logger.progress_marker('set up solver and model start/end times', start_time=t0)
 
         # value time to forced timed events to happen first time accounting for backtracking, eg if doing particle stats, every 3 hours
-        si.time_of_nominal_first_occurrence = -si.model_direction * 1.0E36
-        # todo get rid of time_of_nominal_first_occurrence
-
-
 
         # initialize the rest of the core classes
         #todo below apply to all core classes, reader
@@ -374,6 +367,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.classes[name].final_setup()
         si.msg_logger.progress_marker('final set up of core classes',start_time=t0)
 
+    def _finalize_classes(self):
+        si = self.shared_info
+        #todo need to move other finialisers here??
+        if 'integrated_model' in si.classes:
+            si.classes[ 'integrated_model'].final_setup()
+
+
     def _make_and_initialize_user_classes(self):
         # complete build of particle by adding reade, custom properties and modifiers
         si= self.shared_info
@@ -389,7 +389,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for user_type in ['velocity_modifiers','trajectory_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
             for name, params in si.working_params['class_dicts'][user_type].items():
-                i = si.create_class_dict_instance(name,user_type, 'user', params, crumbs=' making class type ' + user_type + ' ')
+                i = si._create_class_dict_instance(name, user_type,'user', params,  crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
 
         # last load any model models which may depend on the other classes
@@ -406,6 +406,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     # ____________________________
     def _get_case_info(self, d0, t0):
         si = self.shared_info
+
         pgm= si.classes['particle_group_manager']
         info = self.info
         info['date_of_time_zero'] = time_util.seconds_to_datetime64(np.asarray([0.]))
@@ -499,6 +500,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                     for nsig in range(len(sig)):
                         d['numba_code_info']['SMID_code'][name].append(numba_util.count_simd_intructions(func, sig=nsig))
                     pass
+        # final setup warnings
+        if not si.settings['include_dispersion']:
+            si.msg_logger.msg('Dispersion is turned off, no random walk included',
+                              warning=True,hint='ie. setting "include_dispersion" is False')
+
         return d
 
     def close(self):

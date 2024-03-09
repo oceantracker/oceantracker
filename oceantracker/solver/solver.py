@@ -34,7 +34,6 @@ class Solver(ParameterBaseClass):
         self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'particle_velocity', 'v_temp'])
 
 
-
     #@profile
     def solve(self):
         # solve for data in buffer
@@ -50,16 +49,6 @@ class Solver(ParameterBaseClass):
         pgm, fgm = si.classes['particle_group_manager'], si.classes['field_group_manager']
         ri['time_steps_completed'] = 0
 
-        # get hindcast step range
-        time_span= fgm.get_hindcast_start_end_times()
-
-
-        #todo simplify by dropping need to find model end time
-        model_times = ri['model_start_time'] + si.model_direction*np.arange(0., abs(time_span[1]-time_span[0]),abs(si.settings['time_step']))
-        # trim times to hindcast range
-        sel = np.logical_and(model_times >= time_span[0], model_times <=time_span[1])
-        model_times = model_times[ sel]
-
         # work out time steps between writing tracks to screen
         write_tracks_time_step = si.settings['screen_output_time_interval']
         if write_tracks_time_step is None:
@@ -69,6 +58,7 @@ class Solver(ParameterBaseClass):
 
         t0_model = perf_counter()
         free_wheeling = False
+        model_times = si.run_info['times']
         fgm.update_reader(model_times[0]) # initial buffer fill
 
         # run forwards through model time variable, which for backtracking are backwards in time
@@ -100,7 +90,7 @@ class Solver(ParameterBaseClass):
 
 
             # do stats etc updates and write tracks
-            self.pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
+            self._pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
@@ -130,21 +120,21 @@ class Solver(ParameterBaseClass):
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             ri['time_steps_completed'] += 1
             si.block_timer('Time stepping',t0_step)
-            if abs(t2 - ri['model_start_time']) > ri['model_duration']:  break
+            if abs(t2 - ri['start_time']) > ri['duration']:  break
 
         # write out props etc at last step
         if n_time_step > 0:# if more than on set completed
-            self.pre_step_bookkeeping(n_time_step, t2)
+            self._pre_step_bookkeeping(n_time_step, t2)
             self.screen_output(ri['time_steps_completed'], t2, t0_model,t0_step)
 
-        ri['model_end_time'] = t2
+        ri['end_time'] = t2
         ri['model_end_date'] = t2.astype('datetime64[s]')
-        ri['model_run_duration'] =  ri['model_end_time'] -ri['model_start_time']
+        ri['model_run_duration'] =  ri['end_time'] -ri['start_time']
         ri['computation_started'] =computation_started
         ri['computation_ended'] = datetime.now()
         ri['computation_duration'] = datetime.now() -computation_started
 
-    def pre_step_bookkeeping(self, n_time_step,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
+    def _pre_step_bookkeeping(self, n_time_step,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
         si = self.shared_info
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
@@ -314,12 +304,12 @@ class Solver(ParameterBaseClass):
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
         si= self.shared_info
-        fraction_done= abs((time_sec - si.run_info['model_start_time']) / si.run_info['model_duration'])
+        fraction_done= abs((time_sec - si.run_info['start_time']) / si.run_info['duration'])
         s = f'{100* fraction_done:02.0f}%'
         s += f' step {nt:04d}'
         s += si.classes['field_group_manager'].screen_info()
 
-        t = abs(time_sec - si.run_info['model_start_time'])
+        t = abs(time_sec - si.run_info['start_time'])
         s += ' Day ' + ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(time_sec) + ':'

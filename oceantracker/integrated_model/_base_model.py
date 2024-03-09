@@ -21,5 +21,8 @@ class _BaseModel(ParameterBaseClass):
         self.settings = si.settings
         self.part_prop = si.classes['particle_properties']
 
-
+    def add_release_group_params(self,name, params):
+        # adds the parameters required to release any particles with the integrated models,
+        # these are in addition to any added using "release_group" parameter
+        si = self.shared_info
 

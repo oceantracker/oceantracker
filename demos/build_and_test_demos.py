@@ -247,9 +247,11 @@ schsim_base_params=\
         'release_groups': {
                     'P1':{'points': [[1595000, 5482600, -1],[1599000, 5486200, -1] ],
                                              'pulse_size': 10, 'release_interval': 3600,
-                                            'allow_release_in_dry_cells': True},
+                                            'allow_release_in_dry_cells': True,
+                          'release_start_date': '2017-01-01T01:30:00'},
                     'Poly1':    {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                             'points': poly_points,
+                            'release_start_date': '2017-01-01T01:30:00',
                             'pulse_size': 10, 'release_interval':  3600}
                 },
             'particle_properties': {
@@ -274,11 +276,13 @@ s56['release_groups']={
                                     'points': poly_points,
                        'z_min': -1,
                         'z_max': -1,
+                        'release_start_date': '2017-01-01T01:30:00',
                         'pulse_size': 10, 'release_interval':  3600},
             'P1': {'points': [[1594500, 5487000, -1],
                               [1594500, 5483000, -1],
                               [1598000, 5486100, -1]
                                 ],
+                'release_start_date': '2017-01-01T01:30:00',
                 'pulse_size': 10, 'release_interval': 3600},
 
 
@@ -391,7 +395,7 @@ p70['integrated_model']={'class_name': 'LagarangianCoherentStructures',
             'grid_span' : [ 6000, 3000],
            'grid_center': [1595500, 5485000],
             'update_interval': 705,
-           'lags': [ 3600*24+20],
+           'lags': [ 3600,3*3600],
             }
 
 params.append(p70)
@@ -400,7 +404,8 @@ params.append(p70)
 p90= deepcopy(p2)
 
 p90.update({'max_run_duration': 2*24*3600.,'output_file_base': 'demo90forward',
-                                'backtracking': False,'debug': True,'time_step' :60 })
+            'inculde_dispersion':False,
+            'backtracking': False,'debug': True,'time_step' :60 })
 p90['reader']['time_buffer_size']=2  # test with  tiny buffer
 p90['release_groups']= {
     'P1':{'pulse_size': 1, 'release_interval': 0,

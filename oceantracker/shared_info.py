@@ -31,7 +31,11 @@ class SharedInfoClass(object):
         if initialise: i.initial_setup()
         return i
 
-    def create_class_dict_instance(self,name,class_role, group, params,  crumbs='', initialise=False,default_classID=None):
+    def add_user_class(self,class_role, name,params):
+        i = self._create_class_dict_instance(name, class_role, 'user', params, default_classID=None, caller=None, initialise=True)
+        return i
+
+    def _create_class_dict_instance(self, name, class_role, class_type, params, crumbs='', initialise=False, default_classID=None, caller=None):
         # dynamically  get instance of class from string eg oceantracker.solver.Solver
         ml= self.msg_logger
 
@@ -39,16 +43,17 @@ class SharedInfoClass(object):
 
         crumb_base = f' >>> adding_class type >> "{class_role}"  (name=  "{name}" instance #{instanceID: 1d}), '
 
+        if class_role not in common_info.class_dicts_list:
+            ml.msg(f'Class type = "{class_role}": name is not a known class_role=' + class_role,fatal_error=True, exit_now=True,caller=caller,
+                   exception=True, crumbs=crumb_base + crumbs, hint=f'known roles:{common_info.class_dicts_list}')
+
         # make instance  and merge params
         i = self.class_importer.new_make_class_instance_from_params(params,class_role,name=name,crumbs=crumb_base + crumbs, default_classID=default_classID)
 
-        if class_role not in common_info.class_dicts_list :
-            ml.msg(f'Class type = "{class_role}": name is not a known class_role=' + class_role ,
-                   exception = True, crumbs =  crumb_base + crumbs)
 
         # now add to class lists and interators
 
-        i.info['type'] = group
+        i.info['type'] = class_type
 
         # needed for release group identification info etc, zero based
         i.info['instanceID'] =  instanceID
@@ -57,7 +62,8 @@ class SharedInfoClass(object):
 
         if name in self.classes[class_role]:
             ml.msg('Class type"' + class_role + '" already has a class with name = "' + i.info['name']
-                         + '", "name" parameter must be unique',  crumbs =crumb_base + crumbs,  fatal_error=True)
+                         + '", "name" parameter must be unique',
+                   caller=caller,crumbs =crumb_base + crumbs,  fatal_error=True)
         else:
             self.classes[class_role][name] = i
         if initialise: i.initial_setup()
@@ -135,8 +141,7 @@ class SharedInfoClass(object):
                        interval =None, times=None,lags= None,
                        caller=None, crumbs=None):
         
-        s = Scheduler(self.run_info['model_start_time'], self.run_info['model_end_time'],
-                      self.run_info['model_time_step'],
+        s = Scheduler(self.run_info,
                       start=start, end=end,
                       # add duration to go with start?
                       interval =interval, times=times, lags=lags,
@@ -159,7 +164,7 @@ class SharedInfoClass(object):
         #  if lags = True then fiest values are already relative to zero
 
         # make relative to start time
-        t = times if lags else times-self.run_info['model_start_time']
+        t = times if lags else times-self.run_info['start_time']
 
         dt = self.settings['time_step']
         n_steps, remainders = np.divmod(t, dt)
@@ -169,5 +174,5 @@ class SharedInfoClass(object):
                                 caller=caller, crumbs=crumbs)
         times_out = n_steps*dt
         # if a time, then add back model start time
-        if not lags: times_out += self.run_info['model_start_time']
+        if not lags: times_out += self.run_info['start_time']
         return times_out
