@@ -71,6 +71,8 @@ class LagarangianCoherentStructures(_BaseModel):
 
         if params['lags'] is None: params['lags']  = [24*3600.]
 
+        return
+
         # todo move to sheduler ? -- round interval and lags to model time step
         params['update_interval'] = si.round_interval_to_model_time_step(params['update_interval'],caller=self, crumbs='update_interval param> ')
         params['lags'] = si.round_times_to_model_times(params['lags'], lags=True, caller=self, crumbs='lags param> ')
@@ -78,8 +80,8 @@ class LagarangianCoherentStructures(_BaseModel):
         # add a
         for name, rg in si.classes['release_groups'].items():
             t = rg.info['release_info']['times'][0] +  params['lags']  # time of lags after start of release group
-            s = si.make_scheduler( times= t,  caller=self, crumbs='Adding lagged calculation times')
-            rg.calculation_scheduler = s
+            si.add_scheduler_to_class(rg, times= t,  caller=self, crumbs='Adding lagged calculation times')
+
         pass
 
     def update(self, n_time_step, time_sec):

@@ -270,20 +270,21 @@ params.append (s50)
 
 # schsim 3D
 s56 = deepcopy(schsim_base_params)
-
+# hydro start is '2017-01-01T00:30:00'
 s56['release_groups']={
             'poly1': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                                     'points': poly_points,
                        'z_min': -1,
                         'z_max': -1,
-                        'release_start_date': '2017-01-01T01:30:00',
-                        'pulse_size': 10, 'release_interval':  3600},
+                      'release_interval': 3603,
+                        'release_start_date': '2017-01-01T00:31:30',
+                        'pulse_size': 10, 'release_interval':  3660},
             'P1': {'points': [[1594500, 5487000, -1],
                               [1594500, 5483000, -1],
                               [1598000, 5486100, -1]
                                 ],
-                #'release_start_date': '2017-01-01T01:30:00',
-                'pulse_size': 10, 'release_interval': 3600},
+                'release_interval':  3600,
+                'pulse_size': 10},
 
 
 }

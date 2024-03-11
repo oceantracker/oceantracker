@@ -32,7 +32,7 @@ class _BaseModel(ParameterBaseClass):
             si.settings[key] = value
 
     def add_class(self, class_role, name=None, **kwargs):
-        # helper method only called from within users add_settings_and_class_params
+        '''helper method only called from within users add_settings_and_class_params'''
         si = self.shared_info
         if class_role in common_info.class_dicts_list:
             # those with mutil classes
@@ -44,9 +44,15 @@ class _BaseModel(ParameterBaseClass):
 
         elif class_role in common_info.core_class_list:
             # update core class params, no name needed
-            raise ('working on it')
+            si.msg_logger.msg(f'can not core class paramters in in role {class_role} used in "add_settings_and_class_params" method', fatal_error=True, exit_now=True,
+                              hint= 'add these parameters as ordinary, top level parameters',
+                              crumbs=' add_class method:', caller=self)
         else:
-            raise('working on it')
+            si.msg_logger.spell_check(f'Do not recognise call role "{class_role}" used in "add_settings_and_class_params" method',
+                                  class_role, common_info.class_dicts_list,
+                                  fatal_error=True, exit_now=True,
+                          crumbs=' add_class method:', caller=self)
+
         pass
 
         # remove any existing release groups

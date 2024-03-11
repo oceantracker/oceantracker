@@ -63,7 +63,7 @@ def  day_hms(x):
 
 def get_regular_events(hindcast_info, backtracking, interval, msg_logger,
                        caller =None,
-                       start=None, end=None,duration=None, crumbs=None ):
+                       start=None, end=None,duration=None, crumbs='' ):
     # gets regularly spaced times within the hindcast span
     # and any start and end times, or a duration
     hi =hindcast_info

@@ -2,7 +2,7 @@ from os import path, remove
 import traceback
 from time import  perf_counter
 from oceantracker.common_info_default_param_dict_templates import docs_base_url
-
+import difflib
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 class GracefulError(Exception):
     def __init__(self, message='-no error message given',hint=None):
@@ -54,9 +54,10 @@ class MessageLogger(object):
             remove(self.error_file_name)
 
         return  log_file_name, error_file_name
+
     #todo add abilty to return excecption/traceback?
     def msg(self, msg_text, warning=False, note=False,
-            hint=None, tag=None, tabs=0, crumbs=None, link=None,caller=None,
+            hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
             fatal_error=False, exit_now=False, exception = None, traceback_str=None, dev=False):
 
         if exception is not None:
@@ -89,21 +90,26 @@ class MessageLogger(object):
         m[0] +=  msg_text
 
         # first line complete
+        if hint is not None:
+            m.append(msg_str('hint: ' + hint, tabs + 3))
+
         # make crumb trail
         if caller is not None:
-            if hasattr(caller,'__class__') and isinstance(caller,ParameterBaseClass):
+            if hasattr(caller,'__class__'):
                 origin=  f' {caller.__class__.__name__}'
-                # add internal name if not None
-                origin +=  ' ' if caller.info["name"] is None else f'"{caller.info["name"]}"'
-                origin += f', instance #[{caller.info["instanceID"]}]  class= {caller.__class__.__module__}.{caller.__class__.__name__} '
+                if isinstance(caller,ParameterBaseClass):
+                    # add internal name if not None
+                    origin +=  ' ' if caller.info["name"] is None else f'"{caller.info["name"]}"'
+                    origin += f', instance #[{caller.info["instanceID"]}]'
+                origin += f', class= {caller.__class__.__module__}.{caller.__class__.__name__} '
+
             else:
                 origin = caller.__name__
             crumbs = origin if crumbs is None else crumbs + origin
 
-        if crumbs is not None:
-            m.append(msg_str('in: ' + crumbs, tabs + 3))
-        if hint is not None:
-            m.append(msg_str('hint: ' + hint, tabs + 3))
+        if crumbs is not None and crumbs != '':
+            m.append(msg_str(f'in: {crumbs}', tabs + 3))
+
         if link is not None:
             m.append(msg_str('see user documentation: ' + self.links[link], tabs + 3))
 
@@ -181,6 +187,16 @@ class MessageLogger(object):
                 s = traceback.format_exc()
                 f.write(s)
                 self.msg(s)
+
+    def spell_check(self, msg, value: str, possible_values: list, **kwargs):
+        ''' Makes suggestion by spell checking value against strings in list of possible_values'''
+
+        if 'fatal_error' not in kwargs: kwargs['warning']= True
+        if 'exit_now' not in kwargs: kwargs['warning'] = True
+        msg = msg + f'. The "{value}" is not recognised, '
+        self.msg(msg,
+                 hint=f'"Closest matches to "{value}" = {difflib.get_close_matches(value, list(possible_values), cutoff=0.4)} ?? ',
+                  **kwargs)
 
     def close(self):
         if self.log_file is not None: self.log_file.close()

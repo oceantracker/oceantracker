@@ -46,9 +46,9 @@
             ],
             "z_min": -1,
             "z_max": -1,
-            "release_start_date": "2017-01-01T01:30:00",
-            "pulse_size": 10,
-            "release_interval": 3600
+            "release_interval": 3660,
+            "release_start_date": "2017-01-01T00:31:30",
+            "pulse_size": 10
         },
         "P1": {
             "points": [
@@ -68,8 +68,8 @@
                     -1
                 ]
             ],
-            "pulse_size": 10,
-            "release_interval": 3600
+            "release_interval": 3600,
+            "pulse_size": 10
         }
     },
     "particle_properties": {

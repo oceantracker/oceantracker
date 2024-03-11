@@ -16,7 +16,7 @@ def plot_line(x, c='b'):
 def show():
     plt.show(block=False)
 
-def check_walk_step(grid, part_prop, active,msg_logger, tol = 1.E-2, crumbs=None):
+def check_walk_step(grid, part_prop, active,msg_logger, tol = 1.E-2, crumbs=''):
     x= part_prop['x'].data[active,:]
     n_cell = part_prop['n_cell'].data[active]
 

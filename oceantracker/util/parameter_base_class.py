@@ -4,7 +4,7 @@ import traceback
 from time import perf_counter
 from oceantracker.shared_info import SharedInfoClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
-from oceantracker.util import spell_check_util
+
 # parameter dictionaries are nested dictionaries or lists of dictionaries
 
 class ParameterBaseClass(object):
@@ -67,7 +67,7 @@ class ParameterBaseClass(object):
 
 
     def check_class_required_fields_prop_etc(self, required_props_list=[],
-                                             requires3D=None, crumbs=None):
+                                             requires3D=None, crumbs=''):
         si = self.shared_info
 
         for name in required_props_list:

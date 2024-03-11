@@ -6,6 +6,7 @@ from os import  path
 
 def ReadCoordinates(file_name, type, select_entity, msg_logger,crumbs, only_select_one=False):
     # get given types selected groups of entity types=[;line','polygon','points']
+
     out= []
     # read file
     if not path.isfile(file_name):

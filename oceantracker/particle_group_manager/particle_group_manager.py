@@ -4,7 +4,6 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
-from oceantracker.util import spell_check_util
 from  oceantracker.particle_group_manager.util import  pgm_util
 
 # holds and provides access to different types a group of particle properties, eg position, field properties, custom properties
@@ -83,7 +82,6 @@ class ParticleGroupManager(ParameterBaseClass):
                                            crumbs='Adding release groups', default_classID='release_groups')
         i.initial_setup()
         # set up release times so duration of run known
-        i.set_up_release_times()
         i.final_setup()
 
         # max_ages needed for culling operations
@@ -100,14 +98,10 @@ class ParticleGroupManager(ParameterBaseClass):
         new_buffer_indices = np.full((0,), 0, np.int32)
 
         for name, rg in si.classes['release_groups'].items():
-            ri = rg.info['release_info']
-            sel =  time_sec * si.model_direction >= ri['times'][ri['index_of_next_release']: ] * si.model_direction# any  puleses not release
-            num_pulses= np.count_nonzero(sel)
-            for n in range(num_pulses):
+            if rg.scheduler.do_task(n_time_step):
                 release_part_prop = rg.get_release_locations(time_sec)
                 new_index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
-                ri['index_of_next_release'] += 1
             pass
         # for all new particles update cell and bc cords for new particles all at same time
         part_prop = si.classes['particle_properties']
@@ -361,9 +355,8 @@ class ParticleGroupManager(ParameterBaseClass):
         if name in list( si.classes['particle_properties'].keys()):
             return   True
         else:
-            spell_check_util.spell_check(name,list( si.classes['particle_properties'].keys()),
-                                         si.msg_logger,
-                                         ' particle property, ignoring', crumbs = crumbs)
+            si.msg_logger.spell_check(' particle property, ignoring', name,si.classes['particle_properties'].keys(),
+                                         crumbs = crumbs, caller=self)
             return False
     def status_counts(self):
         si = self.shared_info
