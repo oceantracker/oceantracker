@@ -98,7 +98,7 @@ class ParticleGroupManager(ParameterBaseClass):
         new_buffer_indices = np.full((0,), 0, np.int32)
 
         for name, rg in si.classes['release_groups'].items():
-            if rg.scheduler.do_task(n_time_step):
+            if rg.release_scheduler.do_task(n_time_step):
                 release_part_prop = rg.get_release_locations(time_sec)
                 new_index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
