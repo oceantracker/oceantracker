@@ -23,11 +23,10 @@ class Solver(ParameterBaseClass):
                         'screen_output_step_count': PVC(None, int, obsolete='use shared_parameter "screen_output_time_interval" in seconds')
                             })
 
-    def initial_setup(self):
+    def final_setup(self):
         si = self.shared_info
         si.classes['particle_group_manager'].add_particle_property('v_temp','manual_update', dict( vector_dim=si.classes['particle_properties']['x'].num_vector_dimensions(), write=False))
 
-        # set up working space for RK stesp to impriove L3 cache performance
 
 
     def check_requirements(self):

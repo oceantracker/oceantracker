@@ -85,7 +85,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         return_msgs = {'errors': si.msg_logger.errors_list, 'warnings': si.msg_logger.warnings_list, 'notes': si.msg_logger.notes_list}
 
         # run info
-        si.run_info = dict(model_time_step = si.settings['time_step'])
+        si.run_info = dict(time_step = si.settings['time_step'],
+                              backtracking=si.settings['backtracking'])
         ri = si.run_info
 
         # case set up
@@ -107,17 +108,15 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             # now  params commlet cabn set up
 
-
             # set up start time and duration based on particle releases
-            start, end = self._setup_particle_release_groups(si.working_params['class_dicts']['release_groups'])
-            self._setup_times_and_solver(start, end)
-
+            self._setup_particle_release_groups_and_start_end_times(si.working_params['class_dicts']['release_groups'])
             self._make_and_initialize_user_classes()
             self._finalize_classes()  # any setup actions that mus be done after other actions, eg shedulers
 
             # model may depend on ther classes, so intilialise after all other claases are setup
             if 'integrated_model' in si.classes:
                 si.classes['integrated_model'].initial_setup()
+                si.classes['integrated_model'].final_setup()
 
              # includes any release groups added  by params or user classes
 
@@ -269,42 +268,52 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         #    i = si.create_class_dict_instance(name, 'pre_processing', 'user', params, crumbs='Adding "fields" from user params')
         #    i.initial_setup()
 
-    def _setup_particle_release_groups(self, particle_release_groups_params_dict):
+    def _setup_particle_release_groups_and_start_end_times(self, particle_release_groups_params_dict):
         # particle_release groups setup and instances,
         # find extremes of  particle existence to calculate model start time and duration
-        #todo move to particle group manager and run in main at set up to get reader range etc , better for shared reader development
+        t0 = perf_counter()
         si = self.shared_info
         pgm = si.classes['particle_group_manager']
+        ri = si.run_info
         # set up to start end times based on release_groups
-        # find earliest and last release times+life_duration ( if going forwards)
 
-        first_release_time = []
-        last_time_alive = []
+        # set up release groups and find first release time to start model
+        first_time = []
+        last_time = []
+        md = si.model_direction
 
-        for name, pg_params in particle_release_groups_params_dict.items():
+        for name, rg_params in particle_release_groups_params_dict.items():
             # make instance and initialise
-            i = pgm.add_release_group(name, pg_params)
+            rg = pgm.add_release_group(name, rg_params)
+            start, life_span = rg.get_start_time_and_life_span()
 
-            release_info = i.info['release_info']
+            first_time.append(start)
+            last_time.append( start + md * life_span)
 
-            if release_info['times'].size > 0:
-                first_release_time.append(release_info['start_time'])
-                last_time_alive.append(release_info['last_time_alive'])
+        # set model run start/end time allowing for back tracking
+        ri['start_time'] = np.min(md * np.asarray(first_time)) * md
+        ri['end_time']   = np.max(md * np.asarray(last_time)) * md
+        ri['times']    = np.arange(ri['start_time'], ri['end_time'], ri['time_step'] * md)
+        ri['end_time'] = ri['times'][-1] # adjust end to nearest time step
 
-        si.msg_logger.exit_if_prior_errors('Errors in release groups')
+        # setup scheduler for each release group, how start and model times known
+        #   this will round start times and release interval to be integer number of model time steps after the start
+        for name, rg in si.classes['release_groups'].items():
+              si.add_scheduler_to_class(rg, start= rg.params['release_start_date'], # set above from start date
+                              interval= rg.params['release_interval'],
+                              end     = rg.params['release_end_date'],
+                              duration= rg.params['release_duration'], caller=rg)
 
         if len(si.classes['release_groups']) == 0:
             # guard against there being no release groups
-            self.msg('No valid release groups' , fatal_error=True, exit_now=True)
+            self.msg('No valid release groups' , fatal_error=True, exit_now=True, caller=self)
 
-        # find first release, and last ime alive
-        t_first = np.min(np.asarray(first_release_time)*si.model_direction)*si.model_direction
-        t_last = np.max(np.asarray(last_time_alive) * si.model_direction) * si.model_direction
+        # useful information
+        ri['duration'] = abs(ri['times'][-1] - ri['times'][0])
+        ri['start_date'] = time_util.seconds_to_isostr(ri['times'][0])
+        ri['end_date'] = time_util.seconds_to_isostr(ri['times'][-1])
 
-        # time range in forwards order
-        return t_first, t_last
-
-
+        si.msg_logger.progress_marker('Set up run start and end times, plus release groups and their schedulers', start_time=t0)
     def _make_core_classes(self):
         # initialise all classes, order is important!
         # shortcuts
@@ -323,8 +332,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up feilds
         fgm = si.add_core_class('field_group_manager', si.working_params['core_classes']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
+        si.is3D_run = fgm.info['is3D']
+        si.run_info['is3D_run']  = fgm.info['is3D']
 
-        fgm = si.classes['field_group_manager']
         fgm.setup_dispersion_and_resuspension()  # setup files required for didpersion etc, depends on what variables are in the hydro-files
         fgm.final_setup()
 
@@ -352,42 +362,23 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.msg_logger.msg(f'Results may not be accurate as, time step param={si.settings["time_step"]:2.0f} sec,  > hydo model time step = {si.hindcast_info["time_step"]:2.0f}',
                               warning=True)
 
-    def _setup_times_and_solver(self, time_start, time_end ):
-        #clip times to maximum duration in shared and case params
-        si= self.shared_info
-        fgm= si.classes['field_group_manager']
+    def _finalize_classes(self):
+        # finalise the classeds
+        #todo , more needed here to finalise othe classes?
+        si = self.shared_info
         t0 = perf_counter()
+        ri = si.run_info
 
-        # clip to max duration of the run
-        duration = abs(time_end - time_start)
-        duration = min(duration, si.settings['max_run_duration'])
-        time_end = time_start + duration* si.model_direction
 
-        # make times steps for solver in run info
-        # this is the only regular event that does not have to begin on a model time step
-        si.run_info['time_step'] = si.settings['time_step'] # min 1 sec time steps
-        si.run_info['duration'] = abs(time_end - time_start)
-        si.run_info['times'] = time_start + si.model_direction*np.arange(0.,si.run_info['duration'], si.run_info['time_step'])
-        si.run_info['start_time'] =  si.run_info['times'][0]
-        si.run_info['end_time'] = si.run_info['times'][-1]
-
-        # initialize the rest of the core classes
-        #todo below apply to all core classes, reader
-        #todo alternative can they be intitlised on creation here?
-        si.classes['solver'].initial_setup()
-        si.msg_logger.progress_marker('set up solver and model start/end times', start_time=t0)
 
         # do final setp which may depend on settings from intitial st up
-        t0= perf_counter()
-        # order matters, must do interpolator after particle_group_manager, to get stucted arrays and solver last
-        for name in ['particle_group_manager', 'solver'] :
-            si.classes[name].final_setup()
-        si.msg_logger.progress_marker('final set up of core classes',start_time=t0)
 
-    def _finalize_classes(self):
-        si = self.shared_info
-        #todo need to move other finialisers here??
-        pass
+        # order matters, must do interpolator after particle_group_manager, to get stucted arrays and solver last
+        for name in ['particle_group_manager', 'solver']:
+            si.classes[name].final_setup()
+
+
+        si.msg_logger.progress_marker('final set up of core classes', start_time=t0)
 
 
     def _make_and_initialize_user_classes(self):

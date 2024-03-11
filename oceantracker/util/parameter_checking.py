@@ -1,12 +1,10 @@
 from copy import deepcopy, copy
 import numpy as np
-from oceantracker.util import time_util, spell_check_util
-
-
+from oceantracker.util import  time_util
 
 crumb_seperator= ' >> '
 
-def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',  check_for_unknown_keys=True):
+def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,  check_for_unknown_keys=True):
     # merge nested paramteres with defaults, returns a copy of params updated
     # if param key is in base case then use base case rather than value from ParamDictValueChecker.get_default()
     # default dict. items must be one of 3 types
@@ -17,6 +15,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',  
     # merge into a copy of params to leave original unchanged
 
     if params is None : params ={}
+    if crumbs is None: crumbs= ''
     if type(params) != dict :
         msg_logger.msg('merge_with_defaults, parameter ' + crumbs + 'params must be a dictionary', fatal_error= True,exit_now=True)
 
@@ -27,9 +26,9 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',  
     if check_for_unknown_keys:
         for key in list(params.keys()):
            if  key not in default_params :
-               spell_check_util.spell_check(key,default_params.keys(),msg_logger,'ignoring this param.',
+               msg_logger.spell_check('ignoring this param.',key,default_params.keys(),
                            crumbs= crumbs + crumb_seperator + f'"{key}"')
-
+    # add crumbs
     for key, item in default_params.items():
         parent_crumb = crumbs + crumb_seperator + key
 
@@ -62,7 +61,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',  
 
 def  CheckParameterValues(key,value_checker, user_param, crumbs, msg_logger):
     # get value from ParamDictValueChecker
-
+    if crumbs is None: crumbs = ''
     crumb_trail = crumbs + crumb_seperator + key
     if user_param is None:
         if value_checker.info['is_required']:
@@ -199,6 +198,7 @@ class ParameterListChecker(object):
 
     def check_list(self, name, user_list, msg_logger, crumbs):
         info =self.info
+        if crumbs is None: crumbs = ''
         crumb_trail = crumbs + crumb_seperator + name
 
         if info['obsolete'] is not None and user_list is not None and len(user_list) > 0:
@@ -294,6 +294,7 @@ class ParameterCoordsChecker(object):
     def check_value(self, crumbs, value, msg_logger):
         # check given value against defaults  in class instance info
         info = self.info
+        if crumbs is None: crumbs = ''
         crumb_trail= crumbs + '> coordinate checker'
         # a position, eg release location, needs to be a numpy array
 

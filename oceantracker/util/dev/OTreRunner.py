@@ -90,7 +90,7 @@ class OceanTrackerReRunner(object):
 
         # clear, then add new release groups   re formed with new param
         si.classes['release_groups']=[]
-        t_start, t_end, estimated_total_particles= otsim._setup_particle_release_groups(case_params['release_groups'])
+        t_start, t_end, estimated_total_particles= otsim._setup_particle_release_groups_and_start_end_times(case_params['release_groups'])
 
         # adjust shared model run time and duration
         si.model_start_time= t_start

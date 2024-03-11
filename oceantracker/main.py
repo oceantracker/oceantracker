@@ -33,7 +33,6 @@ from oceantracker.util import basic_util , get_versions_computer_info
 from oceantracker.util import json_util ,yaml_util
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import get_hydro_model_info
-from oceantracker.util import  spell_check_util
 
 import traceback
 import os
@@ -107,8 +106,8 @@ class OceanTracker():
                     if key != 'name':
                         p[class_role][name][key] = kwargs[key]
         else:
-            spell_check_util.spell_check(class_role, known_class_roles, ml, 'in add_class(), ignoring this class',
-                        crumbs=f'class type "{class_role}"')
+            ml.spell_check('ignoring class helper function add_class(),',class_role, known_class_roles,
+                        crumbs=f' in add_class() class type "{class_role}"', caller = self)
         pass
 
     def _check_case(self,case, crumbs):
@@ -378,7 +377,7 @@ class _OceanTrackerRunner(object):
         caseInfo_file, return_msgs= ot.run_case(deepcopy(working_params))
         return caseInfo_file, return_msgs
 
-    def _decompose_params(self, params, full_checks=True, crumbs=None):
+    def _decompose_params(self, params, full_checks=True, crumbs=''):
         ml = self.msg_logger
         w={'caseID':0, 'shared_settings':{},'case_settings':{},
            'core_classes':{k: {} for k in common_info.core_class_list}, # insert full list and defaults
@@ -436,8 +435,8 @@ class _OceanTrackerRunner(object):
                 w['class_dicts'][k] = item
 
             else:
-                spell_check_util.spell_check(key,known_top_level_keys,ml,' top level parm./key, ignoring')
-                ml.msg('', link='parameter_ref_toc')
+                ml.spell_check(' top level parm./key, ignoring', key,known_top_level_keys, caller=self,
+                               crumbs=crumbs, link='parameter_ref_toc')
 
         ml.exit_if_prior_errors('Errors in decomposing parameters')
         # merge settings params

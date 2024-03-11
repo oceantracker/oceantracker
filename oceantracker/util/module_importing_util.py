@@ -5,7 +5,7 @@ from oceantracker.common_info_default_param_dict_templates import default_classe
 from copy import deepcopy
 from oceantracker.util.parameter_checking import merge_params_with_defaults
 from time import perf_counter
-from oceantracker.util import time_util, spell_check_util
+
 from oceantracker.util.package_util import  scan_package_for_param_classes
 
 
@@ -37,7 +37,7 @@ class ClassImporter(object):
 
         msg_logger.exit_if_prior_errors('"class_name" errors')
 
-    def get_class_obj(self,class_role, name, params, default_classID=None):
+    def get_class_obj(self,class_role, name, params, default_classID=None, crumbs=''):
         ml = self.msg_logger
         if 'class_name' in params and params['class_name'] is not None:
             cls_obj = self.get_class_obj_from_class_name(class_role, params['class_name'])
@@ -49,12 +49,10 @@ class ClassImporter(object):
                     cls_obj = getattr(mod,s[1])
 
                 except Exception as e:
-                    spell_check_util.spell_check(params["class_name"], list(self.class_maps['full_name_map'].keys()), ml,
-                                        'checking known full class names',
-                                        crumbs=f'checking class_name "{params["class_name"]}"')
-                    spell_check_util.spell_check(params["class_name"], list(self.short_name_class_map.keys()), ml,
-                                        'checking known short class names',
-                                                 crumbs=f'checking class_name "{params["class_name"]}"')
+                    ml.spell_check( 'checking known full class names',params["class_name"], self.class_maps['full_name_map'].keys(),
+                                        crumbs=crumbs+ f' checking class_name "{params["class_name"]}"')
+                    ml.spell_check( 'checking known short class names',params["class_name"], self.short_name_class_map.keys(),
+                                                 crumbs= crumbs+ f' checking class_name "{params["class_name"]}"')
 
                     ml.msg(f'For "{class_role}" named "{name}", could not find class_name "{params["class_name"]}"',
                            fatal_error=True)

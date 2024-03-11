@@ -62,41 +62,32 @@ class _BaseReleaseGroup(ParameterBaseClass):
         release_part_prop['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)
         return release_part_prop
 
-    def set_up_release_times(self):
-    # get release times based on release_start_date, duration
-        params = self.params
-        info = self.info
-        si = self.shared_info
+    def get_start_time_and_life_span(self):
+        # gets relese start end and last ime allive from params
+        # and any start and end times, or a duration
+        si = self. shared_info
         hi = si.hindcast_info
-        ml = si.msg_logger
+        ri = si.run_info
+        params = self.params
 
-        self.info['release_info'] = time_util.get_regular_events(
-                        hi, si.backtracking, params['release_interval'],
-                        si.msg_logger, self,
-                        start=params['release_start_date'],
-                        end=params['release_end_date'],
-                        duration=params['release_duration'],
-                        crumbs='Release Group: '
-                                         )
-        release_info = self.info['release_info']  # shortcut
+        if params['release_start_date'] is None:
+            start =  si.hindcast_info['end_time'] if si.backtracking else si.hindcast_info['start_time']
+        else:
+            start = time_util.isostr_to_seconds(params['release_start_date'])
 
-        if release_info['times'].size ==0:
-            ml.msg(f'No release times in range of hydro-model for release_group {info["instanceID"]:2d}, ',
-                   fatal_error=True, caller=self,
-                   hint=' Check hydro-model date range and release dates  ')
+        # work out release duration
+        if params['release_duration'] is None :
+            # look at end date
+            if params['release_end_date'] is None:
+                end = si.hindcast_info['start_time'] if si.backtracking else si.hindcast_info['end_time']
+            else:
+                end = time_util.isostr_to_seconds(params['release_end_date'])
+            duration = abs(end-start)
+        else:
+            duration = abs(params['release_duration'])
 
-        # find last time partiles alive
-        max_age = 1.0E30 if params['max_age'] is None else params['max_age']
-        release_info['last_time_alive'] =  release_info['times'][-1] + si.model_direction*max_age
-        release_info['last_time_alive'] =  min(max(hi['start_time'],release_info['last_time_alive']),hi['end_time']) # trim to limits of hind cast
-
-        # useful info
-
-
-        # index of release the  times to be released next
-        release_info['index_of_next_release'] =  0
-
-        pass
+        life_span =  duration + 0. if params['max_age'] is None else abs(params['max_age'])
+        return start, life_span
 
     def _check_potential_release_locations_in_bounds(self, x):
         # check cadiated in bound

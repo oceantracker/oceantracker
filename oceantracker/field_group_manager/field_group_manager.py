@@ -47,7 +47,7 @@ class FieldGroupManager(ParameterBaseClass):
 
 
         reader= self.reader
-        ml.msg(f'Hydro-model is "{"3D" if si.is3D_run else "2D"}"  type "{reader.__class__.__name__}"', note=True,
+        ml.msg(f'Hydro-model is "{"3D" if info["is3D"] else "2D"}"  type "{reader.__class__.__name__}"', note=True,
                           hint=f'Files found dir and sub-dirs of "{reader.params["input_dir"]}"')
 
         # note coord system
@@ -156,7 +156,7 @@ class FieldGroupManager(ParameterBaseClass):
         # find cell for xq, node list and weight for interp at calls
         interp.find_hori_cell(grid,fields, xq,info['current_buffer_steps'],info['fractional_time_steps'],self.info['open_boundary_type'], active)
 
-        if si.is3D_run:
+        if info['is3D']:
             interp.find_vertical_cell(grid,fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
 
         if fix_bad:
@@ -281,20 +281,20 @@ class FieldGroupManager(ParameterBaseClass):
 
     def _setup_hydro_reader(self,reader_builder):
         si = self.shared_info
-
+        info = self.info
         self.reader  = si.class_importer.new_make_class_instance_from_params(reader_builder['params'],'reader',  crumbs=f'field Group Manager>setup_hydro_fields> reader class  ')
 
         reader = self.reader
         reader.initial_setup(reader_builder['file_info'])
         # give acces to reader info
-        self.info['file_info']= reader.info['file_info']
-        self.info['buffer_info']= reader.info['buffer_info']
+        info['file_info']= reader.info['file_info']
+        info['buffer_info']= reader.info['buffer_info']
 
         nc = reader.open_first_file()
         #reader.info['variables'] = nc.variable_info  # note all variable names
         #self.info['variables'] = nc.variable_info # note all variable names
 
-        self.grid, si.is3D_run   = reader.set_up_grid(nc)
+        self.grid, self.info['is3D'] = reader.set_up_grid(nc)
         grid = self.grid
         si.hydro_model_cords_in_lat_long = grid['hydro_model_cords_in_lat_long']
 
@@ -304,7 +304,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         # setup request to load compulsory fields
         reader.params['load_fields'] = list(set(['water_velocity'] + reader.params['load_fields']))
-        if si.is3D_run:
+        if info['is3D']:
             # request load of water depth and tide fields which are required  in 3D
             reader.params['load_fields'] = list(set(['tide', 'water_depth'] + reader.params['load_fields']))
         else:
@@ -343,7 +343,7 @@ class FieldGroupManager(ParameterBaseClass):
                             default_classID='dispersion_random_walk', initialise=True)
 
         # add resuspension based on friction velocity
-        if si.is3D_run:
+        if info['is3D']:
             # add friction velocity from bottom stress or near seabed vel
             self._setup_resupension_params(nc)
             si.add_core_class('resuspension', si.working_params['core_classes']['resuspension'],
@@ -362,7 +362,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         info['has_A_Z_profile'] = False
 
-        if not si.is3D_run:
+        if not info['is3D']:
             si.settings['use_A_Z_profile'] = False
             return
 

@@ -203,13 +203,6 @@ def get_BC_transform_matrix(points, simplices):
 
     return Tinvs
 
-#@njitOT
-#def _eval_water_depth_kernel(water_depth, bc_cords,nodes):
- #   z_bot = 0.
- #   for m in range(3):
- #       z_bot -= bc_cords[m] * water_depth[nodes[m]]
- #   return z_bot
-
 @njit()
 def interp2D_kernal_time_independent(data,bc):
     # eval interp from values at triangle nodes
