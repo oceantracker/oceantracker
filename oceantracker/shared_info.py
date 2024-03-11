@@ -138,9 +138,9 @@ class SharedInfoClass(object):
         out = np.asarray([float(x[1]-x[0]),float(y[1]-y[0])] )
         return out
 
-    def add_scheduler_to_class(self, param_class_instance, start=None, end=None,duration=None,
-                       interval =None, times=None,
-                       caller=None, crumbs=''):
+    def add_scheduler_to_class(self, name_scheduler, param_class_instance, start=None, end=None, duration=None,
+                               interval =None, times=None,
+                               caller=None, crumbs=''):
         ''' Add a scheduler opject to given param_class_instance, with boolean task_flag attribute for each time step,
             which is true if  task is to be carried out.
             Rounds times interval and times to nearest time step'''
@@ -149,10 +149,20 @@ class SharedInfoClass(object):
         if s.interval_rounded_to_time_step:
             self.msg_logger.msg('Making scheduler: update interval rounded to be integer number of time steps',
                                 hint=f'{interval:.0f} sec. rounded to model time step = {s.info["interval"]:.0f} sec.',
-                                caller=param_class_instance, warning=True)
+                                caller=param_class_instance, warning=True, crumbs= crumbs+' adding scheduler' )
         # add to the class
-        param_class_instance.scheduler = s
-        param_class_instance.info.update(s.info) # add schedule info to class
+        setattr(param_class_instance, name_scheduler, s)
+        # add info about scheduler to in
+        if not hasattr(param_class_instance,'scheduler_info'): setattr(param_class_instance,'scheduler_info',dict())
+        param_class_instance.scheduler_info[name_scheduler] = s.info
         return s
+
+    def get_regular_events_within_hindcast(self, interval, start=None, end=None, duration=None,
+                           crumbs='',caller=None):
+      # wrapper to give regular event times within hindcastend
+
+      d = time_util.get_regular_events_within_hindcast(self.hindcast_info, self.run_info,self.msg_logger, interval,
+                            start=start,end=end,crumbs=crumbs,caller=caller)
+      return d
 
 

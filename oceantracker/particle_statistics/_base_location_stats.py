@@ -21,7 +21,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                                                units='sec'),
                                   'count_start_date': PVC(None, 'iso8601date',doc_str= 'Start particle counting from this iso date-time'),
                                   'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this iso date-time'),
-                                  'role_output_file_tag' :           PVC('stats_base',str),
+                                  'role_output_file_tag' :           PVC('stats_base',str,doc_str='tag on output file for this class'),
                                   'write':                      PVC(True,bool,doc_str='Write statistcs to disk'),
                                   'status_min': PVC('stationary', [str], possible_values=particle_info['status_keys_list'],
                                                                  doc_str=' Count only those particles with status >= to this value'),

@@ -86,8 +86,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # run info
         si.run_info = dict(time_step = si.settings['time_step'],
-                              backtracking=si.settings['backtracking'])
+                        backtracking=si.settings['backtracking'],
+                        model_direction= -1 if si.settings['backtracking'] else 1)
         ri = si.run_info
+        #useful short cuts
+        si.particle_properties = si.classes['particle_properties']
+        si.release_groups = si.classes['release_groups']
 
         # case set up
         try:
@@ -125,8 +129,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
 
             # for some reason these shortcuts must be done after set up, or they remeber values from before setup????
-            si.particle_properties = si.classes['particle_properties']
-            si.release_groups = si.classes['release_groups']
+
 
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
@@ -293,16 +296,24 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set model run start/end time allowing for back tracking
         ri['start_time'] = np.min(md * np.asarray(first_time)) * md
         ri['end_time']   = np.max(md * np.asarray(last_time)) * md
+        # clip end time to be within hincast
+        if si.backtracking:
+            ri['end_time'] = max(ri['end_time'],si.hindcast_info['start_time'])
+        else:
+            ri['end_time'] = min(ri['end_time'], si.hindcast_info['end_time'])
+
+        # make release times array
         ri['times']    = np.arange(ri['start_time'], ri['end_time'], ri['time_step'] * md)
         ri['end_time'] = ri['times'][-1] # adjust end to nearest time step
 
         # setup scheduler for each release group, how start and model times known
         #   this will round start times and release interval to be integer number of model time steps after the start
         for name, rg in si.classes['release_groups'].items():
-              si.add_scheduler_to_class(rg, start= rg.params['release_start_date'], # set above from start date
-                              interval= rg.params['release_interval'],
-                              end     = rg.params['release_end_date'],
-                              duration= rg.params['release_duration'], caller=rg)
+              si.add_scheduler_to_class('release_scheduler',rg,
+                                start= rg.params['release_start_date'], # set above from start date
+                                interval= rg.params['release_interval'],
+                                end     = rg.params['release_end_date'],
+                                duration= rg.params['release_duration'], caller=rg)
 
         if len(si.classes['release_groups']) == 0:
             # guard against there being no release groups
@@ -449,11 +460,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 for key2, i2 in i.items():
                     d['class_roles_info'][key][key2]= i2.info
                     d['output_files'][key][key2]= i2.info['output_file'] if 'output_file' in i2.info else None
-
+                    if hasattr(i2,'scheduler_info'):
+                        d['class_roles_info'][key][key2]['scheduler_info'] = i2.scheduler_info
             else:
                 d['class_roles_info'][key] = i.info
                 d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
-
+                if hasattr(i, 'scheduler_info'):
+                    d['class_roles_info'][key]['scheduler_info'] = i.scheduler_info
         # add basic release group info
         #do do
         for key, item in si.classes['release_groups'].items():

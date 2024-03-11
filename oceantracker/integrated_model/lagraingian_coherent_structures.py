@@ -1,12 +1,14 @@
 import numpy as np
-
+from os import path
+from oceantracker.util.numba_util import njitOT
+from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.integrated_model._base_model import  _BaseModel
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from oceantracker.util import time_util
 class LagarangianCoherentStructures(_BaseModel):
     # random polygon release in 2D or 3D
-
+    #todo make work with lat lng
     def __init__(self):
         # set up info/attributes
         super().__init__()
@@ -23,6 +25,8 @@ class LagarangianCoherentStructures(_BaseModel):
             'grid_span': PCC(None, one_or_more_points=True, is3D=False, doc_str='(width, height)  of the grid release', units='meters or decimal degrees'),
             'z_min': PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
             'z_max': PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
+            'output_file_tag': PVC('LCS', str, doc_str='tag on output file'),
+            'write_intermediate_results': PVC(False, bool, doc_str='write intermediate arrays, x_lag, strain_matrix. Useful for checking results'),
 
         })
 
@@ -44,58 +48,127 @@ class LagarangianCoherentStructures(_BaseModel):
                               grid_size=params['grid_size'],
                               release_interval=0.  )
         # get time for releases
-        a = time_util.get_regular_events(
-            hi, si.backtracking, params['update_interval'],
-            si.msg_logger, self,
-            start=params['start_date'],
-            end=params['end_date'],
-            crumbs='LCS: ')
+        a = si.get_regular_events_within_hindcast(params['update_interval'], caller=self,
+                    start=params['start_date'],end=params['end_date'],crumbs='LCS add_settings_and_class_params : ')
         info.update(a)
-        for nt in range(info['times'].size):
-            for n_grid, (center, span) in enumerate(zip(params['grid_center'], params['grid_span'])):
-                release_params['coords_ll_ur'] = center + np.asarray([[-span[0] / 2, -span[1] / 2],
-                                                                      [span[0] / 2, span[1] / 2]])
+        for n_grid, (center, span) in enumerate(zip(params['grid_center'], params['grid_span'])):
+            release_params['grid_center'] = center
+            release_params['grid_span'] = span
+            for nt in range(info['times'].size):
                 release_params['release_start_date'] = time_util.seconds_to_isostr(info['times'][nt])
                 release_params['max_age'] = params['lags'][-1]  # run each to largest lag
+                release_params['user_instance_info'] = n_grid # tag with grid and lag number
                 # add param dict as keyword arguments
+
                 self.add_class('release_groups', name= f'LCS_grid{n_grid:03d}_time_step{nt:04d}', **release_params )
                 pass
 
-
     def initial_setup(self):
         si = self.shared_info
-        ml = si.msg_logger
         params = self.params
-        info = self.info
 
+        if si. hydro_model_cords_in_lat_long:
+            si.msg_logger.msg(' to do LCS not yet working for hydro models ',fatal_error=True, exit_now=True)
 
         if params['lags'] is None: params['lags']  = [24*3600.]
+        params['lags'] = np.asarray(params['lags']) # easier as an array
+        r, c = params['grid_size']
 
-        return
+        # grid release builds
+        # set up space to hold release grids
+        self.x_release_grids = np.full((params['grid_center'].shape[0], r, c, 2), np.nan, dtype=np.float64)
 
-        # todo move to sheduler ? -- round interval and lags to model time step
-        params['update_interval'] = si.round_interval_to_model_time_step(params['update_interval'],caller=self, crumbs='update_interval param> ')
-        params['lags'] = si.round_times_to_model_times(params['lags'], lags=True, caller=self, crumbs='lags param> ')
-
-        # add a
+        # add lag schedular
         for name, rg in si.classes['release_groups'].items():
-            t = rg.info['release_info']['times'][0] +  params['lags']  # time of lags after start of release group
-            si.add_scheduler_to_class(rg, times= t,  caller=self, crumbs='Adding lagged calculation times')
+            # time of lags after start of release group
+            t = rg.release_scheduler.info['start_time'] +  params['lags']
+            si.add_scheduler_to_class('LCScalculation_scheduler', rg, times= t,  caller=self, crumbs='Adding LCS calculation scheduler ')
+            rg.info['next_lag_to_calculate'] = 0 # counter for the lag to work on
+            # for first lag record the grid into an array user_instance_info is ( ngrid, n_lag)
+            if rg.params['user_instance_info'] == 0:
+                self.x_release_grids[rg.params['user_instance_info'], ...] = rg.info['x_grid']
 
-        pass
+        # add working space arrays for LCS
+
+        self.x_at_lag= np.full((r,c,2), np.nan, dtype=np.float64) # locations grid aftr lag time
+
+        self._open_output_file()
 
     def update(self, n_time_step, time_sec):
         si = self.shared_info
-
+        params = self.params
+        part_prop = si.particle_properties
+        # do LSC calculation on schedule
         for n, rg in enumerate(si.release_groups.values()):
-  #          if rg.calculation_scheduler.task[n_time_step]:
-   #             pass # cal LSC
-            pass
+            if (rg.LCScalculation_scheduler.do_task(n_time_step)
+                    and rg.info['next_lag_to_calculate'] < params['lags'].shape[0]):
+                # find particles in this release group with lag to do calculations
+                sel = part_prop['IDrelease_group'].compare_all_to_a_value('eq', rg.info['IDrelease_group'], out=self.get_partID_buffer('ID1'))
+                n_grid = rg.params['user_instance_info']
+                self._calculate_LCS(rg, n_grid, rg.info['next_lag_to_calculate'],  sel)
+                #print('xx',n, n_grid,rg.info['next_lag_to_calculate'],rg.LCScalculation_scheduler.task_flag.sum())
+                rg.info['next_lag_to_calculate'] += 1
+                pass
         pass
 
-    def _calculate_LCS(self,n):
-        # for nth release
-        pass
+    def _calculate_LCS(self,rg,  n_grid, n_lag, sel):
+        si = self.shared_info
+        params = self.params
+        nc = self.nc
+        part_prop = si.particle_properties
+
+        # make grid of current locations
+        self.x_at_lag.fill(np.nan)
+        self._get_locations_at_lag(part_prop['x'].data,
+                                   part_prop['grid_release_row_col'].data,
+                                    self.x_at_lag, sel)
+        # get strain tensor
+
+        # get larges largest eigen value
+
+        # write LCS
+        #print('xx',self.nWrites, n_grid, n_lag)
+        # tidy up
+        if params['write_intermediate_results']:
+            nc.file_handle.variables['x_at_lag'][self.nWrites, n_grid, n_lag,...] = self.x_at_lag
+
+        self.nWrites += 1
+    def _open_output_file(self):
+        si = self.shared_info
+        params = self.params
+        self.info['output_file'] = si.output_file_base + '_' + self.params['output_file_tag'] + '.nc'
+        self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
+        nc = self. nc
+
+        nc.add_dimension('time_dim', None) # open time dim
+        nc.add_dimension('lag_dim', params['lags'].size)
+        nc.add_dimension('release_grid_rows', self.x_at_lag.shape[0])
+        nc.add_dimension('release_grid_cols', self.x_at_lag.shape[1])
+        nc.add_dimension('grid_dim',  params['grid_center'].shape[0])
+        nc.add_dimension('vector2D', 2)
+
+        # write release group
+        nc.write_a_new_variable('x_release_grid', self.x_release_grids,
+                                ['grid_dim', 'release_grid_rows', 'release_grid_cols','vector2D'],
+                             description='x,y locations of grid release',
+                             attributes=dict(units='meters or longitude deg.'))
+
+        if params['write_intermediate_results']:
+            nc.create_a_variable('x_at_lag',['time_dim','grid_dim', 'lag_dim','release_grid_rows','release_grid_cols','vector2D'],
+                             self.x_at_lag.dtype, description='x,y locations of particles at given lags', fill_value=np.nan,
+                             attributes=dict(units='meters or longitude deg.') )
+        self.nWrites = 0 # time steps written
+    @staticmethod
+    @njitOT
+    def _get_locations_at_lag(x, row_col_part_prop, x_at_lag, sel):
+        # insert current location into original grid
+        # loop over particles in this release group
+        #todo only for moving particles?
+        for n in sel:
+            r, c = row_col_part_prop[n] # row and column at release
+            for m in range(2):
+                x_at_lag[r, c, m ] = x[n,m]
 
 
-
+    def close(self):
+        self.nc.close()

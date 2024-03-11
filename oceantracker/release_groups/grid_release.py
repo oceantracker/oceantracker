@@ -7,10 +7,9 @@ class GridRelease(_BaseReleaseGroup):
         # set up info/attributes
         super().__init__()
         self.add_default_params(dict(
-                coords_ll_ur=PCC(None, is_required=True, is3D=False,
-                            units='Meters, unless hydro-model coords are geographic then points must be given in  (lon, lat) order in decimal degrees.',
-                            doc_str='Coordinates of lower left and upper right of grid release,, ie [[x_ll,y_ll],[x_ur,y_ur]]'),
-              grid_size= PLC([100, 99], [int], fixed_len=2,
+            grid_center= PCC(None, single_cord=True, is_required=True, is3D=False, doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
+            grid_span= PCC(None, single_cord=True,is_required=True, is3D=False, doc_str='(width, height)  of the grid release', units='meters or decimal degrees'),
+            grid_size= PLC([100, 99], [int], fixed_len=2,
                              min =1,max=10**6,
                              doc_str='number of rows and columns in grid'),
                 ))
@@ -25,16 +24,18 @@ class GridRelease(_BaseReleaseGroup):
         info = self.info
 
         # setup grid
-        x = np.linspace(params['coords_ll_ur'][0,0], params['coords_ll_ur'][1,0], params['grid_size'][1])
-        y = np.linspace(params['coords_ll_ur'][0,1], params['coords_ll_ur'][1,1], params['grid_size'][0])
-        xi,yi = np.meshgrid(x,y)
+        gs =params['grid_span'] / 2.
+        x = params['grid_center'][0] + np.linspace(-gs[0], gs[0], params['grid_size'][1]).reshape(-1, 1)
+        y = params['grid_center'][1] + np.linspace(-gs[1], gs[1], params['grid_size'][0]).reshape(-1, 1)
+
+        xi, yi = np.meshgrid(x,y)
         info['x_grid'] = np.stack((xi,yi),axis=2)
 
         # add points param for othe parts of code
         self.points = np.stack((xi.ravel(),yi.ravel()),axis=1)
 
         # build global grid index
-        ri, ci = np.meshgrid(range(y.size),  range(x.size))
+        ci, ri = np.meshgrid(range(x.size),range(y.size))
         info['map_grid_index_to_row_column'] = np.stack((ri.ravel(), ci.ravel()),axis=1)
 
         # add particle prop fort row column only if nor already added by another grid release

@@ -57,6 +57,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info = self.info
         # add release IDs as full arrays
         n = release_part_prop['x'].shape[0]
+        info['IDrelease_group'] = info['instanceID']
         release_part_prop['IDrelease_group'] = np.full((n,), info['instanceID'], dtype=np.int32)
         release_part_prop['IDpulse'] = np.full((n,), info['pulseID'], dtype=np.int32)
         release_part_prop['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)

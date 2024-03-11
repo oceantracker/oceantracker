@@ -14,7 +14,7 @@ class Scheduler(object):
         self.times_rounded_to_time_step =  False
         self.start_time_outside_hydro_model_times = False
 
-        interval= abs(interval) # ensure positive
+
 
         # deal with None and isodates
         if start is None: start = run_info['start_time']
@@ -30,11 +30,11 @@ class Scheduler(object):
             # use times given
             # check if at model time steps
             n = (times - run_info['start_time'])/run_info['time_step']
-            times_rounded = run_info['start_time'] + round(n) * run_info['time_step']
+            times_rounded = run_info['start_time'] + np.round(n) * run_info['time_step']
 
             if np.any(np.abs(times-times_rounded)/dt > tol * dt):
                 self.times_rounded_to_time_step = True
-            self.task_times = times_rounded
+            self.scheduled_times = times_rounded
         else:
             # make from start time and interval
             if start is None: start = run_info['start_time'] # start ast model sart
@@ -48,8 +48,8 @@ class Scheduler(object):
 
             if not ( hindcast_info['start_time'] <= start  <= hindcast_info['end_time']):
                 self.start_time_outside_hydro_model_times = True
-
             # round interval
+            interval = abs(interval)  # ensure positive
             rounded_interval = round(interval/dt)*dt
             if abs(interval-rounded_interval)/dt > tol:
                 self.interval_rounded_to_time_step = True
@@ -65,27 +65,36 @@ class Scheduler(object):
             if interval < .1*dt:
                 # if interval is zero
                 interval = 0.
-                self.task_times= np.asarray([start])
+                self.scheduled_times= np.asarray([start])
             else:
                 interval = max(interval, dt)
-                self.task_times = start + np.arange(0,abs(duration),interval)
+                self.scheduled_times = start + np.arange(0, abs(duration), interval)
 
         # make a task flag for each time step of the model run
         self.task_flag = np.full_like(run_info['times'],False, dtype=bool)
-        nt_task = ((self.task_times-run_info['start_time'])/run_info['time_step']).astype(np.int32)
+        nt_task = ((self.scheduled_times - run_info['start_time']) / run_info['time_step']).astype(np.int32)
 
         # now clip times to be within model start and end of run
         sel = np.logical_and(nt_task >= 0, nt_task < self.task_flag.size)
         self.task_flag[nt_task[sel]] = True
 
+        # flag times steps scheduler is active, ie start to end
+        self.active_flag = np.full_like(run_info['times'], False, dtype=bool)
+        self.active_flag[nt_task[0]:nt_task[-1]+1] = True
+
         # record info
-        self.info= dict(start=self.task_times[0], interval=interval, end=self.task_times[-1],
-                        start_date=time_util.seconds_to_isostr(self.task_times[0]),
-                        end_date=time_util.seconds_to_isostr(self.task_times[-1]),
-                        scheduled_times = self.task_times,
+        self.info= dict(start_time=self.scheduled_times[0], interval=interval, end_time=self.scheduled_times[-1],
+                        start_date=time_util.seconds_to_isostr(self.scheduled_times[0]),
+                        end_date=time_util.seconds_to_isostr(self.scheduled_times[-1]),
+                        number_scheduled_times = self.scheduled_times.size,
                         )
+
         pass
 
     def do_task(self, n_time_step):
         # check if task flag is set
         return self.task_flag[n_time_step]
+
+    def is_active(self, n_time_step):
+        # check if task is between start and end from active_flag is set
+        return self.active_flag[n_time_step]
