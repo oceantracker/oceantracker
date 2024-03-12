@@ -88,9 +88,9 @@ class LagarangianCoherentStructures(_BaseModel):
             if rg.params['user_instance_info'] == 0:
                 self.x_release_grids[rg.params['user_instance_info'], ...] = rg.info['x_grid']
 
-        # add working space arrays for LCS
-
+        # add working space arrays
         self.x_at_lag= np.full((r,c,2), np.nan, dtype=np.float64) # locations grid aftr lag time
+        self.LCS = np.full((r-1, c-1), np.nan, dtype=np.float64)
 
         self._open_output_file()
 
@@ -105,13 +105,13 @@ class LagarangianCoherentStructures(_BaseModel):
                 # find particles in this release group with lag to do calculations
                 sel = part_prop['IDrelease_group'].compare_all_to_a_value('eq', rg.info['IDrelease_group'], out=self.get_partID_buffer('ID1'))
                 n_grid = rg.params['user_instance_info']
-                self._calculate_LCS(rg, n_grid, rg.info['next_lag_to_calculate'],  sel)
+                self._calculate_LCS(n_grid, rg.info['next_lag_to_calculate'],  sel)
                 #print('xx',n, n_grid,rg.info['next_lag_to_calculate'],rg.LCScalculation_scheduler.task_flag.sum())
                 rg.info['next_lag_to_calculate'] += 1
                 pass
         pass
 
-    def _calculate_LCS(self,rg,  n_grid, n_lag, sel):
+    def _calculate_LCS(self, n_grid, n_lag, sel):
         si = self.shared_info
         params = self.params
         nc = self.nc
@@ -122,13 +122,12 @@ class LagarangianCoherentStructures(_BaseModel):
         self._get_locations_at_lag(part_prop['x'].data,
                                    part_prop['grid_release_row_col'].data,
                                     self.x_at_lag, sel)
-        # get strain tensor
+        # get LSC
+        self.LCS.fill(np.nan)
+        self._calc_LCS(self.x_release_grids[n_grid, :, :], self.x_at_lag, self.LCS)
 
-        # get larges largest eigen value
+        nc.file_handle.variables['LCS'][self.nWrites, n_grid, n_lag, ...] = self.LCS
 
-        # write LCS
-        #print('xx',self.nWrites, n_grid, n_lag)
-        # tidy up
         if params['write_intermediate_results']:
             nc.file_handle.variables['x_at_lag'][self.nWrites, n_grid, n_lag,...] = self.x_at_lag
 
@@ -146,13 +145,17 @@ class LagarangianCoherentStructures(_BaseModel):
         nc.add_dimension('release_grid_cols', self.x_at_lag.shape[1])
         nc.add_dimension('grid_dim',  params['grid_center'].shape[0])
         nc.add_dimension('vector2D', 2)
+        nc.add_dimension('rows', self.LCS.shape[0])
+        nc.add_dimension('cols', self.LCS.shape[1])
 
         # write release group
         nc.write_a_new_variable('x_release_grid', self.x_release_grids,
                                 ['grid_dim', 'release_grid_rows', 'release_grid_cols','vector2D'],
                              description='x,y locations of grid release',
                              attributes=dict(units='meters or longitude deg.'))
-
+        nc.create_a_variable('LCS', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols'],
+                             self.x_at_lag.dtype, description=' Largest eign values of 2D strain matrix', fill_value=np.nan,
+                             attributes=dict(units='dimensionless'))
         if params['write_intermediate_results']:
             nc.create_a_variable('x_at_lag',['time_dim','grid_dim', 'lag_dim','release_grid_rows','release_grid_cols','vector2D'],
                              self.x_at_lag.dtype, description='x,y locations of particles at given lags', fill_value=np.nan,
@@ -169,6 +172,38 @@ class LagarangianCoherentStructures(_BaseModel):
             for m in range(2):
                 x_at_lag[r, c, m ] = x[n,m]
 
+    @staticmethod
+    @njitOT
+    def _calc_LCS(x_release_grid, x_at_lag, LCS):
+        #  find strain marix foy each grid point at the center of the release grid cells
+        #  LSC is largest eigen value of this matrix
+        strain_matrix =  np.full((2,2,),0.,dtype=np.float64)
+        # initial  equal separations
+        dx0=  x_release_grid[0, 1, 0] - x_release_grid[0, 0, 0]
+        dy0 = x_release_grid[1, 0, 1] - x_release_grid[0, 0, 1]
+
+        for r in range(x_release_grid.shape[0] - 1):
+            for c in range(x_release_grid.shape[1] - 1):
+                for n in range(2):
+                    # x strain in each component
+                    strain_matrix[0, n]  = 0.5 * (x_at_lag[r, c+1, n] + x_at_lag[r+1, c+1, n])
+                    strain_matrix[0, n] -= 0.5 * (x_at_lag[r, c  , n] + x_at_lag[r+1, c  , n])
+                    strain_matrix[0, n] /= dx0  # divide by initial separation
+                    # y strain in each component
+                    strain_matrix[1, n]  = 0.5 * (x_at_lag[r+1, c, n] + x_at_lag[r+1, c+1, n])
+                    strain_matrix[1, n] -= 0.5 * (x_at_lag[r  , c, n] + x_at_lag[r  , c+1, n])
+                    strain_matrix[1, n] /= dy0 # divide by initial separation
+
+                # Trace and Determinant of matrix
+                T = strain_matrix[0, 0] + strain_matrix[1, 1]
+                D = strain_matrix[0, 0] * strain_matrix[1, 1] - strain_matrix[0, 1] * strain_matrix[0, 1]
+
+                # get Eigen values as  get solutions to a quadratic eq.
+                radical = np.sqrt(T ** 2 - 4.0 * D)
+                e1 = 0.5 * (T - radical)
+                e2 = 0.5 * (T + radical)
+                LCS[r, c] = e1 if abs(e1) >= abs(e2) else e2
+        pass
 
     def close(self):
         self.nc.close()
