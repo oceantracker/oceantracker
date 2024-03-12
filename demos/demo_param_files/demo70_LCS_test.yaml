@@ -8,14 +8,14 @@ integrated_model:
   - 1595500
   - 5485000
   grid_size:
-  - 20
-  - 30
+  - 40
+  - 50
   grid_span:
   - 8000
-  - 6000
+  - 10000
   lags:
-  - 3600
   - 10800
+  - 21600
   update_interval: 705
   write_intermediate_results: true
 numba_cache_code: false
