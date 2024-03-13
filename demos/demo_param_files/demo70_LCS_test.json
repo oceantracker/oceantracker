@@ -76,8 +76,8 @@
     "integrated_model": {
         "class_name": "LagarangianCoherentStructures",
         "grid_size": [
-            40,
-            50
+            45,
+            60
         ],
         "write_intermediate_results": true,
         "grid_span": [
@@ -90,9 +90,9 @@
         ],
         "update_interval": 705,
         "lags": [
-            10800,
-            21600
-        ]
+            18000
+        ],
+        "floating": true
     },
     "root_output_dir": "output"
 }

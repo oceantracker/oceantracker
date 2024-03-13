@@ -23,6 +23,7 @@ class LagarangianCoherentStructures(_BaseModel):
                                             doc_str='number of rows and columns in grid'),
             'grid_center': PCC(None, one_or_more_points=True, is3D=False, doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
             'grid_span': PCC(None, one_or_more_points=True, is3D=False, doc_str='(width, height)  of the grid release', units='meters or decimal degrees'),
+            'floating': PVC(True, bool, doc_str='Particles will float at free surface if a 3D model'),
             'z_min': PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
             'z_max': PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
             'output_file_tag': PVC('LCS', str, doc_str='tag on output file'),
@@ -37,8 +38,9 @@ class LagarangianCoherentStructures(_BaseModel):
         hi = si.hindcast_info
         params = self.params
 
-        # turn off dispersion
-        self.settings(include_dispersion=False)
+
+        self.settings(include_dispersion=False)  # turn off dispersion
+
 
         # make a grid release group at each time interval and grid
         self.clear_class_role('release_groups') # cannot use with other releases
@@ -46,7 +48,17 @@ class LagarangianCoherentStructures(_BaseModel):
         release_params = dict(class_name='oceantracker.release_groups.grid_release.GridRelease',
                               pulse_size=1, z_min=params['z_min'], z_max=params['z_max'],
                               grid_size=params['grid_size'],
+                              max_age = params['lags'][-1],  # run each to largest lag
                               release_interval=0.  )
+        # if 3D sort out depth range and always resuspend
+        if si.is3D_run:
+            self.add_class('resuspension', critical_friction_velocity=0.0)  # always resuspend
+            if params['floating']:
+                self.add_class('trajectory_modifiers',
+                               name='floater',class_name='SurfaceFloat')
+            else:
+                si.msg_logger.msg('LCS not yet working for non-floating particles',
+                                  fatal_error=True, exit_now=True,caller=self)
         # get time for releases
         a = si.get_regular_events_within_hindcast(params['update_interval'], caller=self,
                     start=params['start_date'],end=params['end_date'],crumbs='LCS add_settings_and_class_params : ')
@@ -56,7 +68,6 @@ class LagarangianCoherentStructures(_BaseModel):
             release_params['grid_span'] = span
             for nt in range(info['times'].size):
                 release_params['release_start_date'] = time_util.seconds_to_isostr(info['times'][nt])
-                release_params['max_age'] = params['lags'][-1]  # run each to largest lag
                 release_params['user_instance_info'] = n_grid # tag with grid and lag number
                 # add param dict as keyword arguments
 
@@ -81,7 +92,7 @@ class LagarangianCoherentStructures(_BaseModel):
         # add lag schedular
         for name, rg in si.classes['release_groups'].items():
             # time of lags after start of release group
-            t = rg.release_scheduler.info['start_time'] +  params['lags']
+            t = rg.release_scheduler.info['start_time'] + params['lags']
             si.add_scheduler_to_class('LCScalculation_scheduler', rg, times= t,  caller=self, crumbs='Adding LCS calculation scheduler ')
             rg.info['next_lag_to_calculate'] = 0 # counter for the lag to work on
             # for first lag record the grid into an array user_instance_info is ( ngrid, n_lag)
@@ -89,6 +100,7 @@ class LagarangianCoherentStructures(_BaseModel):
                 self.x_release_grids[rg.params['user_instance_info'], ...] = rg.info['x_grid']
 
         # add working space arrays
+        n_lags = params['lags'].size
         self.x_at_lag= np.full((r,c,2), np.nan, dtype=np.float64) # locations grid aftr lag time
         self.LCS = np.full((r-1, c-1), np.nan, dtype=np.float64)
 
@@ -96,22 +108,23 @@ class LagarangianCoherentStructures(_BaseModel):
 
     def update(self, n_time_step, time_sec):
         si = self.shared_info
-        params = self.params
         part_prop = si.particle_properties
+
         # do LSC calculation on schedule
         for n, rg in enumerate(si.release_groups.values()):
-            if (rg.LCScalculation_scheduler.do_task(n_time_step)
-                    and rg.info['next_lag_to_calculate'] < params['lags'].shape[0]):
-                # find particles in this release group with lag to do calculations
+             if rg.LCScalculation_scheduler.do_task(n_time_step):
+                # find particles in this release group to do calculations at this lag
                 sel = part_prop['IDrelease_group'].compare_all_to_a_value('eq', rg.info['IDrelease_group'], out=self.get_partID_buffer('ID1'))
+
                 n_grid = rg.params['user_instance_info']
-                self._calculate_LCS(n_grid, rg.info['next_lag_to_calculate'],  sel)
-                #print('xx',n, n_grid,rg.info['next_lag_to_calculate'],rg.LCScalculation_scheduler.task_flag.sum())
+
+                self._calculate_LCS(time_sec, n_grid, rg.info['next_lag_to_calculate'],  sel)
+
                 rg.info['next_lag_to_calculate'] += 1
                 pass
         pass
 
-    def _calculate_LCS(self, n_grid, n_lag, sel):
+    def _calculate_LCS(self,time_sec, n_grid, n_lag, sel):
         si = self.shared_info
         params = self.params
         nc = self.nc
@@ -122,6 +135,10 @@ class LagarangianCoherentStructures(_BaseModel):
         self._get_locations_at_lag(part_prop['x'].data,
                                    part_prop['grid_release_row_col'].data,
                                     self.x_at_lag, sel)
+        if np.all(np.isnan( self.x_at_lag)):
+            pass
+        #self.x_at_lag = self.x_at_lag - self.x_release_grids[n_grid, ...]  # converts x's into displacements
+
         # get LSC
         self.LCS.fill(np.nan)
         self._calc_LCS(self.x_release_grids[n_grid, :, :], self.x_at_lag, self.LCS)
@@ -129,9 +146,14 @@ class LagarangianCoherentStructures(_BaseModel):
         nc.file_handle.variables['LCS'][self.nWrites, n_grid, n_lag, ...] = self.LCS
 
         if params['write_intermediate_results']:
-            nc.file_handle.variables['x_at_lag'][self.nWrites, n_grid, n_lag,...] = self.x_at_lag
+            nc.file_handle.variables['x_at_lag'][self.nWrites, n_grid, n_lag, ...] = self.x_at_lag[:]
 
+        nc.file_handle.variables['time'][self.nWrites, n_grid] = time_sec
+
+        # only move to next time step
         self.nWrites += 1
+        pass
+
     def _open_output_file(self):
         si = self.shared_info
         params = self.params
@@ -153,13 +175,19 @@ class LagarangianCoherentStructures(_BaseModel):
                                 ['grid_dim', 'release_grid_rows', 'release_grid_cols','vector2D'],
                              description='x,y locations of grid release',
                              attributes=dict(units='meters or longitude deg.'))
+
+        nc.create_a_variable('time', ['time_dim', 'grid_dim'],
+                             self.x_at_lag.dtype, description='Time LSC calculated', fill_value=np.nan,
+                             attributes=dict(units='sec since 1/1/1970'))
+
         nc.create_a_variable('LCS', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols'],
-                             self.x_at_lag.dtype, description=' Largest eign values of 2D strain matrix', fill_value=np.nan,
+                             self.x_at_lag.dtype, description=' Largest Eigen value of 2D strain matrix', fill_value=np.nan,
                              attributes=dict(units='dimensionless'))
+        # optional output
         if params['write_intermediate_results']:
             nc.create_a_variable('x_at_lag',['time_dim','grid_dim', 'lag_dim','release_grid_rows','release_grid_cols','vector2D'],
                              self.x_at_lag.dtype, description='x,y locations of particles at given lags', fill_value=np.nan,
-                             attributes=dict(units='meters or longitude deg.') )
+                             attributes=dict(units='meters or (lon, lat)  deg.') )
         self.nWrites = 0 # time steps written
     @staticmethod
     @njitOT
@@ -177,7 +205,9 @@ class LagarangianCoherentStructures(_BaseModel):
     def _calc_LCS(x_release_grid, x_at_lag, LCS):
         #  find strain marix foy each grid point at the center of the release grid cells
         #  LSC is largest eigen value of this matrix
-        strain_matrix =  np.full((2,2,),0.,dtype=np.float64)
+        F_deformation_matrix =  np.full((2,2,),0.,dtype=np.float64)
+        C_strain_tensor = np.full((2, 2,), 0., dtype=np.float64)
+
         # initial  equal separations
         dx0=  x_release_grid[0, 1, 0] - x_release_grid[0, 0, 0]
         dy0 = x_release_grid[1, 0, 1] - x_release_grid[0, 0, 1]
@@ -186,17 +216,21 @@ class LagarangianCoherentStructures(_BaseModel):
             for c in range(x_release_grid.shape[1] - 1):
                 for n in range(2):
                     # x strain in each component
-                    strain_matrix[0, n]  = 0.5 * (x_at_lag[r, c+1, n] + x_at_lag[r+1, c+1, n])
-                    strain_matrix[0, n] -= 0.5 * (x_at_lag[r, c  , n] + x_at_lag[r+1, c  , n])
-                    strain_matrix[0, n] /= dx0  # divide by initial separation
+                    F_deformation_matrix[0, n]  = 0.5 * (x_at_lag[r, c+1, n] + x_at_lag[r+1, c+1, n])
+                    F_deformation_matrix[0, n] -= 0.5 * (x_at_lag[r, c  , n] + x_at_lag[r+1, c  , n])
+                    F_deformation_matrix[0, n] /= dx0  # divide by initial separation
                     # y strain in each component
-                    strain_matrix[1, n]  = 0.5 * (x_at_lag[r+1, c, n] + x_at_lag[r+1, c+1, n])
-                    strain_matrix[1, n] -= 0.5 * (x_at_lag[r  , c, n] + x_at_lag[r  , c+1, n])
-                    strain_matrix[1, n] /= dy0 # divide by initial separation
+                    F_deformation_matrix[1, n]  = 0.5 * (x_at_lag[r+1, c, n] + x_at_lag[r+1, c+1, n])
+                    F_deformation_matrix[1, n] -= 0.5 * (x_at_lag[r  , c, n] + x_at_lag[r  , c+1, n])
+                    F_deformation_matrix[1, n] /= dy0 # divide by initial separation
+
+                # C_strain_tensor= F_deformation_matrix.T*F_deformation_matrix
+                #todo faster in for loops?
+                C_strain_tensor[:] = F_deformation_matrix.T * F_deformation_matrix
 
                 # Trace and Determinant of matrix
-                T = strain_matrix[0, 0] + strain_matrix[1, 1]
-                D = strain_matrix[0, 0] * strain_matrix[1, 1] - strain_matrix[0, 1] * strain_matrix[0, 1]
+                T = C_strain_tensor[0, 0] + C_strain_tensor[1, 1]
+                D = C_strain_tensor[0, 0] * C_strain_tensor[1, 1] - C_strain_tensor[0, 1] * C_strain_tensor[0, 1]
 
                 # get Eigen values as  get solutions to a quadratic eq.
                 radical = np.sqrt(T ** 2 - 4.0 * D)

@@ -394,12 +394,14 @@ p70.update({'output_file_base' :'demo70_LCS_test',
             'time_step':600 })
 
 p70['integrated_model']={'class_name': 'LagarangianCoherentStructures',
-           'grid_size': [40, 50],
+           'grid_size': [45, 60],
             'write_intermediate_results': True,
             'grid_span' : [ 8000, 10000],
            'grid_center': [1595500, 5485000],
             'update_interval': 705,
-           'lags': [3*3600,6*3600],
+           #'lags': [3*3600,6*3600],
+            'lags': [5*3600],
+            'floating': True,
             }
 
 params.append(p70)

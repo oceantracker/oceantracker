@@ -30,7 +30,7 @@ class _BaseTimeVaringInfo(ParameterBaseClass):
         s=(1,)
         self.data = self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype(),order='c')
 
-    def update(self): pass # manual update by default
+    def update(self,n_time_step, time_sec, active): pass # manual update by default
     def set_values(self, value): self.data[0]=value
     def get_values(self): return self.data[0]
 
