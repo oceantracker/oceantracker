@@ -50,9 +50,7 @@ class SharedInfoClass(object):
         # make instance  and merge params
         i = self.class_importer.new_make_class_instance_from_params(params,class_role,name=name,crumbs=crumb_base + crumbs, default_classID=default_classID)
 
-
         # now add to class lists and interators
-
         i.info['type'] = class_type
 
         # needed for release group identification info etc, zero based

@@ -4,18 +4,18 @@ dispersion:
   A_V: 0.001
 integrated_model:
   class_name: LagarangianCoherentStructures
+  floating: true
   grid_center:
   - 1595500
   - 5485000
   grid_size:
-  - 40
-  - 50
+  - 45
+  - 60
   grid_span:
   - 8000
   - 10000
   lags:
-  - 10800
-  - 21600
+  - 18000
   update_interval: 705
   write_intermediate_results: true
 numba_cache_code: false

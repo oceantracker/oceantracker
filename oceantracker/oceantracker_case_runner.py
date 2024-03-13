@@ -103,10 +103,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # there can only be one model added
             params = si.working_params['core_classes']['integrated_model']
             if len(params) > 0:
-                i = si.add_core_class('integrated_model', params, crumbs='adding  "integrated_model" class',initialise=False)
+                im = si.add_core_class('integrated_model', params, crumbs='adding  "integrated_model" class',initialise=False)
                 # any changes to params by model,
                 # e.g. release groups from model which affect start and end times
-                i.add_settings_and_class_params()
+                im.have_called_add_settings_and_class_params = False
+                im.add_settings_and_class_params()
+                im.have_called_add_settings_and_class_params = True # this is used to block use of im.add_class and im.settings
 
             #todo remerge/check settings changed by model here?
 
@@ -119,8 +121,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             # model may depend on ther classes, so intilialise after all other claases are setup
             if 'integrated_model' in si.classes:
-                si.classes['integrated_model'].initial_setup()
-                si.classes['integrated_model'].final_setup()
+                im.initial_setup()
+                im.final_setup()
 
              # includes any release groups added  by params or user classes
 
