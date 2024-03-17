@@ -5,7 +5,6 @@ from oceantracker.util import time_util, json_util
 from os import path, walk
 from datetime import datetime
 from copy import copy
-from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from oceantracker.util.basic_util import nopass
 from oceantracker.reader.util.reader_util import append_split_cell_data
@@ -59,7 +58,7 @@ class GenericNCDFreader(_BaseReader):
 
     def is_file_format(self,file_name):
         # check if file matches this file format
-        nc = NetCDFhandler(file_name,'r')
+        nc = self._open_file(file_name)
         gm = self.params['grid_variable_map']
         fm  = self.params['field_variable_map']
         dm = self.params['dimension_map']

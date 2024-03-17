@@ -39,7 +39,7 @@ class FieldGroupManager(ParameterBaseClass):
         params= self.params
         info = self.info
 
-        self._setup_hydro_reader(si.working_params['reader_builder'])
+        self._setup_hydro_reader(si.run_builder['reader_builder'])
 
         grid = self.grid
         # write info about reader grid

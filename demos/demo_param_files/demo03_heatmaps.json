@@ -67,7 +67,7 @@
             "release_interval": 7200
         }
     },
-    "particle_properties ": {
+    "particle_properties": {
         "Oxygen": {
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0,
@@ -75,6 +75,14 @@
         },
         "distance_travelled": {
             "class_name": "DistanceTravelled"
+        },
+        "age_decay": {
+            "class_name": "AgeDecay",
+            "decay_time_scale": 86400.0
+        },
+        "my_constant_prop": {
+            "class_name": "ParticleLoad",
+            "initial_value": 100
         }
     },
     "particle_statistics": {

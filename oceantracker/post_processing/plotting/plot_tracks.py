@@ -31,8 +31,11 @@ def plot_tracks(track_data, show_grid=False,credit=None, heading =None,
     plot_utilities.add_heading(heading)
     plot_utilities.show_output(plot_file_name=plot_file_name)
 
-def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_grid=False, title=None, max_duration=None,
+
+def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_grid=False,
+                      title=None, max_duration=None,
                       movie_file= None, fps=10, dpi=300, interval=50, size=8,
+                      single_time_step=None,
                       polygon_list_to_plot = None, min_status=0,
                       back_ground_depth=True, back_ground_color_map = None, credit=None, heading= None,
                       size_using_data= None,  part_color_map=None,
@@ -119,8 +122,13 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
     plot_utilities.show_particleNumbers(track_data['x'].shape[1])
     fig.tight_layout()
 
-    anim = animation.FuncAnimation(fig, draw_frame, frames=num_frames, interval=interval, blit=True)
-    plot_utilities.animation_output(anim, movie_file, fps=fps, dpi=dpi, show=show)
-    return anim
+    if single_time_step is None:
+        out = animation.FuncAnimation(fig, draw_frame, frames=num_frames, interval=interval, blit=True)
+        plot_utilities.animation_output(out, movie_file, fps=fps, dpi=dpi, show=show)
+    else:
+        draw_frame(single_time_step)
+        plot_file_name = movie_file.split('.')[0] + '.png'
+        out = plot_utilities.show_output(plot_file_name=plot_file_name)
+    return out
 
 

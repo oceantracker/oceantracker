@@ -20,7 +20,7 @@ def msg_str(msg,tabs=0):
     return m
 
 class MessageLogger(object):
-    def __init__(self, screen_tag,max_warnings = 50):
+    def __init__(self, screen_tag = 'T',max_warnings = 50):
         self.screen_tag = screen_tag + ':'
         self.max_warnings = max_warnings
         self.fatal_error_count = 0
@@ -44,7 +44,7 @@ class MessageLogger(object):
 
         # log file
         log_file_name = output_file_base + '_log.txt'
-        self.log_file_name= path.join(run_output_dir, log_file_name)
+        self.log_file_name = path.join(run_output_dir, log_file_name)
         self.log_file= open(self.log_file_name, 'w')
 
         # kill any old error file
@@ -92,9 +92,11 @@ class MessageLogger(object):
         # first line complete
         if hint is not None:
             m.append(msg_str('hint: ' + hint, tabs + 3))
-
         # make crumb trail
-        if caller is not None:
+        if crumbs is not None and crumbs != '':
+            m.append(msg_str(f'in: {crumbs}', tabs + 3))
+
+        if fatal_error and caller is not None:
             if hasattr(caller,'__class__'):
                 origin=  f' {caller.__class__.__name__}'
                 if isinstance(caller,ParameterBaseClass):
@@ -105,10 +107,9 @@ class MessageLogger(object):
 
             else:
                 origin = caller.__name__
-            crumbs = origin if crumbs is None else crumbs + origin
+            m.append(msg_str(f'caller: {origin}', tabs + 3))
 
-        if crumbs is not None and crumbs != '':
-            m.append(msg_str(f'in: {crumbs}', tabs + 3))
+
 
         if link is not None:
             m.append(msg_str('see user documentation: ' + self.links[link], tabs + 3))

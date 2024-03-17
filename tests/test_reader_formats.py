@@ -59,6 +59,7 @@ def get_case(n):
     is3D=True
     water_depth_file = None
     poly_points=None
+    title = ''
 
     params= default_params()
     show_grid = True
@@ -282,6 +283,14 @@ def get_case(n):
                    #hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\resampled_outputs\hgrid_Whangarei.gr3'
 
             ))
+
+        case 2000:
+            root_input_dir = 'dummy_data_dir'
+            file_mask = 'single_ocean_gyre2D.nc'
+            output_file_base = 'dummy_data_single_ocean_grye'
+            x0 = [[20000, 10000],
+                   ]
+            reader ='oceantracker.reader.dummy_data_reader.DummyDataReader'
 
     params['release_groups']['P1']['points'] = x0
     params['release_groups']['Poly1']['points'] = poly_points

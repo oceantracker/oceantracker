@@ -7,7 +7,6 @@ import numpy as np
 from oceantracker.util.triangle_utilities import split_quad_cells
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
 from copy import deepcopy
-from oceantracker.util.ncdf_util import  NetCDFhandler
 from oceantracker.common_info_default_param_dict_templates import node_types
 
 class SCHISMreaderNCDF(_BaseReader):
@@ -34,10 +33,11 @@ class SCHISMreaderNCDF(_BaseReader):
                                    },
             'hgrid_file_name': PVC(None, str),
              })
+        pass
 
     def is_file_format(self,file_name):
         # check if file matches this file format
-        nc = NetCDFhandler(file_name,'r')
+        nc = self._open_file(file_name)
         is_file_type= nc.is_var('SCHISM_hgrid_node_x') and (nc.is_var('hvel') or nc.is_var('dahv'))
         nc.close()
         return is_file_type

@@ -56,10 +56,10 @@ case_settings_defaults ={
             'block_dry_cells' :   PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary'),
             'use_A_Z_profile': PVC(True, bool, doc_str='Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file'),
             'include_dispersion': PVC(True, bool, doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures'),
-
     #  #'loops_over_hindcast':  PVC(0, int, min=0),  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
+      }
+all_setting_defaults =  shared_settings_defaults | case_settings_defaults
 
-            }
 core_class_list=['reader',
                 'solver',
                 'field_group_manager',
@@ -136,6 +136,7 @@ known_readers ={'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                  'roms': 'oceantracker.reader.ROMS_reader.ROMsNativeReader',
                  'delft3d_fm': 'oceantracker.reader.dev_delft_fm.DELFTFM',
                  'generic': 'oceantracker.reader.generic_ncdf_reader.GenericNCDFreader',
+                'dummy_data': 'oceantracker.reader.dummy_data_reader.DummyDataReader',
                 }
 
 

@@ -3,19 +3,20 @@ dispersion:
   A_H: 0.2
   A_V: 0.001
 integrated_model:
-  class_name: LagarangianCoherentStructures
+  class_name: LagarangianCoherentStructuresFTLEheatmaps2D
   floating: true
   grid_center:
-  - 1595500
-  - 5485000
+  - 1596500
+  - 5486000
   grid_size:
   - 45
   - 60
   grid_span:
-  - 8000
   - 10000
+  - 9000
   lags:
-  - 18000
+  - 7200
+  - 10800
   update_interval: 705
   write_intermediate_results: true
 numba_cache_code: false

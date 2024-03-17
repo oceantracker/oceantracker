@@ -1,8 +1,60 @@
-# Notes on requirements for oceantracker reader
+Notes on requirements for oceantracker reader
+_______________________________________________
 
-## Required Parmeters
+Structure
+------------------
 
-Below ued to ses if variable id time dependent ot 3D
+Schema
+
+- Field group manager calls this reader method
+    - reader iternal steps
+      - details customised for particular reader
+# Outline
+
+## Initialise
+- get file list
+- is_format from first file
+  - check variable names in file
+- sort files in time order
+
+## Set up grid and fields need
+
+- read horizontal grid
+  - is3D
+  - read horizontal grid
+    - read nodes 'x'
+    - set is_lng_lat 
+      - convert co-ords if needed 
+- required hori grid data calculations 
+  - adjacency
+  - outline etc
+     
+- setup vertical
+  - read vertical grid
+    - determine grid type
+    - read z, sigma or  z fractions
+    
+- get field info to set up field data structure
+  - determine if field is 3D, vector, time dependent
+ 
+# Each time step - buffer filling
+- update (n_time_step, time_sec)
+  - read time and other time only dependent variables
+  - read water depth and tide first as may be needed to transform vertical grid values
+  - update fields
+  - read triangle variables, 
+    - dry cell etc
+ 
+# Access current values
+- set up access
+  - find hori and vertical cell, BC co-ords etc
+- get field data('name', n_time_step, time_sec)
+  - interp or  direct calculation if tidal cons data
+      
+
+## Required Parameters
+
+Below used to see if variable is time dependent ot 3D
 - hindcast input_dir
 - hindcast file_mask
 - time_dim_name

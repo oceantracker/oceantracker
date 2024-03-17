@@ -121,6 +121,7 @@ class Solver(ParameterBaseClass):
             si.block_timer('Time stepping',t0_step)
             if abs(t2 - ri['start_time']) > ri['duration']:  break
 
+
         # write out props etc at last step
         if n_time_step > 0:# if more than on set completed
             self._pre_step_bookkeeping(n_time_step, t2)

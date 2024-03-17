@@ -3,7 +3,7 @@ from os import  path
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.tracks_writer._base_tracks_writer import  _BaseWriter
 from oceantracker.tracks_writer.dev_convert_compact_tracks import convert_to_rectangular
-
+from oceantracker.util import  output_util
 import oceantracker.common_info_default_param_dict_templates as common_info
 class CompactTracksWriter(_BaseWriter):
     def __init__(self):
@@ -112,9 +112,8 @@ class CompactTracksWriter(_BaseWriter):
             self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
 
-            # write status values to file
-            for key, val in common_info.particle_info['status_flags'].items():
-                self.add_global_attribute('status_'+ key, int(val))
+            # write status values to  file attribues
+            output_util.add_particle_status_values_to_netcdf(self.nc)
 
             super().close()
             '''

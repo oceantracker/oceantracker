@@ -128,3 +128,4 @@ def patch_bottom_velocity_to_make_it_zero(vel_data, bottom_cell_index):
             for component in range(vel_data.shape[3]):
                 vel_data[nt, node, bottom_node, component] = 0.
     return vel_data
+

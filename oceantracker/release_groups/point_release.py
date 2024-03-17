@@ -15,7 +15,7 @@ class PointRelease(_BaseReleaseGroup):
         # set up info/attributes
         super().__init__()
         self.add_default_params({
-                 'points':          PCC(None, is_required=True,
+                 'points':          PCC(None, is_required=True,one_or_more_points=True,
                                         doc_str='A N by 2 or 3 list or numpy array of locations where particles are released. eg for 2D [[25,10],[23,2],....] ',
                                         units='Meters, unless hydro-model coords are in (lon, lat) then points must be given in  (lon, lat) order in decimal degrees.'),
                   'release_radius':  PVC(0., float, min= 0., doc_str= 'Particles are released from random locations in circle of given radius around each point.'),
@@ -40,7 +40,8 @@ class PointRelease(_BaseReleaseGroup):
             params['points'] =  si.transform_lon_lat_to_meters(params['points_lon_lat'], in_lat_lon_order=params['coords_allowed_in_lat_lon_order'],
                                                     crumbs=f'Point release #[{info["instanceID"]}] : {info["name"]}')
 
-
+        info['bounding_box_ll_ul'] = np.stack(( np.nanmin(params['points'][:2],axis=0),
+                                                np.nanmax(params['points'][:2],axis=0)))
 
 
     def get_number_required(self):

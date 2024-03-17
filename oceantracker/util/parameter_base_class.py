@@ -2,7 +2,7 @@ from  oceantracker.util import basic_util
 import numpy as np
 import traceback
 from time import perf_counter
-from oceantracker.shared_info import SharedInfoClass
+from oceantracker.shared_info_depricated import SharedInfoClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
 
 # parameter dictionaries are nested dictionaries or lists of dictionaries

@@ -4,7 +4,8 @@ from oceantracker.util import  time_util
 
 crumb_seperator= ' >> '
 
-def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,  check_for_unknown_keys=True):
+def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,
+                              caller=None, check_for_unknown_keys=True):
     # merge nested paramteres with defaults, returns a copy of params updated
     # if param key is in base case then use base case rather than value from ParamDictValueChecker.get_default()
     # default dict. items must be one of 3 types
@@ -59,21 +60,22 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,
 
     return params
 
-def  CheckParameterValues(key,value_checker, user_param, crumbs, msg_logger):
+def  CheckParameterValues(key,value_checker, user_param, crumbs, msg_logger,caller=None):
     # get value from ParamDictValueChecker
     if crumbs is None: crumbs = ''
-    crumb_trail = crumbs + crumb_seperator + key
+    crumb_trail =f'{crumbs} {crumb_seperator} {key} '
     if user_param is None:
         if value_checker.info['is_required']:
             msg_logger.msg('Required parameter: user parameter "' + crumb_trail +'" is required, must be type '
-                           + str(value_checker.info['type']) + ', Variable description:' + str(value_checker.info['doc_str']), fatal_error = True)
+                           + str(value_checker.info['type']) + ', Variable description:' + str(value_checker.info['doc_str']),
+                           fatal_error = True, caller=caller)
             value = None
         else:
             value = value_checker.get_default()
     else:
         # check the user given
         try:
-            value = value_checker.check_value(crumb_trail, user_param, msg_logger)
+            value = value_checker.check_value(user_param, msg_logger,crumbs=crumb_trail,caller=caller)
         except Exception as e:
             msg_logger.msg('unexpected error',key,crumbs)
             raise(e)
@@ -111,20 +113,21 @@ class ParamValueChecker(object):
     def get_default(self):
         return self.info['default_value']
 
-    def check_value(self, crumb_trail, value, msg_logger):
+
+    def check_value(self,value, msg_logger, crumbs='', caller = None):
         # check given value against defaults  in class instance info
         info = self.info
-
+        crumbs = crumbs + ' > checking value against default'
         if value is not None and info['obsolete'] is not None:
             msg_logger.msg(f'Parameter is obsolete- "{info["obsolete"]}"',
-                           warning=True,crumbs=crumb_trail)
+                           warning=True,crumbs= crumbs, caller= caller)
             return  None
 
         if value is None:
             # check default exits
             if info['is_required']:
                 msg_logger.msg('Required parameter: user parameter is required ',
-                                crumbs = crumb_trail,
+                                crumbs = crumbs,caller= caller,
                                hint= ', must be type' + str(info['type']) + ', Variable description:' + str(self.info['doc_str']),fatal_error=True)
 
             value = info['default_value']  # this might be a None default
@@ -133,8 +136,8 @@ class ParamValueChecker(object):
             if type(value) in [np.str_]:
                 value = str(value)
             elif type(value) != str:
-                msg_logger.msg('Value must be a string, value is  "' + str(value) + '"',
-                               fatal_error=True, crumbs = crumb_trail,)
+                msg_logger.msg('Value must be a string, value is  "' + str(value) + '"', caller= caller,
+                               fatal_error=True, crumbs = crumbs)
 
         elif info['type'] == float and type(value) == int:
             # ensure  ints are floats
@@ -151,29 +154,29 @@ class ParamValueChecker(object):
                 #test if convertable
                 time_util.isostr_to_seconds(value) # leave as a string
             except Exception as e:
-                msg_logger.msg( 'Failed to convert to date as iso8601str got value = ' + str(value),
-                                fatal_error=True, crumbs = crumb_trail,)
+                msg_logger.msg( 'Failed to convert to date as iso8601str got value = ' + str(value),caller= caller,
+                                fatal_error=True, crumbs = crumbs)
 
         # if not one of special types above then value unchanged
         # check  value and type if not a None
         if value is not None:
             if type(info['type']) != str and not type(value) != info['type'] and not isinstance(value, info['type']):
                 msg_logger.msg( 'Parameter data must be of type ' + str(info['type']) + ' got type= ' + str(type(value)) + ' , value given =' +str(value),
-                                fatal_error=True, crumbs = crumb_trail,)
+                                caller= caller,  fatal_error=True, crumbs = crumbs)
 
             if (type(value) in [float, int]):
                 # print(name, value , i['min'])
                 if info['min'] is not None and value < info['min']:
-                    msg_logger.msg( 'Parameter must be >=' + str(info['min']) + ', value given =  ' + str(value),
-                                    fatal_error=True, crumbs = crumb_trail,)
+                    msg_logger.msg( 'Parameter must be >=' + str(info['min']) + ', value given =  ' + str(value),caller= caller,
+                                    fatal_error=True, crumbs = crumbs)
 
                 if info['min'] is not None and info['max'] is not None and value > info['max']:
-                    msg_logger.msg('Parameter must be <= ' + str(info['min']) + ', value given=  ' + str(value),
-                                   fatal_error=True,  crumbs = crumb_trail,)
+                    msg_logger.msg('Parameter must be <= ' + str(info['min']) + ', value given=  ' + str(value),caller= caller,
+                                   fatal_error=True,  crumbs = crumbs)
 
             if info['possible_values'] is not None and len(info['possible_values']) > 0 and value not in info['possible_values']:
-                msg_logger.msg('Parameter must be one of ' + str(info['possible_values']) + ', value given =  ' + str(value),
-                               fatal_error=True,  crumbs = crumb_trail)
+                msg_logger.msg('Parameter must be one of ' + str(info['possible_values']) + ', value given =  ' + str(value),caller= caller,
+                               fatal_error=True,  crumbs = crumbs)
 
         return value  # value may be None if default or given value is None
 
@@ -275,7 +278,7 @@ class ParameterListChecker(object):
 class ParameterCoordsChecker(object):
     # checks input cords or array is a set of N by 2 or 3 values
     def __init__(self,default_value, dtype=np.float64, is3D=False, single_cord=False, doc_str=None,one_or_more_points=False,
-                  is_required=False, units='meters or , degrees if long_lat codes detected'):
+                  is_required=False, units='meters or , degrees if long_lat codes detected', min = None):
         self.info={}
         info = self.info
         info['default_value'] = default_value
@@ -284,6 +287,7 @@ class ParameterCoordsChecker(object):
         info['single_cord'] = single_cord
         info['is_required'] = is_required
         info['units'] = units
+        info['min'] = min
         info['doc_str'] = doc_str
         info['one_or_more_points'] = one_or_more_points
         info['type'] = 'coordinates'
@@ -291,7 +295,7 @@ class ParameterCoordsChecker(object):
     def get_default(self):
         return self.info['default_value']
 
-    def check_value(self, crumbs, value, msg_logger):
+    def check_value(self,  value, msg_logger, crumbs='', caller=None):
         # check given value against defaults  in class instance info
         info = self.info
         if crumbs is None: crumbs = ''
@@ -300,7 +304,7 @@ class ParameterCoordsChecker(object):
 
         if type(value) not in [list, np.ndarray]:
             msg_logger.msg(f' expected param of type list or numppy array got type {type(value)}',
-                           fatal_error=True, crumbs= crumb_trail)
+                           fatal_error=True, caller=caller, crumbs=crumb_trail)
             return None
 
         # attempt array conversion
@@ -310,6 +314,9 @@ class ParameterCoordsChecker(object):
             msg_logger.msg(f'Coordinates must be numpy array or a list convertible to a numpy array ',
                            hint = f'got values {str(value)}',
                            crumbs = crumb_trail, fatal_error=True)
+
+
+
         # now have an array
         if not np.issubdtype(value.dtype, np.integer) and not np.issubdtype(value.dtype, np.float):
             msg_logger.msg(f'Coordinates must only contain floats ot ints, got type "{str(value.dtype)}" ',
@@ -320,6 +327,9 @@ class ParameterCoordsChecker(object):
         # make int float
         value= value.astype(np.float64)
 
+        if info['min'] is not None and  np.any(value < info['min']):
+            msg_logger.msg(f'Values must be greater than minimum value of "{str(info["min"])}" ',
+                           hint=f'got values {str(value)}',  crumbs=crumb_trail, fatal_error=True)
         # if one or more expected make 1 by n
         if info['one_or_more_points'] and value.ndim==1:
             value= value.reshape((1,-1))

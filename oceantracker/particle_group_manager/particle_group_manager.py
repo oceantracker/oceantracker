@@ -78,7 +78,7 @@ class ParticleGroupManager(ParameterBaseClass):
     def add_release_group(self,name,params):
         #doto is this needed
         si = self.shared_info
-        i = si._create_class_dict_instance(name, 'release_groups','user', params,
+        i = si.add_user_class('release_groups',name, params,
                                            crumbs='Adding release groups', default_classID='release_groups')
         i.initial_setup()
         # set up release times so duration of run known
@@ -216,7 +216,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # **karwgs must have at least name
         params = kwargs
         si = self.shared_info
-        i = si._create_class_dict_instance(name, 'time_varying_info','manual_update', params, crumbs=' setup time varing reader info')
+        i = si.add_user_class('time_varying_info',name,params,  class_type='manual_update',  crumbs=' setup time varing reader info')
         i.initial_setup()
 
         if si.settings['write_tracks'] and i.params['write']:
@@ -251,7 +251,7 @@ class ParticleGroupManager(ParameterBaseClass):
                    hint='prop_group must be one of ' + str(self.known_prop_types),   fatal_error=True, exit_now=True)
 
 
-        i = si._create_class_dict_instance(name, 'particle_properties', prop_type, prop_params,
+        i = si.add_user_class('particle_properties',name,  prop_params,class_type=prop_type,
                                            crumbs=crumbs +' adding "particle_properties of type=' + prop_type)
         i.initial_setup()
 

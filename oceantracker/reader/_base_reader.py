@@ -58,10 +58,7 @@ class _BaseReader(ParameterBaseClass):
 
     def read_horizontal_grid_coords(self, nc, grid):   nopass()
 
-
-
     def read_triangles_as_int32(self, nc, grid):     nopass()
-
 
     # work out if field varible is ti depennt, 3D or a vector
     def get_field_params(self,nc, name):
@@ -70,8 +67,6 @@ class _BaseReader(ParameterBaseClass):
         #                         is_vector= True/False,
         #                         )
         nopass()
-
-
 
     def read_zlevel_as_float32(self, nc, grid,fields, file_index, zlevel_buffer, buffer_index):   nopass()
 
@@ -113,7 +108,6 @@ class _BaseReader(ParameterBaseClass):
         # assume  not LSc grid, so bottom cel is zero
         grid['bottom_cell_index'] = np.full((grid['x'].shape[0],), 0, dtype=np.int32)
         return grid
-
 
     def read_open_boundary_data_as_boolean(self, grid):
         is_open_boundary_node = np.full((grid['x'].shape[0],), False)
@@ -203,7 +197,7 @@ class _BaseReader(ParameterBaseClass):
         fi = {'names': file_list, 'n_time_steps': [], 'time_start': [], 'time_end': []}
         for n, fn in enumerate(file_list):
             # get first/second/last time from each file,
-            nc = NetCDFhandler(fn, 'r')
+            nc = self._open_file(fn)
             time = self.read_time_sec_since_1970(nc)
             nc.close()
             fi['time_start'].append(time[0])
@@ -243,7 +237,7 @@ class _BaseReader(ParameterBaseClass):
 
     def open_first_file(self):
         fi = self.info['file_info']
-        nc = NetCDFhandler(fi['names'][0], 'r')
+        nc = self._open_file(fi['names'][0])
         return nc
 
     def get_hindcast_files_info(self, file_list, msg_logger):
@@ -350,7 +344,7 @@ class _BaseReader(ParameterBaseClass):
         msg_logger.progress_marker('found boundary triangles', start_time=t0)
         t0 = perf_counter()
         grid['grid_outline'] = triangle_utilities.build_grid_outlines(grid['triangles'], grid['adjacency'],
-                                                                           grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
+                                                                         grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
 
         msg_logger.progress_marker('built domain and island outlines', start_time=t0)
 
@@ -478,7 +472,7 @@ class _BaseReader(ParameterBaseClass):
 
         while len(nt_hindcast_required) > 0 and 0 <= n_file < len(fi['names']):
 
-            nc = NetCDFhandler(fi['names'][n_file], 'r')
+            nc = self._open_file(fi['names'][n_file])
 
             # find time steps in current file,accounting for direction
             sel = np.logical_and(nt_hindcast_required >= fi['nt_starts'][n_file],
@@ -653,6 +647,9 @@ class _BaseReader(ParameterBaseClass):
             si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so not a meters grid ', warning=True)
         return islatlong
 
+    def _open_file(self,file_name):
+        # open net cdf file for readin
+        return NetCDFhandler(file_name, 'r')
 
     def close(self):
         pass
