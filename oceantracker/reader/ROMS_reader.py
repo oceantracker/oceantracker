@@ -51,7 +51,7 @@ class ROMsNativeReader(_BaseReader):
 
 
     def is_file_format(self, file_name):
-        nc = NetCDFhandler(file_name,'r')
+        nc = self._open_file(file_name)
         is_file_type=  set(['ocean_time','mask_psi','lat_psi','lon_psi','h','zeta','u','v']).issubset(list(nc.variable_info.keys()))
         nc.close()
         return is_file_type

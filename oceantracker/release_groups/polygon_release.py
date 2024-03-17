@@ -33,12 +33,13 @@ class PolygonRelease(PointRelease):
                                         in_lat_lon_order=self.params['coords_allowed_in_lat_lon_order'],
                                        crumbs=f'Polygon release {self.IDstr()}')
         info['release_type'] = 'polygon'
+        info['bounding_box_ll_ul'] = np.stack((np.nanmin(params['points'][:,:2], axis=0),
+                                               np.nanmax(params['points'][:,:2], axis=0)))
 
         self.polygon = InsidePolygon(verticies = params['points'])
-
         info['polygon_area'] = self.polygon.get_area()
-        b = self.polygon.polygon_bounds
-        info['bounding_box_area'] = (b[1]-b[0]) * (b[3]-b[2])
+        ll, ur = info['bounding_box_ll_ul']
+        info['bounding_box_area'] = abs((ur[0] - ll[0]) * (ur[1] - ll[1]))
 
         if info['polygon_area']  < 1:
             ml.msg('Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
@@ -50,21 +51,18 @@ class PolygonRelease(PointRelease):
     def get_release_location_candidates(self):
         si = self.shared_info
         info = self.info
-        bounds = self.polygon.polygon_bounds
-
+        ll, ur = info['bounding_box_ll_ul']
         # find number required to have one guess get all required points
         # by scaling by fraction of bounding box polygon takes up
         n_candidates = int(np.ceil(self.params['pulse_size']*info['bounding_box_area']/ info['polygon_area'] ))
 
-        xi = np.random.uniform(low=bounds[0], high=bounds[1], size=n_candidates)
-        yi = np.random.uniform(low=bounds[2], high=bounds[3], size=n_candidates)
+        xi = np.random.uniform(low=ll[0], high=ur[0], size=n_candidates)
+        yi = np.random.uniform(low=ll[1], high=ur[1], size=n_candidates)
         xy_candidates = np.stack((xi, yi), axis=1)
 
         # select those inside polygon and domain
         sel = self.polygon.inside_indices(xy_candidates)
-
         x = xy_candidates[sel, :]
-
         return x
 
     def get_number_required(self):

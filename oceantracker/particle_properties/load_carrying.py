@@ -19,9 +19,9 @@ class ParticleLoad(ParticleProperty):
         super().initial_setup()
         si = self.shared_info
         info= self.info
-        particles = si.classes['particle_group_manager']
+        pgm = si.classes['particle_group_manager']
 
-        particles.add_particle_property(self.info['name']+'_initial_value','manual_update',dict(time_varying=False, write=False))
+        pgm.add_particle_property(self.info['name']+'_initial_value','manual_update',dict(time_varying=False, write=False))
 
     def initial_value_at_birth(self, new_part_IDs):
 

@@ -219,6 +219,23 @@ def split_quad_cells(triangles_and_quads,quad_cells_to_split):
         triangles = np.concatenate((triangles_and_quads[:,:3],new_tri), axis=0)
     return triangles
 
+@njitOT
+def get_quad_nodes(shape):
+    # get four nodes for each cell in regular grid of given shape
+    cols, rows = shape
+    def array_index(r, c):  return cols * r + c
+
+    quad_cells = np.full(( (rows-1)*(cols-1), 4),-1,dtype=np.int32)
+    n = 0
+    for r in range(rows-1):
+        for c in range(cols - 1):
+            quad_cells[n, 0] = array_index(r,c)
+            quad_cells[n, 1] = array_index(r, c+1)
+            quad_cells[n, 2] = array_index(r+1, c + 1)
+            quad_cells[n, 3] = array_index(r + 1, c )
+            n +=1
+    return quad_cells
+
 if __name__ == "__main__":
     # testing and timing of above routines
     from oceantracker.util import ncdf_util
@@ -263,4 +280,21 @@ if __name__ == "__main__":
     plt.show()
 
     pass
+
+@njitOT
+def get_quad_nodes(shape):
+    # get four nodes for each cell in regular grid of given shape
+    cols, rows = shape
+    def array_index(r, c):  return cols * r + c
+
+    quad_cells = np.full(( (rows-1)*(cols-1), 4),-1,dtype=np.int32)
+    n = 0
+    for r in range(rows-1):
+        for c in range(cols - 1):
+            quad_cells[n, 0] = array_index(r,c)
+            quad_cells[n, 1] = array_index(r, c+1)
+            quad_cells[n, 2] = array_index(r+1, c + 1)
+            quad_cells[n, 3] = array_index(r + 1, c )
+            n +=1
+    return quad_cells
 

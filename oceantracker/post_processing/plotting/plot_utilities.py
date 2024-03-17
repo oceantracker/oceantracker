@@ -204,7 +204,7 @@ def add_map_scale_bar(axis_lims, ax=plt.gca()):
 
 def show_particleNumbers(n):  text_norm(.71, .04, '%3.0f Particles' % n, fontsize=5)
 
-def add_credit(s):  text_norm(.71, .015,'OceanTracker- R. Vennell, 2022' if s is None else s, fontsize=5)
+def add_credit(s):  text_norm(.71, .015,'OceanTracker- R. Vennell, 2024' if s is None else s, fontsize=5)
 
 def show_output(plot_file_name=None, ):
     if plot_file_name is not None:

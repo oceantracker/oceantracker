@@ -91,7 +91,7 @@
             "release_start_date": "2020-06-03T03:00:00"
         }
     },
-    "particle_properties ": {
+    "particle_properties": {
         "Oxygen": {
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0,
@@ -99,9 +99,11 @@
         },
         "distance_travelled": {
             "class_name": "DistanceTravelled"
-        }
-    },
-    "particle_properties": {
+        },
+        "age_decay": {
+            "class_name": "AgeDecay",
+            "decay_time_scale": 86400.0
+        },
         "my_constant_prop": {
             "class_name": "ParticleLoad",
             "initial_value": 100

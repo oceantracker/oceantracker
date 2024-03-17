@@ -106,7 +106,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
             # loop over release groups to get bin edges
             for ngroup, name  in enumerate(si.classes['release_groups'].keys()):
-                x0 = si.classes['release_groups'][name].info['points'] # works for point and polygon releases,
+                rg = si.classes['release_groups'][name]
+                x0 = rg.info['bounding_box_ll_ul'] # works for point and polygon releases,
                 x_release_group_center= np.nanmean(x0[:,:2], axis=0)
                 stats_grid['x_bin_edges'][ngroup, :] = base_x.T + x_release_group_center[0]
                 stats_grid['y_bin_edges'][ngroup, :] = base_y.T + x_release_group_center[1]

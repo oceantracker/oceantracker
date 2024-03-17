@@ -42,7 +42,7 @@
         "tracks_writer": {
             "write_dry_cell_flag": true
         },
-        "particle_properties ": {
+        "particle_properties": {
             "Oxygen": {
                 "class_name": "AgeDecay",
                 "decay_time_scale": 86400.0,
@@ -50,9 +50,11 @@
             },
             "distance_travelled": {
                 "class_name": "DistanceTravelled"
-            }
-        },
-        "particle_properties": {
+            },
+            "age_decay": {
+                "class_name": "AgeDecay",
+                "decay_time_scale": 86400.0
+            },
             "my_constant_prop": {
                 "class_name": "ParticleLoad",
                 "initial_value": 100
@@ -118,15 +120,13 @@
                         3,
                         4
                     ],
-                    "coords_ll_ur": [
-                        [
-                            1592500,
-                            5486000
-                        ],
-                        [
-                            1593200,
-                            5485000
-                        ]
+                    "grid_span": [
+                        1000,
+                        1000
+                    ],
+                    "grid_center": [
+                        1592500,
+                        5486000
                     ],
                     "pulse_size": 2,
                     "release_interval": 3600
@@ -188,15 +188,13 @@
                         3,
                         4
                     ],
-                    "coords_ll_ur": [
-                        [
-                            1592500,
-                            5486000
-                        ],
-                        [
-                            1593200,
-                            5485000
-                        ]
+                    "grid_span": [
+                        1000,
+                        1000
+                    ],
+                    "grid_center": [
+                        1592500,
+                        5486000
                     ],
                     "pulse_size": 2,
                     "release_interval": 3600
@@ -258,15 +256,13 @@
                         3,
                         4
                     ],
-                    "coords_ll_ur": [
-                        [
-                            1592500,
-                            5486000
-                        ],
-                        [
-                            1593200,
-                            5485000
-                        ]
+                    "grid_span": [
+                        1000,
+                        1000
+                    ],
+                    "grid_center": [
+                        1592500,
+                        5486000
                     ],
                     "pulse_size": 2,
                     "release_interval": 3600
@@ -328,15 +324,13 @@
                         3,
                         4
                     ],
-                    "coords_ll_ur": [
-                        [
-                            1592500,
-                            5486000
-                        ],
-                        [
-                            1593200,
-                            5485000
-                        ]
+                    "grid_span": [
+                        1000,
+                        1000
+                    ],
+                    "grid_center": [
+                        1592500,
+                        5486000
                     ],
                     "pulse_size": 2,
                     "release_interval": 3600
@@ -398,15 +392,13 @@
                         3,
                         4
                     ],
-                    "coords_ll_ur": [
-                        [
-                            1592500,
-                            5486000
-                        ],
-                        [
-                            1593200,
-                            5485000
-                        ]
+                    "grid_span": [
+                        1000,
+                        1000
+                    ],
+                    "grid_center": [
+                        1592500,
+                        5486000
                     ],
                     "pulse_size": 2,
                     "release_interval": 3600

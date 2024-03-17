@@ -12,10 +12,12 @@ from oceantracker.util import json_util
 from datetime import datetime
 from time import sleep
 import traceback
-from oceantracker.util.parameter_checking import merge_params_with_defaults
-from oceantracker.util.module_importing_util import ClassImporter
+from oceantracker.util.class_importing_util import ClassImporter
 from oceantracker.util.setup_util import config_numba_environment
 from oceantracker import common_info_default_param_dict_templates as common_info
+
+from oceantracker import shared_info as si2
+
 # note do not import numba here as its enviroment  setting must ve done first, import done below
 
 from oceantracker.util.package_util import get_all_parameter_classes
@@ -26,27 +28,33 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up info/attributes
         super().__init__()  # required
 
-
-    def run_case(self, working_params):
+    def run_case(self, run_builder):
         si = self.shared_info
         si.reset()  # clear out classes from class instance of SharedInfo if running series of mains
         d0 = datetime.now()
         t_start = perf_counter()
+        # used to write a unaltered version to case_info.json
+        self.raw_working_params = deepcopy(run_builder['working_params'])
 
-        # basic param shortcuts
-        si.caseID = working_params['caseID']
-        si.working_params = working_params
-        si.settings = si.working_params['shared_settings']
+        # set up message logging
+        output_files = run_builder['output_files']
+        si.msg_logger = MessageLogger(f'C{run_builder["caseID"]:03d}', run_builder['working_params']['settings']['max_warnings'])
 
-        # merge shared and case setting ito one shared variable as distinction no longer important
-        si.settings.update(si.working_params['case_settings'])
-        si.output_files = si.working_params['output_files']
+        # set numba config environment variables, before any import of numba, eg by readers,
+        # also done in main but also needed here for parallel runs
+        config_numba_environment(run_builder['working_params']['settings'],  si.msg_logger, crumbs='Starting case_runner', caller=self)  # must be done before any numba imports
+
+        # basic  shortcuts
+        si.run_builder = run_builder
+        si.caseID = run_builder['caseID']
+        si.working_params = run_builder['working_params']
+        si.settings = si.working_params['settings']
+
+        si.output_files = run_builder['output_files']
         si.run_output_dir = si.output_files['run_output_dir']
         si.output_file_base = si.output_files['output_file_base']
 
-        # set up message logging
-        output_files = working_params['output_files']
-        si.msg_logger = MessageLogger(f'C{si.caseID:03d}', si.settings['max_warnings'])
+
         output_files['case_log_file'], output_files['case_error_file'] = \
         si.msg_logger.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
         si.msg_logger.print_line()
@@ -66,17 +74,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.model_direction = -1 if si.backtracking else 1
         si.time_of_nominal_first_occurrence = -si.model_direction * 1.0E36
 
-
-
         si.write_output_files = si.settings['write_output_files']
-
         si.z0 = si.settings['z0']
         si.minimum_total_water_depth = si.settings['minimum_total_water_depth']
         si.computer_info = get_versions_computer_info.get_computer_info()
-
-        # set numba config environment variables, before any import of numba,
-        config_numba_environment(si.settings)
-
 
         # set up profiling
         profiling_util.set_profile_mode(si.settings['profiler'])
@@ -90,6 +91,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                         model_direction= -1 if si.settings['backtracking'] else 1)
         ri = si.run_info
         #useful short cuts
+        si2.__shared_info__ = si
+
+        
         si.particle_properties = si.classes['particle_properties']
         si.release_groups = si.classes['release_groups']
 
@@ -123,15 +127,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if 'integrated_model' in si.classes:
                 im.initial_setup()
                 im.final_setup()
-
-             # includes any release groups added  by params or user classes
-
-
-
-            # below are not done in _initialize_solver_core_classes_and_release_groups as it may depend on user classes to work
-
-            # for some reason these shortcuts must be done after set up, or they remeber values from before setup????
-
 
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
@@ -409,7 +404,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for user_type in ['velocity_modifiers','trajectory_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
             for name, params in si.working_params['class_dicts'][user_type].items():
-                i = si._create_class_dict_instance(name, user_type,'user', params,  crumbs=' making class type ' + user_type + ' ')
+                i = si.add_user_class(user_type,name, params,class_type= 'user',   crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
 
 
@@ -442,6 +437,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             'file_written': datetime.now().isoformat(),
              'run_info' : info,
              'hindcast_info': si.classes['field_group_manager'].info,
+             'working_params': self.raw_working_params,
              'full_case_params': si.working_params,
              'particle_status_flags': si.particle_status_flags,
              'release_groups' : {},
@@ -516,10 +512,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                     for nsig in range(len(sig)):
                         d['numba_code_info']['SMID_code'][name].append(numba_util.count_simd_intructions(func, sig=nsig))
                     pass
-        # final setup warnings
-        if not si.settings['include_dispersion']:
-            si.msg_logger.msg('Dispersion is turned off, no random walk included',
-                              warning=True,hint='ie. setting "include_dispersion" is False')
 
         return d
 

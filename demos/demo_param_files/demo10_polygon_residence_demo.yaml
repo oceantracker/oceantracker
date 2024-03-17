@@ -8,16 +8,18 @@ dispersion_miss-spelt:
 numba_cache_code: false
 output_file_base: demo10_polygon_residence_demo
 particle_properties:
-  my_constant_prop:
-    class_name: ParticleLoad
-    initial_value: 100
-'particle_properties ':
   Oxygen:
     class_name: AgeDecay
     decay_time_scale: 86400.0
     initial_value: 20.0
+  age_decay:
+    class_name: AgeDecay
+    decay_time_scale: 86400.0
   distance_travelled:
     class_name: DistanceTravelled
+  my_constant_prop:
+    class_name: ParticleLoad
+    initial_value: 100
 particle_statistics:
   residentpoly:
     class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon

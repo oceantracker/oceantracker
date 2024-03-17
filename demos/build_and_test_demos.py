@@ -44,16 +44,18 @@ demo_base_params={'output_file_base' : None,
     #'numba_caching': False,
     'dispersion_miss-spelt': {'A_H': .1},
     'dispersion': {'A_H': .1},
+
     #'pre_processing':{'my_polygons':{'class_name': 'oceantracker.pre_processing.read_geomerty.ReadCoordinates',
     #                                 'file_name':'demo_hindcast/test.geojson',
     #                                 'type':'polygon'}},
     'tracks_writer': {'turn_on_write_particle_properties_list': ['n_cell'], 'write_dry_cell_flag': True},
     'release_groups': {'mypoints1':{'points': [[1594500, 5483000]], 'pulse_size': 200, 'release_interval': 0}
                                 },
-    'particle_properties ': {
+    'particle_properties': {
                         'Oxygen': { 'class_name': 'AgeDecay', 'decay_time_scale': 1. * 3600 * 24,'initial_value' : 20.},
                         'distance_travelled':   {'class_name': 'DistanceTravelled'},
-
+                            'age_decay': {'class_name': 'AgeDecay', 'decay_time_scale': 1. * 3600 * 24},
+                            'my_constant_prop': {'class_name': 'ParticleLoad',              'initial_value': 100}
                             }
     }
 
@@ -74,12 +76,11 @@ p2['release_groups']={
             'pulse_size': 10, 'release_interval': 3 * 3600},
     'G1': {'class_name': 'GridRelease',
            'grid_size': [3, 4],
-           'coords_ll_ur': [[1592500, 5486000],
-                            [1593200, 5485000]],
+            'grid_span': [1000, 1000],
+           'grid_center': [1592500, 5486000],
            'pulse_size': 2, 'release_interval': 3600},
 }
-p2['particle_properties'] = {'my_constant_prop': {'class_name': 'ParticleLoad',
-                     'initial_value': 100}}
+
 
 p2.update({'block_dry_cells': True,
         'tracks_writer':{'write_dry_cell_flag': True,
@@ -393,14 +394,14 @@ p70.update({'output_file_base' :'demo70_LCS_test',
             #'numba_cache_code': True,
             'time_step':600 })
 
-p70['integrated_model']={'class_name': 'LagarangianCoherentStructures',
+p70['integrated_model']={'class_name': 'LagarangianCoherentStructuresFTLEheatmaps2D',
            'grid_size': [45, 60],
             'write_intermediate_results': True,
-            'grid_span' : [ 8000, 10000],
-           'grid_center': [1595500, 5485000],
+            'grid_span' : [ 10000, 9000],
+           'grid_center': [1596500, 5486000],
             'update_interval': 705,
-           #'lags': [3*3600,6*3600],
-            'lags': [5*3600],
+           'lags': [2*3600,3*3600],
+            #'lags': [3*3600],
             'floating': True,
             }
 

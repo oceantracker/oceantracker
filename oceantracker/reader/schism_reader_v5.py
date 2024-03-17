@@ -1,7 +1,6 @@
 from oceantracker.reader.schism_reader import SCHISMreaderNCDF
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
 from pathlib import Path as pathlib_Path
-from oceantracker.util.ncdf_util import NetCDFhandler
 from os import  path
 import numpy as np
 from copy import  deepcopy, copy
@@ -46,7 +45,7 @@ class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
 
     def is_file_format(self,file_name):
         # check if file matches this file format
-        nc = NetCDFhandler(file_name,'r')
+        nc = self._open_file(file_name)
         is_file_type= nc.is_var('SCHISM_hgrid_node_x') and nc.is_var('elevation')
         nc.close()
         return is_file_type
@@ -100,7 +99,7 @@ class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
             # look in 3D files
             var_file_name = self.get_3D_var_file_name(nc,var_name0)
             if var_file_name is not None:
-                nc_var= NetCDFhandler(var_file_name,mode='r')
+                nc_var= self._open_file(var_file_name)
                 var_dim = nc_var.all_var_dims(var_name0)
                 nc_var.close()
             else:
@@ -121,7 +120,7 @@ class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
         else:
             # 3D variable in another file
             fn = self.get_3D_var_file_name(nc, var_file_name)
-            nc_var= NetCDFhandler(fn,mode='r')
+            nc_var= self._open_file(fn)
             data = nc_var.read_a_variable(var_file_name, sel=sel)
             data_dims = nc_var.all_var_dims(var_file_name)
             nc_var.close()

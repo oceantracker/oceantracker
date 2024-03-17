@@ -74,23 +74,24 @@
         }
     },
     "integrated_model": {
-        "class_name": "LagarangianCoherentStructures",
+        "class_name": "LagarangianCoherentStructuresFTLEheatmaps2D",
         "grid_size": [
             45,
             60
         ],
         "write_intermediate_results": true,
         "grid_span": [
-            8000,
-            10000
+            10000,
+            9000
         ],
         "grid_center": [
-            1595500,
-            5485000
+            1596500,
+            5486000
         ],
         "update_interval": 705,
         "lags": [
-            18000
+            7200,
+            10800
         ],
         "floating": true
     },

@@ -30,6 +30,7 @@ class GridRelease(_BaseReleaseGroup):
 
         xi, yi = np.meshgrid(x,y)
         info['x_grid'] = np.stack((xi,yi),axis=2)
+        info['bounding_box_ll_ul'] = np.asarray([[x[0],y[0]],[ x[-1],y[-1]]] )
 
         # add points param for othe parts of code
         self.points = np.stack((xi.ravel(),yi.ravel()),axis=1)

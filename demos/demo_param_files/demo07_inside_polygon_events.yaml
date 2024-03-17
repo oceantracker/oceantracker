@@ -49,13 +49,6 @@ particle_properties:
   age_decay:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
-'particle_properties ':
-  Oxygen:
-    class_name: AgeDecay
-    decay_time_scale: 86400.0
-    initial_value: 20.0
-  distance_travelled:
-    class_name: DistanceTravelled
 reader:
   class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
   dimension_map:

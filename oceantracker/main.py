@@ -24,13 +24,13 @@ from copy import  copy
 import numpy as np
 import difflib
 
-from oceantracker.util.setup_util import config_numba_environment
+from oceantracker.util import setup_util
 from oceantracker import common_info_default_param_dict_templates as common_info
-from oceantracker.util.module_importing_util import ClassImporter
+from oceantracker.util.class_importing_util import ClassImporter
 
 from oceantracker.util.parameter_checking import merge_params_with_defaults
-from oceantracker.util import basic_util , get_versions_computer_info
-from oceantracker.util import json_util ,yaml_util
+
+from oceantracker.util import json_util ,yaml_util, get_versions_computer_info
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import get_hydro_model_info
 
@@ -40,19 +40,19 @@ OTname = common_info.package_fancy_name
 help_url_base = 'https://oceantracker.github.io/oceantracker/_build/html/info/'
 
 def run(params):
-    ot= _OceanTrackerRunner()
-    case_info_files = ot._run_single(params)
+    ot = _OceanTrackerRunner()
+    case_info_files = ot.run(params)
     return case_info_files
 
 def run_parallel(base_case_params, case_list_params=[{}]):
     ot= _OceanTrackerRunner()
-    case_info_files  = ot._run_parallel(base_case_params, case_list_params)
+    case_info_files  = ot.run(base_case_params, case_list_params)
     return case_info_files
 
 class OceanTracker():
     def __init__(self,params=None):
         self.params= param_template() if params is None else params
-        self.case_list=[]
+        self.case_list_params=[]
 
         self.msg_logger = MessageLogger('helper')
         self.msg_logger.print_line()
@@ -122,12 +122,12 @@ class OceanTracker():
             return
 
         # expand case list to fit case if needed
-        if len(self.case_list) < case+1 :
+        if len(self.case_list_params) < case+1 :
             ml.progress_marker(f'Adding parallel case number # "{str(case)}"')
-            for n in range(len(self.case_list), case+1):
-                self.case_list.append(deepcopy(param_template()))
+            for n in range(len(self.case_list_params), case + 1):
+                self.case_list_params.append(deepcopy(param_template()))
 
-        return self.case_list[case]
+        return self.case_list_params[case]
 
     def run(self):
         self.msg_logger.progress_marker('Starting run using helper class')
@@ -135,14 +135,8 @@ class OceanTracker():
         # todo print helper message here at end??
         ot.helper_msg_logger = self.msg_logger  # used to print helper messages at end and write to file
 
-        if len(self.case_list) == 0:
-            # no case list
-            case_info_file = ot._run_single(self.params)
-        else:
-            # run // case list with params as base case defaults for each run
-            case_info_file = ot._run_parallel(self.params, self.case_list)
+        case_info_file = ot.run(self, self.params, self.case_list_params)
 
-        ot.close()
         self.msg_logger.close()
 
         return case_info_file
@@ -151,12 +145,60 @@ class _OceanTrackerRunner(object):
     def __init__(self):
         self.msg_logger = MessageLogger('main')
 
-    #  other, non helper methods
-    def _run_single(self, user_given_params):
+    def run(self,params, case_list_params = None):
+        ml = self.msg_logger
+        run_builder= dict()
+        self.start_t0 = perf_counter()
+        self.start_date = datetime.now()
+
+        ml.print_line()
+        ml.msg(f'{OTname} starting main:')
+        ml.progress_marker('Output dir set up.')
+        # setup output dir and msg files
+        o = setup_util.setup_output_dir(params, self.msg_logger, crumbs='setting up output dir')
+        o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base'])
+        run_builder['output_files'] = o
+
+        setup_util.write_raw_user_params(run_builder['output_files'],params,ml, case_list=case_list_params)
+
+        # set numba config environment variables, before any import of numba, eg by readers,
+        setup_util.config_numba_environment(params, ml, crumbs='main setup', caller=self)  # must be done before any numba imports
+
+        params = setup_util.merge_settings_with_defaults(params, ['debug'],ml,crumbs='Debug setting ') # make sure needed values are set or use defaults
+
+        ml.msg(f'Output is in dir "{o["run_output_dir"]}"', hint='see for copies of screen output and user supplied parameters, plus all other output',tabs=1)
+        ml.print_line()
+        ml.msg(f' {OTname} version {common_info.code_version} - preliminary setup')
+
+        self._prelimary_checks(params)
+        ml.exit_if_prior_errors('parameters have errors')
+
+        # get list of files etc in time order
+        run_builder = self._get_hindcast_file_info(params, run_builder)
+
+        if case_list_params is  None or len(case_list_params) == 0:
+            # no case list
+            case_info_file = self._run_single(params, run_builder)
+        else:
+            # run // case list with params as base case defaults for each run
+            case_info_file = self._run_parallel(params, case_list_params, run_builder)
+
+        ml.close()
+        return case_info_file
+
+    def _run_single(self, user_given_params, run_builder):
 
         ml = self.msg_logger
 
-        working_params = self._main_run_set_up(user_given_params)
+
+        run_builder['caseID'] = 0 # tag case
+        run_builder['working_params'] = setup_util.decompose_params(user_given_params, ml, crumbs='_run_single>', caller=self)
+
+        # check defaults of all settings
+        run_builder['working_params']['settings'] = merge_params_with_defaults(run_builder['working_params']['settings'],
+                                                            common_info.all_setting_defaults, ml, crumbs='_runs_single checking defaults>',
+                                                            caller=self, check_for_unknown_keys=True)
+
 
         # try catch is needed in notebooks to ensure mesage loger file is close,
         # which allows rerunning in notebook without  permission file errors
@@ -165,7 +207,7 @@ class _OceanTrackerRunner(object):
             from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
             # make instance of case runer and run it with decomposed working params
             ot_case_runner = OceanTrackerCaseRunner()
-            case_info_file, case_msg = ot_case_runner.run_case(working_params)
+            case_info_file, case_msg = ot_case_runner.run_case(run_builder)
 
         except Exception as e:
             # ensure message loggers are closed
@@ -182,40 +224,17 @@ class _OceanTrackerRunner(object):
 
         return case_info_file
 
-    def _main_run_set_up(self,user_given_params, case_list_params=None,full_checks=True):
-        # set up new messagelogger to allow reruns of helper method
-        self.msg_logger = MessageLogger('main')
-        ml =self.msg_logger
+    def _prelimary_checks(self,params):
+        ml = self.msg_logger
 
-        ml.print_line()
-        ml.msg(f' {OTname} version {common_info.code_version} - preliminary setup')
-        self._check_python_version()
+        setup_util.check_python_version(ml)
+        # check for compulsory classes
+        # check reader params
+        if 'reader' not in params or len(params['reader']) < 2:
+            ml.msg('Parameter "reader" is required, or missing required parameters',
+                           hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
+                           fatal_error=True, crumbs='case_run_set_up', caller=self)
 
-        ml.exit_if_prior_errors('parameters have errors')
-
-        self.start_t0 = perf_counter()
-        self.start_date = datetime.now()
-
-        params = deepcopy(user_given_params)
-
-        working_params = self._decompose_params(params, full_checks=full_checks)
-
-
-        working_params = self._setup_output_folders(params, working_params)
-
-        # set numba config environment variables, before any import of numba, eg by readers
-        config_numba_environment(working_params['shared_settings'])
-
-        # look for file type and list of files, in time sorted order
-        working_params = self._get_hindcast_file_info(working_params)
-
-        self._write_raw_user_params(working_params['output_files'],user_given_params, case_list=case_list_params)
-
-        o = working_params['output_files']
-        o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base'])
-        ml.exit_if_prior_errors('errors in top level settings parameters')
-
-        return working_params
 
     def _main_run_end(self,case_info_files, num_case_errors,num_case_warnings,num_case_notes):
         # final info output
@@ -244,104 +263,51 @@ class _OceanTrackerRunner(object):
         ml.print_line()
         ml.close()
 
-    def _run_parallel(self,base_case_params, case_list_params):
+    def _run_parallel(self,base_case_params, case_list_params, run_builder):
         # run list of case params
-        self.helper_msg_logger = self.msg_logger  # keep references to write message at end as runs has main message logger
-
-        # set up using base case, which must have reader
-        # first put base_case into the te,plate, to ensure all keys are present
-        base_case_params_full = param_template()
-        base_case_params_full.update(base_case_params)
-        working_bc =self._main_run_set_up(base_case_params_full, full_checks=False)
         ml = self.msg_logger
-        ml.exit_if_prior_errors('base case parameter errors')
+        self.helper_msg_logger =  ml # keep references to write message at end as runs has main message logger
 
-        # get defaults for setting of base case shared settings used for all cases
-        for key, item in common_info.shared_settings_defaults.items():
-            working_bc['shared_settings'] =   working_bc['shared_settings']  if item is not None else item.get_default()
+        # split base_case_params into shared and case params
+        base_working_params = setup_util.decompose_params(base_case_params, ml, caller=self, crumbs='_run_parallel decompose base case params')
 
-        # work out how many processors to use
-        c =get_versions_computer_info.get_computer_info()
-        if working_bc['shared_settings']['processors'] is None:
-            working_bc['shared_settings']['processors']  = min(max(c['CPUs_hardware']-1,1),  len(case_list_params))
+        base_working_params['settings'] = setup_util.merge_settings_with_defaults(base_working_params['settings'], 'processors', ml,
+                                                                                                crumbs='setting processor number', caller=self)
+
+        case_run_builder_list=[]
+
+        for n_case, case_params in enumerate(case_list_params):
+            case_working_params = setup_util.decompose_params(case_params, msg_logger=ml, caller=self)
+
+            case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, case_working_params, ml,
+                                                                                 crumbs=f'_run_parallel case #[{n_case}]', caller=None)
+
+            # get any missing settings from defaults after merging with base case settings
+            case_working_params['settings'] = merge_params_with_defaults(case_working_params['settings'],
+                                                                        common_info.all_setting_defaults, ml, crumbs=f'_run_parallel case #[{n_case}]',
+                                                                        caller=self, check_for_unknown_keys=True)
 
 
-        # get list working params, with setting merged with defaults
-        working_case_list = []
-        for n_case, p in enumerate(case_list_params):
-            # decompose params but ignore share params , as they come from first case
-            # overwrite shared params from first case
-            msg_tag = ' Building parallel run case #' + str(n_case)
-
-            # remove reader if present in case, will get base case reader below
-            if 'reader' in p :
-                if len(p['reader']) > 0:
-                    ml.msg(f'Reader class can only be set in base case', crumbs=msg_tag, warning=True, hint='ignoring this cases reader class')
-                p.pop('reader')
-            working_params = self._decompose_params(p, full_checks=False)
-
-            # build up full params
-            # copy shared setting from base case, merging with defaults
-            for key, item in working_bc['shared_settings'].items():
-                if key in p and p[key] is not None: # check if present and given by template
-                    ml.msg(f'Setting "{key}" must be the same for all cases', crumbs=msg_tag,  warning=True, hint='ignoring the setting in case list and using base case setting ')
-                # get given base case or default value
-                working_params['shared_settings'][key] = item if item is not None else common_info.shared_settings_defaults[key].get_default()
-
-            # for other settings, use the case list if presents, or use default if not in bas case
-            for key, item in working_bc['case_settings'].items():
-                if key in p and p[key] is not None:
-                    working_params['case_settings'][key] = p[key]
-                else:
-                    working_params['case_settings'][key] = item if item is not None else common_info.case_settings_defaults[key].get_default()
-
-            # copy over core classes
-            for key, item in working_bc['core_classes'].items():
-                if key == 'reader':
-                    working_params['core_classes']['reader'] = item
-                else:
-                    working_params['core_classes'][key] = deepcopy(item)
-                    if key in p:
-                        # update base case with any case key-value pairs
-                        working_params['core_classes'][key].update(p[key])
-
-            # add class dict to full case
-            for role in working_bc['class_dicts'].keys():
-                # add with base case names
-                for name, item in working_bc['class_dicts'][role].items():
-                    working_params['class_dicts'][role][name] = item
-
-                # add case list named classes if role in p
-                for name, item in working_params['class_dicts'][role].items():
-                    if name in base_case_params_full[role]:
-                        ml.msg(f'For the  class role "{role}", the named class "{name}" has been used in the base for case' , warning=True,
-                                   hint= 'names should be unique, will ignore class in the base case', crumbs=msg_tag)
-                        working_params['class_dicts'][role][name] = item
-
-            # check at least one release group from base or case params
-            if len(working_params['class_dicts']['release_groups']) ==0:
-                ml.msg(f'Must have at lest one release group from base case parms or case list', fatal_error=True,
-                       hint='check "release_groups" key in both base and case list parameters', crumbs=msg_tag)
-
-            ml.exit_if_prior_errors('parameter errors case ' + msg_tag)
+            ml.exit_if_prior_errors(f'Errors in setting up case #{n_case}')
+            case_run_builder = deepcopy(run_builder)
+            case_run_builder['caseID'] = n_case
+            case_run_builder['working_params'] = case_working_params
 
             # add and tweak output file info
-            working_params['caseID'] = n_case
-            working_params['output_files'] = deepcopy(working_bc['output_files'])
-            working_params['output_files']['output_file_base'] += '_C%03.0f' % (n_case)
-            working_params['reader_builder'] = working_bc['reader_builder']
-            working_params['nested_reader_builders'] = working_bc['nested_reader_builders']
+            case_run_builder['output_files']['output_file_base'] += '_C%03.0f' % (n_case)
 
-            # now add to list to run
-            working_case_list.append(deepcopy(working_params))
+            # now add builder to list to run
+            case_run_builder_list.append(case_run_builder)
+
+
 
         # do runs
-        num_proc = working_bc['shared_settings']['processors']
+        num_proc = base_working_params['settings']['processors']
         ml.progress_marker(' oceantracker:multiProcessing: processors:' + str(num_proc))
 
         # run // cases
         with multiprocessing.Pool(processes=num_proc) as pool:
-            case_results = pool.map(self._run1_case, working_case_list)
+            case_results = pool.map(self._run1_case, case_run_builder_list)
 
         ml.progress_marker('parallel pool complete')
 
@@ -377,84 +343,23 @@ class _OceanTrackerRunner(object):
         caseInfo_file, return_msgs= ot.run_case(deepcopy(working_params))
         return caseInfo_file, return_msgs
 
-    def _decompose_params(self, params, full_checks=True, crumbs=''):
-        ml = self.msg_logger
-        w={'caseID':0, 'shared_settings':{},'case_settings':{},
-           'core_classes':{k: {} for k in common_info.core_class_list}, # insert full list and defaults
-           'class_dicts': {k: {} for k in common_info.class_dicts_list},
-           }
 
-
-        known_top_level_keys= list(common_info.shared_settings_defaults.keys())\
-                            + list(common_info.case_settings_defaults.keys()) \
-                            + common_info.class_dicts_list\
-                            + common_info.core_class_list
-
-        # check for compulsory classes
-        # check require classes are given
-        if full_checks:
-            if len(params['reader']) < 2:
-                ml.msg('Parameter "reader" is required, got ' +str(params['reader']),
-                       hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
-                       fatal_error=True, crumbs=crumbs)
-
-        if full_checks:
-            if  'release_groups' not in  params or len(params['release_groups']) < 1:
-                ml.msg('Parameter "release_groups" is required, with at least one named release group',
-                       hint=' add a least one named release group class to the "release_groups" key',
-                       fatal_error=True,crumbs=crumbs, link='howto_release_groups')
-
-        # split and check for unknown keys
-        for key, item in params.items():
-            k = copy(key)
-            if len(k) != len(k.strip()):
-                ml.msg(f'Removing leading or trailing blanks from top level parameter key "{key}"', warning=True)
-                k = key.strip() # remove leading/trailing blanks
-
-            if type(item) is tuple:
-                # check item not a tuple
-                ml.msg(f'Top level setting or class must be "key" : value pairs, got a tuple for key= "{key}", value= "{str(item)}"', fatal_error=True,crumbs=crumbs,
-                               hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead')
-
-            elif k in common_info.shared_settings_defaults.keys():
-
-                w['shared_settings'][k] = item
-
-            elif k in common_info.core_class_list:
-
-                w['core_classes'][k] = item
-
-            elif k in common_info.case_settings_defaults.keys():
-                    w['case_settings'][k] = item
-
-            elif k in common_info.class_dicts_list:
-                if type(item) is not dict:
-                    ml.msg('class dict type "' + key +'" must contain a dictionary, where key is name of class, value is a dictionary of parameters',
-                                     hint = ' for this key got type =' +str(type(item)),
-                                   fatal_error=True, crumbs=crumbs)
-                w['class_dicts'][k] = item
-
-            else:
-                ml.spell_check(' top level parm./key, ignoring', key,known_top_level_keys, caller=self,
-                               crumbs=crumbs, link='parameter_ref_toc')
-
-        ml.exit_if_prior_errors('Errors in decomposing parameters')
-        # merge settings params
-        w['shared_settings'] = merge_params_with_defaults(w['shared_settings'],  common_info.shared_settings_defaults,
-                                ml, crumbs='merging settings and checking against defaults')
-        w['case_settings'] = merge_params_with_defaults(w['case_settings'], common_info.case_settings_defaults,
-                                                          ml, crumbs='merging settings and checking against defaults')
-        return w
-
-    def _get_hindcast_file_info(self, working_params ):
+    def _get_hindcast_file_info(self, params, run_builder ):
         # created a dict which can be used to build a reader
         t0= perf_counter()
         ml = self.msg_logger
         class_importer= ClassImporter(path.dirname(__file__), msg_logger=ml)
-        reader_params =  working_params['core_classes']['reader']
+        reader_params =  params['reader']
 
         if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
             ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',fatal_error=True, exit_now=True )
+        # check input dir exists
+
+        if path.isdir(reader_params['input_dir']):
+            ml.progress_marker(f'Found input dir "{reader_params["input_dir"]}"')
+        else:
+            ml.msg(f' Could not find input dir "{reader_params["input_dir"]}"',
+                   hint ='Check reader parameter "input_dir"', fatal_error=True, exit_now=True)
 
         reader_params, file_list = get_hydro_model_info.find_file_format_and_file_list(reader_params,class_importer, ml)
 
@@ -462,15 +367,17 @@ class _OceanTrackerRunner(object):
         reader = class_importer.new_make_class_instance_from_params(reader_params,'reader',  default_classID='reader', crumbs='primary reader>')
 
         ml.exit_if_prior_errors() # class name missing or missing required variables
-        working_params['reader_builder']=dict(params=reader_params,
+        run_builder['reader_builder']=dict(params=reader_params,
                                               file_info= reader.get_hindcast_files_info(file_list, ml)
                                               )
 
         ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
 
         # get file info for nested readers
-        working_params['nested_reader_builders']= {}
-        for name, params in working_params['class_dicts']['nested_readers'].items():
+        run_builder['nested_reader_builders']= {}
+        if 'nested_readers' not in params: params['nested_readers'] ={}
+
+        for name, params in params['nested_readers'].items():
             t0 = perf_counter()
             nested_params, nested_file_list = get_hydro_model_info.find_file_format_and_file_list(params,class_importer, ml)
             nested_reader = class_importer.new_make_class_instance_from_params( nested_params,'reader', default_classID='reader', crumbs=f'nested reader{name}>')
@@ -478,77 +385,13 @@ class _OceanTrackerRunner(object):
             d= dict(params=nested_params,
                     file_info= nested_reader.get_hindcast_files_info(nested_file_list, ml)
                     )
-            working_params['nested_reader_builders'][name]=d
+            run_builder['nested_reader_builders'][name]=d
             ml.progress_marker(f'sorted nested hyrdo-model files in time order{name}', start_time=t0)
 
-        return working_params
+        return run_builder
 
 
-    def _setup_output_folders(self, user_given_params,working_params):
-        # setus up params, opens log files/ error handling, required befor mesage loger can be used
-        ml = self.msg_logger
-        settings= working_params['shared_settings']
-        # get output files location
-        root_output_dir = path.abspath(path.normpath(settings['root_output_dir']))
-        run_output_dir = path.join(root_output_dir, settings['output_file_base'])
 
-        if settings['add_date_to_run_output_dir']:
-            run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
-
-        # kill existing folder
-        if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
-
-        try:
-            makedirs(run_output_dir)  # make  and clear out dir for output
-        except OSError as e:
-            # path may already exist, but if not through other error, exit
-            ml.msg(f'Failed to make run output dir:{run_output_dir}',
-                           exception=e, traceback_str=traceback.print_exc())
-
-        # write a copy of user given parameters, to help with debugging and code support
-        fb = 'users_params_' + settings['output_file_base']
-        json_util.write_JSON(path.join(run_output_dir, fb), user_given_params)
-
-        working_params['output_files'] = {'root_output_dir': root_output_dir,
-                                       'run_output_dir': run_output_dir,
-                                       'output_file_base': settings['output_file_base'],
-                                       'runInfo_file': settings['output_file_base'] + '_runInfo.json',
-                                       'runLog_file': settings['output_file_base'] + '_runScreen.log',
-                                       'run_error_file': settings['output_file_base'] + '_run.err',
-                                       'users_params_json': fb + '.json',
-                                       }
-        ml.msg('output is in dir= ' + run_output_dir,tabs=2, note=True)
-        return working_params
-
-    def  _write_raw_user_params(self,output_files, params, case_list=None):
-        ml = self.msg_logger
-
-        # different if run in parallel
-        if case_list is None:
-            out = params
-        else:
-            out = {'base_case_params': params, 'case_list_params': case_list}
-
-        fn= output_files['output_file_base']+'_raw_user_params.json'
-        output_files['raw_user_params'] = fn
-        json_util.write_JSON(path.join(output_files['run_output_dir'],fn),out)
-        ml.msg('to help with debugging, parameters as given by user  are in "' + fn + '"',  tabs=2, note=True)
-
-    def _check_python_version(self):
-            # set up log files for run
-            ml = self.msg_logger
-            v = get_versions_computer_info.get_code_version()
-            ml.msg(' Python version: ' + v['python_version'], tabs=2)
-            p_major =v['python_major_version']
-            p_minor= v['python_minor_version']
-            install_hint = 'Install Python 3.10 or used environment.yml to build a Conda virtual environment named oceantracker'
-            if not ( p_major > 2 and p_minor >= 9):
-                ml.msg(common_info.package_fancy_name + ' requires Python 3 , version >= 3.9  and < 3.11',
-                             hint=install_hint, warning=True, tabs=1)
-            if (p_major == 3 and p_minor >= 11):
-                ml.msg(common_info.package_fancy_name + ' is not yet compatible with Python 3.11, as not all imported packages have been updated, eg Numba', warning=True)
-
-            ml.exit_if_prior_errors()
 
 
     def _write_run_info_json(self, case_info_files, t0):

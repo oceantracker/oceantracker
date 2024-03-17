@@ -20,7 +20,6 @@ class ClassImporter(object):
         self.full_name_class_map = {}
         for class_role, classes in self.class_tree.items():
             for name, info in classes.items():
-
                 mod_str = info['mod_str']
                 short_name = class_role + '.' + name
 
