@@ -5,6 +5,9 @@ import  oceantracker.util.time_util as time_util
 import numpy as np
 from datetime import  datetime
 from oceantracker.util.ncdf_util import NetCDFhandler
+from oceantracker.shared_info import SharedInfo as si
+
+
 class GLORYSreaderSurface(_BaseReader):
 
     def __init__(self):
@@ -73,7 +76,6 @@ class GLORYSreaderSurface(_BaseReader):
 
     def build_hori_grid(self, nc, grid):
 
-        si = self.shared_info
         # pre-read useful info
         # make land mask from velocity field
         #grid['land_mask']  = nc.read_a_variable(self.params['grid_variable_map']['mask']) == 0
@@ -132,7 +134,7 @@ class GLORYSreaderSurface(_BaseReader):
         return f_params
     def read_file_var_as_4D_nodal_values(self,nc, grid, var_name, file_index=None):
         # reformat file variable into 4D time,node,depth, components  form
-        si =self.shared_info
+
         dm = self.params['dimension_map']
 
         data, data_dims = self.read_field_var(nc, var_name, sel=file_index)

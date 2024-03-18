@@ -2,6 +2,8 @@ from oceantracker.release_groups._base_release_group import _BaseReleaseGroup
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC,ParameterCoordsChecker as PCC
 
+from oceantracker.shared_info import SharedInfo as si
+
 class GridRelease(_BaseReleaseGroup):
     def __init__(self):
         # set up info/attributes
@@ -19,7 +21,7 @@ class GridRelease(_BaseReleaseGroup):
         info['release_type'] = 'grid'
 
     def initial_setup(self):
-        si = self.shared_info
+         
         params = self.params
         info = self.info
 

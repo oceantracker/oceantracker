@@ -4,6 +4,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
 from oceantracker.util.time_util import seconds_to_isostr
+from oceantracker.shared_info import SharedInfo as si
 from time import  perf_counter
 from copy import copy
 # run fields nested with outer main readers grid
@@ -15,7 +16,7 @@ class DevNestedFields(ParameterBaseClass):
     readers=[] # first is outer grid, nesting the others
 
     def initial_setup(self):
-        si = self.shared_info
+
         ml = si.msg_logger
         # setup outer grid first
 
@@ -72,7 +73,7 @@ class DevNestedFields(ParameterBaseClass):
         pass
 
     def final_setup(self):
-        si = self.shared_info
+
         ml = si.msg_logger
         # do final setup for each grid
         for fgm in self.fgm_hydro_grids:
@@ -96,7 +97,7 @@ class DevNestedFields(ParameterBaseClass):
 
     def setup_dispersion_and_resuspension(self):
         # see if al files have the required variables
-        si = self.shared_info
+
         ml = si.msg_logger
         has_bottom_stress = []
         has_A_Z_profile  = []
@@ -154,7 +155,7 @@ class DevNestedFields(ParameterBaseClass):
         self.fgm_hydro_grids[0].add_part_prop_from_fields_plus_book_keeping()
 
     def are_points_inside_domain(self,x,include_dry_cells):
-        si = self.shared_info
+
         part_prop = si.classes['particle_properties']
         # set up space
         N= x.shape[0]
@@ -196,7 +197,6 @@ class DevNestedFields(ParameterBaseClass):
         return vals
 
     def setup_time_step(self, time_sec, xq, active, fix_bad=True):
-        si= self.shared_info
         part_prop=  si.classes['particle_properties']
 
         #todo make faster with id buffers
@@ -238,7 +238,7 @@ class DevNestedFields(ParameterBaseClass):
     def interp_field_at_particle_locations(self, field_name, active, output=None):
 
         # loop over grids find interpolated values
-        si = self.shared_info
+
         part_prop = si.classes['particle_properties']
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
@@ -256,7 +256,7 @@ class DevNestedFields(ParameterBaseClass):
 
     def update_tidal_stranding_status(self, time_sec, alive):
         # loop over grids
-        si = self.shared_info
+
         part_prop = si.classes['particle_properties']
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
@@ -267,7 +267,7 @@ class DevNestedFields(ParameterBaseClass):
 
     def fix_time_step(self, alive):
         # loop over grids
-        si = self.shared_info
+
         part_prop = si.classes['particle_properties']
 
         for n, fgm in enumerate(self.fgm_hydro_grids):

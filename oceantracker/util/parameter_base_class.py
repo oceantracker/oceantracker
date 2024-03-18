@@ -2,9 +2,8 @@ from  oceantracker.util import basic_util
 import numpy as np
 import traceback
 from time import perf_counter
-from oceantracker.shared_info_depricated import SharedInfoClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
-
+from oceantracker.shared_info import SharedInfo as si
 # parameter dictionaries are nested dictionaries or lists of dictionaries
 
 class ParameterBaseClass(object):
@@ -18,7 +17,6 @@ class ParameterBaseClass(object):
     # 6) Defaults must be set in .__init__()  using method ._update_default_param_dictionary({})
     # 7) children must call   super().__init__()   to get defaults of parent
 
-    shared_info = SharedInfoClass()  # for all to access
 
     def initial_setup(self): pass
 
@@ -69,8 +67,6 @@ class ParameterBaseClass(object):
 
     def check_class_required_fields_prop_etc(self, required_props_list=[],
                                              requires3D=None, crumbs=''):
-        si = self.shared_info
-
         for name in required_props_list:
             if name not in si.classes['particle_properties']:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.info['name']
@@ -82,7 +78,6 @@ class ParameterBaseClass(object):
 
     def remove_default_params(self, name_list):
         # used to get rid if paramters of parent class which are not used by a child class
-        si=self.shared_info
         for key in name_list:
             if key in self.default_params:
                 del self.default_params[key]
@@ -102,7 +97,6 @@ class ParameterBaseClass(object):
         #  a selection of particle IDs is made, eg status == moving
         # WARNING never refer directly to the partID_buffers, alawys use this method
         #         to access buffer, as buffer size is dynamically changing
-        si = self.shared_info
         current_particle_buffer_size = si.classes['particle_group_manager'].info['current_particle_buffer_size']
 
         if name not in self.partID_buffers:

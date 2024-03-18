@@ -1,7 +1,8 @@
 from oceantracker.particle_properties._base_particle_properties import ParticleProperty
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker import shared_info as si2
+from oceantracker.shared_info import SharedInfo as si
+
 
 class AgeDecay(ParticleProperty):
 
@@ -20,10 +21,8 @@ class AgeDecay(ParticleProperty):
 
     def update(self,n_time_step, time_sec,active):
         # update decay prop each time step
-        part_op = si2.particle_operations
+        part_prop = si.classes['particle_properties']
+        age = part_prop['age'].get_values(active)
 
-        age = self.shared_info.classes['particle_properties']['age'].get_values(active)
-        #age = part_op.get_values(si2.particle_properties['age'], active)
         val = self.params['initial_value']*np.exp(-np.abs(age) / self.params['decay_time_scale'])
         self.set_values(val,active)
-        #part_op.set_values(self, val, active )# self.set_values(val,active

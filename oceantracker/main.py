@@ -49,14 +49,16 @@ def run_parallel(base_case_params, case_list_params=[{}]):
     case_info_files  = ot.run(base_case_params, case_list_params)
     return case_info_files
 
+
+msg_logger = MessageLogger()
+
 class OceanTracker():
     def __init__(self,params=None):
         self.params= param_template() if params is None else params
         self.case_list_params=[]
-
-        self.msg_logger = MessageLogger('helper')
-        self.msg_logger.print_line()
-        self.msg_logger.msg('Starting OceanTracker helper class')
+        msg_logger.screen_tag('helper')
+        msg_logger.print_line()
+        msg_logger.msg('Starting OceanTracker helper class')
 
     # helper methods
     def settings(self,case=None, **kwargs):
@@ -67,7 +69,7 @@ class OceanTracker():
             p[key]= kwargs[key]
 
     def add_class(self, class_role =None,case=None, **kwargs):
-        ml = self.msg_logger
+        ml = msg_logger
         known_class_roles = common_info.class_dicts_list + common_info.core_class_list
         if class_role is None:
             ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True, caller =self)
@@ -112,7 +114,7 @@ class OceanTracker():
 
     def _check_case(self,case, crumbs):
         # check and make space for case
-        ml = self.msg_logger
+        ml = msg_logger
 
         # no case number given add to ordinary params
         if case is None: return self.params
@@ -130,23 +132,25 @@ class OceanTracker():
         return self.case_list_params[case]
 
     def run(self):
-        self.msg_logger.progress_marker('Starting run using helper class')
+        msg_logger.progress_marker('Starting run using helper class')
         ot= _OceanTrackerRunner()
         # todo print helper message here at end??
-        ot.helper_msg_logger = self.msg_logger  # used to print helper messages at end and write to file
+        ot.helper_msg_logger = msg_logger  # used to print helper messages at end and write to file
 
         case_info_file = ot.run(self, self.params, self.case_list_params)
 
-        self.msg_logger.close()
 
         return case_info_file
 
 class _OceanTrackerRunner(object):
     def __init__(self):
-        self.msg_logger = MessageLogger('main')
-
+        pass
+    
     def run(self,params, case_list_params = None):
-        ml = self.msg_logger
+        ml = msg_logger
+        ml.set_screen_tag('Main')
+
+
         run_builder= dict()
         self.start_t0 = perf_counter()
         self.start_date = datetime.now()
@@ -155,8 +159,10 @@ class _OceanTrackerRunner(object):
         ml.msg(f'{OTname} starting main:')
         ml.progress_marker('Output dir set up.')
         # setup output dir and msg files
-        o = setup_util.setup_output_dir(params, self.msg_logger, crumbs='setting up output dir')
+        o = setup_util.setup_output_dir(params, ml, crumbs='setting up output dir')
+
         o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base'])
+
         run_builder['output_files'] = o
 
         setup_util.write_raw_user_params(run_builder['output_files'],params,ml, case_list=case_list_params)
@@ -188,7 +194,7 @@ class _OceanTrackerRunner(object):
 
     def _run_single(self, user_given_params, run_builder):
 
-        ml = self.msg_logger
+        ml = msg_logger
 
 
         run_builder['caseID'] = 0 # tag case
@@ -225,7 +231,7 @@ class _OceanTrackerRunner(object):
         return case_info_file
 
     def _prelimary_checks(self,params):
-        ml = self.msg_logger
+        ml = msg_logger
 
         setup_util.check_python_version(ml)
         # check for compulsory classes
@@ -238,7 +244,7 @@ class _OceanTrackerRunner(object):
 
     def _main_run_end(self,case_info_files, num_case_errors,num_case_warnings,num_case_notes):
         # final info output
-        ml = self.msg_logger
+        ml = msg_logger
         self._write_run_info_json(case_info_files, self.start_t0)
 
         ml.show_all_warnings_and_errors()
@@ -265,7 +271,7 @@ class _OceanTrackerRunner(object):
 
     def _run_parallel(self,base_case_params, case_list_params, run_builder):
         # run list of case params
-        ml = self.msg_logger
+        ml = msg_logger
         self.helper_msg_logger =  ml # keep references to write message at end as runs has main message logger
 
         # split base_case_params into shared and case params
@@ -347,7 +353,7 @@ class _OceanTrackerRunner(object):
     def _get_hindcast_file_info(self, params, run_builder ):
         # created a dict which can be used to build a reader
         t0= perf_counter()
-        ml = self.msg_logger
+        ml = msg_logger
         class_importer= ClassImporter(path.dirname(__file__), msg_logger=ml)
         reader_params =  params['reader']
 
@@ -396,7 +402,7 @@ class _OceanTrackerRunner(object):
 
     def _write_run_info_json(self, case_info_files, t0):
         # read first case info for shared info
-        ml = self.msg_logger
+        ml = msg_logger
         ci = deepcopy(case_info_files) # dont alter input
         if type(ci) is not list: ci= [ci]
 
@@ -445,7 +451,8 @@ class _OceanTrackerRunner(object):
         ml.msg('run summary with case file names   "' + o['runInfo_file'] + '"',  tabs=2, note=True)
 
     def close(self):
-        pass
+
+        msg_logger.close()
 
 def param_template():
     # return an empty parameter dictionary

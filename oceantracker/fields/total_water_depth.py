@@ -3,6 +3,7 @@ from numba import njit
 import numpy as np
 from oceantracker.fields._base_field import CustomFieldBase
 from oceantracker.util.numba_util import njitOT
+from oceantracker.shared_info import SharedInfo as si
 
 class TotalWaterDepth(CustomFieldBase):
     def __init__(self):
@@ -13,11 +14,11 @@ class TotalWaterDepth(CustomFieldBase):
                                  'is3D': PVC(False,bool)})
 
     def check_requirements(self):
-        si = self.shared_info
+        pass
 
 
     def update(self,fields,grid,active):
-        si = self.shared_info
+
         self.get_time_dependent_total_water_depth_from_tide_and_water_depth(
                 fields['tide'].data,
                 fields['water_depth'].data.ravel(),

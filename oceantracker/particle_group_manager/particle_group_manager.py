@@ -5,6 +5,7 @@ from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from  oceantracker.particle_group_manager.util import  pgm_util
+from oceantracker.shared_info import SharedInfo as si
 
 # holds and provides access to different types a group of particle properties, eg position, field properties, custom properties
 class ParticleGroupManager(ParameterBaseClass):
@@ -15,13 +16,10 @@ class ParticleGroupManager(ParameterBaseClass):
         self.add_default_params( { 'particle_buffer_chunk_size': PVC(500_000, int, min=1)})
 
         # set up pointer dict and lists
-        si = self.shared_info
         self.status_flags= particle_info['status_flags']
         self.known_prop_types = particle_info['known_prop_types']
 
     def initial_setup(self):
-        si= self.shared_info
-
         info=self.info
         # is data 3D
         info['particles_in_buffer'] = 0
@@ -70,14 +68,12 @@ class ParticleGroupManager(ParameterBaseClass):
     def final_setup(self):
         # make a single block of memory from all particle properties
         # as numpy dtype structured array
-        si = self.shared_info
         info = self.info
 
         pass
 
     def add_release_group(self,name,params):
         #doto is this needed
-        si = self.shared_info
         i = si.add_user_class('release_groups',name, params,
                                            crumbs='Adding release groups', default_classID='release_groups')
         i.initial_setup()
@@ -94,7 +90,6 @@ class ParticleGroupManager(ParameterBaseClass):
     #@function_profiler(__name__)
     def release_particles(self,n_time_step, time_sec):
         # see if any group is ready to release
-        si = self.shared_info
         new_buffer_indices = np.full((0,), 0, np.int32)
 
         for name, rg in si.classes['release_groups'].items():
@@ -136,7 +131,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def release_a_particle_group_pulse(self, release_data, time_sec):
         # release one pulse of particles from given group
-        si = self.shared_info
         info= self.info
         smax = info['particles_in_buffer'] + release_data['x'].shape[0]
 
@@ -193,7 +187,6 @@ class ParticleGroupManager(ParameterBaseClass):
         return new_buffer_indices
 
     def _expand_particle_buffers(self,num_particles):
-        si = self.shared_info
         info = self.info
         # get number of chunks required rounded up
         n_chunks = max(1,int(np.ceil(num_particles/self.params['particle_buffer_chunk_size'])))
@@ -215,7 +208,6 @@ class ParticleGroupManager(ParameterBaseClass):
         # property for group of particles, ie not properties of individual particles, eg time, number released
         # **karwgs must have at least name
         params = kwargs
-        si = self.shared_info
         i = si.add_user_class('time_varying_info',name,params,  class_type='manual_update',  crumbs=' setup time varing reader info')
         i.initial_setup()
 
@@ -224,7 +216,6 @@ class ParticleGroupManager(ParameterBaseClass):
             w.create_variable_to_write(name, 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
 
     def add_particle_property(self, name, prop_type, prop_params, crumbs=''):
-        si = self.shared_info
         ml = si.msg_logger
         # todo make name first compulsory argument of this function and create_class_dict_instance
         if name is None:
@@ -273,7 +264,6 @@ class ParticleGroupManager(ParameterBaseClass):
     #@function_profiler(__name__)
     def update_PartProp(self,n_time_step, time_sec, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
-        si = self.shared_info
         t0 = perf_counter()
         si.classes['time_varying_info']['time'].set_values(time_sec)
         si.classes['time_varying_info']['num_part_released_so_far'].set_values(self.info['particles_released'])
@@ -297,7 +287,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def status_counts_and_kill_old_particles(self, t):
         # deactivate old particles for each release group
-        si = self.shared_info
         part_prop = si.classes['particle_properties']
         info = self.info
 
@@ -312,7 +301,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def remove_dead_particles_from_memory(self):
         # in comapct mode, if too many   dead particles remove then from buffer
-        si= self.shared_info
         info = self.info
         part_prop = si.classes['particle_properties']
 
@@ -340,7 +328,7 @@ class ParticleGroupManager(ParameterBaseClass):
         releaseGroups_user_maps = {'particle_release_userRelease_groupID_map': {} , 'particle_release_user_release_group_name_map': {}}
 
         #todo use i.info['nsequence'] for rg id
-        for n, i in enumerate(self.shared_info.classes['release_groups'].values()):
+        for n, i in enumerate(si.classes['release_groups'].values()):
             releaseGroups_user_maps['particle_release_userRelease_groupID_map'][str(i.params['user_release_groupID'])] = n
             releaseGroups_user_maps['particle_release_user_release_group_name_map'][str(i.params['user_release_group_name'])] = n
 
@@ -351,7 +339,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def is_particle_property(self,name, crumbs=''):
         #todo make si.classes['particle_properties'] = self.particle_properties
-        si = self.shared_info
         if name in list( si.classes['particle_properties'].keys()):
             return   True
         else:
@@ -359,7 +346,6 @@ class ParticleGroupManager(ParameterBaseClass):
                                          crumbs = crumbs, caller=self)
             return False
     def status_counts(self):
-        si = self.shared_info
         part_prop = si.classes['particle_properties']
         count_array = self.status_count_array
         pgm_util.do_status_counts(part_prop['status'].used_buffer(), count_array)
@@ -375,7 +361,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
 
     def screen_info(self):
-        si = self.shared_info
         sf= si.particle_status_flags
         info = self.info
         counts =self.status_count_array

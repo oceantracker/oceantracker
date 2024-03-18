@@ -9,6 +9,8 @@ import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_t
 from copy import deepcopy
 from oceantracker.common_info_default_param_dict_templates import node_types
 
+from oceantracker.shared_info import SharedInfo as si
+
 class SCHISMreaderNCDF(_BaseReader):
 
     def __init__(self):
@@ -45,7 +47,7 @@ class SCHISMreaderNCDF(_BaseReader):
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
     def read_horizontal_grid_coords(self, nc, grid):
-        si= self.shared_info
+
         x_var ='SCHISM_hgrid_node_x'
         x =  nc.read_a_variable(x_var)
         y = nc.read_a_variable('SCHISM_hgrid_node_y')
@@ -112,7 +114,7 @@ class SCHISMreaderNCDF(_BaseReader):
 
     def get_field_params(self,nc, name, crumbs=''):
         # work out if feild is 3D ,etc
-        si = self.shared_info
+
         fmap = self.params['field_variable_map']
 
         f_params = dict(time_varying = nc.is_var_dim(fmap[name][0], 'time'),
@@ -159,7 +161,7 @@ class SCHISMreaderNCDF(_BaseReader):
 
     def set_up_uniform_sigma(self, nc, grid):
         # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
-        si= self.shared_info
+
         # read first zlevel time step
         zlevel, zlevel_dims =self.read_field_var(nc, self.params['grid_variable_map']['zlevel'], sel=0)
 

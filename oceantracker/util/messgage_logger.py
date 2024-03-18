@@ -3,7 +3,6 @@ import traceback
 from time import  perf_counter
 from oceantracker.common_info_default_param_dict_templates import docs_base_url
 import difflib
-from oceantracker.util.parameter_base_class import ParameterBaseClass
 class GracefulError(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
@@ -19,16 +18,16 @@ def msg_str(msg,tabs=0):
     m +=  msg
     return m
 
-class MessageLogger(object):
-    def __init__(self, screen_tag = 'T',max_warnings = 50):
-        self.screen_tag = screen_tag + ':'
-        self.max_warnings = max_warnings
+class MessageLogger(object ):
+    def __init__(self):
         self.fatal_error_count = 0
         self.warnings_list=[]
         self.errors_list=[]
         self.notes_list = []
         self.log_file = None
         self.error_warning_count = 0
+        self.screen_tag = '???'
+        self.max_warnings = 25
 
         # build links lookup
         link_map= [['parameter_ref_toc', 'info/parameter_ref/parameter_ref_toc.html'],
@@ -39,13 +38,18 @@ class MessageLogger(object):
         for l in link_map:
             self.links[l[0]]= docs_base_url + l[1]
 
+    def settings(self, max_warnings=None):
+        self.max_warnings = None if max_warnings is None else 25
+    def set_screen_tag(self, screen_tag:str): self.screen_tag = screen_tag
+    def set_max_warnings(self, n:int): self.max_warnings = n
 
-    def set_up_files(self,run_output_dir,output_file_base):
-
+    def set_up_files(self, run_output_dir,output_file_base, append=False):
         # log file
+
         log_file_name = output_file_base + '_log.txt'
         self.log_file_name = path.join(run_output_dir, log_file_name)
-        self.log_file= open(self.log_file_name, 'w')
+
+        self.log_file = open(self.log_file_name, 'w')
 
         # kill any old error file
         error_file_name = output_file_base+ '.err'
@@ -60,6 +64,7 @@ class MessageLogger(object):
             hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
             fatal_error=False, exit_now=False, exception = None, traceback_str=None, dev=False):
 
+        if exit_now : fatal_error = True
         if exception is not None:
             fatal_error = True
             exit_now = True
@@ -99,7 +104,7 @@ class MessageLogger(object):
         if fatal_error and caller is not None:
             if hasattr(caller,'__class__'):
                 origin=  f' {caller.__class__.__name__}'
-                if isinstance(caller,ParameterBaseClass):
+                if hasattr(caller,'info'):
                     # add internal name if not None
                     origin +=  ' ' if caller.info["name"] is None else f'"{caller.info["name"]}"'
                     origin += f', instance #[{caller.info["instanceID"]}]'
@@ -200,4 +205,6 @@ class MessageLogger(object):
                   **kwargs)
 
     def close(self):
-        if self.log_file is not None: self.log_file.close()
+        if self.log_file is not None:
+            self.log_file.close()
+            self.log_file = None

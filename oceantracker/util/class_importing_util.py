@@ -8,6 +8,7 @@ from time import perf_counter
 
 from oceantracker.util.package_util import  scan_package_for_param_classes
 
+from oceantracker.shared_info import SharedInfo as si
 
 class ClassImporter(object):
     def __init__(self,package_root_dir, msg_logger=None):
@@ -89,6 +90,8 @@ class ClassImporter(object):
         i = class_obj() # make instance
         i.info['name'] = name
         i.info['class_role'] = class_role
+
+        i.shared_info = si  # todo allow old code to use this reference
 
         if merge_params:
             i.params  = merge_params_with_defaults(params, i.default_params, self.msg_logger, crumbs=crumbs,check_for_unknown_keys=check_for_unknown_keys)

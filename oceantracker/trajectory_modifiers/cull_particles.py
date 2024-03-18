@@ -4,8 +4,9 @@ from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTra
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.particle_properties.util import particle_comparisons_util
 
+from oceantracker.shared_info import SharedInfo as si
 
-# proptype for how to  cull particles, this version just culls random sltions
+
 class CullParticles(_BaseTrajectoryModifier):
     # splits all particles at given time interval
     def __init__(self):
@@ -16,6 +17,7 @@ class CullParticles(_BaseTrajectoryModifier):
                                  'cull_status_equal_to': PVC(None,str,possible_values=particle_info['status_flags'].keys()),
                                  'probability_of_culling' : PVC(0.1, float, min=0,max= 1.)
                                   })
+        self.class_doc('Prototype for how to  cull particles, this version just culls random particles, inherit and change "def select_particles_to_cull(self, time_sec, active):" method to give other behaviors')
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'])
@@ -25,10 +27,10 @@ class CullParticles(_BaseTrajectoryModifier):
 
         super().initial_setup()  # set up using regular grid for  stats
 
-        self.time_of_last_cull = self.shared_info.time_of_nominal_first_occurrence
+        self.time_of_last_cull = si.time_of_nominal_first_occurrence
 
     def select_particles_to_cull(self, time_sec, active):
-        si = self.shared_info
+         
         part_prop = si.classes['particle_properties']
 
         if self.params['cull_status_equal_to'] is None:
@@ -46,7 +48,7 @@ class CullParticles(_BaseTrajectoryModifier):
         if  abs(time_sec- self.time_of_last_cull ) <= self.params['cull_interval']: return
         self.time_of_last_cull = time_sec
 
-        si = self.shared_info
+
         part_prop =  si.classes['particle_properties']
 
         culled = self.select_particles_to_cull(time_sec, active)

@@ -3,6 +3,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 import numpy as np
+from oceantracker.shared_info import SharedInfo as si
 
 class TotalWaterDepth(ParticleProperty):
     def __init__(self):
@@ -11,11 +12,9 @@ class TotalWaterDepth(ParticleProperty):
                                  'is3D': PVC(False,bool)})
 
     def check_requirements(self):
-        si = self.shared_info
         self.check_class_required_fields_prop_etc(required_props_list=['tide', 'water_depth'])
 
     def update(self,n_time_step, time_sec, active):
-        si = self.shared_info
         self.get_time_dependent_total_water_depth_from_tide_and_water_depth(
             si.classes['particle_properties']['tide'].data,
             si.classes['particle_properties']['water_depth'].data,

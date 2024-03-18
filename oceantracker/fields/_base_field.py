@@ -2,7 +2,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import basic_util
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
-
+from oceantracker.shared_info import SharedInfo as si
 
 
 
@@ -22,7 +22,7 @@ class ReaderField(ParameterBaseClass):
         interp = None
 
     def initial_setup(self,grid, fields):
-        si = self.shared_info
+
         params= self.params
         #todo attach reader to field
         ncomp = 1

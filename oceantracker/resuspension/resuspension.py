@@ -5,6 +5,7 @@ from oceantracker.resuspension._base_resuspension import _BaseResuspension
 from oceantracker.util.numba_util import njitOT
 
 from numba import  njit
+from oceantracker.shared_info import SharedInfo as si
 
 class BasicResuspension(_BaseResuspension):
     # based on
@@ -24,7 +25,6 @@ class BasicResuspension(_BaseResuspension):
         self.check_class_required_fields_prop_etc(requires3D=True)
 
     def initial_setup(self, **kwargs):
-        si = self.shared_info
         info = self.info
         pass
 
@@ -32,7 +32,6 @@ class BasicResuspension(_BaseResuspension):
     def select_particles_to_resupend(self, active):
         # compare to single critical value
         # todo add comparison to  particles critical value from distribution, add new particle property to hold  individual critical values
-        si = self.shared_info
         part_prop = si.classes['particle_properties']
         on_bottom = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['on_bottom'], out = self.get_partID_buffer('B1'))
 
@@ -47,7 +46,6 @@ class BasicResuspension(_BaseResuspension):
         #todo move 'resuspension_factor' calc to initialize() when substeping removed
         #todo is friction velocity up to date?
         self.start_update_timer()
-        si= self.shared_info
         info = self.info
         info['resuspension_factor']= 2.0*0.4*si.z0*si.settings['time_step']/(1. - 2./np.pi)
         info['min_resuspension_jump_not_used'] = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])

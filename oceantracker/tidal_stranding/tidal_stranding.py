@@ -2,6 +2,7 @@ from numba import njit
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 from oceantracker.util.numba_util import njitOT
 from oceantracker.common_info_default_param_dict_templates import particle_info
+from oceantracker.shared_info import SharedInfo as si
 
 # globals
 status_stranded_by_tide = int(particle_info['status_flags']['stranded_by_tide'])
@@ -16,12 +17,12 @@ class TidalStranding(_BaseTrajectoryModifier):
         self.add_default_params({})
 
     def check_requirements(self):
-        si = self.shared_info
+         
         self.check_class_required_fields_prop_etc()
 
 
     def update(self,grid, time_sec,sel):
-        si=self.shared_info
+
         part_prop  =  si.classes['particle_properties']
 
         tidal_stranding_from_dry_cell_index(

@@ -6,6 +6,8 @@ from oceantracker.integrated_model._base_model import  _BaseModel
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.util import time_util
 
+from oceantracker.shared_info import SharedInfo as si
+
 class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
     # random polygon release in 2D or 3D
     #todo make work with lat lng
@@ -35,7 +37,6 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
 
     def add_settings_and_class_params(self):
         # change parameters
-        si = self.shared_info
         info = self.info
         params = self.params
 
@@ -82,7 +83,6 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
                 pass
 
     def initial_setup(self):
-        si = self.shared_info
         params = self.params
 
         if si. hydro_model_cords_in_lat_long:
@@ -123,7 +123,6 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         self._open_output_file()
 
     def update(self, n_time_step, time_sec):
-        si = self.shared_info
         part_prop = si.particle_properties
 
         # do LSC calculation on schedule
@@ -141,7 +140,6 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         pass
 
     def _calculate_LCS(self, n_pulse ,n_grid, n_lag, sel):
-        si = self.shared_info
         params = self.params
         nc = self.nc
         part_prop = si.particle_properties
@@ -168,7 +166,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         pass
 
     def _open_output_file(self):
-        si = self.shared_info
+
         params = self.params
         self.info['output_file'] = si.output_file_base + '_' + self.params['output_file_tag'] + '.nc'
         self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')

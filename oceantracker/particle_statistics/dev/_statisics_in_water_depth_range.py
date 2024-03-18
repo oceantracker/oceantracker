@@ -7,6 +7,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 from oceantracker.util.numba_util import njitOT
+from oceantracker.shared_info import SharedInfo as si
 
 class WaterDepthRangeStats(ParameterBaseClass):
     # methods to add depth range selection merge into basic stats via inheritance
@@ -22,7 +23,7 @@ class WaterDepthRangeStats(ParameterBaseClass):
 
     def select_particles_to_count(self, out):
         # count particles in less than given water depth with status large enough
-        part_prop= self.shared_info.classes['particle_properties']
+        part_prop= si.classes['particle_properties']
 
 
         sel= self.select_depth_range_status(part_prop['status'].used_buffer(),   part_prop['water_depth'].used_buffer(), self.params['min_depth'], self.params['water_depth_max'], out)

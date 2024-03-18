@@ -6,7 +6,7 @@ from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from oceantracker.util.numba_util import njitOT
 
-
+from oceantracker.shared_info import SharedInfo as si
 
 class _CorePolygonMethods(ParameterBaseClass):
 
@@ -22,7 +22,7 @@ class _CorePolygonMethods(ParameterBaseClass):
         self.file_tag = 'polygon_stats'
 
     def initial_setup(self, **kwargs):
-        si = self.shared_info
+
         ml = si.msg_logger
         params = self.params
 
@@ -56,7 +56,7 @@ class _CorePolygonMethods(ParameterBaseClass):
 
 
     def set_up_spatial_bins(self,nc ):
-        si= self.shared_info
+
         particles = si.classes['particle_group_manager']
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
@@ -80,7 +80,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         self.check_class_required_fields_prop_etc(required_props_list=['x'])
 
     def set_up_binned_variables(self,nc):
-        si = self.shared_info
+
         if not self.params['write']: return
         
         dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
@@ -104,7 +104,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
 
     def do_counts(self,n_time_step, time_sec, sel):
-        si= self.shared_info
+
         part_prop = si.classes['particle_properties']
         g = self.grid
 
@@ -159,7 +159,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
 
     def set_up_binned_variables(self,nc):
-        si = self.shared_info
+         
 
 
         # set up space for requested particle properties
@@ -177,7 +177,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
     def do_counts(self,n_time_step, time_sec, sel):
 
-        part_prop = self.shared_info.classes['particle_properties']
+        part_prop = si.classes['particle_properties']
         stats_grid = self.grid
 
         # update time stats  recorded

@@ -18,6 +18,8 @@ from oceantracker.reader.util import reader_util
 from pathlib import Path as pathlib_Path
 from oceantracker.common_info_default_param_dict_templates import node_types
 
+from oceantracker.shared_info import SharedInfo as si
+
 class _BaseReader(ParameterBaseClass):
 
     def __init__(self):
@@ -130,7 +132,6 @@ class _BaseReader(ParameterBaseClass):
     def initial_setup(self,file_info):
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
-        si = self.shared_info
         ml = si.msg_logger
         info = self.info
         self.info['file_info'] = file_info  # add file_info to reader info
@@ -145,11 +146,8 @@ class _BaseReader(ParameterBaseClass):
 
 
 
-    def final_setup(self):
-        si = self.shared_info
-        pass
+    def final_setup(self):      pass
     def set_up_grid(self, nc):
-        si = self.shared_info
         grid={}
         is3D_hydro = self.is_hindcast3D(nc)
         grid = self.build_hori_grid(nc, grid)
@@ -290,9 +288,8 @@ class _BaseReader(ParameterBaseClass):
 
     def build_hori_grid(self, nc, grid):
         # read nodal values and triangles
-        si = self.shared_info
         params = self.params
-        ml = self.shared_info.msg_logger
+        ml = si.msg_logger
 
         # read nodal x's
 
@@ -323,7 +320,6 @@ class _BaseReader(ParameterBaseClass):
     def construct_grid_variables(self, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
-        si = self.shared_info
         info = self.info
         msg_logger = si.msg_logger
         msg_logger.progress_marker('Starting grid setup')
@@ -395,7 +391,6 @@ class _BaseReader(ParameterBaseClass):
 
     def build_vertical_grid(self, nc, grid):
         # setup transforms on the data, eg regrid vertical if 3D to same sigma levels
-        si = self.shared_info
         params = self.params
         info = self.info
 
@@ -442,7 +437,6 @@ class _BaseReader(ParameterBaseClass):
         # fill buffer starting at hindcast time step nt0_buffer
         # todo change so does not read current step again after first fill of buffer
 
-        si = self.shared_info
         params = self.params
 
         t0 = perf_counter()
@@ -590,8 +584,6 @@ class _BaseReader(ParameterBaseClass):
 
     def read_time_variable_grid_variables(self, nc,grid, fields, buffer_index, file_index):
         # read time and  grid variables, eg time,dry cell
-        si = self.shared_info
-
         grid['time'][buffer_index] = self.read_time_sec_since_1970(nc, file_index=file_index)
 
         # add date for convenience
@@ -610,7 +602,6 @@ class _BaseReader(ParameterBaseClass):
     def time_to_hydro_model_index(self, time_sec):
         # convert date time to global time step in hindcast just before/after when forward/backtracking
         # always move forward through buffer, but file info is always forward in time
-        si = self.shared_info
         fi = self.info['file_info']
         model_dir = si.model_direction
 
@@ -627,7 +618,6 @@ class _BaseReader(ParameterBaseClass):
 
     def are_time_steps_in_buffer(self, time_sec):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
-        si = self.shared_info
         bi = self.info['buffer_info']
         model_dir = si.model_direction
 
@@ -640,7 +630,6 @@ class _BaseReader(ParameterBaseClass):
 
     def detect_lonlat_grid(self, xgrid):
         # look at range to see if too small to be meters grid
-        si = self.shared_info
         islatlong=  (np.nanmax(xgrid[:,0])- np.nanmin(xgrid[:,0]) < 360) or (np.nanmax(xgrid[:,0])- np.nanmin(xgrid[:,0]) < 360)
 
         if islatlong:

@@ -8,6 +8,9 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.reader.util import  reader_util
 from oceantracker.reader.util import  hydromodel_grid_transforms
+
+from oceantracker.shared_info import SharedInfo as si
+
 class DELFTFM(_BaseReader):
 
     def __init__(self):
@@ -37,7 +40,6 @@ class DELFTFM(_BaseReader):
 
     def is_file_format(self,file_name):
         # check if file matches this file format
-        si = self.shared_info
         ml = si.msg_logger
         nc = NetCDFhandler(file_name,'r')
         is_file_type= nc.is_var('mesh2d_node_x') and nc.is_var('mesh2d_face_nodes')
@@ -65,7 +67,7 @@ class DELFTFM(_BaseReader):
         return time
 
     def read_horizontal_grid_coords(self, nc, grid):
-        si = self.shared_info
+
         var_names = self.params['grid_variable_map']['x']
         x = np.stack((nc.read_a_variable(var_names[0]), nc.read_a_variable(var_names[1])), axis=1).astype(np.float64)
         var_names_cell = self.params['grid_variable_map']['x_cell']
@@ -105,7 +107,7 @@ class DELFTFM(_BaseReader):
         return grid
 
     def is_hindcast3D(self, nc):
-        si = self.shared_info
+
         ml = si.msg_logger
         uname=self.params['field_variable_map']['water_velocity'][0]
         is3D = nc.is_var_dim(uname,'nmesh2d_layer')
@@ -119,7 +121,7 @@ class DELFTFM(_BaseReader):
         fm = self.params['field_variable_map']
         var_file_name=fm['water_velocity'][0]
 
-        if self.shared_info.is3D_run:#
+        if si.is3D_run:#
             # todo 3D not working yet
             #  3D velocity, check if vertical vel file exits
             if self.get_3D_var_file_name(nc,fm['water_velocity'][2]) is not None:
@@ -139,7 +141,6 @@ class DELFTFM(_BaseReader):
 
     def read_dry_cell_data(self, nc, grid, fields, file_index, is_dry_cell_buffer, buffer_index):
         # get dry cells from water depth and tide
-        si = self.shared_info
         # no tide data so set on min water depth?
 
         mean_water_depth = np.nanmean(fields['water_depth'].data[0,:,0,0][grid['triangles']],axis=1)

@@ -8,6 +8,8 @@ from os import path
 from datetime import datetime
 import numpy as np
 
+from oceantracker.shared_info import SharedInfo as si
+
 class _BaseTriangleProperties(ParameterBaseClass):
 
     def __init__(self):
@@ -33,7 +35,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
 
     def set_up_output_file(self):
         # set up output file
-        si = self.shared_info
+
         grid = si.classes['field_group_manager'].grid
 
         self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_' + self.info['name'] + '.nc'
@@ -51,7 +53,6 @@ class _BaseTriangleProperties(ParameterBaseClass):
         self.info['time_last_stats_recorded'] = si.time_of_nominal_first_occurrence
 
     def select_particles_to_count(self):
-        si= self.shared_info
         part_prop =  si.classes['particle_properties']
         return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['stationary'], out=self.get_partID_buffer('B1'))
 
@@ -67,9 +68,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
     def close(self):
 
         if hasattr(self,'nc'):
-            si = self.shared_info
             nc = self.nc
-
             # add attributes mapping release index to release group name
             output_util.add_release_group_ID_info_to_netCDF(nc, si.classes['release_groups'])
 

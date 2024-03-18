@@ -3,6 +3,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.particle_properties.util import particle_comparisons_util
 
+from oceantracker.shared_info import SharedInfo as si
 
 # proptype for how to  split particles
 class SplitParticles(_BaseTrajectoryModifier):
@@ -18,12 +19,11 @@ class SplitParticles(_BaseTrajectoryModifier):
     def initial_setup(self):
 
         super().initial_setup()  # set up using regular grid for  stats
-        si= self.shared_info
         self.time_of_last_split = si.run_info['start_time']
 
     def select_particles_to_split(self, time_sec, active):
         # get indices of particles to split
-        si = self.shared_info
+         
         part_prop = si.classes['particle_properties']
         if self.params['split_status_equal_to'] is None:
             eligible_to_split = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags[self.params['split_status_greater_than']], out=self.get_partID_buffer('B1'))
@@ -36,11 +36,11 @@ class SplitParticles(_BaseTrajectoryModifier):
         return split
 
     def update(self,n_time_step, time_sec, active):
-        si = self.shared_info
+         
         part_prop = si.classes['particle_properties']
 
         if  abs(time_sec - self.time_of_last_split) <= self.params['splitting_interval']:  return
-        si = self.shared_info
+         
         self.time_of_last_split  = time_sec
 
         # split given fraction

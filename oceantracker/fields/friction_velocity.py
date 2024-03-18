@@ -3,6 +3,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.util.numba_util import njitOT
 from numba import njit
 import numpy as np
+from oceantracker.shared_info import SharedInfo as si
 
 class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
     def __init__(self):
@@ -11,12 +12,9 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
 
 
     def check_requirements(self):
-        si = self.shared_info
-
         self.check_class_required_fields_prop_etc(requires3D=True)
 
     def update(self, fields,grid,buffer_index):
-        si = self.shared_info
 
         if 'sigma' in grid:
             # sigma model
@@ -66,7 +64,6 @@ class FrictionVelocityFromBottomStress(FrictionVelocityFromNearSeaBedVelocity):
 
 
     def update(self, fields,grid, buffer_index):
-        si = self.shared_info
         self.calc_friction_velocity_from_bottom_stress(buffer_index,fields['bottom_stress'].data,  si.settings['water_density'],self.data)
 
 

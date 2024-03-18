@@ -3,7 +3,7 @@ import numpy as np
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from oceantracker.particle_properties.util import particle_operations_util
-
+from oceantracker.shared_info import SharedInfo as si
 
 class LogPolygonEntryAndExit(_BaseEventLogger):
     # assumes non over lapping polygons
@@ -24,14 +24,14 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
     def initial_setup(self):
 
         super().initial_setup()  # set up using regular grid for  stats
-        si = self.shared_info
+
         ml = si.msg_logger
         if self.info['instanceID'] > 0 :
             #todo why only 1
             ml.msg('LogPolygonEntryAndExit: can only have one instance',fatal_error=True,exit_now=True )
 
         # add particle property to show which polygon particle is in, -1 = in no polygon
-        particle = self.shared_info.classes['particle_group_manager']
+        particle = si.classes['particle_group_manager']
         particle.add_particle_property('event_polygon', 'manual_update',dict( initial_value=-1, dtype=np.int16))
         particle.add_particle_property('current_polygon_for_event_logging','user',dict(class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=self.params['polygon_list'],  write=False))
@@ -41,7 +41,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
 
     def update(self,n_time_step, time_sec):
         self.start_update_timer()
-        si = self.shared_info
+
         part_prop = si.classes['particle_properties']
         event_polygon = part_prop['event_polygon']
         current_polygon_for_event_logging = part_prop['current_polygon_for_event_logging']

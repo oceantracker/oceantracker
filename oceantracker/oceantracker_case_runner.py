@@ -16,9 +16,10 @@ from oceantracker.util.class_importing_util import ClassImporter
 from oceantracker.util.setup_util import config_numba_environment
 from oceantracker import common_info_default_param_dict_templates as common_info
 
-from oceantracker import shared_info as si2
+from oceantracker.shared_info import SharedInfo as si
 
-# note do not import numba here as its enviroment  setting must ve done first, import done below
+
+# note do not import numba here as its environment  setting must ve done first, import done below
 
 from oceantracker.util.package_util import get_all_parameter_classes
 
@@ -29,8 +30,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         super().__init__()  # required
 
     def run_case(self, run_builder):
-        si = self.shared_info
-        si.reset()  # clear out classes from class instance of SharedInfo if running series of mains
+        si.setup() # clear out classes from class instance of SharedInfo if running series of mains
+        si.msg_logger.set_screen_tag(f'C{run_builder["caseID"]:03d}')
+        si.msg_logger.settings(max_warnings=run_builder['working_params']['settings']['max_warnings'])
+
         d0 = datetime.now()
         t_start = perf_counter()
         # used to write a unaltered version to case_info.json
@@ -38,7 +41,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # set up message logging
         output_files = run_builder['output_files']
-        si.msg_logger = MessageLogger(f'C{run_builder["caseID"]:03d}', run_builder['working_params']['settings']['max_warnings'])
 
         # set numba config environment variables, before any import of numba, eg by readers,
         # also done in main but also needed here for parallel runs
@@ -53,13 +55,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.output_files = run_builder['output_files']
         si.run_output_dir = si.output_files['run_output_dir']
         si.output_file_base = si.output_files['output_file_base']
-
-
         output_files['case_log_file'], output_files['case_error_file'] = \
-        si.msg_logger.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
+                    si.msg_logger.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
+
         si.msg_logger.print_line()
-        self.msg = si.msg_logger.msg
-        self.msg('Starting case number %3.0f, ' % si.caseID + ' '
+        si.msg_logger.msg('Starting case number %3.0f, ' % si.caseID + ' '
                                       + si.output_files['output_file_base']
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
         si.msg_logger.print_line()
@@ -89,11 +89,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.run_info = dict(time_step = si.settings['time_step'],
                         backtracking=si.settings['backtracking'],
                         model_direction= -1 if si.settings['backtracking'] else 1)
+
+
         ri = si.run_info
         #useful short cuts
-        si2.__shared_info__ = si
 
-        
         si.particle_properties = si.classes['particle_properties']
         si.release_groups = si.classes['release_groups']
 
@@ -124,7 +124,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             self._finalize_classes()  # any setup actions that mus be done after other actions, eg shedulers
 
             # model may depend on ther classes, so intilialise after all other claases are setup
-            if 'integrated_model' in si.classes:
+            if si.classes['integrated_model'] is not None:
                 im.initial_setup()
                 im.final_setup()
 
@@ -187,7 +187,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # reshow warnings
         si.msg_logger.show_all_warnings_and_errors()
-        self.close()  # close al classes
 
         si.msg_logger.print_line()
         si.msg_logger.progress_marker('Finished case number %3.0f, ' % si.caseID + ' '
@@ -197,6 +196,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
         si.msg_logger.print_line()
 
+        self.close()  # close al classes and msg logger
         si.msg_logger.close()
         case_info_file = path.join(si.run_output_dir,case_info_file)
         return case_info_file,  return_msgs
@@ -204,9 +204,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def _set_up_run(self):
         # builds shared_info class variable with data and classes initialized  ready for run
         # from single run case_runner_params
-        si =self.shared_info
-
-
 
         # get short class names map
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
@@ -228,8 +225,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # build and run solver from parameter dictionary
         # run from a given dictionary to enable particle tracking on demand from JSON type parameter set
         # also used for parallel  version
-        si = self.shared_info
-
         info= self.info
         info['model_run_started'] = datetime.now()
 
@@ -248,10 +243,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         pass
 
     def _do_run_integrity_checks(self):
-        si=self.shared_info
-
-
-        # check all have required, fields, part props and grid data
+         # check all have required, fields, part props and grid data
         for i in si.all_class_instance_pointers_iterator():
             i.check_requirements()
 
@@ -261,18 +253,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
     def _do_pre_processing(self):
         # do pre-processing, eg read polygons from files
-        si = self.shared_info
-
-        #case_params = si.working_params
-        #for name, params in case_params['class_dicts']['pre_processing'].items():
-        #    i = si.create_class_dict_instance(name, 'pre_processing', 'user', params, crumbs='Adding "fields" from user params')
-        #    i.initial_setup()
+       pass
 
     def _setup_particle_release_groups_and_start_end_times(self, particle_release_groups_params_dict):
         # particle_release groups setup and instances,
         # find extremes of  particle existence to calculate model start time and duration
         t0 = perf_counter()
-        si = self.shared_info
         pgm = si.classes['particle_group_manager']
         ri = si.run_info
         # set up to start end times based on release_groups
@@ -326,7 +312,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # initialise all classes, order is important!
         # shortcuts
         t0 = perf_counter()
-        si = self.shared_info
         si.particle_status_flags = common_info.particle_info['status_flags']
 
         # start with setting up field gropus, which set up readers
@@ -373,7 +358,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def _finalize_classes(self):
         # finalise the classeds
         #todo , more needed here to finalise othe classes?
-        si = self.shared_info
         t0 = perf_counter()
         ri = si.run_info
 
@@ -391,8 +375,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
     def _make_and_initialize_user_classes(self):
         # complete build of particle by adding reade, custom properties and modifiers
-        si= self.shared_info
-
         pgm = si.classes['particle_group_manager']
 
         # any custom particle properties added by user
@@ -414,8 +396,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     # internal methods below
     # ____________________________
     def _get_case_info(self, d0, t0):
-        si = self.shared_info
-
         pgm= si.classes['particle_group_manager']
         info = self.info
         info['date_of_time_zero'] = time_util.seconds_to_datetime64(np.asarray([0.]))
@@ -469,7 +449,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         #do do
         for key, item in si.classes['release_groups'].items():
             # grid does not have points pararm
-            rginfo={'points': item.points,
+
+            rginfo={'points': item.points if hasattr(item,'points') else item.params['points'],
                     'is_polygon': hasattr(item,'polygon')}
             d['release_groups'][key]= rginfo
 
@@ -512,17 +493,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                     for nsig in range(len(sig)):
                         d['numba_code_info']['SMID_code'][name].append(numba_util.count_simd_intructions(func, sig=nsig))
                     pass
-
         return d
 
     def close(self):
         # close all instances, eg their files if not close etc
-        si=self.shared_info
-
         for i in si.all_class_instance_pointers_iterator():
             try:
                 i.close()
 
             except Exception as e:
+                si.msg_logger.msg(f'Unexpected error closing class ="{ i.info["name"]}"', fatal_error= True, exception=e)
 
-                self.msg(f'Unexpected error closing class ="{ i.info["name"]}"', fatal_error= True, exception=e)

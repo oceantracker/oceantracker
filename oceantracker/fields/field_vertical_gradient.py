@@ -3,6 +3,7 @@ import numpy as np
 from numba import njit
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.util.numba_util import njitOT
+from oceantracker.shared_info import SharedInfo as si
 
 class VerticalGradient(CustomFieldBase):
 
@@ -16,7 +17,6 @@ class VerticalGradient(CustomFieldBase):
         self.class_doc('Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"')
 
     def initial_setup(self, grid, fields):
-        si = self.shared_info
         ml = si.msg_logger
         # get fields prop from named field
         params= self.params
@@ -32,7 +32,7 @@ class VerticalGradient(CustomFieldBase):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True,)
     def update(self,fields,grid,active):
-        si = self.shared_info
+
         if 'sigma' in grid:
             _calc_field_vert_grad_from_sigma_levels(fields[self.params['name_of_field']].data, grid['sigma'],
                                                fields['tide'].data,fields['water_depth'].data,

@@ -6,7 +6,7 @@ from oceantracker.util.numba_util import njitOT
 
 from random import normalvariate
 from oceantracker.util.numba_util import njitOT
-
+from oceantracker.shared_info import SharedInfo as si
 class RandomWalk(_BaseTrajectoryModifer):
     # add random walk using velocity modifier
     def __init__(self):
@@ -16,14 +16,12 @@ class RandomWalk(_BaseTrajectoryModifer):
                                    } )
 
     def check_requirements(self):
-        si = self.shared_info
         if si.settings['use_A_Z_profile']:
                 self.check_class_required_fields_prop_etc(requires3D=True,
                                                             required_props_list=['nz_cell', 'x', 'n_cell'],
                                                           crumbs='random walk with use_A_Z_profile')
 
     def initial_setup(self):
-        si = self.shared_info
         info = self.info
         dt = si.settings['time_step']
         info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
@@ -40,7 +38,6 @@ class RandomWalk(_BaseTrajectoryModifer):
     # apply random walk
     def update(self, n_time_step,time_sec, active):
         # add up 2D/3D diffusion coeff as random walk done using velocity_modifier
-        si= self.shared_info
         part_prop = si.classes['particle_properties']
 
         if  si.is3D_run:
