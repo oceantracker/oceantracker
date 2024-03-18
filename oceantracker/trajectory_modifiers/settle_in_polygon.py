@@ -3,6 +3,8 @@ from  oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTr
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParamValueChecker as PVC
 from oceantracker.util.polygon_util import  InsidePolygon
 
+from oceantracker.shared_info import SharedInfo as si
+
 class SettleInPolygon(_BaseTrajectoryModifier):
     # fallows particles to freeze if inside a polygon
     def __init__(self):
@@ -22,7 +24,6 @@ class SettleInPolygon(_BaseTrajectoryModifier):
     def initial_setup(self, **kwargs):
 
         super().initial_setup()
-        si=self.shared_info
 
         # set up polygons to test if particles inside
         if 'points' not in self.params['polygon']:
@@ -43,7 +44,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
 
     # all particles checked to see if they need status changing
     def update(self,n_time_step, time_sec, active):
-        si = self.shared_info
+         
         part_prop = si.classes['particle_properties']
 
         # find those inside and freeze, only if they haven't been recently stationary

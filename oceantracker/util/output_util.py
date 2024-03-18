@@ -9,7 +9,7 @@ def add_release_group_ID_info_to_netCDF(nc, release_groups):
     max_points= 0
     for n, name in enumerate(release_groups.keys()):
         nc.write_global_attribute(f'release_groupID_{name}', n)
-        max_points= max(max_points, release_groups[name].points.shape[0])
+        max_points= max(max_points, release_groups[name].points.shape[0] if hasattr(release_groups[name],'points') else release_groups[name].params['points'].shape[0])
 
     # make array full on points with different lengths for each release group
     n_rel= len(release_groups)
@@ -19,7 +19,7 @@ def add_release_group_ID_info_to_netCDF(nc, release_groups):
     
     for n, name in enumerate(release_groups.keys()):
         r = release_groups[name]
-        p = r.points
+        p = r.points if hasattr(r,'points') else r.params['points']
         points[n,:p.shape[0],:p.shape[1]] = p
         n_points[n] = p.shape[0]
         is_polygon[n] = r.info['release_type'] == 'polygon'

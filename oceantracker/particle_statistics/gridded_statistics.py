@@ -3,8 +3,9 @@ from numba import njit
 from oceantracker.util.numba_util import njitOT
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
-
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
+
+from oceantracker.shared_info import SharedInfo as si
 
 class GriddedStats2D_timeBased(_BaseParticleLocationStats):
     # class to hold counts of particles inside grid squares
@@ -14,9 +15,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         super().__init__()
         # set up info/attributes
         self.add_default_params({
-                 'grid_size':           PLC([100, 99],[int], fixed_len=2,
-                                            min=1, max=10 ** 5,
-                                            doc_str='number of rows and columns in grid'),
+                 'grid_size':  PLC([100, 99],[int], fixed_len=2, min=1, max=10 ** 5, doc_str='number of rows and columns in grid'),
                  'release_group_centered_grids': PVC(False, bool),
                  'grid_center':         PCC(None, single_cord=True, is3D=False, doc_str='center of the statitics grid as (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
                  'grid_span':           PCC(None, single_cord=True, is3D=False,doc_str='(width, height)  of the statistics grid', units='meters or decimal degrees'),
@@ -29,7 +28,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
     def initial_setup(self):
         # set up regular grid for  stats
-        si =self.shared_info
+
         super().initial_setup()
         self.open_output_file()
         nc = self.nc
@@ -57,7 +56,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         nc.write_a_new_variable('grid_cell_area', area, [ 'y_dim','x_dim'],  description='Horizontal area of each cell')
 
     def set_up_spatial_bins(self,nc):
-        si = self.shared_info
+
         stats_grid= self.grid
         params= self.params
         info = self.info
@@ -131,7 +130,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
     def set_up_binned_variables(self,nc):
         if not self.params['write']: return
-        si= self.shared_info
+
         stats_grid = self.grid
 
         dim_names= ['time_dim', 'release_group_dim', 'y_dim', 'x_dim']
@@ -153,7 +152,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
     def do_counts(self,n_time_step, time_sec, sel):
         # do counts for each release  location and grid cell
-        part_prop = self.shared_info.classes['particle_properties']
+        part_prop = si.classes['particle_properties']
         stats_grid = self.grid
 
         # set up pointers to particle properties
@@ -218,7 +217,6 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
     def set_up_time_bins(self,nc):
         # this set up age bins, not time
-        si= self.shared_info
         ml = si.msg_logger
         stats_grid = self.grid
 
@@ -249,7 +247,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
     def set_up_binned_variables(self, nc):
         # set up space for requested particle properties based on asge
-        si =self.shared_info
+
         ml = si.msg_logger
         stats_grid = self.grid
 
@@ -267,12 +265,10 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
                 ml.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True, caller=self)
 
     def do_counts(self,n_time_step, time_sec, sel):
-        # do counts for each release  location and grid cell, over rides parent
-
-        stats_grid = self.grid
-
+        # do counts for each release  location and grid cell, overrides parent
         # set up pointers to particle properties
-        part_prop = self.shared_info.classes['particle_properties']
+        part_prop = si.classes['particle_properties']
+        stats_grid = self.grid
         p_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()

@@ -41,6 +41,7 @@ New features
 
 #. Setting display_grid_at_start plots grid as a check, clicking on image will print coords in console to use as release points
 
+
 Behaviour changes
 ______________________________________________________________
 
@@ -51,13 +52,18 @@ Known breaking changes- ask for help if needed to transition
 ______________________________________________________________
 
 
-#.  For coders getting parameter  agmument mis-matches on update methods, all class update methods of part_prop and modifiers now have a n_time_step as the first parameter, the particle tracking time step starting at zero. This is the clock tick of the code, is used to more precisely take actions, and avoid situations such as the model time step in 3600sec, and the user request a 4000sec release interval, which currently result in periodic unequal release intervals and double pulses. So that methods like update(time_in_sec, active) become update(n_time_step, time_in_sec, active). Not all update methods will use these time syncing variables, but some variants may.
-
 #. Reader param load_fields replaces 'field_variables' param, to load variables to names used internally. These internal names may be mapped to file variables in  new  'field_variable_map'. If a special variable, eg concentration field, no map is needed.
 
 #. z range parameter for release and sats, replaced by z_min and z_max, warning is given
 
-#. the frozen paticle status name is now stationary, the numerical value remains the same, it is rarely used and is not the same status as stranded by tide
+#. the frozen particle status name is now stationary, the numerical value remains the same, it is rarely used and is not the same status as stranded by tide
+
+Breaking changes for coders
+
+
+#.  For coders getting parameter  argument mis-matches on update methods, all class update methods of part_prop and modifiers now have a n_time_step as the first parameter, the particle tracking time step starting at zero. This is the clock tick of the code, is used to more precisely take actions, and avoid situations such as the model time step in 3600sec, and the user request a 4000sec release interval, which currently result in periodic unequal release intervals and double pulses. So that methods like update(time_in_sec, active) become update(n_time_step, time_in_sec, active). Not all update methods will use these time syncing variables, but some variants may.
+
+#. Shared info is done by  "import from oceantracker.shared_info import SharedInfo as si", old way si = self.shared_info still works
 
 Internal changes
 _________________

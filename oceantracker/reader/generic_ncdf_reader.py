@@ -20,6 +20,8 @@ from oceantracker.reader.util import reader_util
 from oceantracker.reader._base_reader import _BaseReader
 from copy import  deepcopy
 
+from oceantracker.shared_info import SharedInfo as si
+
 class GenericNCDFreader(_BaseReader):
 
     def __init__(self):
@@ -87,7 +89,7 @@ class GenericNCDFreader(_BaseReader):
 
     def build_hori_grid(self, nc, grid):
         # read nodal values and triangles
-        si = self.shared_info
+         
         ml = si.msg_logger
         params = self.params
         grid_map= params['grid_variable_map']
@@ -111,7 +113,7 @@ class GenericNCDFreader(_BaseReader):
         return grid
 
     def field_var_info(self,nc,file_var_map):
-        si = self.shared_info
+         
         ml = si.msg_logger
         params = self.params
         dim_map= params['dimension_map']
@@ -141,7 +143,7 @@ class GenericNCDFreader(_BaseReader):
     def is_hindcast3D(self, nc):
        # look for 3D vel variabel, if not use 2D version
 
-        si = self.shared_info
+         
         params = self.params
         vm = params['field_variable_map']
 
@@ -202,7 +204,7 @@ class GenericNCDFreader(_BaseReader):
 
     def set_up_uniform_sigma(self, nc, grid):
         # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
-        si = self.shared_info
+         
         # read first zlevel time step
         zlevel = nc.read_a_variable(self.params['grid_variable_map']['zlevel'], sel=0)
         bottom_cell_index = self.read_bottom_cell_index_as_int32(nc).astype(np.int32)
@@ -277,7 +279,7 @@ class GenericNCDFreader(_BaseReader):
 
     def read_dry_cell_data(self,nc,grid, fields, file_index,is_dry_cell_buffer, buffer_index):
         # calculate dry cell flags, if any cell node is dry
-        si = self.shared_info
+         
 
         if self.params['grid_variable_map']['is_dry_cell'] is None:
             if grid['zlevel'] is None and 'tide' in fields and 'water_depth' in fields:
@@ -303,7 +305,7 @@ class GenericNCDFreader(_BaseReader):
     def time_to_hydro_model_index(self, time_sec):
         #convert date time to global time step in hindcast just before/after when forward/backtracking
         # always move forward through buffer, but file info is always forward in time
-        si = self.shared_info
+         
         fi = self.info['file_info']
 
         hindcast_fraction= (time_sec - fi['first_time']) / (fi['last_time'] - fi['first_time'])
@@ -318,7 +320,7 @@ class GenericNCDFreader(_BaseReader):
 
     def are_time_steps_in_buffer(self, time_sec):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
-        si = self.shared_info
+         
         bi = self.info['buffer_info']
         model_dir = si.model_direction
 

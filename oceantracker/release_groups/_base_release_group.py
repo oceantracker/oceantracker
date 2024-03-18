@@ -6,6 +6,8 @@ from numba import njit
 from oceantracker.util.numba_util import njitOT
 from oceantracker.common_info_default_param_dict_templates import large_float
 from oceantracker.util.basic_util import nopass
+from oceantracker.shared_info import SharedInfo as si
+
 class _BaseReleaseGroup(ParameterBaseClass):
     def __init__(self):
         super().__init__() # get parent defaults
@@ -66,7 +68,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
     def get_start_time_and_life_span(self):
         # gets relese start end and last ime allive from params
         # and any start and end times, or a duration
-        si = self. shared_info
+
         hi = si.hindcast_info
         ri = si.run_info
         params = self.params
@@ -93,8 +95,6 @@ class _BaseReleaseGroup(ParameterBaseClass):
     def _check_potential_release_locations_in_bounds(self, x):
         # check cadiated in bound
         # there must be a particle property set up for every release_part_prop must have a
-        #
-        si= self.shared_info
         # use KD tree to find points those inside model domain
         fgm = si.classes['field_group_manager']
         is_inside, release_part_prop  = fgm.are_points_inside_domain(x, self.params['allow_release_in_dry_cells'])
@@ -103,7 +103,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
     def get_release_locations(self, time_sec):
         # set up full set of release locations inside  polygons
-        si = self.shared_info
+         
         ml = si.msg_logger
         info= self.info
         params=self.params
@@ -198,7 +198,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         return release_part_prop
 
     def add_tide_and_depth_release_part_prop(self,release_part_prop, time_sec):# get water depth and tide at particle locations, which may be needed to filter particle releases
-            si = self.shared_info
+             
             # add tide and water depth at released particle locations
             fgm = si.classes['field_group_manager']
             release_part_prop['water_depth'] = fgm.interp_named_field_at_given_locations_and_time(

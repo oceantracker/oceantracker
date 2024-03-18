@@ -2,6 +2,7 @@ import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.release_groups.point_release import PointRelease
 from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
+from oceantracker.shared_info import SharedInfo as si
 
 class PolygonRelease(PointRelease):
     # random polygon release in 2D or 3D
@@ -20,7 +21,6 @@ class PolygonRelease(PointRelease):
     def initial_setup(self):
         # sort out list  polygon from points
         info = self.info
-        si= self.shared_info
         params= self.params
         ml = si.msg_logger
         if params['points'].shape[0] < 3:
@@ -49,7 +49,6 @@ class PolygonRelease(PointRelease):
 
 
     def get_release_location_candidates(self):
-        si = self.shared_info
         info = self.info
         ll, ur = info['bounding_box_ll_ul']
         # find number required to have one guess get all required points

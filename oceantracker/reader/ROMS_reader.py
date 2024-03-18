@@ -19,7 +19,7 @@ from oceantracker.reader.util.hydromodel_grid_transforms import convert_regular_
 from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.util.numba_util import njitOT
 
-
+from oceantracker.shared_info import SharedInfo as si
 
 
 from oceantracker.reader.util import reader_util
@@ -56,8 +56,6 @@ class ROMsNativeReader(_BaseReader):
         nc.close()
         return is_file_type
     def build_hori_grid(self, nc, grid):
-
-        si = self.shared_info
         # pre-read useful info
         grid['psi_land_mask'] = nc.read_a_variable('mask_psi') != 1
         grid['u_land_mask'] = nc.read_a_variable('mask_u') != 1
@@ -71,7 +69,6 @@ class ROMsNativeReader(_BaseReader):
     def build_vertical_grid(self, nc, grid):
         # add time invariant vertical grid variables needed for transformations
         # first values in z axis is the top? so flip
-        si= self.shared_info
         grid['sigma'] = 1+ nc.read_a_variable('s_w', sel=None).astype(np.float32)  # layer boundary fractions reversed from negative values
         grid['sigma_layer'] =1 + nc.read_a_variable('s_rho', sel=None).astype(np.float32)  # layer center fractions
         grid['vertical_grid_type'] = 'S-sigma'
@@ -136,7 +133,6 @@ class ROMsNativeReader(_BaseReader):
 
     def read_dry_cell_data(self, nc, grid,fields,  file_index,is_dry_cell_buffer,buffer_index):
         # get dry cells from water depth and tide
-        si = self.shared_info
         reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
                                                 si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
         pass
@@ -158,7 +154,7 @@ class ROMsNativeReader(_BaseReader):
 
     def read_file_var_as_4D_nodal_values(self,nc, grid, var_name, file_index=None):
         # reformat file variable into 4D time,node,depth, components  form
-        si =self.shared_info
+
         ml = si.msg_logger
 
         data = nc.read_a_variable(var_name, sel=file_index)

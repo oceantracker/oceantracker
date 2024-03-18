@@ -1,3 +1,5 @@
+from oceantracker.shared_info import SharedInfo as si
+
 def get_run_params():
     pass
 
@@ -37,7 +39,7 @@ class EmitOutputParticle(ParticleGroup):
     def write_step(self):
         # writes each time step
         # Cast to int32 to save space
-        si=self.shared_info
+
         particle_locations = np.asarray(self.get_partProp_inBufferPtr('x'), dtype = np.int32)
         status = np.array(self.get_partProp_inBufferPtr('status'), dtype = np.int8)  # Cast to int8
 

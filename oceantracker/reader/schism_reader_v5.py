@@ -80,7 +80,7 @@ class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
 
     def get_field_params(self, nc, name, crumbs=''):
         # work out if feild is 3D ,etc
-        si = self.shared_info
+         
         ml = si.msg_logger
         fmap = deepcopy(self.params['field_variable_map'])
 

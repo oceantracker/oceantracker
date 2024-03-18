@@ -10,6 +10,7 @@ from oceantracker.solver.util import solver_util
 from oceantracker.util import numpy_util
 from oceantracker.common_info_default_param_dict_templates import cell_search_status_flags, particle_info
 
+from oceantracker.shared_info import SharedInfo as si
 class Solver(ParameterBaseClass):
     #  does particle tracking solution as class to allow multi processing
 
@@ -24,7 +25,6 @@ class Solver(ParameterBaseClass):
                             })
 
     def final_setup(self):
-        si = self.shared_info
         si.classes['particle_group_manager'].add_particle_property('v_temp','manual_update', dict( vector_dim=si.classes['particle_properties']['x'].num_vector_dimensions(), write=False))
 
 
@@ -36,7 +36,6 @@ class Solver(ParameterBaseClass):
     #@profile
     def solve(self):
         # solve for data in buffer
-        si = self.shared_info
         ri=si.run_info
         ml = si.msg_logger
         part_prop = si.classes['particle_properties']
@@ -135,7 +134,6 @@ class Solver(ParameterBaseClass):
         ri['computation_duration'] = datetime.now() -computation_started
 
     def _pre_step_bookkeeping(self, n_time_step,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
-        si = self.shared_info
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
         fgm = si.classes['field_group_manager']
@@ -179,7 +177,7 @@ class Solver(ParameterBaseClass):
         self._update_events(n_time_step, time_sec)
 
         # update integrated models, eg LCS
-        if 'integrated_model' in si.classes:
+        if si.classes['integrated_model'] is not None :
             si.classes['integrated_model'].update(n_time_step,time_sec)
 
         # write tracks
@@ -194,7 +192,7 @@ class Solver(ParameterBaseClass):
 
 
     def do_time_step(self, time_sec, is_moving):
-        si = self.shared_info
+
         fgm = si.classes['field_group_manager']
         part_prop = si.classes['particle_properties']
 
@@ -233,7 +231,7 @@ class Solver(ParameterBaseClass):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties
         # nb is buffer offset
-        si = self.shared_info
+
         RK_order =self.params['RK_order']
         fgm = si.classes['field_group_manager']
         part_prop =  si.classes['particle_properties']
@@ -303,7 +301,6 @@ class Solver(ParameterBaseClass):
 
     def screen_output(self, nt, time_sec,t0_model, t0_step):
 
-        si= self.shared_info
         fraction_done= abs((time_sec - si.run_info['start_time']) / si.run_info['duration'])
         s = f'{100* fraction_done:02.0f}%'
         s += f' step {nt:04d}'
@@ -326,7 +323,6 @@ class Solver(ParameterBaseClass):
 
     def _update_stats(self,n_time_step, time_sec):
         # update and write stats
-        si= self.shared_info
         t0 = perf_counter()
         for name, i in si.classes['particle_statistics'].items():
             if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['update_interval']:
@@ -337,7 +333,7 @@ class Solver(ParameterBaseClass):
 
     def _update_concentrations(self,n_time_step,  time_sec):
         # update triangle concentrations, these can optionally be done every time step, if concentrations values affect particle properties
-        si = self.shared_info
+
         t0 = perf_counter()
         for name, i in si.classes['particle_concentrations'].items():
             i.start_update_timer()
@@ -347,7 +343,7 @@ class Solver(ParameterBaseClass):
 
     def _update_events(self, n_time_step,  time_sec):
         # write events
-        si = self.shared_info
+
         t0 = perf_counter()
         for name, i in si.classes['event_loggers'].items():
             i.start_update_timer()

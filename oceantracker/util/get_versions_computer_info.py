@@ -4,7 +4,7 @@ from oceantracker import  common_info_default_param_dict_templates as common_inf
 from sys import version, version_info
 import  subprocess
 from os import path
-from oceantracker import shared_info as si2
+
 def get_code_version():
 
     try:

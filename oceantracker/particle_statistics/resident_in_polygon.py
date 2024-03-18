@@ -5,6 +5,8 @@ from copy import  deepcopy
 from oceantracker.release_groups.polygon_release import PolygonRelease
 from oceantracker.util.numba_util import njitOT
 
+from oceantracker.shared_info import SharedInfo as si
+
 import numpy as np
 from numba import njit
 #todo much clearner to  have user define polygon list for residewnce time per polygon like stats polygon!
@@ -20,7 +22,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                  })
 
     def initial_setup(self, **kwargs):
-        si= self.shared_info
+
         ml = si.msg_logger
         params = self.params
         # do standard stats initialize
@@ -65,12 +67,11 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
 
     def check_requirements(self):
-        si= self.shared_info
         params = self.params
         self.check_class_required_fields_prop_etc()
 
     def set_up_binned_variables(self, nc):
-        si = self.shared_info
+
         if not self.params['write']: return
 
         dim_names = ('time_dim', 'pulse_dim')
@@ -93,7 +94,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
     def set_up_spatial_bins(self,nc ): pass
 
     def do_counts(self,n_time_step, time_sec, sel):
-        si= self.shared_info
+
         part_prop = si.classes['particle_properties']
         rg  = self.release_group_to_count
 

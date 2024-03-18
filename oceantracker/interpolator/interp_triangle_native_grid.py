@@ -14,6 +14,7 @@ from oceantracker.particle_properties.util import  particle_operations_util
 
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
 
+from oceantracker.shared_info import SharedInfo as si
 
 class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
@@ -30,7 +31,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def initial_setup(self, grid):
         super().initial_setup()  # children must call this parent class to default shared_params etc
         params = self.params
-        si= self.shared_info
 
 
         # make barcentric transform matrix for the grid,  typee to match numba signature
@@ -43,7 +43,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         self.KDtree = cKDTree(grid['x'])
 
     def add_part_prop_for_book_keeping(self):
-        si = self.shared_info
+
         pgm = si.classes['particle_group_manager']
 
         pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
@@ -63,7 +63,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def final_setup(self, grid):
 
         # set up a grid class,part_prop and vertical cell find functions to minimise numba function arguments
-        si = self.shared_info
+
         info = self.info
 
         # create particle properties to  store history of current triangle  for reuse
@@ -97,7 +97,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
 
     def fix_bad_cell_search(self, current_buffer_steps,fractional_time_steps, open_boundary_type,  active):
-        si = self.shared_info
+
         part_prop = si.classes['particle_properties']
 
         # deal with open boundary
@@ -129,7 +129,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
         # in place evaluation of field interpolation
-        si = self.shared_info
 
         triangles = grid['triangles']
 
@@ -155,7 +154,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     def _time_dependent_2Dfield(self,current_buffer_steps, fractional_time_steps,output,
                                                    field_instance, triangles,
                                                    n_cell, bc_cords, active):
-        si = self.shared_info
         ml = si.msg_logger
         data =  field_instance.data
 
@@ -180,7 +178,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
         # in place evaluation of field interpolation
-        si = self.shared_info
+
 
         triangles = grid['triangles']
 
@@ -217,7 +215,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                             field_instance,       triangles,
                            n_cell, bc_cords, nz_cell, z_fraction,
                            output, active):
-        si = self.shared_info
+
         ml = si.msg_logger
 
         data = field_instance.data
@@ -243,7 +241,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # todo only time_dependent_2Dfield  working - eval_field_interpolation_at_given_locations
         # todo add time dependence/ time fractions
         # does this over write paricle props??
-        si = self.shared_info
+
         info = self.info
 
         part_prop = si.classes['particle_properties']
@@ -288,9 +286,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     
     def find_vertical_cell(self, grid, fields, xq, current_buffer_steps,fractional_time_steps, active):
         # locate vertical cell in place
-
-        si= self.shared_info
-
         part_prop = si.classes['particle_properties']
         n_cell= part_prop['n_cell_last_good'].data
         status = part_prop['status'].data
@@ -326,7 +321,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def find_hori_cell(self,grid, fields,  xq, current_buffer_steps,fractional_time_steps,open_boundary_type, active):
         # do cell walk
-        si= self.shared_info
         t0= perf_counter()
         info = self.info
         part_prop = si.classes['particle_properties']
@@ -398,7 +392,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     #@function_profiler(__name__)
     def initial_horizontal_cell(self, grid, xq):
         # find nearest cell
-        si=self.shared_info
+
         t0 = perf_counter()
 
          # find nearest node
@@ -430,7 +424,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def get_bc_cords(self,grid, x,n_cells):
         # get BC cords for given x's
-        si= self.shared_info
         bc_cords = np.full((x.shape[0],3), 0.)
         tri_interp_util.calc_BC_cords_numba(x, n_cells, grid['bc_transform'], bc_cords)
         return bc_cords
@@ -440,7 +433,6 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         triangle_eval_interp.update_dry_cell_index(grid['is_dry_cell'], grid['dry_cell_index'],
                                                    current_buffer_steps, fractional_time_steps)
     def close(self):
-        si=self.shared_info
         info = self.info
         # transfer walk / step info from to class attributes to write in case_info file
 

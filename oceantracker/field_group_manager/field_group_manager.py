@@ -12,6 +12,7 @@ from  oceantracker.interpolator.util.triangle_eval_interp import time_independen
 
 from time import  perf_counter
 from copy import deepcopy
+from oceantracker.shared_info import SharedInfo as si
 
 #TODO allow fields to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
@@ -34,7 +35,6 @@ class FieldGroupManager(ParameterBaseClass):
         info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
 
     def initial_setup(self):
-        si= self.shared_info
         ml = si.msg_logger
         params= self.params
         info = self.info
@@ -61,7 +61,6 @@ class FieldGroupManager(ParameterBaseClass):
 
 
     def final_setup(self):
-        si = self.shared_info
         ml = si.msg_logger
         info = self.info
 
@@ -92,7 +91,6 @@ class FieldGroupManager(ParameterBaseClass):
         self.info['open_boundary_type'] = si.settings['open_boundary_type']
 
         # add tidal stranding class
-        si = self.shared_info
         i = si.class_importer.new_make_class_instance_from_params(si.working_params['core_classes']['tidal_stranding'],'tidal_stranding',                                                 default_classID='tidal_stranding',
                                                 crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ')
         i.initial_setup()
@@ -105,7 +103,7 @@ class FieldGroupManager(ParameterBaseClass):
 
 
     def add_part_prop_from_fields_plus_book_keeping(self):
-        si = self.shared_info
+
         pgm = si.classes['particle_group_manager']
 
         self.interpolator.add_part_prop_for_book_keeping()
@@ -119,7 +117,6 @@ class FieldGroupManager(ParameterBaseClass):
                                             time_varying=True, dtype=np.float64, initial_value=0.))
     def update_reader(self, time_sec):
         # check if all interpolators have the time steps they need
-        si  = self.shared_info
 
         reader = self.reader
         if not reader.are_time_steps_in_buffer(time_sec):
@@ -135,7 +132,6 @@ class FieldGroupManager(ParameterBaseClass):
         # eg query point and nt the current global time step, from which we are making nt+1
         # if fix bad, then blocked and cells are corrected, for RK steps want to delay this till sub-steps are complete, so set fix_bad = false
 
-        si = self.shared_info
         part_prop = si.classes['particle_properties']
         info = self.info
         interp = self.interpolator
@@ -163,7 +159,7 @@ class FieldGroupManager(ParameterBaseClass):
             interp.fix_bad_cell_search(info['current_buffer_steps'],info['fractional_time_steps'],self.info['open_boundary_type'], active)
 
     def time_step_and_buffer_offsets(self, time_sec):
-        si = self.shared_info
+
         grid= self.grid
         fi = self.info['file_info']
         bi = self.info['buffer_info']
@@ -205,7 +201,7 @@ class FieldGroupManager(ParameterBaseClass):
         # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
 
-        si = self.shared_info
+
         info= self.info
         grid = self.grid
 
@@ -238,7 +234,7 @@ class FieldGroupManager(ParameterBaseClass):
         # output can optionally be redirected to another particle property name different from  reader's field_name
         # particle_prop_name
         #todo move interp function into here
-        si = self.shared_info
+
         info = self.info
 
         field_instance = self.fields[field_name]
@@ -280,7 +276,7 @@ class FieldGroupManager(ParameterBaseClass):
         return output
 
     def _setup_hydro_reader(self,reader_builder):
-        si = self.shared_info
+
         info = self.info
         self.reader  = si.class_importer.new_make_class_instance_from_params(reader_builder['params'],'reader',  crumbs=f'field Group Manager>setup_hydro_fields> reader class  ')
 
@@ -321,7 +317,7 @@ class FieldGroupManager(ParameterBaseClass):
 
 
     def set_up_interpolator(self):
-        si = self.shared_info
+
         i = si.class_importer.new_make_class_instance_from_params(si.working_params['core_classes']['interpolator'],'interpolator',
                                                 default_classID='interpolator',
                                                 crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
@@ -330,7 +326,6 @@ class FieldGroupManager(ParameterBaseClass):
 
     def setup_dispersion_and_resuspension(self):
         # these depend on which variables are available inb the hydro file
-        si = self.shared_info
         reader = self.reader
         fmap = reader.params['field_variable_map']
         info = self.info
@@ -352,7 +347,7 @@ class FieldGroupManager(ParameterBaseClass):
         nc.close()
 
     def _setup_dispersion_params(self, nc,  has_A_Z_profile=None):
-        si = self.shared_info
+
         ml = si.msg_logger
         info = self.info
         fmap = self.reader.params['field_variable_map']
@@ -386,7 +381,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def _setup_resupension_params(self, nc, has_bottom_stress=None):
         # get fields needed to calculate friction velocity field, needed for suspension
-        si = self.shared_info
+
         ml = si.msg_logger
         fmap = self.reader.params['field_variable_map']
 
@@ -407,7 +402,7 @@ class FieldGroupManager(ParameterBaseClass):
             ml.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
 
     def add_reader_field(self, name, nc,write_interp_particle_prop_to_tracks_file=True):
-        si = self.shared_info
+
         ml = si.msg_logger
         reader= self.reader
 
@@ -448,7 +443,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def add_custom_field(self, name,  params={}, crumbs='', default_classID=None):
         # class name given or default_classID specified to get from defaults in common_info
-        si = self.shared_info
+
 
         i = si.class_importer.new_make_class_instance_from_params(params,'fields', name,   default_classID=default_classID,
                                                 crumbs=crumbs+ f'Field group manager > custom field setup > "{name}"')
@@ -459,7 +454,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def update_dry_cell_index(self):
         # update 0-255 dry cell index for each interpolator
-        si =self.shared_info
+
         info= self.info
         self.interpolator.update_dry_cell_index(self.grid, info['current_buffer_steps'], info['fractional_time_steps'],)
 
@@ -475,7 +470,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def write_hydro_model_grid(self, gridID=None):
         # write a netcdf of the grid from first hindcast file
-        si = self.shared_info
+
         grid = self.grid
         output_files = si.output_files
 
@@ -531,6 +526,6 @@ class FieldGroupManager(ParameterBaseClass):
         return sel
     
     def close(self):
-        si = self.shared_info
+
         self.info.update(self.reader.info)
 

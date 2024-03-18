@@ -8,6 +8,7 @@ from oceantracker.common_info_default_param_dict_templates import particle_info
 from numba.typed import List as NumbaList
 from numba import  njit
 from oceantracker.util.numba_util import njitOT
+from oceantracker.shared_info import SharedInfo as si
 
 from oceantracker.util import time_util
 class _BaseParticleLocationStats(ParameterBaseClass):
@@ -40,7 +41,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.role_doc('Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
 
     def initial_setup(self):
-        si =self.shared_info
+
         ml = si.msg_logger
         info = self.info
         params = self.params
@@ -69,7 +70,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                      caller=self,fatal_error=True)
 
     def check_part_prop_list(self):
-        si = self.shared_info
+
         part_prop = si.classes['particle_properties']
         pgm = si.classes['particle_group_manager']
         names=[]
@@ -93,7 +94,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def set_up_spatial_bins(self): basic_util.nopass()
 
     def open_output_file(self):
-        si=self.shared_info
+
         if self.params['write']:
             self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag']
             self.info['output_file'] += '_' + self.info['name'] + '.nc'
@@ -112,7 +113,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
-        si=self.shared_info
+
         part_prop = si.classes['particle_properties']
         self.prop_list, self.sum_prop_list = [],[]
         # todo put this in numba uti;, for other classes to use
@@ -148,7 +149,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
 
     def is_time_to_count(self):
-        si = self.shared_info
+
         params= self.params
         info=self.info
 
@@ -175,7 +176,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def update(self,n_time_step, time_sec):
         if not self.is_time_to_count(): return
-        si= self.shared_info
+
         part_prop = si.classes['particle_properties']
         params = self.params
         info = self.info
@@ -195,7 +196,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         #update prop list data, as buffer may have expnaded
         #todo do this only when expansion occurs??
-        part_prop = self.shared_info.classes['particle_properties']
+        part_prop = si.classes['particle_properties']
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
             self.prop_list[n]= part_prop[name].data
 
@@ -227,7 +228,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def write_time_varying_stats(self, n, time):
         # write nth step in file
-        si = self.shared_info
         fh = self.nc.file_handle
         fh['time'][n] = time
         release_groups = si.classes['release_groups']
@@ -247,7 +247,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def info_to_write_at_end(self) : pass
 
     def close(self):
-        si= self.shared_info
+
         nc = self.nc
         # write total released in each release group
         num_released=[]

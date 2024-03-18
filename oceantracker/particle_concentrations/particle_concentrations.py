@@ -4,6 +4,7 @@ from oceantracker.util.numba_util import njitOT
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 import numpy as np
+from oceantracker.shared_info import SharedInfo as si
 
 class  ParticleConcentrations2D(_BaseTriangleProperties):
     def __init__(self):
@@ -18,7 +19,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['tide','water_depth'])
     def set_up_data_buffers(self):
-        si = self.shared_info
+
         grid = si.classes['field_group_manager'].grid
         # set up data buffer
         s = (grid['triangles'].shape[0],)
@@ -37,7 +38,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
         nc.create_a_variable('load_concentration', ['time_dim', 'triangle_dim'], self.load_concentration.dtype, description='concentration of  particle load decaying with age in each triangle at given time')
 
     def write(self, time_sec):
-        si = self.shared_info
+
 
 
         self.nc.file_handle['time'][self.time_steps_written] = time_sec
@@ -48,7 +49,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
 
     def update(self,n_time_step, time_sec):
         params= self.params
-        si=self.shared_info
+
         grid = si.classes['field_group_manager'].grid
         part_prop =si.classes['particle_properties']
 

@@ -6,7 +6,7 @@ from oceantracker.util import output_util
 from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
 from oceantracker.util.profiling_util import  function_profiler
-
+from oceantracker.shared_info import SharedInfo as si
 # class to write with, outline methods needed
 # a non-writer, as all methods are None
 
@@ -39,7 +39,6 @@ class _BaseWriter(ParameterBaseClass):
         self.nc = None
 
     def initial_setup(self):
-        si= self.shared_info
 
         params = self.params
 
@@ -86,7 +85,7 @@ class _BaseWriter(ParameterBaseClass):
         self.info['file_builder']['variables'][name] = var
 
     def open_file_if_needed(self):
-        si = self.shared_info
+
         fn =si.output_file_base + '_' + self.params['role_output_file_tag']
 
         if self.total_time_steps_written == 0:
@@ -103,7 +102,6 @@ class _BaseWriter(ParameterBaseClass):
 
     def _open_file(self,file_name):
         self.time_steps_written_to_current_file = 0
-        si = self.shared_info
 
         self.info['output_file'].append(file_name + '.nc')
 
@@ -140,7 +138,7 @@ class _BaseWriter(ParameterBaseClass):
     def write_all_non_time_varing_part_properties(self, new_particleIDs):
     # to work in compact mode must write particle non-time varying  particle properties when released
     #  eg ID etc, releaseGroupID  etc
-        si= self.shared_info
+
         writer = si.classes['tracks_writer']
         if si.settings['write_tracks'] and new_particleIDs.shape[0] > 0:
             for name, prop in si.classes['particle_properties'].items():
@@ -151,8 +149,6 @@ class _BaseWriter(ParameterBaseClass):
     #@function_profiler(__name__)
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none the a forced write
-
-        si= self.shared_info
 
         if si.run_info['time_steps_completed'] % self.info['output_step_count'] != 0: return
 
@@ -180,7 +176,6 @@ class _BaseWriter(ParameterBaseClass):
         self.total_time_steps_written  += 1 # time steps written since the start
 
     def close(self):
-        si= self.shared_info
         if si.settings['write_tracks']:
             nc = self.nc
             # write properties only written at end

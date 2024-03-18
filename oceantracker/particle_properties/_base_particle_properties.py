@@ -4,7 +4,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.util import time_util
-
+from oceantracker.shared_info import SharedInfo as si
 
 class _BaseParticleProperty(ParameterBaseClass):
     # property of each particle individually, eg x, time released etc , status
@@ -33,7 +33,7 @@ class _BaseParticleProperty(ParameterBaseClass):
         self.role_doc('Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
 
     def initial_setup(self):
-        si = self.shared_info
+
         s = (si.classes['particle_group_manager'].info['current_particle_buffer_size'],)
         if self.params['vector_dim'] > 1:
             s += (self.params['vector_dim'],)
@@ -78,12 +78,11 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def copy(self, prop_name, active):
         # copy from named particle
-        si = self.shared_info
         part_prop= si.classes['particle_properties']
         particle_operations_util.copy(self.data, part_prop[prop_name].data, active)
 
     def fill_buffer(self,value):
-        n_in_buffer = self.shared_info.classes['particle_group_manager'].info['particles_in_buffer']
+        n_in_buffer = si.classes['particle_group_manager'].info['particles_in_buffer']
         self.data[:n_in_buffer,...] = value
 
 
@@ -91,7 +90,7 @@ class _BaseParticleProperty(ParameterBaseClass):
         # get property values using indices sel
         return np.take(self.data,sel, axis=0)  # for integer index sel, take is faster than numpy fancy indexing and numba
 
-    def used_buffer(self): return self.data[:self.shared_info.classes['particle_group_manager'].info['particles_in_buffer'], ...]
+    def used_buffer(self): return self.data[:si.classes['particle_group_manager'].info['particles_in_buffer'], ...]
 
     def full_buffer(self):  return self.data
 

@@ -7,6 +7,9 @@ from oceantracker.release_groups._base_release_group import _BaseReleaseGroup
 from oceantracker.util.numba_util import njitOT
 from oceantracker.common_info_default_param_dict_templates import large_float
 
+from oceantracker.shared_info import SharedInfo as si
+
+
 class PointRelease(_BaseReleaseGroup):
     # releases particles at fixed points, inside optional radius
     # add checks to see if points inside domain and dry if released in a radius
@@ -30,7 +33,7 @@ class PointRelease(_BaseReleaseGroup):
     def initial_setup(self):
         # must be called after unpack_x0
         # tidy up parameters to make them numpy arrays with first dimension equal to number of locations
-        si =self.shared_info
+
         params = self.params
         info = self.info
 
@@ -48,7 +51,7 @@ class PointRelease(_BaseReleaseGroup):
         return self.params['pulse_size']*self.params['points'].shape[0]
 
     def get_release_location_candidates(self):
-        si = self.shared_info
+         
         x = np.repeat(self.params['points'], self.params['pulse_size'], axis=0)
 
         if self.params['release_radius']> 0.:

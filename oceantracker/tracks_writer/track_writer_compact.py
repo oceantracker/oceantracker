@@ -5,6 +5,9 @@ from oceantracker.tracks_writer._base_tracks_writer import  _BaseWriter
 from oceantracker.tracks_writer.dev_convert_compact_tracks import convert_to_rectangular
 from oceantracker.util import  output_util
 import oceantracker.common_info_default_param_dict_templates as common_info
+
+from oceantracker.shared_info import SharedInfo as si
+
 class CompactTracksWriter(_BaseWriter):
     def __init__(self):
         # set up info/attributes
@@ -22,7 +25,6 @@ class CompactTracksWriter(_BaseWriter):
 
     def initial_setup(self):
         super().initial_setup()
-        si = self.shared_info
         self.add_dimension('particle_dim', None)
         self.add_dimension('time_particle_dim', None)
         self.add_dimension('range_pair_dim', 2)
@@ -45,7 +47,6 @@ class CompactTracksWriter(_BaseWriter):
     def create_variable_to_write(self,name,is_time_varying, is_part_prop, vector_dim=None,
                                  description=None, attributes=None, dtype=None, fill_value=None):
         # creates a variable to write with given shape, normally shape[0]= None as unlimited
-        si=self.shared_info
         dimList=[]
         if is_time_varying and not is_part_prop: dimList.append('time_dim')
         if is_time_varying and is_part_prop:dimList.append('time_particle_dim')
@@ -75,7 +76,6 @@ class CompactTracksWriter(_BaseWriter):
         # write indexing variables
         #todo change to write particle shared_params when culling ?
         nc = self.nc
-        si = self.shared_info
         nWrite = self.time_steps_written_to_current_file
         self.sel_alive = si.classes['particle_properties']['status'].compare_all_to_a_value('gt', si.particle_status_flags['dead'], out= self.get_partID_buffer('B1'))
 
@@ -97,7 +97,6 @@ class CompactTracksWriter(_BaseWriter):
 
     def write_non_time_varying_particle_prop(self, prop_name, data, released):
         # this writes prop like release ID as particles are release, so it works with both rectangular and compact writers
-        si = self.shared_info
         IDs= si.classes['particle_properties']['ID'].get_values(released)
         d= data[released, ...]
         self.nc.file_handle.variables[prop_name][IDs, ...]  = d
@@ -107,7 +106,7 @@ class CompactTracksWriter(_BaseWriter):
         self.nc.file_handle.variables[prop_name][self.file_index[0]:self.file_index[1], ...] = data[self.sel_alive, ...]
 
     def close(self):
-        si = self.shared_info
+
         if si.settings['write_tracks']:
             self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
