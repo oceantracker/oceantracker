@@ -89,7 +89,6 @@ default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
                         field_friction_velocity_from_bottom_stress='oceantracker.fields.friction_velocity.FrictionVelocityFromBottomStress',
                         field_friction_velocity_from_near_sea_bed_velocity='oceantracker.fields.friction_velocity.FrictionVelocityFromNearSeaBedVelocity',
                         field_A_Z_profile_vertical_gradient='oceantracker.fields.field_vertical_gradient.VerticalGradient',
-
                         )
 
 class_dicts_list=[ # class dicts which replace lists
@@ -106,7 +105,6 @@ class_dicts_list=[ # class dicts which replace lists
             # below still to be developed
             # 'post_processing':      PDLdefaults({}), #todo after run post processing not implemented yet
             'time_varying_info', # particle info,eg. time,or  tide at at tide gauge, core example is particle time
-
             ]
 
 
@@ -115,32 +113,6 @@ default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
                 'points': PCC( None,is_required=True, doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
                                }
 
-particle_info = {'status_flags': {'unknown': -128, 'bad_cord': -20, 'cell_search_failed': -19,
-                                  'notReleased': -10,
-                                  'dead': -2,
-                                  'outside_open_boundary': -1,
-                                  'stationary': 0,
-                                  'stranded_by_tide': 3,  'on_bottom': 6,  'moving': 10},
-                 'known_prop_types': ['manual_update', 'from_fields','user']
-
-                 }
-particle_info['status_keys_list']= list(particle_info['status_flags'].keys()) # possible values for checking user input
-# interp cell find flags
-
-cell_search_status_flags = dict(ok =0, outside_domain=1 ,blocked_domain=-5, blocked_dry_cell=-4, bad_cord=-20, failed=-30)
-
-# default reader classes used by auto-detection of file type
-known_readers ={'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
-                'schisim_v5':    'oceantracker.reader.schism_reader_v5.SCHISMreaderNCDFv5',
-                 'fvcom': 'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
-                 'roms': 'oceantracker.reader.ROMS_reader.ROMsNativeReader',
-                 'delft3d_fm': 'oceantracker.reader.dev_delft_fm.DELFTFM',
-                 'generic': 'oceantracker.reader.generic_ncdf_reader.GenericNCDFreader',
-                'dummy_data': 'oceantracker.reader.dummy_data_reader.DummyDataReader',
-                }
-
-
-large_float=1.0E32
 
 # node types for hydro model
 node_types= dict(interior = 0,island_boundary = 1, domain_boundary= 2, open_boundary=3, land = 4)

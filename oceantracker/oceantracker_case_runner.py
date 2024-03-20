@@ -30,7 +30,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         super().__init__()  # required
 
     def run_case(self, run_builder):
-        si.setup() # clear out classes from class instance of SharedInfo if running series of mains
+        si._setup() # clear out classes from class instance of SharedInfo if running series of mains
         si.msg_logger.set_screen_tag(f'C{run_builder["caseID"]:03d}')
         si.msg_logger.settings(max_warnings=run_builder['working_params']['settings']['max_warnings'])
 
@@ -94,8 +94,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         ri = si.run_info
         #useful short cuts
 
-        si.particle_properties = si.classes['particle_properties']
-        si.release_groups = si.classes['release_groups']
+
 
         # case set up
         try:
@@ -107,7 +106,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # there can only be one model added
             params = si.working_params['core_classes']['integrated_model']
             if len(params) > 0:
-                im = si.add_core_class('integrated_model', params, crumbs='adding  "integrated_model" class',initialise=False)
+                im = si.add_core_role('integrated_model', params, crumbs='adding  "integrated_model" class',initialise=False)
                 # any changes to params by model,
                 # e.g. release groups from model which affect start and end times
                 im.have_called_add_settings_and_class_params = False
@@ -124,7 +123,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             self._finalize_classes()  # any setup actions that mus be done after other actions, eg shedulers
 
             # model may depend on ther classes, so intilialise after all other claases are setup
-            if si.classes['integrated_model'] is not None:
+            if si.core_roles.integrated_model is not None:
                 im.initial_setup()
                 im.final_setup()
 
@@ -160,7 +159,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if si.settings['write_output_files']:
                 # write grid if first case
                 if si.caseID == 0:
-                    si.classes['field_group_manager'].write_hydro_model_grid()
+                    si.core_roles.field_group_manager.write_hydro_model_grid()
 
                 case_info_file = si.output_file_base + '_caseInfo.json'
                 json_util.write_JSON(path.join(si.run_output_dir, case_info_file), case_info)
@@ -228,7 +227,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         info= self.info
         info['model_run_started'] = datetime.now()
 
-        solver = si.classes['solver']
+        solver = si.core_roles.solver
 
         # fill and process buffer until there is less than 2 steps
         si.msg_logger.print_line()
@@ -259,7 +258,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # particle_release groups setup and instances,
         # find extremes of  particle existence to calculate model start time and duration
         t0 = perf_counter()
-        pgm = si.classes['particle_group_manager']
+        pgm = si.core_roles.particle_group_manager
         ri = si.run_info
         # set up to start end times based on release_groups
 
@@ -291,16 +290,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # setup scheduler for each release group, how start and model times known
         #   this will round start times and release interval to be integer number of model time steps after the start
-        for name, rg in si.classes['release_groups'].items():
+        for name, rg in si.roles.release_groups.items():
               si.add_scheduler_to_class('release_scheduler',rg,
                                 start= rg.params['release_start_date'], # set above from start date
                                 interval= rg.params['release_interval'],
                                 end     = rg.params['release_end_date'],
                                 duration= rg.params['release_duration'], caller=rg)
 
-        if len(si.classes['release_groups']) == 0:
+        if len(si.roles.release_groups) == 0:
             # guard against there being no release groups
-            self.msg('No valid release groups' , fatal_error=True, exit_now=True, caller=self)
+            si.msg_logger.msg('No valid release groups' , fatal_error=True, exit_now=True, caller=self)
 
         # useful information
         ri['duration'] = abs(ri['times'][-1] - ri['times'][0])
@@ -312,7 +311,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # initialise all classes, order is important!
         # shortcuts
         t0 = perf_counter()
-        si.particle_status_flags = common_info.particle_info['status_flags']
 
         # start with setting up field gropus, which set up readers
         # as it has info on whether 2D or 3D which  changes class options'
@@ -323,7 +321,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.working_params['core_classes']['field_group_manager'].update(dict(class_name='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields'))
 
         # set up feilds
-        fgm = si.add_core_class('field_group_manager', si.working_params['core_classes']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
+        fgm = si.add_core_role('field_group_manager', si.working_params['core_classes']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
         si.is3D_run = fgm.info['is3D']
         si.run_info['is3D_run']  = fgm.info['is3D']
@@ -335,11 +333,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
         if si.settings['write_tracks']:
-            si.add_core_class('tracks_writer',si.working_params['core_classes']['tracks_writer'], initialise=True)
+            si.add_core_role('tracks_writer',si.working_params['core_classes']['tracks_writer'], initialise=True)
         else:
-            si.classes['tracks_writer'] = None
+            si.core_roles.tracks_writer = None
 
-        pgm = si.add_core_class('particle_group_manager', si.working_params['core_classes']['particle_group_manager'], crumbs=f'adding core class "particle_group_manager" ')
+        pgm = si.add_core_role('particle_group_manager', si.working_params['core_classes']['particle_group_manager'], crumbs=f'adding core class "particle_group_manager" ')
         pgm.initial_setup()  # needed here to add reader fields inside reader build
 
 
@@ -348,7 +346,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         core_role_params = si.working_params['core_classes']
 
         # make other core classes
-        si.add_core_class('solver', core_role_params['solver'], crumbs='core class solver ')
+        si.add_core_role('solver', core_role_params['solver'], crumbs='core class solver ')
 
 
         if  si.settings['time_step'] >  si.hindcast_info['time_step']:
@@ -360,22 +358,17 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         #todo , more needed here to finalise othe classes?
         t0 = perf_counter()
         ri = si.run_info
-
-
-
         # do final setp which may depend on settings from intitial st up
 
         # order matters, must do interpolator after particle_group_manager, to get stucted arrays and solver last
-        for name in ['particle_group_manager', 'solver']:
-            si.classes[name].final_setup()
-
+        si.core_roles.particle_group_manager.final_setup()
+        si.core_roles.solver.final_setup()
 
         si.msg_logger.progress_marker('final set up of core classes', start_time=t0)
 
-
     def _make_and_initialize_user_classes(self):
         # complete build of particle by adding reade, custom properties and modifiers
-        pgm = si.classes['particle_group_manager']
+        pgm = si.core_roles.particle_group_manager
 
         # any custom particle properties added by user
         for name, p in si.working_params['class_dicts']['particle_properties'].items():
@@ -396,7 +389,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     # internal methods below
     # ____________________________
     def _get_case_info(self, d0, t0):
-        pgm= si.classes['particle_group_manager']
+        pgm= si.core_roles.particle_group_manager
         info = self.info
         info['date_of_time_zero'] = time_util.seconds_to_datetime64(np.asarray([0.]))
 
@@ -416,38 +409,41 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             'computer_info': get_versions_computer_info.get_computer_info(),
             'file_written': datetime.now().isoformat(),
              'run_info' : info,
-             'hindcast_info': si.classes['field_group_manager'].info,
+             'hindcast_info': si.core_roles.field_group_manager.info,
              'working_params': self.raw_working_params,
              'full_case_params': si.working_params,
-             'particle_status_flags': si.particle_status_flags,
+             'particle_status_flags': si.particle_status_flags.as_dict(),
              'release_groups' : {},
-             'particle_release_group_user_maps': si.classes['particle_group_manager'].get_release_group_userIDmaps(),
+             'particle_release_group_user_maps': si.core_roles.particle_group_manager.get_release_group_userIDmaps(),
              'errors': si.msg_logger.errors_list,
              'warnings': si.msg_logger.warnings_list,
              'notes': si.msg_logger.notes_list,
              'function_timers': {},
              'class_roles_info': {}, }
 
-        for key, i in si.classes.items():
+        for key, i in si.roles.as_dict().items():
             if i is None : continue
 
-            if type(i) == dict:
-                d['class_roles_info'][key] = {}
-                d['output_files'][key] = {}
-                # interate over dict
-                for key2, i2 in i.items():
-                    d['class_roles_info'][key][key2]= i2.info
-                    d['output_files'][key][key2]= i2.info['output_file'] if 'output_file' in i2.info else None
-                    if hasattr(i2,'scheduler_info'):
-                        d['class_roles_info'][key][key2]['scheduler_info'] = i2.scheduler_info
-            else:
-                d['class_roles_info'][key] = i.info
-                d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
-                if hasattr(i, 'scheduler_info'):
-                    d['class_roles_info'][key]['scheduler_info'] = i.scheduler_info
+            d['class_roles_info'][key] = {}
+            d['output_files'][key] = {}
+            # interate over dict
+            for key2, i2 in i.items():
+                d['class_roles_info'][key][key2]= i2.info
+                d['output_files'][key][key2]= i2.info['output_file'] if 'output_file' in i2.info else None
+                if hasattr(i2,'scheduler_info'):
+                    d['class_roles_info'][key][key2]['scheduler_info'] = i2.scheduler_info
+
+        # core roles
+        for key, i in si.core_roles.as_dict().items():
+            if i is None: continue
+            d['class_roles_info'][key] = i.info
+            d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
+            if hasattr(i, 'scheduler_info'):
+                d['class_roles_info'][key]['scheduler_info'] = i.scheduler_info
+
         # add basic release group info
         #do do
-        for key, item in si.classes['release_groups'].items():
+        for key, item in si.roles.release_groups.items():
             # grid does not have points pararm
 
             rginfo={'points': item.points if hasattr(item,'points') else item.params['points'],

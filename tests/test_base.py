@@ -9,7 +9,6 @@
 # -m bohrium
 import numpy as np
 
-from oceantracker.util import basic_util
 from  oceantracker.main import  run
 import argparse
 import matplotlib.pyplot as plt
@@ -17,8 +16,9 @@ from os import path
 import glob
 from copy import copy
 import time
-from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.post_processing.plotting import plot_utilities, plot_tracks
+from read_oceantracker.python import load_output_files
+from plot_oceantracker import plot_tracks
+from plot_oceantracker import plot_utilities
 
 
 def plot_sample(caseInfoFile, num_to_plot=10 ** 3):

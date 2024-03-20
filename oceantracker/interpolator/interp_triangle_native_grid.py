@@ -8,7 +8,6 @@ from oceantracker.util import basic_util
 from oceantracker.util.profiling_util import function_profiler
 from time import perf_counter
 from oceantracker.util import numpy_util
-from oceantracker.common_info_default_param_dict_templates import  cell_search_status_flags, particle_info
 from oceantracker.interpolator.util import triangle_interpolator_util as tri_interp_util ,  triangle_eval_interp
 from oceantracker.particle_properties.util import  particle_operations_util
 
@@ -44,11 +43,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def add_part_prop_for_book_keeping(self):
 
-        pgm = si.classes['particle_group_manager']
+        pgm = si.core_roles.particle_group_manager
 
         pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
         pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
-        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=cell_search_status_flags['ok'], dtype=np.int8))
+        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=si.cell_search_status_flags.ok, dtype=np.int8))
 
         pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype=np.float32))
 
@@ -98,13 +97,13 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
     def fix_bad_cell_search(self, current_buffer_steps,fractional_time_steps, open_boundary_type,  active):
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         # deal with open boundary
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['outside_domain'], out=self.get_partID_subset_buffer('cell_status'))
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', si.cell_search_status_flags.outside_domain, out=self.get_partID_subset_buffer('cell_status'))
         if sel.size > 0:
             if open_boundary_type > 0:
-                part_prop['status'].set_values(particle_info['status_flags']['outside_open_boundary'], sel)
+                part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel)
                 part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell, but not the location
             else:
                 # outside so move back
@@ -112,15 +111,12 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
 
         # do move backs for blocked and bad
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags['ok'], out=self.get_partID_subset_buffer('cell_status'))
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', si.cell_search_status_flags.ok, out=self.get_partID_subset_buffer('cell_status'))
         if sel.size > 0:
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
 
-
-            # debug_util.plot_walk_step(xq, si.classes['reader'].grid, part_prop)
-
-
+        #debug_util.plot_walk_step(xq, si.core_roles.reader.grid, part_prop)
 
     #@function_profiler(__name__)
     def _interp_field2D(self,field_name, field_instance,grid, current_buffer_steps, fractional_time_steps,
@@ -182,7 +178,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         triangles = grid['triangles']
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
         nz_cell = part_prop['nz_cell'].data
@@ -244,7 +240,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         info = self.info
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         # is no output name given particle property for output is same as hindcast field_name
         if output is None:
@@ -286,7 +282,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
     
     def find_vertical_cell(self, grid, fields, xq, current_buffer_steps,fractional_time_steps, active):
         # locate vertical cell in place
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         n_cell= part_prop['n_cell_last_good'].data
         status = part_prop['status'].data
         bc_cords = part_prop['bc_cords'].data
@@ -323,7 +319,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         # do cell walk
         t0= perf_counter()
         info = self.info
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
@@ -342,7 +338,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                            self.walk_counts,
                            params['max_search_steps'], params['bc_walk_tol'], open_boundary_type,si.settings['block_dry_cells'],
                            active)
-            sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags['cell_search_failed'], out=self.get_partID_subset_buffer('B1'))
+            sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags.cell_search_failed, out=self.get_partID_subset_buffer('B1'))
 
         else:
             tri_interp_util.BCwalk(
@@ -352,7 +348,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 self.walk_counts,
                 params['max_search_steps'], params['bc_walk_tol'], open_boundary_type, si.settings['block_dry_cells'], active)
 
-            sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['failed'], out=self.get_partID_subset_buffer('B1'))
+            sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', si.cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
 
         if sel.size > 0:
             # si.msg_logger.msg(f'Search retried for {sel.size} cells')
@@ -368,7 +364,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
 
             # recheck for additional failures
-            sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags['failed'], out=self.get_partID_subset_buffer('B1'))
+            sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', si.cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
 
             if sel.size > 0:
                 wf = {'x0': part_prop['x_last_good'].get_values(sel),
@@ -383,7 +379,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 si.msg_logger.msg(' location xq =' + str(xq[sel[:3], :].tolist()), warning=True, tabs=2)
                 si.msg_logger.msg(' x_old =' + str(part_prop['x_last_good'].data[sel[:3], :].tolist()), warning=True, tabs=2)
                 # kill particles
-                part_prop['status'].set_values(si.particle_status_flags['dead'], sel)
+                part_prop['status'].set_values(si.particle_status_flags.dead, sel)
 
         si.block_timer('Find cell, horizontal walk', t0)
 

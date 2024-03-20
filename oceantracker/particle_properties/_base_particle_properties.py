@@ -2,7 +2,6 @@ import numpy as np
 from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.util import time_util
 from oceantracker.shared_info import SharedInfo as si
 
@@ -26,7 +25,7 @@ class _BaseParticleProperty(ParameterBaseClass):
                                     'write': PVC(True, bool, doc_str='Write particle property to tracks or event files file'),
                                     'type': PVC('user', str,
                                                 doc_str='type of particle property, used to manage how to update particle property',
-                                                possible_values=particle_info['known_prop_types']),
+                                                possible_values=si.info.known_prop_types),
                                      'release_group_parameters':PVC([], list, doc_str='In development: release group specific particle prop params'),
               })
 
@@ -34,7 +33,7 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def initial_setup(self):
 
-        s = (si.classes['particle_group_manager'].info['current_particle_buffer_size'],)
+        s = (si.core_roles.particle_group_manager.info['current_particle_buffer_size'],)
         if self.params['vector_dim'] > 1:
             s += (self.params['vector_dim'],)
 
@@ -78,11 +77,11 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def copy(self, prop_name, active):
         # copy from named particle
-        part_prop= si.classes['particle_properties']
+        part_prop= si.roles.particle_properties
         particle_operations_util.copy(self.data, part_prop[prop_name].data, active)
 
     def fill_buffer(self,value):
-        n_in_buffer = si.classes['particle_group_manager'].info['particles_in_buffer']
+        n_in_buffer = si.core_roles.particle_group_manager.info['particles_in_buffer']
         self.data[:n_in_buffer,...] = value
 
 
@@ -90,7 +89,7 @@ class _BaseParticleProperty(ParameterBaseClass):
         # get property values using indices sel
         return np.take(self.data,sel, axis=0)  # for integer index sel, take is faster than numpy fancy indexing and numba
 
-    def used_buffer(self): return self.data[:si.classes['particle_group_manager'].info['particles_in_buffer'], ...]
+    def used_buffer(self): return self.data[:si.core_roles.particle_group_manager.info['particles_in_buffer'], ...]
 
     def full_buffer(self):  return self.data
 

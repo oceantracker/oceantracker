@@ -14,7 +14,7 @@
 # 
 # 
 
-# In[1]:
+# In[7]:
 
 
 # build a more complex dictionary of parameters using code
@@ -65,14 +65,13 @@ yaml_util.write_YAML('./example_param_files/param_test1.yaml', params)
 # 
 # 
 
-# In[2]:
+# In[8]:
 
 
 from oceantracker import main
 
-# repeat above using a template and set dict keys values by assignments
-params = main.param_template()  # get a copy of the template
-
+# repeat above and set dict keys values by assignments
+params =dict(reader={},release_groups={}, resuspension={},velocity_modifiers={} )
 params['output_file_base'] ='param_test1'
 params['root_output_dir']= 'output'             #  output is put in dir   'root_output_dir'/'output_file_base'
 params['time_step']= 120  #  2 min time step as seconds  
@@ -103,7 +102,7 @@ params['velocity_modifiers']['my_fall_velocity']= {   # here a fall velocity wit
                                                     }
 
 
-# In[3]:
+# In[9]:
 
 
 # show the full template as json
@@ -115,7 +114,7 @@ print( json.dumps(params, indent=4))
 # 
 #   yaml format has no brackets/braces and relies on tab indenting to nest items
 
-# In[4]:
+# In[10]:
 
 
 # show the full template in yaml format
@@ -149,7 +148,7 @@ print( yaml.dump(params))
 # 
 # Is line below!
 
-# In[5]:
+# In[11]:
 
 
 # run oceantracker using param dict built in cells above
@@ -159,13 +158,13 @@ case_info_file_name = main.run(params)
 # case_info file is the name of a json file useful in plotting results 
 
 
-# In[6]:
+# In[12]:
 
 
 # plot animation of results
 from matplotlib import pyplot as plt
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-from oceantracker.post_processing.read_output_files import  load_output_files
+from plot_oceantracker.plot_tracks import animate_particles
+from read_oceantracker.python import  load_output_files
 from IPython.display import HTML # show animation in note book
 
 # read particle track data into a dictionary using case_info_file_name
@@ -204,7 +203,7 @@ HTML(anim.to_html5_video())
 # 
 # the full arguments are below
 
-# In[7]:
+# In[13]:
 
 
 get_ipython().system('python ../oceantracker/run_oceantracker.py -h')

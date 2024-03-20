@@ -2,11 +2,9 @@
 import numpy as np
 
 from oceantracker.util import json_util
-from oceantracker.post_processing.read_output_files import read_ncdf_output_files, get_names_util
+from read_oceantracker.python import read_ncdf_output_files
 from os import path
 from glob import glob
-
-
 
 def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0, run_output_dir= None):
     # get case_info.json file name from runInfo dict or json file name, can also set root_output_dir, if output moved to new location

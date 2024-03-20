@@ -29,7 +29,7 @@ class _CorePolygonMethods(ParameterBaseClass):
         # pre fill  polygon list from release groups if requested
         if params['use_release_group_polygons']:
             params['polygon_list']=[]
-            for name, i in si.classes['release_groups'].items():
+            for name, i in si.roles.release_groups.items():
                 if i.info['release_type'] == 'polygon':
                     params['polygon_list'].append({'name': name, 'points':i.params['points']})
 
@@ -57,11 +57,11 @@ class _CorePolygonMethods(ParameterBaseClass):
 
     def set_up_spatial_bins(self,nc ):
 
-        particles = si.classes['particle_group_manager']
+        pgm = si.core_roles.particle_group_manager
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
         self.info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_ {self.info["instanceID"]:03d}'
-        particles.add_particle_property(self.info['inside_polygon_particle_prop'],'manual_update',dict(
+        pgm.add_particle_property(self.info['inside_polygon_particle_prop'],'manual_update',dict(
                                                class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=self.params['polygon_list'],
                                                 write=False))
@@ -84,7 +84,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         if not self.params['write']: return
         
         dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
-        dim_sizes  = ( None, len(si.classes['release_groups']), nc.dim_size('polygon_dim') )
+        dim_sizes  = ( None, len(si.roles.release_groups), nc.dim_size('polygon_dim') )
 
         nc.add_dimension('release_group_dim', dim_sizes[1])
         nc.create_a_variable('count', dim_names, np.int64, description='counts of particles in each polygon at given times, for each release group')
@@ -94,10 +94,10 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         self.count_time_slice = np.full(dim_sizes[1:], 0, np.int64)
 
         # counts in each age bin, whether inside polygon or not
-        self.count_all_particles_time_slice =  np.full((len(si.classes['release_groups']),) , 0, np.int64)
+        self.count_all_particles_time_slice =  np.full((len(si.roles.release_groups),) , 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
-            if p_name in si.classes['particle_properties']:
+            if p_name in si.roles.particle_properties:
                 self.sum_binned_part_prop[p_name] = np.full(dim_sizes[1:], 0.)  # zero for  summing
                 nc.create_a_variable( 'sum_' + p_name, dim_names, np.float64,  description='sum of particle property inside polygon  ' + p_name)
             else:
@@ -105,7 +105,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
 
     def do_counts(self,n_time_step, time_sec, sel):
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         g = self.grid
 
         # update time stats  recorded
@@ -163,21 +163,21 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
 
         # set up space for requested particle properties
-        dims= ( self.grid['age_bins'].shape[0], len(si.classes['release_groups']), len(self.params['polygon_list']))
+        dims= ( self.grid['age_bins'].shape[0], len(si.roles.release_groups), len(self.params['polygon_list']))
         # working count space, row are (y,x)
         self.count_age_bins = np.full(dims, 0, np.int64)
         # counts in each age bin, whether inside polygon or not
         self.count_all_particles = np.full(dims[:-1] , 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
-            if p_name in si.classes['particle_properties']:
+            if p_name in si.roles.particle_properties:
                 self.sum_binned_part_prop[p_name] = np.full(dims, 0.)  # zero for  summing
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
     def do_counts(self,n_time_step, time_sec, sel):
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         stats_grid = self.grid
 
         # update time stats  recorded

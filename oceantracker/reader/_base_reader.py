@@ -1,14 +1,11 @@
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.util import time_util, json_util
-from os import path, walk
-from datetime import datetime
-from copy import copy
+from oceantracker.util import time_util
+from os import path
 from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from oceantracker.util.basic_util import nopass
-from oceantracker.reader.util.reader_util import append_split_cell_data
 import oceantracker.reader.util.hydromodel_grid_transforms as hydromodel_grid_transforms
 
 from oceantracker.util.cord_transforms import get_Metcator_info
@@ -155,7 +152,7 @@ class _BaseReader(ParameterBaseClass):
 
 
         if si.settings['display_grid_at_start']:
-            from oceantracker.post_processing.plotting.plot_utilities import  display_grid
+            from plot_oceantracker.plot_utilities import  display_grid
             display_grid(grid,1)
 
             pass

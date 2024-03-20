@@ -1,7 +1,5 @@
 from oceantracker.run_oceantracker import main
-from oceantracker.util import yaml_util, json_util
 from os import path
-import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -60,10 +58,9 @@ else:
     caseInfo_file_name= main.run(params)
 
 
-from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.post_processing.plotting import plot_utilities
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles, plot_tracks
-from oceantracker.post_processing.plotting.plot_statistics import animate_heat_map, plot_heat_map
+from read_oceantracker.python import load_output_files
+from plot_oceantracker.plot_tracks import animate_particles, plot_tracks
+from plot_oceantracker.plot_statistics import animate_heat_map, plot_heat_map
 
 grid= load_output_files.load_grid(caseInfo_file_name)
 

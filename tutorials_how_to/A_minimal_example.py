@@ -15,7 +15,7 @@
 # 
 # See next notebook for more details on the process.
 # 
-# This example uses helper methods of OceanTracker class to build parameters. The example is part of a a 3D Schisim model, where particles always re-suspend if the land on the bottom. Particles stranded by the falling tide in dry cells are stationary, until the cell becomes wet.  
+# This example uses helper methods of OceanTracker class to build parameters. The example is part of a a 3D Schisim model, where particles always re-suspend if the land on the bottom. Particles stranded by the falling tide in dry cells are frozen, until the cell becomes wet.  
 
 # In[1]:
 
@@ -60,13 +60,13 @@ print(case_info_file_name)
 
 
 # read output files
-from oceantracker.post_processing.read_output_files import  load_output_files
+from read_oceantracker.python import load_output_files
 
 # read particle track data into a dictionary using case_info_file_name
 tracks = load_output_files.load_track_data(case_info_file_name)
 print(tracks.keys()) # show what is in tracks dictionary holds
 
-from oceantracker.post_processing.plotting.plot_tracks import plot_tracks
+from plot_oceantracker.plot_tracks import plot_tracks
 
 ax= [1591000, 1601500, 5478500, 5491000]  # area to plot
 plot_tracks(tracks, axis_lims=ax, show_grid=True)
@@ -85,11 +85,11 @@ plot_tracks(tracks, axis_lims=ax, show_grid=True)
 # By default particles are blocked from moving from a wet cell to a dry cell and will not be released if the release location lies within a dry cell. 
 #   
 
-# In[3]:
+# In[5]:
 
 
 from matplotlib import pyplot as plt
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+from plot_oceantracker.plot_tracks import animate_particles
 from IPython.display import HTML
 
 # animate particles

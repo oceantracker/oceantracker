@@ -19,7 +19,7 @@ New features
 
 #. By default uses diffusivity vertical profile for A_Z in random walk if variable mapped to A_Z_profile is found in the hydro file
 
-#. Uses bottom stress to calculate friction velocity field if variable mapped to bottom_stress is found in the hydro file, if not uses near seabed velocity
+#. Re-suspension by critical friction velocity, uses bottom stress to calculate friction velocity field if variable mapped to bottom_stress is found in the hydro file, if not uses near seabed velocity
 
 #. Now reads new Schism v5 multi-file output, where 3D fields are in separate files
 
@@ -45,7 +45,7 @@ New features
 Behaviour changes
 ______________________________________________________________
 
-#. All user give intervals are now rounded to the an integer number of particle tracking  time steps, eg. release_interval, update_interval( particle statistics and others)
+#. All user give intervals are now rounded to the an integer number of particle tracking  time steps after the models starting time, eg. release_interval, update_interval( particle statistics and others)
 As these updates can only happen at a model time step.
 
 Known breaking changes- ask for help if needed to transition
@@ -54,16 +54,24 @@ ______________________________________________________________
 
 #. Reader param load_fields replaces 'field_variables' param, to load variables to names used internally. These internal names may be mapped to file variables in  new  'field_variable_map'. If a special variable, eg concentration field, no map is needed.
 
-#. z range parameter for release and sats, replaced by z_min and z_max, warning is given
+#. z range parameter for release and stats, replaced by z_min and z_max, warning is given
 
 #. the frozen particle status name is now stationary, the numerical value remains the same, it is rarely used and is not the same status as stranded by tide
+
+#. post_processing read and plot code has moved, so import statements need to change. read code imports are now "from read_oceantracker.python import *" and for plots "from plot_oceantracker import *"
+
+#. Matlab code to read output is now in read_oceantracker.matlab
 
 Breaking changes for coders
 
 
-#.  For coders getting parameter  argument mis-matches on update methods, all class update methods of part_prop and modifiers now have a n_time_step as the first parameter, the particle tracking time step starting at zero. This is the clock tick of the code, is used to more precisely take actions, and avoid situations such as the model time step in 3600sec, and the user request a 4000sec release interval, which currently result in periodic unequal release intervals and double pulses. So that methods like update(time_in_sec, active) become update(n_time_step, time_in_sec, active). Not all update methods will use these time syncing variables, but some variants may.
+#. For coders getting parameter  argument mis-matches on update methods, all class update methods of part_prop and modifiers now have a n_time_step as the first parameter, the particle tracking time step starting at zero. This is the clock tick of the code, is used to more precisely take actions, and avoid situations such as the model time step in 3600sec, and the user request a 4000sec release interval, which currently result in periodic unequal release intervals and double pulses. So that methods like update(time_in_sec, active) become update(n_time_step, time_in_sec, active). Not all update methods will use these time syncing variables, but some variants may.
 
 #. Shared info is done by  "import from oceantracker.shared_info import SharedInfo as si", old way si = self.shared_info still works
+
+#. shared_info.classes is deprecated, eg si.classes['particle_properties'] is now si.roles.particle_properties, where more than one class can be added. and   si.classes['particle_grop_manager'] is si.core_roles.particle_grop_manager. The .class[name] approach still works for now.
+
+#. particle status flags are all on si.particle_status_flags and auto complete, Can use si.particle_status_flags.moving or  si.particle_status_flags['moving']
 
 Internal changes
 _________________

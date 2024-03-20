@@ -156,7 +156,7 @@ class DevNestedFields(ParameterBaseClass):
 
     def are_points_inside_domain(self,x,include_dry_cells):
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         # set up space
         N= x.shape[0]
         is_inside= np.full((N,),False)
@@ -197,7 +197,7 @@ class DevNestedFields(ParameterBaseClass):
         return vals
 
     def setup_time_step(self, time_sec, xq, active, fix_bad=True):
-        part_prop=  si.classes['particle_properties']
+        part_prop=  si.roles.particle_properties
 
         #todo make faster with id buffers
 
@@ -209,7 +209,7 @@ class DevNestedFields(ParameterBaseClass):
             sel =np.flatnonzero(part_prop['hydro_model_gridID'].data == n)
             fgm.setup_time_step(time_sec, xq, sel, fix_bad=fix_bad)
             # find those outside that were on this grid but are now not outside the open boundary
-            outside_domain = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags['outside_open_boundary'])
+            outside_domain = part_prop['status'].find_subset_where(sel, 'eq', si.particle_status_flags.outside_open_boundary)
 
             # try to move any outside the nested grids open boundary to the outer grid
             is_inside, n_cell, bc, hydro_model_gridID = self.fgm_hydro_grids[0].are_points_inside_domain(xq[outside_domain,:], not si.settings['block_dry_cells'])
@@ -239,7 +239,7 @@ class DevNestedFields(ParameterBaseClass):
 
         # loop over grids find interpolated values
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
             # find particles in this hydro-grid
@@ -257,7 +257,7 @@ class DevNestedFields(ParameterBaseClass):
     def update_tidal_stranding_status(self, time_sec, alive):
         # loop over grids
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
             # find particles in this hydro-grid
@@ -268,7 +268,7 @@ class DevNestedFields(ParameterBaseClass):
     def fix_time_step(self, alive):
         # loop over grids
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
             # find particles in this hydro-grid

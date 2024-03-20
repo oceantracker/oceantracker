@@ -32,8 +32,8 @@ class BasicResuspension(_BaseResuspension):
     def select_particles_to_resupend(self, active):
         # compare to single critical value
         # todo add comparison to  particles critical value from distribution, add new particle property to hold  individual critical values
-        part_prop = si.classes['particle_properties']
-        on_bottom = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['on_bottom'], out = self.get_partID_buffer('B1'))
+        part_prop = si.roles.particle_properties
+        on_bottom = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.on_bottom, out = self.get_partID_buffer('B1'))
 
         # compare to critical friction velocity
         resupend = part_prop['friction_velocity'].find_subset_where(on_bottom, 'gteq',self.params['critical_friction_velocity'], out=self.get_partID_subset_buffer('B1'))
@@ -51,7 +51,7 @@ class BasicResuspension(_BaseResuspension):
         info['min_resuspension_jump_not_used'] = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
 
         # resuspend those on bottom and friction velocity exceeds critical value
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         resuspend = self.select_particles_to_resupend(active)
 
         self.resuspension_jump(part_prop['friction_velocity'].data, info['resuspension_factor'], part_prop['x'].data, part_prop['water_depth'].data,si.z0, resuspend)
@@ -60,7 +60,7 @@ class BasicResuspension(_BaseResuspension):
         #  Lynch (Particles in the Ocean Book, says don't adjust as a fall velocity  affects prior that particle resuspends)
 
         # any z out of bounds will  be fixed by find_depth cell at start of next time step
-        part_prop['status'].set_values(si.particle_status_flags['moving'], resuspend)
+        part_prop['status'].set_values(si.particle_status_flags.moving, resuspend)
 
         self.stop_update_timer()
 

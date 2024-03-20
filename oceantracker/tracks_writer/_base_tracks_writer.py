@@ -51,7 +51,7 @@ class _BaseWriter(ParameterBaseClass):
         self.info['output_step_count'] = max(nt_step, 1)
 
         if si.settings['write_dry_cell_flag']:
-            grid = si.classes['field_group_manager'].grid
+            grid = si.core_roles.field_group_manager.grid
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])
             self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])
@@ -139,9 +139,9 @@ class _BaseWriter(ParameterBaseClass):
     # to work in compact mode must write particle non-time varying  particle properties when released
     #  eg ID etc, releaseGroupID  etc
 
-        writer = si.classes['tracks_writer']
+        writer = si.core_roles.tracks_writer
         if si.settings['write_tracks'] and new_particleIDs.shape[0] > 0:
-            for name, prop in si.classes['particle_properties'].items():
+            for name, prop in si.roles.particle_properties.items():
                 # parameters are not time varying, so done at ends in retangular writes, or on culling particles
                 if not prop.params['time_varying'] and prop.params['write']:
                     writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs)
@@ -156,11 +156,11 @@ class _BaseWriter(ParameterBaseClass):
         self.pre_time_step_write_book_keeping()
 
         # write group data
-        for name,i in si.classes['time_varying_info'].items():
+        for name,i in si.roles.time_varying_info.items():
             if i.params['write']:
                 self.write_time_varying_info(name, i)
 
-        part_prop=si.classes['particle_properties']
+        part_prop=si.roles.particle_properties
         for name,i in part_prop.items():
             if i.params['write'] and i.params['time_varying']:
                 if si.hydro_model_cords_in_lat_long and name in ['x','x_last_good']:
@@ -169,7 +169,7 @@ class _BaseWriter(ParameterBaseClass):
 
         if si.settings['write_dry_cell_flag']:
             # wont run if nested grids
-            grid = si.classes['field_group_manager'].grid
+            grid = si.core_roles.field_group_manager.grid
             self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid['dry_cell_index'].reshape(1,-1)
 
         self.time_steps_written_to_current_file +=1 # time steps in current file
@@ -179,7 +179,7 @@ class _BaseWriter(ParameterBaseClass):
         if si.settings['write_tracks']:
             nc = self.nc
             # write properties only written at end
-            self.add_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])
+            self.add_global_attribute('total_num_particles_released', si.core_roles.particle_group_manager.info['particles_released'])
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
 
             # add all global attributes
@@ -187,7 +187,7 @@ class _BaseWriter(ParameterBaseClass):
                 nc.write_global_attribute(name,item)
 
             # add attributes mapping release index to release group name
-            output_util.add_release_group_ID_info_to_netCDF(nc, si.classes['release_groups'])
+            output_util.add_release_group_ID_info_to_netCDF(nc, si.roles.release_groups)
             nc.close()
             self.nc = None
 

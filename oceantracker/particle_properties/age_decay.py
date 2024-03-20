@@ -21,7 +21,7 @@ class AgeDecay(ParticleProperty):
 
     def update(self,n_time_step, time_sec,active):
         # update decay prop each time step
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         age = part_prop['age'].get_values(active)
 
         val = self.params['initial_value']*np.exp(-np.abs(age) / self.params['decay_time_scale'])

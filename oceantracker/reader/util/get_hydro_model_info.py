@@ -1,10 +1,6 @@
-from oceantracker.util.ncdf_util import NetCDFhandler
-from glob import  glob
-from os import path
-from oceantracker.common_info_default_param_dict_templates import known_readers
-from pathlib import Path as pathlib_Path
-from oceantracker.common_info_default_param_dict_templates import known_readers
+
 from copy import deepcopy
+from oceantracker.shared_info import SharedInfo as si
 
 def find_file_format_and_file_list(reader_params, class_importer, msg_logger):
     found=False
@@ -16,7 +12,7 @@ def find_file_format_and_file_list(reader_params, class_importer, msg_logger):
         return reader_params, file_list
 
     # search
-    for r_name, r in known_readers.items():
+    for r_name, r in si.info.known_readers.items():
         params= deepcopy(reader_params)
         params['class_name'] = r
         reader = class_importer.new_make_class_instance_from_params(params,'reader',  default_classID='reader', check_for_unknown_keys=False)

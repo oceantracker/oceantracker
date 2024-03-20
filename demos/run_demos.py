@@ -1,19 +1,18 @@
-from os import path, mkdir, getcwd , system
+from os import path, mkdir, getcwd
 import argparse
 import glob
 import matplotlib.pyplot as plt
-from matplotlib import colors
 from oceantracker.util import json_util
 from oceantracker.util import time_util
 
 from oceantracker import main
-from oceantracker.post_processing.plotting import plot_statistics,plot_tracks, plot_vertical_tracks, plot_utilities
+from plot_oceantracker import plot_utilities
 import make_demo_plots
 import build_and_test_demos
 import numpy as np
-from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.post_processing.read_output_files.load_output_files import load_stats_data, load_concentration_data
-from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
+from read_oceantracker.python import load_output_files
+from read_oceantracker.python.load_output_files import load_stats_data, load_concentration_data
+from plot_oceantracker.plot_statistics import plot_heat_map, animate_heat_map
 
 two_points= [[1594500, 5483000], [1598000, 5486100]]
 
@@ -101,6 +100,7 @@ if __name__ == "__main__":
 
             continue
 
+
         elif not args.skiprun:
             if type(params) == list:
                 case_info_file_name = main.run_parallel(params[0], params[1])
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
         if args.testing:
             #tracks=load_output_files.load_track_data(case_info_file_name)
-            #from oceantracker.post_processing.plotting.plot_utilities import display_grid
+            #from plot_oceantracker.plot_utilities import display_grid
             #display_grid(tracks['grid'],ginput=3)
             pass
 
@@ -153,7 +153,7 @@ if __name__ == "__main__":
         elif n == 61:
             #todo make conc plotting work
 
-            from oceantracker.post_processing.plotting.plot_statistics import animate_concentrations
+            from plot_oceantracker.plot_statistics import animate_concentrations
 
             c = load_concentration_data(case_info_file_name)
 
@@ -207,7 +207,7 @@ if __name__ == "__main__":
                 ax.scatter(d2['x'][0, :, 0], d2['x'][0, :, 1], color='y', marker='o', s=20, zorder=9)
                 ax.set_title('Test particle tracking forwards then backwards')
                 plt.gcf().tight_layout()
-                plot_utilities.show_output(plot_file_name= 'output\\'+ demo_name +'_and_backward_tracks.jpeg')
+                plot_utilities.show_output(plot_file_name='output\\' + demo_name + '_and_backward_tracks.jpeg')
             elif n==91:
 
                 track_data = load_output_files.load_track_data(case_info_file_name)

@@ -1,7 +1,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.basic_util import nopass
-from oceantracker.common_info_default_param_dict_templates import particle_info
+
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import output_util
 from os import path
@@ -19,7 +19,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
                                  'particle_properties_to_track': PLC(None,[str],  make_list_unique=True),
                                  'write': PVC(True, bool),
                                  'role_output_file_tag': PVC('_concentrations_', str),
-                                 'count_status_equal_to': PVC(None, str, possible_values=particle_info['status_flags'].keys()),
+                                 'count_status_equal_to': PVC(None, str, possible_values=si.particle_status_flags.possible_values()),
                                  'only_update_concentrations_on_write': PVC(True, bool),
                                  'update_interval': PVC(3600., int, min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
                                  'update_values_every_time_step': PVC(False, bool, min=1, units='sec', doc_str='update values in memory every time step, needed if using concentrations within modelling to change particle behaviour or properties. Output interval still sep by update_interval')
@@ -36,7 +36,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
     def set_up_output_file(self):
         # set up output file
 
-        grid = si.classes['field_group_manager'].grid
+        grid = si.core_roles.field_group_manager.grid
 
         self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_' + self.info['name'] + '.nc'
         si.msg_logger.progress_marker('opening concentrations output to : ' + self.info['output_file'])
@@ -53,8 +53,8 @@ class _BaseTriangleProperties(ParameterBaseClass):
         self.info['time_last_stats_recorded'] = si.time_of_nominal_first_occurrence
 
     def select_particles_to_count(self):
-        part_prop =  si.classes['particle_properties']
-        return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['stationary'], out=self.get_partID_buffer('B1'))
+        part_prop =  si.roles.particle_properties
+        return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
 
     def write(self, time_sec): nopass()
 
@@ -70,7 +70,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         if hasattr(self,'nc'):
             nc = self.nc
             # add attributes mapping release index to release group name
-            output_util.add_release_group_ID_info_to_netCDF(nc, si.classes['release_groups'])
+            output_util.add_release_group_ID_info_to_netCDF(nc, si.roles.release_groups)
 
             nc.close()
 

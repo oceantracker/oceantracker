@@ -90,7 +90,7 @@ for f in glob.glob('output/minimal_example/*'):
 # example of reading tracks file
 
 # read netcdf into dictionary
-from oceantracker.post_processing.read_output_files import read_ncdf_output_files
+from read_oceantracker.python import read_ncdf_output_files
 
 tracks =read_ncdf_output_files.read_particle_tracks_file('output/minimal_example\minimal_example_tracks_compact.nc')
 print('Track data', tracks.keys())
@@ -108,7 +108,7 @@ print('Grid data',grid.keys())
 
 
 # load netcdf with grid and other useful info for plotting
-from oceantracker.post_processing.read_output_files import load_output_files
+from read_oceantracker.python import load_output_files
 
 tracks_plot =load_output_files.load_track_data('output/minimal_example\minimal_example_caseInfo.json')
 

@@ -24,7 +24,7 @@ class DistanceTravelled(ParticleProperty):
 
     def update(self,n_time_step,time_sec, active):
         # get total distance traveled
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         # faster in numba?
         dx = part_prop['x'].get_values(active) - part_prop['x_last_good'].get_values(active)
         ds = np.sqrt(np.power(dx[:, 0], 2), np.power(dx[:, 1], 2)).reshape((-1,))

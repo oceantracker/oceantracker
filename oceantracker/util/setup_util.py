@@ -16,7 +16,6 @@ def setup_output_dir(params, msg_logger, crumbs='', caller=None):
     params = merge_settings_with_defaults(params,  ['root_output_dir','output_file_base','add_date_to_run_output_dir'],
                                          msg_logger, crumbs='setup_output_dir')
 
-
     # get output files location
     root_output_dir = path.abspath(path.normpath(params['root_output_dir']))
     run_output_dir = path.join(root_output_dir, params['output_file_base'])
@@ -137,14 +136,14 @@ def config_numba_environment(params, msg_logger, crumbs='', caller = None):
 
     environ['numba_function_cache_size'] = str(params['numba_function_cache_size'])
 
-    if params['numba_cache_code']:
+    if 'numba_cache_code' in params  and params['numba_cache_code']:
        environ['OCEANTRACKER_NUMBA_CACHING'] = '1'
        environ['NUMBA_CACHE_DIR'] = path.join(params['root_output_dir'], 'numba_cache')
     else:
         environ['OCEANTRACKER_NUMBA_CACHING'] = '0'
 
 
-    if params['debug']:
+    if  'debug' in params and params['debug']:
         environ['NUMBA_BOUNDSCHECK'] = '1'
         environ['NUMBA_FULL_TRACEBACKS'] = '1'
         
@@ -165,8 +164,9 @@ def merge_base_and_case_working_params(base_working_run_builder, case_working_pa
 
     # check any case settings are not in the ones that can only be shared
     for key in case_working_params['settings'].keys():
+        pass
         if key in common_info.shared_settings_defaults:
-            msg_logger.msg(f'Setting {key} cannot be set with a case', crumbs= f'{crumbs} > case number {case_working_params["caseID"]}',
+            msg_logger.msg(f'Setting {key} cannot be set with a case', crumbs= crumbs,
                           hint='Move parameter from cases to the base case', caller=caller, fatal_error=True)
 
     # merge the settings first

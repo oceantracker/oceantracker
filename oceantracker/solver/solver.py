@@ -8,11 +8,12 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
 from oceantracker.util import numpy_util
-from oceantracker.common_info_default_param_dict_templates import cell_search_status_flags, particle_info
+
 
 from oceantracker.shared_info import SharedInfo as si
+
 class Solver(ParameterBaseClass):
-    #  does particle tracking solution as class to allow multi processing
+    ''' Does particle tracking solution '''
 
     def __init__(self):
         # set up info/attributes
@@ -25,7 +26,7 @@ class Solver(ParameterBaseClass):
                             })
 
     def final_setup(self):
-        si.classes['particle_group_manager'].add_particle_property('v_temp','manual_update', dict( vector_dim=si.classes['particle_properties']['x'].num_vector_dimensions(), write=False))
+        si.core_roles.particle_group_manager.add_particle_property('v_temp','manual_update', dict( vector_dim=si.roles.particle_properties['x'].num_vector_dimensions(), write=False))
 
 
 
@@ -38,13 +39,13 @@ class Solver(ParameterBaseClass):
         # solve for data in buffer
         ri=si.run_info
         ml = si.msg_logger
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         computation_started = datetime.now()
         # set up particle velocity working space for solver
         ri['total_alive_particles'] = 0
 
-        pgm, fgm = si.classes['particle_group_manager'], si.classes['field_group_manager']
+        pgm, fgm = si.core_roles.particle_group_manager, si.core_roles.field_group_manager
         ri['time_steps_completed'] = 0
 
         # work out time steps between writing tracks to screen
@@ -92,16 +93,16 @@ class Solver(ParameterBaseClass):
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
-            is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags['moving'], out=self.get_partID_buffer('ID1'))
+            is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.moving, out=self.get_partID_buffer('ID1'))
 
             # update particle velocity modification
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
-            for name, i in si.classes['velocity_modifiers'].items():
+            for name, i in si.roles.velocity_modifiers.items():
                 i.update(n_time_step, time_sec, is_moving)
 
             # dispersion is done by random walk velocity modification prior to integration step
             if si.settings['include_dispersion']:
-                si.classes['dispersion'].update(n_time_step, time_sec, is_moving)
+                si.core_roles.dispersion.update(n_time_step, time_sec, is_moving)
 
             #  Main integration step
             #--------------------------------------
@@ -134,9 +135,9 @@ class Solver(ParameterBaseClass):
         ri['computation_duration'] = datetime.now() -computation_started
 
     def _pre_step_bookkeeping(self, n_time_step,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
-        part_prop = si.classes['particle_properties']
-        pgm = si.classes['particle_group_manager']
-        fgm = si.classes['field_group_manager']
+        part_prop = si.roles.particle_properties
+        pgm = si.core_roles.particle_group_manager
+        fgm = si.core_roles.field_group_manager
 
         ri = si.run_info
         ri['current_model_date'] = time_util.seconds_to_datetime64(time_sec)
@@ -146,17 +147,17 @@ class Solver(ParameterBaseClass):
         pgm.remove_dead_particles_from_memory()
 
         # some may now have status dead so update
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['stationary'], out=self.get_partID_buffer('ID1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('ID1'))
 
         # trajectory modifiers,
-        for name, i in si.classes['trajectory_modifiers'].items():
+        for name, i in si.roles.trajectory_modifiers.items():
             i.update(n_time_step, time_sec, alive)
 
         # modify status, eg tidal stranding
         fgm.update_dry_cell_index()
 
 
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags['stationary'], out=self.get_partID_buffer('ID1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('ID1'))
 
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
@@ -164,7 +165,7 @@ class Solver(ParameterBaseClass):
         # resuspension is a core trajectory modifier
         if si.is3D_run:
             # friction_velocity property  is now updated, so do resupension
-            si.classes['resuspension'].update(n_time_step,time_sec, alive)
+            si.core_roles.resuspension.update(n_time_step,time_sec, alive)
 
         fgm.update_tidal_stranding_status(time_sec, alive)
 
@@ -177,12 +178,12 @@ class Solver(ParameterBaseClass):
         self._update_events(n_time_step, time_sec)
 
         # update integrated models, eg LCS
-        if si.classes['integrated_model'] is not None :
-            si.classes['integrated_model'].update(n_time_step,time_sec)
+        if si.core_roles.integrated_model is not None :
+            si.core_roles.integrated_model.update(n_time_step,time_sec)
 
         # write tracks
         if si.settings['write_tracks']:
-            tracks_writer = si.classes['tracks_writer']
+            tracks_writer = si.core_roles.tracks_writer
             tracks_writer.open_file_if_needed()
             if new_particleIDs.size > 0:
                 tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
@@ -193,22 +194,22 @@ class Solver(ParameterBaseClass):
 
     def do_time_step(self, time_sec, is_moving):
 
-        fgm = si.classes['field_group_manager']
-        part_prop = si.classes['particle_properties']
+        fgm = si.core_roles.field_group_manager
+        part_prop = si.roles.particle_properties
 
         part_prop['x_last_good'].copy('x', is_moving)
         part_prop['n_cell_last_good'].copy('n_cell', is_moving)
-        part_prop['cell_search_status'].set_values(cell_search_status_flags['ok'], is_moving)
+        part_prop['cell_search_status'].set_values(si.cell_search_status_flags['ok'], is_moving)
 
         # do time step
         dt = si.settings['time_step']*si.model_direction
         self.RK_step(time_sec, dt,is_moving)
 
         # for failed walks try half step
-        bad = part_prop['cell_search_status'].find_subset_where(is_moving, 'lt', cell_search_status_flags['ok'], out=self.get_partID_subset_buffer('bad_walk'))
+        bad = part_prop['cell_search_status'].find_subset_where(is_moving, 'lt', si.cell_search_status_flags['ok'], out=self.get_partID_subset_buffer('bad_walk'))
         if bad.size> 0:
             self.RK_step(time_sec, dt/2.0, bad)
-            #bad2 = part_prop['cell_search_status'].find_subset_where(is_moving, 'lt', cell_search_status_flags['ok'])
+            #bad2 = part_prop['cell_search_status'].find_subset_where(is_moving, 'lt', si.cell_search_status_flags['ok'])
             pass
 
         # fix any still bad
@@ -218,12 +219,12 @@ class Solver(ParameterBaseClass):
         # check bc coords correct
         if si.settings['dev_debug_opt'] ==10:
             from oceantracker.util import debug_util
-            still_bad = debug_util.check_walk_step(si.classes['reader'].grid, part_prop, bad, msg_logger=si.msg_logger, crumbs='solver-post RK step')
+            still_bad = debug_util.check_walk_step(si.core_roles.reader.grid, part_prop, bad, msg_logger=si.msg_logger, crumbs='solver-post RK step')
 
             if still_bad.size > 0:
                 si.msg_logger.msg(f'Cell search,  some still bad after fixing step  {np.count_nonzero(still_bad)} of  {is_moving.size} ', warning=True)
                 if si.settings['debug_plots']:
-                    debug_util.plot_walk_step(part_prop['x'].data, si.classes['reader'].grid, part_prop, still_bad)
+                    debug_util.plot_walk_step(part_prop['x'].data, si.core_roles.reader.grid, part_prop, still_bad)
                 pass
         pass
 
@@ -233,8 +234,8 @@ class Solver(ParameterBaseClass):
         # nb is buffer offset
 
         RK_order =self.params['RK_order']
-        fgm = si.classes['field_group_manager']
-        part_prop =  si.classes['particle_properties']
+        fgm = si.core_roles.field_group_manager
+        part_prop =  si.roles.particle_properties
 
         # note here subStep_time_step has sign of forwards/backwards
         dt2 = dt/2.
@@ -304,13 +305,13 @@ class Solver(ParameterBaseClass):
         fraction_done= abs((time_sec - si.run_info['start_time']) / si.run_info['duration'])
         s = f'{100* fraction_done:02.0f}%'
         s += f' step {nt:04d}'
-        s += si.classes['field_group_manager'].screen_info()
+        s += si.core_roles.field_group_manager.screen_info()
 
         t = abs(time_sec - si.run_info['start_time'])
         s += ' Day ' + ('-' if si.backtracking else '+')
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(time_sec) + ':'
-        s +=   si.classes['particle_group_manager'].screen_info()
+        s +=   si.core_roles.particle_group_manager.screen_info()
 
         elapsed_time= perf_counter() - t0_model
         remaining_time= (1 - fraction_done) * elapsed_time / max(.01, fraction_done)
@@ -324,7 +325,7 @@ class Solver(ParameterBaseClass):
     def _update_stats(self,n_time_step, time_sec):
         # update and write stats
         t0 = perf_counter()
-        for name, i in si.classes['particle_statistics'].items():
+        for name, i in si.roles.particle_statistics.items():
             if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['update_interval']:
                 i.start_update_timer()
                 i.update(n_time_step, time_sec)
@@ -335,7 +336,7 @@ class Solver(ParameterBaseClass):
         # update triangle concentrations, these can optionally be done every time step, if concentrations values affect particle properties
 
         t0 = perf_counter()
-        for name, i in si.classes['particle_concentrations'].items():
+        for name, i in si.roles.particle_concentrations.items():
             i.start_update_timer()
             i.update(n_time_step, time_sec)
             i.stop_update_timer()
@@ -345,7 +346,7 @@ class Solver(ParameterBaseClass):
         # write events
 
         t0 = perf_counter()
-        for name, i in si.classes['event_loggers'].items():
+        for name, i in si.roles.event_loggers.items():
             i.start_update_timer()
             i.update(n_time_step,time_sec)
             i.stop_update_timer()

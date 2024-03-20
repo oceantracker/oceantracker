@@ -38,7 +38,7 @@ class RandomWalk(_BaseTrajectoryModifer):
     # apply random walk
     def update(self, n_time_step,time_sec, active):
         # add up 2D/3D diffusion coeff as random walk done using velocity_modifier
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         if  si.is3D_run:
             self._add_random_walk_velocity3D_modifier_constantAZ(self.info['random_walk_velocity'],

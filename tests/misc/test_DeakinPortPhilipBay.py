@@ -79,8 +79,8 @@ if __name__ == '__main__':
 
     # do plots
     if not args.noplots:
-        from oceantracker.post_processing.read_output_files import load_output_files
-        from oceantracker.post_processing.plotting import plot_tracks, plot_statistics
+        from read_oceantracker.python import load_output_files
+        from plot_oceantracker import plot_tracks, plot_statistics
 
 
         ax = None

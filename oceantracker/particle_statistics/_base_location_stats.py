@@ -4,7 +4,6 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from os import  path
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.common_info_default_param_dict_templates import particle_info
 from numba.typed import List as NumbaList
 from numba import  njit
 from oceantracker.util.numba_util import njitOT
@@ -24,9 +23,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                   'count_end_date': PVC(None, 'iso8601date', doc_str='Stop particle counting from this iso date-time'),
                                   'role_output_file_tag' :           PVC('stats_base',str,doc_str='tag on output file for this class'),
                                   'write':                      PVC(True,bool,doc_str='Write statistcs to disk'),
-                                  'status_min': PVC('stationary', [str], possible_values=particle_info['status_keys_list'],
+                                  'status_min': PVC('stationary', [str], possible_values= si.particle_status_flags.possible_values(),
                                                                  doc_str=' Count only those particles with status >= to this value'),
-                                  'status_max': PVC('moving', [str], possible_values=particle_info['status_keys_list'],
+                                  'status_max': PVC('moving', [str], possible_values=si.particle_status_flags.possible_values(),
                                                     doc_str=' Count only those particles with status  <= to this value'),
                                   'z_min': PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value', units='meters above mean water level, so is < 0 at depth'),
                                   'z_max': PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value', units='meters above mean water level, so is < 0 at depth'),
@@ -71,8 +70,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def check_part_prop_list(self):
 
-        part_prop = si.classes['particle_properties']
-        pgm = si.classes['particle_group_manager']
+        part_prop = si.roles.particle_properties
+        pgm = si.core_roles.particle_group_manager
         names=[]
         for name in self.params['particle_property_list']:
 
@@ -114,7 +113,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         self.prop_list, self.sum_prop_list = [],[]
         # todo put this in numba uti;, for other classes to use
         names=[]
@@ -177,14 +176,14 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def update(self,n_time_step, time_sec):
         if not self.is_time_to_count(): return
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         params = self.params
         info = self.info
 
         self.start_update_timer()
 
         self.record_time_stats_last_recorded(time_sec)
-        num_in_buffer = si.classes['particle_group_manager'].info['particles_in_buffer']
+        num_in_buffer = si.core_roles.particle_group_manager.info['particles_in_buffer']
 
         # first select those to count based on status and z location
         sel = self.sel_status_waterdepth_and_z(part_prop['status'].data, part_prop['x'].data, part_prop['water_depth'].data.ravel(),
@@ -196,7 +195,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         #update prop list data, as buffer may have expnaded
         #todo do this only when expansion occurs??
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
             self.prop_list[n]= part_prop[name].data
 
@@ -230,7 +229,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # write nth step in file
         fh = self.nc.file_handle
         fh['time'][n] = time
-        release_groups = si.classes['release_groups']
+        release_groups = si.roles.release_groups
 
         # add up number released
         num_released = 0
@@ -251,16 +250,16 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         nc = self.nc
         # write total released in each release group
         num_released=[]
-        for name, i in si.classes['release_groups'].items():
+        for name, i in si.roles.release_groups.items():
             num_released.append(i.info['number_released'])
 
         if self.params['write']:
             self.info_to_write_at_end()
             nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
-            nc.write_global_attribute('total_num_particles_released', si.classes['particle_group_manager'].info['particles_released'])
+            nc.write_global_attribute('total_num_particles_released', si.core_roles.particle_group_manager.info['particles_released'])
 
             # add attributes mapping release index to release group name
-            output_util.add_release_group_ID_info_to_netCDF(nc, si.classes['release_groups'] )
+            output_util.add_release_group_ID_info_to_netCDF(nc, si.roles.release_groups )
 
             nc.close()
         self.nc = None  # parallel pool cant pickle nc

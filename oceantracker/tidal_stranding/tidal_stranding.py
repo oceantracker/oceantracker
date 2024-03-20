@@ -1,13 +1,13 @@
 from numba import njit
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 from oceantracker.util.numba_util import njitOT
-from oceantracker.common_info_default_param_dict_templates import particle_info
+
 from oceantracker.shared_info import SharedInfo as si
 
-# globals
-status_stranded_by_tide = int(particle_info['status_flags']['stranded_by_tide'])
-status_stationary = int(particle_info['status_flags']['stationary'])
-status_moving = int(particle_info['status_flags']['moving'])
+# globals for numba code compilation
+status_stranded_by_tide = int(si.particle_status_flags.stranded_by_tide)
+status_stationary = int(si.particle_status_flags.stationary)
+status_moving = int(si.particle_status_flags.moving)
 
 class TidalStranding(_BaseTrajectoryModifier):
 
@@ -23,7 +23,7 @@ class TidalStranding(_BaseTrajectoryModifier):
 
     def update(self,grid, time_sec,sel):
 
-        part_prop  =  si.classes['particle_properties']
+        part_prop  =  si.roles.particle_properties
 
         tidal_stranding_from_dry_cell_index(
             grid['dry_cell_index'],
@@ -31,7 +31,6 @@ class TidalStranding(_BaseTrajectoryModifier):
             sel,
             part_prop['status'].data)
         pass
-
 
 @njitOT
 def tidal_stranding_from_dry_cell_index(dry_cell_index, n_cell, sel, status):

@@ -16,7 +16,7 @@ class eDNAdetection(ParticleProperty):
 
 
     def initial_value_at_birth(self, new_part_IDs):
-        part_prop= si.classes['particle_properties']
+        part_prop= si.roles.particle_properties
         depth = part_prop['water_depth'].get(new_part_IDs)
 
         sampling_volume = abs(depth) * self.params[ 'sample_collector_area']  # depth times area of sampler pulled through full water depth
@@ -26,7 +26,7 @@ class eDNAdetection(ParticleProperty):
 
     def update(self,n_time_step,time_sec,active):
         # update c, ie growth going backwards in time,  prop each time step
-        age = si.classes['particle_properties']['age'].get_values(active)
+        age = si.roles.particle_properties['age'].get_values(active)
         conc = self.params['initial_value']*np.exp( np.abs(age) / abs(self.params['decay_time_scale']))
 
         self.set_values(conc,active)

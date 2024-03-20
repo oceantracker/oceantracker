@@ -68,7 +68,7 @@ class ParameterBaseClass(object):
     def check_class_required_fields_prop_etc(self, required_props_list=[],
                                              requires3D=None, crumbs=''):
         for name in required_props_list:
-            if name not in si.classes['particle_properties']:
+            if name not in si.roles.particle_properties:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.info['name']
                                 + '" requires particle property  "' + name + '"'
                                 + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', fatal_error=True,crumbs=crumbs)
@@ -97,7 +97,7 @@ class ParameterBaseClass(object):
         #  a selection of particle IDs is made, eg status == moving
         # WARNING never refer directly to the partID_buffers, alawys use this method
         #         to access buffer, as buffer size is dynamically changing
-        current_particle_buffer_size = si.classes['particle_group_manager'].info['current_particle_buffer_size']
+        current_particle_buffer_size = si.core_roles.particle_group_manager.info['current_particle_buffer_size']
 
         if name not in self.partID_buffers:
             # create a new ID buffer

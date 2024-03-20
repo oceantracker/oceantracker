@@ -8,7 +8,7 @@ def reponse_end(self):
     # stuff sent and end
 
     # send individual particle stats
-    particle = self.otsim.shared_info.classes['particle_group_manager']
+    pgm = self.otsim.shared_info.core_roles.particle_group_manager
     s = particle.get_partProp_inBufferPtr('distance_travelled').copy()
     time_alive = particle.get_partProp_inBufferPtr('age').copy()
     time_alive[time_alive == 0] = 1e32
@@ -44,7 +44,7 @@ class EmitOutputParticle(ParticleGroup):
         status = np.array(self.get_partProp_inBufferPtr('status'), dtype = np.int8)  # Cast to int8
 
         self.emit('response', {
-            'realtime': int(si.classes['time_varying_info']['time'].get()),
+            'realtime': int(si.roles.time_varying_info['time'].get()),
             'num_released': self.info['num_released'],
             'crds':  particle_locations,
             'status':  status,

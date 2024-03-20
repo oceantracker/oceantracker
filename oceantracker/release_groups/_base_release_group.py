@@ -4,7 +4,7 @@ from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC, ParameterCoordsChecker as PCC
 from numba import njit
 from oceantracker.util.numba_util import njitOT
-from oceantracker.common_info_default_param_dict_templates import large_float
+
 from oceantracker.util.basic_util import nopass
 from oceantracker.shared_info import SharedInfo as si
 
@@ -96,7 +96,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         # check cadiated in bound
         # there must be a particle property set up for every release_part_prop must have a
         # use KD tree to find points those inside model domain
-        fgm = si.classes['field_group_manager']
+        fgm = si.core_roles.field_group_manager
         is_inside, release_part_prop  = fgm.are_points_inside_domain(x, self.params['allow_release_in_dry_cells'])
 
         return is_inside, release_part_prop
@@ -186,8 +186,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
                 release_part_prop['x'][:, 2] = release_part_prop['water_depth'] + params['release_offset_from_surface_or_bottom']
 
             elif params['z_min'] is not None or  params['z_max'] is not None:
-                z_min = -large_float if params['z_min'] is None else params['z_min']
-                z_max =  large_float if params['z_max'] is None else params['z_max']
+                z_min = -si.info.large_float if params['z_min'] is None else params['z_min']
+                z_max =  si.info.large_float if params['z_max'] is None else params['z_max']
 
                 if z_min > z_max:
                     ml.msg(f'Must have zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
@@ -200,7 +200,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
     def add_tide_and_depth_release_part_prop(self,release_part_prop, time_sec):# get water depth and tide at particle locations, which may be needed to filter particle releases
              
             # add tide and water depth at released particle locations
-            fgm = si.classes['field_group_manager']
+            fgm = si.core_roles.field_group_manager
             release_part_prop['water_depth'] = fgm.interp_named_field_at_given_locations_and_time(
                                                 'water_depth', release_part_prop['x'], time_sec=None,
                                                 n_cell=release_part_prop['n_cell'],

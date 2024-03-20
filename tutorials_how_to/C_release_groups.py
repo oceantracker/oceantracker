@@ -7,11 +7,13 @@
 # 
 # A release group is a set of particles released at the same times and location. There can be many release groups. This enables the fate of particles from different origins to be tracked separately within the same computational run. Importantly,  on the fly statistics  are separated into release groups. Eg. gridded statistics return a heat map for each release group, while polygon statistics give the connectivity between each given polygon and each release group.    
 # 
-# A release group may be 
+# A release group may be a:
 # 
-# * a "point_releases" set points, giving one or more 2D or 3D locations where particles are released. A radius for 2D release around theses point also can be set. 
+# * "point_releases" set points, giving one or more 2D or 3D locations where particles are released. A radius for 2D release around theses point also can be set. 
 #     
 # * "polygon release", where particles are released randomly within polygon made up of 3 or more 2D points. Particles will not be released in any parts of the polygon outside the domain. 
+# 
+# * "grid_release", particles released from points on a regular grid.
 #     
 # For polygons, the vertical release location is randomly chosen in the water column, or user a given  in z range. If the z value of a point release is not given, then the vertical release location is chosen in the same manner. 
 # 

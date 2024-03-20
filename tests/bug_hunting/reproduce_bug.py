@@ -3,9 +3,9 @@
 
 # %%
 from oceantracker.main import run
-from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.post_processing.plotting import plot_tracks
-from oceantracker.post_processing.plotting import plot_statistics
+from read_oceantracker.python import load_output_files
+from plot_oceantracker import plot_tracks
+from plot_oceantracker import plot_statistics
 
 import os
 import numpy as np

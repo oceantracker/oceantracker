@@ -29,12 +29,12 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         super().initial_setup()  # set up using regular grid for  stats
 
         # find associated release group
-        if params['name_of_polygon_release_group']  not in si.classes['release_groups']:
+        if params['name_of_polygon_release_group']  not in si.roles.release_groups:
             ml.msg(params['class_name'].split('.')[-1] + ' no polygon release group of name ' + params['name_of_polygon_release_group'] +
-                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.classes['release_groups'].keys())),
+                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.roles.release_groups.keys())),
                                 caller=self, fatal_error=True)
 
-        rg = si.classes['release_groups'][params['name_of_polygon_release_group']]
+        rg = si.roles.release_groups[params['name_of_polygon_release_group']]
         if not isinstance(rg, PolygonRelease) :
             ml.msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params['name_of_polygon_release_group'] +
                                   '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ',
@@ -49,9 +49,9 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                              'points': self.release_group_to_count.params['points']},default_polygon_dict_params ,
                                              si.msg_logger)
         # create resident in polygon for single release group
-        particles = si.classes['particle_group_manager']
+        pgm = si.core_roles.particle_group_manager
         self.info['inside_polygon_particle_prop'] = f'resident_in_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
-        particles.add_particle_property(self.info['inside_polygon_particle_prop'],'manual_update',dict(
+        pgm.add_particle_property(self.info['inside_polygon_particle_prop'],'manual_update',dict(
                                                class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=[polygon],
                                                 write=False))
@@ -85,7 +85,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         self.count_all_particles_time_slice = np.full_like(self.count_time_slice, 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
-            if p_name in si.classes['particle_properties']:
+            if p_name in si.roles.particle_properties:
                 self.sum_binned_part_prop[p_name] = np.full(num_pulses, 0.)  # zero for  summing
                 nc.create_a_variable('sum_' + p_name, dim_names, np.float64, description= 'sum of particle property inside polygon  ' + p_name)
             else:
@@ -95,7 +95,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
     def do_counts(self,n_time_step, time_sec, sel):
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         rg  = self.release_group_to_count
 
 

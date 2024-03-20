@@ -42,8 +42,8 @@ class GridRelease(_BaseReleaseGroup):
         info['map_grid_index_to_row_column'] = np.stack((ri.ravel(), ci.ravel()),axis=1)
 
         # add particle prop fort row column only if nor already added by another grid release
-        if 'grid_release_row_col' not in si.classes['particle_properties']:
-            pgm = si.classes['particle_group_manager']
+        if 'grid_release_row_col' not in si.roles.particle_properties:
+            pgm = si.core_roles.particle_group_manager
             pgm.add_particle_property('grid_release_row_col','manual_update', dict(write=True, time_varying= False, vector_dim=2,dtype=np.int32,
                                                                                   description='(row , column) of grid point which released the particle' ))
             pass

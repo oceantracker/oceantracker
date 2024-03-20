@@ -1,6 +1,6 @@
 from oceantracker.main import run
-from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.post_processing.plotting import plot_tracks, plot_utilities, plot_statistics
+from read_oceantracker.python import load_output_files
+from plot_oceantracker import plot_tracks
 from oceantracker.util.cord_transforms import WGS84_to_NZTM
 import argparse
 import numpy as np

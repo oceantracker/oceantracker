@@ -2,7 +2,7 @@ import numpy as np
 from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.common_info_default_param_dict_templates import particle_info
+
 from oceantracker.util import time_util
 
 class _BaseTimeVaringInfo(ParameterBaseClass):

@@ -30,7 +30,7 @@ class _BaseEventLogger(ParameterBaseClass):
     def initial_setup(self):
 
         # boolean buffer particle prop to recorded history of event having started (must be prop to be managed in compact mode)
-        pgm = si.classes['particle_group_manager']
+        pgm = si.core_roles.particle_group_manager
         pgm.add_particle_property('event_has_started_boolean','manual_update',dict(initial_value=False, dtype=bool, write=False))
         self.time_steps_written = 0
 
@@ -40,7 +40,7 @@ class _BaseEventLogger(ParameterBaseClass):
         # eg. based on number of particles in buffer
         # returns particle indices where event has started and ended
 
-        event_has_started_boolean = si.classes['particle_properties']['event_has_started_boolean'].data
+        event_has_started_boolean = si.roles.particle_properties['event_has_started_boolean'].data
 
         IDs_event_began, IDs_event_ended = self._find_particles_where_event_has_started_or_ended_numba(
                                                         event_has_started_boolean,
@@ -51,7 +51,7 @@ class _BaseEventLogger(ParameterBaseClass):
 
     def set_up_output_file(self,addition_prop_to_write = None):
         # set up netcdf-file variables with open dimension
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         params = self.params
         info= self.info
 
@@ -87,9 +87,9 @@ class _BaseEventLogger(ParameterBaseClass):
     def write_events(self,IDs_event_began, IDs_event_ended):
         # prop to write is list of particle prop to write beyond the standard ones, e.g.  ID of polygon each particle is inside, to note which polygon event is associated with
 
-        part_prop= si.classes['particle_properties']
+        part_prop= si.roles.particle_properties
 
-        time = si.classes['time_varying_info']['time'].get_values()
+        time = si.roles.time_varying_info['time'].get_values()
 
         for event_flag, IDs in zip([1,-1], [IDs_event_began, IDs_event_ended]):
 
@@ -136,5 +136,5 @@ class _BaseEventLogger(ParameterBaseClass):
         if self.params['write']:
             # add attributes mapping release index to release group name
             nc = self.nc
-            output_util.add_release_group_ID_info_to_netCDF(nc, si.classes['release_groups'])
+            output_util.add_release_group_ID_info_to_netCDF(nc, si.roles.release_groups)
             nc.close()

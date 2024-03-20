@@ -9,8 +9,8 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo61_concentration_test
 
 # below only required for plotting
-from oceantracker.post_processing.read_output_files.load_output_files import load_concentration_data, get_case_info_file_from_run_file
-from oceantracker.post_processing.plotting.plot_statistics import animate_concentrations
+from read_oceantracker.python.load_output_files import load_concentration_data, get_case_info_file_from_run_file
+from plot_oceantracker.plot_statistics import animate_concentrations
 
 output_file= "output\demo61_concentration_test"
 
