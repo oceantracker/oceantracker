@@ -1,29 +1,32 @@
 import numpy as np
 from numba import njit,prange, types as nbt, typeof, from_dtype
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.common_info_default_param_dict_templates import particle_info, cell_search_status_flags
+
 # record variable to hold walk info/counts
 # to reduce number of args required in numba functions and be morr readable
 from oceantracker.util.numba_util import  njitOT
 import os
 from copy import copy
+from oceantracker.shared_info import SharedInfo as si
+
 # globals
-# todo make numpy structure?
-status_moving = int(particle_info['status_flags']['moving'])
-status_on_bottom = int(particle_info['status_flags']['on_bottom'])
-status_stranded_by_tide = int(particle_info['status_flags']['stranded_by_tide'])
 
-status_outside_open_boundary = int(particle_info['status_flags']['outside_open_boundary'])
-status_dead = int(particle_info['status_flags']['dead'])
-status_bad_cord = int(particle_info['status_flags']['bad_cord'])
-status_cell_search_failed = int(particle_info['status_flags']['cell_search_failed'])
+# globals to complile into numba to save pass arguments
+psf = si.particle_status_flags
+status_moving = int(psf['moving'])
+status_on_bottom = int(psf['on_bottom'])
+status_stranded_by_tide = int(psf['stranded_by_tide'])
+status_outside_open_boundary = int(psf['outside_open_boundary'])
+status_dead = int(psf['dead'])
+status_bad_cord = int(psf['bad_cord'])
+status_cell_search_failed = int(psf['cell_search_failed'])
 
-search_ok= int(cell_search_status_flags['ok'])
-search_blocked_domain= int(cell_search_status_flags['blocked_domain'])
-search_blocked_dry_cell= int(cell_search_status_flags['blocked_dry_cell'])
-search_bad_cord= int(cell_search_status_flags['bad_cord'])
-search_outside_domain= int(cell_search_status_flags['outside_domain'])
-search_failed= int(cell_search_status_flags['failed'])
+search_ok= int(si.cell_search_status_flags['ok'])
+search_blocked_domain= int(si.cell_search_status_flags['blocked_domain'])
+search_blocked_dry_cell= int(si.cell_search_status_flags['blocked_dry_cell'])
+search_bad_cord= int(si.cell_search_status_flags['bad_cord'])
+search_outside_domain= int(si.cell_search_status_flags['outside_domain'])
+search_failed= int(si.cell_search_status_flags['failed'])
 
 #below is called by another numba function which will work out signature on first call
 @njitOT

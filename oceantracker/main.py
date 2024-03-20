@@ -35,42 +35,47 @@ from oceantracker.util.messgage_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import get_hydro_model_info
 
 import traceback
-import os
+
+from  oceantracker.shared_info import SharedInfo as si
+
+# use separate message logger for actions in main, cases use si.msg_logger
+msg_logger = MessageLogger()
+
 OTname = common_info.package_fancy_name
 help_url_base = 'https://oceantracker.github.io/oceantracker/_build/html/info/'
 
 def run(params):
+    '''Run a single OceanTracker case using given parameters'''
     ot = _OceanTrackerRunner()
     case_info_files = ot.run(params)
     return case_info_files
 
 def run_parallel(base_case_params, case_list_params=[{}]):
-    ot= _OceanTrackerRunner()
+    ot = _OceanTrackerRunner()
     case_info_files  = ot.run(base_case_params, case_list_params)
     return case_info_files
 
 
-msg_logger = MessageLogger()
-
 class OceanTracker():
     def __init__(self,params=None):
-        self.params= param_template() if params is None else params
+        self.params= {}
         self.case_list_params=[]
-        msg_logger.screen_tag('helper')
+        msg_logger.set_screen_tag('helper')
         msg_logger.print_line()
         msg_logger.msg('Starting OceanTracker helper class')
+        self.has_run = False
 
     # helper methods
     def settings(self,case=None, **kwargs):
-
         # work out if to add to base params or case list params
-        p = self._check_case(case, f'adding settings "{str(kwargs.keys())}"')
+        existing_params = self._get_case_params_to_work_on(case)
         for key in kwargs:
-            p[key]= kwargs[key]
+            existing_params[key]= kwargs[key]
 
-    def add_class(self, class_role =None,case=None, **kwargs):
+    def add_class(self, class_role=None, case=None, name=None, **kwargs):
         ml = msg_logger
         known_class_roles = common_info.class_dicts_list + common_info.core_class_list
+
         if class_role is None:
             ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True, caller =self)
             return
@@ -81,65 +86,60 @@ class OceanTracker():
             return
 
         if class_role not in known_class_roles:
-            ml.msg(f'oceantracker.add_class, class_role parameter is not recognised, value ="{class_role}"', fatal_error=True,
-                   hint= 'Must be one of-' +str(known_class_roles))
+            ml.spell_check(f'oceantracker.add_class, class_role parameter is not recognised, value ="{class_role}"',
+                           class_role,known_class_roles, fatal_error=True)
             return
 
+        existing_params = self._get_case_params_to_work_on(case)
+        if class_role not in existing_params: existing_params[class_role] = {}
+
+        # add new params to core or other roles
         if class_role in common_info.core_class_list:
-            # single class
-            self.params[class_role] = kwargs
-
-        elif class_role in common_info.class_dicts_list:
-            # can have more than one class
-            if 'name' not in kwargs:
-                ml.msg(f'add_class_dict() : for class_role"{class_role}" must have a name parameter, eg. name=my_{class_role}1, ignoring this class' ,
-                       fatal_error=True,
-                       hint= f'the can be more than one {"{class_role}"}, so each must have a unique name')
-                return
-            name =kwargs["name"]
-            if name in self.params[class_role]:
-                ml.msg(f'class type "{class_role}" already has a class named "{name}", ignoring later versions', warning=True)
-            else:
-                # add params to  class type of given name and case
-                p = self._check_case( case, f'adding class "{name}"') # find if added to base case or case list # case
-
-                p[class_role][name]={} # add blank param dict
-                for key in kwargs:
-                    if key != 'name':
-                        p[class_role][name][key] = kwargs[key]
+            existing_params[class_role].update(kwargs)
         else:
-            ml.spell_check('ignoring class helper function add_class(),',class_role, known_class_roles,
-                        crumbs=f' in add_class() class type "{class_role}"', caller = self)
-        pass
+            #add to mulit component role
+            # auto name if needed
+            if name is None:  name = f'{class_role.upper()}_{len(existing_params[class_role]):03d}'
 
-    def _check_case(self,case, crumbs):
-        # check and make space for case
-        ml = msg_logger
+            if 'name' in existing_params[class_role]:# auto name
+                msg_logger.msg(f'Class role  "{class_role}" already has a component named "{name}", only using last one given',
+                           warning= True)
+            existing_params[class_role][name] = {}
+            for key in kwargs:
+                  existing_params[class_role][name][key] = kwargs[key]
+        return
 
-        # no case number given add to ordinary params
-        if case is None: return self.params
+    def _get_case_params_to_work_on(self, case):
+        # work out whether to work on base of given case
+        if case is None:
+            return self.params
+        else:
+            if type(case) != int or case < 0:
+                msg_logger.msg(f'Case keyword must be an integer >0', fatal_error=True, hint=f'Got value :{str(case)}')
 
-        if type(case) != int or case < 0:
-            ml.msg(f'Parallel case number nust be a integer >0, got case # "{str(case)}"', fatal_error=True, crumbs=crumbs)
-            return
 
-        # expand case list to fit case if needed
-        if len(self.case_list_params) < case+1 :
-            ml.progress_marker(f'Adding parallel case number # "{str(case)}"')
-            for n in range(len(self.case_list_params), case + 1):
-                self.case_list_params.append(deepcopy(param_template()))
 
-        return self.case_list_params[case]
+            if case < len(self.case_list_params):
+                return self.case_list_params[case] # work on existing case
+            elif case >= len(self.case_list_params):
+                # expand and fill in any extra cases as empty
+                for n in range(len(self.case_list_params), case + 1):  self.case_list_params.append({})
+                return self.case_list_params[case] # work on new last one
+
+            else:
+                msg_logger.msg(f'Cases must be added in order, have case = {case}',
+                               fatal_error=True, hint=f"This would be the {case + 1}'th case added, but only :{len(self.case_list_params)} cases have been added so far" )
+                return {}
 
     def run(self):
         msg_logger.progress_marker('Starting run using helper class')
         ot= _OceanTrackerRunner()
         # todo print helper message here at end??
-        ot.helper_msg_logger = msg_logger  # used to print helper messages at end and write to file
 
-        case_info_file = ot.run(self, self.params, self.case_list_params)
+        case_info_file = ot.run(self.params, self.case_list_params)
 
-
+        self.has_run = True
+        # todo flag use so params can be reset if needed if same OceanTracker instance used more than once
         return case_info_file
 
 class _OceanTrackerRunner(object):
@@ -161,7 +161,7 @@ class _OceanTrackerRunner(object):
         # setup output dir and msg files
         o = setup_util.setup_output_dir(params, ml, crumbs='setting up output dir')
 
-        o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base'])
+        o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base']+'_run')
 
         run_builder['output_files'] = o
 
@@ -277,14 +277,16 @@ class _OceanTrackerRunner(object):
         # split base_case_params into shared and case params
         base_working_params = setup_util.decompose_params(base_case_params, ml, caller=self, crumbs='_run_parallel decompose base case params')
 
-        base_working_params['settings'] = setup_util.merge_settings_with_defaults(base_working_params['settings'], 'processors', ml,
-                                                                                                crumbs='setting processor number', caller=self)
+        comp_info= get_versions_computer_info.get_computer_info()
+
+        bs= base_working_params['settings']
+        num_processors = bs['processors'] if 'processors' in bs and bs['processors'] is not None else  max(int(.75*comp_info['CPUs_hardware']),1)
 
         case_run_builder_list=[]
 
         for n_case, case_params in enumerate(case_list_params):
-            case_working_params = setup_util.decompose_params(case_params, msg_logger=ml, caller=self)
 
+            case_working_params = setup_util.decompose_params(case_params, msg_logger=ml, caller=self)
             case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, case_working_params, ml,
                                                                                  crumbs=f'_run_parallel case #[{n_case}]', caller=None)
 
@@ -306,13 +308,11 @@ class _OceanTrackerRunner(object):
             case_run_builder_list.append(case_run_builder)
 
 
-
-        # do runs
-        num_proc = base_working_params['settings']['processors']
-        ml.progress_marker(' oceantracker:multiProcessing: processors:' + str(num_proc))
+        # do runs num_processors
+        ml.progress_marker(' oceantracker:multiProcessing: processors:' + str(num_processors))
 
         # run // cases
-        with multiprocessing.Pool(processes=num_proc) as pool:
+        with multiprocessing.Pool(processes=num_processors) as pool:
             case_results = pool.map(self._run1_case, case_run_builder_list)
 
         ml.progress_marker('parallel pool complete')
@@ -454,16 +454,3 @@ class _OceanTrackerRunner(object):
 
         msg_logger.close()
 
-def param_template():
-    # return an empty parameter dictionary
-
-    d = {}
-    all_settings=list(common_info.shared_settings_defaults.keys())+ list(common_info.case_settings_defaults.keys())
-    for key in all_settings:
-        d[key] = None
-
-    for key in sorted(common_info.class_dicts_list):
-        d[key] = {}
-    for key in sorted(common_info.core_class_list):
-        d[key] = {}
-    return deepcopy(d)

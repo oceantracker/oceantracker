@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -136,9 +137,13 @@ another process” errors.</p>
 <section id="run-parallel-with-helper-class">
 <h2>Run parallel with helper class<a class="headerlink" href="#run-parallel-with-helper-class" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># run in parallel using helper class method</span>
-<span class="kn">from</span> <span class="nn">oceantracker.main</span> <span class="kn">import</span> <span class="n">OceanTracker</span>
+<span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
+<span class="kn">from</span>  <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">reload</span> <span class="c1"># force a reload to get around notebooks single name space</span>
+<span class="n">reload</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 
-<span class="n">ot</span> <span class="o">=</span> <span class="n">OceanTracker</span><span class="p">()</span>
+
+<span class="n">ot</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">OceanTracker</span><span class="p">()</span>
+
 <span class="c1"># setup base case</span>
 <span class="c1"># by default settings and classes are added to base case</span>
 <span class="n">ot</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">output_file_base</span><span class="o">=</span> <span class="s1">&#39;parallel_test2&#39;</span><span class="p">,</span>      <span class="c1"># name used as base for output files</span>
@@ -163,11 +168,12 @@ another process” errors.</p>
 <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
     <span class="c1"># add a release group with one point to case &quot;n&quot;</span>
     <span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;release_groups&#39;</span><span class="p">,</span>
-                <span class="n">name</span> <span class="o">=</span><span class="s1">&#39;mypoint&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
+                <span class="n">case</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="c1"># this adds release group to the n&#39;th case to run in //</span>
+                <span class="n">name</span> <span class="o">=</span><span class="s1">&#39;mypoint&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="c1"># must have unique name for each group</span>
                 <span class="n">points</span><span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">],</span>  <span class="c1"># needs to be 1, by 2 list for single 2D point</span>
                 <span class="n">release_interval</span><span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>           <span class="c1"># seconds between releasing particles</span>
                 <span class="n">pulse_size</span><span class="o">=</span> <span class="mi">10</span><span class="p">,</span>                   <span class="c1"># number of particles released each release_interval</span>
-                <span class="n">case</span><span class="o">=</span><span class="n">n</span><span class="p">)</span> <span class="c1"># this adds release group to the nth case to run in //</span>
+                <span class="p">)</span>
 
 <span class="c1"># to run parallel in windows, must put run  call  inside the below &quot;if __name__ == &#39;__main__&#39;:&quot; block</span>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
@@ -182,40 +188,45 @@ another process” errors.</p>
     <span class="c1">#   where n is the case number 0,1,2...</span>
 </pre></div>
 </div>
-<pre class="literal-block">helper: --------------------------------------------------------------------------
-helper: Starting OceanTracker helper class
-helper:   - Adding parallel case number # &quot;0&quot;
-helper:   - Adding parallel case number # &quot;1&quot;
-helper:   - Adding parallel case number # &quot;2&quot;
-helper:   - Adding parallel case number # &quot;3&quot;
-helper:   - Starting run using helper class
-main: --------------------------------------------------------------------------
-main:  OceanTracker version 0.4.01.004 2023-07-14 - preliminary setup
-main:      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
-main:   - found hydro-model files of type SCHISIM
-main:       -  sorted hyrdo-model files in time order,        0.009 sec
-main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test2
-main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test2_raw_user_params.json&quot;
-main:   -  oceantracker:multiProcessing: processors:4
-main:   - parallel pool complete
-main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test2_runInfo.json&quot;
-main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test2
-main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test2_raw_user_params.json&quot;
-main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test2_runInfo.json&quot;
-main: --------------------------------------------------------------------------
-main: OceanTracker summary:  elapsed time =0:00:17.630557
-main:       Cases -   0 errors,   0 warnings,   8 notes, check above
-main:       Helper-   0 errors,   0 warnings,   0 notes, check above
-main:       Main  -   0 errors,   0 warnings,   3 notes, check above
-main: --------------------------------------------------------------------------</pre>
+<pre class="literal-block">helper --------------------------------------------------------------------------
+helper Starting OceanTracker helper class
+helper   - Starting run using helper class
+Main --------------------------------------------------------------------------
+Main OceanTracker starting main:
+Main   - Output dir set up.
+Main &gt;&gt;&gt; Warning: Deleted contents of existing output dir
+Main     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test2_raw_user_params.json&quot;
+Main   Output is in dir &quot;e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test2&quot;
+Main         hint: see for copies of screen output and user supplied parameters, plus all other output
+Main --------------------------------------------------------------------------
+Main  OceanTracker version 0.5.0.000 2024-03-07 - preliminary setup
+Main      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
+Main   - Found input dir &quot;../demos/demo_hindcast&quot;
+Main   - found hydro-model files of type  &quot;SCHISIM&quot;
+Main       -  sorted hyrdo-model files in time order,         0.026 sec
+Main   -  oceantracker:multiProcessing: processors:24
+Main   - parallel pool complete
+Main     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test2_runInfo.json&quot;
+Main     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test2_raw_user_params.json&quot;
+Main     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test2_runInfo.json&quot;
+Main &gt;&gt;&gt; Warning: Deleted contents of existing output dir
+Main &gt;&gt;&gt; Warning: Deleted contents of existing output dir
+Main --------------------------------------------------------------------------
+Main OceanTracker summary:  elapsed time =0:00:18.767578
+Main       Cases -   0 errors,   4 warnings,  20 notes, check above
+Main       Helper-   0 errors,   1 warnings,   2 notes, check above
+Main       Main  -   0 errors,   1 warnings,   2 notes, check above
+Main --------------------------------------------------------------------------</pre>
 </section>
 <section id="run-parallel-using-param-dicts">
 <h2>Run parallel using param. dicts.<a class="headerlink" href="#run-parallel-using-param-dicts" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># oceantracker parallel demo, run different release groups as parallel processes</span>
 <span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
+<span class="kn">from</span>  <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">reload</span> <span class="c1"># force a reload to get around notebooks single name space</span>
+<span class="n">reload</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 
 <span class="c1"># first build base case, params used for all cases</span>
-<span class="n">base_case</span><span class="o">=</span><span class="p">{</span>
+<span class="n">base_case</span><span class="o">=</span><span class="p">{</span> <span class="s2">&quot;debug&quot;</span> <span class="p">:</span><span class="kc">True</span><span class="p">,</span>
     <span class="s1">&#39;output_file_base&#39;</span> <span class="p">:</span><span class="s1">&#39;parallel_test1&#39;</span><span class="p">,</span>      <span class="c1"># name used as base for output files</span>
     <span class="s1">&#39;root_output_dir&#39;</span><span class="p">:</span><span class="s1">&#39;output&#39;</span><span class="p">,</span>             <span class="c1">#  output is put in dir   &#39;root_output_dir&#39;/&#39;output_file_base&#39;</span>
     <span class="s1">&#39;time_step&#39;</span> <span class="p">:</span> <span class="mi">120</span><span class="p">,</span>  <span class="c1">#  2 min time step as seconds</span>
@@ -234,7 +245,7 @@ main: --------------------------------------------------------------------------
 <span class="c1"># build a list of params for each case, with one release group fot each point</span>
 <span class="n">case_list</span><span class="o">=</span><span class="p">[]</span>
 <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
-    <span class="n">case_param</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">param_template</span><span class="p">()</span>
+    <span class="n">case_param</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="c1"># add one point as a release group to this case</span>
     <span class="n">case_param</span><span class="p">[</span><span class="s1">&#39;release_groups&#39;</span><span class="p">][</span><span class="s1">&#39;mypoint&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># better to give release group a unique name</span>
                                             <span class="s1">&#39;points&#39;</span><span class="p">:[</span><span class="n">p</span><span class="p">],</span>  <span class="c1"># needs to be 1, by 2 list for single 2D point</span>
@@ -258,25 +269,215 @@ main: --------------------------------------------------------------------------
     <span class="c1">#   where n is the case number 0,1,2...</span>
 </pre></div>
 </div>
-<pre class="literal-block">main: --------------------------------------------------------------------------
-main:  OceanTracker version 0.4.01.004 2023-07-14 - preliminary setup
-main:      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
-main:   - found hydro-model files of type SCHISIM
-main:       -  sorted hyrdo-model files in time order,        0.007 sec
-main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test1
-main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test1_raw_user_params.json&quot;
-main:   -  oceantracker:multiProcessing: processors:4
-main:   - parallel pool complete
-main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test1_runInfo.json&quot;
-main:     &gt;&gt;&gt; Note: output is in dir= e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test1
-main:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test1_raw_user_params.json&quot;
-main:     &gt;&gt;&gt; Note: run summary with case file names   &quot;parallel_test1_runInfo.json&quot;
-main: --------------------------------------------------------------------------
-main: OceanTracker summary:  elapsed time =0:00:17.336455
-main:       Cases -   0 errors,   0 warnings,   8 notes, check above
-main:       Helper-   0 errors,   0 warnings,   0 notes, check above
-main:       Main  -   0 errors,   0 warnings,   3 notes, check above
-main: --------------------------------------------------------------------------</pre>
+<pre class="literal-block">Main --------------------------------------------------------------------------
+Main OceanTracker starting main:
+Main   - Output dir set up.
+Main &gt;&gt;&gt; Warning: Deleted contents of existing output dir
+Main     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test1_raw_user_params.json&quot;
+Main   Output is in dir &quot;e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test1&quot;
+Main         hint: see for copies of screen output and user supplied parameters, plus all other output
+Main --------------------------------------------------------------------------
+Main  OceanTracker version 0.5.0.000 2024-03-07 - preliminary setup
+Main      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
+Main   - Found input dir &quot;../demos/demo_hindcast&quot;
+Main   - found hydro-model files of type  &quot;SCHISIM&quot;
+Main       -  sorted hyrdo-model files in time order,         0.949 sec
+Main &gt;&gt;&gt; Error: Setting root_output_dir cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting add_date_to_run_output_dir cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting output_file_base cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting time_step cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting screen_output_time_interval cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting backtracking cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting regrid_z_to_uniform_sigma_levels cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting display_grid_at_start cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting dev_debug_plots cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting debug cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting dev_debug_opt cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting minimum_total_water_depth cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting write_output_files cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting write_dry_cell_flag cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting max_run_duration cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting max_particles cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting processors cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting max_warnings cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting use_random_seed cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting numba_function_cache_size cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting numba_cache_code cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting multiprocessing_case_start_delay cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting profiler cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting EPSG_code_metres_grid cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main --------------------------------------------------------------------------
+Main &gt;&gt;&gt; Fatal errors, can not continue
+Main &gt;&gt;&gt; Error: Setting root_output_dir cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting add_date_to_run_output_dir cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting output_file_base cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting time_step cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting screen_output_time_interval cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting backtracking cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting regrid_z_to_uniform_sigma_levels cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting display_grid_at_start cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting dev_debug_plots cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting debug cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting dev_debug_opt cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting minimum_total_water_depth cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting write_output_files cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting write_dry_cell_flag cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting max_run_duration cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting max_particles cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting processors cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting max_warnings cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting use_random_seed cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting numba_function_cache_size cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting numba_cache_code cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting multiprocessing_case_start_delay cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting profiler cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main &gt;&gt;&gt; Error: Setting EPSG_code_metres_grid cannot be set with a case
+Main       hint: Move parameter from cases to the base case
+Main       in: _run_parallel case #[0]
+Main --------------------------------------------------------------------------</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---------------------------------------------------------------------------</span>
+
+<span class="n">GracefulError</span>                             <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">42</span>
+     <span class="mi">37</span> <span class="c1"># to run parallel in windows, must put run  call  inside the below &quot;if __name__ == &#39;__main__&#39;:&quot; block</span>
+     <span class="mi">38</span> <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+     <span class="mi">39</span>
+     <span class="mi">40</span>     <span class="c1"># run as parallel set of cases</span>
+     <span class="mi">41</span>     <span class="c1">#    by default uses one less than the number of physical processors at one time, use setting &quot;processors&quot;</span>
+<span class="o">---&gt;</span> <span class="mi">42</span>     <span class="n">case_info_files</span><span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">run_parallel</span><span class="p">(</span><span class="n">base_case</span><span class="p">,</span> <span class="n">case_list</span><span class="p">)</span>
+
+
+<span class="n">File</span> <span class="n">e</span><span class="p">:</span>\<span class="n">h_local_drive</span>\<span class="n">particletracking</span>\<span class="n">oceantracker</span>\<span class="n">oceantracker</span>\<span class="n">main</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">55</span><span class="p">,</span> <span class="ow">in</span> <span class="n">run_parallel</span><span class="p">(</span><span class="n">base_case_params</span><span class="p">,</span> <span class="n">case_list_params</span><span class="p">)</span>
+     <span class="mi">53</span> <span class="k">def</span> <span class="nf">run_parallel</span><span class="p">(</span><span class="n">base_case_params</span><span class="p">,</span> <span class="n">case_list_params</span><span class="o">=</span><span class="p">[{}]):</span>
+     <span class="mi">54</span>     <span class="n">ot</span> <span class="o">=</span> <span class="n">_OceanTrackerRunner</span><span class="p">()</span>
+<span class="o">---&gt;</span> <span class="mi">55</span>     <span class="n">case_info_files</span>  <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">base_case_params</span><span class="p">,</span> <span class="n">case_list_params</span><span class="p">)</span>
+     <span class="mi">56</span>     <span class="k">return</span> <span class="n">case_info_files</span>
+
+
+<span class="n">File</span> <span class="n">e</span><span class="p">:</span>\<span class="n">h_local_drive</span>\<span class="n">particletracking</span>\<span class="n">oceantracker</span>\<span class="n">oceantracker</span>\<span class="n">main</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">190</span><span class="p">,</span> <span class="ow">in</span> <span class="n">_OceanTrackerRunner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">case_list_params</span><span class="p">)</span>
+    <span class="mi">187</span>     <span class="n">case_info_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_single</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">run_builder</span><span class="p">)</span>
+    <span class="mi">188</span> <span class="k">else</span><span class="p">:</span>
+    <span class="mi">189</span>     <span class="c1"># run // case list with params as base case defaults for each run</span>
+<span class="o">--&gt;</span> <span class="mi">190</span>     <span class="n">case_info_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_parallel</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">case_list_params</span><span class="p">,</span> <span class="n">run_builder</span><span class="p">)</span>
+    <span class="mi">192</span> <span class="n">ml</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="mi">193</span> <span class="k">return</span> <span class="n">case_info_file</span>
+
+
+<span class="n">File</span> <span class="n">e</span><span class="p">:</span>\<span class="n">h_local_drive</span>\<span class="n">particletracking</span>\<span class="n">oceantracker</span>\<span class="n">oceantracker</span>\<span class="n">main</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">299</span><span class="p">,</span> <span class="ow">in</span> <span class="n">_OceanTrackerRunner</span><span class="o">.</span><span class="n">_run_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_case_params</span><span class="p">,</span> <span class="n">case_list_params</span><span class="p">,</span> <span class="n">run_builder</span><span class="p">)</span>
+    <span class="mi">293</span> <span class="c1"># get any missing settings from defaults after merging with base case settings</span>
+    <span class="mi">294</span> <span class="n">case_working_params</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_params_with_defaults</span><span class="p">(</span><span class="n">case_working_params</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">],</span>
+    <span class="mi">295</span>                                                             <span class="n">common_info</span><span class="o">.</span><span class="n">all_setting_defaults</span><span class="p">,</span> <span class="n">ml</span><span class="p">,</span> <span class="n">crumbs</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;_run_parallel case #[</span><span class="si">{</span><span class="n">n_case</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span>
+    <span class="mi">296</span>                                                             <span class="n">caller</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_for_unknown_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">--&gt;</span> <span class="mi">299</span> <span class="n">ml</span><span class="o">.</span><span class="n">exit_if_prior_errors</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Errors in setting up case #</span><span class="si">{</span><span class="n">n_case</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="mi">300</span> <span class="n">case_run_builder</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">run_builder</span><span class="p">)</span>
+    <span class="mi">301</span> <span class="n">case_run_builder</span><span class="p">[</span><span class="s1">&#39;caseID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_case</span>
+
+
+<span class="n">File</span> <span class="n">e</span><span class="p">:</span>\<span class="n">h_local_drive</span>\<span class="n">particletracking</span>\<span class="n">oceantracker</span>\<span class="n">oceantracker</span>\<span class="n">util</span>\<span class="n">messgage_logger</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">153</span><span class="p">,</span> <span class="ow">in</span> <span class="n">MessageLogger</span><span class="o">.</span><span class="n">exit_if_prior_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+    <span class="mi">151</span>     <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    <span class="mi">152</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+<span class="o">--&gt;</span> <span class="mi">153</span> <span class="k">raise</span> <span class="n">GracefulError</span><span class="p">(</span><span class="s1">&#39;Fatal error cannot continue &gt;&gt;&gt; &#39;</span> <span class="o">+</span><span class="n">msg</span> <span class="k">if</span> <span class="n">msg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">hint</span><span class="o">=</span><span class="s1">&#39;Check above or run.err file for errors&#39;</span><span class="p">)</span>
+
+
+<span class="n">GracefulError</span><span class="p">:</span> <span class="n">Error</span> <span class="o">&gt;&gt;</span> <span class="n">Fatal</span> <span class="n">error</span> <span class="n">cannot</span> <span class="k">continue</span> <span class="o">&gt;&gt;&gt;</span> <span class="n">Errors</span> <span class="ow">in</span> <span class="n">setting</span> <span class="n">up</span> <span class="n">case</span> <span class="c1">#0</span>
+ <span class="n">hint</span><span class="o">=</span> <span class="n">Check</span> <span class="n">above</span> <span class="ow">or</span> <span class="n">run</span><span class="o">.</span><span class="n">err</span> <span class="n">file</span> <span class="k">for</span> <span class="n">errors</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -303,7 +504,7 @@ main: --------------------------------------------------------------------------
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

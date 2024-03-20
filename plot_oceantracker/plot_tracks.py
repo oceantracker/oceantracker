@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors, animation
-from oceantracker.post_processing.plotting import plot_utilities
+from plot_oceantracker import plot_utilities
 
-from oceantracker.post_processing.read_output_files import load_output_files
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 from oceantracker.util import time_util
@@ -17,8 +16,8 @@ def plot_tracks(track_data, show_grid=False,credit=None, heading =None,
 
     fig.tight_layout()
 
-    plot_utilities.draw_base_map(track_data['grid'],ax=ax, axis_lims=axis_lims, show_grid= show_grid, title=title, credit=credit,
-                  back_ground_depth=back_ground_depth,back_ground_color_map= back_ground_color_map)
+    plot_utilities.draw_base_map(track_data['grid'], ax=ax, axis_lims=axis_lims, show_grid= show_grid, title=title, credit=credit,
+                                 back_ground_depth=back_ground_depth, back_ground_color_map= back_ground_color_map)
 
     ax.plot(track_data['x'][:,:, 0], track_data['x'][:, :, 1], linewidth=.5)
     if show_start:
@@ -26,7 +25,7 @@ def plot_tracks(track_data, show_grid=False,credit=None, heading =None,
         ax.scatter( track_data['x0'][ :, 0],  track_data['x0'][ :, 1], edgecolors=None, c='green', s=4, zorder =8)
 
     plot_utilities.plot_release_points_and_polygons(track_data, ax=ax) # these are nominal starts
-    plot_utilities.draw_polygon_list(polygon_list_to_plot,ax=ax)
+    plot_utilities.draw_polygon_list(polygon_list_to_plot, ax=ax)
     plot_utilities.show_particleNumbers(track_data['x'].shape[1])
     plot_utilities.add_heading(heading)
     plot_utilities.show_output(plot_file_name=plot_file_name)
@@ -73,9 +72,9 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
         plt.axis('scaled')
 
     plot_utilities.draw_base_map(track_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
-                  back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
+                                 back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
-    dry_cell_plot,dry_cell_data = plot_utilities.plot_dry_cells(track_data,show_dry_cells)
+    dry_cell_plot,dry_cell_data = plot_utilities.plot_dry_cells(track_data, show_dry_cells)
 
 
     s0 =size

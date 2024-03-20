@@ -16,7 +16,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="status_modifiers" href="status_modifiers_toc.html" />
+    <link rel="next" title="time_varying_info" href="time_varying_info_toc.html" />
     <link rel="prev" title="PolygonRelease" href="PolygonRelease.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -76,7 +77,7 @@
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="release_groups_toc.html">release_groups</a><ul>
       <li>Previous: <a href="PolygonRelease.html" title="previous chapter">PolygonRelease</a></li>
-      <li>Next: <a href="status_modifiers_toc.html" title="next chapter">status_modifiers</a></li>
+      <li>Next: <a href="time_varying_info_toc.html" title="next chapter">time_varying_info</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -106,7 +107,7 @@
 <p><strong>Description:</strong> Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.</p>
 <p><strong>class_name:</strong> oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange</p>
 <p><strong>File:</strong> oceantracker/release_groups/polygon_release_water_depth_range.py</p>
-<p><strong>Inheritance:</strong> PointRelease&gt; PolygonRelease&gt; PolygonReleaseWaterDepthRange</p>
+<p><strong>Inheritance:</strong> _BaseReleaseGroup&gt; PointRelease&gt; PolygonRelease&gt; PolygonReleaseWaterDepthRange</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
@@ -140,22 +141,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">max_cycles_to_find_release_points</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">50</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">50</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">max_water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">1e+37</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">min_water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">-1e+37</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">100</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -167,20 +154,34 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">points</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">array</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D <code class="docutils literal notranslate"><span class="pre">[[25,10],[23,2],....]</span></code>, must be convertible into N by 2 or 3 numpy array</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
-<li><p>list_contains_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 </ul>
-</dd>
-</dl>
-</li>
+</div></blockquote>
+<p>points: still working on display  of default params of  type &lt;class ‘oceantracker.util.parameter_checking.ParameterCoordsChecker’&gt;</p>
+<blockquote>
+<div><ul>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">pulse_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Number of particles released in a single pulse, this number is released every release_interval.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">release_at_bottom</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: 3D release particles at bottom, with  offset given by release_offset_from_surface_or_bottom param, overrides any given release z value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">release_at_surface</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: 3D release particles at free surface, ie tide height, with  offset given by release_offset_from_surface_or_bottom param, overrides any given release z value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -195,7 +196,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">release_end_date</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Date to stop releasing particles, ignored if release_duration give, must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
+<dt><code class="docutils literal notranslate"><span class="pre">release_end_date</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
@@ -213,7 +214,25 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">release_start_date</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
+<dt><code class="docutils literal notranslate"><span class="pre">release_offset_from_surface_or_bottom</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: 3D release particles at offset from free surface or bottom, if release_at_surface or  release_at_bottom = True</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+<li><p>units: <code class="docutils literal notranslate"><span class="pre">m</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">release_start_date</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: start date of release, Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">user_instance_info</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
@@ -251,13 +270,43 @@
 </dd>
 </dl>
 </li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">z_range</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - z range = [zmin, zmax] to randomly release in 3D, overrides any given release z value</p>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">water_depth_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">1e+37</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">water_depth_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">-1e+37</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">z_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: max/ highest z vale release for to randomly release in 3D, overrides any given release z value</p>
 <ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">z_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: min/ deepest z value to release for to randomly release in 3D, overrides any given release z value</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">z_range</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;]</span></code></p></li>
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>min_length: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+<li><p>obsolete: <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">z_min</span> <span class="pre">and/or</span> <span class="pre">z_max</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -278,7 +327,7 @@
           <a href="PolygonRelease.html" title="Previous document">PolygonRelease</a>
         </li>
         <li>
-          <a href="status_modifiers_toc.html" title="Next document">status_modifiers</a>
+          <a href="time_varying_info_toc.html" title="Next document">time_varying_info</a>
           &rarr;
         </li>
     </ul>
@@ -290,7 +339,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

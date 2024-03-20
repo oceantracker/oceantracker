@@ -16,7 +16,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Parameter details" href="../parameter_ref/parameter_ref_toc.html" />
+    <link rel="next" title="Trouble shooting" href="../trouble_shooting.html" />
     <link rel="prev" title="Running OceanTracker" href="../running_ocean_tracker.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -75,7 +76,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="../running_ocean_tracker.html">Running OceanTracker</a><ul>
       <li>Previous: <a href="../running_ocean_tracker.html" title="previous chapter">Running OceanTracker</a></li>
-      <li>Next: <a href="../parameter_ref/parameter_ref_toc.html" title="next chapter">Parameter details</a></li>
+      <li>Next: <a href="../trouble_shooting.html" title="next chapter">Trouble shooting</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -468,8 +469,8 @@ case file name= e:OneDrive - CawthronH_Local_driveParticleTrackingoceantrackertu
 <p>also see … for more on plotting notebook</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot animation of results</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files</span> <span class="kn">import</span>  <span class="n">load_output_files</span>
+<span class="kn">from</span> <span class="nn">plot_oceantracker.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
+<span class="kn">from</span> <span class="nn">read_oceantracker.python</span> <span class="kn">import</span>  <span class="n">load_output_files</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span> <span class="c1"># show animation in note book</span>
 
 <span class="c1"># read particle track data into a dictionary using case_info_file_name</span>
@@ -49575,7 +49576,7 @@ YXRhAAAAAQAAAABMYXZmNTguNDUuMTAw
           <a href="../running_ocean_tracker.html" title="Previous document">Running OceanTracker</a>
         </li>
         <li>
-          <a href="../parameter_ref/parameter_ref_toc.html" title="Next document">Parameter details</a>
+          <a href="../trouble_shooting.html" title="Next document">Trouble shooting</a>
           &rarr;
         </li>
     </ul>
@@ -49587,7 +49588,7 @@ YXRhAAAAAQAAAABMYXZmNTguNDUuMTAw
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

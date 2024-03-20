@@ -77,7 +77,6 @@ Below list the files after running the minimal example.
     output/minimal_example\minimal_example_raw_user_params.json
     output/minimal_example\minimal_example_runInfo.json
     output/minimal_example\minimal_example_tracks_compact.nc
-    output/minimal_example\users_params_minimal_example.json
     
 
 Reading particle tracks
@@ -129,7 +128,7 @@ The below also shows how read the hydrodynamic grid.
     # example of reading tracks file
     
     # read netcdf into dictionary
-    from oceantracker.post_processing.read_output_files import read_ncdf_output_files
+    from read_oceantracker.python import read_ncdf_output_files
     
     tracks =read_ncdf_output_files.read_particle_tracks_file('output/minimal_example\minimal_example_tracks_compact.nc')
     print('Track data', tracks.keys())
@@ -142,7 +141,7 @@ The below also shows how read the hydrodynamic grid.
 
 .. parsed-literal::
 
-    Track data dict_keys(['file_created', 'total_num_particles_released', 'time_steps_written', 'status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_frozen', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'release_groupID_my_release_point', 'dimensions', 'status', 'time', 'ID', 'number_of_release_points', 'x0', 'water_depth', 'user_release_groupID', 'particles_written_per_time_step', 'x_last_good', 'friction_velocity', 'dry_cell_index', 'particle_ID', 'is_polygon_release', 'time_step_range', 'tide', 'num_part_released_so_far', 'x', 'time_released', 'IDpulse', 'release_points', 'IDrelease_group', 'age', 'release_groupID', 'release_locations', 'z'])
+    Track data dict_keys(['status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_stationary', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'file_created', 'total_num_particles_released', 'time_steps_written', 'release_groupID_my_release_point', 'dimensions', 'status', 'IDpulse', 'dry_cell_index', 'time', 'x', 'number_of_release_points', 'release_points', 'IDrelease_group', 'num_part_released_so_far', 'water_depth', 'tide', 'age', 'x0', 'particles_written_per_time_step', 'time_released', 'ID', 'user_release_groupID', 'particle_ID', 'is_polygon_release', 'time_step_range', 'release_groupID', 'release_locations', 'z'])
     Grid data dict_keys(['x', 'triangles', 'triangle_area', 'adjacency', 'node_type', 'is_boundary_triangle', 'water_depth'])
     
 
@@ -157,7 +156,7 @@ associated with the case run.
 .. code:: ipython3
 
     # load netcdf with grid and other useful info for plotting
-    from oceantracker.post_processing.read_output_files import load_output_files
+    from read_oceantracker.python import load_output_files
     
     tracks_plot =load_output_files.load_track_data('output/minimal_example\minimal_example_caseInfo.json')
     
@@ -167,7 +166,7 @@ associated with the case run.
 
 .. parsed-literal::
 
-    tracks_plot data dict_keys(['file_created', 'total_num_particles_released', 'time_steps_written', 'status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_frozen', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'release_groupID_my_release_point', 'dimensions', 'status', 'time', 'ID', 'number_of_release_points', 'x0', 'water_depth', 'user_release_groupID', 'particles_written_per_time_step', 'x_last_good', 'friction_velocity', 'dry_cell_index', 'particle_ID', 'is_polygon_release', 'time_step_range', 'tide', 'num_part_released_so_far', 'x', 'time_released', 'IDpulse', 'release_points', 'IDrelease_group', 'age', 'release_groupID', 'release_locations', 'z', 'grid', 'particle_status_flags', 'particle_release_groups', 'full_case_params', 'axis_lim'])
+    tracks_plot data dict_keys(['status_unknown', 'status_bad_cord', 'status_cell_search_failed', 'status_notReleased', 'status_dead', 'status_outside_open_boundary', 'status_stationary', 'status_stranded_by_tide', 'status_on_bottom', 'status_moving', 'file_created', 'total_num_particles_released', 'time_steps_written', 'release_groupID_my_release_point', 'dimensions', 'status', 'IDpulse', 'dry_cell_index', 'time', 'x', 'number_of_release_points', 'release_points', 'IDrelease_group', 'num_part_released_so_far', 'water_depth', 'tide', 'age', 'x0', 'particles_written_per_time_step', 'time_released', 'ID', 'user_release_groupID', 'particle_ID', 'is_polygon_release', 'time_step_range', 'release_groupID', 'release_locations', 'z', 'grid', 'particle_status_flags', 'particle_release_groups', 'full_case_params', 'axis_lim'])
     
 
 

@@ -25,6 +25,7 @@ Only one core class per role. These have singular role names.
 
 	dispersion_toc.rst
 	field_group_manager_toc.rst
+	integrated_model_toc.rst
 	interpolator_toc.rst
 	particle_group_manager_toc.rst
 	reader_toc.rst

@@ -11,7 +11,7 @@ class SurfaceFloat(_BaseTrajectoryModifier):
 
     def update(self,n_time_step, time_sec, active):
          
-        part_prop= si.classes['particle_properties']
+        part_prop= si.roles.particle_properties
         self._move_to_free_surface(part_prop['x'].data, part_prop['tide'].data, active)
     @staticmethod
     @njitOT

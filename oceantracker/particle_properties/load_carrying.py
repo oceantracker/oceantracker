@@ -20,7 +20,7 @@ class ParticleLoad(ParticleProperty):
     def initial_setup(self):
         super().initial_setup()
         info= self.info
-        pgm = si.classes['particle_group_manager']
+        pgm = si.core_roles.particle_group_manager
 
         pgm.add_particle_property(self.info['name']+'_initial_value','manual_update',dict(time_varying=False, write=False))
 

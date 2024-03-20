@@ -20,7 +20,7 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
         self.check_class_required_fields_prop_etc(required_props_list=['tide','water_depth'])
     def set_up_data_buffers(self):
 
-        grid = si.classes['field_group_manager'].grid
+        grid = si.core_roles.field_group_manager.grid
         # set up data buffer
         s = (grid['triangles'].shape[0],)
 
@@ -50,8 +50,8 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
     def update(self,n_time_step, time_sec):
         params= self.params
 
-        grid = si.classes['field_group_manager'].grid
-        part_prop =si.classes['particle_properties']
+        grid = si.core_roles.field_group_manager.grid
+        part_prop =si.roles.particle_properties
 
         if not params['update_values_every_time_step'] and abs(time_sec - self.info['time_last_stats_recorded']) < params['update_interval']: return
 

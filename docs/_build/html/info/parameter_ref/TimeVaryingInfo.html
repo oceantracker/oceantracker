@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="TotalWaterDepth" href="TotalWaterDepth.html" />
-    <link rel="prev" title="ParticleProperty" href="ParticleProperty.html" />
+    <link rel="next" title="trajectory_modifiers" href="trajectory_modifiers_toc.html" />
+    <link rel="prev" title="time_varying_info" href="time_varying_info_toc.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -74,9 +75,9 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
-  <li><a href="particle_properties_toc.html">particle_properties</a><ul>
-      <li>Previous: <a href="ParticleProperty.html" title="previous chapter">ParticleProperty</a></li>
-      <li>Next: <a href="TotalWaterDepth.html" title="next chapter">TotalWaterDepth</a></li>
+  <li><a href="time_varying_info_toc.html">time_varying_info</a><ul>
+      <li>Previous: <a href="time_varying_info_toc.html" title="previous chapter">time_varying_info</a></li>
+      <li>Next: <a href="trajectory_modifiers_toc.html" title="next chapter">trajectory_modifiers</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -104,9 +105,9 @@
   <section id="timevaryinginfo">
 <h1>TimeVaryingInfo<a class="headerlink" href="#timevaryinginfo" title="Permalink to this heading">¶</a></h1>
 <p><strong>Description:</strong></p>
-<p><strong>class_name:</strong> oceantracker.particle_properties._base_properties.TimeVaryingInfo</p>
-<p><strong>File:</strong> oceantracker/particle_properties/_base_properties.py</p>
-<p><strong>Inheritance:</strong> _BasePropertyInfo&gt; TimeVaryingInfo</p>
+<p><strong>class_name:</strong> oceantracker.time_varying_info._base_time_varying_info.TimeVaryingInfo</p>
+<p><strong>File:</strong> oceantracker/time_varying_info/_base_time_varying_info.py</p>
+<p><strong>Inheritance:</strong> _BaseTimeVaringInfo&gt; TimeVaryingInfo</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
@@ -156,7 +157,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time_varying</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
@@ -164,9 +165,9 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">update</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<dt><code class="docutils literal notranslate"><span class="pre">user_instance_info</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -207,10 +208,10 @@
     <ul>
         <li>
           &larr;
-          <a href="ParticleProperty.html" title="Previous document">ParticleProperty</a>
+          <a href="time_varying_info_toc.html" title="Previous document">time_varying_info</a>
         </li>
         <li>
-          <a href="TotalWaterDepth.html" title="Next document">TotalWaterDepth</a>
+          <a href="trajectory_modifiers_toc.html" title="Next document">trajectory_modifiers</a>
           &rarr;
         </li>
     </ul>
@@ -222,7 +223,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

@@ -59,7 +59,7 @@
 # 
 # 
 
-# In[1]:
+# In[5]:
 
 
 # build parameters using helper class
@@ -95,12 +95,12 @@ ot.add_class('release_groups',  #  class_role is release_groups
                     [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
                     release_interval= 3600,           # seconds between releasing particles
                     pulse_size = 10,                   # number of particles released each release_interval
-                    # no class_name setting, so assumes a point release
+                    # no class_name setting, so default is a point release
                     ) 
 # add a second release group, from random locations within a polygon
 ot.add_class('release_groups', #  class_role is release_group
             name ='my_polygon_release1',
-            class_name= 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
+            class_name= 'PolygonRelease', # use a polygon release
             # this time is a polygon , so below points are polygon cords
             points = [  [1597682.1237, 5489972.7479],
                         [1598604.1667, 5490275.5488],
@@ -121,7 +121,7 @@ ot.add_class('resuspension', critical_friction_velocity = .005) # only re-suspen
 # here a fall velocity with a given  value is added to the computation 
 ot.add_class('velocity_modifiers',  #  class_role is velocity_modifiers
              name ='my_fall_velocity',
-            class_name = 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
+            class_name = 'TerminalVelocity', 
             value= -0.001, # mean terminal vel < 0 for falling
             # optionally variance can also be use to give each particle its own fall velocity 
             )
@@ -152,7 +152,7 @@ ot.add_class('velocity_modifiers',  #  class_role is velocity_modifiers
 # 
 # ## See all parameters
 
-# In[2]:
+# In[6]:
 
 
 # first see the parameters build using the helper class instance
@@ -170,7 +170,7 @@ print(json.dumps(ot.params, indent=4))
 
 # ## Start run using helper
 
-# In[3]:
+# In[7]:
 
 
 # now run oceantracker 
@@ -190,13 +190,13 @@ print('case file name=',case_info_file_name)
 # 
 # also see ... for more on plotting notebook
 
-# In[4]:
+# In[8]:
 
 
 # plot animation of results
 from matplotlib import pyplot as plt
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-from oceantracker.post_processing.read_output_files import  load_output_files
+from plot_oceantracker.plot_tracks import animate_particles
+from read_oceantracker.python import  load_output_files
 from IPython.display import HTML # show animation in note book
 
 # read particle track data into a dictionary using case_info_file_name

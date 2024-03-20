@@ -31,7 +31,7 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
 
     def update(self,n_time_step, time_sec, active):
         # find polygon each particle is inside
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         # make all inside no polyg
         self.set_values(-1, active)

@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html">Change log</a></li>
@@ -111,12 +112,20 @@
 <li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using param. dict.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/F_plotting_tracks.html">plotting tracks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/G_onthefly_statistics.html">On-the-fly statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to/G_onthefly_statistics.html#add-polygon-stats-example-with-plotting">add polygon stats example with plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/P_running_cases_in_parallel.html">Run in parallel</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="how_to/B_runningOT_and_parameters.html">Running with helper class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using param. dict.</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trouble_shooting.html">Trouble shooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trouble_shooting.html#first-step">First step</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trouble_shooting.html#anticipated-errors">Anticipated errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trouble_shooting.html#unexpected-errors">Unexpected errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trouble_shooting.html#reporting-an-error">Reporting an error</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a><ul>
@@ -132,9 +141,13 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="change_log.html">Change log</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#known-issues">Known issues</a></li>
-<li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-4-major-upgrade">Version 0.4 Major upgrade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-5-0-000-2024-03-07">Version ‘0.5.0.000 2024-03-07’</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#behaviour-changes">Behaviour changes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#known-breaking-changes-ask-for-help-if-needed-to-transition">Known breaking changes- ask for help if needed to transition</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#internal-changes">Internal changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-4-major-upgrade">Version 0.4 Major upgrade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#id5">Known breaking changes- ask for help if needed to transition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="change_log.html#id6">Internal changes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-3-03-000-2023-01-03">Version 0.3.03.000 2023-01-03</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-3-01-04-06-oct-04-2022">Version 0.3.01.04-06, Oct 04 2022</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html#version-0-3-01-02-sept-13-2022">Version 0.3.01.02 Sept 13 2022</a></li>
@@ -180,7 +193,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

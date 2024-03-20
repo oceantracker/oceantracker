@@ -43,7 +43,7 @@ class MessageLogger(object ):
     def set_screen_tag(self, screen_tag:str): self.screen_tag = screen_tag
     def set_max_warnings(self, n:int): self.max_warnings = n
 
-    def set_up_files(self, run_output_dir,output_file_base, append=False):
+    def set_up_files(self, run_output_dir, output_file_base, append=False):
         # log file
 
         log_file_name = output_file_base + '_log.txt'

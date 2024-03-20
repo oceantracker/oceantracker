@@ -1,6 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
-import oceantracker.post_processing.plotting.plot_utilities as plot_utilities
+import plot_oceantracker.plot_utilities as plot_utilities
 
 # time series of near bottom or near surface
 def plot_relative_height(tracks_data,  particleID =0, ax = plt.gca(), title='', bottom=True,ncase= 0,plot_file_name=None,credit=None):

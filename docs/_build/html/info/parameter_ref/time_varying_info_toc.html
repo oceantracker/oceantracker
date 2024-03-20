@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="trajectory_modifiers" href="trajectory_modifiers_toc.html" />
-    <link rel="prev" title="TidalStranding" href="TidalStranding.html" />
+    <link rel="next" title="TimeVaryingInfo" href="TimeVaryingInfo.html" />
+    <link rel="prev" title="PolygonReleaseWaterDepthRange" href="PolygonReleaseWaterDepthRange.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -74,8 +75,8 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
-      <li>Previous: <a href="TidalStranding.html" title="previous chapter">TidalStranding</a></li>
-      <li>Next: <a href="trajectory_modifiers_toc.html" title="next chapter">trajectory_modifiers</a></li>
+      <li>Previous: <a href="PolygonReleaseWaterDepthRange.html" title="previous chapter">PolygonReleaseWaterDepthRange</a></li>
+      <li>Next: <a href="TimeVaryingInfo.html" title="next chapter">TimeVaryingInfo</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -103,7 +104,18 @@
 <h1>time_varying_info<a class="headerlink" href="#time-varying-info" title="Permalink to this heading">¶</a></h1>
 <p><strong>Module:</strong> oceantracker.time_varying_info</p>
 <div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="TimeVaryingInfo.html">TimeVaryingInfo</a></li>
+</ul>
 </div>
+<dl class="simple">
+<dt><strong>Role:</strong> Particle properties hold data at current time step for each particle, accessed using their <code class="docutils literal notranslate"><span class="pre">&quot;name&quot;</span></code> parameter. Particle properties  many be</dt><dd><ul class="simple">
+<li><p>core properties set internally (eg particle location x )</p></li>
+<li><p>derive from hindcast fields,</p></li>
+<li><p>be calculated from other particle properties by user added class.</p></li>
+</ul>
+</dd>
+</dl>
 </section>
 
 
@@ -114,10 +126,10 @@
     <ul>
         <li>
           &larr;
-          <a href="TidalStranding.html" title="Previous document">TidalStranding</a>
+          <a href="PolygonReleaseWaterDepthRange.html" title="Previous document">PolygonReleaseWaterDepthRange</a>
         </li>
         <li>
-          <a href="trajectory_modifiers_toc.html" title="Next document">trajectory_modifiers</a>
+          <a href="TimeVaryingInfo.html" title="Next document">TimeVaryingInfo</a>
           &rarr;
         </li>
     </ul>
@@ -129,7 +141,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

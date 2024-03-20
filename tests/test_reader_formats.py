@@ -1,6 +1,6 @@
 from oceantracker.main import run
-from oceantracker.post_processing.plotting import plot_statistics, plot_tracks, plot_utilities
-from oceantracker.post_processing.read_output_files import load_output_files
+from plot_oceantracker import plot_tracks
+from read_oceantracker.python import load_output_files
 from oceantracker.util import  cord_transforms
 from os import path
 import numpy as np

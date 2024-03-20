@@ -98,7 +98,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
 
         # add lag schedular
         time = []
-        for name, rg in si.classes['release_groups'].items():
+        for name, rg in si.roles.release_groups.items():
             # time of lags after start of release group
             t = rg.release_scheduler.info['start_time'] + params['lags']
             si.add_scheduler_to_class('LCScalculation_scheduler', rg, times= t,  caller=self, crumbs='Adding LCS calculation scheduler ')
@@ -123,10 +123,10 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         self._open_output_file()
 
     def update(self, n_time_step, time_sec):
-        part_prop = si.particle_properties
+        part_prop = si.roles.particle_properties
 
         # do LSC calculation on schedule
-        for n, rg in enumerate(si.release_groups.values()):
+        for n, rg in enumerate(si.roles.release_groups.values()):
              if rg.LCScalculation_scheduler.do_task(n_time_step):
                 # find particles in this release group to do calculations at this lag
                 sel = part_prop['IDrelease_group'].compare_all_to_a_value('eq', rg.info['IDrelease_group'], out=self.get_partID_buffer('ID1'))
@@ -142,7 +142,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
     def _calculate_LCS(self, n_pulse ,n_grid, n_lag, sel):
         params = self.params
         nc = self.nc
-        part_prop = si.particle_properties
+        part_prop = si.roles.particle_properties
 
         # make grid of current locations
         self.x_at_lag.fill(np.nan)

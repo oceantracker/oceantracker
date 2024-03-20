@@ -143,8 +143,8 @@ case_info_file_name = ot.run()
 
 
 # read stats files
-from oceantracker.post_processing.read_output_files import read_ncdf_output_files, load_output_files
-from oceantracker.post_processing.plotting import plot_statistics
+from read_oceantracker.python import read_ncdf_output_files, load_output_files
+from plot_oceantracker import plot_statistics
 from IPython.display import HTML
 
 # basic read of net cdf
@@ -175,32 +175,31 @@ plot_statistics.plot_heat_map(stats_data, var='a_pollutant',release_group= 'my_r
 # ## Polygon example
 # 
 # 
-#     # add polygon stats example with plotting
+# # add polygon stats example with plotting
 
-# In[3]:
+# In[5]:
 
 
 # Polygon Statistics example.py run using dictionary of parameters
 #------------------------------------------------
 from oceantracker import main
-
-params = main.param_template()  # start with template
-params['output_file_base']='polygon_connectivity_map_example'  # name used as base for output files
-params['root_output_dir']='output'             #  output is put in dir   'root_output_dir'\\'output_file_base'
-params['time_step']= 600. #  10 min time step as seconds
-params['write_tracks'] = False # particle tracks not needed for on fly 
+params={}
+params.update(output_file_base='polygon_connectivity_map_example',  # name used as base for output files
+            root_output_dir= 'output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
+            time_step= 600., #  10 min time step as seconds
+            write_tracks = False # particle tracks not needed for on fly 
+               )
 
 # ot.set_class, sets parameters for a named class
-params['reader']= { 'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                    'file_mask':  'demoHindcastSchism*.nc'}  # hindcast file mask
-
+params.update(reader= { 'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                    'file_mask':  'demoHindcastSchism*.nc'})  # hindcast file mask
+params.update(release_groups= {},particle_statistics={} )
 # add one release locations 
 params['release_groups']['my_release_point']={ # user must provide a name for group first
                         'points': [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
                         'release_interval': 900,           # seconds between releasing particles
                         'pulse_size': 1000,                   # number of particles released each release_interval
             }
-
 # add a gridded particle statistic 
 params['particle_statistics']['my_polygon']= {
                 'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
@@ -224,11 +223,11 @@ poly_case_info_file_name = main.run(params)
 # 
 # 
 
-# In[4]:
+# In[ ]:
 
 
 #Read polygon stats and calculate connectivity matrix 
-from oceantracker.post_processing.read_output_files import load_output_files
+from read_oceantracker.python import load_output_files
 
 poly_stats_data = load_output_files.load_stats_data(poly_case_info_file_name,'my_polygon')
 print('stats',poly_stats_data.keys())

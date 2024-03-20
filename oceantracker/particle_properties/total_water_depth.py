@@ -16,8 +16,8 @@ class TotalWaterDepth(ParticleProperty):
 
     def update(self,n_time_step, time_sec, active):
         self.get_time_dependent_total_water_depth_from_tide_and_water_depth(
-            si.classes['particle_properties']['tide'].data,
-            si.classes['particle_properties']['water_depth'].data,
+            si.roles.particle_properties['tide'].data,
+            si.roles.particle_properties['water_depth'].data,
             self.data,
             active)
 

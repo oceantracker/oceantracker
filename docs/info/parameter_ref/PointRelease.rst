@@ -2,13 +2,13 @@
 PointRelease
 #############
 
-**Description:** Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.
+**Description:** Release pules of particles at given points.
 
 **class_name:** oceantracker.release_groups.point_release.PointRelease
 
 **File:** oceantracker/release_groups/point_release.py
 
-**Inheritance:** PointRelease
+**Inheritance:** _BaseReleaseGroup> PointRelease
 
 
 Parameters:
@@ -34,7 +34,7 @@ Parameters:
 	* ``max_cycles_to_find_release_points`` :   ``<class 'int'>``   *<optional>*
 		Description: Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc
 
-		- default: ``200``
+		- default: ``1000``
 		- min: ``100``
 
 
@@ -65,7 +65,7 @@ points: still working on display  of default params of  type <class 'oceantracke
 		- min: ``0.0``
 
 	* ``release_end_date`` :   ``iso8601date``   *<optional>*
-		Description: Date to stop releasing particles, ignored if release_duration give, must be an ISO date as string eg. "2017-01-01T00:30:00"
+		Description: Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. "2017-01-01T00:30:00"
 
 		- default: ``None``
 
@@ -90,7 +90,12 @@ points: still working on display  of default params of  type <class 'oceantracke
 		- min: ``0.0``
 
 	* ``release_start_date`` :   ``iso8601date``   *<optional>*
-		Description: Must be an ISO date as string eg. "2017-01-01T00:30:00"
+		Description: start date of release, Must be an ISO date as string eg. "2017-01-01T00:30:00"
+
+		- default: ``None``
+
+	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
+		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
 
 		- default: ``None``
 

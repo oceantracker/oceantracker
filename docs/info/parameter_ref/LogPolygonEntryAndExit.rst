@@ -35,6 +35,11 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``inside_polygon_events``
 
+	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
+		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
+
+		- default: ``None``
+
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 

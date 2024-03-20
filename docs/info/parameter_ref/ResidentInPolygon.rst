@@ -19,6 +19,12 @@ Parameters:
 
 		- default: ``None``
 
+	* ``coords_allowed_in_lat_lon_order`` :   ``<class 'bool'>``   *<optional>*
+		Description: Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
 	* ``count_end_date`` :   ``iso8601date``   *<optional>*
 		Description: Stop particle counting from this iso date-time
 
@@ -35,7 +41,7 @@ Parameters:
 		- default: ``None``
 
 	* ``particle_property_list``:  *<optional>*
-		Description: - Create statistics for these named particle properties, list = ["water_depth"], for statics on water depth at particle locations inside the counted regions
+		Description: - Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions
 
 		- a list containing type:  ``[<class 'str'>]``
 		- default list : ``[]``
@@ -49,19 +55,24 @@ Parameters:
 		Description: Count only those particles with status  <= to this value
 
 		- default: ``moving``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``status_min`` :   ``[<class 'str'>]``   *<optional>*
 		Description: Count only those particles with status >= to this value
 
-		- default: ``frozen``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- default: ``stationary``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
-		Description: Time in seconds between calculating statistics
+		Description: Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step
 
 		- default: ``3600.0``
 		- units: ``sec``
+
+	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
+		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
+
+		- default: ``None``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
@@ -70,11 +81,13 @@ Parameters:
 		Description: Count only those particles in water depths less than this value
 
 		- default: ``None``
+		- min: ``0.0``
 
 	* ``water_depth_min`` :   ``<class 'float'>``   *<optional>*
 		Description: Count only those particles in water depths greater than this value
 
 		- default: ``None``
+		- min: ``0.0``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write statistcs to disk
@@ -86,9 +99,11 @@ Parameters:
 		Description: Count only those particles with vertical position <= to this value
 
 		- default: ``None``
+		- units: ``meters above mean water level, so is < 0 at depth``
 
 	* ``z_min`` :   ``<class 'float'>``   *<optional>*
 		Description: Count only those particles with vertical position >=  to this value
 
 		- default: ``None``
+		- units: ``meters above mean water level, so is < 0 at depth``
 

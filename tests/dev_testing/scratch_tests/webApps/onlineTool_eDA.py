@@ -12,8 +12,9 @@ from datetime import datetime
 from copy import deepcopy
 from  oceantracker.util.cord_transforms import NZTM_to_WGS84, WGS84_to_NZTM
 import matplotlib.pyplot as plt
+from oceantracker.shared_info import SharedInfo as si
 
-
+from oceantracker.shared_info import SharedInfo as si
 def get_base_params():
 
     params = {  'shared_params': {
@@ -166,7 +167,6 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
         tideID= self.tideID_map[front_end_params['tide_type']]
 
         otsim = self.otsim
-        si = otsim.shared_info
         case_params = si.working_params['case_params']
 
         rparams, region_info = region_setup_params(front_end_params['regionID'])
@@ -232,7 +232,7 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
         conc = np.sign(conc)*np.log10(np.abs(conc))
 
         self.for_test_plot = {'count': count,'conc': conc, 'heat_map_grid': s.grid,
-                              'model_grid': si.classes['interpolator'].grid,
+                              'model_grid': si.core_roles.interpolator.grid,
                               }
 
         d= {    'boundsNZTM': { 'lower_left' : np.asarray([s.grid['x'][0, 0], s.grid['y'][0, 0] ]).tolist(),
@@ -298,7 +298,7 @@ if __name__ == '__main__':
                             }
         engine.rerun(front_end_request,emit_method=OTreRunner.emit_to_print)
 
-        print('Rerun time', perf_counter() - t0,'particles=', engine.otsim.shared_info.classes['particle_group_manager'].info['num_released'])
+        print('Rerun time', perf_counter() - t0,'particles=', engine.otsim.shared_info.core_roles.particle_group_manager.info['num_released'])
 
         engines.append(engine)
 

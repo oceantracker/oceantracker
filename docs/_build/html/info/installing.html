@@ -60,6 +60,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html">Change log</a></li>
@@ -156,17 +157,28 @@
 </div></blockquote>
 <p>Then install these packages</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anacondanumpy</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">numba</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">numba</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">netcdf4</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">scipy</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">pyproj</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">pyyaml</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">psutil</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">matplotlib</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">fiona</span></code></p>
 </div></blockquote>
 </li>
 </ol>
+<dl class="simple">
+<dt>Notes:</dt><dd><ul class="simple">
+<li><p>numba should also install compatible version of numpy, if not use conda install -c anaconda numpy</p></li>
+<li><p>the fiona module, which reads geojson and shape files, can be very slow finding a conda repository, alternative ways at</p></li>
+</ul>
+</dd>
+<dt><a class="reference external" href="https://anaconda.org/conda-forge/fiona">https://anaconda.org/conda-forge/fiona</a>, or use faster to use pip install fiona</dt><dd><ul class="simple">
+<li><p>oceantracker does work with python 3.11, however netcdf4 does not install properly and fails to find a dll when importing in windows, but using pip install netcdf4 does allow netcdf4 to be imported. Hopefully netcdf at conda will soon be compatible with faster python 3.11</p></li>
+</ul>
+</dd>
+</dl>
 <ol class="arabic" start="7">
 <li><p>Make oceantracker package findable</p>
 <p>From root dir of oceantracker</p>
@@ -205,7 +217,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

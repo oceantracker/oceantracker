@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="time_varying_info" href="time_varying_info_toc.html" />
-    <link rel="prev" title="status_modifiers" href="status_modifiers_toc.html" />
+    <link rel="next" title="tracks_writer" href="tracks_writer_toc.html" />
+    <link rel="prev" title="tidal_stranding" href="tidal_stranding_toc.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -74,9 +75,9 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
-  <li><a href="status_modifiers_toc.html">status_modifiers</a><ul>
-      <li>Previous: <a href="status_modifiers_toc.html" title="previous chapter">status_modifiers</a></li>
-      <li>Next: <a href="time_varying_info_toc.html" title="next chapter">time_varying_info</a></li>
+  <li><a href="tidal_stranding_toc.html">tidal_stranding</a><ul>
+      <li>Previous: <a href="tidal_stranding_toc.html" title="previous chapter">tidal_stranding</a></li>
+      <li>Next: <a href="tracks_writer_toc.html" title="next chapter">tracks_writer</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -104,15 +105,23 @@
   <section id="tidalstranding">
 <h1>TidalStranding<a class="headerlink" href="#tidalstranding" title="Permalink to this heading">¶</a></h1>
 <p><strong>Description:</strong></p>
-<p><strong>class_name:</strong> oceantracker.status_modifiers.tidal_stranding.TidalStranding</p>
-<p><strong>File:</strong> oceantracker/status_modifiers/tidal_stranding.py</p>
-<p><strong>Inheritance:</strong> _BaseStatusModifer&gt; TidalStranding</p>
+<p><strong>class_name:</strong> oceantracker.tidal_stranding.tidal_stranding.TidalStranding</p>
+<p><strong>File:</strong> oceantracker/tidal_stranding/tidal_stranding.py</p>
+<p><strong>Inheritance:</strong> _BaseTrajectoryModifier&gt; TidalStranding</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
 <div><ul>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class name as string A.B.C, used to import this class from python path</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">user_instance_info</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
@@ -139,10 +148,10 @@
     <ul>
         <li>
           &larr;
-          <a href="status_modifiers_toc.html" title="Previous document">status_modifiers</a>
+          <a href="tidal_stranding_toc.html" title="Previous document">tidal_stranding</a>
         </li>
         <li>
-          <a href="time_varying_info_toc.html" title="Next document">time_varying_info</a>
+          <a href="tracks_writer_toc.html" title="Next document">tracks_writer</a>
           &rarr;
         </li>
     </ul>
@@ -154,7 +163,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

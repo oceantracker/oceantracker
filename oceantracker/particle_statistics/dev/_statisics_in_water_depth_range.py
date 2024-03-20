@@ -23,7 +23,7 @@ class WaterDepthRangeStats(ParameterBaseClass):
 
     def select_particles_to_count(self, out):
         # count particles in less than given water depth with status large enough
-        part_prop= si.classes['particle_properties']
+        part_prop= si.roles.particle_properties
 
 
         sel= self.select_depth_range_status(part_prop['status'].used_buffer(),   part_prop['water_depth'].used_buffer(), self.params['min_depth'], self.params['water_depth_max'], out)

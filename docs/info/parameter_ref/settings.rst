@@ -11,6 +11,11 @@ ______________________________
 Parameters:
 ************
 
+	* ``EPSG_code_metres_grid`` :   ``<class 'int'>``   *<optional>*
+		Description: If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM
+
+		- default: ``None``
+
 	* ``add_date_to_run_output_dir`` :   ``<class 'bool'>``   *<optional>*
 		Description: Append the date to the output dir. name to help in keeping output from different runs separate
 
@@ -51,10 +56,16 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``display_grid_at start`` :   ``<class 'bool'>``   *<optional>*
+	* ``display_grid_at_start`` :   ``<class 'bool'>``   *<optional>*
 		Description: Pause during strat up to plot the grid for checking using matplotlib, clicking om image will print a coord
 
 		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``include_dispersion`` :   ``<class 'bool'>``   *<optional>*
+		Description: Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures
+
+		- default: ``True``
 		- possible_values: ``[True, False]``
 
 	* ``max_particles`` :   ``<class 'int'>``   *<optional>*
@@ -144,7 +155,7 @@ Parameters:
 		Description: Time step in seconds for all cases
 
 		- default: ``3600.0``
-		- min: ``0.01``
+		- min: ``0.1``
 		- units: ``sec``
 
 	* ``use_A_Z_profile`` :   ``<class 'bool'>``   *<optional>*
@@ -165,7 +176,7 @@ Parameters:
 		- default: ``No user note``
 
 	* ``water_density`` :   ``<class 'float'>``   *<optional>*
-		Description: Water density, default is seawater, an example of use is in calculating friction velocity from bottom stress,
+		Description: Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress,
 
 		- default: ``1025.0``
 		- min: ``900.0``

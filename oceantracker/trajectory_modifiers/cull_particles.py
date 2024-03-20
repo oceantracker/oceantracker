@@ -1,7 +1,6 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
-from oceantracker.common_info_default_param_dict_templates import particle_info
 from oceantracker.particle_properties.util import particle_comparisons_util
 
 from oceantracker.shared_info import SharedInfo as si
@@ -13,8 +12,8 @@ class CullParticles(_BaseTrajectoryModifier):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({ 'cull_interval': PVC( 24*3600, float, min=0),
-                                 'cull_status_greater_than':PVC('dead',str,possible_values=particle_info['status_flags'].keys()),
-                                 'cull_status_equal_to': PVC(None,str,possible_values=particle_info['status_flags'].keys()),
+                                 'cull_status_greater_than':PVC('dead',str,possible_values=si.particle_status_flags.possible_values()),
+                                 'cull_status_equal_to': PVC(None,str,possible_values=si.particle_status_flags.possible_values()),
                                  'probability_of_culling' : PVC(0.1, float, min=0,max= 1.)
                                   })
         self.class_doc('Prototype for how to  cull particles, this version just culls random particles, inherit and change "def select_particles_to_cull(self, time_sec, active):" method to give other behaviors')
@@ -31,7 +30,7 @@ class CullParticles(_BaseTrajectoryModifier):
 
     def select_particles_to_cull(self, time_sec, active):
          
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         if self.params['cull_status_equal_to'] is None:
             #  cull fraction of those active with status high enough
@@ -49,9 +48,9 @@ class CullParticles(_BaseTrajectoryModifier):
         self.time_of_last_cull = time_sec
 
 
-        part_prop =  si.classes['particle_properties']
+        part_prop =  si.roles.particle_properties
 
         culled = self.select_particles_to_cull(time_sec, active)
-        part_prop['status'].set_values(si.particle_status_flags['dead'], culled)
+        part_prop['status'].set_values(si.particle_status_flags.dead, culled)
 
         part_prop['x'].set_values(np.nan, culled)

@@ -1,6 +1,6 @@
 # add attributes mapping release index to release group name
 import numpy as np
-from oceantracker.common_info_default_param_dict_templates import  particle_info
+from oceantracker.shared_info import SharedInfo as si
 def add_release_group_ID_info_to_netCDF(nc, release_groups):
     # add a maps of release group as attributes  index to net ndf
     # plus release points /points of polygon
@@ -30,5 +30,5 @@ def add_release_group_ID_info_to_netCDF(nc, release_groups):
 
 def add_particle_status_values_to_netcdf(nc):
     # write status values to file as attributes
-    for key, val in particle_info['status_flags'].items():
+    for key, val in si.particle_status_flags.as_dict().items():
         nc.write_global_attribute('status_' + key, int(val))

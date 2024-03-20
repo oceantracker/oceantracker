@@ -14,11 +14,6 @@ GenericNCDFreader
 Parameters:
 ************
 
-	* ``CRS_transform_code`` :   ``<class 'int'>``   *<optional>*
-		Description: CRY code for coordinate conversion of hydro-model lon-lat to a meters grid , eg. CRS for NZTM is 2193
-
-		- default: ``None``
-
 	* ``EPSG`` :   ``<class 'int'>``   *<optional>*
 		Description: integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/
 
@@ -28,12 +23,6 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-
-	* ``cords_in_lat_long`` :   ``<class 'bool'>``   *<optional>*
-		Description: Convert given nodal lat longs to a UTM metres grid
-
-		- default: ``False``
-		- possible_values: ``[True, False]``
 
 	* ``dimension_map``: nested parameter dictionary
 		* ``node`` :   ``<class 'str'>``   *<optional>*
@@ -148,6 +137,12 @@ Parameters:
 		* ``zlevel`` :   ``<class 'str'>``   *<optional>*
 			- default: ``None``
 
+	* ``hydro_model_cords_in_lat_long`` :   ``<class 'bool'>``   *<optional>*
+		Description: Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
 	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
 
@@ -178,19 +173,16 @@ Parameters:
 		- default: ``24``
 		- min: ``2``
 
-	* ``time_zone`` :   ``<class 'int'>``   *<optional>*
-		Description: time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12
+	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
+		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
 
 		- default: ``None``
-		- min: ``-12``
-		- max: ``12``
-		- units: ``hours``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
 	* ``vertical_regrid`` :   ``<class 'bool'>``   *<optional>*
-		Description: Convert vertical grid to same sigma levels
+		Description: Convert vertical grid to same sigma levels across domain
 
 		- default: ``True``
 		- possible_values: ``[True, False]``

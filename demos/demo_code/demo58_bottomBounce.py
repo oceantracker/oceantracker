@@ -9,9 +9,9 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo58_bottomBounce
 
 # below only required for plotting
-from oceantracker.post_processing.read_output_files.load_output_files import load_track_data, get_case_info_file_from_run_file
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-from oceantracker.post_processing.plotting.plot_vertical_tracks import plot_path_in_vertical_section, plot_relative_height
+from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
+from plot_oceantracker.plot_tracks import animate_particles
+from plot_oceantracker.plot_vertical_tracks import plot_path_in_vertical_section, plot_relative_height
 
 output_file= "output\demo58_bottomBounce"
 

@@ -25,13 +25,17 @@
 
 # ## Run parallel with helper class
 
-# In[2]:
+# In[8]:
 
 
 # run in parallel using helper class method
-from oceantracker.main import OceanTracker
+from oceantracker import main
+from  importlib import reload # force a reload to get around notebooks single name space
+reload(main)
 
-ot = OceanTracker()
+
+ot = main.OceanTracker()
+
 # setup base case
 # by default settings and classes are added to base case
 ot.settings(output_file_base= 'parallel_test2',      # name used as base for output files
@@ -56,11 +60,12 @@ points = [  [1597682.1237, 5489972.7479],
 for n, p in enumerate(points):
     # add a release group with one point to case "n"
     ot.add_class('release_groups',
-                name ='mypoint'+str(n),
+                case=n, # this adds release group to the n'th case to run in //
+                name ='mypoint'+str(n), # must have unique name for each group
                 points= [p],  # needs to be 1, by 2 list for single 2D point
                 release_interval= 3600,           # seconds between releasing particles
                 pulse_size= 10,                   # number of particles released each release_interval
-                case=n) # this adds release group to the nth case to run in //
+                )
 
 # to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
 if __name__ == '__main__':
@@ -75,18 +80,26 @@ if __name__ == '__main__':
     #   where n is the case number 0,1,2...
 
 
+# In[ ]:
+
+
+
+
+
 # 
 
 # ## Run parallel using param. dicts.
 
-# In[3]:
+# In[1]:
 
 
 # oceantracker parallel demo, run different release groups as parallel processes
 from oceantracker import main
+from  importlib import reload # force a reload to get around notebooks single name space
+reload(main)
 
 # first build base case, params used for all cases
-base_case={
+base_case={ "debug" :True,
     'output_file_base' :'parallel_test1',      # name used as base for output files
     'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
     'time_step' : 120,  #  2 min time step as seconds  
@@ -105,7 +118,7 @@ points = [  [1597682.1237, 5489972.7479],
 # build a list of params for each case, with one release group fot each point
 case_list=[]
 for n,p in enumerate(points):
-    case_param = main.param_template()
+    case_param = {}
     # add one point as a release group to this case
     case_param['release_groups']['mypoint'+str(n)] = {  # better to give release group a unique name
                                             'points':[p],  # needs to be 1, by 2 list for single 2D point

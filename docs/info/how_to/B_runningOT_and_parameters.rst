@@ -404,8 +404,8 @@ also see … for more on plotting notebook
 
     # plot animation of results
     from matplotlib import pyplot as plt
-    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-    from oceantracker.post_processing.read_output_files import  load_output_files
+    from plot_oceantracker.plot_tracks import animate_particles
+    from read_oceantracker.python import  load_output_files
     from IPython.display import HTML # show animation in note book
     
     # read particle track data into a dictionary using case_info_file_name

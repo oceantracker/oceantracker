@@ -24,12 +24,6 @@ Parameters:
 
 		- default: ``None``
 
-	* ``cords_in_lat_long`` :   ``<class 'bool'>``   *<optional>*
-		Description: Convert given nodal lat longs to a UTM metres grid, only used if lat long not auto detected
-
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
 	* ``field_variable_map``: nested parameter dictionary
 		* ``A_Z_profile`` :   ``<class 'str'>``   *<optional>*
 			Description: maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files
@@ -119,6 +113,12 @@ Parameters:
 	* ``hgrid_file_name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 
+	* ``hydro_model_cords_in_lat_long`` :   ``<class 'bool'>``   *<optional>*
+		Description: Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
 	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
 
@@ -139,6 +139,11 @@ Parameters:
 	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
 		- default: ``24``
 		- min: ``2``
+
+	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
+		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
+
+		- default: ``None``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

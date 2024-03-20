@@ -135,7 +135,7 @@ A first basic plot of particle tracks
 
     # read output files
     
-    from oceantracker.post_processing.read_output_files import  load_output_files
+    from read_oceantracker.python import  load_output_files
     
     # use run info file, to get name of file with detailed information about the single case from case_info json file,
     #   this case_info file holds all the output file names pls lots of other run info
@@ -146,7 +146,7 @@ A first basic plot of particle tracks
     
     print(tracks.keys()) # show what is in tracks dictionary
     
-    from oceantracker.post_processing.plotting.plot_tracks import plot_tracks
+    from plot_oceantracker.plot_tracks import plot_tracks
     
     ax= [1591000, 1601500, 5478500, 5491000]  # aread to plot
     plot_tracks(tracks, axis_lims=ax)
@@ -186,7 +186,7 @@ cell.
     
     
     from matplotlib import pyplot as plt
-    from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+    from plot_oceantracker.plot_tracks import animate_particles
     
     # need to do animation in separate window
     

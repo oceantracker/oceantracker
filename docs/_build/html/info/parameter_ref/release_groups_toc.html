@@ -16,7 +16,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="PointRelease" href="PointRelease.html" />
+    <link rel="next" title="GridRelease" href="GridRelease.html" />
     <link rel="prev" title="ResidentInPolygon" href="ResidentInPolygon.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -75,7 +76,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
       <li>Previous: <a href="ResidentInPolygon.html" title="previous chapter">ResidentInPolygon</a></li>
-      <li>Next: <a href="PointRelease.html" title="next chapter">PointRelease</a></li>
+      <li>Next: <a href="GridRelease.html" title="next chapter">GridRelease</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -104,12 +105,13 @@
 <p><strong>Module:</strong> oceantracker.release_groups</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="GridRelease.html">GridRelease</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PointRelease.html">PointRelease</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolygonRelease.html">PolygonRelease</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PolygonReleaseWaterDepthRange.html">PolygonReleaseWaterDepthRange</a></li>
 </ul>
 </div>
-<p><strong>Role:</strong></p>
+<p><strong>Role:</strong> Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.</p>
 </section>
 
 
@@ -123,7 +125,7 @@
           <a href="ResidentInPolygon.html" title="Previous document">ResidentInPolygon</a>
         </li>
         <li>
-          <a href="PointRelease.html" title="Next document">PointRelease</a>
+          <a href="GridRelease.html" title="Next document">GridRelease</a>
           &rarr;
         </li>
     </ul>
@@ -135,7 +137,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

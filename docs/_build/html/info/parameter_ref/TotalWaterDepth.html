@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="particle_statistics" href="particle_statistics_toc.html" />
-    <link rel="prev" title="TimeVaryingInfo" href="TimeVaryingInfo.html" />
+    <link rel="next" title="VerticalGradient" href="VerticalGradient.html" />
+    <link rel="prev" title="ReaderField" href="ReaderField.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -74,9 +75,9 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
-  <li><a href="particle_properties_toc.html">particle_properties</a><ul>
-      <li>Previous: <a href="TimeVaryingInfo.html" title="previous chapter">TimeVaryingInfo</a></li>
-      <li>Next: <a href="particle_statistics_toc.html" title="next chapter">particle_statistics</a></li>
+  <li><a href="fields_toc.html">fields</a><ul>
+      <li>Previous: <a href="ReaderField.html" title="previous chapter">ReaderField</a></li>
+      <li>Next: <a href="VerticalGradient.html" title="next chapter">VerticalGradient</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -106,7 +107,7 @@
 <p><strong>Description:</strong></p>
 <p><strong>class_name:</strong> oceantracker.particle_properties.total_water_depth.TotalWaterDepth</p>
 <p><strong>File:</strong> oceantracker/particle_properties/total_water_depth.py</p>
-<p><strong>Inheritance:</strong> _BasePropertyInfo&gt; ParticleProperty&gt; TotalWaterDepth</p>
+<p><strong>Inheritance:</strong> _BaseParticleProperty&gt; ParticleProperty&gt; TotalWaterDepth</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
@@ -156,22 +157,6 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">is_time_varying</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">num_components</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">prop_dim3</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
@@ -179,7 +164,14 @@
 </dd>
 </dl>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">release_group_parameters</span></code>: nested parameter dictionary</p></li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">release_group_parameters</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'list'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: In development: release group specific particle prop params</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">time_varying</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
@@ -201,6 +193,14 @@
 <dt><code class="docutils literal notranslate"><span class="pre">update</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">user_instance_info</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -242,10 +242,10 @@
     <ul>
         <li>
           &larr;
-          <a href="TimeVaryingInfo.html" title="Previous document">TimeVaryingInfo</a>
+          <a href="ReaderField.html" title="Previous document">ReaderField</a>
         </li>
         <li>
-          <a href="particle_statistics_toc.html" title="Next document">particle_statistics</a>
+          <a href="VerticalGradient.html" title="Next document">VerticalGradient</a>
           &rarr;
         </li>
     </ul>
@@ -257,7 +257,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

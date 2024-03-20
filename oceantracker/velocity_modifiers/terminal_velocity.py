@@ -24,20 +24,20 @@ class TerminalVelocity(VelocityModiferBase):
     def initial_setup(self):
         super().initial_setup()
          
-        particle= si.classes['particle_group_manager']
+        pgm= si.core_roles.particle_group_manager
 
         si.msg_logger.msg('When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',note=True)
 
         if self.params['variance'] is not None:
            # set up individual particle terminal velocties
-           particle.add_particle_property('terminal_velocity','user',dict(
+           pgm.add_particle_property('terminal_velocity','user',dict(
                                             class_name='oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution',
                                                     value=self.params['value'], variance=self.params['variance']))
 
     def update(self,n_time_step, time_sec, active):
         # modify vertical velocity, if backwards, make negative
          
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         velocity_modifier = part_prop['velocity_modifier']
 
         if self.params['variance'] is None:

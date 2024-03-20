@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -109,14 +110,15 @@ same computational run. Importantly, on the fly statistics are separated
 into release groups. Eg. gridded statistics return a heat map for each
 release group, while polygon statistics give the connectivity between
 each given polygon and each release group.</p>
-<p>A release group may be</p>
+<p>A release group may be a:</p>
 <ul class="simple">
-<li><p>a “point_releases” set points, giving one or more 2D or 3D locations
+<li><p>“point_releases” set points, giving one or more 2D or 3D locations
 where particles are released. A radius for 2D release around theses
 point also can be set.</p></li>
 <li><p>“polygon release”, where particles are released randomly within
 polygon made up of 3 or more 2D points. Particles will not be
 released in any parts of the polygon outside the domain.</p></li>
+<li><p>“grid_release”, particles released from points on a regular grid.</p></li>
 </ul>
 <p>For polygons, the vertical release location is randomly chosen in the
 water column, or user a given in z range. If the z value of a point
@@ -163,7 +165,7 @@ a single release.</p></li>
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>

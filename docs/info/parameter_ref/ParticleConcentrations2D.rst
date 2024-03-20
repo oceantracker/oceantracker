@@ -19,7 +19,7 @@ Parameters:
 
 	* ``count_status_equal_to`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``initial_particle_load`` :   ``<class 'float'>``   *<optional>*
 		Description: initial load of particles on release
@@ -60,6 +60,11 @@ Parameters:
 		- min: ``1``
 		- units: ``sec``
 		- possible_values: ``[True, False]``
+
+	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
+		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
+
+		- default: ``None``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

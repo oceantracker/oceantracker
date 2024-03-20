@@ -260,6 +260,7 @@ def build_param_ref():
 
     page.add_new_toc_to_page('user', maxdepth=1)
     for key in sorted(common_info.class_dicts_list):
+        if key in ['nested_readers'] : continue
         toc = make_class_sub_pages(key)
         page.add_toc_link('user', toc)
 

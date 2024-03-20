@@ -31,9 +31,9 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
             ml.msg('LogPolygonEntryAndExit: can only have one instance',fatal_error=True,exit_now=True )
 
         # add particle property to show which polygon particle is in, -1 = in no polygon
-        particle = si.classes['particle_group_manager']
-        particle.add_particle_property('event_polygon', 'manual_update',dict( initial_value=-1, dtype=np.int16))
-        particle.add_particle_property('current_polygon_for_event_logging','user',dict(class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
+        pgm = si.core_roles.particle_group_manager
+        pgm.add_particle_property('event_polygon', 'manual_update',dict( initial_value=-1, dtype=np.int16))
+        pgm.add_particle_property('current_polygon_for_event_logging','user',dict(class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                polygon_list=self.params['polygon_list'],  write=False))
 
         # set up output file to also write event polygon property
@@ -42,7 +42,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
     def update(self,n_time_step, time_sec):
         self.start_update_timer()
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         event_polygon = part_prop['event_polygon']
         current_polygon_for_event_logging = part_prop['current_polygon_for_event_logging']
 

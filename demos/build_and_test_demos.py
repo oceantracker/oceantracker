@@ -6,7 +6,7 @@ import numpy as np
 from oceantracker.util import json_util
 from oceantracker.util import yaml_util
 from copy import deepcopy
-from oceantracker.main import param_template, OceanTracker
+
 
 params =[]
 two_points= [[1594500, 5483000], [1598000, 5486100]]

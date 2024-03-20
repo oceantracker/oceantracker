@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from oceantracker.util.triangle_utilities import convert_face_to_nodal_values
-import oceantracker.post_processing.plotting.plot_utilities as plot_utilities
+import plot_oceantracker.plot_utilities as plot_utilities
 
 from matplotlib import animation
 from oceantracker.util import time_util
@@ -41,8 +41,8 @@ def animate_heat_map(stats_data, release_group, var='count',  axis_lims=None, cr
 
     if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
 
-    plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title,credit=credit,
-                  back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
+    plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
+                                 back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
     plot_utilities.plot_release_points_and_polygons(stats_data, ax= ax, release_group=release_group)
 
@@ -92,8 +92,8 @@ def animate_concentrations(concentration_data, plot_load=False,  axis_lims=None,
 
     if axis_lims is None:    axis_lims=[np.min(grid['x'][:,0]),np.max(grid['x'][:,0]),np.min(grid['x'][:,1]),np.max(grid['x'][:,1])] # set axis limits to those of the grid
 
-    plot_utilities.draw_base_map(grid, ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title,credit=credit,
-                  back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
+    plot_utilities.draw_base_map(grid, ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
+                                 back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
     plot_utilities.plot_release_points_and_polygons(concentration_data, ax= ax)
     #plot_utilities.show_particleNumbers(data_to_plot['total_num_particles_released'])
@@ -121,8 +121,8 @@ def plot_heat_map(stats_data,  release_group, nt=-1, axis_lims=None,show_grid=Fa
     pc = ax.pcolormesh(x, y, z, shading='gouraud', cmap=cmap, zorder=2)
     if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
 
-    plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid,title=title,credit=credit,
-                  back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
+    plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
+                                 back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
     pc.set_clim(vmin, vmax)
     if colour_bar:

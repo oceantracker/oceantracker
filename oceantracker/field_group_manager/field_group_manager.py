@@ -6,7 +6,7 @@ import numpy as np
 from oceantracker.util import time_util, ncdf_util, json_util
 from datetime import datetime
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.common_info_default_param_dict_templates import  cell_search_status_flags, node_types
+from oceantracker.common_info_default_param_dict_templates import  node_types
 from os import path
 from  oceantracker.interpolator.util.triangle_eval_interp import time_independent_2Dfield_scalar, time_dependent_2Dfield_scalar
 
@@ -104,7 +104,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def add_part_prop_from_fields_plus_book_keeping(self):
 
-        pgm = si.classes['particle_group_manager']
+        pgm = si.core_roles.particle_group_manager
 
         self.interpolator.add_part_prop_for_book_keeping()
 
@@ -132,7 +132,7 @@ class FieldGroupManager(ParameterBaseClass):
         # eg query point and nt the current global time step, from which we are making nt+1
         # if fix bad, then blocked and cells are corrected, for RK steps want to delay this till sub-steps are complete, so set fix_bad = false
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         info = self.info
         interp = self.interpolator
         grid = self.grid
@@ -147,7 +147,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         if fix_bad:
             # record current cell and location so they can be fixed
-            part_prop['cell_search_status'].set_values(cell_search_status_flags['ok'], active)
+            part_prop['cell_search_status'].set_values(si.cell_search_status_flags['ok'], active)
 
         # find cell for xq, node list and weight for interp at calls
         interp.find_hori_cell(grid,fields, xq,info['current_buffer_steps'],info['fractional_time_steps'],self.info['open_boundary_type'], active)
@@ -205,7 +205,7 @@ class FieldGroupManager(ParameterBaseClass):
         info= self.info
         grid = self.grid
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
 
@@ -246,7 +246,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         current_hydro_model_step, current_buffer_steps, fractional_time_steps = self.time_step_and_buffer_offsets(time_sec)
 
-        part_prop = si.classes['particle_properties']
+        part_prop = si.roles.particle_properties
 
         # is no output name given particle property for output is same as hindcast field_name
         if output is None:
@@ -334,14 +334,14 @@ class FieldGroupManager(ParameterBaseClass):
 
         # set up dispersion using vertical profiles of A_Z if available
         self._setup_dispersion_params(nc)
-        si.add_core_class('dispersion',si.working_params['core_classes']['dispersion'],
+        si.add_core_role('dispersion',si.working_params['core_classes']['dispersion'],
                             default_classID='dispersion_random_walk', initialise=True)
 
         # add resuspension based on friction velocity
         if info['is3D']:
             # add friction velocity from bottom stress or near seabed vel
             self._setup_resupension_params(nc)
-            si.add_core_class('resuspension', si.working_params['core_classes']['resuspension'],
+            si.add_core_role('resuspension', si.working_params['core_classes']['resuspension'],
                               default_classID='resuspension_basic', initialise=True)
 
         nc.close()

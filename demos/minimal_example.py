@@ -29,8 +29,8 @@ case_info_file_name, has_errors = ot.run()
 
 # below is optional code for plotting
 #-------------------------------------
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles, plot_tracks
-from oceantracker.post_processing.read_output_files.load_output_files import load_track_data
+from plot_oceantracker.plot_tracks import animate_particles, plot_tracks
+from read_oceantracker.python.load_output_files import load_track_data
 
 # read particle tracks for plotting
 track_data = load_track_data(case_info_file_name)
@@ -43,4 +43,6 @@ anim = plot_tracks(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
 anim = animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
                          title='Minimal example of OceanTracker with 3D point release',
                          movie_file='output\\minimal_example.mp4', show_dry_cells=True)
+
+
 
