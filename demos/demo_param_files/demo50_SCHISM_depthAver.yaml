@@ -64,7 +64,7 @@ release_groups:
       - -1
     pulse_size: 10
     release_interval: 3600
-    release_start_date: '2017-01-01T01:30:00'
+    start: '2017-01-01T01:30:00'
   Poly1:
     class_name: oceantracker.release_groups.polygon_release.PolygonRelease
     points:
@@ -82,6 +82,6 @@ release_groups:
       - 5489972.7479
     pulse_size: 10
     release_interval: 3600
-    release_start_date: '2017-01-01T01:30:00'
+    start: '2017-01-01T01:30:00'
 root_output_dir: output
 time_step: 120

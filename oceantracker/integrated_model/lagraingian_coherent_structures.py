@@ -16,8 +16,8 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         # set up info/attributes
         super().__init__()
         self.add_default_params({
-            'start_date': PVC(None, 'iso8601date', doc_str='start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
-            'end_date': PVC(None, 'iso8601date', doc_str=' end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
+            'start': PVC(None, 'iso8601date', doc_str='start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
+            'end': PVC(None, 'iso8601date', doc_str=' end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
             'update_interval': PVC(60*60.,float,units='sec',
                                     doc_str='Time in seconds between calculating statistics, will be rounded to be a multiple of the particle tracking time step'),
             'lags': PLC(None, [float,int], units='sec',min=1,
@@ -68,14 +68,14 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
                                   fatal_error=True, exit_now=True,caller=self)
         # get time for releases
         a = si.get_regular_events_within_hindcast(params['update_interval'], caller=self,
-                    start=params['start_date'],end=params['end_date'],crumbs='LCS add_settings_and_class_params : ')
+                    start=params['start'],end=params['end'],crumbs='LCS add_settings_and_class_params : ')
         info.update(a)
         for n_grid in range(params['grid_center'].shape[0]):
             release_params['grid_center'] = params['grid_center'][n_grid]
             release_params['grid_span'] = params['grid_span'][n_grid]
 
             for n_pulse in range(info['times'].size):
-                release_params['release_start_date'] = time_util.seconds_to_isostr(info['times'][n_pulse])
+                release_params['start'] = time_util.seconds_to_isostr(info['times'][n_pulse])
                 release_params['user_instance_info'] = (n_grid, n_pulse) # tag with grid and pulse number
                 # add param dict as keyword arguments
 
@@ -101,7 +101,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         for name, rg in si.roles.release_groups.items():
             # time of lags after start of release group
             t = rg.release_scheduler.info['start_time'] + params['lags']
-            si.add_scheduler_to_class('LCScalculation_scheduler', rg, times= t,  caller=self, crumbs='Adding LCS calculation scheduler ')
+            si.add_sheduler_to_class('LCScalculation_scheduler', rg, times= t, caller=self, crumbs='Adding LCS calculation scheduler ')
             rg.info['next_lag_to_calculate'] = 0 # counter for the lag to work on
 
             # from first grid record start time of each pulse, as is the same for all grids

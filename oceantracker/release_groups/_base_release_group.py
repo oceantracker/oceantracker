@@ -14,11 +14,10 @@ class _BaseReleaseGroup(ParameterBaseClass):
         self.add_default_params({
                 'pulse_size': PVC(1, int, min=1, doc_str='Number of particles released in a single pulse, this number is released every release_interval.'),
                'release_interval': PVC(0., float, min=0., units='sec', doc_str='Time interval between released pulses. To release at only one time use release_interval=0.'),
-               'release_start_date': PVC(None, 'iso8601date',doc_str='start date of release, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
-               # to do add ability to release on set dates/times 'release_dates': PLC([], 'iso8601date'),
-               'release_duration': PVC(None, float, min=0.,
-                                       doc_str='Time in seconds particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "release_end_date"'),
-               'release_end_date': PVC(None, 'iso8601date', doc_str='Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. "2017-01-01T00:30:00"',),
+                'start': PVC(None, 'iso8601date', doc_str='start date of release, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
+                'end': PVC(None, 'iso8601date', doc_str='Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. "2017-01-01T00:30:00"', ),
+                'duration': PVC(None, float, min=0.,units='sec',
+                                    doc_str='How long particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "end"'),
                'max_age': PVC(None, float, min=1.,
                               doc_str='Particles older than this age in seconds are culled,ie. status=dead, and removed from computation, very useful in reducing run time'),
                'user_release_groupID': PVC(0, int, doc_str='User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.'),
@@ -37,7 +36,10 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
                # Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value': 5.}
                'max_cycles_to_find_release_points': PVC(1000, int, min=100, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
-                })
+                'release_duration': PVC(None, float, min=0., obsolete='use "duration" parameter instead'),
+                'release_start_date': PVC(None, 'iso8601date', obsolete='use "start" paramteer instead'),
+                'release_end_date': PVC(None, 'iso8601date',  obsolete='use "end" parameter instead' ),
+        })
 
         self.role_doc('Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.')
 
@@ -73,21 +75,21 @@ class _BaseReleaseGroup(ParameterBaseClass):
         ri = si.run_info
         params = self.params
 
-        if params['release_start_date'] is None:
+        if params['start'] is None:
             start =  si.hindcast_info['end_time'] if si.backtracking else si.hindcast_info['start_time']
         else:
-            start = time_util.isostr_to_seconds(params['release_start_date'])
+            start = time_util.isostr_to_seconds(params['start'])
 
         # work out release duration
-        if params['release_duration'] is None :
+        if params['duration'] is None :
             # look at end date
-            if params['release_end_date'] is None:
+            if params['end'] is None:
                 end = si.hindcast_info['start_time'] if si.backtracking else si.hindcast_info['end_time']
             else:
-                end = time_util.isostr_to_seconds(params['release_end_date'])
+                end = time_util.isostr_to_seconds(params['end'])
             duration = abs(end-start)
         else:
-            duration = abs(params['release_duration'])
+            duration = abs(params['duration'])
 
         life_span =  duration + 0. if params['max_age'] is None else abs(params['max_age'])
         return start, life_span

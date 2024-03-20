@@ -32,7 +32,7 @@
             "pulse_size": 10,
             "release_interval": 3600,
             "allow_release_in_dry_cells": true,
-            "release_start_date": "2017-01-01T01:30:00"
+            "start": "2017-01-01T01:30:00"
         },
         "Poly1": {
             "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
@@ -62,7 +62,7 @@
                     5489972.7479
                 ]
             ],
-            "release_start_date": "2017-01-01T01:30:00",
+            "start": "2017-01-01T01:30:00",
             "pulse_size": 10,
             "release_interval": 3600
         }

@@ -291,11 +291,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # setup scheduler for each release group, how start and model times known
         #   this will round start times and release interval to be integer number of model time steps after the start
         for name, rg in si.roles.release_groups.items():
-              si.add_scheduler_to_class('release_scheduler',rg,
-                                start= rg.params['release_start_date'], # set above from start date
-                                interval= rg.params['release_interval'],
-                                end     = rg.params['release_end_date'],
-                                duration= rg.params['release_duration'], caller=rg)
+              si.add_sheduler_to_class('release_scheduler', rg,
+                                        start= rg.params['start'],  # set above from start date
+                                        interval= rg.params['release_interval'],
+                                        end     = rg.params['end'],
+                                        duration= rg.params['duration'], caller=rg)
 
         if len(si.roles.release_groups) == 0:
             # guard against there being no release groups

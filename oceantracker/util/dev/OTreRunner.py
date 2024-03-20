@@ -218,9 +218,9 @@ if __name__ == '__main__':
 
     # 3) now test rerunner for a point and an polygon
     prg = [
-        {'release_start_date': '2017-01-05', 'points': [[1594500, 5482700], [
+        {'start': '2017-01-05', 'points': [[1594500, 5482700], [
             1598000, 5486100]], 'pulse_size': 10, 'release_interval': 1 * 3600},
-        {'release_start_date': '2017-01-05',
+        {'start': '2017-01-05',
             'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
          'points': [[1597682.1237, 5489972.7479],
                     [1598604.1667, 5490275.5488],

@@ -47,7 +47,7 @@
             "z_min": -1,
             "z_max": -1,
             "release_interval": 3660,
-            "release_start_date": "2017-01-01T00:31:30",
+            "start": "2017-01-01T00:31:30",
             "pulse_size": 10
         },
         "P1": {

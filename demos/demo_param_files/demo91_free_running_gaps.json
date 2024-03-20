@@ -52,7 +52,7 @@
             "max_age": 21600,
             "release_interval": 0,
             "pulse_size": 1,
-            "release_start_date": "2020-06-02T00:00:00"
+            "start": "2020-06-02T00:00:00"
         },
         "r2": {
             "points": [
@@ -64,7 +64,7 @@
             "max_age": 21600,
             "release_interval": 0,
             "pulse_size": 1,
-            "release_start_date": "2020-06-03T00:00:00"
+            "start": "2020-06-03T00:00:00"
         },
         "r3": {
             "points": [
@@ -76,7 +76,7 @@
             "max_age": 21600,
             "release_interval": 0,
             "pulse_size": 1,
-            "release_start_date": "2020-06-04T00:00:00"
+            "start": "2020-06-04T00:00:00"
         },
         "r4": {
             "points": [
@@ -88,7 +88,7 @@
             "max_age": 21600,
             "release_interval": 0,
             "pulse_size": 1,
-            "release_start_date": "2020-06-03T03:00:00"
+            "start": "2020-06-03T03:00:00"
         }
     },
     "particle_properties": {

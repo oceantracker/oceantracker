@@ -98,8 +98,12 @@ class OceanTracker():
             existing_params[class_role].update(kwargs)
         else:
             #add to mulit component role
-            # auto name if needed
-            if name is None:  name = f'{class_role.upper()}_{len(existing_params[class_role]):03d}'
+            # auto name if needed with camel case role
+            if name is None:
+                s = class_role.split('_')
+                s = [x.title() for x in s]
+                s = ''.join(s)
+                name = f'{s}_{len(existing_params[class_role]):04d}'
 
             if 'name' in existing_params[class_role]:# auto name
                 msg_logger.msg(f'Class role  "{class_role}" already has a component named "{name}", only using last one given',
@@ -265,7 +269,7 @@ class _OceanTrackerRunner(object):
         if hasattr(self, 'helper_msg_logger'):
             ml.msg(f'Helper- {len(ml_helper.errors_list):3d} errors, {len(ml_helper.warnings_list):3d} warnings, {len(ml_helper.notes_list):3d} notes, check above', tabs=3)
         ml.msg(f'Main  - {len(ml.errors_list):3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes, check above', tabs=3)
-
+        ml.msg(f'Output in {si.run_output_dir}', tabs=1)
         ml.print_line()
         ml.close()
 
