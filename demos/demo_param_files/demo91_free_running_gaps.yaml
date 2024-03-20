@@ -50,7 +50,7 @@ release_groups:
       - 5486100
     pulse_size: 1
     release_interval: 0
-    release_start_date: '2020-06-02T00:00:00'
+    start: '2020-06-02T00:00:00'
   r2:
     max_age: 21600
     points:
@@ -58,7 +58,7 @@ release_groups:
       - 5486100
     pulse_size: 1
     release_interval: 0
-    release_start_date: '2020-06-03T00:00:00'
+    start: '2020-06-03T00:00:00'
   r3:
     max_age: 21600
     points:
@@ -66,7 +66,7 @@ release_groups:
       - 5486100
     pulse_size: 1
     release_interval: 0
-    release_start_date: '2020-06-04T00:00:00'
+    start: '2020-06-04T00:00:00'
   r4:
     max_age: 21600
     points:
@@ -74,7 +74,7 @@ release_groups:
       - 5486100
     pulse_size: 1
     release_interval: 0
-    release_start_date: '2020-06-03T03:00:00'
+    start: '2020-06-03T03:00:00'
 root_output_dir: output
 time_step: 900
 tracks_writer:

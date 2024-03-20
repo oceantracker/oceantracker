@@ -49,7 +49,9 @@ class Scheduler(object):
 
             if not ( hindcast_info['start_time'] <= start  <= hindcast_info['end_time']):
                 self.start_time_outside_hydro_model_times = True
+
             # round interval
+            if interval is None: interval = hindcast_info['time_step']
             interval = abs(interval)  # ensure positive
             rounded_interval = round(interval/dt)*dt
             if abs(interval-rounded_interval)/dt > tol:

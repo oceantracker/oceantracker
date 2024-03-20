@@ -94,7 +94,7 @@ release_groups:
       - 5489972.7479
     pulse_size: 10
     release_interval: 3660
-    release_start_date: '2017-01-01T00:31:30'
+    start: '2017-01-01T00:31:30'
     z_max: -1
     z_min: -1
 resuspension:

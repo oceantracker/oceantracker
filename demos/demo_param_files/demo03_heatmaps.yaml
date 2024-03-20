@@ -25,12 +25,12 @@ particle_properties:
 particle_statistics:
   gridstats1:
     class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
-    count_start_date: '2020-06-01 21:16:07'
     grid_size:
     - 220
     - 221
     particle_property_list:
     - water_depth
+    start: '2020-06-01 21:16:07'
     update_interval: 1800
   polystats1:
     class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased

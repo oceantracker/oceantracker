@@ -47,9 +47,15 @@ class ParameterBaseClass(object):
         # eg particle buffer size
         pass
 
-    def add_default_params(self,d=None):
+    def add_default_params(self,*args, **kwargs):
         # add default as key word or dictionary
-        if d is None: return
+        if len(args)>=1:
+            d = args[0]
+        elif len(kwargs) >= 1:
+            d = kwargs
+        else:
+            raise('Parameter class> add_default_params >> no default dict or kwargs given')
+
         if type(d) is not dict: raise ValueError('add_default_params : default param must be a dictionary')
         # deep update to defaults
         basic_util.deep_dict_update(self.default_params, d)

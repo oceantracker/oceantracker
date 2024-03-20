@@ -61,8 +61,8 @@ def get_base_params():
                                                 }]}
                                       }
 
-    release_template={  'points': None, 'release_start_date': None, 'pulse_size': None,
-                       'release_interval': 900., 'release_duration': 3600.,
+    release_template={  'points': None, 'start': None, 'pulse_size': None,
+                       'release_interval': 900., 'duration': 3600.,
                        'max_age' : None,'release_radius' : 20,
                        'user_particle_property_parameters': { 'DNAdecay': {'initial_value' : 1.0}} }  # initial value may be + or - for detection/non-detection
     params['base_case_params']['release_groups'] =[release_template]
@@ -87,7 +87,7 @@ def region_setup_params(regionID, test_root_output_dir=None):
         file_mask ='eDNAtool_MPInorthland_v01.nc'
 
         # test release
-        rg= { 'points':[p],'release_start_date':twhightide[1],
+        rg= { 'points':[p],'start':twhightide[1],
               'release_radius': 10., # make sample location fuzzy as sampling takes time
               'pulse_size' : pulse_size}
            # stats grid
@@ -101,7 +101,7 @@ def region_setup_params(regionID, test_root_output_dir=None):
     pg = case_params['release_groups'][0]
     pg.update(rg)
 
-    max_part = int(region_info['max_release_points']*pulse_size* pg['release_duration']/pg['release_interval'] + 10)
+    max_part = int(region_info['max_release_points']*pulse_size* pg['duration']/pg['release_interval'] + 10)
 
     case_params['particle_statistics'][0].update(s)
 
@@ -178,10 +178,10 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
         for p in front_end_params['points_list_WGS84']:
             pg = deepcopy(rparams['base_case_params']['release_groups'][0])
             t0 = time_util.iso8601str_to_seconds(region_info['high_tides'][tideID]) + front_end_params['time_afterHW_hours'] * 3600.
-            t0 += pg['release_duration']/2  # center particle rleases on given time
+            t0 += pg['duration']/2  # center particle rleases on given time
             p1= WGS84_to_NZTM(np.asarray(p)).tolist()
             pg.update({'points': p1,
-                          'release_start_date': time_util.seconds_to_isostr(t0)
+                          'start': time_util.seconds_to_isostr(t0)
                           })
 
             pg_param.append(pg)

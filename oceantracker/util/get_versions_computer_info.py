@@ -12,7 +12,8 @@ def get_code_version():
     except:
         git_revision = 'unknown'
 
-    d ={'version': common_info.code_version,
+    d ={'major_version' : common_info.code_major_version,
+        'version': common_info.code_version,
         'git_revision': git_revision,
         'python_version': version,
         'python_major_version': version_info.major,

@@ -23,6 +23,8 @@ New features
 
 #. Now reads new Schism v5 multi-file output, where 3D fields are in separate files
 
+#. In helper method in add_class "name" is  now optional, will auto nane eg ParticleRelease_0001
+
 #. Can auto detect if hydro-model has lat lng cords, by looking at bounds of grid coordinates.
 
 #. If hydro model is in geographic coords all inputs can now be in lon, lat, eg release locations, stats grid location and size. Currently outputs are in a meters grid, UTM or user given ESPG code. Future versions will work natively geographic coords, ie both inputs and outputs.

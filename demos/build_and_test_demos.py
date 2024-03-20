@@ -99,7 +99,7 @@ p3['release_groups']= {
 
 p3['particle_statistics'] = {'gridstats1': {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
-                   'count_start_date': '2020-06-01 21:16:07',
+                   'start': '2020-06-01 21:16:07',
                       'grid_size': [220, 221]},
             'polystats1' : {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
@@ -249,10 +249,10 @@ schsim_base_params=\
                     'P1':{'points': [[1595000, 5482600, -1],[1599000, 5486200, -1] ],
                                              'pulse_size': 10, 'release_interval': 3600,
                                             'allow_release_in_dry_cells': True,
-                          'release_start_date': '2017-01-01T01:30:00'},
+                          'start': '2017-01-01T01:30:00'},
                     'Poly1':    {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                             'points': poly_points,
-                            'release_start_date': '2017-01-01T01:30:00',
+                            'start': '2017-01-01T01:30:00',
                             'pulse_size': 10, 'release_interval':  3600}
                 },
             'particle_properties': {
@@ -278,7 +278,7 @@ s56['release_groups']={
                        'z_min': -1,
                         'z_max': -1,
                       'release_interval': 3603,
-                        'release_start_date': '2017-01-01T00:31:30',
+                        'start': '2017-01-01T00:31:30',
                         'pulse_size': 10, 'release_interval':  3660},
             'P1': {'points': [[1594500, 5487000, -1],
                               [1594500, 5483000, -1],
@@ -432,17 +432,17 @@ p91['release_groups']['r1'] ={'points':[two_points[1]],
                                       'max_age':6*3600,
                                       'release_interval':0,
                                       'pulse_size' : 1,
-                                      'release_start_date':'2020-06-02T00:00:00' # start 1 day in 2020-06-02T21:16:07
+                                      'start':'2020-06-02T00:00:00' # start 1 day in 2020-06-02T21:16:07
                                       }
 # 2020-06-01T05:16:07 to 2020-06-06T03:16:07
 p91['release_groups']['r2'] = deepcopy(p91['release_groups']['r1'])
-p91['release_groups']['r2']['release_start_date']='2020-06-03T00:00:00'
+p91['release_groups']['r2']['start']='2020-06-03T00:00:00'
 
 p91['release_groups']['r3'] = deepcopy(p91['release_groups']['r1']) # overlaps with last
-p91['release_groups']['r3']['release_start_date']='2020-06-04T00:00:00'
+p91['release_groups']['r3']['start']='2020-06-04T00:00:00'
 
 p91['release_groups']['r4'] = deepcopy(p91['release_groups']['r1']) # overlaps with last
-p91['release_groups']['r4']['release_start_date']='2020-06-03T03:00:00'
+p91['release_groups']['r4']['start']='2020-06-03T03:00:00'
 #p91['release_groups']['start_mid']['max_age']=2*3600
 params.append(p91)
 

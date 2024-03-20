@@ -9,3 +9,4 @@ venv
 /tests/misc/output/
 /demos/root_output_dir/
 /tests/dev_testing/root_output_dir/
+/tests/unit_tests/output/

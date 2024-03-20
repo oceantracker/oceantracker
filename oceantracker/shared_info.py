@@ -248,7 +248,7 @@ class SharedInfo(object):
         return out
 
     @classmethod
-    def add_scheduler_to_class(cls, name_scheduler, param_class_instance, start=None, end=None, duration=None,
+    def add_sheduler_to_class(cls, name_scheduler, param_class_instance, start=None, end=None, duration=None,
                                interval =None, times=None,
                                caller=None, crumbs=''):
         ''' Add a scheduler opject to given param_class_instance, with boolean task_flag attribute for each time step,
