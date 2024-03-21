@@ -7,7 +7,7 @@ from time import  perf_counter
 from oceantracker.util.messgage_logger import MessageLogger, GracefulError
 from oceantracker.util import profiling_util, get_versions_computer_info
 import numpy as np
-from oceantracker.util import time_util, numba_util
+from oceantracker.util import time_util, numba_util, output_util
 from oceantracker.util import json_util
 from datetime import datetime
 from time import sleep
@@ -86,7 +86,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         return_msgs = {'errors': si.msg_logger.errors_list, 'warnings': si.msg_logger.warnings_list, 'notes': si.msg_logger.notes_list}
 
         # run info
-        si.run_info = dict(time_step = si.settings['time_step'],
+        si.run_info = dict(time_step = abs(si.settings['time_step']),
                         backtracking=si.settings['backtracking'],
                         model_direction= -1 if si.settings['backtracking'] else 1)
 
@@ -154,13 +154,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         try:
             self._do_a_run()
+
+
             case_info = self._get_case_info(d0,t_start)
 
             if si.settings['write_output_files']:
                 # write grid if first case
                 if si.caseID == 0:
                     si.core_roles.field_group_manager.write_hydro_model_grid()
-
                 case_info_file = si.output_file_base + '_caseInfo.json'
                 json_util.write_JSON(path.join(si.run_output_dir, case_info_file), case_info)
 
@@ -239,6 +240,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # ------------------------------------------
         solver.solve()
         # ------------------------------------------
+
+        si.output_files['release_group_info'] = output_util.write_release_group_netcdf()
+
         pass
 
     def _do_run_integrity_checks(self):
@@ -278,6 +282,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set model run start/end time allowing for back tracking
         ri['start_time'] = np.min(md * np.asarray(first_time)) * md
         ri['end_time']   = np.max(md * np.asarray(last_time)) * md
+
         # clip end time to be within hincast
         if si.backtracking:
             ri['end_time'] = max(ri['end_time'],si.hindcast_info['start_time'])
@@ -285,7 +290,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             ri['end_time'] = min(ri['end_time'], si.hindcast_info['end_time'])
 
         # make release times array
-        ri['times']    = np.arange(ri['start_time'], ri['end_time'], ri['time_step'] * md)
+        duration =  abs(ri['end_time']-ri['start_time'])
+        if si.working_params['settings']['max_run_duration'] is not None:  duration = min(si.working_params['settings']['max_run_duration'],duration)
+
+        ri['times']    = ri['start_time'] + md * np.arange(0., duration + ri['time_step'], ri['time_step'])
         ri['end_time'] = ri['times'][-1] # adjust end to nearest time step
 
         # setup scheduler for each release group, how start and model times known
@@ -307,6 +315,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         ri['end_date'] = time_util.seconds_to_isostr(ri['times'][-1])
 
         si.msg_logger.progress_marker('Set up run start and end times, plus release groups and their schedulers', start_time=t0)
+
+
     def _make_core_classes(self):
         # initialise all classes, order is important!
         # shortcuts
@@ -493,10 +503,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
     def close(self):
         # close all instances, eg their files if not close etc
+
+
+
         for i in si.all_class_instance_pointers_iterator():
             try:
                 i.close()
 
             except Exception as e:
                 si.msg_logger.msg(f'Unexpected error closing class ="{ i.info["name"]}"', fatal_error= True, exception=e)
+
 

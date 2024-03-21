@@ -39,7 +39,7 @@ class NetCDFhandler(object):
         if name not in self.file_handle.dimensions:
             self.file_handle.createDimension(name, dim_size)
 
-    def create_a_variable(self, name, dimList,dtype, description=None, fill_value=None,
+    def create_a_variable(self, name, dimList,dtype, description=None, fill_value=None,units=None,
                           attributes=None,  chunksizes=None, compressionLevel=0):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
@@ -60,6 +60,8 @@ class NetCDFhandler(object):
         # set attributes the hard way, must be an easier way!
         if description is not None:
             setattr(self.file_handle.variables[name], 'description', self._sanitize_attribute(description))
+        if units is not None:
+            setattr(self.file_handle.variables[name], 'units', self._sanitize_attribute(units))
 
         if attributes is not None:
             for key, value in attributes.items():
@@ -86,7 +88,8 @@ class NetCDFhandler(object):
             output[name] = self.read_a_variable(name)
         return output
 
-    def write_a_new_variable(self, name, X, dimList, description=None, attributes=None,dtype=None, chunksizes=None, compressionLevel=0, fill_value=None):
+    def write_a_new_variable(self, name, X, dimList, description=None, attributes=None,dtype=None, chunksizes=None,
+                             compressionLevel=0, fill_value=None, units=None):
         # write a whole variable and add dimensions if required
         if type(dimList) != list and type(dimList) != tuple :dimList =[dimList]
 
@@ -100,7 +103,8 @@ class NetCDFhandler(object):
         if dtype is None: dtype = X.dtype  # preserve type unless explicitly changed
 
 
-        v = self.create_a_variable(name, dimList,description=description,attributes= attributes,dtype=dtype, chunksizes= chunksizes, compressionLevel=compressionLevel, fill_value=-1)
+        v = self.create_a_variable(name, dimList,description=description,attributes= attributes,dtype=dtype, chunksizes= chunksizes,
+                                   units= units,  compressionLevel=compressionLevel, fill_value=-1)
 
         # check dims match as below write does not repect shape
         for n,dn in enumerate(dimList):

@@ -295,4 +295,22 @@ def _get_release_group_map_and_points(nc):
     return m
 
 
+def read_release_groups_info(file_name):
+    nc = NetCDFhandler(file_name,mode='r')
+    d= dict(release_group_name_list=[])
+    for name in nc.all_var_names():
+        data = nc.read_a_variable(name)
+        attr = nc.all_var_attr(name)
+        rg_name= attr['release_group_name']
 
+        # extract info
+        d['release_group_name_list'].append(rg_name)
+        d[rg_name] = attr
+        if attr['release_type'] =='grid':
+            d[rg_name]['x_grid'] = data
+            d[rg_name]['points'] = np.reshape(data,(data.shape[0]*data.shape[1], data.shape[2])) # flatten points
+        else:
+            d[rg_name]['points'] = data
+        pass
+    nc.close()
+    return d

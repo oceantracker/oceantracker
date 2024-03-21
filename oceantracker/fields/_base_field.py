@@ -11,13 +11,13 @@ class ReaderField(ParameterBaseClass):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params
 
-        self.add_default_params(dict(
+        self.add_default_params(
                     time_varying= PVC(False, bool),
                     is3D = PVC(False, bool),
                     is_vector= PVC(False, bool),
                     write_interp_particle_prop_to_tracks_file = PVC(True, bool),
                     create_particle_property_with_same_name  = PVC(True, bool),
-                            ))
+                            )
         reader = None
         interp = None
 

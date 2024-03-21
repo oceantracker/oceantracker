@@ -43,6 +43,7 @@ New features
 
 #. Setting display_grid_at_start plots grid as a check, clicking on image will print coords in console to use as release points
 
+#. Release group data now writen to separate file for each case, to use
 
 Behaviour changes
 ______________________________________________________________
