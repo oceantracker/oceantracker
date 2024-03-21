@@ -1,13 +1,14 @@
 from os import path, sep
 from oceantracker.main import OceanTracker
-import pathlib
-
+from read_oceantracker.python import load_output_files
+from plot_oceantracker import plot_tracks
 
 
 def base_settings(fn):
     d =  dict(output_file_base=path.split(fn)[-1].split('.')[0],
                 root_output_dir=path.join(path.dirname(fn), 'output'),
-                time_step=600.  # 10 min time step
+                time_step=600.,  # 10 min time step
+                max_run_duration=12*3600.
                 )
     return d
 
@@ -58,6 +59,9 @@ ps1 = dict(name='my_heatmap',
          start='2017-01-01T02:30:00',
          )
 
+def read_tracks(case_info_file):
+    return load_output_files.load_track_data(case_info_file)
+
 def main():
     ot = OceanTracker()
     ot.settings(**base_settings(__file__))
@@ -76,9 +80,24 @@ def main():
     ot.add_class('particle_statistics',**ps1)
     ot.add_class('resuspension', critical_friction_velocity=0.01)
 
-    ot.run()
+    case_info_file = ot.run()
+    return case_info_file
 
+def read_test(case_info_file):
+    track_data = read_tracks(case_info_file)
+    return track_data
 
+def plot_test(track_data):
+    ax = [1591000, 1601500, 5478500, 5491000]
+    single_time_step = 23
+    image_dir = r'E:\H_Local_drive\OceanTrackerPaper'
+    p1 = plot_tracks.animate_particles(track_data, axis_lims=ax, single_time_step=single_time_step,
+                                       show_grid=True, show_dry_cells=True, part_color_map='hot',
+                                       size_using_data=track_data['a_pollutant'], colour_using_data=track_data['a_pollutant'],
+                                       movie_file=path.join(image_dir, 'decay_movie_frame.mp4'))
 
 if __name__ == "__main__":
-    main()
+    case_info_file = main()
+
+    track_data= read_test(case_info_file)
+    plot_test(track_data)

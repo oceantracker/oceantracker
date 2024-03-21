@@ -6,6 +6,7 @@ from read_oceantracker.python import read_ncdf_output_files
 from os import path
 from glob import glob
 
+
 def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0, run_output_dir= None):
     # get case_info.json file name from runInfo dict or json file name, can also set root_output_dir, if output moved to new location
     # ncase is one based
@@ -67,6 +68,7 @@ def get_case_info_files_from_dir(dir_name, case = None):
 def read_case_info_file(case_info_file_name):
     # load runInfo and given case case_infofiles into dict
     # runcase_info is used as input for all particle_plot methods
+    # if dir of case info does not match that in the case_info.json, then it is changed to match given name
 
     if type(case_info_file_name) == list:
         print('Warning: case_info_file is a list from a parallel run, loading first case, ie case_info_file[0], if another case required use read_case_info_file(case_info_file[n]) ')
@@ -83,7 +85,7 @@ def read_case_info_file(case_info_file_name):
     case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
     return case_info
 
-def load_track_data(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1):
+def load_track_data(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1, run_output_dir=None):
     # load one track file from squeuence of what may be split files
     # todo load split track files into  dictionary
 
@@ -100,10 +102,15 @@ def load_track_data(case_info_file_name, var_list=None, release_group= None, fra
     return tracks
 
 def _extract_useful_info(case_info, d):
-    d.update({'particle_status_flags': case_info['particle_status_flags'],
-                 'particle_release_groups': case_info['release_groups']})
-    d['full_case_params'] = case_info['full_case_params']
+    if case_info['version_info']['major_version'] >= 0.5:
+        prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'] , case_info['output_files']['release_group_info']))
+    else:
+        #todo deprecated from version 0.5
+        prg_info = case_info['release_groups']
+        prg_info['release_group_name_list'] = [str(n) for n in case_info['release_groups'].keys()]
 
+    d.update( particle_status_flags =case_info['particle_status_flags'], particle_release_groups= prg_info)
+    d['full_case_params'] = case_info['full_case_params']
     return d
 
 def load_concentration_data(case_info_file_name, name= None):
