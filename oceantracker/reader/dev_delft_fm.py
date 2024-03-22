@@ -121,7 +121,7 @@ class DELFTFM(_BaseReader):
         fm = self.params['field_variable_map']
         var_file_name=fm['water_velocity'][0]
 
-        if si.is3D_run:#
+        if si.run_info.is3D_run:#
             # todo 3D not working yet
             #  3D velocity, check if vertical vel file exits
             if self.get_3D_var_file_name(nc,fm['water_velocity'][2]) is not None:
@@ -145,10 +145,10 @@ class DELFTFM(_BaseReader):
 
         mean_water_depth = np.nanmean(fields['water_depth'].data[0,:,0,0][grid['triangles']],axis=1)
 
-        is_dry_cell_buffer[buffer_index,:]=  mean_water_depth < si.minimum_total_water_depth
+        is_dry_cell_buffer[buffer_index,:]=  mean_water_depth < si.run_info.minimum_total_water_depth
 
         reader_util.set_dry_cell_flag_from_tide(grid['triangles'],  fields['tide'].data, fields['water_depth'].data,
-                                                si.minimum_total_water_depth, is_dry_cell_buffer, buffer_index)
+                                                si.run_info.minimum_total_water_depth, is_dry_cell_buffer, buffer_index)
         pass
 
     def set_up_uniform_sigma(self,nc, grid):

@@ -180,8 +180,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
         part_prop = si.roles.particle_properties
         stats_grid = self.grid
 
-        # update time stats  recorded
-        self.record_time_stats_last_recorded(time_sec)
+
 
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
         p_groupID   = part_prop['IDrelease_group'].used_buffer()

@@ -42,9 +42,9 @@ class TerminalVelocity(VelocityModiferBase):
 
         if self.params['variance'] is None:
             # constant fall vel
-            self._add_constant_vertical_vel(velocity_modifier.data, self.params['value'] * si.model_direction, active)
+            self._add_constant_vertical_vel(velocity_modifier.data, self.params['value'] * si.run_info.model_direction, active)
         else:
-            self._add_individual_vertical_vel(velocity_modifier.data, part_prop['terminal_velocity'].data,  si.model_direction, active)
+            self._add_individual_vertical_vel(velocity_modifier.data, part_prop['terminal_velocity'].data,  si.run_info.model_direction, active)
 
     @staticmethod
     @njitOT

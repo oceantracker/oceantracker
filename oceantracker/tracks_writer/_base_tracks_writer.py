@@ -20,7 +20,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.add_default_params({
                                 'role_output_file_tag': PVC('tracks', str),
-                                'update_interval': PVC(None, int, min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
+                                'update_interval': PVC(None, [int,float], min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
                                 'output_step_count': PVC(None,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
                                 'turn_on_write_particle_properties_list': PLC(None, [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                                  'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
@@ -44,11 +44,8 @@ class _BaseWriter(ParameterBaseClass):
 
         # find steps between wrtites, rounded to nearest model time step
         if params['update_interval'] is None :
-            nt_step = 1
-        else:
-            nt_step = int(np.round(params['update_interval']/si.settings['time_step']))
+            params['update_interval'] = si.hindcast_info['time_step']
 
-        self.info['output_step_count'] = max(nt_step, 1)
 
         if si.settings['write_dry_cell_flag']:
             grid = si.core_roles.field_group_manager.grid
@@ -56,6 +53,8 @@ class _BaseWriter(ParameterBaseClass):
             self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])
 
+    def final_setup(self):
+        si.add_sheduler_to_class('write_scheduler', self, interval=self.params['update_interval'])
 
     def add_dimension(self, name, size):
         self.info['file_builder']['dimensions' ][name] ={'size': size}
@@ -86,7 +85,7 @@ class _BaseWriter(ParameterBaseClass):
 
     def open_file_if_needed(self):
 
-        fn =si.output_file_base + '_' + self.params['role_output_file_tag']
+        fn =si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
 
         if self.total_time_steps_written == 0:
             if self.params['time_steps_per_per_file'] is not None: # first of the split files
@@ -108,7 +107,7 @@ class _BaseWriter(ParameterBaseClass):
         si.msg_logger.progress_marker('opening tracks output to : ' + self.info['output_file'][-1])
         self.add_global_attribute('file_created', datetime.now().isoformat())
 
-        self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file'][-1]), 'w')
+        self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file'][-1]), 'w')
         nc = self.nc
 
         for name, item in self.info['file_builder']['dimensions'].items():
@@ -140,7 +139,7 @@ class _BaseWriter(ParameterBaseClass):
     #  eg ID etc, releaseGroupID  etc
 
         writer = si.core_roles.tracks_writer
-        if si.settings['write_tracks'] and new_particleIDs.shape[0] > 0:
+        if si.run_info.write_tracks and new_particleIDs.shape[0] > 0:
             for name, prop in si.roles.particle_properties.items():
                 # parameters are not time varying, so done at ends in retangular writes, or on culling particles
                 if not prop.params['time_varying'] and prop.params['write']:
@@ -149,9 +148,6 @@ class _BaseWriter(ParameterBaseClass):
     #@function_profiler(__name__)
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none the a forced write
-
-        if si.run_info['time_steps_completed'] % self.info['output_step_count'] != 0: return
-
         # write time vary info , eg "time"
         self.pre_time_step_write_book_keeping()
 
@@ -176,7 +172,7 @@ class _BaseWriter(ParameterBaseClass):
         self.total_time_steps_written  += 1 # time steps written since the start
 
     def close(self):
-        if si.settings['write_tracks']:
+        if si.run_info.write_tracks:
             nc = self.nc
             # write properties only written at end
             self.add_global_attribute('total_num_particles_released', si.core_roles.particle_group_manager.info['particles_released'])

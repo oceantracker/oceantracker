@@ -28,7 +28,7 @@ class ParticleGroupManager(ParameterBaseClass):
         info['num_alive'] = 0
         info['max_age_for_each_release_group'] =np.zeros((0,),dtype=np.int32)
 
-        nDim = 3 if si.is3D_run else  2
+        nDim = 3 if si.run_info.is3D_run else  2
         info['current_particle_buffer_size'] = self.params['particle_buffer_chunk_size']
 
         #  time dependent core  properties
@@ -212,7 +212,7 @@ class ParticleGroupManager(ParameterBaseClass):
         i = si.add_user_class('time_varying_info',name,params,  class_type='manual_update',  crumbs=' setup time varing reader info')
         i.initial_setup()
 
-        if si.settings['write_tracks'] and i.params['write']:
+        if si.run_info.write_tracks and i.params['write']:
             w = si.core_roles.tracks_writer
             w.create_variable_to_write(name, 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
 
@@ -247,7 +247,7 @@ class ParticleGroupManager(ParameterBaseClass):
                                            crumbs=crumbs +' adding "particle_properties of type=' + prop_type)
         i.initial_setup()
 
-        if si.settings['write_tracks']:
+        if si.run_info.write_tracks:
             # tweak write flag if in param lists
             w = si.core_roles.tracks_writer
             if name in w.params['turn_off_write_particle_properties_list']: i.params['write'] = False

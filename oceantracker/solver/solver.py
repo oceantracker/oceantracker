@@ -43,10 +43,10 @@ class Solver(ParameterBaseClass):
 
         computation_started = datetime.now()
         # set up particle velocity working space for solver
-        ri['total_alive_particles'] = 0
+        ri.total_alive_particles = 0
 
         pgm, fgm = si.core_roles.particle_group_manager, si.core_roles.field_group_manager
-        ri['time_steps_completed'] = 0
+        ri.time_steps_completed = 0
 
         # work out time steps between writing tracks to screen
         write_tracks_time_step = si.settings['screen_output_time_interval']
@@ -57,7 +57,7 @@ class Solver(ParameterBaseClass):
 
         t0_model = perf_counter()
         free_wheeling = False
-        model_times = si.run_info['times']
+        model_times = si.run_info.times
         fgm.update_reader(model_times[0]) # initial buffer fill
 
         # run forwards through model time variable, which for backtracking are backwards in time
@@ -84,7 +84,7 @@ class Solver(ParameterBaseClass):
             free_wheeling = False # has ended
 
            # alive particles so do steps
-            ri['total_alive_particles'] += num_alive
+            ri.total_alive_particles += num_alive
             fgm.update_reader(time_sec)
 
 
@@ -112,27 +112,27 @@ class Solver(ParameterBaseClass):
 
             # print progress to screen
             if n_time_step % nt_write_time_step_to_screen == 0:
-                self.screen_output(ri['time_steps_completed'], time_sec, t0_model, t0_step)
+                self.screen_output(ri.time_steps_completed, time_sec, t0_model, t0_step)
 
-            t2 = time_sec + si.settings['time_step'] * si.model_direction
+            t2 = time_sec + ri.time_step * ri.model_direction
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
-            ri['time_steps_completed'] += 1
+            ri.time_steps_completed += 1
             si.block_timer('Time stepping',t0_step)
-            if abs(t2 - ri['start_time']) > ri['duration']:  break
+            if abs(t2 - ri.start_time) > ri.duration:  break
 
 
         # write out props etc at last step
         if n_time_step > 0:# if more than on set completed
             self._pre_step_bookkeeping(n_time_step, t2)
-            self.screen_output(ri['time_steps_completed'], t2, t0_model,t0_step)
+            self.screen_output(ri.time_steps_completed, t2, t0_model,t0_step)
 
-        ri['end_time'] = t2
-        ri['model_end_date'] = t2.astype('datetime64[s]')
-        ri['model_run_duration'] =  ri['end_time'] -ri['start_time']
-        ri['computation_started'] =computation_started
-        ri['computation_ended'] = datetime.now()
-        ri['computation_duration'] = datetime.now() -computation_started
+        ri.end_time = t2
+        ri.model_end_date = t2.astype('datetime64[s]')
+        ri.model_run_duration =  ri.end_time - ri.start_time
+        ri.computation_started =computation_started
+        ri.computation_ended = datetime.now()
+        ri.computation_duration = datetime.now() -computation_started
 
     def _pre_step_bookkeeping(self, n_time_step,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
         part_prop = si.roles.particle_properties
@@ -140,9 +140,9 @@ class Solver(ParameterBaseClass):
         fgm = si.core_roles.field_group_manager
 
         ri = si.run_info
-        ri['current_model_date'] = time_util.seconds_to_datetime64(time_sec)
-        ri['current_model_time_step'] = n_time_step
-        ri['current_model_time'] = time_sec
+        ri.current_model_date = time_util.seconds_to_datetime64(time_sec)
+        ri.current_model_time_step = n_time_step
+        ri.current_model_time = time_sec
 
         pgm.remove_dead_particles_from_memory()
 
@@ -163,7 +163,7 @@ class Solver(ParameterBaseClass):
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
 
         # resuspension is a core trajectory modifier
-        if si.is3D_run:
+        if si.run_info.is3D_run:
             # friction_velocity property  is now updated, so do resupension
             si.core_roles.resuspension.update(n_time_step,time_sec, alive)
 
@@ -182,14 +182,16 @@ class Solver(ParameterBaseClass):
             si.core_roles.integrated_model.update(n_time_step,time_sec)
 
         # write tracks
-        if si.settings['write_tracks']:
+        if si.run_info.write_tracks:
             tracks_writer = si.core_roles.tracks_writer
             tracks_writer.open_file_if_needed()
             if new_particleIDs.size > 0:
                 tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
             # write tracks file
-            tracks_writer.write_all_time_varying_prop_and_data()
+            pass
+            if tracks_writer.write_scheduler.do_task(n_time_step):
+                tracks_writer.write_all_time_varying_prop_and_data()
 
 
     def do_time_step(self, time_sec, is_moving):
@@ -202,7 +204,7 @@ class Solver(ParameterBaseClass):
         part_prop['cell_search_status'].set_values(si.cell_search_status_flags['ok'], is_moving)
 
         # do time step
-        dt = si.settings['time_step']*si.model_direction
+        dt = si.run_info.time_step*si.run_info.model_direction
         self.RK_step(time_sec, dt,is_moving)
 
         # for failed walks try half step
@@ -301,14 +303,14 @@ class Solver(ParameterBaseClass):
         #print('xxx2',v[:5,2],part_prop['tide'].data[:5], part_prop['water_depth'].data[:5])
 
     def screen_output(self, nt, time_sec,t0_model, t0_step):
-
-        fraction_done= abs((time_sec - si.run_info['start_time']) / si.run_info['duration'])
+        ri = si.run_info
+        fraction_done= abs((time_sec - ri.start_time) / ri.duration)
         s = f'{100* fraction_done:02.0f}%'
         s += f' step {nt:04d}'
         s += si.core_roles.field_group_manager.screen_info()
 
-        t = abs(time_sec - si.run_info['start_time'])
-        s += ' Day ' + ('-' if si.backtracking else '+')
+        t = abs(time_sec - ri.start_time)
+        s += ' Day ' + ('-' if ri.backtracking else '+')
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(time_sec) + ':'
         s +=   si.core_roles.particle_group_manager.screen_info()
@@ -326,7 +328,8 @@ class Solver(ParameterBaseClass):
         # update and write stats
         t0 = perf_counter()
         for name, i in si.roles.particle_statistics.items():
-            if abs(time_sec - i.info['time_last_stats_recorded']) >= i.params['update_interval']:
+            pass
+            if i.count_scheduler.do_task(n_time_step):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec)
                 i.stop_update_timer()

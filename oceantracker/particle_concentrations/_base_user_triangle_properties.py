@@ -38,10 +38,10 @@ class _BaseTriangleProperties(ParameterBaseClass):
 
         grid = si.core_roles.field_group_manager.grid
 
-        self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag'] + '_' + self.info['name'] + '.nc'
+        self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag'] + '_' + self.info['name'] + '.nc'
         si.msg_logger.progress_marker('opening concentrations output to : ' + self.info['output_file'])
 
-        self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
+        self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         nc = self.nc
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
         nc.add_dimension('time_dim', None)
@@ -63,7 +63,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
 
     def check_requirements(self): pass
 
-    def record_time_stats_last_recorded(self, t): self.info['time_last_stats_recorded'] = t
+
 
     def close(self):
 

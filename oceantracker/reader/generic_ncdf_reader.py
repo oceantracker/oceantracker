@@ -210,7 +210,7 @@ class GenericNCDFreader(_BaseReader):
         bottom_cell_index = self.read_bottom_cell_index_as_int32(nc).astype(np.int32)
         # use node with thinest top/bot layers as template for all sigma levels
 
-        node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(zlevel, bottom_cell_index, si.z0)
+        node_min, grid['zlevel_fractions'] = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(zlevel, bottom_cell_index, si.run_info.z0)
 
         # use layer fractions from this node to give layer fractions everywhere
         # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
@@ -286,12 +286,12 @@ class GenericNCDFreader(_BaseReader):
                 # calc dry cell from min water depth
                 reader_util.set_dry_cell_flag_from_tide( grid['triangles'],
                                                         fields['tide'].data, fields['water_depth'].data,
-                                                        si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
+                                                        si.run_info.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
             else:
                 # from bottom zlevel
                 reader_util.set_dry_cell_flag_from_zlevel( grid['triangles'],
                                                           grid['zlevel'], grid['bottom_cell_index'],
-                                                          si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
+                                                          si.run_info.minimum_total_water_depth, is_dry_cell_buffer,buffer_index)
         else:
             # get dry cells from hydro file for each triangle allowing for splitting quad cells
             self.read_dry_cell_data(self, nc, grid, fields, file_index, is_dry_cell_buffer, buffer_index)
@@ -312,7 +312,7 @@ class GenericNCDFreader(_BaseReader):
         nt = (fi['n_time_steps_in_hindcast'] - 1) *  hindcast_fraction
 
         # if back tracking round up as moving backwards through buffer, forward round down
-        return np.int32(np.floor(nt*si.model_direction)*si.model_direction)
+        return np.int32(np.floor(nt*si.run_info.model_direction)*si.run_info.model_direction)
 
     def hydro_model_index_to_buffer_offset(self, nt_hindcast):
         # ring buffer mapping
@@ -322,7 +322,7 @@ class GenericNCDFreader(_BaseReader):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
          
         bi = self.info['buffer_info']
-        model_dir = si.model_direction
+        model_dir = si.run_info.model_direction
 
         # get hindcast time step at current time
         nt_hindcast = self.time_to_hydro_model_index(time_sec)

@@ -166,7 +166,7 @@ class SCHISMreaderNCDF(_BaseReader):
         zlevel, zlevel_dims =self.read_field_var(nc, self.params['grid_variable_map']['zlevel'], sel=0)
 
         # use node with thinest top/bot layers as template for all sigma levels
-        grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.z0)
+        grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.run_info.z0)
 
         # get profile with smallest bottom layer  tickness as basis for first sigma layer
         node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],grid['bottom_cell_index'])

@@ -108,9 +108,9 @@ class DevNestedFields(ParameterBaseClass):
             fmap = fgm.reader.params['field_variable_map']
 
             # see if A_z profile variablve present to use in vertical dispersion
-            has_A_Z_profile.append(si.is3D_run and si.settings['use_A_Z_profile'] and fmap['A_Z_profile'] is not None and nc.is_var(fmap['A_Z_profile']) )
+            has_A_Z_profile.append(si.run_info.is3D_run and si.settings['use_A_Z_profile'] and fmap['A_Z_profile'] is not None and nc.is_var(fmap['A_Z_profile']) )
             # use bottom stres for resupension if in all files
-            if si.is3D_run:
+            if si.run_info.is3D_run:
                 # add friction velocity from bottom stress or near seabed vel
                 bs_map = fmap['bottom_stress'] if type(fmap['bottom_stress']) == list else [fmap['bottom_stress']]  # ensure map is a list
                 has_bottom_stress.append(nc.is_var(bs_map[0]))

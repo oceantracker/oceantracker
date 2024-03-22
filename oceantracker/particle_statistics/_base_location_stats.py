@@ -50,8 +50,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         ml = si.msg_logger
         info = self.info
         params = self.params
-       # used to create boolean of those to count
-        info['time_last_stats_recorded'] = si.time_of_nominal_first_occurrence
 
         self.check_part_prop_list()
 
@@ -105,9 +103,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def open_output_file(self):
 
         if self.params['write']:
-            self.info['output_file'] = si.output_file_base + '_' + self.params['role_output_file_tag']
+            self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
             self.info['output_file'] += '_' + self.info['name'] + '.nc'
-            self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
+            self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         else:
             self.nc = None
         self.nWrites = 0
@@ -156,7 +154,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         pass
 
 
-    def record_time_stats_last_recorded(self, t):   self .info['time_last_stats_recorded'] = t
+
 
     # overload this method to subset indicies in out of particles to count
     def select_particles_to_count(self, out):
@@ -165,13 +163,11 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     def update(self,n_time_step, time_sec):
         '''do particle counts'''
-        if not self.count_scheduler.do_task(n_time_step): return
-
         part_prop = si.roles.particle_properties
         info = self.info
         self.start_update_timer()
 
-        self.record_time_stats_last_recorded(time_sec)
+
         num_in_buffer = si.core_roles.particle_group_manager.info['particles_in_buffer']
 
         # first select those to count based on status and z location

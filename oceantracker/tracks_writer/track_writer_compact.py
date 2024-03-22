@@ -107,7 +107,7 @@ class CompactTracksWriter(_BaseWriter):
 
     def close(self):
 
-        if si.settings['write_tracks']:
+        if si.run_info.write_tracks:
             self.add_global_attribute('total_num_particles_released', si.core_roles.particle_group_manager.info['particles_released'])
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
 
@@ -119,7 +119,7 @@ class CompactTracksWriter(_BaseWriter):
             if self.params['convert']:
                 # convert output files to rectangular format
                 for fn in self.info['output_file']:
-                    convert_to_rectangular(path.join(si.run_output_dir, fn),
+                    convert_to_rectangular(path.join(si.run_info.run_output_dir, fn),
                                            time_chunk=self.params['NCDF_time_chunk'])
                 pass
             '''
