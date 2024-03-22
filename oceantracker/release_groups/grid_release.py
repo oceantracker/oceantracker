@@ -8,13 +8,15 @@ class GridRelease(_BaseReleaseGroup):
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        self.add_default_params(dict(
+        self.remove_default_params(['points'])
+        self.add_default_params(
             grid_center= PCC(None, single_cord=True, is_required=True, is3D=False, doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
             grid_span= PCC(None, single_cord=True,is_required=True, is3D=False, doc_str='(width, height)  of the grid release', units='meters or decimal degrees'),
             grid_size= PLC([100, 99], [int], fixed_len=2,
                              min =1,max=10**6,
                              doc_str='number of rows and columns in grid'),
-                ))
+                )
+
         self.class_doc('Release pules of particles on a regular grid.')
 
         info = self.info

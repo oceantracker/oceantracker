@@ -23,7 +23,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
                'user_release_groupID': PVC(0, int, doc_str='User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.'),
                'user_release_group_name': PVC(None, str, doc_str='User given name/label to attached to this release groups to make it easier to distinguish.'),
                'allow_release_in_dry_cells': PVC(False, bool,
-                                                 doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.'),
+                            doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.'),
                'z_range': PLC(None, [float, int], min_length=2, obsolete='use z_min and/or z_max'),
                'z_min': PVC(None, float, doc_str='min/ deepest z value to release for to randomly release in 3D, overrides any given release z value'),
                'z_max': PVC(None, float, doc_str='max/ highest z vale release for to randomly release in 3D, overrides any given release z value'),

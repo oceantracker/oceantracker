@@ -36,7 +36,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,
         if key not in params: params[key] = None  # add default key to params if not present
 
         if type(item) in [ParamValueChecker, ParameterCoordsChecker]:
-            params[key] = CheckParameterValues(key, item, params[key], crumbs, msg_logger)
+            params[key] = CheckParameterValues(key, item, params[key], crumbs, msg_logger, caller= caller)
 
         elif type(item) == ParameterListChecker:
             params[key] = item.check_list(key,params[key],  msg_logger, crumbs)

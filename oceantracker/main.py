@@ -115,7 +115,10 @@ class OceanTracker():
             if 'name' in existing_params[class_role]:# auto name
                 msg_logger.msg(f'Class role  "{class_role}" already has a component named "{name}", only using last one given',
                            warning= True)
-            existing_params[class_role][name] = {}
+
+            # add users class name or None
+            existing_params[class_role][name] = dict(class_name = class_name)
+            # add other params to existing params for role and name
             for key in kwargs:
                   existing_params[class_role][name][key] = kwargs[key]
         return
@@ -127,7 +130,6 @@ class OceanTracker():
         else:
             if type(case) != int or case < 0:
                 msg_logger.msg(f'Case keyword must be an integer >0', fatal_error=True, hint=f'Got value :{str(case)}')
-
 
 
             if case < len(self.case_list_params):
