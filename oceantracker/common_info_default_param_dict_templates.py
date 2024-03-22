@@ -26,7 +26,7 @@ shared_settings_defaults ={
                 'debug': PVC(False, bool, doc_str= 'more info on errors'),
                 'dev_debug_opt': PVC(0, int,doc_str= 'does extra checks given by integer, not for general use'),
                 'minimum_total_water_depth': PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering'),
-                'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
+                #'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
                 'write_dry_cell_flag': PVC(True, bool,
                                 doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots, currently cannot be used with nested grids '),
                 'max_run_duration':    PVC(max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration

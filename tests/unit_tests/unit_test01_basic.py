@@ -89,7 +89,7 @@ def read_test(case_info_file):
 
 def plot_test(track_data):
     ax = [1591000, 1601500, 5478500, 5491000]
-    single_time_step = 23
+    single_time_step = -1
     image_dir = r'E:\H_Local_drive\OceanTrackerPaper'
     p1 = plot_tracks.animate_particles(track_data, axis_lims=ax, single_time_step=single_time_step,
                                        show_grid=True, show_dry_cells=True, part_color_map='hot',

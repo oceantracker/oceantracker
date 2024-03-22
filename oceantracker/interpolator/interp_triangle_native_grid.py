@@ -52,7 +52,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype=np.float32))
 
         # BC walk info
-        if si.is3D_run:
+        if si.run_info.is3D_run:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
             pgm.add_particle_property('nz_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # todo  create  initial serach for vertical cell
@@ -299,11 +299,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                         #grid['water_depth_triangles'],
                                         fields['water_depth'].data.ravel(),
                                         fields['tide'].data,
-                                        si.minimum_total_water_depth,
+                                        si.run_info.minimum_total_water_depth,
                                         grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],
                                         n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                         current_buffer_steps, fractional_time_steps,
-                                        active, si.z0)
+                                        active, si.run_info.z0)
         else:
             # natve slayer option
             tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
@@ -312,7 +312,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                         n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_water_velocity,
                                         current_buffer_steps,fractional_time_steps,
                                         self.walk_counts,
-                                        active,  si.z0)
+                                        active,  si.run_info.z0)
         si.block_timer('Find cell, vertical walk', t0)
 
     def find_hori_cell(self,grid, fields,  xq, current_buffer_steps,fractional_time_steps,open_boundary_type, active):
@@ -438,7 +438,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                 info[key] = int(info[key])
 
         info['average_number_of_triangles_walked']= info['number_of_triangles_walked']/max(1,info['particles_located_by_walking'])
-        if si.is3D_run:
+        if si.run_info.is3D_run:
             info['average_vertical_walk_steps'] = info['total_vertical_steps_walked'] / max(1, info['particles_located_by_walking'])
 
         f = f" Triangle walk summary: Of  {info['particles_located_by_walking']:6,d} particles located, "

@@ -172,7 +172,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         # ring buffer locations of surounding steps
         current_buffer_steps[0] = current_hydro_model_step % bi['buffer_size']
-        current_buffer_steps[1] = (current_hydro_model_step + int(si.model_direction)) % bi['buffer_size']
+        current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % bi['buffer_size']
 
         time_hindcast = grid['time'][current_buffer_steps[0]]
 

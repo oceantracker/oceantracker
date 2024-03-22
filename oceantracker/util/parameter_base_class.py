@@ -78,7 +78,7 @@ class ParameterBaseClass(object):
                                 + '" requires particle property  "' + name + '"'
                                 + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', fatal_error=True,crumbs=crumbs)
 
-        if requires3D and not si.is3D_run:
+        if requires3D and not si.run_info.is3D_run:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.info['name'] + ' can only be used with 3D hindcast ', fatal_error=True,crumbs=crumbs)
 
     def remove_default_params(self, name_list):

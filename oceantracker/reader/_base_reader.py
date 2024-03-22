@@ -435,7 +435,7 @@ class _BaseReader(ParameterBaseClass):
         # todo change so does not read current step again after first fill of buffer
 
         params = self.params
-
+        md = si.run_info.model_direction
         t0 = perf_counter()
 
         info = self.info
@@ -452,10 +452,10 @@ class _BaseReader(ParameterBaseClass):
         bi['buffer_available'] = buffer_size
 
         # find first file with time step in it, if backwars files are in reverse time order
-        n_file = np.argmax(np.logical_and(nt0_hindcast >= fi['nt_starts'] * si.model_direction, nt0_hindcast <= fi['nt_ends']))
+        n_file = np.argmax(np.logical_and(nt0_hindcast >= fi['nt_starts'] * md, nt0_hindcast <= fi['nt_ends']))
 
         # get required time step and trim to size of hindcast
-        nt_hindcast_required = nt0_hindcast + si.model_direction * np.arange(min(fi['n_time_steps_in_hindcast'], buffer_size))
+        nt_hindcast_required = nt0_hindcast + md * np.arange(min(fi['n_time_steps_in_hindcast'], buffer_size))
         sel = np.logical_and(0 <= nt_hindcast_required, nt_hindcast_required < fi['n_time_steps_in_hindcast'])
         nt_hindcast_required = nt_hindcast_required[sel]
 
@@ -505,7 +505,7 @@ class _BaseReader(ParameterBaseClass):
                                         grid['zlevel_fractions'], grid['bottom_cell_index'],
                                         grid['sigma'],
                                         fields['water_depth'].data, fields['tide'].data,
-                                        si.z0, si.minimum_total_water_depth,
+                                        si.run_info.z0, si.run_info.minimum_total_water_depth,
                                         data, out,
                                         name == 'water_velocity')
 
@@ -543,7 +543,7 @@ class _BaseReader(ParameterBaseClass):
             # set up for next step
 
             bi['buffer_available'] -= num_read
-            n_file += si.model_direction
+            n_file += md
             nt_hindcast_required = nt_hindcast_required[num_read:]
             bi['time_steps_in_buffer'] += nt_file.tolist()
 
@@ -587,7 +587,7 @@ class _BaseReader(ParameterBaseClass):
         grid['date'][buffer_index] = time_util.seconds_to_datetime64(grid['time'][buffer_index])
 
 
-        if si.is3D_run:
+        if si.run_info.is3D_run:
             # read zlevel inplace to save memory?
             if 'sigma' not in grid:
                 # native zlevel grid and used for regidding in sigma
@@ -600,7 +600,7 @@ class _BaseReader(ParameterBaseClass):
         # convert date time to global time step in hindcast just before/after when forward/backtracking
         # always move forward through buffer, but file info is always forward in time
         fi = self.info['file_info']
-        model_dir = si.model_direction
+        model_dir = si.run_info.model_direction
 
         hindcast_fraction = (time_sec - fi['first_time']) / (fi['last_time'] - fi['first_time'])
         nt = (fi['n_time_steps_in_hindcast'] - 1) * hindcast_fraction
@@ -616,7 +616,7 @@ class _BaseReader(ParameterBaseClass):
     def are_time_steps_in_buffer(self, time_sec):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer
         bi = self.info['buffer_info']
-        model_dir = si.model_direction
+        model_dir = si.run_info.model_direction
 
         # get hindcast time step at current time
         nt_hindcast = self.time_to_hydro_model_index(time_sec)

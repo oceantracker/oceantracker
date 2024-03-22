@@ -45,6 +45,8 @@ New features
 
 #. Release group data now writen to separate file for each case, to use
 
+#. For coders using IDEs (Pycharm, VS code) the shared info structure variables and methods now auto completes/hints variable/method names, with doc_strs where available.
+
 Behaviour changes
 ______________________________________________________________
 
@@ -73,6 +75,8 @@ Breaking changes for coders
 #. Shared info is done by  "import from oceantracker.shared_info import SharedInfo as si", old way si = self.shared_info still works
 
 #. shared_info.classes is deprecated, eg si.classes['particle_properties'] is now si.roles.particle_properties, where more than one class can be added. and   si.classes['particle_grop_manager'] is si.core_roles.particle_grop_manager. The .class[name] approach still works for now.
+
+#. all control vaiables and settings used during run moved from si.(name) to si.run ifo.(name) auto completes in IDEs, eg si.backtracking is now si.run_info.backtracking
 
 #. particle status flags are all on si.particle_status_flags and auto complete, Can use si.particle_status_flags.moving or  si.particle_status_flags['moving']
 

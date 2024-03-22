@@ -16,21 +16,27 @@ from oceantracker.particle_properties import particle_operations
 class _Object(object):  pass
 class _SharedStruct():
     # holds varives as clas attributes to enable auto complete hints and give iterators over these attributes
-    @classmethod
-    def as_dict(cls):
+
+    def __init__(self):
+        # add  class variables in ._class_.__dict__
+        # to instance __dict__ by adding attributes
+        for key, item in self.__class__.__dict__.items():
+            if not key.startswith('_'):
+                setattr(self, key, item)
+    def as_dict(self):
         d = dict()
-        for key, item in cls.__dict__.items():
+        for key, item in self.__dict__.items():
             if not key.startswith('_'): d[key] = item
         return d
-    @classmethod
-    def possible_values(cls):
+
+    def possible_values(self):
         d = []
-        for key in cls.__dict__.keys():
+        for key in self.__dict__.keys():
             if not key.startswith('_'): d.append(key) 
         return d
-    @classmethod
-    def __getitem__(cls, name:str):
-        return getattr(cls,name)
+
+    def __getitem__(self, name:str):
+        return getattr(self,name)
 
     # blocks that make up parts of shared info
 class _ClassRoles(_SharedStruct):
@@ -78,6 +84,29 @@ class _CellSearchStatusFlags(_SharedStruct):
         bad_cord=-20
         failed=-30
 
+
+class _RunInfo(_SharedStruct):
+    is3D_run = None
+    backtracking= None
+    model_direction = None
+    free_wheeling = None
+    start_time = None
+    end_time = None
+    time_step = None
+    current_model_time = None
+    current_model_date = None
+    current_model_time_step = 0
+    times = None
+    duration = None
+    run_output_dir = None
+    output_file_base = None
+    caseID = None
+    # copies of settings
+    write_tracks = None
+    z0 = None
+    minimum_total_water_depth = None
+
+
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
     known_readers = {'schisim': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
@@ -93,24 +122,25 @@ class _UseFullInfo(_SharedStruct):
 
 # Shared class, build using the above
 #------------------------------------------------------------
-class SharedInfo(object):
+class SharedInfoClass(object):
     """Gives access to shared variables, classes and some utility methods. Attributes are:
 
         eg SharedInfo.particle_properties is a dictionary of named particle property instances
 
     """
-    roles = _ClassRoles
-    core_roles = _CoreClassRoles
+    roles = _ClassRoles()
+    core_roles = _CoreClassRoles()
     particle_operations = particle_operations
     particle_status_flags = _ParticleStatusFlags() # need to be instances to allow particle_status_flags[key] form
     cell_search_status_flags = _CellSearchStatusFlags()
-
+    run_info  = _RunInfo()
+    hindcast_info = None
     msg_logger = MessageLogger()
     block_timers={}
     classes = {}
     info = _UseFullInfo
 
-    @classmethod
+    #@classmethod
     def _setup(cls):
         # empty out roles and core roles in case of rerunning and shared info import only happens once
         for role in cls.core_roles.as_dict().keys():
@@ -120,11 +150,11 @@ class SharedInfo(object):
 
         # todo deprecated .classes
         cls.classes = {}
-        for role in list(cls. roles.as_dict().keys()) +  list(cls.core_roles.as_dict().keys()):
+        for role in list(cls.roles.as_dict().keys()) +  list(cls.core_roles.as_dict().keys()):
             cls.classes[role] = None if role in  cls.core_roles.as_dict() else {}
 
 
-    @classmethod
+    #@classmethod
     def add_core_role(cls, class_role, params, crumbs ='',initialise=False,default_classID=None):
 
         ml= cls.msg_logger
@@ -142,7 +172,7 @@ class SharedInfo(object):
 
         return i
 
-    @classmethod
+   # @classmethod
     def add_user_class(cls, class_role, name = None, params= {}, class_type='user' ,crumbs='', initialise=False, default_classID=None, caller=None):
         ml = cls.msg_logger
 
@@ -158,7 +188,7 @@ class SharedInfo(object):
 
         #if not hasattr(cls.roles,class_role): setattr(cls.roles, class_role,Object())
         #setattr(getattr(cls.roles, class_role), name, i)
-        if name in cls.classes[class_role]:
+        if name in cls.roles[class_role]:
             cls.msg_logger.msg('Class type"' + class_role + '" already has a class with name = "' + i.info['name']
                    + '", "name" parameter must be unique',
                    caller=caller, crumbs=crumbs, fatal_error=True)
@@ -175,7 +205,7 @@ class SharedInfo(object):
 
         return i
 
-    @classmethod
+    #@classmethod
     def all_class_instance_pointers_iterator(cls):
         # build list of all points for iteration, eg in calling all close methods
         p = []
@@ -193,7 +223,7 @@ class SharedInfo(object):
 
         return p
 
-    @classmethod
+    #@classmethod
     def block_timer(cls,name,t0):
         b = cls.block_timers
         if name not in b:
@@ -201,7 +231,7 @@ class SharedInfo(object):
         b[name]['time'] += perf_counter()-t0
         b[name]['calls'] += 1
 
-    @classmethod
+    #@classmethod
     def setup_lon_lat_to_meters_grid_tranforms(cls,grid_lon_lat):
         #todo add user given meters grid option
         if cls.settings['EPSG_code_metres_grid'] is None:
@@ -212,7 +242,7 @@ class SharedInfo(object):
         cls.Transformer_to_meters = cord_transforms.get_tansformer(cord_transforms.EPSG_WGS84,epsg)
         cls.Transformer_to_lon_lat = cord_transforms.get_tansformer(epsg, cord_transforms.EPSG_WGS84)
 
-    @classmethod
+    #@classmethod
     def transform_lon_lat_to_meters(cls, lon_lat, in_lat_lon_order=False, crumbs=''):
         # transform 2D/3D vector of points or single point to meters
         # also swaps input data to lon_lat if in_lat_lon_order
@@ -233,7 +263,7 @@ class SharedInfo(object):
                             crumbs=crumbs,fatal_error=True,exit_now=True)
         return out
 
-    @classmethod
+    #@classmethod
     def transform_lon_lat_deltas(cls,ll_deltas, ref_lon_lat,  deltas_in_lat_lon_order=False):
         # transform step in lon lat difereces in meter grid diff   (a 2 element array) at given lat long/3D vector of points or single point to meters
 
@@ -247,7 +277,7 @@ class SharedInfo(object):
         out = np.asarray([float(x[1]-x[0]),float(y[1]-y[0])] )
         return out
 
-    @classmethod
+    #@classmethod
     def add_sheduler_to_class(cls, name_scheduler, param_class_instance, start=None, end=None, duration=None,
                                interval =None, times=None,
                                caller=None, crumbs=''):
@@ -267,7 +297,7 @@ class SharedInfo(object):
         param_class_instance.scheduler_info[name_scheduler] = s.info
         return s
 
-    @classmethod
+    #@classmethod
     def get_regular_events_within_hindcast(cls, interval, start=None, end=None, duration=None,
                            crumbs='',caller=None):
       # wrapper to give regular event times within hindcastend
@@ -277,3 +307,4 @@ class SharedInfo(object):
       return d
 
 
+SharedInfo = SharedInfoClass()

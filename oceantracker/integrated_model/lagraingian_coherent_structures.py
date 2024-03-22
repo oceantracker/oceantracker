@@ -58,7 +58,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
                               max_age = params['lags'][-1],  # run each to largest lag
                               release_interval=0.  )
         # if 3D sort out depth range and always resuspend
-        if si.is3D_run:
+        if si.run_info.is3D_run:
             self.add_class('resuspension', critical_friction_velocity=0.0)  # always resuspend
             if params['floating']:
                 self.add_class('trajectory_modifiers',
@@ -168,8 +168,8 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
     def _open_output_file(self):
 
         params = self.params
-        self.info['output_file'] = si.output_file_base + '_' + self.params['output_file_tag'] + '.nc'
-        self.nc = NetCDFhandler(path.join(si.run_output_dir, self.info['output_file']), 'w')
+        self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['output_file_tag'] + '.nc'
+        self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         nc = self. nc
 
         nc.add_dimension('time_dim', None) # open time dim

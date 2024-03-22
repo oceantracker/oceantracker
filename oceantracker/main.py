@@ -117,7 +117,7 @@ class OceanTracker():
                            warning= True)
 
             # add users class name or None
-            existing_params[class_role][name] = dict(class_name = class_name)
+            existing_params[class_role][name] = dict(class_name=class_name)
             # add other params to existing params for role and name
             for key in kwargs:
                   existing_params[class_role][name][key] = kwargs[key]
@@ -278,7 +278,7 @@ class _OceanTrackerRunner(object):
         if hasattr(self, 'helper_msg_logger'):
             ml.msg(f'Helper- {len(ml_helper.errors_list):3d} errors, {len(ml_helper.warnings_list):3d} warnings, {len(ml_helper.notes_list):3d} notes, check above', tabs=3)
         ml.msg(f'Main  - {len(ml.errors_list):3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes, check above', tabs=3)
-        ml.msg(f'Output in {si.run_output_dir}', tabs=1)
+        ml.msg(f'Output in {si.run_info.run_output_dir}', tabs=1)
         ml.print_line()
         ml.close()
 
@@ -409,10 +409,6 @@ class _OceanTrackerRunner(object):
 
         return run_builder
 
-
-
-
-
     def _write_run_info_json(self, case_info_files, t0):
         # read first case info for shared info
         ml = msg_logger
@@ -428,7 +424,7 @@ class _OceanTrackerRunner(object):
 
             if case_file is not None :
                 c= json_util.read_JSON(case_file)
-                n_time_steps +=  c['run_info']['time_steps_completed']
+                n_time_steps +=  c['run_info']['current_model_time_step']
                 total_alive_particles += c['run_info']['total_alive_particles']
                 case_info_list.append(path.basename(case_file))
             else:

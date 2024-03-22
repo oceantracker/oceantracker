@@ -134,7 +134,7 @@ class ROMsNativeReader(_BaseReader):
     def read_dry_cell_data(self, nc, grid,fields,  file_index,is_dry_cell_buffer,buffer_index):
         # get dry cells from water depth and tide
         reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
-                                                si.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
+                                                si.run_info.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
         pass
 
     def read_time_sec_since_1970(self, nc, file_index=None):

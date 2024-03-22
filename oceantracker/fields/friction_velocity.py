@@ -22,10 +22,10 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
                                                           grid['sigma'],
                                                           fields['tide'].data,fields['water_depth'].data,
                                                           fields['water_velocity'].data,
-                                                          si.z0, self.data)
+                                                          si.run_info.z0, self.data)
         else:
             # native vertical grid
-            self.calc_friction_velocity_from_native_zlevels(buffer_index, grid['zlevel'], grid['bottom_cell_index'], si.z0, fields['water_velocity'].data, self.data)
+            self.calc_friction_velocity_from_native_zlevels(buffer_index, grid['zlevel'], grid['bottom_cell_index'], si.run_info.z0, fields['water_velocity'].data, self.data)
         pass
 
     @staticmethod

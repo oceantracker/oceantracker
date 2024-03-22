@@ -37,8 +37,8 @@ def add_particle_status_values_to_netcdf(nc):
 
 def write_release_group_netcdf():
     '''Write releae groups data to own file for each case '''
-    fn =  si.output_file_base + '_release_group_info.nc'
-    nc = NetCDFhandler(path.join(si.run_output_dir, fn), mode= 'w')
+    fn =  si.run_info.output_file_base + '_release_group_info.nc'
+    nc = NetCDFhandler(path.join(si.run_info.run_output_dir, fn), mode= 'w')
 
     # loop over release groups
     for name, rg in si.roles.release_groups.items():

@@ -98,10 +98,6 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         part_prop = si.roles.particle_properties
         rg  = self.release_group_to_count
 
-
-        # update time stats  recorded
-        self.record_time_stats_last_recorded(time_sec)
-
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
         inside_poly_prop.update(n_time_step, time_sec, sel)

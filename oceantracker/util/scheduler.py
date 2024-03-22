@@ -18,31 +18,31 @@ class Scheduler(object):
 
 
         # deal with None and isodates
-        if start is None: start = run_info['start_time']
+        if start is None: start = run_info.start_time
         if type(start) is str: start = time_util.isostr_to_seconds(start)
 
-        if end is None: end = run_info['end_time']
+        if end is None: end = run_info.end_time
         if type(end) is str: end = time_util.isostr_to_seconds(end)
 
-        dt = run_info['time_step']
+        dt = run_info.time_step
         tol = 0.05
 
         if times is not None:
             # use times given
             # check if at model time steps
-            n = (times - run_info['start_time'])/run_info['time_step']
-            times_rounded = run_info['start_time'] + np.round(n) * run_info['time_step']
+            n = (times - run_info.start_time)/run_info.time_step
+            times_rounded = run_info.start_time + np.round(n) * run_info.time_step
 
             if np.any(np.abs(times-times_rounded)/dt > tol * dt):
                 self.times_rounded_to_time_step = True
             self.scheduled_times = times_rounded
         else:
             # make from start time and interval
-            if start is None: start = run_info['start_time'] # start ast model sart
+            if start is None: start = run_info.start_time # start ast model sart
             if type(start) == str: start = time_util.isostr_to_seconds(start)
 
-            n =(start- run_info['start_time'])/dt  # number of model steps since the start
-            start_rounded = run_info['start_time'] + round(n)*dt
+            n =(start- run_info.start_time)/dt  # number of model steps since the start
+            start_rounded = run_info.start_time + round(n)*dt
             if  abs(start_rounded-start)/dt > tol:
                 self.times_rounded_to_time_step = True
             start = start_rounded
@@ -74,15 +74,15 @@ class Scheduler(object):
                 self.scheduled_times = start + np.arange(0, abs(duration), interval)
 
         # make a task flag for each time step of the model run
-        self.task_flag = np.full_like(run_info['times'],False, dtype=bool)
-        nt_task = ((self.scheduled_times - run_info['start_time']) / run_info['time_step']).astype(np.int32)
+        self.task_flag = np.full_like(run_info.times,False, dtype=bool)
+        nt_task = ((self.scheduled_times - run_info.start_time) / run_info.time_step).astype(np.int32)
 
         # now clip times to be within model start and end of run
         sel = np.logical_and(nt_task >= 0, nt_task < self.task_flag.size)
         self.task_flag[nt_task[sel]] = True
 
         # flag times steps scheduler is active, ie start to end
-        self.active_flag = np.full_like(run_info['times'], False, dtype=bool)
+        self.active_flag = np.full_like(run_info.times, False, dtype=bool)
         self.active_flag[nt_task[0]:nt_task[-1]+1] = True
 
         # record info

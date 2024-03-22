@@ -25,7 +25,7 @@ class RandomWalk(_BaseTrajectoryModifer):
         info = self.info
         dt = si.settings['time_step']
         info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
-        if not si.is3D_run:
+        if not si.run_info.is3D_run:
             info['random_walk_size'] = info['random_walk_size'][:2]
 
         info['random_walk_velocity'] = info['random_walk_size'] /si.settings['time_step']  # velocity equivalent of random walk distance
@@ -40,7 +40,7 @@ class RandomWalk(_BaseTrajectoryModifer):
         # add up 2D/3D diffusion coeff as random walk done using velocity_modifier
         part_prop = si.roles.particle_properties
 
-        if  si.is3D_run:
+        if  si.run_info.is3D_run:
             self._add_random_walk_velocity3D_modifier_constantAZ(self.info['random_walk_velocity'],
                                                                  active, part_prop['velocity_modifier'].data )
         else:

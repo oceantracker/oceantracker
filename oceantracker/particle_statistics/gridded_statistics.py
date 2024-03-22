@@ -236,7 +236,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
         # arange requites one mere step beyong required max_age
         dage= abs(int(self.params['age_bin_size']))
-        stats_grid['age_bin_edges'] =  float(si.model_direction) * np.arange(int(age_min), int(age_max+dage), dage)
+        stats_grid['age_bin_edges'] =  float(si.run_info.model_direction) * np.arange(int(age_min), int(age_max+dage), dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
             ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
