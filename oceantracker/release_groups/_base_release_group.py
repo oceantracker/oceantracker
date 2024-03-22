@@ -41,7 +41,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
                 'release_end_date': PVC(None, 'iso8601date',  obsolete='use "end" parameter instead' ),
         })
 
-        self.role_doc('Release particles at 1 or more given locations. Pulse_size particles are released every release_interval. All these particles are tagged as a single release_group.')
+        self.role_doc('Release particles at 1 or more given locations. A pulse_size of particles are released every release_interval. All these particles have ID properties for their release_group and the pulese they were released in.')
 
         info = self.info
         info['number_released'] = 0  # count of particles released in this group
