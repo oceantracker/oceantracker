@@ -72,7 +72,14 @@ class OceanTracker():
         for key in kwargs:
             existing_params[key]= kwargs[key]
 
-    def add_class(self, class_role=None, case=None, name=None, **kwargs):
+    def add_class(self, class_role:str=None, class_name:str=None, name: str=None, case:int=None,  **kwargs):
+        '''
+        Add a class instance in given role to computational pipeline, or add settings to a core class
+        :param class_role: The role to add or set eg 'release_group'
+        :param class_name: Name of class to import, required in some cases. eg "oceantracker.release_groups.polygon_release import PolygonRelease" or short name "PolygonRelease"
+        :param name: Name of this instance of added class, used in output and internally to refer to this instance, eg 'my_polygon release'
+        :param case: Add this instance to this case ID (>=0) to be run in parallel.
+        '''
         ml = msg_logger
         known_class_roles = common_info.class_dicts_list + common_info.core_class_list
 

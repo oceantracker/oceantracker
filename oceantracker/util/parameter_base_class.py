@@ -49,12 +49,12 @@ class ParameterBaseClass(object):
 
     def add_default_params(self,*args, **kwargs):
         # add default as key word or dictionary
-        if len(args) > 0 and len(kwargs) == 0:
+        if len(args) == 1 and len(kwargs) == 0:
             d = args[0]
-        elif  len(kwargs) >= 1:
+        elif len(args) == 0:
             d = kwargs
         else:
-            raise(f'Parameter class> add_default_params >> no default dict or kwargs given args = {str(args)} kwargs={str(kwargs)}')
+            raise(f'Parameter class> add_default_params >> only one arg or kkwano default dict or kwargs given args = {str(args)} kwargs={str(kwargs)}')
 
         if type(d) is not dict: raise ValueError('add_default_params : default param must be a dictionary')
         # deep update to defaults
@@ -64,7 +64,6 @@ class ParameterBaseClass(object):
         self.docs['role'] = role  # only in base class
     def class_doc(self,description):
         self.docs['description']=description
-
 
 
     def check_requirements(self):
