@@ -169,17 +169,13 @@ class ParticleGroupManager(ParameterBaseClass):
         #part_prop['n_cell'].set_values(release_data['n_cell'], new_buffer_indices)  # use x0's best guess  for starting point cell
 
         # record needed copies
-        part_prop['x0'].set_values(release_data['x'], new_buffer_indices)
-        part_prop['x_last_good'].set_values(release_data['x'], new_buffer_indices)
-        part_prop['n_cell_last_good'].set_values(release_data['n_cell'], new_buffer_indices)
-
-
-        part_prop['status'].set_values(si.particle_status_flags.moving, new_buffer_indices)  # set  status of released particles
-
-        # below two needed for reruns of same solver to prevent contamination by last run
-        part_prop['time_released'].set_values(time_sec, new_buffer_indices)  # time released for each particle, needed to calculate age
-
-        part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
+        if new_buffer_indices.size >0:
+            part_prop['x0'].set_values(release_data['x'], new_buffer_indices)
+            part_prop['x_last_good'].set_values(release_data['x'], new_buffer_indices)
+            part_prop['n_cell_last_good'].set_values(release_data['n_cell'], new_buffer_indices)
+            part_prop['status'].set_values(si.particle_status_flags.moving, new_buffer_indices)  # set  status of released particles
+            part_prop['time_released'].set_values(time_sec, new_buffer_indices)  # time released for each particle, needed to calculate age
+            part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
 
 
         # set interp memory properties if present
@@ -241,7 +237,6 @@ class ParticleGroupManager(ParameterBaseClass):
         if prop_type not in self.known_prop_types:    #todo move all raise exception to msglogger
             ml.msg('ParticleGroupManager.create_particle_property, unknown prop_group name', caller=self,
                    hint='prop_group must be one of ' + str(self.known_prop_types),   fatal_error=True, exit_now=True)
-
 
         i = si.add_user_class('particle_properties',name,  prop_params,class_type=prop_type,
                                            crumbs=crumbs +' adding "particle_properties of type=' + prop_type)

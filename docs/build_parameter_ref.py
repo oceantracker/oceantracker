@@ -4,10 +4,11 @@ from glob import  glob
 import inspect
 import importlib
 
-import oceantracker.common_info_default_param_dict_templates as common_info
+import oceantracker.definitions as common_info
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
+from oceantracker.shared_info import SharedInfo as si
 
 root_param_ref_dir = path.join(package_util.get_root_package_dir(),'docs', 'info', 'parameter_ref')
 
@@ -248,7 +249,7 @@ def build_param_ref():
     page.add_heading('Core "class" roles',level=2)
     page.add_lines('Only one core class per role. These have singular role names.')
     page.add_new_toc_to_page('core', maxdepth=1)
-    for key in sorted(common_info.core_class_list):
+    for key in sorted(si.core_roles.possible_values()):
         toc = make_class_sub_pages(key)
         page.add_toc_link('core', toc)
 
@@ -256,7 +257,7 @@ def build_param_ref():
 
     page.add_heading('Multiple classes for each role',level=2)
     page.add_lines('Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.')
-    page.add_new_toc_to_page('class_dicts', maxdepth=1, sort_body=True)
+    page.add_new_toc_to_page('roles_dict, maxdepth=1, sort_body=True)
 
     page.add_new_toc_to_page('user', maxdepth=1)
     for key in sorted(common_info.class_dicts_list):

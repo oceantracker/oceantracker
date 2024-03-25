@@ -3,13 +3,14 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as clr
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as font_manager
-from oceantracker.common_info_default_param_dict_templates import node_types
+from oceantracker.definitions import node_types
 from time import perf_counter
 
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 from matplotlib import animation
 from oceantracker.util import time_util
+
 
 color_palette={'land': (np.asarray([146, 179, 140])/256).tolist(), 'land_edge': [.5, .5, .5]}
 
@@ -131,17 +132,19 @@ def plot_dry_cells(track_data,show_dry_cells=True, nt=0):
 def plot_release_points_and_polygons(d, release_group=None, ax = plt.gca(), color=[.3,.3,.3]):
     # release_group is 1 based
     if release_group is None :
-        sel = list(d['release_locations'].keys()) # plot all release groups
+        # plot all release groups
+        sel = d['particle_release_groups']['release_group_name_list']
 
     else:
         sel= [release_group]
     objs=[]
     for name in sel:
-        rg = d['release_locations'][name]
+        rg = d['particle_release_groups'][name]
         p = rg['points'][:,:2]
-        if rg['is_polygon']:
+        if rg['release_type'] == 'polygon':
             o = ax.plot(p[:, 0], p[:, 1], '-', color=color,zorder=8, linewidth=1)
         else:
+            # for grid and points releases
             o = ax.plot(p[:, 0], p[:, 1], 'x', color=color, markersize=6,zorder=9)
 
         objs.append(o)

@@ -1,6 +1,6 @@
 from psutil import  cpu_count, cpu_freq
 import platform
-from oceantracker import  common_info_default_param_dict_templates as common_info
+from oceantracker import  definitions as common_info
 from sys import version, version_info
 import  subprocess
 from os import path

@@ -1,7 +1,7 @@
 from os import path, remove
 import traceback
 from time import  perf_counter
-from oceantracker.common_info_default_param_dict_templates import docs_base_url
+from oceantracker.definitions import docs_base_url
 import difflib
 class GracefulError(Exception):
     def __init__(self, message='-no error message given',hint=None):
@@ -101,9 +101,9 @@ class MessageLogger(object ):
         if crumbs is not None and crumbs != '':
             m.append(msg_str(f'in: {crumbs}', tabs + 3))
 
-        if fatal_error and caller is not None:
+        if caller is not None and (fatal_error or warning) :
             if hasattr(caller,'__class__'):
-                origin=  f' {caller.__class__.__name__}'
+                origin=  f' {caller.__class__.__name__} '
                 if hasattr(caller,'info'):
                     # add internal name if not None
                     origin +=  ' ' if caller.info["name"] is None else f'"{caller.info["name"]}"'
@@ -143,10 +143,10 @@ class MessageLogger(object ):
 
     def has_fatal_errors(self): return  self.fatal_error_count > 0
 
-    def exit_if_prior_errors(self,msg=None):
+    def exit_if_prior_errors(self,msg, caller=None, crumbs=''):
         if self.has_fatal_errors():
             self.print_line()
-            self.msg('>>> Fatal errors, can not continue')
+            self.msg(msg + '>>> Fatal errors, can not continue', crumbs= crumbs, caller=caller)
             for m in self.errors_list:
                 self.msg(m)
             self.print_line()
@@ -160,7 +160,7 @@ class MessageLogger(object ):
         # add completion time if start given
         if start_time is not None:
             msg = f' {msg},\t  {perf_counter()-start_time:1.3f} sec'
-            tabs += 2
+            tabs += 1
 
         self.msg('- ' + msg, tabs=tabs)
 

@@ -16,28 +16,28 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # set up info/attributes
         super().__init__()
         #todo add depth range for count
-        self.add_default_params({
-                'update_interval':  PVC(60*60.,float,units='sec',
-                                   doc_str='Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step'),
-                'start': PVC(None, 'iso8601date',doc_str= 'Start particle counting from this date-time, default is start of model run'),
-                'end': PVC(None, 'iso8601date', doc_str='Stop particle counting from this iso date-time, default is end of model run'),
-            'duration': PVC(None, float, min=0.,units='sec',
-                            doc_str='How long to do counting after start time, can be used instead of "end" parameter'),
+        self.add_default_params(
+                        update_interval =   PVC(60*60.,float,units='sec',
+                                       doc_str='Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step'),
+                        start =  PVC(None, 'iso8601date',doc_str= 'Start particle counting from this date-time, default is start of model run'),
+                        end =  PVC(None, 'iso8601date', doc_str='Stop particle counting from this iso date-time, default is end of model run'),
+                        duration =  PVC(None, float, min=0.,units='sec',
+                                doc_str='How long to do counting after start time, can be used instead of "end" parameter'),
 
-            'role_output_file_tag' :           PVC('stats_base',str,doc_str='tag on output file for this class'),
-                'write':                      PVC(True,bool,doc_str='Write statistcs to disk'),
-                'status_min': PVC('stationary', [str], possible_values= si.particle_status_flags.possible_values(),
-                                                 doc_str=' Count only those particles with status >= to this value'),
-                  'status_max': PVC('moving', [str], possible_values=si.particle_status_flags.possible_values(),
-                                    doc_str=' Count only those particles with status  <= to this value'),
-                  'z_min': PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value', units='meters above mean water level, so is < 0 at depth'),
-                  'z_max': PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value', units='meters above mean water level, so is < 0 at depth'),
-                  'water_depth_min': PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
-                  'water_depth_max': PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
-                  'particle_property_list': PLC(None, [str], make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
-                'coords_allowed_in_lat_lon_order': PVC(False, bool,
-                        doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
-                })
+                        role_output_file_tag =            PVC('stats_base',str,doc_str='tag on output file for this class'),
+                        write =                       PVC(True,bool,doc_str='Write statistcs to disk'),
+                        status_min =  PVC('stationary', [str], possible_values= si.particle_status_flags.possible_values(),
+                                                     doc_str=' Count only those particles with status >= to this value'),
+                        status_max =  PVC('moving', [str], possible_values=si.particle_status_flags.possible_values(),
+                                        doc_str=' Count only those particles with status  <= to this value'),
+                        z_min =  PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value', units='meters above mean water level, so is < 0 at depth'),
+                        z_max =  PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value', units='meters above mean water level, so is < 0 at depth'),
+                        water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
+                        water_depth_max =  PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
+                        particle_property_list = PLC(None, [str], make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
+                        coords_allowed_in_lat_lon_order =  PVC(False, bool,
+                            doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
+                        )
         self.add_default_params(count_start_date= PVC(None, 'iso8601date', obsolete='Use "start" parameter'),
                                 count_end_date= PVC(None, 'iso8601date',  obsolete='Use "end" parameter'))
 
@@ -72,8 +72,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             ml.msg(f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
                      caller=self,fatal_error=True)
 
-        si.add_sheduler_to_class('count_scheduler', self, start= params['start'], end=params['end'],
-                                 duration= params['duration'], interval=params['update_interval'])
+        si.add_scheduler_to_class('count_scheduler', self, start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
         pass
 
     def check_part_prop_list(self):
@@ -242,9 +241,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.info_to_write_at_end()
             nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
             nc.write_global_attribute('total_num_particles_released', si.core_roles.particle_group_manager.info['particles_released'])
-
-            # add attributes mapping release index to release group name
-            output_util.add_release_group_ID_info_to_netCDF(nc, si.roles.release_groups )
 
             nc.close()
         self.nc = None  # parallel pool cant pickle nc

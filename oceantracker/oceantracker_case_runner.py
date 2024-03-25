@@ -8,56 +8,63 @@ from oceantracker.util.messgage_logger import MessageLogger, GracefulError
 from oceantracker.util import profiling_util, get_versions_computer_info
 import numpy as np
 from oceantracker.util import time_util, numba_util, output_util
-from oceantracker.util import json_util
+from oceantracker.util import json_util, setup_util
 from datetime import datetime
 from time import sleep
 import traceback
-from oceantracker.util.class_importing_util import ClassImporter
-from oceantracker.util.setup_util import config_numba_environment
-from oceantracker import common_info_default_param_dict_templates as common_info
+from oceantracker.util.setup_util import config_numba_environment_and_random_seed
+from oceantracker import definitions as common_info
+
 
 from oceantracker.shared_info import SharedInfo as si
 
 
 # note do not import numba here as its environment  setting must ve done first, import done below
-
-from oceantracker.util.package_util import get_all_parameter_classes
-
 class OceanTrackerCaseRunner(ParameterBaseClass):
     # this class runs a single case
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required
+        self.info['name'] = 'OceanTrackerCaseRunner'
 
     def run_case(self, run_builder):
-        si._setup() # clear out classes from class instance of SharedInfo if running series of mains
-        si.msg_logger.set_screen_tag(f'C{run_builder["caseID"]:03d}')
-        si.msg_logger.settings(max_warnings=run_builder['working_params']['settings']['max_warnings'])
-        ri = si.run_info
+        # one case
 
         d0 = datetime.now()
         t_start = perf_counter()
-        # used to write a unaltered version to case_info.json
-        self.raw_working_params = deepcopy(run_builder['working_params'])
+        crumbs = 'OceanTrackerCaseRunner setup'
 
-        # set up message logging
-        output_files = run_builder['output_files']
+        # give shared access to params
+        si.working_params = run_builder['working_params']
+
+        # setup shared info and message logger
+        si._setup() # clear out classes from class instance of SharedInfo if running series of mains
+        si.msg_logger.set_screen_tag(f'C{run_builder["caseID"]:03d}')
+        si.msg_logger.settings(max_warnings=run_builder['working_params']['settings']['max_warnings'])
+        ml = si.msg_logger # shortcut for logger
+
+        # merge settings with defaults
+        si.working_params['settings'] = setup_util.merge_settings(si.working_params['settings'], si.default_settings, si.settings.possible_values(),
+                                                               ml, crumbs= crumbs +'> case settings', caller=self)
+        ml.exit_if_prior_errors('Errors in settings??', caller=self)
+        # transfer all settings to shared_info.settings to allow tab hints
+        ri = si.run_info
+        for key in si.settings.possible_values():
+            setattr(si.settings, key, si.working_params['settings'][key])
+
+
 
         # set numba config environment variables, before any import of numba, eg by readers,
         # also done in main but also needed here for parallel runs
-        config_numba_environment(run_builder['working_params']['settings'],  si.msg_logger, crumbs='Starting case_runner', caller=self)  # must be done before any numba imports
+        config_numba_environment_and_random_seed(si.working_params['settings'], si.msg_logger, crumbs='Starting case_runner', caller=self)  # must be done before any numba imports
 
         # basic  shortcuts
         si.run_builder = run_builder
         ri.caseID = run_builder['caseID']
-        si.working_params = run_builder['working_params']
-        si.settings = si.working_params['settings']
 
         si.output_files = run_builder['output_files']
 
         # move stuff to run info as central repository
-
-
         ri.run_output_dir = si.output_files['run_output_dir']
         ri.output_file_base = si.output_files['output_file_base']
         # move settings to run Info
@@ -65,6 +72,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         ri.z0 = si.settings['z0']
         ri.minimum_total_water_depth = si.settings['minimum_total_water_depth']
 
+        # set up message logging
+        output_files = run_builder['output_files']
         output_files['case_log_file'], output_files['case_error_file'] = \
                     si.msg_logger.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
 
@@ -74,13 +83,19 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
         si.msg_logger.print_line()
 
-        # setup class importer
+        # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
+        if si.settings['multiprocessing_case_start_delay'] is not None:
+            delay = si.settings['multiprocessing_case_start_delay'] * (si.run_info.caseID % si.settings['processors'])
+            si.msg_logger.progress_marker('Delaying start by  ' + str(delay) + ' sec')
+            sleep(delay)
+            si.msg_logger.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
+
+
         t0=perf_counter()
-        si.class_importer = ClassImporter(path.dirname(__file__), msg_logger=si.msg_logger)
         si.msg_logger.progress_marker('Scanned OceanTracker to build short name map to the full class_names', start_time=t0)
 
         # set up profiling
-        profiling_util.set_profile_mode(si.settings['profiler'])
+        #profiling_util.set_profile_mode(si.settings['profiler'])
 
         case_info_file = None
         return_msgs = {'errors': si.msg_logger.errors_list, 'warnings': si.msg_logger.warnings_list, 'notes': si.msg_logger.notes_list}
@@ -90,13 +105,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # case set up
         try:
-            self._set_up_run()
-            self._do_pre_processing()
-            self._make_core_classes()
 
-            # add any intergrated model, to get params changes, but don't initialise
-            # there can only be one model added
-            params = si.working_params['core_classes']['integrated_model']
+            # add any para,s from intergrated moedl to the other  user supplied working params
+            params = si.working_params['core_roles']['integrated_model']
             if len(params) > 0:
                 im = si.add_core_role('integrated_model', params, crumbs='adding  "integrated_model" class',initialise=False)
                 # any changes to params by model,
@@ -105,12 +116,17 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 im.add_settings_and_class_params()
                 im.have_called_add_settings_and_class_params = True # this is used to block use of im.add_class and im.settings
 
+            self._make_core_classes()
+
+            # add any intergrated model, to get params changes, but don't initialise
+            # there can only be one model added
+
             #todo remerge/check settings changed by model here?
 
             # now  params commlet cabn set up
 
             # set up start time and duration based on particle releases
-            self._setup_particle_release_groups_and_start_end_times(si.working_params['class_dicts']['release_groups'])
+            self._setup_particle_release_groups_and_start_end_times(si.working_params['roles_dict']['release_groups'])
 
             self._make_and_initialize_user_classes()
             self._finalize_classes()  # any setup actions that mus be done after other actions, eg shedulers
@@ -194,24 +210,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         case_info_file = path.join(ri.run_output_dir,case_info_file)
         return case_info_file,  return_msgs
 
-    def _set_up_run(self):
-        # builds shared_info class variable with data and classes initialized  ready for run
-        # from single run case_runner_params
-
-        # get short class names map
-        # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
-        if si.settings['multiprocessing_case_start_delay'] is not None:
-            delay = si.settings['multiprocessing_case_start_delay'] * (si.run_info.caseID % si.settings['processors'])
-            si.msg_logger.progress_marker('Delaying start by  ' + str(delay) + ' sec')
-            sleep(delay)
-            si.msg_logger.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
 
 
-        if si.settings['use_random_seed']:
-            np.random.seed(0) # set numpy
-            from oceantracker.util.numba_util import seed_numba_random
-            seed_numba_random(0)
-            si.msg_logger.msg('Using numpy.random.seed(0), makes results reproducible (only use for testing developments give the same results!)',warning=True)
 
     #@function_profiler(__name__)
     def _do_a_run(self):
@@ -240,16 +240,32 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
     def _do_run_integrity_checks(self):
          # check all have required, fields, part props and grid data
-        for i in si.all_class_instance_pointers_iterator():
+        for i in si._all_class_instance_pointers_iterator():
             i.check_requirements()
 
-        si.msg_logger.exit_if_prior_errors()
+        si.msg_logger.exit_if_prior_errors('errors found in _do_run_integrity_checks')
 
+    def dev_setup_dispersion_and_resuspension(self):
+        # these depend on which variables are available inb the hydro file
+        fgm = si.core_roles.field_group_manager
+        fmap = reader.params['field_variable_map']
+        info = self.info
 
+        nc = reader.open_first_file()
 
-    def _do_pre_processing(self):
-        # do pre-processing, eg read polygons from files
-       pass
+        # set up dispersion using vertical profiles of A_Z if available
+        self._setup_dispersion_params(nc)
+        si.add_core_role('dispersion', si.working_params['core_roles']['dispersion'],
+                         default_classID='dispersion_random_walk', initialise=True)
+
+        # add resuspension based on friction velocity
+        if info['is3D']:
+            # add friction velocity from bottom stress or near seabed vel
+            self._setup_resupension_params(nc)
+            si.add_core_role('resuspension', si.working_params['core_roles']['resuspension'],
+                             default_classID='resuspension_basic', initialise=True)
+
+        nc.close()
 
     def _setup_particle_release_groups_and_start_end_times(self, particle_release_groups_params_dict):
         # particle_release groups setup and instances,
@@ -264,7 +280,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         last_time = []
 
         # useful run info
-        ri.time_step = si.settings['time_step']
+
         ri.backtracking = si.settings['backtracking']
         ri.model_direction = -1 if ri.backtracking else 1
         ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
@@ -293,17 +309,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         duration =  abs(ri.end_time-ri.start_time)
         if si.working_params['settings']['max_run_duration'] is not None:  duration = min(si.working_params['settings']['max_run_duration'],duration)
 
+        ri.time_step = si.settings.time_step
         ri.times    = ri.start_time  + md * np.arange(0., duration + ri.time_step, ri.time_step)
         ri.end_time = ri.times[-1] # adjust end to nearest time step
 
         # setup scheduler for each release group, how start and model times known
         #   this will round start times and release interval to be integer number of model time steps after the start
         for name, rg in si.roles.release_groups.items():
-              si.add_sheduler_to_class('release_scheduler', rg,
-                                        start= rg.params['start'],  # set above from start date
-                                        interval= rg.params['release_interval'],
-                                        end     = rg.params['end'],
-                                        duration= rg.params['duration'], caller=rg)
+            si.add_scheduler_to_class('release_scheduler', rg, start=rg.params['start'], end=rg.params['end'], duration=rg.params['duration'], interval=rg.params['release_interval'], caller=rg)
 
         if len(si.roles.release_groups) == 0:
             # guard against there being no release groups
@@ -327,12 +340,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
         # chose fiel manager for normal or nested readers
-        if len(si.working_params['class_dicts']['nested_readers']) > 0:
+        if len(si.working_params['roles_dict']['nested_readers']) > 0:
             # use devopment nested readers class
-            si.working_params['core_classes']['field_group_manager'].update(dict(class_name='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields'))
+            si.working_params['core_roles']['field_group_manager'].update(dict(class_name='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields'))
 
         # set up feilds
-        fgm = si.add_core_role('field_group_manager', si.working_params['core_classes']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
+        fgm = si.add_core_role('field_group_manager', si.working_params['core_roles']['field_group_manager'], crumbs=f'adding core class "field_group_manager" ')
         fgm.initial_setup()  # needed here to add reader fields inside reader build
         si.run_info.is3D_run = fgm.info['is3D']
 
@@ -341,18 +354,19 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.hindcast_info = fgm.get_hydro_model_info()
         if si.run_info.write_tracks:
-            si.add_core_role('tracks_writer', si.working_params['core_classes']['tracks_writer'], initialise=True)
+            i = si.add_core_role('tracks_writer', si.working_params['core_roles']['tracks_writer'], initialise=True)
+
         else:
             si.core_roles.tracks_writer = None
 
 
-        pgm = si.add_core_role('particle_group_manager', si.working_params['core_classes']['particle_group_manager'], crumbs=f'adding core class "particle_group_manager" ')
+        pgm = si.add_core_role('particle_group_manager', si.working_params['core_roles']['particle_group_manager'], crumbs=f'adding core class "particle_group_manager" ')
         pgm.initial_setup()  # needed here to add reader fields inside reader build
 
 
         # set up particle properties associated with fields etc
         fgm.add_part_prop_from_fields_plus_book_keeping()
-        core_role_params = si.working_params['core_classes']
+        core_role_params = si.working_params['core_roles']
 
         # make other core classes
         si.add_core_role('solver', core_role_params['solver'], crumbs='core class solver ')
@@ -385,14 +399,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
         # any custom particle properties added by user
-        for name, p in si.working_params['class_dicts']['particle_properties'].items():
+        for name, p in si.working_params['roles_dict']['particle_properties'].items():
             pgm.add_particle_property(name, 'user',p)
 
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for user_type in ['velocity_modifiers','trajectory_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
-            for name, params in si.working_params['class_dicts'][user_type].items():
+            for name, params in si.working_params['roles_dict'][user_type].items():
                 i = si.add_user_class(user_type,name, params,class_type= 'user',   crumbs=' making class type ' + user_type + ' ')
                 i.initial_setup()  # some require instanceID from above add class to initialise
 
@@ -422,7 +436,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             'file_written': datetime.now().isoformat(),
              'run_info' : info,
              'hindcast_info': si.core_roles.field_group_manager.info,
-             'working_params': self.raw_working_params,
+             'working_params': si.working_params,
              'full_case_params': si.working_params,
              'particle_status_flags': si.particle_status_flags.as_dict(),
              'release_groups' : {},
@@ -508,7 +522,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
 
-        for i in si.all_class_instance_pointers_iterator():
+        for i in si._all_class_instance_pointers_iterator():
             try:
                 i.close()
 

@@ -6,7 +6,7 @@ import numpy as np
 from oceantracker.util import time_util, ncdf_util, json_util
 from datetime import datetime
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.common_info_default_param_dict_templates import  node_types
+from oceantracker.definitions import  node_types
 from os import path
 from  oceantracker.interpolator.util.triangle_eval_interp import time_independent_2Dfield_scalar, time_dependent_2Dfield_scalar
 
@@ -91,17 +91,13 @@ class FieldGroupManager(ParameterBaseClass):
         self.info['open_boundary_type'] = si.settings['open_boundary_type']
 
         # add tidal stranding class
-        i = si.class_importer.new_make_class_instance_from_params(si.working_params['core_classes']['tidal_stranding'],'tidal_stranding',                                                 default_classID='tidal_stranding',
-                                                crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ')
-        i.initial_setup()
+        i = si.add_core_role('tidal_stranding',{},crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ',
+                           caller=self, initialise=True)
         self.tidal_stranding = i
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
-        for name, params in si.working_params['class_dicts']['fields'].items():
+        for name, params in si.working_params['roles_dict']['fields'].items():
             self.add_custom_field(name, params, crumbs=f'adding custom field {name}')
-
-
-
     def add_part_prop_from_fields_plus_book_keeping(self):
 
         pgm = si.core_roles.particle_group_manager
@@ -278,15 +274,24 @@ class FieldGroupManager(ParameterBaseClass):
     def _setup_hydro_reader(self,reader_builder):
 
         info = self.info
-        self.reader  = si.class_importer.new_make_class_instance_from_params(reader_builder['params'],'reader',  crumbs=f'field Group Manager>setup_hydro_fields> reader class  ')
+        self.reader  = si.make_instance_from_params('reader', reader_builder['params'],
+                                        si.msg_logger,caller=self,
+                                        crumbs=f'setup_hydro_fields> reader class ')
 
         reader = self.reader
         reader.initial_setup(reader_builder['file_info'])
         # give acces to reader info
-        info['file_info']= reader.info['file_info']
-        info['buffer_info']= reader.info['buffer_info']
+        info['file_info'] = reader.info['file_info']
+        info['buffer_info'] = reader.info['buffer_info']
 
         nc = reader.open_first_file()
+        # see if mapped any feilds are present
+        f = {}
+        for name, item in reader.params['field_variable_map'].items():
+            file_var_name = item[0] if type(item) ==list else  item # only check first item for vectors
+            f[name] = True if nc.is_var(file_var_name) else False
+        info['found_mapped_fields'] = f
+
         #reader.info['variables'] = nc.variable_info  # note all variable names
         #self.info['variables'] = nc.variable_info # note all variable names
 
@@ -318,8 +323,8 @@ class FieldGroupManager(ParameterBaseClass):
 
     def set_up_interpolator(self):
 
-        i = si.class_importer.new_make_class_instance_from_params(si.working_params['core_classes']['interpolator'],'interpolator',
-                                                default_classID='interpolator',
+        i = si.make_instance_from_params('interpolator',si.working_params['core_roles']['interpolator'],
+                                                default_classID='interpolator', caller= self,
                                                 crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
         i.initial_setup(self.grid)
         self.interpolator = i
@@ -334,14 +339,14 @@ class FieldGroupManager(ParameterBaseClass):
 
         # set up dispersion using vertical profiles of A_Z if available
         self._setup_dispersion_params(nc)
-        si.add_core_role('dispersion',si.working_params['core_classes']['dispersion'],
+        si.add_core_role('dispersion',si.working_params['core_roles']['dispersion'],
                             default_classID='dispersion_random_walk', initialise=True)
 
         # add resuspension based on friction velocity
         if info['is3D']:
             # add friction velocity from bottom stress or near seabed vel
             self._setup_resupension_params(nc)
-            si.add_core_role('resuspension', si.working_params['core_classes']['resuspension'],
+            si.add_core_role('resuspension', si.working_params['core_roles']['resuspension'],
                               default_classID='resuspension_basic', initialise=True)
 
         nc.close()
@@ -413,8 +418,8 @@ class FieldGroupManager(ParameterBaseClass):
 
         field_params = reader.get_field_params(nc, name)
         field_params['write_interp_particle_prop_to_tracks_file'] =write_interp_particle_prop_to_tracks_file
-        i = si.class_importer.new_make_class_instance_from_params(field_params,'fields', name=name, default_classID='field_reader',
-                                                crumbs=f'Field Group Manager > adding reader field "{name}"')
+        i = si.add_user_class('fields',name, field_params,  default_classID='field_reader',
+                                caller=self,   crumbs=f'Field Group Manager > adding reader field "{name}"')
         i.info['type'] = 'reader_field'
         i.initial_setup(self.grid, self.fields)
 
@@ -434,7 +439,7 @@ class FieldGroupManager(ParameterBaseClass):
                 ml.msg(f'Cannot find field variable named "{file_var_name}" in hydro-file mapped to  field "{name}" ',
                                 hint=f'variable is not in file, currently variable map is = "{fm[name]}"',
                                   fatal_error=True)
-        si.msg_logger.exit_if_prior_errors()
+        si.msg_logger.exit_if_prior_errors('errors setting up fields')
         # read data if not time varying
         if not i.is_time_varying():
             i.data[0, ...] = reader.assemble_field_components(nc, self.grid, name, i)
@@ -444,9 +449,8 @@ class FieldGroupManager(ParameterBaseClass):
     def add_custom_field(self, name,  params={}, crumbs='', default_classID=None):
         # class name given or default_classID specified to get from defaults in common_info
 
-
-        i = si.class_importer.new_make_class_instance_from_params(params,'fields', name,   default_classID=default_classID,
-                                                crumbs=crumbs+ f'Field group manager > custom field setup > "{name}"')
+        i = si.add_user_class( 'fields',name, params,   default_classID=default_classID,
+                        caller = self, crumbs=crumbs+ f'Field group manager > custom field setup > "{name}"')
         i.info['type'] = 'custom_field'
         i.initial_setup(self.grid, self.fields)
         self.fields[name] = i

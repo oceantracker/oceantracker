@@ -13,7 +13,7 @@ from oceantracker.util import triangle_utilities
 
 from oceantracker.reader.util import reader_util
 from pathlib import Path as pathlib_Path
-from oceantracker.common_info_default_param_dict_templates import node_types
+from oceantracker.definitions import node_types
 
 from oceantracker.shared_info import SharedInfo as si
 
@@ -32,9 +32,14 @@ class _BaseReader(ParameterBaseClass):
                                make_list_unique=True),
             'field_variables': PLC(None, [str], obsolete=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',                              make_list_unique=True),
             'field_variable_map': {'water_velocity': PLC(None, [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
-                                   'tide': PVC('elev', str, doc_str='maps standard internal field name to file variable name'),
-                                   'water_depth': PVC('depth', str, is_required=True, doc_str='maps standard internal field name to file variable name'),
+                                   'tide': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+                                   'water_depth': PVC(None, str, is_required=True, doc_str='maps standard internal field name to file variable name'),
                                    'A_Z_profile': PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
+                                   'water_temperature': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+                                   'salinity': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+                                   'wind_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+                                   'bottom_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+
                                    'water_velocity_depth_averaged': PLC(None, [str], fixed_len=2,
                                                                         doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
@@ -46,8 +51,6 @@ class _BaseReader(ParameterBaseClass):
 
     # Below are required  methods for any new reader
     # ---------------------------------------------------------
-
-
 
     def is_hindcast3D(self, nc):  nopass()
 
@@ -304,7 +307,7 @@ class _BaseReader(ParameterBaseClass):
             a2 = calcuate_triangle_areas(grid['x_mercator'], grid['triangles'])
             rm = a2 / a1
 
-            xutm = si.transform_lon_lat_to_meters(grid['lon_lat'])
+            xutm = si._transform_lon_lat_to_meters(grid['lon_lat'])
             a3= calcuate_triangle_areas(xutm, grid['triangles'])
             ru = a3 / a1
             pass

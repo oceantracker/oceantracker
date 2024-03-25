@@ -4,9 +4,11 @@ import traceback
 from time import perf_counter
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.shared_info import SharedInfo as si
-# parameter dictionaries are nested dictionaries or lists of dictionaries
+# root class needed to avoid circular imports when building class trees
+from .__root_parameter_base_class__ import _RootParameterBaseClass
 
-class ParameterBaseClass(object):
+class ParameterBaseClass(_RootParameterBaseClass):
+    # parameter dictionaries are nested dictionaries or lists of dictionaries
     # object with default parameters as class dictionary, that are checked against expections
     # philosophy is that
     # 1) is that all the options that can be tweaked on an object are parameters, with defaults
@@ -38,6 +40,8 @@ class ParameterBaseClass(object):
                                  })
 
         self.partID_buffers={} # dict of int32 ID number buffers
+        self.shared_info = None
+
     def intitial_setup(self):
         # setup done before other classes set
         pass
@@ -72,6 +76,7 @@ class ParameterBaseClass(object):
 
     def check_class_required_fields_prop_etc(self, required_props_list=[],
                                              requires3D=None, crumbs=''):
+        si = self.shared_info
         for name in required_props_list:
             if name not in si.roles.particle_properties:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.info['name']

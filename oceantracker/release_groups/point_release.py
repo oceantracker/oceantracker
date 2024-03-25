@@ -38,7 +38,7 @@ class PointRelease(_BaseReleaseGroup):
         # ensure points are  meters
         if si.hydro_model_cords_in_lat_long:
             params['points_lon_lat'] = params['points'].copy()
-            params['points'] =  si.transform_lon_lat_to_meters(params['points_lon_lat'], in_lat_lon_order=params['coords_allowed_in_lat_lon_order'],
+            params['points'] =  si._transform_lon_lat_to_meters(params['points_lon_lat'], in_lat_lon_order=params['coords_allowed_in_lat_lon_order'],
                                                     crumbs=f'Point release #[{info["instanceID"]}] : {info["name"]}')
 
         info['bounding_box_ll_ul'] = np.stack(( np.nanmin(params['points'][:2],axis=0),

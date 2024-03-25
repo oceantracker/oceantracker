@@ -2,7 +2,7 @@ from oceantracker.particle_properties._base_particle_properties import ParticleP
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.polygon_util import set_up_list_of_polygon_instances, InsidePolygon
-from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
+
 from oceantracker.shared_info import SharedInfo as si
 
 class InsidePolygonsNonOverlapping2D(ParticleProperty):
@@ -15,7 +15,7 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
                                  'dtype':PVC(np.int32,type)})
         self.class_doc('Index of polygon a particle is inside',)
 
-        self.add_default_params({'polygon_list':PLC(None, [dict], default_value=default_polygon_dict_params,
+        self.add_default_params({'polygon_list':PLC(None, [dict], default_value=si.default_polygon_dict_params,
                                                     can_be_empty_list=False)
                                  })
 

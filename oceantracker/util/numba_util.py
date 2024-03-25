@@ -7,10 +7,6 @@ from time import perf_counter
 from numba.core import config
 
 
-@njit
-def seed_numba_random(a):
-    np.random.seed(a)
-
 #def set_caching(b):
 #   os.environ['oceantracker_numba_cac'] =str(1 if b else 0)
 #def is_caching():

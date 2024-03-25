@@ -7,6 +7,7 @@ from oceantracker.util.numba_util import njitOT
 from random import normalvariate
 from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import SharedInfo as si
+
 class RandomWalk(_BaseTrajectoryModifer):
     # add random walk using velocity modifier
     def __init__(self):

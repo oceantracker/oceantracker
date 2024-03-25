@@ -3,6 +3,7 @@
     "debug": true,
     "time_step": 120,
     "numba_cache_code": false,
+    "use_A_Z_profile": false,
     "regrid_z_to_uniform_sigma_levels": true,
     "reader": {
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
@@ -150,12 +151,6 @@
             ]
         }
     },
-    "velocity_modifiers": {
-        "terminal_velocity": {
-            "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
-            "value": -0.002
-        }
-    },
     "particle_statistics": {
         "grid1": {
             "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
@@ -173,6 +168,12 @@
     },
     "resuspension": {
         "critical_friction_velocity": 0.005
+    },
+    "velocity_modifiers": {
+        "terminal_velocity": {
+            "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
+            "value": -0.001
+        }
     },
     "root_output_dir": "output"
 }
