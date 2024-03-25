@@ -34,7 +34,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
             'write_tracks':             PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off oby default for LCS'),
         })
         self.class_doc('Time series of Lagrangian Coherent Structures heat maps, calculated as Finite-Time Lyapunov exponents (FTLEs) at given lag times, see Haller, G., 2015. Lagrangian coherent structures. Annual review of fluid mechanics, 47, pp.137-162.')
-
+    si.settings.use_A_Z_profile
     def add_settings_and_class_params(self):
         # change parameters
         info = self.info
@@ -101,7 +101,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         for name, rg in si.roles.release_groups.items():
             # time of lags after start of release group
             t = rg.release_scheduler.info['start_time'] + params['lags']
-            si.add_sheduler_to_class('LCScalculation_scheduler', rg, times= t, caller=self, crumbs='Adding LCS calculation scheduler ')
+            si.add_scheduler_to_class('LCScalculation_scheduler', rg, times=t, caller=self, crumbs='Adding LCS calculation scheduler ')
             rg.info['next_lag_to_calculate'] = 0 # counter for the lag to work on
 
             # from first grid record start time of each pulse, as is the same for all grids

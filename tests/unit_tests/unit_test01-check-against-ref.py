@@ -2,14 +2,19 @@ from os import path, sep
 from oceantracker.main import OceanTracker
 from read_oceantracker.python import load_output_files
 from plot_oceantracker import plot_tracks
-
+import  argparse
+import shutil
+import numpy as np
 
 def base_settings(fn):
     d =  dict(output_file_base=path.split(fn)[-1].split('.')[0],
-                root_output_dir=path.join(path.dirname(fn), 'output'),
-                time_step=600.,  # 10 min time step
-                max_run_duration=12*3600.
-                )
+            root_output_dir=path.join(path.dirname(fn), 'output'),
+            time_step=600.,  # 10 min time step
+            max_run_duration=24*3600.,
+            USE_random_seed = True,
+            include_dispersion=False,
+            use_A_Z_profile = False
+            )
     return d
 
 reader1=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
@@ -18,8 +23,11 @@ reader1=   dict( # folder to search for hindcast files, sub-dirs will, by defaul
 
 rg1 = dict( name='my_point_release',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
-         points=[[1595000, 5482600, -2],  # one or more (x,y,z) of release points
-                 [1594000, 5484200, -2]],
+         points=[
+             #   [1595000, 5482600, -2],  # one or more (x,y,z) of release points
+              [1594000, 5484200, -2]
+                 ],
+
          # the below are optional settings/parameters
          release_interval=600,  # seconds between releasing particles
          pulse_size=5)  # how many are released each interval
@@ -62,16 +70,20 @@ ps1 = dict(name='my_heatmap',
 def read_tracks(case_info_file):
     return load_output_files.load_track_data(case_info_file)
 
-def main():
+def main(args):
     ot = OceanTracker()
     ot.settings(**base_settings(__file__))
-    #ot.settings(numba_cache_code = True)
+    ot.settings(time_step=1800, NCDF_time_chunk=1, )
+    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
+                 NCDF_particle_chunk= 500) # keep file small
+
+    #ot.settings(NUMBA_cache_code = True)
     ot.add_class('reader',**reader1)
 
     # add a point release
     ot.add_class('release_groups',**rg1)
-    ot.add_class('release_groups',**rg2)  # class role
-    ot.add_class('release_groups', **rg3)  # class role
+    #ot.add_class('release_groups',**rg2)  # class role
+    #ot.add_class('release_groups', **rg3)  # class role
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **pp1) # add a new property to particle_properties role
@@ -79,8 +91,20 @@ def main():
     # add a gridded particle statistic to plot heat map
     ot.add_class('particle_statistics',**ps1)
     ot.add_class('resuspension', critical_friction_velocity=0.01)
-
     case_info_file = ot.run()
+
+    reference_case_info_file = case_info_file.replace('output','reference_case_output')
+    if args.reference_case:
+        # rewrite reference case output
+        shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file),dirs_exist_ok=True)
+
+
+    tracks= read_tracks(case_info_file)
+    tracks_ref = read_tracks(reference_case_info_file)
+    dx = np.abs(tracks['x']- tracks_ref['x'])
+    print('x diffs max ', np.nanmax(dx, axis=1))
+    print('x diffs mean', np.nanmean(dx, axis=1))
+
     return case_info_file
 
 def read_test(case_info_file):
@@ -97,7 +121,10 @@ def plot_test(track_data):
                                        movie_file=path.join(image_dir, 'decay_movie_frame.mp4'))
 
 if __name__ == "__main__":
-    case_info_file = main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-reference_case', action='store_true')
+    args = parser.parse_args()
+    case_info_file = main(args)
 
     track_data= read_test(case_info_file)
-    plot_test(track_data)
+    #plot_test(track_data)

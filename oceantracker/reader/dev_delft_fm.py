@@ -76,10 +76,10 @@ class DELFTFM(_BaseReader):
         if 'degree' in nc.var_attr(var_names[0],'units').lower() :
             grid['hydro_model_cords_in_lat_long'] = True
             grid['lon_lat'] = x.copy()
-            si.setup_lon_lat_to_meters_grid_tranforms(grid['lon_lat'])
-            grid['x'] = si.transform_lon_lat_to_meters(grid['lon_lat'])
+            si._setup_lon_lat_to_meters_grid_tranforms(grid['lon_lat'])
+            grid['x'] = si._transform_lon_lat_to_meters(grid['lon_lat'])
             grid['lon_lat_cell'] = x_cell.copy()
-            grid['x_cell'] = si.transform_lon_lat_to_meters(grid['lon_lat_cell'])
+            grid['x_cell'] = si._transform_lon_lat_to_meters(grid['lon_lat_cell'])
 
         else:
             grid['hydro_model_cords_in_lat_long'] = False

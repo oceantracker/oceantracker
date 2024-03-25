@@ -91,4 +91,5 @@ release_groups:
     start: '2017-01-01T01:30:00'
 root_output_dir: output
 time_step: 120
+use_A_Z_profile: false
 write_tracks: false

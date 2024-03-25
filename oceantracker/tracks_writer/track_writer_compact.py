@@ -4,7 +4,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.tracks_writer._base_tracks_writer import  _BaseWriter
 from oceantracker.tracks_writer.dev_convert_compact_tracks import convert_to_rectangular
 from oceantracker.util import  output_util
-import oceantracker.common_info_default_param_dict_templates as common_info
+import oceantracker.definitions as common_info
 
 from oceantracker.shared_info import SharedInfo as si
 
@@ -13,13 +13,12 @@ class CompactTracksWriter(_BaseWriter):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaultsults
 
-        self.add_default_params({'NCDF_time_chunk': PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file'),
+        self.add_default_params({
                                  'NCDF_particle_chunk': PVC(100_000, int, min=1000, doc_str=' number of particles per time chunk in the netcdf file'),
                                  #'convert': PVC(False, bool, doc_str='convert compact tracks file to rectangular for at end of the run'),
                                  'retain_compact_files': PVC(False, bool,
                                                              doc_str='keep  compact tracks files after conversion to rectangular format'),
                                  'role_output_file_tag': PVC('tracks_compact', str),
-                                 'write_dry_cell_flag' : PVC(True,bool, obsolete='Use top level setting write_dry_cell_flag, instead')
                                  })
         self.nc = None
 
@@ -59,9 +58,9 @@ class CompactTracksWriter(_BaseWriter):
                 raise ValueError('Tracks file setup error: variable dimensions must be defined before variables are defined, variable  =' + name + ' , dim=', dim)
 
             if dim == 'time_dim':
-                chunks.append(self.params['NCDF_time_chunk'])
+                chunks.append(si.settings.NCDF_time_chunk)
             elif dim == 'time_particle_dim':
-                chunks.append(self.params['NCDF_time_chunk']*self.params['NCDF_particle_chunk'])
+                chunks.append(si.settings.NCDF_time_chunk*self.params['NCDF_particle_chunk'])
             elif dim == 'particle_dim':
                 chunks.append(self.params['NCDF_particle_chunk'])
             else:
@@ -120,7 +119,7 @@ class CompactTracksWriter(_BaseWriter):
                 # convert output files to rectangular format
                 for fn in self.info['output_file']:
                     convert_to_rectangular(path.join(si.run_info.run_output_dir, fn),
-                                           time_chunk=self.params['NCDF_time_chunk'])
+                                           time_chunk=si.settings.NCDF_time_chunk)
                 pass
             '''
 

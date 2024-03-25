@@ -21,8 +21,8 @@ class DevNestedFields(ParameterBaseClass):
         # setup outer grid first
 
 
-        fgm_outer_grid = si.class_importer.new_make_class_instance_from_params(dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
-                                                                               'field_group_manager',
+        fgm_outer_grid = si.class_importer.new_make_class_instance_from_params('field_group_manager',dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
+
                                                                                 crumbs='adding outer hydro-grid field manager for nested grid run')
         fgm_outer_grid.initial_setup()
 

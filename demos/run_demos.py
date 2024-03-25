@@ -76,7 +76,7 @@ if __name__ == "__main__":
             output_folder = path.join(params[0]['root_output_dir'], params[0]['output_file_base'])
             params[0]['root_output_dir'] = 'output'
         else:
-            params['use_random_seed'] = True
+            params['USE_random_seed'] = True
             demo_name = params['output_file_base']
             if params['reader'] is not None:
                 params['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')

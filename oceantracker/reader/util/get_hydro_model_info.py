@@ -1,21 +1,22 @@
 
 from copy import deepcopy
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.definitions import known_readers
 
-def find_file_format_and_file_list(reader_params, class_importer, msg_logger):
+def find_file_format_and_file_list(reader_params, class_importer, msg_logger, crumbs='', caller = None):
     found=False
     # first see if it matches known formats
-
+    crumbs += '> find_file_format_and_file_list'''
     if 'class_name' in reader_params:
-        reader = class_importer.new_make_class_instance_from_params(reader_params, 'reader', default_classID='reader', check_for_unknown_keys=False)
+        reader = class_importer.new_make_class_instance_from_params( reader_params,  default_classID='reader', check_for_unknown_keys=False)
         file_list = reader.get_file_list()
         return reader_params, file_list
 
     # search
-    for r_name, r in si.info.known_readers.items():
+    for r_name, r in known_readers.items():
         params= deepcopy(reader_params)
         params['class_name'] = r
-        reader = class_importer.new_make_class_instance_from_params(params,'reader',  default_classID='reader', check_for_unknown_keys=False)
+        reader = class_importer.new_make_class_instance_from_params('reader',params,  default_classID='reader',
+                                        check_for_unknown_keys=False, crumbs = crumbs + f'> loading reader {r_name}', caller=caller)
         file_list = reader.get_file_list()
         if len(file_list) > 0 and reader.is_file_format(file_list[0]):
             # found format
@@ -27,7 +28,7 @@ def find_file_format_and_file_list(reader_params, class_importer, msg_logger):
     else:
         msg_logger.msg(f'Could not set up reader, no files in dir = "{reader_params["input_dir"]} found matching mask = "{reader_params["file_mask"]}"  (or "out2d*.nc" if schism v5), or files do no match known format',
                         hint='Check given input_dir and  file_mask params, check if any non-hydro netcdf files in the dir, otherwise may not be known format',
-                        fatal_error=True,  exit_now=True)
+                        fatal_error=True,  exit_now=True, cumbs= crumbs, caller=caller )
     return reader_params, file_list
 
 

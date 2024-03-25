@@ -1,6 +1,5 @@
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC, merge_params_with_defaults
-from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from copy import  deepcopy
 from oceantracker.release_groups.polygon_release import PolygonRelease
 from oceantracker.util.numba_util import njitOT
@@ -46,7 +45,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
         polygon =merge_params_with_defaults({'name': 'residence_for_release_group' + params['name_of_polygon_release_group'],
-                                             'points': self.release_group_to_count.params['points']},default_polygon_dict_params ,
+                                             'points': self.release_group_to_count.params['points']},si.default_polygon_dict_params ,
                                              si.msg_logger)
         # create resident in polygon for single release group
         pgm = si.core_roles.particle_group_manager

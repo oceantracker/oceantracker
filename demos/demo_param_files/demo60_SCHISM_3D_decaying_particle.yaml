@@ -31,3 +31,4 @@ release_groups:
     release_interval: 150.0
 root_output_dir: output
 time_step: 120
+use_A_Z_profile: false

@@ -136,5 +136,4 @@ class _BaseEventLogger(ParameterBaseClass):
         if self.params['write']:
             # add attributes mapping release index to release group name
             nc = self.nc
-            output_util.add_release_group_ID_info_to_netCDF(nc, si.roles.release_groups)
             nc.close()

@@ -1,6 +1,6 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC,ParameterCoordsChecker as PCC
-import oceantracker.common_info_default_param_dict_templates as ci
+import oceantracker.definitions as ci
 from oceantracker.shared_info import SharedInfo as si
 
 class _BaseModel(ParameterBaseClass):
@@ -38,7 +38,7 @@ class _BaseModel(ParameterBaseClass):
 
         if class_role in ci.class_dicts_list:
             # those with mutil classes
-            classes_in_role = si.working_params['class_dicts'][class_role]
+            classes_in_role = si.working_params['roles_dict'][class_role]
             if name is None:
                 #todo remove block by giving default name??
                 si.msg_logger.msg('added class must have a name ', fatal_error=True, exit_now=True,
@@ -46,15 +46,15 @@ class _BaseModel(ParameterBaseClass):
 
             classes_in_role[name] = kwargs
 
-        elif class_role in ci.core_class_list:
+        elif class_role in si.core_roles:
             # update core class params, no name needed
-            si.working_params['class_dicts'][class_role] = kwargs
+            si.working_params['roles_dict'][class_role] = kwargs
             #si.msg_logger.msg(f'can not core class paramters in in role {class_role} used in "add_settings_and_class_params" method', fatal_error=True, exit_now=True,
             #                  hint= 'add these parameters as ordinary, top level parameters',
             #                  crumbs=' add_class method:', caller=self)
         else:
             si.msg_logger.spell_check(f'Do not recognise class role "{class_role}" used in "add_settings_and_class_params" method',
-                                      class_role, ci.class_dicts_list + ci.core_class_list,
+                                      class_role, si.core_roles.possible_values()+ si.roles.possible_values(),
                                       fatal_error=True, exit_now=True,
                                       crumbs=' add_class method:', caller=self)
 
@@ -66,10 +66,10 @@ class _BaseModel(ParameterBaseClass):
 
 
         if class_role in ci.class_dicts_list:
-            if len(si.working_params['class_dicts'][class_role]) > 0:
+            if len(si.working_params['roles_dict'][class_role]) > 0:
                 si.msg_logger.msg(f'Found existing classes in role {class_role} cannot run with existing classes, these have been removed',
                                   warning=True, caller=self, crumbs='clear_class_role> ')
-            si.working_params['class_dicts'][class_role] = dict()
+            si.working_params['roles_dict'][class_role] = dict()
         else:
             si.msg_logger.msg(f'Cannot clear core class role {class_role} or unkown role, ignoring',
                               warning=True, caller=self, crumbs='clear_class_role> ')

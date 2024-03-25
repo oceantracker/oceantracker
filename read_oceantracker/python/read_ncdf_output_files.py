@@ -28,8 +28,6 @@ def read_particle_tracks_file(file_name, var_list=None, release_group= None, fra
     else:
         d= _read_rectangular_tracks(nc, working_var_list,release_group)
 
-    d.update(_get_release_group_map_and_points(nc))
-
     nc.close()
 
     if d['x'].shape[2] == 3: d['z'] = d['x'][:,:,2] # make a z variable if 3D
@@ -168,7 +166,6 @@ def read_stats_file(file_name):
     d = nc.global_attrs()  # read all  global attibutes
     d['dimensions'] = nc.dims()
     d['limits']=  {}
-    d.update(_get_release_group_map_and_points(nc))
 
     data = nc.read_variables()
     d.update(data)
@@ -212,7 +209,7 @@ def read_concentration_file(file_name):
     # read concentration et cdf
     d={}
     nc = NetCDFhandler(file_name, 'r')
-    d.update(_get_release_group_map_and_points(nc))
+
     for var in  nc.all_var_names():
         if nc.is_var(var):
             d[var]= nc.read_a_variable(var)
@@ -232,7 +229,6 @@ def read_residence_file(file_name, var_list=[]):
 
     d['release_times']= nc.read_a_variable('release_times')
 
-    d.update(_get_release_group_map_and_points(nc))
 
     # read count first for mean value calc
     for v in ['count','count_all_particles','time']:
@@ -273,26 +269,6 @@ def dev_read_event_file(file_name):
     #todo finish event reader
     nc = NetCDFhandler(file_name, 'r')
     nc.close()
-
-def _get_release_group_map_and_points(nc):
-    # get a dict mapping release group index to names and the reverse
-    m = {'release_groupID': {},'release_locations':{} }
-    name_list=[]
-    for n, a  in enumerate(nc.global_attr_names()):
-        val = nc.global_attr(a)
-        if a.startswith('release_groupID_'):
-            name= a.split('release_groupID_')[-1]
-            m['release_groupID'][name] = val
-            name_list.append(name)
-
-    # unpack release points
-    is_polygon_release = nc.read_a_variable('is_polygon_release')
-    number_of_release_points = nc.read_a_variable('number_of_release_points')
-    release_points = nc.read_a_variable('release_points')
-
-    for n in range( is_polygon_release.size):
-        m['release_locations'][name_list[n]]=dict(points =release_points[n,:number_of_release_points[n],:],is_polygon= is_polygon_release[n]==1)
-    return m
 
 
 def read_release_groups_info(file_name):

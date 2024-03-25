@@ -1,16 +1,5 @@
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
-from oceantracker.util.profiling_util import available_profile_types
-package_fancy_name= 'OceanTracker'
-import numpy as np
-from copy import deepcopy
-
-code_major_version = 0.5
-code_version = '0.5.0.000 2024-03-07'
-
-max_timedelta_in_seconds = 1000*365*24*3600
-
-docs_base_url= 'https://oceantracker.github.io/oceantracker/_build/html/'
-
+from oceantracker import definitions
 # shared settings allpy to all parallel cases
 shared_settings_defaults ={
                 'root_output_dir':     PVC('root_output_dir', str, doc_str='base dir for all output files'),
@@ -29,22 +18,20 @@ shared_settings_defaults ={
                 #'write_output_files':     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web'),
                 'write_dry_cell_flag': PVC(True, bool,
                                 doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots, currently cannot be used with nested grids '),
-                'max_run_duration':    PVC(max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration
+                'max_run_duration':    PVC(definitions.max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing'),  # limit all cases to this duration
                 'max_particles': PVC(10**9, int, min=1,  doc_str='Maximum number of particles to release, useful in testing'),  # limit all cases to this number
                 'processors':          PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel'),
                 'max_warnings':        PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps'),  # dont record more that this number of warnings, to keep caseInfo.json finite
-                'use_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
-                'numba_function_cache_size' :  PVC(4048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB'),
+                'USE_random_seed':  PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!'),
+                'NUMBA_function_cache_size' :  PVC(4048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB'),
                 'numba_cache_code': PVC(False, bool,  doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."'),
                 'multiprocessing_case_start_delay': PVC(None, float, min=0., doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file'),  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
-                'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
-                                                       doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
+                #'profiler': PVC('oceantracker', str, possible_values=available_profile_types,
+               #                                        doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules '),
                 'EPSG_code_metres_grid': PVC(None, int,
                                  doc_str='If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM'),
 
                 }
-
-
 
 #  these setting can be different for each case
 case_settings_defaults ={
@@ -61,36 +48,6 @@ case_settings_defaults ={
       }
 all_setting_defaults =  shared_settings_defaults | case_settings_defaults
 
-core_class_list=['reader',
-                'solver',
-                'field_group_manager',
-               'interpolator',
-                'particle_group_manager',
-                'tracks_writer',
-                'dispersion',
-                 'tidal_stranding',
-                'resuspension',
-                 'integrated_model' # this is here as ther can be only one at a time
-                 ]
-
-default_classes_dict = dict( solver= 'oceantracker.solver.solver.Solver',
-                        particle_properties='oceantracker.particle_properties._base_particle_properties.ParticleProperty',
-                        time_varying_info='oceantracker.time_varying_info._base_time_varying_info.TimeVaryingInfo',
-                        field_group_manager='oceantracker.field_group_manager.field_group_manager.FieldGroupManager',
-                        particle_group_manager= 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager',
-                        tracks_writer = 'oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter',
-                        interpolator = 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid',
-                        dispersion_random_walk = 'oceantracker.dispersion.random_walk.RandomWalk',
-                        dispersion_random_walk_varyingAz ='oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ',
-                        resuspension_basic = 'oceantracker.resuspension.resuspension.BasicResuspension',
-                        tidal_stranding = 'oceantracker.tidal_stranding.tidal_stranding.TidalStranding',
-                        release_groups = 'oceantracker.release_groups.point_release.PointRelease',
-                        field_reader='oceantracker.fields._base_field.ReaderField',
-                        field_custom='oceantracker.fields._base_field.CustomField',
-                        field_friction_velocity_from_bottom_stress='oceantracker.fields.friction_velocity.FrictionVelocityFromBottomStress',
-                        field_friction_velocity_from_near_sea_bed_velocity='oceantracker.fields.friction_velocity.FrictionVelocityFromNearSeaBedVelocity',
-                        field_A_Z_profile_vertical_gradient='oceantracker.fields.field_vertical_gradient.VerticalGradient',
-                        )
 
 class_dicts_list=[ # class dicts which replace lists
             #'pre_processing',
@@ -109,10 +66,7 @@ class_dicts_list=[ # class dicts which replace lists
             ]
 
 
-default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
-                'name': PVC(None, str),
-                'points': PCC( None,is_required=True, doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
-                               }
+
 
 
 # node types for hydro model
@@ -260,7 +214,3 @@ node_types= dict(interior = 0,island_boundary = 1, domain_boundary= 2, open_boun
 #TODO ISSUES
     #  todo in making custom fields how do i know fiels have been added before i use i
     #  todo how doi know part prop which depend on others are up to date before use
-
-
-
-

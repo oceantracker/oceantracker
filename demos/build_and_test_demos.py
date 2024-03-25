@@ -236,7 +236,7 @@ params.append(p10)
 # case 50 schism basic
 schsim_base_params=\
 {'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,
-            'numba_cache_code': False,
+            'numba_cache_code': False,'use_A_Z_profile' : False,
             'regrid_z_to_uniform_sigma_levels': True,
                 #'numba_caching': False,
         'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
@@ -289,9 +289,6 @@ s56['release_groups']={
 
 
 }
-s56['velocity_modifiers']={'terminal_velocity':
-       {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.000}
-                           }
 s56['particle_statistics']= {'grid1':
                   {   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min':'moving','z_min' :-2,
@@ -303,13 +300,13 @@ s56['resuspension'] = {'critical_friction_velocity': .005}
 s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel',
             })
 s56['velocity_modifiers']= {'terminal_velocity':
-                                {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002}
+            {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.001}
                             }
 params.append (s56)
 
 # schsim 3D, don't resupend lateral boundary test
 s57 = deepcopy(s50)
-s57.update(dict(use_A_Z_profile=True,use_random_seed= False))
+s57.update(dict(use_A_Z_profile=True,USE_random_seed= False))
 s57.update({'output_file_base' : 'demo57_SCHISM_3D_lateralBoundaryTest'})
 s57['dispersion'].update({'A_H':10,'A_V': 10})
 s57['velocity_modifiers']= {'terminal_velocity':

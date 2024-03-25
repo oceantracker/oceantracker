@@ -7,7 +7,7 @@ import numpy as np
 from oceantracker.util.triangle_utilities import split_quad_cells
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
 from copy import deepcopy
-from oceantracker.common_info_default_param_dict_templates import node_types
+from oceantracker.definitions import node_types
 
 from oceantracker.shared_info import SharedInfo as si
 
@@ -64,9 +64,9 @@ class SCHISMreaderNCDF(_BaseReader):
             grid['hydro_model_cords_in_lat_long'] = self.params['hydro_model_cords_in_lat_long']
 
         if grid['hydro_model_cords_in_lat_long']:
-            si.setup_lon_lat_to_meters_grid_tranforms(grid['x'])
+            si._setup_lon_lat_to_meters_grid_tranforms(grid['x'])
             grid['lon_lat'] = grid['x'].copy()
-            grid['x'] = si.transform_lon_lat_to_meters( grid['lon_lat'])
+            grid['x'] = si._transform_lon_lat_to_meters( grid['lon_lat'])
 
         return  grid
 

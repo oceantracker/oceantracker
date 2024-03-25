@@ -18,17 +18,19 @@ class _BaseWriter(ParameterBaseClass):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
 
-        self.add_default_params({
-                                'role_output_file_tag': PVC('tracks', str),
-                                'update_interval': PVC(None, [int,float], min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
-                                'output_step_count': PVC(None,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
-                                'turn_on_write_particle_properties_list': PLC(None, [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
-                                 'turn_off_write_particle_properties_list': PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
-                                                            doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),
-                                 'time_steps_per_per_file': PVC(None, int,min=1, doc_str='Split track output into files with given number of time integer steps'),
-
-                                 })
-        self.info.update({'output_file': []})
+        self.add_default_params(
+                        role_output_file_tag =  PVC('tracks', str),
+                        update_interval =  PVC(None, [int,float], min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
+                        output_step_count =  PVC(None,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
+                        turn_on_write_particle_properties_list =  PLC(None, [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
+                        turn_off_write_particle_properties_list =  PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
+                                    doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),
+                        time_steps_per_per_file =  PVC(None, int,min=1, doc_str='Split track output into files with given number of time integer steps'),
+                        write_dry_cell_flag =  PVC(False, bool, doc_str='Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down '),
+                        write_dry_cell_index=PVC(True, bool,obsolete='Replaced by write_dry_cell_flag, set to false by default'),
+                        NCDF_time_chunk = PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file'),
+                                )
+        self.info.update(output_file= [])
         self.total_time_steps_written = 0
         self.n_files_written = 0
 
@@ -40,21 +42,19 @@ class _BaseWriter(ParameterBaseClass):
 
     def initial_setup(self):
 
-        params = self.params
-
-        # find steps between wrtites, rounded to nearest model time step
-        if params['update_interval'] is None :
-            params['update_interval'] = si.hindcast_info['time_step']
-
-
         if si.settings['write_dry_cell_flag']:
             grid = si.core_roles.field_group_manager.grid
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])
             self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
-                                  dtype=np.uint8, chunking=[self.params['NCDF_time_chunk'],grid['triangles'].shape[0]])
+                                  dtype=np.uint8, chunking=[si.settings.NCDF_time_chunk,grid['triangles'].shape[0]])
 
     def final_setup(self):
-        si.add_sheduler_to_class('write_scheduler', self, interval=self.params['update_interval'])
+        params = self.params
+        # set up write schedule
+        if params['update_interval'] is None :
+            params['update_interval'] = si.run_info.time_step
+
+        si.add_scheduler_to_class('write_scheduler', self, interval=self.params['update_interval'], caller=self)
 
     def add_dimension(self, name, size):
         self.info['file_builder']['dimensions' ][name] ={'size': size}
@@ -181,9 +181,6 @@ class _BaseWriter(ParameterBaseClass):
             # add all global attributes
             for name, item in self.info['file_builder']['attributes'].items():
                 nc.write_global_attribute(name,item)
-
-            # add attributes mapping release index to release group name
-            output_util.add_release_group_ID_info_to_netCDF(nc, si.roles.release_groups)
             nc.close()
             self.nc = None
 

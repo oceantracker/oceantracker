@@ -1,7 +1,7 @@
 from oceantracker.event_loggers._base_event_loggers import _BaseEventLogger
 import numpy as np
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
+
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.shared_info import SharedInfo as si
 
@@ -12,7 +12,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         super().__init__()
         # set up info/attributes
         self.add_default_params({'polygon_list': PLC(None, [dict], can_be_empty_list=False,
-                                                     default_value= default_polygon_dict_params),
+                                                     default_value= si.default_polygon_dict_params),
                                     'role_output_file_tag': PVC('inside_polygon_events',str)
                                                             })
 

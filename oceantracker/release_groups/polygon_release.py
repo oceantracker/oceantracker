@@ -1,7 +1,6 @@
 import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.release_groups.point_release import PointRelease
-from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
 from oceantracker.shared_info import SharedInfo as si
 
 class PolygonRelease(PointRelease):
@@ -10,7 +9,7 @@ class PolygonRelease(PointRelease):
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        self.add_default_params(default_polygon_dict_params)
+        self.add_default_params(si.default_polygon_dict_params)
 
         self.class_doc('Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.')
 
@@ -29,7 +28,7 @@ class PolygonRelease(PointRelease):
         # ensure points are  meters
         if si.hydro_model_cords_in_lat_long:
             params['points_lon_lat'] = params['points'].copy()
-            params['points'] = si.transform_lon_lat_to_meters(params['points_lon_lat'],
+            params['points'] = si._transform_lon_lat_to_meters(params['points_lon_lat'],
                                         in_lat_lon_order=self.params['coords_allowed_in_lat_lon_order'],
                                        crumbs=f'Polygon release {self.IDstr()}')
         info['release_type'] = 'polygon'
