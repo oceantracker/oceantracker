@@ -16,7 +16,7 @@ class GLORYSreaderSurface(_BaseReader):
             'dimension_map': {'time': PVC('time', str),
                               'depth': PVC('depth', str),
                               #'z': PVC(None, str,doc_str='name of dim for vertical layer boundaries'),
-                              #'z_water_velocity': PVC('z', str, doc_str='z dimension of water velocity'),
+                              'z_water_velocity': PVC('z', str, doc_str='z dimension of water velocity'),
                               #'vector2D': PVC(None, str),
                               #'vector3D': PVC(None, str)
                               },

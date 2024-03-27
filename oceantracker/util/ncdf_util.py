@@ -195,6 +195,41 @@ class NetCDFhandler(object):
         nc_new.write_a_new_variable(name,v[:], v.dimensions, description=v.description)
         pass
 
+    def write_packed_1Darrays(self, name, array_list, description=None, attributes=None, dtype=None, chunksizes=None,
+                              compressionLevel=0, fill_value=None, units=None):
+        # write list of numpy 1D arrays  which differ in size,
+        # as a single array with unpacking data, m
+
+        out = np.full((0,),-1,dtype=array_list[0].dtype)
+        ranges = np.full((0,2),-1,dtype=np.int32)
+        n_start = 0
+        for  a in array_list:
+            m = a.shape[0]
+            ranges = np.concatenate((ranges, np.asarray([n_start, n_start+m]).reshape(1,2)), axis=0)
+            out =np.concatenate((out, a),axis=0)
+            n_start += m
+
+        pass
+        ranges_var= f'{name}_packed_ranges'
+        self.write_a_new_variable(name, out,f'{name}_packed_dim',
+                                  description= description+' packed array' ,
+                                  attributes=dict(ranges_var =ranges_var)
+                                  )
+        self.write_a_new_variable(ranges_var, ranges, [f'{name}_ranges_dim','range_pair_dim'],
+                                  description=description + ' packed array',
+                                  attributes=dict(ranges_var=ranges_var)
+                                  )
+        pass
+
+    def un_packed_1Darrays(self, name:str):
+        '''  unpack variable of given name, from range variable '''
+        out =[]
+        data =  self.read_a_variable(name)
+        ranges = self.read_a_variable(self.var_attr(name,'ranges_var'))
+        for r in ranges:
+            out.append(data[r[0]:r[1]])
+        return out
+
     def close(self):
         self.file_handle.close()
         self.file_handle = None  # parallel pool cant pickle nc so void

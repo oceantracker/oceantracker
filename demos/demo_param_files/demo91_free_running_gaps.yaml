@@ -1,12 +1,10 @@
+NUMBA_cache_code: false
 add_date_to_run_output_dir: false
 backtracking: true
 block_dry_cells: true
 debug: true
 dispersion:
   A_H: 0.1
-dispersion_miss-spelt:
-  A_H: 0.1
-numba_cache_code: false
 output_file_base: demo91_free_running_gaps
 particle_properties:
   Oxygen:
@@ -22,7 +20,7 @@ particle_properties:
     class_name: ParticleLoad
     initial_value: 100
 reader:
-  class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
+  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
     node: nodes
     time: time

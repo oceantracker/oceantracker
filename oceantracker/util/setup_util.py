@@ -131,7 +131,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
 
     environ['NUMBA_function_cache_size'] = str(settings['NUMBA_function_cache_size'])
 
-    if 'numba_cache_code' in settings  and settings['numba_cache_code']:
+    if 'NUMBA_cache_code' in settings  and settings['NUMBA_cache_code']:
        environ['OCEANTRACKER_NUMBA_CACHING'] = '1'
        environ['NUMBA_CACHE_DIR'] = path.join(settings['root_output_dir'], 'numba_cache')
     else:

@@ -1,9 +1,8 @@
+NUMBA_cache_code: false
 add_date_to_run_output_dir: false
 block_dry_cells: true
 debug: true
 dispersion:
-  A_H: 0.1
-dispersion_miss-spelt:
   A_H: 0.1
 event_loggers:
   in_out_poly:
@@ -43,14 +42,13 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-numba_cache_code: false
 output_file_base: demo07_inside_polygon_events
 particle_properties:
   age_decay:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay
     decay_time_scale: 86400.0
 reader:
-  class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
+  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
     node: nodes
     time: time

@@ -1,11 +1,11 @@
 {
     "output_file_base": "demo03_heatmaps",
     "add_date_to_run_output_dir": false,
-    "numba_cache_code": false,
+    "NUMBA_cache_code": false,
     "time_step": 900,
     "debug": true,
     "reader": {
-        "class_name": "oceantracker.reader.generic_ncdf_reader.GenericNCDFreader",
+        "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
         "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "demoHindcast2D*.nc",
         "dimension_map": {
@@ -32,9 +32,6 @@
         "isodate_of_hindcast_time_zero": "2020-06-01"
     },
     "user_note": "test of notes",
-    "dispersion_miss-spelt": {
-        "A_H": 0.1
-    },
     "dispersion": {
         "A_H": 0.1
     },

@@ -258,6 +258,17 @@ def read_grid_file(file_name):
     nc = NetCDFhandler(file_name,'r')
     for var in nc.file_handle.variables.keys():
         d[var]= nc.read_a_variable(var)
+    if nc.is_var('domain_outline_nodes'):
+        domain=dict(nodes=d['domain_outline_nodes'],
+                                       points= d['x'][d['domain_outline_nodes'],:])
+
+        if nc.is_var('island_outline_nodes'):
+            island_nodes = nc.un_packed_1Darrays('island_outline_nodes')
+            islands = [ dict(nodes = n,points= d['x'][n,:]) for n in island_nodes]
+        else:
+            islands =[]
+
+        d['grid_outline'] = dict(domain= domain, islands=islands)
     nc.close()
 
     return d

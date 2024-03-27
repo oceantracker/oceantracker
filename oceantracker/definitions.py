@@ -14,6 +14,7 @@ max_timedelta_in_seconds = 1000*365*24*3600
 
 docs_base_url= 'https://oceantracker.github.io/oceantracker/_build/html/'
 package_dir = path.dirname(__file__)
+ot_root_dir = path.dirname(package_dir)
 
 known_readers = dict(
                 schisim= 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
@@ -21,7 +22,7 @@ known_readers = dict(
                 fvcom =  'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
                 roms =  'oceantracker.reader.ROMS_reader.ROMsNativeReader',
                 delft3d_fm =  'oceantracker.reader.dev_delft_fm.DELFTFM',
-                generic =  'oceantracker.reader.generic_ncdf_reader.GenericNCDFreader',
+                generic =  'oceantracker.reader.generic_ncdf_reader.GenericUnstructuredReader',
                 dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',
                  )
 

@@ -76,7 +76,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         params = self.params
 
         if params['start'] is None:
-            start =  si.hindcast_info['end_time'] if ri.backtracking else si.hindcast_info['start_time']
+            start =  si.hindcast_info['end_time'] if si.settings.backtracking else si.hindcast_info['start_time']
         else:
             start = time_util.isostr_to_seconds(params['start'])
 
@@ -84,7 +84,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         if params['duration'] is None :
             # look at end date
             if params['end'] is None:
-                end = si.hindcast_info['start_time'] if ri.backtracking else si.hindcast_info['end_time']
+                end = si.hindcast_info['start_time'] if si.settings.backtracking else si.hindcast_info['end_time']
             else:
                 end = time_util.isostr_to_seconds(params['end'])
             duration = abs(end-start)

@@ -218,7 +218,7 @@ def base_param(is3D=False, isBackwards = False):
            'write_tracks': True,
             'time_step': 5*60,
            'duration': 10. * 24 * 3600,
-            'reader': {'class_name':	"oceantracker.reader.generic_ncdf_reader.GenericNCDFreader",
+            'reader': {'class_name':	"oceantracker.reader.generic_ncdf_reader.GenericUnstructuredReader",
                   'file_mask' : 'circFlow2D*.nc', 'input_dir': input_dir,
                         'field_variable_map': {'water_velocity' : ['u','v'],'water_depth': 'depth','tide': 'tide' },
                         'dimension_map': {'node': 'node', 'time': 'time'},

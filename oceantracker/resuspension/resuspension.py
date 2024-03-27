@@ -47,7 +47,7 @@ class BasicResuspension(_BaseResuspension):
         #todo is friction velocity up to date?
         self.start_update_timer()
         info = self.info
-        info['resuspension_factor']= 2.0*0.4*si.run_info.z0*si.settings['time_step']/(1. - 2./np.pi)
+        info['resuspension_factor']= 2.0*0.4*si.run_info.z0*si.settings.time_step/(1. - 2./np.pi)
         info['min_resuspension_jump_not_used'] = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
 
         # resuspend those on bottom and friction velocity exceeds critical value

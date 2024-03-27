@@ -6,7 +6,7 @@ from oceantracker.util.__root_parameter_base_class__ import _RootParameterBaseCl
 import pkgutil,inspect,importlib
 from oceantracker import  definitions
 import importlib
-
+from timeit import  timeit
 class ClassImporter():
     def __init__(self,shared_info, msg_logger, crumbs='', caller=None):
         self.shared_info = shared_info
@@ -59,7 +59,8 @@ class ClassImporter():
         elif short_name in self.short_name_class_map:
             return self.short_name_class_map[short_name]['class_obj']
         else:
-            return None
+            return self._import_module_from_string(class_name)
+
 
     def new_make_class_instance_from_params(self, class_role, params, name = None,  default_classID=None,
                                     caller=None,   crumbs='', merge_params=True, check_for_unknown_keys=True):
@@ -97,6 +98,7 @@ class ClassImporter():
         # to set up class tree on instances of  package classes
         ml= self.msg_logger
         crumbs += '> scan_package_for_classes '
+        t0 = perf_counter()
         tree = dict()
         crumbs + '> scan_package_for_classes'
         for _, sub_pkg_name, ispkg in pkgutil.iter_modules([definitions.package_dir]):
@@ -105,12 +107,17 @@ class ClassImporter():
                 # look at sub packages
                 if sub_pkg_name not in tree: tree[sub_pkg_name] = {}
 
+                #sub_pkg_str =f'{path.basename(definitions.package_dir)}.{sub_pkg_name}'
+                #sub_pkg = self._import_module_from_string(sub_pkg_str)
+
                 for _, mod_name, is_mod_a_pkg in pkgutil.iter_modules(path=[path.join(definitions.package_dir, sub_pkg_name)]):
+                #for _, mod_name, is_mod_a_pkg in pkgutil.iter_modules(sub_pkg):
+
                     if not is_mod_a_pkg:
                         mod = f'{path.basename(definitions.package_dir)}.{sub_pkg_name}.{mod_name}'
 
                         # import class and get info
-                        i_mod = importlib.import_module(mod)
+                        i_mod = self._import_module_from_string(mod)
                         for class_name, class_obj in inspect.getmembers(i_mod):
                             if inspect.isclass(class_obj) and issubclass(class_obj, _RootParameterBaseClass) and class_obj.__module__ == mod:
                                 # local classes only
@@ -137,11 +144,16 @@ class ClassImporter():
 
                 # sort keys into alphabetical order for documetation gerneration
                 tree[sub_pkg_name] = dict(sorted(tree[sub_pkg_name].items()))
+        ml.progress_marker(f'Built {definitions.package_fancy_name} package tree', start_time=t0,tabs=2)
         return tree
 
+    def _import_module_from_string(self, mod):
+        m = importlib.import_module(mod)
+        return m
     def build_short_and_full_name_maps(self, class_tree):
         # build short and full name maps to oceantracker's parameter classes
         ml = self.msg_logger
+        t0= perf_counter()
         short_name_class_map = {}
         full_name_class_map = {}
         for class_role, classes in class_tree.items():
@@ -159,5 +171,5 @@ class ClassImporter():
                                    fatal_error=True, hint='class names must be unique in core OceanTracker code'
                                    )
                 full_name_class_map[mod_str] = info
-
+        ml.progress_marker(f'Built {definitions.package_fancy_name} sort name map', start_time=t0, tabs=2)
         return short_name_class_map, full_name_class_map

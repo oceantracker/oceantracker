@@ -39,7 +39,6 @@ class _BaseReader(ParameterBaseClass):
                                    'salinity': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'wind_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'bottom_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
-
                                    'water_velocity_depth_averaged': PLC(None, [str], fixed_len=2,
                                                                         doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
@@ -153,7 +152,7 @@ class _BaseReader(ParameterBaseClass):
         grid = self.build_hori_grid(nc, grid)
         grid = self.construct_grid_variables(grid)
 
-
+        pass
         if si.settings['display_grid_at_start']:
             from plot_oceantracker.plot_utilities import  display_grid
             display_grid(grid,1)
