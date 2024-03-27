@@ -365,7 +365,7 @@ if __name__ == '__main__':
                     debug_plots = args.debug_plots,
                     use_A_Z_profile = True,
                     debug=True,
-                    #numba_cache_code=True
+                    #NUMBA_cache_code=True
                     #display_grid_at_start=True
                        )
 

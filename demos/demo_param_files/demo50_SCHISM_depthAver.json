@@ -2,7 +2,7 @@
     "output_file_base": "demo50_SCHISM_depthAver",
     "debug": true,
     "time_step": 120,
-    "numba_cache_code": false,
+    "NUMBA_cache_code": false,
     "use_A_Z_profile": false,
     "regrid_z_to_uniform_sigma_levels": true,
     "reader": {

@@ -1,3 +1,4 @@
+NUMBA_cache_code: false
 debug: true
 dispersion:
   A_H: 0.2
@@ -40,7 +41,6 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-numba_cache_code: false
 output_file_base: demo56_SCHISM_3D_resupend_crtitical_friction_vel
 particle_properties:
   age_decay:

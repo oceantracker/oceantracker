@@ -53,7 +53,7 @@ class Solver(ParameterBaseClass):
         if write_tracks_time_step is None:
             nt_write_time_step_to_screen = 1
         else:
-            nt_write_time_step_to_screen = max(1,int(write_tracks_time_step/si.settings['time_step']))
+            nt_write_time_step_to_screen = max(1,int(write_tracks_time_step/si.settings.time_step))
 
         t0_model = perf_counter()
         free_wheeling = False
@@ -114,7 +114,7 @@ class Solver(ParameterBaseClass):
             if n_time_step % nt_write_time_step_to_screen == 0:
                 self.screen_output(ri.time_steps_completed, time_sec, t0_model, t0_step)
 
-            t2 = time_sec + ri.time_step * ri.model_direction
+            t2 = time_sec + si.settings.time_step * ri.model_direction
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             ri.time_steps_completed += 1
@@ -204,7 +204,7 @@ class Solver(ParameterBaseClass):
         part_prop['cell_search_status'].set_values(si.cell_search_status_flags['ok'], is_moving)
 
         # do time step
-        dt = si.run_info.time_step*si.run_info.model_direction
+        dt = si.settings.time_step*si.run_info.model_direction
         self.RK_step(time_sec, dt,is_moving)
 
         # for failed walks try half step
@@ -310,7 +310,7 @@ class Solver(ParameterBaseClass):
         s += si.core_roles.field_group_manager.screen_info()
 
         t = abs(time_sec - ri.start_time)
-        s += ' Day ' + ('-' if ri.backtracking else '+')
+        s += ' Day ' + ('-' if si.settings.backtracking else '+')
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(time_sec) + ':'
         s +=   si.core_roles.particle_group_manager.screen_info()

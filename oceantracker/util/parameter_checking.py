@@ -225,7 +225,7 @@ class ParameterListChecker(object):
                                    crumbs= crumb_trail,
                                    hint = 'acceptable types within are list= '+ str(info['acceptable_types']), fatal_error=True)
 
-        # merge non vector lists, user, base and default lists
+        # merge lists, user, base and default lists
         # two types of list merge, appendable or required max size
         ul = [] if user_list is None else deepcopy(user_list)
         dl = [] if info['default_list'] is None else deepcopy(info['default_list'])
@@ -243,7 +243,7 @@ class ParameterListChecker(object):
         elif info['fixed_len'] is not None:
             complete_list = info['fixed_len']*[None]
             complete_list[:len(dl)] = dl
-            complete_list[:len(ul)] = ul # over write with user/case_lit param
+            complete_list[:len(ul)] = ul # overwrite with user/case_lit param
             if complete_list == info['fixed_len']*[None]: complete_list=[] # make empty if nothing set
 
         # check each of the list items

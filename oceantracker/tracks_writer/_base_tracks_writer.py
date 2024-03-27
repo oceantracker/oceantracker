@@ -52,7 +52,7 @@ class _BaseWriter(ParameterBaseClass):
         params = self.params
         # set up write schedule
         if params['update_interval'] is None :
-            params['update_interval'] = si.run_info.time_step
+            params['update_interval'] = si.settings.time_step
 
         si.add_scheduler_to_class('write_scheduler', self, interval=self.params['update_interval'], caller=self)
 

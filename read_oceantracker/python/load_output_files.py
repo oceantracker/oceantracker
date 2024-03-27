@@ -109,8 +109,9 @@ def _extract_useful_info(case_info, d):
         prg_info = case_info['release_groups']
         prg_info['release_group_name_list'] = [str(n) for n in case_info['release_groups'].keys()]
 
-    d.update( particle_status_flags =case_info['particle_status_flags'], particle_release_groups= prg_info)
-    d['full_case_params'] = case_info['full_case_params']
+    d.update( particle_status_flags =case_info['particle_status_flags'],
+              particle_release_groups= prg_info)
+
     return d
 
 def load_concentration_data(case_info_file_name, name= None):
@@ -127,16 +128,18 @@ def load_grid(case_info_file_name):
     grid_file = path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['grid'])
     d = read_ncdf_output_files.read_grid_file(grid_file)
 
-    # load  grid outline and convert outline to numpy arrays
-    grid_outline_file = path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['grid_outline'])
-    d['grid_outline'] = read_ncdf_output_files.read_grid_outline_file(grid_outline_file)
+    if 'grid_outline' not in d:
+        # todo deprecated from version 0.5, data now in netcdf grid file
+        # load  json grid outline and convert outline to numpy arrays
+        grid_outline_file = path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['grid_outline'])
+        d['grid_outline'] = read_ncdf_output_files.read_grid_outline_file(grid_outline_file)
 
-    # make outline list np arrays for plotting
-    for key in d['grid_outline']['domain']:
-        d['grid_outline']['domain'][key] = np.asarray(d['grid_outline']['domain'][key])
-    for n in range(len(d['grid_outline']['islands'])):
-        for key in  d['grid_outline']['islands'][n]:
-            d['grid_outline']['islands'][n][key]= np.asarray( d['grid_outline']['islands'][n][key])
+        # make outline list np arrays for plotting
+        for key in d['grid_outline']['domain']:
+            d['grid_outline']['domain'][key] = np.asarray(d['grid_outline']['domain'][key])
+        for n in range(len(d['grid_outline']['islands'])):
+            for key in  d['grid_outline']['islands'][n]:
+                d['grid_outline']['islands'][n][key]= np.asarray( d['grid_outline']['islands'][n][key])
 
     return d
 

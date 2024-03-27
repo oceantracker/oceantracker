@@ -7,7 +7,9 @@ def find_file_format_and_file_list(reader_params, class_importer, msg_logger, cr
     # first see if it matches known formats
     crumbs += '> find_file_format_and_file_list'''
     if 'class_name' in reader_params:
-        reader = class_importer.new_make_class_instance_from_params( reader_params,  default_classID='reader', check_for_unknown_keys=False)
+        reader = class_importer.new_make_class_instance_from_params('reader', reader_params,  default_classID='reader', check_for_unknown_keys=False)
+        if reader is None:
+            msg_logger.msg(f'Error loading given reader  hydro-model files of type  "{reader_params["class_name"]}"', exit_now= True)
         file_list = reader.get_file_list()
         return reader_params, file_list
 

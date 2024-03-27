@@ -40,7 +40,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # setup shared info and message logger
         si._setup() # clear out classes from class instance of SharedInfo if running series of mains
         si.msg_logger.set_screen_tag(f'C{run_builder["caseID"]:03d}')
-        si.msg_logger.settings(max_warnings=run_builder['working_params']['settings']['max_warnings'])
+        si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml = si.msg_logger # shortcut for logger
 
         # merge settings with defaults
@@ -51,7 +51,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         ri = si.run_info
         for key in si.settings.possible_values():
             setattr(si.settings, key, si.working_params['settings'][key])
-
 
 
         # set numba config environment variables, before any import of numba, eg by readers,
@@ -202,7 +201,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                       + si.run_info.output_file_base
                                       + ' started: ' + str(d0)
                                       + ', ended: ' + str(datetime.now()))
-        si.msg_logger.msg('Elapsed time =' + str(datetime.now() - d0), tabs=3)
+        si.msg_logger.msg('Computational time =' + str(datetime.now() - d0), tabs=3)
         si.msg_logger.print_line()
 
         self.close()  # close al classes and msg logger
@@ -280,9 +279,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         last_time = []
 
         # useful run info
-
-        ri.backtracking = si.settings['backtracking']
-        ri.model_direction = -1 if ri.backtracking else 1
+        ri.model_direction = -1 if si.settings.backtracking else 1
         ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
         md = ri.model_direction
 
@@ -300,17 +297,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
 
         # clip end time to be within hincast
-        if ri.backtracking:
+        if si.settings.backtracking:
             ri.end_time = max(ri.end_time, si.hindcast_info['start_time'])
         else:
             ri.end_time = min(ri.end_time, si.hindcast_info['end_time'])
 
         # make release times array
         duration =  abs(ri.end_time-ri.start_time)
-        if si.working_params['settings']['max_run_duration'] is not None:  duration = min(si.working_params['settings']['max_run_duration'],duration)
+        if si.settings.max_run_duration is not None:  duration = min(si.settings.max_run_duration,duration)
 
-        ri.time_step = si.settings.time_step
-        ri.times    = ri.start_time  + md * np.arange(0., duration + ri.time_step, ri.time_step)
+        ri.times    = ri.start_time  + md * np.arange(0., duration + si.settings.time_step, si.settings.time_step)
         ri.end_time = ri.times[-1] # adjust end to nearest time step
 
         # setup scheduler for each release group, how start and model times known
@@ -372,8 +368,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.add_core_role('solver', core_role_params['solver'], crumbs='core class solver ')
 
 
-        if  si.settings['time_step'] >  si.hindcast_info['time_step']:
-            si.msg_logger.msg(f'Results may not be accurate as, time step param={si.settings["time_step"]:2.0f} sec,  > hydo model time step = {si.hindcast_info["time_step"]:2.0f}',
+        if  si.settings.time_step >  si.hindcast_info['time_step']:
+            si.msg_logger.msg(f'Results may not be accurate as, time step param={si.settings.time_step:2.0f} sec,  > hydo model time step = {si.hindcast_info["time_step"]:2.0f}',
                               warning=True)
 
     def _finalize_classes(self):
@@ -434,10 +430,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'version_info': get_versions_computer_info.get_code_version(),
             'computer_info': get_versions_computer_info.get_computer_info(),
             'file_written': datetime.now().isoformat(),
+             'settings' : si.settings.as_dict(),
              'run_info' : info,
              'hindcast_info': si.core_roles.field_group_manager.info,
-             'working_params': si.working_params,
-             'full_case_params': si.working_params,
              'particle_status_flags': si.particle_status_flags.as_dict(),
              'release_groups' : {},
              'particle_release_group_user_maps': si.core_roles.particle_group_manager.get_release_group_userIDmaps(),
@@ -447,6 +442,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'function_timers': {},
              'class_roles_info': {}, }
 
+        # sweep up any output files from al used classes
         for key, i in si.roles.as_dict().items():
             if i is None : continue
 
@@ -467,16 +463,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if hasattr(i, 'scheduler_info'):
                 d['class_roles_info'][key]['scheduler_info'] = i.scheduler_info
 
-        # add basic release group info
-        #do do
-        for key, item in si.roles.release_groups.items():
-            # grid does not have points pararm
-
-            rginfo={'points': item.points if hasattr(item,'points') else item.params['points'],
-                    'is_polygon': hasattr(item,'polygon')}
-            d['release_groups'][key]= rginfo
-
-        # sort function times into order
         keys= []
         times=[]
         for key, f in profiling_util.func_timings.items():

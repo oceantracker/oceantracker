@@ -1,11 +1,9 @@
+NUMBA_cache_code: false
 add_date_to_run_output_dir: false
 debug: true
 dispersion:
   A_H: 0.1
-dispersion_miss-spelt:
-  A_H: 0.1
 max_run_duration: 259200
-numba_cache_code: false
 output_file_base: demo03_heatmaps
 particle_group_manager:
   particle_buffer_chunk_size: 20000
@@ -52,7 +50,7 @@ particle_statistics:
         - 5489972.7479
     update_interval: 1800
 reader:
-  class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
+  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
     node: nodes
     time: time

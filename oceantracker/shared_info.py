@@ -16,8 +16,13 @@ from os import path
 # useful utility classes to enable auto complete
 class _Object(object):  pass
 class _SharedStruct():
-    # holds varives as clas attributes to enable auto complete hints and give iterators over these attributes
+    '''
+    holds variables as clas attributes to enable auto complete hints
+    and give iterators over these variables
 
+    allows both  instance.backtracking and i['instance.backtracking']
+
+    '''
     def __init__(self):
         # add  class variables in ._class_.__dict__
         # to instance __dict__ by adding attributes
@@ -143,12 +148,10 @@ class _CellSearchStatusFlags(_SharedStruct):
 
 class _RunInfo(_SharedStruct):
     is3D_run = None
-    backtracking= None
     model_direction = None
     free_wheeling = None
     start_time = None
     end_time = None
-    time_step = None
     current_model_time = None
     current_model_date = None
     current_model_time_step = 0

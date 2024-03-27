@@ -1,12 +1,10 @@
+NUMBA_cache_code: false
 add_date_to_run_output_dir: false
 backtracking: true
 block_dry_cells: true
 debug: true
 dispersion:
   A_H: 0.1
-dispersion_miss-spelt:
-  A_H: 0.1
-numba_cache_code: false
 output_file_base: demo06_reefstranding
 particle_properties:
   Oxygen:
@@ -43,7 +41,7 @@ particle_statistics:
     update_interval: 1800
     use_release_group_polygons: true
 reader:
-  class_name: oceantracker.reader.generic_ncdf_reader.GenericNCDFreader
+  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
     node: nodes
     time: time

@@ -1,3 +1,4 @@
+NUMBA_cache_code: false
 debug: true
 dispersion:
   A_H: 0.2
@@ -19,7 +20,6 @@ integrated_model:
   - 10800
   update_interval: 705
   write_intermediate_results: true
-numba_cache_code: false
 output_file_base: demo70_LCS_test
 particle_properties:
   age_decay:

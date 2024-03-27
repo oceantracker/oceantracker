@@ -1,8 +1,8 @@
+NUMBA_cache_code: false
 debug: true
 dispersion:
   A_H: 0.2
   A_V: 0.001
-numba_cache_code: false
 output_file_base: demo60_SCHISM_3D_decaying_particle
 particle_properties:
   age_decay:

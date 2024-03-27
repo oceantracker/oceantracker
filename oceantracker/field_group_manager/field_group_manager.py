@@ -274,6 +274,7 @@ class FieldGroupManager(ParameterBaseClass):
     def _setup_hydro_reader(self,reader_builder):
 
         info = self.info
+
         self.reader  = si.make_instance_from_params('reader', reader_builder['params'],
                                         si.msg_logger,caller=self,
                                         crumbs=f'setup_hydro_fields> reader class ')
@@ -288,6 +289,7 @@ class FieldGroupManager(ParameterBaseClass):
         # see if mapped any feilds are present
         f = {}
         for name, item in reader.params['field_variable_map'].items():
+            if item is None or (type(item)==list and len(item)==0): continue # pass oif not given
             file_var_name = item[0] if type(item) ==list else  item # only check first item for vectors
             f[name] = True if nc.is_var(file_var_name) else False
         info['found_mapped_fields'] = f
@@ -494,11 +496,21 @@ class FieldGroupManager(ParameterBaseClass):
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
 
         if 'water_depth' in self.fields:
-            nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
-        nc.close()
+            pass
+            #nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
 
-        output_files['grid_outline'] = output_files['output_file_base'] + '_' + key + '_outline.json'
-        json_util.write_JSON(path.join(output_files['run_output_dir'], output_files['grid_outline']), grid['grid_outline'])
+        nc.write_a_new_variable('domain_outline_nodes', grid['grid_outline']['domain']['nodes'], ('domain_outline_nodes_dim',),
+                                description='node numbers in order around outer model domain')
+
+        if len( grid['grid_outline']['islands']) > 0:
+            # write any islands
+            array_list = [ a['nodes'] for a in grid['grid_outline']['islands']]
+            nc.write_packed_1Darrays('island_outline_nodes', array_list, description='node numbers in order around islands')
+
+        nc.close()
+        # pre version 0.5 json outline
+        #output_files['grid_outline'] = output_files['output_file_base'] + '_' + key + '_outline.json'
+        #json_util.write_JSON(path.join(output_files['run_output_dir'], output_files['grid_outline']), grid['grid_outline'])
 
     def screen_info(self):
         info = self.info

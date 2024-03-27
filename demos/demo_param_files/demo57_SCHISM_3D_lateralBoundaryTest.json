@@ -2,7 +2,7 @@
     "output_file_base": "demo57_SCHISM_3D_lateralBoundaryTest",
     "debug": true,
     "time_step": 120,
-    "numba_cache_code": false,
+    "NUMBA_cache_code": false,
     "use_A_Z_profile": true,
     "regrid_z_to_uniform_sigma_levels": true,
     "reader": {
@@ -107,7 +107,7 @@
             ]
         }
     },
-    "use_random_seed": false,
+    "USE_random_seed": false,
     "velocity_modifiers": {
         "terminal_velocity": {
             "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",

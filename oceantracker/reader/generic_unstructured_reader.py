@@ -1,59 +1,21 @@
 import numpy as np
-from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util, json_util
-from os import path, walk
-from datetime import datetime
-from copy import copy
-from time import perf_counter
-from oceantracker.util.basic_util import nopass
-from oceantracker.reader.util.reader_util import append_split_cell_data
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
-
-from oceantracker.util import  cord_transforms
-from oceantracker.reader.util import shared_reader_memory_util
-from oceantracker.util.profiling_util import function_profiler
-from oceantracker.util import triangle_utilities
-from oceantracker.util.triangle_utilities import split_quad_cells
-from oceantracker.fields._base_field import  CustomFieldBase , ReaderField
 from oceantracker.reader.util import reader_util
-from oceantracker.reader._base_reader import _BaseReader
+from oceantracker.reader._base_generic_reader import _BaseGenericReader
 from copy import  deepcopy
 
 from oceantracker.shared_info import SharedInfo as si
 
-class GenericNCDFreader(_BaseReader):
+class GenericUnstructuredReader(_BaseGenericReader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
-        self.add_default_params({
-            'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-            'grid_variable_map': {'time': PVC('time',str, doc_str='time variable nae in file' ),
-                               'x': PLC(['x', 'y'], [str], fixed_len=2),
-                               'zlevel': PVC(None, str),
-                               'triangles': PVC(None, str),
-                               'bottom_cell_index': PVC(None, str),
-                               'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-             'field_variable_map': {'water_velocity': PLC(['u', 'v', 'w'], [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
-                                'tide': PVC('elev', str, doc_str='maps standard internal field name to file variable name'),
-                                'water_depth': PVC('depth', str, is_required=True,doc_str='maps standard internal field name to file variable name'),
-                                'water_temperature': PVC('temp', str,doc_str='maps standard internal field name to file variable name'),
-                                'salinity': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
-                                'wind_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
-                                'bottom_stress': PVC(None, str,doc_str='maps standard internal field name to file variable name'),
-                                'water_velocity_depth_averaged': PLC(['u', 'v'], [str], fixed_len=2,
-                                                                        doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
-
-                                   },
-            'dimension_map': {'time': PVC('time', str, is_required=True),
-                              'node': PVC('node', str),
-                              'z': PVC(None, str,doc_str='name of dim for vertical layer boundaries'),
-                              'z_water_velocity': PVC('z', str, doc_str='z dimension of water velocity'),
-                              'vector2D': PVC(None, str),
-                              'vector3D': PVC(None, str)},
-            'one_based_indices' :  PVC(False, bool,doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
-            'isodate_of_hindcast_time_zero': PVC('1970-01-01', 'iso8601date'),
-             })  # list of normal required dimensions
+        self.add_default_params(
+                dimension_map=dict(node= PVC('node', str)),
+                grid_variable_map =dict( triangles= PVC(None, str)),
+             )  # list of normal required dimensions
 
         self.info['field_variable_info'] = {}
         self.info['buffer_info'] ={}

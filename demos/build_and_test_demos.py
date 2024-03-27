@@ -25,14 +25,14 @@ poly_points_large=[[1597682.1237, 5489972.7479],
                         [1597300, 5487000],
                        [1597682.1237, 5489972.7479]]
 
-import oceantracker.reader.generic_ncdf_reader
+from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredReader
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
-    'numba_cache_code': False,
+    'NUMBA_cache_code': False,
 
    'time_step' : 900,
     'debug': True,
-    'reader': {"class_name": 'oceantracker.reader.generic_ncdf_reader.GenericNCDFreader',
+    'reader': {"class_name": 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 'input_dir': '.',
                 'file_mask': 'demoHindcast2D*.nc',
                 'dimension_map': {'time': 'time', 'node': 'nodes'},
@@ -42,7 +42,6 @@ demo_base_params={'output_file_base' : None,
                 'isodate_of_hindcast_time_zero': '2020-06-01'},
     'user_note':'test of notes',
     #'numba_caching': False,
-    'dispersion_miss-spelt': {'A_H': .1},
     'dispersion': {'A_H': .1},
 
     #'pre_processing':{'my_polygons':{'class_name': 'oceantracker.pre_processing.read_geomerty.ReadCoordinates',
@@ -236,7 +235,7 @@ params.append(p10)
 # case 50 schism basic
 schsim_base_params=\
 {'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,
-            'numba_cache_code': False,'use_A_Z_profile' : False,
+            'NUMBA_cache_code': False,'use_A_Z_profile' : False,
             'regrid_z_to_uniform_sigma_levels': True,
                 #'numba_caching': False,
         'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
@@ -388,7 +387,7 @@ params.append(p62)
 p70 = deepcopy(schsim_base_params)
 del p70['event_loggers']
 p70.update({'output_file_base' :'demo70_LCS_test',
-            #'numba_cache_code': True,
+            #'NUMBA_cache_code': True,
             'time_step':600 })
 
 p70['integrated_model']={'class_name': 'LagarangianCoherentStructuresFTLEheatmaps2D',

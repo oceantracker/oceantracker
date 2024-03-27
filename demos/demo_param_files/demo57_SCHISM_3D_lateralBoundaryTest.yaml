@@ -1,3 +1,5 @@
+NUMBA_cache_code: false
+USE_random_seed: false
 debug: true
 dispersion:
   A_H: 10
@@ -40,7 +42,6 @@ event_loggers:
       - - 1597682.1237
         - 5489972.7479
       user_polygon_name: B
-numba_cache_code: false
 output_file_base: demo57_SCHISM_3D_lateralBoundaryTest
 particle_properties:
   age_decay:
@@ -63,7 +64,6 @@ release_groups:
 root_output_dir: output
 time_step: 120
 use_A_Z_profile: true
-use_random_seed: false
 velocity_modifiers:
   terminal_velocity:
     class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity

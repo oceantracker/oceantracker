@@ -99,6 +99,9 @@ class OceanTracker():
         existing_params = self._get_case_params_to_work_on(case)
         if class_role not in existing_params: existing_params[class_role] = {}
 
+        #add class name  if given
+        if class_name is not None: existing_params[class_role]['class_name'] = class_name
+
         # add new params to core or other roles
         if class_role in shared_info.core_roles.possible_values():
             existing_params[class_role].update(kwargs)
@@ -294,13 +297,13 @@ class _OceanTrackerRunner(object):
             'root_output_dir', 'output_file_base', 'add_date_to_run_output_dir',
             'backtracking', 'debug', 'dev_debug_plots',
             'EPSG_code_metres_grid', 'write_tracks', 'display_grid_at_start',
-            'numba_cache_code', 'NUMBA_function_cache_size',
+            'NUMBA_cache_code', 'NUMBA_function_cache_size',
             'processors', 'multiprocessing_case_start_delay',
             'max_warnings', 'USE_random_seed',
             'write_dry_cell_flag']
 
         # split base_case_params into shared and case params
-        base_working_params = setup_util.decompose_params(base_case_params, ml, caller=self, crumbs='_run_parallel decompose base case params')
+        base_working_params = setup_util.decompose_params(shared_info, base_case_params, ml, caller=self, crumbs='_run_parallel decompose base case params')
 
         comp_info= get_versions_computer_info.get_computer_info()
 
@@ -311,14 +314,10 @@ class _OceanTrackerRunner(object):
 
         for n_case, case_params in enumerate(case_list_params):
 
-            case_working_params = setup_util.decompose_params(case_params, msg_logger=ml, caller=self)
+            case_working_params = setup_util.decompose_params(shared_info,case_params, msg_logger=ml, caller=self)
             case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, case_working_params, ml,
                                                                                  crumbs=f'_run_parallel case #[{n_case}]', caller=None)
 
-            # get any missing settings from defaults after merging with base case settings
-            case_working_params['settings'] = merge_params_with_defaults(case_working_params['settings'],
-                                                                         defintions.all_setting_defaults, ml, crumbs=f'_run_parallel case #[{n_case}]',
-                                                                         caller=self, check_for_unknown_keys=True)
 
 
             ml.exit_if_prior_errors(f'Errors in setting up case #{n_case}')
@@ -377,13 +376,14 @@ class _OceanTrackerRunner(object):
 
     def _get_hindcast_file_info(self, run_builder ):
         # created a dict which can be used to build a reader
-        t0= perf_counter()
+
         ml = msg_logger
         working_params = run_builder['working_params']
         reader_params =  working_params['core_roles']['reader']
         crumbs = 'Getting hydro-model file info.'
         class_importer = class_importer_util.ClassImporter(shared_info, msg_logger, crumbs=crumbs +'> build class_importer', caller=self)
 
+        t0 = perf_counter()
         if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
             ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',
                                     fatal_error=True, exit_now=True , crumbs=crumbs)

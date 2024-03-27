@@ -198,7 +198,7 @@ def add_map_scale_bar(axis_lims, ax=plt.gca()):
                                pad=0.2,
                                color='black',
                                frameon=False,
-                               size_vertical = 1,
+                               size_vertical = .005,
                                label_top=False,
                                fontproperties=fontprops)
 

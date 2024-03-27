@@ -24,7 +24,7 @@ class RandomWalk(_BaseTrajectoryModifer):
 
     def initial_setup(self):
         info = self.info
-        dt = si.settings['time_step']
+        dt = si.settings.time_step
         info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
         if not si.run_info.is3D_run:
             info['random_walk_size'] = info['random_walk_size'][:2]
