@@ -100,7 +100,7 @@ class OceanTracker():
         if class_role not in existing_params: existing_params[class_role] = {}
 
         #add class name  if given
-        if class_name is not None: existing_params[class_role]['class_name'] = class_name
+        if class_name is not None: kwargs['class_name'] = class_name
 
         # add new params to core or other roles
         if class_role in shared_info.core_roles.possible_values():
@@ -115,8 +115,7 @@ class OceanTracker():
                 name = f'{s}_{len(existing_params[class_role]):04d}'
 
             if 'name' in existing_params[class_role]:# auto name
-                msg_logger.msg(f'Class role  "{class_role}" already has a component named "{name}", only using last one given',
-                           warning= True)
+                msg_logger.msg(f'Class role  "{class_role}" already has a component named "{name}", only using last one given',   warning= True)
 
             # add users class name or None
             existing_params[class_role][name] = dict(class_name=class_name)
@@ -131,7 +130,7 @@ class OceanTracker():
             return self.params
         else:
             if type(case) != int or case < 0:
-                msg_logger.msg(f'Case keyword must be an integer >0', fatal_error=True, hint=f'Got value :{str(case)}')
+                msg_logger.msg(f'Case keyword must be an integer >=0', fatal_error=True, hint=f'Got value :{str(case)}')
 
 
             if case < len(self.case_list_params):
@@ -319,7 +318,6 @@ class _OceanTrackerRunner(object):
                                                                                  crumbs=f'_run_parallel case #[{n_case}]', caller=None)
 
 
-
             ml.exit_if_prior_errors(f'Errors in setting up case #{n_case}')
             case_run_builder = deepcopy(run_builder)
             case_run_builder['caseID'] = n_case
@@ -330,7 +328,6 @@ class _OceanTrackerRunner(object):
 
             # now add builder to list to run
             case_run_builder_list.append(case_run_builder)
-
 
         # do runs num_processors
         ml.progress_marker(' oceantracker:multiProcessing: processors:' + str(num_processors))
