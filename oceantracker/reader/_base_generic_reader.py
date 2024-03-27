@@ -20,7 +20,8 @@ class _BaseGenericReader(_BaseReader):
                                'zlevel': PVC(None, str),
                                'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
 
-            'dimension_map': dict(time =PVC('time', str, is_required=True),
+            'dimension_map': dict(
+                            time =PVC('time', str, is_required=True),
                             z = PVC(None, str,doc_str='name of dim for vertical layer boundaries'),
                             z_water_velocity= PVC('z', str, doc_str='z dimension of water velocity'),
                             vector2D = PVC(None, str),

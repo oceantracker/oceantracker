@@ -176,7 +176,7 @@ def merge_settings(settings, default_settings, settings_to_merge, msg_logger, cr
         pass
     return settings
 
-def merge_base_and_case_working_params(base_working_run_builder, case_working_params, msg_logger, crumbs='', caller=None):
+def merge_base_and_case_working_params(base_working_params, case_working_params, msg_logger, crumbs='', caller=None):
 
     # check any case settings are not in the ones that can only be shared
     for key in case_working_params['settings'].keys():
@@ -186,18 +186,18 @@ def merge_base_and_case_working_params(base_working_run_builder, case_working_pa
                           hint='Move parameter from cases to the base case', caller=caller, fatal_error=True)
 
     # merge the settings first
-    for key, item in base_working_run_builder['settings'].items():
+    for key, item in base_working_params['settings'].items():
         if key not in case_working_params:
             case_working_params['settings'][key] = item
 
     # merge core classes
-    for key, item in base_working_run_builder['core_roles'].items():
+    for key, item in base_working_params['core_roles'].items():
         if key not in case_working_params:
             case_working_params['core_roles'][key]= item
     # class dicts
-    for role, role_dict in base_working_run_builder['roles_dict'].items():
+    for role, role_dict in base_working_params['roles_dict'].items():
         # loop over named base case classes
-        for name, item in  base_working_run_builder['roles_dict'][role].items():
+        for name, item in  base_working_params['roles_dict'][role].items():
             if name not in case_working_params['roles_dict'][role]:
                 case_working_params['roles_dict'][role][name] = item
             else:
