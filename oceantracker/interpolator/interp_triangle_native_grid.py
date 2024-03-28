@@ -299,11 +299,11 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                         #grid['water_depth_triangles'],
                                         fields['water_depth'].data.ravel(),
                                         fields['tide'].data,
-                                        si.run_info.minimum_total_water_depth,
+                                        si.settings.minimum_total_water_depth,
                                         grid['sigma'], grid['sigma_map_nz_interval_with_sigma'],
                                         n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                         current_buffer_steps, fractional_time_steps,
-                                        active, si.run_info.z0)
+                                        active, si.settings.z0)
         else:
             # natve slayer option
             tri_interp_util.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
@@ -312,7 +312,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
                                         n_cell, status, bc_cords,nz_cell,z_fraction,z_fraction_water_velocity,
                                         current_buffer_steps,fractional_time_steps,
                                         self.walk_counts,
-                                        active,  si.run_info.z0)
+                                        active,  si.settings.z0)
         si.block_timer('Find cell, vertical walk', t0)
 
     def find_hori_cell(self,grid, fields,  xq, current_buffer_steps,fractional_time_steps,open_boundary_type, active):

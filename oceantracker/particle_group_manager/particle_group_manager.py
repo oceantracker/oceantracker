@@ -208,7 +208,7 @@ class ParticleGroupManager(ParameterBaseClass):
         i = si.add_user_class('time_varying_info',name,params,  class_type='manual_update',  crumbs=' setup time varing reader info')
         i.initial_setup()
 
-        if si.run_info.write_tracks and i.params['write']:
+        if si.settings.write_tracks and i.params['write']:
             w = si.core_roles.tracks_writer
             w.create_variable_to_write(name, 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
 
@@ -242,7 +242,7 @@ class ParticleGroupManager(ParameterBaseClass):
                                            crumbs=crumbs +' adding "particle_properties of type=' + prop_type)
         i.initial_setup()
 
-        if si.run_info.write_tracks:
+        if si.settings.write_tracks:
             # tweak write flag if in param lists
             w = si.core_roles.tracks_writer
             if name in w.params['turn_off_write_particle_properties_list']: i.params['write'] = False
@@ -319,16 +319,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
                 info['particles_in_buffer'] = num_alive # record new number in buffer
 
-    def get_release_group_userIDmaps(self):
-        # make dict masp from userId and user_release_group_name to sequence number
-        releaseGroups_user_maps = {'particle_release_userRelease_groupID_map': {} , 'particle_release_user_release_group_name_map': {}}
 
-        #todo use i.info['nsequence'] for rg id
-        for n, i in enumerate(si.roles.release_groups.values()):
-            releaseGroups_user_maps['particle_release_userRelease_groupID_map'][str(i.params['user_release_groupID'])] = n
-            releaseGroups_user_maps['particle_release_user_release_group_name_map'][str(i.params['user_release_group_name'])] = n
-
-        return releaseGroups_user_maps
 
     # below return  info about particle group
     #__________________________________

@@ -8,6 +8,7 @@ import  sys
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--test',type=int)
+    parser.add_argument('--variant',type=int)
     parser.add_argument('-reference_case', action='store_true')
     parser.add_argument('-save_plots', action='store_true')
 

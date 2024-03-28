@@ -36,11 +36,11 @@ class VerticalGradient(CustomFieldBase):
         if 'sigma' in grid:
             _calc_field_vert_grad_from_sigma_levels(fields[self.params['name_of_field']].data, grid['sigma'],
                                                fields['tide'].data,fields['water_depth'].data,
-                                               grid['bottom_cell_index'], si.run_info.z0, fields[self.info['name']].data)
+                                               grid['bottom_cell_index'], si.settings.z0, fields[self.info['name']].data)
         else:
             # z levels
             _calc_field_vert_grad_from_zlevels(fields[self.params['name_of_field']].data,grid['zlevel'],
-                                    grid['bottom_cell_index'], si.run_info.z0, fields[self.info['name']].data)
+                                    grid['bottom_cell_index'], si.settings.z0, fields[self.info['name']].data)
 
 @njitOT
 def _calc_field_vert_grad_from_zlevels(field4D,zlevel,bottom_cell_index,z0,gradient_field):

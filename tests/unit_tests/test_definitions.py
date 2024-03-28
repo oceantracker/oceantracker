@@ -7,6 +7,12 @@ import shutil
 import numpy as np
 from oceantracker import definitions
 
+def set_output_loc(fn):
+    d =  dict(output_file_base=path.split(fn)[-1].split('.')[0],
+            root_output_dir=path.join(path.dirname(fn), 'output'),
+            )
+    return d
+
 def base_settings(fn):
     d =  dict(output_file_base=path.split(fn)[-1].split('.')[0],
             root_output_dir=path.join(path.dirname(fn), 'output'),
@@ -21,7 +27,13 @@ reader1=   dict( # folder to search for hindcast files, sub-dirs will, by defaul
                  input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                  file_mask='demoHindcastSchism*.nc')  # file mask to search for
 
-
+reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.GenericStructuredReader',
+             input_dir=f'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\generic2D_structured_DoubleGyre',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+             file_mask='Double_gyreV1.nc',
+             dimension_map=dict(time='t', rows='y', cols='x'),
+             grid_variable_map=dict(time='Time', x=['x_grid', 'y_grid']),
+             field_variable_map=dict(water_depth='Depth', water_velocity=['U', 'V'], tide='Tide'),
+             hydro_model_cords_in_lat_long=False)
 
 rg0 = dict( name='my_point_release',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use

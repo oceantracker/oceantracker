@@ -36,7 +36,10 @@ class _BaseModel(ParameterBaseClass):
             si.msg_logger.msg('Can only call "add_class" method from within "add_settings_and_class_params" method', fatal_error=True, exit_now=True,
                               crumbs=' add_class method:', caller=self)
 
-        if class_role in ci.class_dicts_list:
+
+        if class_role in si.roles.possible_values():
+
+            if class_role not in  si.working_params['roles_dict']:  si.working_params['roles_dict'][class_role] ={}
             # those with mutil classes
             classes_in_role = si.working_params['roles_dict'][class_role]
             if name is None:
@@ -46,7 +49,7 @@ class _BaseModel(ParameterBaseClass):
 
             classes_in_role[name] = kwargs
 
-        elif class_role in si.core_roles:
+        elif class_role in si.core_roles.possible_values():
             # update core class params, no name needed
             si.working_params['roles_dict'][class_role] = kwargs
             #si.msg_logger.msg(f'can not core class paramters in in role {class_role} used in "add_settings_and_class_params" method', fatal_error=True, exit_now=True,
@@ -63,9 +66,7 @@ class _BaseModel(ParameterBaseClass):
         # remove any existing release groups
     def clear_class_role(self, class_role):
         # clears all user added classes in thatrole, to alolw model to add its version
-
-
-        if class_role in ci.class_dicts_list:
+        if class_role in si.roles.possible_values():
             if len(si.working_params['roles_dict'][class_role]) > 0:
                 si.msg_logger.msg(f'Found existing classes in role {class_role} cannot run with existing classes, these have been removed',
                                   warning=True, caller=self, crumbs='clear_class_role> ')

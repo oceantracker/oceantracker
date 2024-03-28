@@ -145,6 +145,5 @@
     },
     "write_tracks": false,
     "max_run_duration": 259200,
-    "junk": "h",
     "root_output_dir": "output"
 }

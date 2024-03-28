@@ -44,7 +44,6 @@ event_loggers:
       user_polygon_name: B
 max_particles: 1000
 output_file_base: demo08_particle_splitting
-particle_buffer_size: 5000
 particle_properties:
   age_decay:
     class_name: oceantracker.particle_properties.age_decay.AgeDecay

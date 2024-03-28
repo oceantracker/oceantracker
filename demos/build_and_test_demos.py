@@ -114,7 +114,6 @@ params.append(p3)
 
 # demo 4 age based heat maps
 p4 = deepcopy(p3)
-p4['junk']='h'
 p4['particle_statistics'] = {}
 p4['particle_statistics']['age_grid'] =  {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
              'update_interval': 1800, 'particle_property_list': ['water_depth','water_depth_bad'],
@@ -193,8 +192,6 @@ params.append (p7)
 # demo 8, particle splitting animation
 p8 = deepcopy(p7)
 p8['max_particles'] = 10**3
-
-p8.update({'particle_buffer_size':  5000})
 
 p8['release_groups']={
         'P1':{'points': [[1594500, 5483500],[1594500, 5483500+3000]], 'pulse_size': 1, 'release_interval': 0}
