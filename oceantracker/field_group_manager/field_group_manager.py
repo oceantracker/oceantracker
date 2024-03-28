@@ -164,7 +164,7 @@ class FieldGroupManager(ParameterBaseClass):
         current_buffer_steps = np.zeros((2,), dtype=np.int32)
 
         hindcast_fraction = (time_sec - fi['first_time']) / (fi['last_time'] - fi['first_time'])
-        current_hydro_model_step = int((fi['n_time_steps_in_hindcast'] - 1) * hindcast_fraction)  # global hindcast time step
+        current_hydro_model_step = int((fi['time_steps_in_hindcast'] - 1) * hindcast_fraction)  # global hindcast time step
 
         # ring buffer locations of surounding steps
         current_buffer_steps[0] = current_hydro_model_step % bi['buffer_size']
@@ -472,6 +472,7 @@ class FieldGroupManager(ParameterBaseClass):
         d['duration'] = d['end_time']- d['start_time']
         d['start_date'] = time_util.seconds_to_isostr(d['start_time'])
         d['end_date'] = time_util.seconds_to_isostr(d['end_time'])
+        d['date_span'] = time_util.seconds_to_pretty_duration_string( abs(d['end_time']-d['start_time']) )
         return d
 
     def write_hydro_model_grid(self, gridID=None):

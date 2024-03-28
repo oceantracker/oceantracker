@@ -56,7 +56,7 @@ class Solver(ParameterBaseClass):
             nt_write_time_step_to_screen = max(1,int(write_tracks_time_step/si.settings.time_step))
 
         t0_model = perf_counter()
-        free_wheeling = False
+        ri.free_wheeling = False
         model_times = si.run_info.times
         fgm.update_reader(model_times[0]) # initial buffer fill
 
@@ -75,13 +75,13 @@ class Solver(ParameterBaseClass):
             num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
             if num_alive == 0:
                 #freewheel until more are released or end of run/hindcast
-                if not free_wheeling:
+                if not ri.free_wheeling:
                     # at start note
                     ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(time_sec)}, skipping time steps until more are released', note=True)
-                free_wheeling = True
+                ri.free_wheeling = True
                 continue
 
-            free_wheeling = False # has ended
+            ri.free_wheeling = False # has ended
 
            # alive particles so do steps
             ri.total_alive_particles += num_alive
@@ -107,7 +107,6 @@ class Solver(ParameterBaseClass):
             #  Main integration step
             #--------------------------------------
             self.do_time_step(time_sec, is_moving)
-            #self.kernal_solver(time_sec, is_moving)
             #--------------------------------------
 
             # print progress to screen
@@ -119,18 +118,19 @@ class Solver(ParameterBaseClass):
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             ri.time_steps_completed += 1
             si.block_timer('Time stepping',t0_step)
-            if abs(t2 - ri.start_time) > ri.duration:  break
+
+            if abs(t2 - ri.start_time) > ri.duration: break
 
 
         # write out props etc at last step
-        if n_time_step > 0:# if more than on set completed
-            self._pre_step_bookkeeping(n_time_step, t2)
+        if n_time_step > 0: # if more than on set completed
+            self._pre_step_bookkeeping(ri.time_steps_completed, t2) # update and record stuff from last step
             self.screen_output(ri.time_steps_completed, t2, t0_model,t0_step)
 
         ri.end_time = t2
         ri.model_end_date = t2.astype('datetime64[s]')
         ri.model_run_duration =  ri.end_time - ri.start_time
-        ri.computation_started =computation_started
+        ri.computation_started = computation_started
         ri.computation_ended = datetime.now()
         ri.computation_duration = datetime.now() -computation_started
 
@@ -182,7 +182,7 @@ class Solver(ParameterBaseClass):
             si.core_roles.integrated_model.update(n_time_step,time_sec)
 
         # write tracks
-        if si.run_info.write_tracks:
+        if si.settings.write_tracks:
             tracks_writer = si.core_roles.tracks_writer
             tracks_writer.open_file_if_needed()
             if new_particleIDs.size > 0:
@@ -276,8 +276,7 @@ class Solver(ParameterBaseClass):
         solver_util.euler_substep( x1, v_temp, velocity_modifier, dt2, is_moving, x2)
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity step 2
 
-        #print('xxxa1', x1[:5, 2], x2[:5, 2])
-        #print('xxxa2',v_temp[:5,2],part_prop['tide'].data[:5], part_prop['water_depth'].data[:5])
+
 
         # step 3, a second half step
         t2 = time_sec + 0.5 * dt
@@ -299,8 +298,7 @@ class Solver(ParameterBaseClass):
         solver_util.euler_substep( x1, v, velocity_modifier, dt, is_moving, x2)  # set final location directly to particle x property
 
         pass
-        #print('xxx1', x1[:5, 2], x2[:5, 2])
-        #print('xxx2',v[:5,2],part_prop['tide'].data[:5], part_prop['water_depth'].data[:5])
+
 
     def screen_output(self, nt, time_sec,t0_model, t0_step):
         ri = si.run_info

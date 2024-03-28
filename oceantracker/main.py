@@ -262,6 +262,7 @@ class _OceanTrackerRunner(object):
     def _main_run_end(self,case_info_files, num_case_errors,num_case_warnings,num_case_notes):
         # final info output
         ml = msg_logger
+
         self._write_run_info_json(case_info_files, self.start_t0)
 
         ml.show_all_warnings_and_errors()

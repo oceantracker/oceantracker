@@ -3,6 +3,7 @@ import traceback
 from time import  perf_counter
 from oceantracker.definitions import docs_base_url
 import difflib
+from time import sleep
 class GracefulError(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
@@ -150,6 +151,7 @@ class MessageLogger(object ):
             for m in self.errors_list:
                 self.msg(m)
             self.print_line()
+            sleep(1) # allow time for messages to print
             raise GracefulError('Fatal error cannot continue >>> ' +msg if msg is not None else '', hint='Check above or run.err file for errors')
 
     def print_line(self):

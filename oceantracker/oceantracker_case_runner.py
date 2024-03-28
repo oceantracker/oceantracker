@@ -43,6 +43,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml = si.msg_logger # shortcut for logger
 
+
         # merge settings with defaults
         si.working_params['settings'] = setup_util.merge_settings(si.working_params['settings'], si.default_settings, si.settings.possible_values(),
                                                                ml, crumbs= crumbs +'> case settings', caller=self)
@@ -67,9 +68,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         ri.run_output_dir = si.output_files['run_output_dir']
         ri.output_file_base = si.output_files['output_file_base']
         # move settings to run Info
-        ri.write_tracks = si.settings['write_tracks']
-        ri.z0 = si.settings['z0']
-        ri.minimum_total_water_depth = si.settings['minimum_total_water_depth']
+        ri.model_direction = -1 if si.settings.backtracking else 1
+        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
         # set up message logging
         output_files = run_builder['output_files']
@@ -104,6 +104,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # case set up
         try:
+            # setup fields to get hindcast info, ie starts and ends
+            self._setup_fields()
 
             # add any para,s from intergrated moedl to the other  user supplied working params
             params = si.working_params['core_roles']['integrated_model']
@@ -117,7 +119,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             self._make_core_classes()
 
-            # add any intergrated model, to get params changes, but don't initialise
+            # add any integrated model, to get params changes, but don't initialise
             # there can only be one model added
 
             #todo remerge/check settings changed by model here?
@@ -278,9 +280,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         first_time = []
         last_time = []
 
-        # useful run info
-        ri.model_direction = -1 if si.settings.backtracking else 1
-        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
+
         md = ri.model_direction
 
         for name, rg_params in particle_release_groups_params_dict.items():
@@ -326,8 +326,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.msg_logger.progress_marker('Set up run start and end times, plus release groups and their schedulers', start_time=t0)
 
-
-    def _make_core_classes(self):
+    def _setup_fields(self):
         # initialise all classes, order is important!
         # shortcuts
         t0 = perf_counter()
@@ -349,7 +348,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         fgm.final_setup()
 
         si.hindcast_info = fgm.get_hydro_model_info()
-        if si.run_info.write_tracks:
+        si.msg_logger.progress_marker('Setup field group manager', start_time=t0)
+
+
+    def _make_core_classes(self):
+        # initialise all classes, order is important!
+        # shortcuts
+        t0 = perf_counter()
+        fgm = si.core_roles.field_group_manager
+
+        if si.settings.write_tracks:
             i = si.add_core_role('tracks_writer', si.working_params['core_roles']['tracks_writer'], initialise=True)
 
         else:
@@ -382,7 +390,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # order matters, must do interpolator after particle_group_manager, to get stucted arrays and solver last
         si.core_roles.particle_group_manager.final_setup()
         si.core_roles.solver.final_setup()
-        if si.run_info.write_tracks:
+        if si.settings.write_tracks:
             si.core_roles.tracks_writer.final_setup()
 
         si.msg_logger.progress_marker('final set up of core classes', start_time=t0)
@@ -425,17 +433,15 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'user_note': si.settings['user_note'],
              'output_files': si.output_files,
+             'version_info': get_versions_computer_info.get_code_version(),
+             'computer_info': get_versions_computer_info.get_computer_info(),
+             'hindcast_info': si.hindcast_info,
              'caseID' : si.run_info.caseID,
              'block_timings': [],
-             'version_info': get_versions_computer_info.get_code_version(),
-            'computer_info': get_versions_computer_info.get_computer_info(),
             'file_written': datetime.now().isoformat(),
              'settings' : si.settings.as_dict(),
              'run_info' : info,
-             'hindcast_info': si.core_roles.field_group_manager.info,
              'particle_status_flags': si.particle_status_flags.as_dict(),
-             'release_groups' : {},
-             'particle_release_group_user_maps': si.core_roles.particle_group_manager.get_release_group_userIDmaps(),
              'errors': si.msg_logger.errors_list,
              'warnings': si.msg_logger.warnings_list,
              'notes': si.msg_logger.notes_list,

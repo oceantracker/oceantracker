@@ -47,14 +47,14 @@ class BasicResuspension(_BaseResuspension):
         #todo is friction velocity up to date?
         self.start_update_timer()
         info = self.info
-        info['resuspension_factor']= 2.0*0.4*si.run_info.z0*si.settings.time_step/(1. - 2./np.pi)
+        info['resuspension_factor']= 2.0*0.4*si.settings.z0*si.settings.time_step/(1. - 2./np.pi)
         info['min_resuspension_jump_not_used'] = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
 
         # resuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.roles.particle_properties
         resuspend = self.select_particles_to_resupend(active)
 
-        self.resuspension_jump(part_prop['friction_velocity'].data, info['resuspension_factor'], part_prop['x'].data, part_prop['water_depth'].data,si.run_info.z0, resuspend)
+        self.resuspension_jump(part_prop['friction_velocity'].data, info['resuspension_factor'], part_prop['x'].data, part_prop['water_depth'].data,si.settings.z0, resuspend)
 
         #  don't adjust resupension distance for terminal velocity,
         #  Lynch (Particles in the Ocean Book, says don't adjust as a fall velocity  affects prior that particle resuspends)

@@ -191,15 +191,15 @@ class _BaseReader(ParameterBaseClass):
 
     def sort_files_by_time(self, file_list, msg_logger):
         # get time sorted list of files matching mask
-        fi = {'names': file_list, 'n_time_steps': [], 'time_start': [], 'time_end': []}
+        fi = {'names': file_list, 'time_steps_per_file': [], 'file_start_times': [], 'file_end_times': []}
         for n, fn in enumerate(file_list):
             # get first/second/last time from each file,
             nc = self._open_file(fn)
             time = self.read_time_sec_since_1970(nc)
             nc.close()
-            fi['time_start'].append(time[0])
-            fi['time_end'].append(time[-1])  # -1 guards against there being only one time step in the file
-            fi['n_time_steps'].append(time.shape[0])
+            fi['file_start_times'].append(time[0])
+            fi['file_end_times'].append(time[-1])  # -1 guards against there being only one time step in the file
+            fi['time_steps_per_file'].append(time.shape[0])
             if n + 1 >= self.params['max_numb_files_to_load']: break
 
         # check some files found
@@ -209,12 +209,12 @@ class _BaseReader(ParameterBaseClass):
                    caller=self, fatal_error=True)
 
         # convert file info to numpy arrays for sorting
-        keys = ['names', 'n_time_steps', 'time_start', 'time_end']
+        keys = ['names', 'time_steps_per_file', 'file_start_times', 'file_end_times']
         for key in keys:
             fi[key] = np.asarray(fi[key])
 
         # sort files into order based on start time
-        s = np.argsort(fi['time_start'])
+        s = np.argsort(fi['file_start_times'])
         for key in fi.keys():
             if isinstance(fi[key], np.ndarray):
                 fi[key] = fi[key][s]
@@ -223,10 +223,10 @@ class _BaseReader(ParameterBaseClass):
         fi['names'] = fi['names'].tolist()
 
         # get time step index at start and end on files
-        cs = np.cumsum(fi['n_time_steps'])
-        fi['nt_starts'] = cs - fi['n_time_steps']
-        fi['n_time_steps_in_hindcast'] = np.sum(fi['n_time_steps'], axis=0)
-        fi['nt_ends'] = fi['nt_starts'] + fi['n_time_steps'] - 1
+        cs = np.cumsum(fi['time_steps_per_file'])
+        fi['nt_starts'] = cs - fi['time_steps_per_file']
+        fi['time_steps_in_hindcast'] = np.sum(fi['time_steps_per_file'], axis=0)
+        fi['nt_ends'] = fi['nt_starts'] + fi['time_steps_per_file'] - 1
 
         self.info['file_info'] = fi
 
@@ -250,30 +250,28 @@ class _BaseReader(ParameterBaseClass):
         fi = self.sort_files_by_time(file_list, msg_logger)
 
         # checks on hindcast
-        if fi['n_time_steps_in_hindcast'] < 2:
-            msg_logger.msg('Hindcast must have at least two time steps, found ' + str(fi['n_time_steps_in_hindcast']),
+        if fi['time_steps_in_hindcast'] < 2:
+            msg_logger.msg('Hindcast must have at least two time steps, found ' + str(fi['time_steps_in_hindcast']),
                      fatal_error=True, exit_now=True, caller=self)
 
 
-        t = np.stack((fi['time_start'], fi['time_end']), axis=1)
+        t = np.stack((fi['file_start_times'], fi['file_end_times']), axis=1)
         fi['first_time'] = np.min(t[:,0])
         fi['last_time'] = np.max(t[:,1])
         fi['duration'] = abs(fi['last_time'] - fi['first_time'])
-        fi['hydro_model_time_step'] = fi['duration'] / (fi['n_time_steps_in_hindcast']-1)
+        fi['hydro_model_time_step'] = fi['duration'] / (fi['time_steps_in_hindcast']-1)
 
         # datetime versions for reference
-        fi['date_start'] = time_util.seconds_to_datetime64(fi['time_start'])
-        fi['date_end'] = time_util.seconds_to_datetime64(fi['time_end'])
+        fi['file_start_dates'] = time_util.seconds_to_datetime64(fi['file_start_times'])
+        fi['file_end_dates'] = time_util.seconds_to_datetime64(fi['file_end_times'])
         fi['first_date'] = time_util.seconds_to_datetime64(fi['first_time'])
         fi['last_date'] = time_util.seconds_to_datetime64(fi['last_time'])
         fi['hydro_model_timedelta'] = time_util.seconds_to_pretty_duration_string(fi['hydro_model_time_step'])
-        fi['start_end_times'] = t
-        fi['start_end_dates'] = time_util.seconds_to_datetime64(t)
 
         # check for large time gaps between files
         # check if time diff between starts of file and end of last are larger than average time step
-        if len(fi['time_start']) > 1:
-            dt_gaps = fi['time_start'][1:] - fi['time_end'][:-1]
+        if len(fi['file_start_times']) > 1:
+            dt_gaps = fi['file_start_times'][1:] - fi['file_end_times'][:-1]
             sel = np.abs(dt_gaps) > 3. * fi['hydro_model_time_step']
 
             if np.any(sel):
@@ -457,8 +455,8 @@ class _BaseReader(ParameterBaseClass):
         n_file = np.argmax(np.logical_and(nt0_hindcast >= fi['nt_starts'] * md, nt0_hindcast <= fi['nt_ends']))
 
         # get required time step and trim to size of hindcast
-        nt_hindcast_required = nt0_hindcast + md * np.arange(min(fi['n_time_steps_in_hindcast'], buffer_size))
-        sel = np.logical_and(0 <= nt_hindcast_required, nt_hindcast_required < fi['n_time_steps_in_hindcast'])
+        nt_hindcast_required = nt0_hindcast + md * np.arange(min(fi['time_steps_in_hindcast'], buffer_size))
+        sel = np.logical_and(0 <= nt_hindcast_required, nt_hindcast_required < fi['time_steps_in_hindcast'])
         nt_hindcast_required = nt_hindcast_required[sel]
 
         bi['time_steps_in_buffer'] = []
@@ -475,8 +473,8 @@ class _BaseReader(ParameterBaseClass):
 
             file_index = nt_file - fi['nt_starts'][n_file]
             buffer_index = self.hydro_model_index_to_buffer_offset(nt_file)
-            s = f'Reading-file-{(n_file):02d}  {path.basename(fi["names"][n_file])}, steps in file {fi["n_time_steps"][n_file]:3d},'
-            s += f' steps  available {fi["nt_starts"][n_file]:03d}:{fi["nt_starts"][n_file] + fi["n_time_steps"][n_file] - 1:03d}, '
+            s = f'Reading-file-{(n_file):02d}  {path.basename(fi["names"][n_file])}, steps in file {fi["time_steps_per_file"][n_file]:3d},'
+            s += f' steps  available {fi["nt_starts"][n_file]:03d}:{fi["nt_starts"][n_file] + fi["time_steps_per_file"][n_file] - 1:03d}, '
             s += f'reading  {num_read:2d} of {bi["buffer_available"]:2d} steps, '
             s += f' for hydo-model time steps {nt_file[0]:02d}:{nt_file[-1]:02d}, '
             s += f' from file offsets {file_index[0]:02d}:{file_index[-1]:02d}, '
@@ -507,7 +505,7 @@ class _BaseReader(ParameterBaseClass):
                                         grid['zlevel_fractions'], grid['bottom_cell_index'],
                                         grid['sigma'],
                                         fields['water_depth'].data, fields['tide'].data,
-                                        si.run_info.z0, si.run_info.minimum_total_water_depth,
+                                        si.settings.z0, si.settings.minimum_total_water_depth,
                                         data, out,
                                         name == 'water_velocity')
 
@@ -605,7 +603,7 @@ class _BaseReader(ParameterBaseClass):
         model_dir = si.run_info.model_direction
 
         hindcast_fraction = (time_sec - fi['first_time']) / (fi['last_time'] - fi['first_time'])
-        nt = (fi['n_time_steps_in_hindcast'] - 1) * hindcast_fraction
+        nt = (fi['time_steps_in_hindcast'] - 1) * hindcast_fraction
 
         # if back tracking ronud up as moving backwards through buffer, forward round down
         return np.int32(np.floor(nt * model_dir) * model_dir)

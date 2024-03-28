@@ -36,6 +36,7 @@ class Scheduler(object):
             if np.any(np.abs(times-times_rounded)/dt > tol * dt):
                 times_rounded_to_time_step = True
             self.scheduled_times = times_rounded
+            rounded_interval = None
         else:
             # make from start time and interval
             if start is None: start = run_info.start_time # start ast model sart
@@ -76,7 +77,7 @@ class Scheduler(object):
                 self.scheduled_times= np.asarray([start])
             else:
                 rounded_interval = max(rounded_interval, dt)
-                self.scheduled_times = start + np.arange(0, abs(duration), rounded_interval)
+                self.scheduled_times = start + np.arange(0, abs(duration)+rounded_interval, rounded_interval)
 
         # make a task flag for each time step of the model run
         self.task_flag = np.full_like(run_info.times,False, dtype=bool)

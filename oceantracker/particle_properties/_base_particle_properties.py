@@ -15,6 +15,7 @@ class _BaseParticleProperty(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
 
         self.add_default_params({   'description': PVC(None,str),
+                                    'units': PVC(None, str),
                                     'time_varying':PVC(True, bool),
                                     'vector_dim': PVC(1, int, min = 1 ),
                                     'prop_dim3': PVC(1, int, min=1),

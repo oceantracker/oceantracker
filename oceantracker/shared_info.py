@@ -54,7 +54,7 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Append the date to the output dir. name to help in keeping output from different runs separate' )
     output_file_base =    PVC('output_file_base', str,
                 doc_str= 'The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written' )
-    time_step = PVC(3600., float, min=0.1, units='sec',doc_str='Time step in seconds for all cases' )
+    time_step = PVC(3600., float, min=0.001, units='sec',doc_str='Time step in seconds for all cases' )
     screen_output_time_interval = PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file' )
     backtracking =   PVC(False, bool, doc_str='Run model backwards in time')
     regrid_z_to_uniform_sigma_levels = PVC(True, bool,
@@ -69,7 +69,7 @@ class _DefaultSettings(_SharedStruct):
     write_dry_cell_flag = PVC(True, bool,
                 doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots, currently cannot be used with nested grids ' )
     max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing' )  # limit all cases to this duration
-    max_particles = PVC(10**9, int, min=1,  doc_str='Maximum number of particles to release, useful in testing' )  # limit all cases to this number
+    max_particles = PVC(10**10, int, min=1,  doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
     processors = PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel' )
     max_warnings = PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps' )  # dont record more that this number of warnings, to keep caseInfo.json finite
     USE_random_seed = PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!' )
@@ -160,11 +160,7 @@ class _RunInfo(_SharedStruct):
     run_output_dir = None
     output_file_base = None
     caseID = None
-    # copies of settings
-    write_tracks = None
-    z0 = None
-    minimum_total_water_depth = None
-
+    time_of_nominal_first_occurrence = None
 
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
@@ -371,9 +367,9 @@ class _SharedInfoClass():
 
     def get_regular_events_within_hindcast(self, interval, start=None, end=None, duration=None,
                            crumbs='',caller=None):
-      # wrapper to give regular event times within hindcastend
+      # wrapper to give regular event times within hindcast end
 
-      d = time_util.get_regular_events_within_hindcast(self.hindcast_info, self.run_info,self.msg_logger, interval,
+      d = time_util.get_regular_events_within_hindcast(self,self.msg_logger, interval,
                             start=start,end=end,crumbs=crumbs,caller=caller)
       return d
 

@@ -26,7 +26,7 @@ class CullParticles(_BaseTrajectoryModifier):
 
         super().initial_setup()  # set up using regular grid for  stats
 
-        self.time_of_last_cull = si.time_of_nominal_first_occurrence
+        self.time_of_last_cull = si.run_info.time_of_nominal_first_occurrence
 
     def select_particles_to_cull(self, time_sec, active):
          

@@ -20,7 +20,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.add_default_params(
                         role_output_file_tag =  PVC('tracks', str),
-                        update_interval =  PVC(None, [int,float], min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
+                        update_interval =  PVC(None, [int,float], min=.01, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
                         output_step_count =  PVC(None,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
                         turn_on_write_particle_properties_list =  PLC(None, [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                         turn_off_write_particle_properties_list =  PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
@@ -55,6 +55,7 @@ class _BaseWriter(ParameterBaseClass):
             params['update_interval'] = si.settings.time_step
 
         si.add_scheduler_to_class('write_scheduler', self, interval=self.params['update_interval'], caller=self)
+        pass
 
     def add_dimension(self, name, size):
         self.info['file_builder']['dimensions' ][name] ={'size': size}
@@ -139,7 +140,7 @@ class _BaseWriter(ParameterBaseClass):
     #  eg ID etc, releaseGroupID  etc
 
         writer = si.core_roles.tracks_writer
-        if si.run_info.write_tracks and new_particleIDs.shape[0] > 0:
+        if si.settings.write_tracks and new_particleIDs.shape[0] > 0:
             for name, prop in si.roles.particle_properties.items():
                 # parameters are not time varying, so done at ends in retangular writes, or on culling particles
                 if not prop.params['time_varying'] and prop.params['write']:
@@ -160,6 +161,7 @@ class _BaseWriter(ParameterBaseClass):
         for name,i in part_prop.items():
             if i.params['write'] and i.params['time_varying']:
                 if si.hydro_model_cords_in_lat_long and name in ['x','x_last_good']:
+                    #todo convert to latlong
                     pass
                 self.write_time_varying_particle_prop(name, i.data)
 
@@ -168,11 +170,11 @@ class _BaseWriter(ParameterBaseClass):
             grid = si.core_roles.field_group_manager.grid
             self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid['dry_cell_index'].reshape(1,-1)
 
-        self.time_steps_written_to_current_file +=1 # time steps in current file
+        self.time_steps_written_to_current_file += 1 # time steps in current file
         self.total_time_steps_written  += 1 # time steps written since the start
 
     def close(self):
-        if si.run_info.write_tracks:
+        if si.settings.write_tracks:
             nc = self.nc
             # write properties only written at end
             self.add_global_attribute('total_num_particles_released', si.core_roles.particle_group_manager.info['particles_released'])

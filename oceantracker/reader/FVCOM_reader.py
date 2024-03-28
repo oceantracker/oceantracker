@@ -134,7 +134,7 @@ class unstructured_FVCOM(_BaseReader):
         else:
             # get dry cells from water depth and tide
             reader_util.set_dry_cell_flag_from_tide(grid['triangles'],fields['tide'].data, fields['water_depth'].data,
-                                                    si.run_info.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
+                                                    si.settings.minimum_total_water_depth, is_dry_cell_buffer,buffer_index )
 
     def read_time_sec_since_1970(self, nc, file_index=None):
         # read time as seconds

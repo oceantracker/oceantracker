@@ -61,20 +61,20 @@ def  day_hms(x):
 
     return "%02.0f %02.0f:%02.0f" % (days, hours, minutes)
 
-def get_regular_events_within_hindcast(hindcast_info, run_info, msg_logger, interval,
+def get_regular_events_within_hindcast(shared_info, msg_logger, interval,
                        start=None, end=None, duration=None,
                        crumbs='', caller=None
                        ):
     # gets regularly spaced times within the hindcast span
     # and any start and end times, or a duration
-    ri =run_info
-    hi = hindcast_info
+    ri =shared_info.run_info
+    hi = shared_info.hindcast_info
     h1, h2 = hi['start_time'], hi['end_time']
     model_dir = ri['model_direction']
     interval = abs(interval)
 
     # first and last possible times
-    t1, t2 = (h2, h1) if ri['backtracking'] else (h1,h2)
+    t1, t2 = (h2, h1) if shared_info.settings.backtracking else (h1,h2)
 
     r =f'hydro-model range: {seconds_to_isostr(h1)} to {seconds_to_isostr(h2)}'
     if start is not None:
@@ -103,7 +103,7 @@ def get_regular_events_within_hindcast(hindcast_info, run_info, msg_logger, inte
             t2 = tt
 
     duration = abs(t2-t1)
-    if interval < 0.1:
+    if interval < 0.001:
         times = np.asarray([t1])
     else:
         times =  t1 + model_dir * np.arange(0,duration,interval)

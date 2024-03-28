@@ -134,7 +134,6 @@
         }
     },
     "max_particles": 1000,
-    "particle_buffer_size": 5000,
     "trajectory_modifiers": {
         "part_spliting": {
             "class_name": "oceantracker.trajectory_modifiers.split_particles.SplitParticles",

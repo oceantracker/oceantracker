@@ -3,7 +3,6 @@ add_date_to_run_output_dir: false
 debug: true
 dispersion:
   A_H: 0.1
-junk: h
 max_run_duration: 259200
 output_file_base: demo04_ageBasedHeatmaps
 particle_group_manager:

@@ -5,7 +5,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.integrated_model._base_model import  _BaseModel
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.util import time_util
-
+from copy import  deepcopy
 from oceantracker.shared_info import SharedInfo as si
 
 class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
@@ -18,7 +18,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         self.add_default_params({
             'start': PVC(None, 'iso8601date', doc_str='start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
             'end': PVC(None, 'iso8601date', doc_str=' end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
-            'update_interval': PVC(60*60.,float,units='sec',
+            'update_interval': PVC(3600.,float,units='sec',
                                     doc_str='Time in seconds between calculating statistics, will be rounded to be a multiple of the particle tracking time step'),
             'lags': PLC(None, [float,int], units='sec',min=1,
                         doc_str='List of one or more times after particle release to calculate Lagarangian Coherent Structures, default is 1 day'),
@@ -52,9 +52,11 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
                               hint=f'Grid center has {params["grid_center"].shape[0]} values  and grid span is size  {str(params["grid_span"].shape)}',
                           fatal_error=True, exit_now=True, caller=self)
 
+        # set up release grid
+        release_grid_size= [ x+1 for x in params['grid_size']]# release grid one larger than LCS grid
         release_params = dict(class_name='oceantracker.release_groups.grid_release.GridRelease',
                               pulse_size=1, z_min=params['z_min'], z_max=params['z_max'],
-                              grid_size=params['grid_size'],
+                              grid_size= release_grid_size,
                               max_age = params['lags'][-1],  # run each to largest lag
                               release_interval=0.  )
         # if 3D sort out depth range and always resuspend
@@ -71,15 +73,16 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
                     start=params['start'],end=params['end'],crumbs='LCS add_settings_and_class_params : ')
         info.update(a)
         for n_grid in range(params['grid_center'].shape[0]):
-            release_params['grid_center'] = params['grid_center'][n_grid]
-            release_params['grid_span'] = params['grid_span'][n_grid]
+            rp = deepcopy(release_params)
+            rp['grid_center'] = params['grid_center'][n_grid]
+            rp['grid_span'] = params['grid_span'][n_grid]
 
             for n_pulse in range(info['times'].size):
-                release_params['start'] = time_util.seconds_to_isostr(info['times'][n_pulse])
-                release_params['user_instance_info'] = (n_grid, n_pulse) # tag with grid and pulse number
+                rp['start'] = time_util.seconds_to_isostr(info['times'][n_pulse])
+                rp['user_instance_info'] = (n_grid, n_pulse) # tag with grid and pulse number
                 # add param dict as keyword arguments
 
-                self.add_class('release_groups', name= f'LCS_grid{n_grid:03d}_time_step{n_pulse:04d}', **release_params )
+                self.add_class('release_groups', name= f'LCS_grid{n_grid:03d}_time_step{n_pulse:04d}', **rp)
                 pass
 
     def initial_setup(self):
@@ -94,7 +97,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
 
         # grid release builds
         # set up space to hold release grids
-        self.x_release_grids = np.full((params['grid_center'].shape[0], r, c, 2), np.nan, dtype=np.float64)
+        self.x_release_grids = np.full((params['grid_center'].shape[0], r+1, c+1, 2), np.nan, dtype=np.float64)
 
         # add lag schedular
         time = []
@@ -117,8 +120,8 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
 
         # add working space arrays
         n_lags = params['lags'].size
-        self.x_at_lag= np.full((r,c,2), np.nan, dtype=np.float64) # locations grid aftr lag time
-        self.LCS = np.full((r-1, c-1), np.nan, dtype=np.float64)
+        self.x_at_lag= np.full((r+1,c+1,2), np.nan, dtype=np.float64) # locations grid aftr lag time
+        self.LCS = np.full((r, c), np.nan, dtype=np.float64)
 
         self._open_output_file()
 

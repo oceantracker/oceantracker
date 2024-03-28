@@ -22,7 +22,7 @@ class TotalWaterDepth(CustomFieldBase):
         self.get_time_dependent_total_water_depth_from_tide_and_water_depth(
                 fields['tide'].data,
                 fields['water_depth'].data.ravel(),
-                si.run_info.minimum_total_water_depth,
+                si.settings.minimum_total_water_depth,
                 self.data)
 
     @staticmethod

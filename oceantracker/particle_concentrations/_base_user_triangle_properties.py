@@ -50,7 +50,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         nc.create_a_variable('time', ['time_dim'], np.float64,description='time in seconds since 1970-01-01')
         self.time_steps_written = 0
         # need to add other variables in children
-        self.info['time_last_stats_recorded'] = si.time_of_nominal_first_occurrence
+        self.info['time_last_stats_recorded'] = si.run_info.time_of_nominal_first_occurrence
 
     def select_particles_to_count(self):
         part_prop =  si.roles.particle_properties
