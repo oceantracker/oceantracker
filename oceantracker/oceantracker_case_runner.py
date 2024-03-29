@@ -13,7 +13,7 @@ from datetime import datetime
 from time import sleep
 import traceback
 from oceantracker.util.setup_util import config_numba_environment_and_random_seed
-from oceantracker import definitions as common_info
+from oceantracker import definitions
 
 
 from oceantracker.shared_info import SharedInfo as si
@@ -204,7 +204,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                       + ' started: ' + str(d0)
                                       + ', ended: ' + str(datetime.now()))
         si.msg_logger.msg('Computational time =' + str(datetime.now() - d0), tabs=3)
-        si.msg_logger.print_line()
+        si.msg_logger.print_line(f'End case {ri.caseID}')
 
         self.close()  # close al classes and msg logger
         si.msg_logger.close()
@@ -433,7 +433,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'user_note': si.settings['user_note'],
              'output_files': si.output_files,
-             'version_info': get_versions_computer_info.get_code_version(),
+             'version':   si.run_builder['version'],
              'computer_info': get_versions_computer_info.get_computer_info(),
              'hindcast_info': si.hindcast_info,
              'caseID' : si.run_info.caseID,

@@ -9,6 +9,7 @@ from oceantracker.util import json_util
 from oceantracker.util import basic_util , get_versions_computer_info
 from numba import  njit
 import  numpy as np
+from oceantracker import definitions
 
 def setup_output_dir(params, msg_logger, crumbs='', caller=None):
 
@@ -59,6 +60,7 @@ def write_raw_user_params(output_files, params,msg_logger, case_list=None):
         out = params
     else:
         out = {'base_case_params': params, 'case_list_params': case_list}
+    out['_version'] = definitions.version
 
     fn= output_files['output_file_base']+'_raw_user_params.json'
     output_files['raw_user_params'] = fn
@@ -113,7 +115,7 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
 def check_python_version(msg_logger):
         # set up log files for run
         ml = msg_logger
-        v = get_versions_computer_info.get_code_version()
+        v = definitions.version
         ml.msg(' Python version: ' + v['python_version'], tabs=2)
         p_major =v['python_major_version']
         p_minor= v['python_minor_version']

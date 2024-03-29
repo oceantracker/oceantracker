@@ -6,9 +6,20 @@
 package_fancy_name= 'OceanTracker'
 
 from os import path
+import subprocess, sys
 
-code_major_version = 0.5
-code_version = '0.5.0.000 2024-03-07'
+
+version= dict(major= 0.5, minor=0., revision  = 1, date = '2024-03-30', parameter_ver=0.5)
+version['str'] = f"{version['major']:.2f}.{version['revision']:04.0f}-{version['date']}"
+
+try:
+    version['git_revision'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
+except:
+    version['git_revision'] = 'unknown'
+
+version.update( python_version = sys.version,python_major_version= sys.version_info.major,
+                python_minor_version = sys.version_info.minor, python_micro_version= sys.version_info.micro,)
+
 
 max_timedelta_in_seconds = 1000*365*24*3600
 

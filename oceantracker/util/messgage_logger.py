@@ -154,8 +154,12 @@ class MessageLogger(object ):
             sleep(1) # allow time for messages to print
             raise GracefulError('Fatal error cannot continue >>> ' +msg if msg is not None else '', hint='Check above or run.err file for errors')
 
-    def print_line(self):
-        self.msg('--------------------------------------------------------------------------')
+    def print_line(self, text=None):
+        n= 70
+        if text is None:
+            self.msg(n*'-')
+        else:
+            self.msg(f"--- {text} {(n-len(text) -5)*'-'}")
 
     def progress_marker(self, msg, tabs=0, start_time=None):
         tabs= tabs+1
