@@ -160,7 +160,7 @@ class _OceanTrackerRunner(object):
     def __init__(self):
         pass
     
-    def run(self,params, case_list_params = None):
+    def run(self, params, case_list_params = None):
         ml = msg_logger
         ml.set_screen_tag('Main')
 
@@ -176,6 +176,7 @@ class _OceanTrackerRunner(object):
         # start forming the run builder
         crumbs = 'Forming run builder'
         run_builder = dict(working_params=setup_util.decompose_params(shared_info, deepcopy(params), ml, crumbs= crumbs, caller=self))
+        run_builder['version'] = definitions.version
 
         #  merge defaults of settings which have to be the same for all cases
         critical_settings = ['root_output_dir', 'output_file_base', 'processors', 'max_warnings',
@@ -200,7 +201,7 @@ class _OceanTrackerRunner(object):
         setup_util.config_numba_environment_and_random_seed(working_params['settings'], ml, crumbs='main setup', caller=self)  # must be done before any numba imports
 
         ml.print_line()
-        ml.msg(f' {OTname} version {definitions.code_version} - preliminary setup')
+        ml.msg(f' {OTname} version {definitions.version["str"]} - preliminary setup')
 
         self._prelimary_checks(params)
         ml.exit_if_prior_errors('parameters have errors')
@@ -262,7 +263,7 @@ class _OceanTrackerRunner(object):
     def _main_run_end(self,case_info_files, num_case_errors,num_case_warnings,num_case_notes):
         # final info output
         ml = msg_logger
-
+        ml.set_screen_tag('End')
         self._write_run_info_json(case_info_files, self.start_t0)
 
         ml.show_all_warnings_and_errors()
@@ -445,7 +446,7 @@ class _OceanTrackerRunner(object):
 
         # JSON parallel run info data
         d = {'output_files' :{},
-            'version_info': get_versions_computer_info.get_code_version(),
+            'version_info': definitions.version,
             'computer_info': get_versions_computer_info.get_computer_info(),
             'num_cases': num_cases,
             'elapsed_time' :perf_counter() - t0,
