@@ -2,7 +2,11 @@
 
 # Required for version 0.5
 
-1. exit if using obsolete  params
+1. ~~exit if using obsolete  params~~
+2. relese groups
+    1.  flag if point or polygon all outside domain, 
+    4.  flag if none released ie always dry, 
+    5.  warn if partial relese due to wet/dryinging 
 2. 1. check if no release found stop 
 3. 1. flag error if any end  before start in scheduler
 4. try to write partial json if error
