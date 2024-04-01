@@ -28,7 +28,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,
         for key in list(params.keys()):
            if  key not in default_params :
                msg_logger.spell_check('ignoring this param.',key,default_params.keys(),
-                           crumbs= crumbs + crumb_seperator + f'"{key}"')
+                           crumbs= crumbs + crumb_seperator + f'"{key}"', fatal_error=True)
     # add crumbs
     for key, item in default_params.items():
         parent_crumb = crumbs + crumb_seperator + key
@@ -120,7 +120,7 @@ class ParamValueChecker(object):
         crumbs = crumbs + ' > checking value against default'
         if value is not None and info['obsolete'] is not None:
             msg_logger.msg(f'Parameter is obsolete- "{info["obsolete"]}"',
-                           warning=True,crumbs= crumbs, caller= caller)
+                           fatal_error=True,crumbs= crumbs, caller= caller)
             return  None
 
         if value is None:

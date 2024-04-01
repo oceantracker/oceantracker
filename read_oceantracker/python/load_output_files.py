@@ -102,7 +102,7 @@ def load_track_data(case_info_file_name, var_list=None, release_group= None, fra
     return tracks
 
 def _extract_useful_info(case_info, d):
-    if case_info['version_info']['major_version'] >= 0.5:
+    if case_info['version']['major'] >= 0.5:
         prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'] , case_info['output_files']['release_group_info']))
     else:
         #todo deprecated from version 0.5

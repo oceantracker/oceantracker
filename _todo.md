@@ -48,6 +48,8 @@
 2. unit tests
     1. write ref case option
     1. master.py to run all tests 
+1. check pointing of run to enable restart
+1. native global lon-lat  models
     
 
 ## Niggles that need sorting some time
