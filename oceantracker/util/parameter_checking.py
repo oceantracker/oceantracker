@@ -27,7 +27,9 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,
     if check_for_unknown_keys:
         for key in list(params.keys()):
            if  key not in default_params :
-               msg_logger.spell_check('ignoring this param.',key,default_params.keys(),
+                # get possible values without obsolete params
+               possible_params=  [key for key, item in default_params.items() if item.info['obsolete'] is None]
+               msg_logger.spell_check('Parameter not recognised.',key,possible_params,
                            crumbs= crumbs + crumb_seperator + f'"{key}"', fatal_error=True)
     # add crumbs
     for key, item in default_params.items():
@@ -205,7 +207,7 @@ class ParameterListChecker(object):
         crumb_trail = crumbs + crumb_seperator + name
 
         if info['obsolete'] is not None and user_list is not None and len(user_list) > 0:
-            msg_logger.msg(f'List Parameter is obsolete  - "{info["obsolete"]}"', warning=True,
+            msg_logger.msg(f'List Parameter is obsolete  - "{info["obsolete"]}"', fatal_error=True,
                            crumbs=crumb_trail)
             return None
 
@@ -278,7 +280,7 @@ class ParameterListChecker(object):
 class ParameterCoordsChecker(object):
     # checks input cords or array is a set of N by 2 or 3 values
     def __init__(self,default_value, dtype=np.float64, is3D=False, single_cord=False, doc_str=None,one_or_more_points=False,
-                  is_required=False, units='meters or , degrees if long_lat codes detected', min = None):
+                  is_required=False, units='meters or , degrees if long_lat codes detected', min = None, obsolete = None):
         self.info={}
         info = self.info
         info['default_value'] = default_value
@@ -291,6 +293,7 @@ class ParameterCoordsChecker(object):
         info['doc_str'] = doc_str
         info['one_or_more_points'] = one_or_more_points
         info['type'] = 'coordinates'
+        info['obsolete'] = obsolete
 
     def get_default(self):
         return self.info['default_value']
@@ -301,6 +304,11 @@ class ParameterCoordsChecker(object):
         if crumbs is None: crumbs = ''
         crumb_trail= crumbs + '> coordinate checker'
         # a position, eg release location, needs to be a numpy array
+
+        if info['obsolete'] is not None :
+            msg_logger.msg(f'Coordinate parameter is obsolete  - "{info["obsolete"]}"', fatal_error=True,
+                           crumbs=crumb_trail)
+            return None
 
         if type(value) not in [list, np.ndarray]:
             msg_logger.msg(f' expected param of type list or numppy array got type {type(value)}',
