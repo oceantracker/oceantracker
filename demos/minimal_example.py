@@ -23,7 +23,12 @@ ot.add_class('release_groups', name ='my_release_point', # user must provide a n
                     pulse_size= 10,                   # number of particles released each release_interval
                     )
 
-case_info_file_name, has_errors = ot.run()
+from oceantracker.util import json_util,yaml_util
+from os import path
+json_util.write_JSON(path.join('demo_param_files', 'minimal_example.json'), ot.params)
+yaml_util.write_YAML(path.join('demo_param_files', 'minimal_example.yaml'), ot.params)
+
+case_info_file_name = ot.run()
 # case_info_file_name is a json file with useful ingo for post processing, eg output file names
 # output now in folder output/minimal_example
 

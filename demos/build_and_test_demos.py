@@ -525,14 +525,6 @@ def build_demos(testrun=False):
             chdir(cwd)
 
 
-    # special case of minimal example demo
-
-    if testrun:
-        from minimal_example import params as min_params
-
-        json_util.write_JSON(path.join(paramdir, 'minimal_example.json'), min_params)
-        yaml_util.write_YAML(path.join(paramdir, 'minimal_example.yaml'), min_params)
-
 
 if __name__ == "__main__":
 
