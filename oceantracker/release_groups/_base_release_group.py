@@ -164,7 +164,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
         if release_part_prop['x'].shape[0] < n_required:
             ml.msg(f'Only found {release_part_prop["x"].shape[0]} of {n_required} required points inside domain after {self.params["max_cycles_to_find_release_points"]} cycles',
-                           fatal_error=True, caller=self,
+                           warning=True, caller=self,
                            hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  "max_cycles_to_find_release_points", current value = {self.params["max_cycles_to_find_release_points"]:3}' )
             n_required = release_part_prop['x'].shape[0] #
 

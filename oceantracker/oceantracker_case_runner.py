@@ -119,6 +119,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             self._make_core_classes()
 
+
             # add any integrated model, to get params changes, but don't initialise
             # there can only be one model added
 
@@ -137,34 +138,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 im.initial_setup()
                 im.final_setup()
 
-        except GracefulError as e:
-            si.msg_logger.show_all_warnings_and_errors()
-            si.msg_logger.write_error_log_file(e)
-            si.msg_logger.msg(f' Case Funner graceful exit from case number [{ri.caseID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+            ml.exit_if_prior_errors('Errors in setup??', caller=self)
 
-            if si.settings['debug']:
-                si.msg_logger.write_error_log_file(e)
-                si.msg_logger.write_error_log_file(traceback.print_exc())
-
-            si.msg_logger.close()
-            return None, return_msgs
-
-        except Exception as e:
-            si.msg_logger.show_all_warnings_and_errors()
-            si.msg_logger.write_error_log_file(e)
-            si.msg_logger.write_error_log_file(traceback.print_exc())
-            si.msg_logger.msg(f' Unexpected error in case number [{ri.caseID:2}] ', fatal_error=True,hint='check above or .err file')
-            si.msg_logger.close()
-            return  None, return_msgs
-
-
-        # check particle properties have other particle properties, fields and other compatibles they require
-        self._do_run_integrity_checks()
-
-
-        try:
             self._do_a_run()
-
 
             case_info = self._get_case_info(d0,t_start)
 
