@@ -271,6 +271,11 @@ class _SharedInfoClass():
 
         return i
 
+    def add_release_group_instance(self, name=None, **kwargs):
+        '''Add a release group with given name as an instance to computational pipeline, not the same as add_class, which just adds parameters'''
+        pgm= self.core_roles.particle_group_manager
+        i = pgm. add_release_group(name,kwargs)
+        return i
     def make_instance_from_params(self, class_role,params,  name = None, default_classID=None,
                                caller=None, crumbs=''):
 

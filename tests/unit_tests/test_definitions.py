@@ -29,7 +29,7 @@ reader1=   dict( # folder to search for hindcast files, sub-dirs will, by defaul
 
 reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.GenericStructuredReader',
              input_dir=f'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\generic2D_structured_DoubleGyre',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-             file_mask='Double_gyreV1.nc',
+             file_mask='Double_gyre.nc',
              dimension_map=dict(time='t', rows='y', cols='x'),
              grid_variable_map=dict(time='Time', x=['x_grid', 'y_grid']),
              field_variable_map=dict(water_depth='Depth', water_velocity=['U', 'V'], tide='Tide'),

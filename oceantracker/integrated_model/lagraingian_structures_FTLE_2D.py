@@ -8,7 +8,7 @@ from oceantracker.util import time_util
 from copy import  deepcopy
 from oceantracker.shared_info import SharedInfo as si
 
-class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
+class LagarangianStructuresFTLE2D(_BaseModel):
     # random polygon release in 2D or 3D
     #todo make work with lat lng
 
@@ -52,11 +52,13 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
                               hint=f'Grid center has {params["grid_center"].shape[0]} values  and grid span is size  {str(params["grid_span"].shape)}',
                           fatal_error=True, exit_now=True, caller=self)
 
-        # set up release grid
-        release_grid_size= [ x+1 for x in params['grid_size']]# release grid one larger than LCS grid
+        # set up lCS grid
+        r, c = params['grid_size']
+
+        # set up release grid is padded by one all around
         release_params = dict(class_name='oceantracker.release_groups.grid_release.GridRelease',
                               pulse_size=1, z_min=params['z_min'], z_max=params['z_max'],
-                              grid_size= release_grid_size,
+                              grid_size= [r+2,c+2],
                               max_age = params['lags'][-1],  # run each to largest lag
                               release_interval=0.  )
         # if 3D sort out depth range and always resuspend
@@ -97,8 +99,8 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
 
         # grid release builds
         # set up space to hold release grids
-        self.x_release_grids = np.full((params['grid_center'].shape[0], r+1, c+1, 2), np.nan, dtype=np.float64)
-
+        self.x_release_grids = np.full((params['grid_center'].shape[0], r+2, c+2, 2), np.nan, dtype=np.float64)
+        self.x_LSC_grid = np.full((params['grid_center'].shape[0], r , c , 2), np.nan, dtype=np.float64)
         # add lag schedular
         time = []
         for name, rg in si.roles.release_groups.items():
@@ -115,14 +117,13 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
             # record grid from first pulse of each grid
             if n_pulse == 0:
                 self.x_release_grids[n_grid, ...] = rg.info['x_grid']
+                self.x_LSC_grid[n_grid, ...] = rg.info['x_grid'][1:-1,1:-1,:]
 
         self.time= np.asarray(time) # times or t0 for LSC
 
         # add working space arrays
-        n_lags = params['lags'].size
-        self.x_at_lag= np.full((r+1,c+1,2), np.nan, dtype=np.float64) # locations grid aftr lag time
-        self.LCS = np.full((r, c), np.nan, dtype=np.float64)
-
+        self.x_at_lag=  np.full((r+2, c+2, 2), np.nan, dtype=np.float64)
+        self.LCS  = np.full((r, c), np.nan, dtype=np.float64)
         self._open_output_file()
 
     def update(self, n_time_step, time_sec):
@@ -152,9 +153,6 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         self._get_locations_at_lag(part_prop['x'].data,
                                    part_prop['grid_release_row_col'].data,
                                     self.x_at_lag, sel)
-        if np.all(np.isnan( self.x_at_lag)):
-            pass
-        #self.x_at_lag = self.x_at_lag - self.x_release_grids[n_grid, ...]  # converts x's into displacements
 
         # get LSC
         self.LCS.fill(np.nan)
@@ -174,15 +172,15 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['output_file_tag'] + '.nc'
         self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         nc = self. nc
-
+        r, c = params['grid_size']
         nc.add_dimension('time_dim', None) # open time dim
         nc.add_dimension('lag_dim', params['lags'].size)
-        nc.add_dimension('release_grid_rows', self.x_at_lag.shape[0])
-        nc.add_dimension('release_grid_cols', self.x_at_lag.shape[1])
+        nc.add_dimension('release_grid_rows', r+2)
+        nc.add_dimension('release_grid_cols', c+2)
         nc.add_dimension('grid_dim',  params['grid_center'].shape[0])
         nc.add_dimension('vector2D', 2)
-        nc.add_dimension('rows', self.LCS.shape[0])
-        nc.add_dimension('cols', self.LCS.shape[1])
+        nc.add_dimension('rows', r)
+        nc.add_dimension('cols', c)
 
         # write release group
         nc.write_a_new_variable('time', self.time,'time_dim', dtype=np.float64,
@@ -192,10 +190,15 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
                                 description='Lags between release and calculation of FTLEs  type LCS',
                                 attributes=dict(units='seconds'))
 
+        nc.write_a_new_variable('x_LSC_grid', self.x_LSC_grid,
+                                ['grid_dim', 'rows', 'cols','vector2D'],
+                             description='x,y locations of calculationed LCS',
+                             attributes=dict(units='meters or longitude deg.'))
         nc.write_a_new_variable('x_release_grid', self.x_release_grids,
                                 ['grid_dim', 'release_grid_rows', 'release_grid_cols','vector2D'],
                              description='x,y locations of grid release',
                              attributes=dict(units='meters or longitude deg.'))
+
         nc.create_a_variable('LCS', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols'],
                              self.x_at_lag.dtype, description=' Largest Eigen value of 2D strain matrix', fill_value=np.nan,
                              attributes=dict(units='dimensionless'))
@@ -230,26 +233,20 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
         dx0=  x_release_grid[0, 1, 0] - x_release_grid[0, 0, 0]
         dy0 = x_release_grid[1, 0, 1] - x_release_grid[0, 0, 1]
 
-        for r in range(x_release_grid.shape[0] - 1):
-            for c in range(x_release_grid.shape[1] - 1):
+        for r in range(1,x_release_grid.shape[0] - 1):
+            for c in range(1, x_release_grid.shape[1] - 1):
                 for n in range(2):
                     # x grads strain in, first column
-                    F_deformation_grad[n, 0]  = 0.5 * (x_at_lag[r, c+1, n] + x_at_lag[r+1, c+1, n])
-                    F_deformation_grad[n, 0] -= 0.5 * (x_at_lag[r, c  , n] + x_at_lag[r+1, c  , n])
-                    F_deformation_grad[n, 0] /= dx0  # divide by initial separation
-                    # x grads strain in, second column
-                    F_deformation_grad[n, 1]  = 0.5 * (x_at_lag[r+1, c, n] + x_at_lag[r+1, c+1, n])
-                    F_deformation_grad[n, 1] -= 0.5 * (x_at_lag[r  , c, n] + x_at_lag[r  , c+1, n])
-                    F_deformation_grad[n, 1] /= dy0 # divide by initial separation
+                    F_deformation_grad[n, 0]  = (x_at_lag[r, c+1, n] - x_at_lag[r, c-1, n])/2.0/dx0
+                    # y grads strain in, second column
+                    F_deformation_grad[n, 1] = (x_at_lag[r+1, c , n] - x_at_lag[r - 1, c, n]) / 2.0 / dy0
 
                 C_strain_tensor[:] = F_deformation_grad.T* F_deformation_grad
 
                 eigen_vals2by2(C_strain_tensor, e_vals)
 
-                LCS[r, c] = e_vals[0] if abs(e_vals[0]) >= abs(e_vals[1]) else e_vals[1]
+                LCS[r-1, c-1] = e_vals[0] if abs(e_vals[0]) >= abs(e_vals[1]) else e_vals[1]
         pass
-
-
 
     def close(self):
         self.nc.close()
@@ -258,7 +255,7 @@ class LagarangianCoherentStructuresFTLEheatmaps2D(_BaseModel):
 def eigen_vals2by2(A, e_vals):
     # Trace and Determinant of matrix
     T = A[0, 0] + A[1, 1]
-    D = A[0, 0] * A[1, 1] - A[0, 1] * A[0, 1]
+    D = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0]
 
     # get Eigen values as  get solutions to a quadratic eq.
     r = np.sqrt(T ** 2 - 4.0 * D)

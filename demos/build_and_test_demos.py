@@ -387,7 +387,7 @@ p70.update({'output_file_base' :'demo70_LCS_test',
             #'NUMBA_cache_code': True,
             'time_step':600 })
 
-p70['integrated_model']={'class_name': 'LagarangianCoherentStructuresFTLEheatmaps2D',
+p70['integrated_model']={'class_name': 'LagarangianStructuresFTLE2D',
            'grid_size': [45, 60],
             'write_intermediate_results': True,
             'grid_span' : [ 10000, 9000],
