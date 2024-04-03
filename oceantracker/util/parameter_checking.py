@@ -4,7 +4,7 @@ from oceantracker.util import  time_util
 
 crumb_seperator= ' >> '
 
-def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,
+def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
                               caller=None, check_for_unknown_keys=True):
     # merge nested paramteres with defaults, returns a copy of params updated
     # if param key is in base case then use base case rather than value from ParamDictValueChecker.get_default()
@@ -16,7 +16,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,
     # merge into a copy of params to leave original unchanged
 
     if params is None : params ={}
-    if crumbs is None: crumbs= ''
+
     if type(params) != dict :
         msg_logger.msg('merge_with_defaults, parameter ' + crumbs + 'params must be a dictionary', fatal_error= True,exit_now=True)
 
@@ -29,7 +29,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= None,
            if  key not in default_params :
                 # get possible values without obsolete params
                possible_params=  [key for key, item in default_params.items() if item.info['obsolete'] is None]
-               msg_logger.spell_check('Parameter not recognised.',key,possible_params,
+               msg_logger.spell_check('Parameter not recognised.',key,possible_params,caller=caller,
                            crumbs= crumbs + crumb_seperator + f'"{key}"', fatal_error=True)
     # add crumbs
     for key, item in default_params.items():

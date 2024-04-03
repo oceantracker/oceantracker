@@ -84,7 +84,7 @@ class FieldGroupManager(ParameterBaseClass):
                    warning=True)
         else:
             ml.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid',
-                   warning=True)
+                   note=True)
 
         self.interpolator.final_setup(self.grid)
         self.info['has_open_boundary_nodes'] = np.any(self.grid['node_type'] == node_types['open_boundary'])

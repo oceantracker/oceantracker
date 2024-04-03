@@ -281,7 +281,7 @@ class _OceanTrackerRunner(object):
         ml.print_line()
         total_errors = num_case_errors + len(ml.errors_list)
         if total_errors > 0:
-            ml.print_line('Has errors, so some cases may not have completed, see above')
+            ml.print_line('Found errors, so some cases may not have completed, see above')
         ml.close()
 
     def _run_parallel(self,base_case_params, case_list_params, run_builder):

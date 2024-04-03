@@ -41,7 +41,6 @@
     "release_groups": {
         "point1": {
             "allow_release_in_dry_cells": true,
-            "ppoint": 1,
             "points": [
                 [
                     1594500,

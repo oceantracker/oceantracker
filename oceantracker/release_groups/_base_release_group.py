@@ -46,6 +46,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info = self.info
         info['number_released'] = 0  # count of particles released in this group
         info['pulseID'] = 0
+        info['total_number_required'] = 0
 
     def get_release_location_candidates(self): nopass()
     def get_number_required(self): nopass()
@@ -142,12 +143,12 @@ class _BaseReleaseGroup(ParameterBaseClass):
             for key in rd.keys():
                 rd[key] = rd[key][is_inside, ...]
 
-                   # if any data concatenate it
-
+            # if any data concatenate it
+            # add release particle prop
             if rd['x'].shape[0] > 0:
                   # if any to list so far
                 for key, item in rd.items():
-                    # add keys  if not there as 0, by whats is needed add to
+                    # add keys  if not there as 0, by what is needed add to
                     if key not in release_part_prop:
                         s = [0]
                         if item.ndim ==2:
@@ -162,20 +163,19 @@ class _BaseReleaseGroup(ParameterBaseClass):
             count += 1
             if count > self.params["max_cycles_to_find_release_points"]: break
 
-        if release_part_prop['x'].shape[0] < n_required:
-            ml.msg(f'Only found {release_part_prop["x"].shape[0]} of {n_required} required points inside domain after {self.params["max_cycles_to_find_release_points"]} cycles',
-                           warning=True, caller=self,
-                           hint=f'Maybe, release points outside the domain?, or hydro-model grid and release points use different coordinate systems?? or increase parameter  "max_cycles_to_find_release_points", current value = {self.params["max_cycles_to_find_release_points"]:3}' )
-            n_required = release_part_prop['x'].shape[0] #
+        info['pulseID'] += 1
+        info['number_released'] += release_part_prop['x'].shape[0]  # count number released in this group
+        info['total_number_required'] += n_required  # used to check what proportion  sucessfully release all that were required, used to find groups tha have no releaseses
+
+        n_required = release_part_prop['x'].shape[0] #
 
         # trim initial location, cell  etc to required number
         for key in release_part_prop.keys():
             release_part_prop[key] = release_part_prop[key][:n_required, ...]
 
-
-        info['pulseID'] += 1
-        info['number_released'] += release_part_prop['x'].shape[0]  # count number released in this group
-
+        # if nothing to release then retuun as is
+        if release_part_prop['x'].shape[0] ==0:
+            return release_part_prop
 
         if si.run_info.is3D_run:
             if release_part_prop['x'].shape[1] <= 2:
