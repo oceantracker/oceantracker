@@ -15,9 +15,7 @@ import traceback
 from oceantracker.util.setup_util import config_numba_environment_and_random_seed
 from oceantracker import definitions
 
-
 from oceantracker.shared_info import SharedInfo as si
-
 
 # note do not import numba here as its environment  setting must ve done first, import done below
 class OceanTrackerCaseRunner(ParameterBaseClass):
@@ -35,6 +33,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         crumbs = 'OceanTrackerCaseRunner setup'
 
         # give shared access to params
+        si.run_builder = run_builder
         si.working_params = run_builder['working_params']
 
         # setup shared info and message logger
@@ -59,7 +58,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         config_numba_environment_and_random_seed(si.working_params['settings'], si.msg_logger, crumbs='Starting case_runner', caller=self)  # must be done before any numba imports
 
         # basic  shortcuts
-        si.run_builder = run_builder
         ri.caseID = run_builder['caseID']
 
         si.output_files = run_builder['output_files']
@@ -142,6 +140,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             self._do_a_run()
 
+            # warn if not al particle were relesed due to dry cells or points being outside the domain
+            self._check_if_all_particles_released()
             case_info = self._get_case_info(d0,t_start)
 
 
@@ -393,6 +393,20 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         pass
 
+    def _check_if_all_particles_released(self):
+        # warn if al request particle pules were not relesed.
+        pass
+        for name, rg in si.roles.release_groups.items():
+            h2 =  f', parameter "allow_release_in_dry_cells" = {rg.params["allow_release_in_dry_cells"]}'
+
+            if rg.info['number_released']==0:
+                si.msg_logger.msg(f'No particles were released from release group {name}', warning = True, caller=rg,
+                                  hint= f'Points/polygon or grid could be fully outside the domain or permanently with dry cells' + h2)
+            elif  rg.info['number_released'] < rg.info['total_number_required'] :
+                si.msg_logger.msg(f'Releases group  {name}, only released {rg.info["number_released"] / rg.info["total_number_required"]:.1%} of required particles', warning=True, caller=rg,
+                                  hint='Parts of release area are sometimes dry?. If a polygon releases, polygon makes up too small a fraction of bounding box, try increasing release param "max_cycles_to_find_release_points"')
+            pass
+
     # ____________________________
     # internal methods below
     # ____________________________
@@ -409,7 +423,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # base class variable warnings is common with all descendents of parameter_base_class
         d = {'user_note': si.settings['user_note'],
              'output_files': si.output_files,
-             'version':   si.run_builder['version'],
+             'version_info':   si.run_builder['version'],
              'computer_info': get_versions_computer_info.get_computer_info(),
              'hindcast_info': si.hindcast_info,
              'caseID' : si.run_info.caseID,
@@ -466,7 +480,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             d['block_timings'].append(l)
         d['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
 
-
         # check numba code for SIMD
         if True:
             from numba.core import config
@@ -486,15 +499,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         return d
 
     def close(self):
+
         # close all instances, eg their files if not close etc
-
-
-
         for i in si._all_class_instance_pointers_iterator():
             try:
                 i.close()
-
             except Exception as e:
-                si.msg_logger.msg(f'Unexpected error closing class ="{ i.info["name"]}"', fatal_error= True, exception=e)
+                si.msg_logger.msg(f'Unexpected error closing class ="{ i.info["name"]}"', fatal_error= True, exception=e, caller=self)
 
 

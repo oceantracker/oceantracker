@@ -68,7 +68,7 @@ params.append(p1)
 # demo 2 track animation
 p2= deepcopy(demo_base_params)
 p2['release_groups']={
-    'point1':{'allow_release_in_dry_cells': True,'ppoint':1,
+    'point1':{'allow_release_in_dry_cells': True,
             'points': two_points, 'pulse_size': 10, 'release_interval': 3 * 3600},
     'poly1':{'class_name': 'PolygonRelease',
             'points': deepcopy(poly_points),

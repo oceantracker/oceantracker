@@ -75,7 +75,7 @@
         }
     },
     "integrated_model": {
-        "class_name": "LagarangianCoherentStructuresFTLEheatmaps2D",
+        "class_name": "LagarangianStructuresFTLE2D",
         "grid_size": [
             45,
             60

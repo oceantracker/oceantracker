@@ -60,7 +60,6 @@ release_groups:
       - 5483000
     - - 1598000
       - 5486100
-    ppoint: 1
     pulse_size: 10
     release_interval: 10800
   poly1:
