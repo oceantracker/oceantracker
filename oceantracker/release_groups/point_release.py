@@ -9,9 +9,9 @@ from oceantracker.shared_info import SharedInfo as si
 
 
 class PointRelease(_BaseReleaseGroup):
-    # releases particles at fixed points, inside optional radius
-    # add checks to see if points inside domain and dry if released in a radius
-
+    '''
+    Release pulse of particles at given points, or in cicile around points.
+    '''
     def __init__(self):
         # set up info/attributes
         super().__init__()
@@ -22,7 +22,7 @@ class PointRelease(_BaseReleaseGroup):
                   'release_radius':  PVC(0., float, min= 0., doc_str= 'Particles are released from random locations in circle of given radius around each point.'),
 
                                   })
-        self.class_doc('Release pules of particles at given points.')
+
         info= self.info
         info['number_released'] = 0 # count of particles released in this group
         info['pulseID'] = 0

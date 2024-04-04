@@ -8,9 +8,13 @@ from oceantracker.util import time_util
 from copy import  deepcopy
 from oceantracker.shared_info import SharedInfo as si
 
-class LagarangianStructuresFTLE2D(_BaseModel):
-    # random polygon release in 2D or 3D
-    #todo make work with lat lng
+class dev_LagarangianStructuresFTLE2D(_BaseModel):
+    '''Time series of Lagrangian Coherent Structures heat maps,
+     calculated as Finite-Time Lyapunov exponents (FTLEs) at given lag times,
+     see Haller, G., 2015. Lagrangian coherent structures.
+     Annual review of fluid mechanics, 47, pp.137-162.')
+     Currently only 2D  implemented
+     '''
 
     def __init__(self):
         # set up info/attributes
@@ -30,11 +34,10 @@ class LagarangianStructuresFTLE2D(_BaseModel):
             'z_min': PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
             'z_max': PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
             'output_file_tag': PVC('LCS', str, doc_str='tag on output file'),
+            #'backwards': PVC(False, bool, doc_str='Do LCS backwards in time'),
             'write_intermediate_results': PVC(False, bool, doc_str='write intermediate arrays, x_lag, strain_matrix. Useful for checking results'),
-            'write_tracks':             PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off oby default for LCS'),
+            'write_tracks':             PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off by default for LCS'),
         })
-        self.class_doc('Time series of Lagrangian Coherent Structures heat maps, calculated as Finite-Time Lyapunov exponents (FTLEs) at given lag times, see Haller, G., 2015. Lagrangian coherent structures. Annual review of fluid mechanics, 47, pp.137-162.')
-    si.settings.use_A_Z_profile
     def add_settings_and_class_params(self):
         # change parameters
         info = self.info
@@ -42,6 +45,7 @@ class LagarangianStructuresFTLE2D(_BaseModel):
 
         # turn off dispersion
         self.settings(include_dispersion=False)
+        #, backtracking= params['backwards'])and ste forrad/mackwads
 
         # make a grid release group at each time interval and grid
         self.clear_class_role('release_groups') # cannot use with other releases
@@ -123,7 +127,9 @@ class LagarangianStructuresFTLE2D(_BaseModel):
 
         # add working space arrays
         self.x_at_lag=  np.full((r+2, c+2, 2), np.nan, dtype=np.float64)
-        self.LCS  = np.full((r, c), np.nan, dtype=np.float64)
+        self.FTLE  = np.full((r, c), np.nan, dtype=np.float64)
+        self.eigen_values = np.full((r, c, 2), np.nan, dtype=np.float64)
+        self.eigen_vectors = np.full((r, c, 2, 2), np.nan, dtype=np.float64)
         self._open_output_file()
 
     def update(self, n_time_step, time_sec):
@@ -145,7 +151,7 @@ class LagarangianStructuresFTLE2D(_BaseModel):
 
     def _calculate_LCS(self, n_pulse ,n_grid, n_lag, sel):
         params = self.params
-        nc = self.nc
+
         part_prop = si.roles.particle_properties
 
         # make grid of current locations
@@ -154,13 +160,20 @@ class LagarangianStructuresFTLE2D(_BaseModel):
                                    part_prop['grid_release_row_col'].data,
                                     self.x_at_lag, sel)
 
-        # get LSC
-        self.LCS.fill(np.nan)
-        self._calc_LCS(self.x_release_grids[n_grid, :, :], self.x_at_lag, self.LCS)
-        self.LCS = np.log(np.sqrt(self.LCS))/params['lags'][n_lag]
+        # get LSC, first fil matrcies with nan to blank areas outside domain, or dry
+        self.FTLE.fill(np.nan)
+        self.eigen_values.fill(np.nan)
+        self.eigen_vectors.fill(np.nan)
+
+        self._calc_FTLE(self.x_release_grids[n_grid, :, :], self.x_at_lag, self.FTLE, self.eigen_values, self.eigen_vectors)
+
+        self.FTLE = np.log(np.sqrt(self.FTLE)) / params['lags'][n_lag]
 
         #write LSCs
-        nc.file_handle.variables['LCS'][n_pulse, n_grid, n_lag, ...] = self.LCS
+        nc = self.nc
+        nc.file_handle.variables['FTLE'][n_pulse, n_grid, n_lag, ...] = self.FTLE
+        nc.file_handle.variables['eigen_values'][n_pulse, n_grid, n_lag, ...] = self.eigen_values
+        nc.file_handle.variables['eigen_vectors'][n_pulse, n_grid, n_lag, ...] = self.eigen_vectors
 
         if params['write_intermediate_results']:
             nc.file_handle.variables['x_at_lag'][n_pulse, n_grid, n_lag, ...] = self.x_at_lag
@@ -199,14 +212,20 @@ class LagarangianStructuresFTLE2D(_BaseModel):
                              description='x,y locations of grid release',
                              attributes=dict(units='meters or longitude deg.'))
 
-        nc.create_a_variable('LCS', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols'],
-                             self.x_at_lag.dtype, description=' Largest Eigen value of 2D strain matrix', fill_value=np.nan,
+        nc.create_a_variable('FTLE', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols'],
+                             np.float32, description=' Largest Eigen value of 2D strain matrix', fill_value=np.nan,
+                             attributes=dict(units='dimensionless'))
+        nc.create_a_variable('eigen_values', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols','vector2D'],
+                             np.float32, description='Eigen values of 2D strain matrix, largest first', fill_value=np.nan,
+                             attributes=dict(units='dimensionless'))
+        nc.create_a_variable('eigen_vectors', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols', 'vector2D', 'vector2D'],
+                             np.float32, description='Columns are Eigen vectors of 2D strain matrix, vector for largest eigen value in the first column t', fill_value=np.nan,
                              attributes=dict(units='dimensionless'))
 
         # optional output
         if params['write_intermediate_results']:
             nc.create_a_variable('x_at_lag',['time_dim','grid_dim', 'lag_dim','release_grid_rows','release_grid_cols','vector2D'],
-                             self.x_at_lag.dtype, description='x,y locations of particles at given lags', fill_value=np.nan,
+                             np.float32, description='x,y locations of particles at given lags', fill_value=np.nan,
                              attributes=dict(units='meters or (lon, lat)  deg.') )
 
     @staticmethod
@@ -222,12 +241,15 @@ class LagarangianStructuresFTLE2D(_BaseModel):
 
     @staticmethod
     @njitOT
-    def _calc_LCS(x_release_grid, x_at_lag, LCS):
+    def _calc_FTLE(x_release_grid, x_at_lag, FTLE, eigen_values, eigen_vectors):
         #  find strain marix foy each grid point at the center of the release grid cells
         #  LSC is largest eigen value of this matrix
+
+        # working space
         F_deformation_grad =  np.full((2,2),0.,dtype=np.float64)
         C_strain_tensor = np.full((2, 2), 0., dtype=np.float64)
-        e_vals = np.full((2,), 0., dtype=np.float64)
+        e_val = np.full((2, ), 0., dtype=np.float64)
+        e_vec = np.full((2,2), 0., dtype=np.float64)
 
         # initial  equal separations
         dx0=  x_release_grid[0, 1, 0] - x_release_grid[0, 0, 0]
@@ -235,29 +257,26 @@ class LagarangianStructuresFTLE2D(_BaseModel):
 
         for r in range(1,x_release_grid.shape[0] - 1):
             for c in range(1, x_release_grid.shape[1] - 1):
-                for n in range(2):
+                for m in range(2):
                     # x grads strain in, first column
-                    F_deformation_grad[n, 0]  = (x_at_lag[r, c+1, n] - x_at_lag[r, c-1, n])/2.0/dx0
+                    F_deformation_grad[m, 0]  = (x_at_lag[r, c+1, m] - x_at_lag[r, c-1, m])/2.0/dx0
                     # y grads strain in, second column
-                    F_deformation_grad[n, 1] = (x_at_lag[r+1, c , n] - x_at_lag[r - 1, c, n]) / 2.0 / dy0
+                    F_deformation_grad[m, 1] = (x_at_lag[r+1, c , m] - x_at_lag[r - 1, c, m]) / 2.0 / dy0
+                # don't calculate if any grid relesed outside domain or by default in dry cells
+                if np.any(np.isnan(F_deformation_grad)) : continue
 
-                C_strain_tensor[:] = F_deformation_grad.T* F_deformation_grad
+                C_strain_tensor[:] = np.dot(F_deformation_grad.T, F_deformation_grad)
+                e_val[:], e_vec[:] = np.linalg.eig(C_strain_tensor)
 
-                eigen_vals2by2(C_strain_tensor, e_vals)
-
-                LCS[r-1, c-1] = e_vals[0] if abs(e_vals[0]) >= abs(e_vals[1]) else e_vals[1]
+                # put largest  eigen value first
+                n1 = int(abs(e_val[1]) >= abs(e_val[0])) # largest value index
+                n2 = (n1 + 1) % 2 # other index
+                r1, c1 = r - 1, c - 1
+                eigen_values[r1, c1, 0],   eigen_values[r1, c1, 1] = e_val[n1], e_val[n2]
+                eigen_vectors[r1, c1, :, 0],   eigen_vectors[r1, c1, :, 1] = e_vec[:, n1], e_vec[:, n2]
+                FTLE[r1, c1] = eigen_values[r1, c1, 0] #largest
         pass
 
     def close(self):
         self.nc.close()
 
-@njitOT
-def eigen_vals2by2(A, e_vals):
-    # Trace and Determinant of matrix
-    T = A[0, 0] + A[1, 1]
-    D = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0]
-
-    # get Eigen values as  get solutions to a quadratic eq.
-    r = np.sqrt(T ** 2 - 4.0 * D)
-    e_vals[0] = 0.5 * (T - r)
-    e_vals[1] = 0.5 * (T + r)

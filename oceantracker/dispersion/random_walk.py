@@ -9,7 +9,9 @@ from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import SharedInfo as si
 
 class RandomWalk(_BaseTrajectoryModifer):
-    # add random walk using velocity modifier
+    '''
+    implements random walk of particles by adding equivalent random velocity
+    '''
     def __init__(self):
         # set up default params
         super().__init__()  # required in children to get parent defaults

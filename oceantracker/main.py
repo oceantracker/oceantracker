@@ -162,8 +162,8 @@ class _OceanTrackerRunner(object):
     
     def run(self, params, case_list_params = None):
         ml = msg_logger
+        ml.reset()
         ml.set_screen_tag('Main')
-
 
         self.start_t0 = perf_counter()
         self.start_date = datetime.now()

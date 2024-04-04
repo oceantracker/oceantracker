@@ -6,6 +6,9 @@ from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import SharedInfo as si
 
 class VerticalGradient(CustomFieldBase):
+    '''Add a vertical gradient field of the  "name_of_field" param,
+    as a custom field named "name_of_field_vertical_grad"'
+    '''
 
     def __init__(self):
         super().__init__()
@@ -14,7 +17,6 @@ class VerticalGradient(CustomFieldBase):
                                  'time_varying': PVC(True, bool, is_required=False),
                                  'is3D': PVC(True, bool, is_required=False),
                                  })
-        self.class_doc('Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"')
 
     def initial_setup(self, grid, fields):
         ml = si.msg_logger

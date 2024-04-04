@@ -66,8 +66,6 @@ class ParameterBaseClass(_RootParameterBaseClass):
 
     def role_doc(self,role):
         self.docs['role'] = role  # only in base class
-    def class_doc(self,description):
-        self.docs['description']=description
 
 
     def check_requirements(self):

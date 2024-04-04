@@ -202,6 +202,8 @@ class _SharedInfoClass():
         pass
     def _setup(self):
         # this allows shared info to make a class importer when needed
+        self.msg_logger.set_screen_tag('Prelim')
+        self.msg_logger.reset()
         self._class_importer = class_importer_util.ClassImporter(self, self.msg_logger)
 
         # empty out roles and core roles in case of rerunning and shared info import only happens once

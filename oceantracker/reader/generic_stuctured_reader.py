@@ -8,7 +8,7 @@ from copy import  deepcopy
 
 from oceantracker.shared_info import SharedInfo as si
 
-class GenericStructuredReader(_BaseGenericReader):
+class dev_GenericStructuredReader(_BaseGenericReader):
 
     def __init__(self):
         super().__init__()

@@ -4,14 +4,16 @@ from oceantracker.release_groups.point_release import PointRelease
 from oceantracker.shared_info import SharedInfo as si
 
 class PolygonRelease(PointRelease):
-    # random polygon release in 2D or 3D
+    '''
+    Release particles at random locations within given polygon.
+    Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.
+    '''
 
     def __init__(self):
         # set up info/attributes
         super().__init__()
         self.add_default_params(si.default_polygon_dict_params)
 
-        self.class_doc('Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.')
 
         # below are not needed for polygons
         self.remove_default_params(['release_radius'])

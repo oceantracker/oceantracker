@@ -1,0 +1,17 @@
+    output_file_base: minimal_example
+    root_output_dir: output
+    time_step: 120.0
+    reader:
+      file_mask: demoHindcastSchism*.nc
+      input_dir: ..\demos\demo_hindcast
+    release_groups:
+      my_release_point:
+        class_name: null
+        points:
+        - - 1595000
+          - 5482600
+        - - 1599000
+          - 5486200
+        pulse_size: 10
+        release_interval: 3600
+
