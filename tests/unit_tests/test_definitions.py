@@ -19,6 +19,7 @@ def base_settings(fn):
             time_step=600.,  # 10 min time step
             USE_random_seed = True,
             NCDF_time_chunk=1,
+            debug=True
             )
     return d
 

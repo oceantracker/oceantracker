@@ -4,11 +4,13 @@ SplitParticles
 
 **Description:** 
 
-**class_name:** oceantracker.trajectory_modifiers.split_particles.SplitParticles
+**full class_name :** oceantracker.trajectory_modifiers.split_particles.SplitParticles
 
-**File:** oceantracker/trajectory_modifiers/split_particles.py
+**short class_name:** SplitParticles
 
-**Inheritance:** _BaseTrajectoryModifier> SplitParticles
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> SplitParticles
 
 
 Parameters:

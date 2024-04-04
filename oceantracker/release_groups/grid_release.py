@@ -5,6 +5,10 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from oceantracker.shared_info import SharedInfo as si
 
 class GridRelease(_BaseReleaseGroup):
+    '''
+    Release pules of particles on a regular grid.
+    '''
+
     def __init__(self):
         # set up info/attributes
         super().__init__()
@@ -16,7 +20,6 @@ class GridRelease(_BaseReleaseGroup):
                             min =1,max=10**6,  doc_str='number of rows and columns in grid'),
                 )
 
-        self.class_doc('Release pules of particles on a regular grid.')
 
         info = self.info
         info['release_type'] = 'grid'

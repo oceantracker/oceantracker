@@ -4,11 +4,13 @@ ParticleGroupManager
 
 **Description:** 
 
-**class_name:** oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager
+**full class_name :** oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager
 
-**File:** oceantracker/particle_group_manager/particle_group_manager.py
+**short class_name:** ParticleGroupManager
 
-**Inheritance:** ParticleGroupManager
+docs>>
+
+**Inheritance:** > ParameterBaseClass> ParticleGroupManager
 
 
 Parameters:

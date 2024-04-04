@@ -4,11 +4,13 @@ GriddedStats2D_agedBased
 
 **Description:** 
 
-**class_name:** oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased
+**full class_name :** oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased
 
-**File:** oceantracker/particle_statistics/gridded_statistics.py
+**short class_name:** GriddedStats2D_agedBased
 
-**Inheritance:** _BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased
 
 
 Parameters:
@@ -28,13 +30,15 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``count_end_date`` :   ``iso8601date``   *<optional>*
-		Description: Stop particle counting from this iso date-time
+	* ``duration`` :   ``<class 'float'>``   *<optional>*
+		Description: How long to do counting after start time, can be used instead of "end" parameter
 
 		- default: ``None``
+		- min: ``0.0``
+		- units: ``sec``
 
-	* ``count_start_date`` :   ``iso8601date``   *<optional>*
-		Description: Start particle counting from this iso date-time
+	* ``end`` :   ``iso8601date``   *<optional>*
+		Description: Stop particle counting from this iso date-time, default is end of model run
 
 		- default: ``None``
 
@@ -74,6 +78,11 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_gridded_age``
+
+	* ``start`` :   ``iso8601date``   *<optional>*
+		Description: Start particle counting from this date-time, default is start of model run
+
+		- default: ``None``
 
 	* ``status_max`` :   ``[<class 'str'>]``   *<optional>*
 		Description: Count only those particles with status  <= to this value

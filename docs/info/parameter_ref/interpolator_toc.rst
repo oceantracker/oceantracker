@@ -2,8 +2,6 @@
 interpolator
 #############
 
-**Module:** oceantracker.interpolator
-
 
 .. toctree::
 	:maxdepth: 1

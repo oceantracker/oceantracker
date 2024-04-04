@@ -2,8 +2,6 @@
 fields
 #######
 
-**Module:** oceantracker.fields
-
 
 .. toctree::
 	:maxdepth: 1

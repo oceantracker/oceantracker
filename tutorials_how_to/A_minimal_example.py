@@ -56,7 +56,7 @@ print(case_info_file_name)
 # 
 #   A first basic plot of particle tracks
 
-# In[4]:
+# In[2]:
 
 
 # read output files
@@ -85,7 +85,7 @@ plot_tracks(tracks, axis_lims=ax, show_grid=True)
 # By default particles are blocked from moving from a wet cell to a dry cell and will not be released if the release location lies within a dry cell. 
 #   
 
-# In[5]:
+# In[3]:
 
 
 from matplotlib import pyplot as plt

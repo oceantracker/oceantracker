@@ -4,11 +4,13 @@ ParticleParameterFromNormalDistribution
 
 **Description:** 
 
-**class_name:** oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution
+**full class_name :** oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution
 
-**File:** oceantracker/particle_properties/particle_parameter_from_normal_distribution.py
+**short class_name:** ParticleParameterFromNormalDistribution
 
-**Inheritance:** _BaseParticleProperty> ParticleProperty> ParticleParameterFromNormalDistribution
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ParticleProperty> ParticleParameterFromNormalDistribution
 
 
 Parameters:
@@ -49,6 +51,9 @@ Parameters:
 
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
+
+	* ``units`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``

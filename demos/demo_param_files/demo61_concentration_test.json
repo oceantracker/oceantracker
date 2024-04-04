@@ -151,7 +151,6 @@
     "particle_concentrations": {
         "outfall_conc": {
             "class_name": "oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D",
-            "case_output_file_tag": "siteA",
             "update_interval": 1800
         }
     },

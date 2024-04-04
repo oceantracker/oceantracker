@@ -105,9 +105,10 @@
   <section id="griddedstats2d-timebased">
 <h1>GriddedStats2D_timeBased<a class="headerlink" href="#griddedstats2d-timebased" title="Permalink to this heading">¶</a></h1>
 <p><strong>Description:</strong></p>
-<p><strong>class_name:</strong> oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased</p>
-<p><strong>File:</strong> oceantracker/particle_statistics/gridded_statistics.py</p>
-<p><strong>Inheritance:</strong> _BaseParticleLocationStats&gt; GriddedStats2D_timeBased</p>
+<p><strong>full class_name :</strong> oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased</p>
+<p><strong>short class_name:</strong> GriddedStats2D_timeBased</p>
+<p>docs&gt;&gt;</p>
+<p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseParticleLocationStats&gt; GriddedStats2D_timeBased</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
@@ -130,15 +131,17 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">count_end_date</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Stop particle counting from this iso date-time</p>
+<dt><code class="docutils literal notranslate"><span class="pre">duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: How long to do counting after start time, can be used instead of “end” parameter</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+<li><p>units: <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">count_start_date</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Start particle counting from this iso date-time</p>
+<dt><code class="docutils literal notranslate"><span class="pre">end</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Stop particle counting from this iso date-time, default is end of model run</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
@@ -190,6 +193,14 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">role_output_file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">stats_gridded_time</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">start</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Start particle counting from this date-time, default is start of model run</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>

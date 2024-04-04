@@ -2,13 +2,15 @@
 VerticalGradient
 #################
 
-**Description:** Calculated a vertical gradient field with name  "name_of_field" param, as a field named "name_of_field_vertical_grad"
+**Description:** 
 
-**class_name:** oceantracker.fields.field_vertical_gradient.VerticalGradient
+**full class_name :** oceantracker.fields.field_vertical_gradient.VerticalGradient
 
-**File:** oceantracker/fields/field_vertical_gradient.py
+**short class_name:** VerticalGradient
 
-**Inheritance:** ReaderField> CustomFieldBase> VerticalGradient
+Add a vertical gradient field of the  "name_of_field" param,    as a custom field named "name_of_field_vertical_grad"'    
+
+**Inheritance:** > ParameterBaseClass> ReaderField> CustomFieldBase> VerticalGradient
 
 
 Parameters:

@@ -21,14 +21,9 @@ def msg_str(msg,tabs=0):
 
 class MessageLogger(object ):
     def __init__(self):
-        self.fatal_error_count = 0
-        self.warnings_list=[]
-        self.errors_list=[]
-        self.notes_list = []
-        self.log_file = None
-        self.error_warning_count = 0
-        self.screen_tag = '???'
-        self.max_warnings = 25
+
+
+        self.reset()
 
         # build links lookup
         link_map= [['parameter_ref_toc', 'info/parameter_ref/parameter_ref_toc.html'],
@@ -38,6 +33,17 @@ class MessageLogger(object ):
         self.links={}
         for l in link_map:
             self.links[l[0]]= docs_base_url + l[1]
+
+    def reset(self):
+        self.fatal_error_count = 0
+        self.warnings_list=[]
+        self.errors_list=[]
+        self.notes_list = []
+        self.log_file = None
+        self.error_warning_count = 0
+        self.screen_tag = '???'
+        self.max_warnings = 25
+
 
     def settings(self, max_warnings=None):
         self.max_warnings = None if max_warnings is None else 25

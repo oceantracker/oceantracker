@@ -4,21 +4,19 @@ from glob import  glob
 import inspect
 import importlib
 
-import oceantracker.definitions as common_info
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
 from oceantracker.shared_info import SharedInfo as si
-
-root_param_ref_dir = path.join(package_util.get_root_package_dir(),'docs', 'info', 'parameter_ref')
-
+si._setup()
+from oceantracker import definitions
 
 class RSTfileBuilder(object):
     def __init__(self, file_name, title):
         self.lines=[]
         self.toc_dict = {}
         self.file_name = file_name + '.rst'
-
+        self.docs_dir= path.join(definitions.ot_root_dir,'docs','info','parameter_ref')
         self.add_lines((len(title)+1) * '#')
         self.add_lines(title)
         self.add_lines((len(title)+1)  * '#')
@@ -64,7 +62,7 @@ class RSTfileBuilder(object):
         '''
 
     def write(self):
-        file_name = path.join(root_param_ref_dir, self.file_name)
+        file_name = path.join(self.docs_dir, self.file_name)
         with open(file_name ,'w') as f:
             for l in self.lines:
                 indent=l['indent'] * '\t'
@@ -158,65 +156,45 @@ class RSTfileBuilder(object):
 def make_class_sub_pages(class_role, link_tag=''):
     # make doc pages from defaults of all python in named dir
 
-    mod_name=package_util.get_package_name() + '.' + class_role
-
-    mod = importlib.import_module( mod_name)
-
-    package_dir= package_util.get_package_dir()
+    mods= si._class_importer.class_tree[class_role]
 
     toc = RSTfileBuilder(class_role+'_toc', class_role + link_tag)
 
-    toc.add_lines('**Module:** ' + package_util.package_relative_file_name(mod.__name__).strip())
-    toc.add_lines()
-
     toc.add_new_toc_to_page(class_role, maxdepth=1,sort_body=True)
     instance = None
-    for f in glob(path.join( package_dir,class_role,'*.py')):
+    for name, info in mods.items():
+        if name[0] == '_':   continue  # ignore internal/base classes flagged with underscore
+        instance= info['class_obj']()
+        p = RSTfileBuilder(name, name)
 
-        mod_str= path.splitext(f)[0].split(package_util.get_root_package_dir() +'\\')[-1].replace('\\','.')
-        mod = importlib.import_module(mod_str)
-        package_util.get_package_name()
+        p.add_lines('**Description:** ' + (instance.docs['description'] if instance.docs['description'] is not None else '' ) )
+        p.add_lines()
+        p.add_lines(f'**full class_name :** {info["mod_str"]}')
+        p.add_lines()
+        short_name =info["mod_str"].split(".")[-1]
+        p.add_lines(f'**short class_name:** {short_name}')
+        p.add_lines()
+        if short_name.lower().startswith('dev'):
+            p.add_directive('warning', body='Class is under development may not yet work in all cases, if errors contact developer')
 
-        for name, c in  inspect.getmembers(mod):
-            if not inspect.isclass(c) : continue
-            #print(name)
-            if name[0] == '_':   continue  # ignore internal/base classes flagged with underscore
+        # show inheritance
+        parents=''
+        for b in info['class_obj'].__mro__[:-2][::-1]:
+            parents = parents  + '> ' + b.__name__
+        doc_str = info["class_obj"].__doc__
+        # should not do this is doc strs are in native rst
+        ds = "docs>>" if doc_str is None else doc_str.replace("\n","")
+        p.add_lines(f'{ds}')
+        p.add_lines()
+        p.add_lines(f'**Inheritance:** {parents}')
+        p.add_lines()
 
-            if not issubclass(c, ParameterBaseClass): continue
-            if c.__module__ !=  mod.__name__ : continue  # only work on locally declared claseses
-            instance= c()
+        p.add_heading('Parameters:', level=0)
 
+        p.add_params_from_dict(instance.default_params)
 
-            p = RSTfileBuilder(name, name)
-
-            p.add_lines('**Description:** ' + (instance.docs['description'] if instance.docs['description'] is not None else '' ) )
-            p.add_lines()
-            p.add_lines('**class_name:** ' + c.__module__ + '.' + c.__name__)
-            p.add_lines()
-
-            p.add_lines('**File:** ' + package_util.package_relative_file_name(mod.__file__))
-            p.add_lines()
-
-            # show pinhertince
-            parents=''
-            for b in inspect.getmro(c)[1:]:
-                #print(b.__name__, parents)
-                if b.__name__ in ['object',  'ParameterBaseClass'] :continue
-                parents = b.__name__ + '> ' + parents
-
-            p.add_lines('**Inheritance:** ' + parents + c.__name__)
-            p.add_lines()
-
-            # get all defaults and wrte to yaml
-            #instance.merge_with_class_defaults({},{})
-            #write_YAML(name+'.yaml',instance.params)
-
-            p.add_heading('Parameters:', level=0)
-
-            p.add_params_from_dict(instance.default_params)
-
-            p.write()
-            toc.add_toc_link(class_role,p)
+        p.write()
+        toc.add_toc_link(class_role,p)
 
     # add role from last instance, as it derives from base class
     if instance is not None:
@@ -235,8 +213,7 @@ def build_param_ref():
 
     # settings sub page
     sp = RSTfileBuilder('settings', 'Settings')
-    settings_dict = common_info.shared_settings_defaults
-    settings_dict.update(common_info.case_settings_defaults)
+    settings_dict = si.settings.as_dict()
     sp.add_heading('Top level settings/parameters', level=2)
     sp.write_param_dict_defaults(settings_dict)
 
@@ -257,10 +234,10 @@ def build_param_ref():
 
     page.add_heading('Multiple classes for each role',level=2)
     page.add_lines('Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.')
-    page.add_new_toc_to_page('roles_dict, maxdepth=1, sort_body=True)
+    page.add_new_toc_to_page('roles_dict', maxdepth=1, sort_body=True)
 
     page.add_new_toc_to_page('user', maxdepth=1)
-    for key in sorted(common_info.class_dicts_list):
+    for key in sorted(si.roles.possible_values()):
         if key in ['nested_readers'] : continue
         toc = make_class_sub_pages(key)
         page.add_toc_link('user', toc)

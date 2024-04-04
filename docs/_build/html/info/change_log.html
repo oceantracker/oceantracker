@@ -113,6 +113,7 @@
 <li><p>By default uses diffusivity vertical profile for A_Z in random walk if variable mapped to A_Z_profile is found in the hydro file</p></li>
 <li><p>Re-suspension by critical friction velocity, uses bottom stress to calculate friction velocity field if variable mapped to bottom_stress is found in the hydro file, if not uses near seabed velocity</p></li>
 <li><p>Now reads new Schism v5 multi-file output, where 3D fields are in separate files</p></li>
+<li><p>In helper method in add_class “name” is  now optional, will auto nane eg ParticleRelease_0001</p></li>
 <li><p>Can auto detect if hydro-model has lat lng cords, by looking at bounds of grid coordinates.</p></li>
 <li><p>If hydro model is in geographic coords all inputs can now be in lon, lat, eg release locations, stats grid location and size. Currently outputs are in a meters grid, UTM or user given ESPG code. Future versions will work natively geographic coords, ie both inputs and outputs.</p></li>
 <li><p>Release group now has options to release at bottom or sea surface, with optional offset.These override any given z release values.</p></li>
@@ -122,6 +123,8 @@
 <li><p>All on the fly stats. can restrict particle counting within given z range and also a given water depth range</p></li>
 <li><p>Now exits with error if any the release group start time is outside time range of hindcast</p></li>
 <li><p>Setting display_grid_at_start plots grid as a check, clicking on image will print coords in console to use as release points</p></li>
+<li><p>Release group data now writen to separate file for each case, to use</p></li>
+<li><p>For coders using IDEs (Pycharm, VS code) the shared info structure variables and methods now auto completes/hints variable/method names, with doc_strs where available.</p></li>
 </ol>
 </section>
 </section>
@@ -137,13 +140,14 @@ As these updates can only happen at a model time step.</p>
 <li><p>z range parameter for release and stats, replaced by z_min and z_max, warning is given</p></li>
 <li><p>the frozen particle status name is now stationary, the numerical value remains the same, it is rarely used and is not the same status as stranded by tide</p></li>
 <li><p>post_processing read and plot code has moved, so import statements need to change. read code imports are now “from read_oceantracker.python import <a href="#id1"><span class="problematic" id="id2">*</span></a>” and for plots “from plot_oceantracker import <a href="#id3"><span class="problematic" id="id4">*</span></a>”</p></li>
-<li><p>Matlab code to read output is now in read_oceantrackermatlab</p></li>
+<li><p>Matlab code to read output is now in read_oceantracker.matlab</p></li>
 </ol>
 <p>Breaking changes for coders</p>
 <ol class="arabic simple">
 <li><p>For coders getting parameter  argument mis-matches on update methods, all class update methods of part_prop and modifiers now have a n_time_step as the first parameter, the particle tracking time step starting at zero. This is the clock tick of the code, is used to more precisely take actions, and avoid situations such as the model time step in 3600sec, and the user request a 4000sec release interval, which currently result in periodic unequal release intervals and double pulses. So that methods like update(time_in_sec, active) become update(n_time_step, time_in_sec, active). Not all update methods will use these time syncing variables, but some variants may.</p></li>
 <li><p>Shared info is done by  “import from oceantracker.shared_info import SharedInfo as si”, old way si = self.shared_info still works</p></li>
 <li><p>shared_info.classes is deprecated, eg si.classes[‘particle_properties’] is now si.roles.particle_properties, where more than one class can be added. and   si.classes[‘particle_grop_manager’] is si.core_roles.particle_grop_manager. The .class[name] approach still works for now.</p></li>
+<li><p>all control vaiables and settings used during run moved from si.(name) to si.run ifo.(name) auto completes in IDEs, eg si.backtracking is now si.run_info.backtracking</p></li>
 <li><p>particle status flags are all on si.particle_status_flags and auto complete, Can use si.particle_status_flags.moving or  si.particle_status_flags[‘moving’]</p></li>
 </ol>
 </section>

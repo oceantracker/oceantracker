@@ -4,11 +4,13 @@ TerminalVelocity
 
 **Description:** 
 
-**class_name:** oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
+**full class_name :** oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
 
-**File:** oceantracker/velocity_modifiers/terminal_velocity.py
+**short class_name:** TerminalVelocity
 
-**Inheritance:** VelocityModiferBase> TerminalVelocity
+docs>>
+
+**Inheritance:** > ParameterBaseClass> VelocityModiferBase> TerminalVelocity
 
 
 Parameters:

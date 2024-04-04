@@ -357,7 +357,7 @@ s61 = deepcopy(schsim_base_params)
 s61.update({'max_run_duration': 15*24*3600.,'output_file_base': 'demo61_concentration_test'})
 s61['write_tracks']= False
 s61['particle_concentrations']={'outfall_conc':{'class_name':'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
-                                                          'case_output_file_tag': 'siteA','update_interval': 1800}}
+                                                        'update_interval': 1800}}
 
 for rg in s61['release_groups'].values():
     rg.update({'pulse_size': 1000, 'release_interval': 3600})
@@ -387,7 +387,7 @@ p70.update({'output_file_base' :'demo70_LCS_test',
             #'NUMBA_cache_code': True,
             'time_step':600 })
 
-p70['integrated_model']={'class_name': 'LagarangianStructuresFTLE2D',
+p70['integrated_model']={'class_name': 'dev_LagarangianStructuresFTLE2D',
            'grid_size': [45, 60],
             'write_intermediate_results': True,
             'grid_span' : [ 10000, 9000],
@@ -404,7 +404,7 @@ params.append(p70)
 p90= deepcopy(p2)
 
 p90.update({'max_run_duration': 2*24*3600.,'output_file_base': 'demo90forward',
-            'inculde_dispersion':False,
+            'include_dispersion':False,
             'backtracking': False,'debug': True,'time_step' :60 })
 p90['reader']['time_buffer_size']=2  # test with  tiny buffer
 p90['release_groups']= {

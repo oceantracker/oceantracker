@@ -4,11 +4,13 @@ TidalStranding
 
 **Description:** 
 
-**class_name:** oceantracker.tidal_stranding.tidal_stranding.TidalStranding
+**full class_name :** oceantracker.tidal_stranding.tidal_stranding.TidalStranding
 
-**File:** oceantracker/tidal_stranding/tidal_stranding.py
+**short class_name:** TidalStranding
 
-**Inheritance:** _BaseTrajectoryModifier> TidalStranding
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> TidalStranding
 
 
 Parameters:

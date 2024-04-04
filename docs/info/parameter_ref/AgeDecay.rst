@@ -2,13 +2,15 @@
 AgeDecay
 #########
 
-**Description:** Exponentially decaying particle property based on age.
+**Description:** 
 
-**class_name:** oceantracker.particle_properties.age_decay.AgeDecay
+**full class_name :** oceantracker.particle_properties.age_decay.AgeDecay
 
-**File:** oceantracker/particle_properties/age_decay.py
+**short class_name:** AgeDecay
 
-**Inheritance:** _BaseParticleProperty> ParticleProperty> AgeDecay
+    Exponentially decaying particle property based on age with user given decay time scale.    
+
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ParticleProperty> AgeDecay
 
 
 Parameters:
@@ -54,6 +56,9 @@ Parameters:
 
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
+
+	* ``units`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``

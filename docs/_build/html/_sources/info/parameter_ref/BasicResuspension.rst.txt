@@ -4,11 +4,13 @@ BasicResuspension
 
 **Description:** 
 
-**class_name:** oceantracker.resuspension.resuspension.BasicResuspension
+**full class_name :** oceantracker.resuspension.resuspension.BasicResuspension
 
-**File:** oceantracker/resuspension/resuspension.py
+**short class_name:** BasicResuspension
 
-**Inheritance:** _BaseResuspension> BasicResuspension
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseResuspension> BasicResuspension
 
 
 Parameters:

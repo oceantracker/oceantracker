@@ -4,11 +4,13 @@ ParticleConcentrations2D
 
 **Description:** 
 
-**class_name:** oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D
+**full class_name :** oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D
 
-**File:** oceantracker/particle_concentrations/particle_concentrations.py
+**short class_name:** ParticleConcentrations2D
 
-**Inheritance:** _BaseTriangleProperties> ParticleConcentrations2D
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseTriangleProperties> ParticleConcentrations2D
 
 
 Parameters:

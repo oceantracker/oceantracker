@@ -2,8 +2,6 @@
 dispersion
 ###########
 
-**Module:** oceantracker.dispersion
-
 
 .. toctree::
 	:maxdepth: 1

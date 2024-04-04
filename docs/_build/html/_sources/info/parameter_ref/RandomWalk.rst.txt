@@ -4,11 +4,13 @@ RandomWalk
 
 **Description:** 
 
-**class_name:** oceantracker.dispersion.random_walk.RandomWalk
+**full class_name :** oceantracker.dispersion.random_walk.RandomWalk
 
-**File:** oceantracker/dispersion/random_walk.py
+**short class_name:** RandomWalk
 
-**Inheritance:** _BaseTrajectoryModifer> RandomWalk
+    implements random walk of particles by adding equivalent random velocity    
+
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifer> RandomWalk
 
 
 Parameters:

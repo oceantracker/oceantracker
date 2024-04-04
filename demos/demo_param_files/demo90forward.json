@@ -79,7 +79,7 @@
     },
     "block_dry_cells": true,
     "max_run_duration": 172800.0,
-    "inculde_dispersion": false,
+    "include_dispersion": false,
     "backtracking": false,
     "root_output_dir": "output"
 }

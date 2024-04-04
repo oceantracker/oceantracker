@@ -105,9 +105,10 @@
   <section id="compacttrackswriter">
 <h1>CompactTracksWriter<a class="headerlink" href="#compacttrackswriter" title="Permalink to this heading">¶</a></h1>
 <p><strong>Description:</strong></p>
-<p><strong>class_name:</strong> oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter</p>
-<p><strong>File:</strong> oceantracker/tracks_writer/track_writer_compact.py</p>
-<p><strong>Inheritance:</strong> _BaseWriter&gt; CompactTracksWriter</p>
+<p><strong>full class_name :</strong> oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter</p>
+<p><strong>short class_name:</strong> CompactTracksWriter</p>
+<p>docs&gt;&gt;</p>
+<p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseWriter&gt; CompactTracksWriter</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
@@ -184,10 +185,10 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">update_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: the time in model seconds between writes (will be rounded to model time step)</p>
+<dt><code class="docutils literal notranslate"><span class="pre">update_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: the time in model seconds between writes (will be rounded to model time step)</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.01</span></code></p></li>
 <li><p>units: <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
 </ul>
 </dd>
@@ -204,6 +205,15 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">write_dry_cell_flag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>

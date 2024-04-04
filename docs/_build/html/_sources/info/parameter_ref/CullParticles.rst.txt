@@ -2,13 +2,15 @@
 CullParticles
 ##############
 
-**Description:** Prototype for how to  cull particles, this version just culls random particles, inherit and change "def select_particles_to_cull(self, time_sec, active):" method to give other behaviors
+**Description:** 
 
-**class_name:** oceantracker.trajectory_modifiers.cull_particles.CullParticles
+**full class_name :** oceantracker.trajectory_modifiers.cull_particles.CullParticles
 
-**File:** oceantracker/trajectory_modifiers/cull_particles.py
+**short class_name:** CullParticles
 
-**Inheritance:** _BaseTrajectoryModifier> CullParticles
+    Prototype for how to  cull particles, this version just culls random particles,     inherit and change "def select_particles_to_cull(self, time_sec, active):" method to give other behaviors')    
+
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> CullParticles
 
 
 Parameters:

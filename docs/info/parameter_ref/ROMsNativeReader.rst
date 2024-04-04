@@ -4,11 +4,13 @@ ROMsNativeReader
 
 **Description:** 
 
-**class_name:** oceantracker.reader.ROMS_reader.ROMsNativeReader
+**full class_name :** oceantracker.reader.ROMS_reader.ROMsNativeReader
 
-**File:** oceantracker/reader/ROMS_reader.py
+**short class_name:** ROMsNativeReader
 
-**Inheritance:** _BaseReader> ROMsNativeReader
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseReader> ROMsNativeReader
 
 
 Parameters:
@@ -35,6 +37,11 @@ Parameters:
 
 			- default: ``None``
 
+		* ``salinity`` :   ``<class 'str'>``   *<optional>*
+			Description: maps standard internal field name to file variable name
+
+			- default: ``None``
+
 		* ``tide`` :   ``<class 'str'>``   *<optional>*
 			- default: ``zeta``
 
@@ -55,6 +62,11 @@ Parameters:
 			- default list : ``['ubar', 'vbar']``
 			- can_be_empty_list: ``True``
 			- fixed_len: ``2``
+
+		* ``wind_stress`` :   ``<class 'str'>``   *<optional>*
+			Description: maps standard internal field name to file variable name
+
+			- default: ``None``
 
 	* ``field_variables``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``

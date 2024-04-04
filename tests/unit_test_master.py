@@ -29,7 +29,6 @@ if __name__ == "__main__":
 
     for n, name in info:
         if n in test_list:
-
             p = importlib.import_module(name)
             p.main(args)
 

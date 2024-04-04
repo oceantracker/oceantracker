@@ -11,7 +11,7 @@ from oceantracker.reader.util import  hydromodel_grid_transforms
 
 from oceantracker.shared_info import SharedInfo as si
 
-class DELFTFM(_BaseReader):
+class dev_DELFTFM(_BaseReader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params

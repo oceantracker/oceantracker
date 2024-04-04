@@ -4,11 +4,13 @@ VelocityModiferBase
 
 **Description:** 
 
-**class_name:** oceantracker.velocity_modifiers._base_velocity_modifer.VelocityModiferBase
+**full class_name :** oceantracker.velocity_modifiers._base_velocity_modifer.VelocityModiferBase
 
-**File:** oceantracker/velocity_modifiers/_base_velocity_modifer.py
+**short class_name:** VelocityModiferBase
 
-**Inheritance:** VelocityModiferBase
+docs>>
+
+**Inheritance:** > ParameterBaseClass> VelocityModiferBase
 
 
 Parameters:

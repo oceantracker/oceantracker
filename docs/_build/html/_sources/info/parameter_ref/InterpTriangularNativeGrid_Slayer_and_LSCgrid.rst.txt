@@ -4,11 +4,13 @@ InterpTriangularNativeGrid_Slayer_and_LSCgrid
 
 **Description:** 
 
-**class_name:** oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid
+**full class_name :** oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid
 
-**File:** oceantracker/interpolator/interp_triangle_native_grid.py
+**short class_name:** InterpTriangularNativeGrid_Slayer_and_LSCgrid
 
-**Inheritance:** _BaseInterp> InterpTriangularNativeGrid_Slayer_and_LSCgrid
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseInterp> InterpTriangularNativeGrid_Slayer_and_LSCgrid
 
 
 Parameters:

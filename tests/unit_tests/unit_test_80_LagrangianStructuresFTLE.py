@@ -43,7 +43,7 @@ def LCS(args):
     ot.add_class('reader', **test_definitions.reader_double_gyre)
     ot.settings(** test_definitions.set_output_loc(__file__))
     ot.settings(time_step=.25,screen_output_time_interval=1, include_dispersion=False)
-    ot.add_class('integrated_model',class_name= 'LagarangianStructuresFTLE2D',
+    ot.add_class('integrated_model',class_name= 'dev_LagarangianStructuresFTLE2D',
                 grid_size= [100, 200],
                 write_intermediate_results= True,
                 grid_span = [2,1],

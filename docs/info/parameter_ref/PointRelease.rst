@@ -2,13 +2,15 @@
 PointRelease
 #############
 
-**Description:** Release pules of particles at given points.
+**Description:** 
 
-**class_name:** oceantracker.release_groups.point_release.PointRelease
+**full class_name :** oceantracker.release_groups.point_release.PointRelease
 
-**File:** oceantracker/release_groups/point_release.py
+**short class_name:** PointRelease
 
-**Inheritance:** _BaseReleaseGroup> PointRelease
+    Release pulse of particles at given points, or in cicile around points.    
+
+**Inheritance:** > ParameterBaseClass> _BaseReleaseGroup> PointRelease
 
 
 Parameters:
@@ -22,6 +24,18 @@ Parameters:
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
+
+		- default: ``None``
+
+	* ``duration`` :   ``<class 'float'>``   *<optional>*
+		Description: How long particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "end"
+
+		- default: ``None``
+		- min: ``0.0``
+		- units: ``sec``
+
+	* ``end`` :   ``iso8601date``   *<optional>*
+		Description: Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. "2017-01-01T00:30:00"
 
 		- default: ``None``
 
@@ -58,17 +72,6 @@ points: still working on display  of default params of  type <class 'oceantracke
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``release_duration`` :   ``<class 'float'>``   *<optional>*
-		Description: Time in seconds particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "release_end_date"
-
-		- default: ``None``
-		- min: ``0.0``
-
-	* ``release_end_date`` :   ``iso8601date``   *<optional>*
-		Description: Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. "2017-01-01T00:30:00"
-
-		- default: ``None``
-
 	* ``release_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: Time interval between released pulses. To release at only one time use release_interval=0.
 
@@ -89,7 +92,7 @@ points: still working on display  of default params of  type <class 'oceantracke
 		- default: ``0.0``
 		- min: ``0.0``
 
-	* ``release_start_date`` :   ``iso8601date``   *<optional>*
+	* ``start`` :   ``iso8601date``   *<optional>*
 		Description: start date of release, Must be an ISO date as string eg. "2017-01-01T00:30:00"
 
 		- default: ``None``

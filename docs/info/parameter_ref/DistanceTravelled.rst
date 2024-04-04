@@ -4,11 +4,13 @@ DistanceTravelled
 
 **Description:** 
 
-**class_name:** oceantracker.particle_properties.distance_travelled.DistanceTravelled
+**full class_name :** oceantracker.particle_properties.distance_travelled.DistanceTravelled
 
-**File:** oceantracker/particle_properties/distance_travelled.py
+**short class_name:** DistanceTravelled
 
-**Inheritance:** _BaseParticleProperty> ParticleProperty> DistanceTravelled
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ParticleProperty> DistanceTravelled
 
 
 Parameters:
@@ -49,6 +51,9 @@ Parameters:
 
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
+
+	* ``units`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``

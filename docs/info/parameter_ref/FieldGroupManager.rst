@@ -4,11 +4,13 @@ FieldGroupManager
 
 **Description:** 
 
-**class_name:** oceantracker.field_group_manager.field_group_manager.FieldGroupManager
+**full class_name :** oceantracker.field_group_manager.field_group_manager.FieldGroupManager
 
-**File:** oceantracker/field_group_manager/field_group_manager.py
+**short class_name:** FieldGroupManager
 
-**Inheritance:** FieldGroupManager
+docs>>
+
+**Inheritance:** > ParameterBaseClass> FieldGroupManager
 
 
 Parameters:

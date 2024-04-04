@@ -2,8 +2,6 @@
 particle_properties
 ####################
 
-**Module:** oceantracker.particle_properties
-
 
 .. toctree::
 	:maxdepth: 1

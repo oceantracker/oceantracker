@@ -6,14 +6,16 @@ from oceantracker.util.polygon_util import set_up_list_of_polygon_instances, Ins
 from oceantracker.shared_info import SharedInfo as si
 
 class InsidePolygonsNonOverlapping2D(ParticleProperty):
-    # property giving ID of 2D polygon which particle is inside. -1 if in no polygon
-    # assumes non-overlapping polygons, ie so only inside one at a time, ie the first it is found inside,
-    # does not check if polygons overlap
+    '''
+    particle property giving ID of 2D polygon which particle is inside. -1 if in no polygon
+    assumes non-overlapping polygons, ie so only inside one at a time, ie the first it is found inside,
+    does not check if polygons overlap
+    '''
     def __init__(self):
         super().__init__()
         self.add_default_params({'initial_value': PVC(-1, int),
                                  'dtype':PVC(np.int32,type)})
-        self.class_doc('Index of polygon a particle is inside',)
+
 
         self.add_default_params({'polygon_list':PLC(None, [dict], default_value=si.default_polygon_dict_params,
                                                     can_be_empty_list=False)

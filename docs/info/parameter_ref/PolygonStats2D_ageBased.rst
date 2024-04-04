@@ -4,11 +4,13 @@ PolygonStats2D_ageBased
 
 **Description:** 
 
-**class_name:** oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased
+**full class_name :** oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased
 
-**File:** oceantracker/particle_statistics/polygon_statistics.py
+**short class_name:** PolygonStats2D_ageBased
 
-**Inheritance:** _BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased> _CorePolygonMethods> PolygonStats2D_ageBased
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_agedBased> _CorePolygonMethods> PolygonStats2D_ageBased
 
 
 Parameters:
@@ -28,13 +30,15 @@ Parameters:
 		- default: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``count_end_date`` :   ``iso8601date``   *<optional>*
-		Description: Stop particle counting from this iso date-time
+	* ``duration`` :   ``<class 'float'>``   *<optional>*
+		Description: How long to do counting after start time, can be used instead of "end" parameter
 
 		- default: ``None``
+		- min: ``0.0``
+		- units: ``sec``
 
-	* ``count_start_date`` :   ``iso8601date``   *<optional>*
-		Description: Start particle counting from this iso date-time
+	* ``end`` :   ``iso8601date``   *<optional>*
+		Description: Stop particle counting from this iso date-time, default is end of model run
 
 		- default: ``None``
 
@@ -70,6 +74,11 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_polygon_age``
+
+	* ``start`` :   ``iso8601date``   *<optional>*
+		Description: Start particle counting from this date-time, default is start of model run
+
+		- default: ``None``
 
 	* ``status_max`` :   ``[<class 'str'>]``   *<optional>*
 		Description: Count only those particles with status  <= to this value

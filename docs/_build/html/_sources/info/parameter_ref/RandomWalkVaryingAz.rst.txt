@@ -4,11 +4,13 @@ RandomWalkVaryingAZ
 
 **Description:** 
 
-**class_name:** oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ
+**full class_name :** oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ
 
-**File:** oceantracker/dispersion/random_walk_varyingAz.py
+**short class_name:** RandomWalkVaryingAZ
 
-**Inheritance:** _BaseTrajectoryModifer> RandomWalk> RandomWalkVaryingAZ
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifer> RandomWalk> RandomWalkVaryingAZ
 
 
 Parameters:

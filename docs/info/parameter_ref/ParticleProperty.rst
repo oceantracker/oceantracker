@@ -4,11 +4,13 @@ ParticleProperty
 
 **Description:** 
 
-**class_name:** oceantracker.particle_properties._base_particle_properties.ParticleProperty
+**full class_name :** oceantracker.particle_properties._base_particle_properties.ParticleProperty
 
-**File:** oceantracker/particle_properties/_base_particle_properties.py
+**short class_name:** ParticleProperty
 
-**Inheritance:** _BaseParticleProperty> ParticleProperty
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ParticleProperty
 
 
 Parameters:
@@ -49,6 +51,9 @@ Parameters:
 
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
+
+	* ``units`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``

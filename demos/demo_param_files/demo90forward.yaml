@@ -6,7 +6,7 @@ debug: true
 dispersion:
   A_H: 0.0
   A_V: 0.0
-inculde_dispersion: false
+include_dispersion: false
 max_run_duration: 172800.0
 output_file_base: demo90forward
 particle_properties:

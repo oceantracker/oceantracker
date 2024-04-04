@@ -7,7 +7,11 @@ from oceantracker.shared_info import SharedInfo as si
 
 
 class CullParticles(_BaseTrajectoryModifier):
-    # splits all particles at given time interval
+    '''
+    Prototype for how to  cull particles, this version just culls random particles,
+     inherit and change "def select_particles_to_cull(self, time_sec, active):" method to give other behaviors')
+    '''
+
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
@@ -16,7 +20,6 @@ class CullParticles(_BaseTrajectoryModifier):
                                  'cull_status_equal_to': PVC(None,str,possible_values=si.particle_status_flags.possible_values()),
                                  'probability_of_culling' : PVC(0.1, float, min=0,max= 1.)
                                   })
-        self.class_doc('Prototype for how to  cull particles, this version just culls random particles, inherit and change "def select_particles_to_cull(self, time_sec, active):" method to give other behaviors')
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'])

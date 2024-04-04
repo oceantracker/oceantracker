@@ -4,11 +4,13 @@ TimeVaryingInfo
 
 **Description:** 
 
-**class_name:** oceantracker.time_varying_info._base_time_varying_info.TimeVaryingInfo
+**full class_name :** oceantracker.time_varying_info._base_time_varying_info.TimeVaryingInfo
 
-**File:** oceantracker/time_varying_info/_base_time_varying_info.py
+**short class_name:** TimeVaryingInfo
 
-**Inheritance:** _BaseTimeVaringInfo> TimeVaryingInfo
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseTimeVaringInfo> TimeVaryingInfo
 
 
 Parameters:

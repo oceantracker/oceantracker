@@ -4,11 +4,13 @@ Solver
 
 **Description:** 
 
-**class_name:** oceantracker.solver.solver.Solver
+**full class_name :** oceantracker.solver.solver.Solver
 
-**File:** oceantracker/solver/solver.py
+**short class_name:** Solver
 
-**Inheritance:** Solver
+ Does particle tracking solution 
+
+**Inheritance:** > ParameterBaseClass> Solver
 
 
 Parameters:

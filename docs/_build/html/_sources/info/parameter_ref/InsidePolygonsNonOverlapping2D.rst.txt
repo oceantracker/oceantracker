@@ -2,13 +2,15 @@
 InsidePolygonsNonOverlapping2D
 ###############################
 
-**Description:** Index of polygon a particle is inside
+**Description:** 
 
-**class_name:** oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D
+**full class_name :** oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D
 
-**File:** oceantracker/particle_properties/inside_polygons.py
+**short class_name:** InsidePolygonsNonOverlapping2D
 
-**Inheritance:** _BaseParticleProperty> ParticleProperty> InsidePolygonsNonOverlapping2D
+    particle property giving ID of 2D polygon which particle is inside. -1 if in no polygon    assumes non-overlapping polygons, ie so only inside one at a time, ie the first it is found inside,    does not check if polygons overlap    
+
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ParticleProperty> InsidePolygonsNonOverlapping2D
 
 
 Parameters:
@@ -53,6 +55,9 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
+
+	* ``units`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``

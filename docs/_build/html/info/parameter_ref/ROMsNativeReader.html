@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="SCHISMreaderNCDF" href="SCHISMreaderNCDF.html" />
-    <link rel="prev" title="GenericNCDFreader" href="GenericNCDFreader.html" />
+    <link rel="prev" title="GenericUnstructuredReader" href="GenericUnstructuredReader.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -76,7 +76,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="reader_toc.html">reader</a><ul>
-      <li>Previous: <a href="GenericNCDFreader.html" title="previous chapter">GenericNCDFreader</a></li>
+      <li>Previous: <a href="GenericUnstructuredReader.html" title="previous chapter">GenericUnstructuredReader</a></li>
       <li>Next: <a href="SCHISMreaderNCDF.html" title="next chapter">SCHISMreaderNCDF</a></li>
   </ul></li>
   </ul></li>
@@ -105,9 +105,10 @@
   <section id="romsnativereader">
 <h1>ROMsNativeReader<a class="headerlink" href="#romsnativereader" title="Permalink to this heading">¶</a></h1>
 <p><strong>Description:</strong></p>
-<p><strong>class_name:</strong> oceantracker.reader.ROMS_reader.ROMsNativeReader</p>
-<p><strong>File:</strong> oceantracker/reader/ROMS_reader.py</p>
-<p><strong>Inheritance:</strong> _BaseReader&gt; ROMsNativeReader</p>
+<p><strong>full class_name :</strong> oceantracker.reader.ROMS_reader.ROMsNativeReader</p>
+<p><strong>short class_name:</strong> ROMsNativeReader</p>
+<p>docs&gt;&gt;</p>
+<p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseReader&gt; ROMsNativeReader</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
@@ -140,6 +141,14 @@
 </li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">bottom_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">salinity</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
@@ -183,6 +192,14 @@
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">['ubar',</span> <span class="pre">'vbar']</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">wind_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -291,7 +308,7 @@
     <ul>
         <li>
           &larr;
-          <a href="GenericNCDFreader.html" title="Previous document">GenericNCDFreader</a>
+          <a href="GenericUnstructuredReader.html" title="Previous document">GenericUnstructuredReader</a>
         </li>
         <li>
           <a href="SCHISMreaderNCDF.html" title="Next document">SCHISMreaderNCDF</a>

@@ -10,7 +10,7 @@ from tests.unit_tests import test_definitions
 def main(args):
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__))
-    ot.settings(time_step=1800,include_dispersion=False,
+    ot.settings(time_step=1800,include_dispersion=False,backwards=True,
              use_A_Z_profile=False, )
 
 

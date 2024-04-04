@@ -4,11 +4,13 @@ LogPolygonEntryAndExit
 
 **Description:** 
 
-**class_name:** oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
+**full class_name :** oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
 
-**File:** oceantracker/event_loggers/log_polygon_entry_and_exit.py
+**short class_name:** LogPolygonEntryAndExit
 
-**Inheritance:** _BaseEventLogger> LogPolygonEntryAndExit
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseEventLogger> LogPolygonEntryAndExit
 
 
 Parameters:

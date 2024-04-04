@@ -4,11 +4,13 @@ TotalWaterDepth
 
 **Description:** 
 
-**class_name:** oceantracker.particle_properties.total_water_depth.TotalWaterDepth
+**full class_name :** oceantracker.particle_properties.total_water_depth.TotalWaterDepth
 
-**File:** oceantracker/particle_properties/total_water_depth.py
+**short class_name:** TotalWaterDepth
 
-**Inheritance:** _BaseParticleProperty> ParticleProperty> TotalWaterDepth
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ParticleProperty> TotalWaterDepth
 
 
 Parameters:
@@ -53,6 +55,9 @@ Parameters:
 
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
+
+	* ``units`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``

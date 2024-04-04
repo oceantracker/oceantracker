@@ -497,8 +497,7 @@ class FieldGroupManager(ParameterBaseClass):
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
 
         if 'water_depth' in self.fields:
-            pass
-            #nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
+            nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
 
         nc.write_a_new_variable('domain_outline_nodes', grid['grid_outline']['domain']['nodes'], ('domain_outline_nodes_dim',),
                                 description='node numbers in order around outer model domain')

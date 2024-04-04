@@ -2,8 +2,6 @@
 particle_statistics
 ####################
 
-**Module:** oceantracker.particle_statistics
-
 
 .. toctree::
 	:maxdepth: 1

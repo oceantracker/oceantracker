@@ -4,11 +4,13 @@ SettleInPolygon
 
 **Description:** 
 
-**class_name:** oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon
+**full class_name :** oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon
 
-**File:** oceantracker/trajectory_modifiers/settle_in_polygon.py
+**short class_name:** SettleInPolygon
 
-**Inheritance:** _BaseTrajectoryModifier> SettleInPolygon
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> SettleInPolygon
 
 
 Parameters:

@@ -8,7 +8,8 @@ from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import SharedInfo as si
 
 class RandomWalkVaryingAZ(RandomWalk):
-    # dispersion for PDE of  the form d(A_z d(V)/dz)/dz if turbulent eddy viscosity A_z depends on z adds  vertical advection to random walk equal to d A_z/dz
+    # dispersion for PDE of  the form d(A_z d(V)/dz)/dz if turbulent eddy viscosity A_z depends on z adds
+    # vertical advection to random walk equal to d A_z/dz
     # see Lynch Particles in the Coastal Ocean: Theory and Applications
     def __init__(self):
         # set up default params

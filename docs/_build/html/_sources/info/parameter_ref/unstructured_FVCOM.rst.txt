@@ -4,11 +4,13 @@ unstructured_FVCOM
 
 **Description:** 
 
-**class_name:** oceantracker.reader.FVCOM_reader.unstructured_FVCOM
+**full class_name :** oceantracker.reader.FVCOM_reader.unstructured_FVCOM
 
-**File:** oceantracker/reader/FVCOM_reader.py
+**short class_name:** unstructured_FVCOM
 
-**Inheritance:** _BaseReader> unstructured_FVCOM
+docs>>
+
+**Inheritance:** > ParameterBaseClass> _BaseReader> unstructured_FVCOM
 
 
 Parameters:
@@ -68,6 +70,11 @@ Parameters:
 			- default list : ``[]``
 			- can_be_empty_list: ``True``
 			- fixed_len: ``2``
+
+		* ``wind_stress`` :   ``<class 'str'>``   *<optional>*
+			Description: maps standard internal field name to file variable name
+
+			- default: ``None``
 
 		* ``wind_velocity``:  *<optional>*
 			Description: - maps standard internal field name to file variable name

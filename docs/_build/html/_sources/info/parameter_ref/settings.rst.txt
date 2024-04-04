@@ -16,6 +16,30 @@ Parameters:
 
 		- default: ``None``
 
+	* ``NCDF_time_chunk`` :   ``<class 'int'>``   *<optional>*
+		Description: Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file
+
+		- default: ``24``
+		- min: ``1``
+
+	* ``NUMBA_cache_code`` :   ``<class 'bool'>``   *<optional>*
+		Description: Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
+	* ``NUMBA_function_cache_size`` :   ``<class 'int'>``   *<optional>*
+		Description: Size of memory cache for compiled numba functions in kB
+
+		- default: ``4048``
+		- min: ``128``
+
+	* ``USE_random_seed`` :   ``<class 'bool'>``   *<optional>*
+		Description: Makes results reproducible, only use for testing developments give the same results!
+
+		- default: ``False``
+		- possible_values: ``[True, False]``
+
 	* ``add_date_to_run_output_dir`` :   ``<class 'bool'>``   *<optional>*
 		Description: Append the date to the output dir. name to help in keeping output from different runs separate
 
@@ -69,9 +93,9 @@ Parameters:
 		- possible_values: ``[True, False]``
 
 	* ``max_particles`` :   ``<class 'int'>``   *<optional>*
-		Description: Maximum number of particles to release, useful in testing
+		Description: Maximum number of particles to release, useful to restrict if splitting particles
 
-		- default: ``1000000000``
+		- default: ``10000000000``
 		- min: ``1``
 
 	* ``max_run_duration`` :   ``<class 'float'>``   *<optional>*
@@ -99,18 +123,6 @@ Parameters:
 		- default: ``None``
 		- min: ``0.0``
 
-	* ``numba_cache_code`` :   ``<class 'bool'>``   *<optional>*
-		Description: Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."
-
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
-	* ``numba_function_cache_size`` :   ``<class 'int'>``   *<optional>*
-		Description: Size of memory cache for compiled numba functions in kB
-
-		- default: ``4048``
-		- min: ``128``
-
 	* ``open_boundary_type`` :   ``<class 'int'>``   *<optional>*
 		Description: new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS
 
@@ -128,12 +140,6 @@ Parameters:
 
 		- default: ``None``
 		- min: ``1``
-
-	* ``profiler`` :   ``<class 'str'>``   *<optional>*
-		Description: in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules
-
-		- default: ``oceantracker``
-		- possible_values: ``['none', 'oceantracker', 'cprofiler', 'line_profiler', 'scalene']``
 
 	* ``regrid_z_to_uniform_sigma_levels`` :   ``<class 'bool'>``   *<optional>*
 		Description: much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS
@@ -155,19 +161,13 @@ Parameters:
 		Description: Time step in seconds for all cases
 
 		- default: ``3600.0``
-		- min: ``0.1``
+		- min: ``0.001``
 		- units: ``sec``
 
 	* ``use_A_Z_profile`` :   ``<class 'bool'>``   *<optional>*
 		Description: Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file
 
 		- default: ``True``
-		- possible_values: ``[True, False]``
-
-	* ``use_random_seed`` :   ``<class 'bool'>``   *<optional>*
-		Description: Makes results reproducible, only use for testing developments give the same results!
-
-		- default: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
@@ -184,12 +184,6 @@ Parameters:
 
 	* ``write_dry_cell_flag`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots, currently cannot be used with nested grids
-
-		- default: ``True``
-		- possible_values: ``[True, False]``
-
-	* ``write_output_files`` :   ``<class 'bool'>``   *<optional>*
-		Description: Set to False if no output files are to be written, eg. for output sent to web
 
 		- default: ``True``
 		- possible_values: ``[True, False]``

@@ -2,13 +2,15 @@
 ParticleLoad
 #############
 
-**Description:** Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass
+**Description:** 
 
-**class_name:** oceantracker.particle_properties.load_carrying.ParticleLoad
+**full class_name :** oceantracker.particle_properties.load_carrying.ParticleLoad
 
-**File:** oceantracker/particle_properties/load_carrying.py
+**short class_name:** ParticleLoad
 
-**Inheritance:** _BaseParticleProperty> ParticleProperty> ParticleLoad
+    Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass.    
+
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ParticleProperty> ParticleLoad
 
 
 Parameters:
@@ -51,6 +53,9 @@ Parameters:
 
 		- default: ``user``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
+
+	* ``units`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``

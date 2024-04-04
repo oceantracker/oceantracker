@@ -104,10 +104,13 @@
             
   <section id="polygonrelease">
 <h1>PolygonRelease<a class="headerlink" href="#polygonrelease" title="Permalink to this heading">¶</a></h1>
-<p><strong>Description:</strong> Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.</p>
-<p><strong>class_name:</strong> oceantracker.release_groups.polygon_release.PolygonRelease</p>
-<p><strong>File:</strong> oceantracker/release_groups/polygon_release.py</p>
-<p><strong>Inheritance:</strong> _BaseReleaseGroup&gt; PointRelease&gt; PolygonRelease</p>
+<p><strong>Description:</strong></p>
+<p><strong>full class_name :</strong> oceantracker.release_groups.polygon_release.PolygonRelease</p>
+<p><strong>short class_name:</strong> PolygonRelease</p>
+<blockquote>
+<div><p>Release particles at random locations within given polygon.    Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.</p>
+</div></blockquote>
+<p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseReleaseGroup&gt; PointRelease&gt; PolygonRelease</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
 <blockquote>
@@ -123,6 +126,24 @@
 </li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class name as string A.B.C, used to import this class from python path</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: How long particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using “end”</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+<li><p>units: <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">end</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
@@ -187,23 +208,6 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">release_duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Time in seconds particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using “release_end_date”</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">release_end_date</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">release_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Time interval between released pulses. To release at only one time use release_interval=0.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
@@ -224,7 +228,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">release_start_date</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: start date of release, Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
+<dt><code class="docutils literal notranslate"><span class="pre">start</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: start date of release, Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
