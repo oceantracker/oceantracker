@@ -17,7 +17,7 @@ def base_settings(fn):
     d =  dict(output_file_base=path.split(fn)[-1].split('.')[0],
             root_output_dir=path.join(path.dirname(fn), 'output'),
             time_step=600.,  # 10 min time step
-            USE_random_seed = True,
+            use_random_seed = True,
             NCDF_time_chunk=1,
             debug=True
             )
@@ -36,25 +36,29 @@ reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_read
              field_variable_map=dict(water_depth='Depth', water_velocity=['U', 'V'], tide='Tide'),
              hydro_model_cords_in_lat_long=False)
 
-rg0 = dict( name='my_point_release',  # name used internal to refer to this release
+rg_release_interval0 = dict( name='release_interval0',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
-         points=[
-              #[1595000, 5482600, -2],  # one or more (x,y,z) of release points
-              [1594000, 5484200, -2]
-                 ],
+         points=[[1594000, 5484200, -2]  ],
          # the below are optional settings/parameters
-         release_interval=600,  # seconds between releasing particles
+         release_interval=0,  # seconds between releasing particles
          pulse_size=5)  # how many are released each interval
-rg1 = dict( name='my_point_release',  # name used internal to refer to this release
+rg_dates = dict( name='start_in_middle',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
-         points=[
-              [1595000, 5482600, -2],  # one or more (x,y,z) of release points
-              [1594000, 5484200, -2]
-                 ],
+        points=[[1594000, 5484200, -2]],
+            dates=['2017-01-01T08:30:00','2017-01-01T01:30:00'],
          # the below are optional settings/parameters
          release_interval=3600,  # seconds between releasing particles
          pulse_size=5)  # how many are released each interval
-rg2 = dict(name='my_polygon_release',  # name used internal to refer to this release
+
+rg_start_in_middle = dict( name='start_in_middle',  # name used internal to refer to this release
+         class_name='PointRelease',  # class to use
+        points=[[1594000, 5484200, -2]],
+        start='2017-01-01T03:30:00',
+         # the below are optional settings/parameters
+         release_interval=3600,  # seconds between releasing particles
+         pulse_size=5)  # how many are released each interval
+
+rg_ploy1 = dict(name='my_polygon_release',  # name used internal to refer to this release
          class_name='PolygonRelease',  # class to use
          # (x,y) points making up a 2D polygon
          points=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],

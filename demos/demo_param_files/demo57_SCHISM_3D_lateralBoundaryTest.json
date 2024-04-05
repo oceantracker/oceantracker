@@ -107,7 +107,7 @@
             ]
         }
     },
-    "USE_random_seed": false,
+    "use_random_seed": false,
     "velocity_modifiers": {
         "terminal_velocity": {
             "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",

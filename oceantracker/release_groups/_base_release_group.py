@@ -1,6 +1,5 @@
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC, ParameterCoordsChecker as PCC
 from numba import njit
 from oceantracker.util.numba_util import njitOT
@@ -79,7 +78,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         if params['start'] is None:
             start =  si.hindcast_info['end_time'] if si.settings.backtracking else si.hindcast_info['start_time']
         else:
-            start = time_util.isostr_to_seconds(params['start'])
+            start = params['start']
 
         # work out release duration
         if params['duration'] is None :
@@ -87,7 +86,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
             if params['end'] is None:
                 end = si.hindcast_info['start_time'] if si.settings.backtracking else si.hindcast_info['end_time']
             else:
-                end = time_util.isostr_to_seconds(params['end'])
+                end = params['end']
             duration = abs(end-start)
         else:
             duration = abs(params['duration'])

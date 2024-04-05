@@ -180,7 +180,7 @@ class _OceanTrackerRunner(object):
 
         #  merge defaults of settings which have to be the same for all cases
         critical_settings = ['root_output_dir', 'output_file_base', 'processors', 'max_warnings',
-                             'backtracking','add_date_to_run_output_dir','debug','USE_random_seed']
+                             'backtracking','add_date_to_run_output_dir','debug','use_random_seed']
         working_params = run_builder['working_params']
         working_params['settings'], self.settings_only_set_in_base_case = setup_util.merge_critical_settings_with_defaults(
                                                                                             working_params['settings'], shared_info.default_settings,
@@ -232,7 +232,7 @@ class _OceanTrackerRunner(object):
             from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
             # make instance of case runer and run it with decomposed working params
             ot_case_runner = OceanTrackerCaseRunner()
-            case_info_file, case_msg = ot_case_runner.run_case(run_builder)
+            case_summary= ot_case_runner.run_case(run_builder)
 
         except Exception as e:
             # ensure message loggers are closed
@@ -242,12 +242,12 @@ class _OceanTrackerRunner(object):
             return None
 
         # check is case ran
-        if case_info_file is None:
+        if  case_summary['case_info_file'] is None:
             ml.msg('case_info_file is None, run may not have completed', fatal_error=True)
 
-        self._main_run_end(case_info_file,run_builder, len(case_msg['errors']), len(case_msg['warnings']), len(case_msg['notes']))
+        case_info_files = self._main_run_end( case_summary,run_builder)
 
-        return case_info_file
+        return case_info_files
 
     def _prelimary_checks(self,params):
         ml = msg_logger
@@ -261,15 +261,21 @@ class _OceanTrackerRunner(object):
                            fatal_error=True, crumbs='case_run_set_up', caller=self)
 
 
-    def _main_run_end(self,case_info_files,run_builder, num_case_errors,num_case_warnings,num_case_notes):
+    def _main_run_end(self,case_summary,run_builder):
         # final info output
+
+        # count total messages
+        num_case_errors,num_case_warnings,num_case_notes = 0,0,0
+        for c in case_summary if type(case_summary) ==list else [case_summary]:
+            num_case_errors +=  len(c['return_msgs']['errors'])
+            num_case_warnings +=  len(c['return_msgs']['warnings'])
+            num_case_notes += len(c['return_msgs']['notes'])
+
         ml = msg_logger
         ml.set_screen_tag('End')
-        self._write_run_info_json(case_info_files,run_builder, self.start_t0)
+        case_info_files= self._write_run_info_json(case_summary,run_builder, self.start_t0)
 
         ml.show_all_warnings_and_errors()
-
-
 
         ml.print_line()
         ml.msg(f'OceanTracker summary:  elapsed time =' + str(datetime.now() - self.start_date),)
@@ -283,6 +289,7 @@ class _OceanTrackerRunner(object):
         if total_errors > 0:
             ml.print_line('Found errors, so some cases may not have completed, see above')
         ml.close()
+        return case_info_files
 
     def _run_parallel(self,base_case_params, case_list_params, run_builder):
         # run list of case params
@@ -296,7 +303,7 @@ class _OceanTrackerRunner(object):
             'EPSG_code_metres_grid', 'write_tracks', 'display_grid_at_start',
             'NUMBA_cache_code', 'NUMBA_function_cache_size',
             'processors', 'multiprocessing_case_start_delay',
-            'max_warnings', 'USE_random_seed',
+            'max_warnings', 'use_random_seed',
             'write_dry_cell_flag']
 
         # split base_case_params into shared and case params
@@ -332,28 +339,11 @@ class _OceanTrackerRunner(object):
 
         # run // cases
         with multiprocessing.Pool(processes=num_processors) as pool:
-            case_results = pool.map(self._run1_case, case_run_builder_list)
+            case_summaries = pool.map(self._run1_case, case_run_builder_list)
 
         ml.progress_marker('parallel pool complete')
 
-        # get case files and  error/warning counts
-        case_msg=[]
-        num_warnings= 0
-        num_errors = 0
-        num_notes = 0
-        case_info_files =[]
-        for n, c in  enumerate(case_results):
-            if c[0] is None:
-                ml.msg(f'Case #{n:03}, failed to finish', fatal_error=True, hint='hint see above, any case errors detected are listed below')
-                for m in c[1]['errors']:
-                    ml.msg(m, tabs =2)
-            case_info_files.append(c[0])
-            case_msg.append(c[1])
-            num_errors += len(c[1]['errors'])
-            num_warnings += len(c[1]['warnings'])
-            num_notes += len(c[1]['notes'])
-
-        self._main_run_end(case_info_files,run_builder, num_errors,num_warnings,num_notes)
+        case_info_files = self._main_run_end(case_summaries,run_builder)
         return case_info_files
 
     @staticmethod
@@ -365,8 +355,8 @@ class _OceanTrackerRunner(object):
         from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
 
         ot = OceanTrackerCaseRunner()
-        caseInfo_file, return_msgs= ot.run_case(deepcopy(working_params))
-        return caseInfo_file, return_msgs
+        case_summary= ot.run_case(deepcopy(working_params))
+        return case_summary
 
 
     def _get_hindcast_file_info(self, run_builder ):
@@ -416,10 +406,11 @@ class _OceanTrackerRunner(object):
 
         return reader_builder
 
-    def _write_run_info_json(self, case_info_files,run_builder, t0):
+    def _write_run_info_json(self, case_summary,run_builder, t0):
         # read first case info for shared info
         ml = msg_logger
-        ci = deepcopy(case_info_files) # dont alter input
+        o = run_builder['output_files']
+        ci = deepcopy(case_summary) # dont alter input
         if type(ci) is not list: ci= [ci]
 
         # finally get run totals of steps and particles across al cases and write
@@ -427,17 +418,14 @@ class _OceanTrackerRunner(object):
         total_alive_particles = 0
         case_info_list=[]
         # load log files to get info on run from solver info
-        for n, case_file  in enumerate(ci) :
-
-            if case_file is not None :
-                c= json_util.read_JSON(case_file)
-                n_time_steps +=  c['run_info']['current_model_time_step']
-                total_alive_particles += c['run_info']['total_alive_particles']
-                case_info_list.append(path.basename(case_file))
+        for n, c  in enumerate(ci) :
+            n_time_steps += c['run_info']['current_model_time_step']
+            total_alive_particles += c['run_info']['total_alive_particles']
+            if c['case_info_file'] is not None :
+                case_info_list.append(path.join(path.basename(c['case_info_file'])))
             else:
                 case_info_list.append(None)
                 ml.msg(f'Case #{n:d} has no case info file, likely has crashed',warning=True)
-
 
         num_cases = len(ci)
 
@@ -449,11 +437,12 @@ class _OceanTrackerRunner(object):
             'elapsed_time' :perf_counter() - t0,
             'average_active_particles': total_alive_particles / num_cases if num_cases > 0 else None,
             'average_number_of_time_steps': n_time_steps/num_cases  if num_cases > 0 else None,
-            'particles_processed_per_second': total_alive_particles /(perf_counter() - t0)
+            'particles_processed_per_second': total_alive_particles /(perf_counter() - t0),
+             'case_summary' : case_summary
              }
 
         # get output file names
-        o = run_builder['output_files']
+
         d['output_files'] = {'root_output_dir':  o['root_output_dir'],
                             'run_output_dir': o['run_output_dir'],
                             'output_file_base': o['output_file_base'],
@@ -465,6 +454,9 @@ class _OceanTrackerRunner(object):
                              }
         json_util.write_JSON(path.join(o['run_output_dir'],o['runInfo_file']),  d)
         ml.msg('run summary with case file names   "' + o['runInfo_file'] + '"',  tabs=2, note=True)
+
+        case_files= [path.join(run_builder['output_files']['run_output_dir'],f) for f in case_info_list]
+        return case_files if len(case_files) > 1 else case_files[0]
 
     def close(self):
 

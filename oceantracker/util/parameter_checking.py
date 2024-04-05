@@ -1,7 +1,7 @@
 from copy import deepcopy, copy
 import numpy as np
 from oceantracker.util import  time_util
-
+from inspect import getfullargspec
 crumb_seperator= ' >> '
 
 def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
@@ -69,7 +69,7 @@ def  CheckParameterValues(key,value_checker, user_param, crumbs, msg_logger,call
     if user_param is None:
         if value_checker.info['is_required']:
             msg_logger.msg('Required parameter: user parameter "' + crumb_trail +'" is required, must be type '
-                           + str(value_checker.info['type']) + ', Variable description:' + str(value_checker.info['doc_str']),
+                           + str(value_checker.info['required_type']) + ', Variable description:' + str(value_checker.info['doc_str']),
                            fatal_error = True, caller=caller)
             value = None
         else:
@@ -91,26 +91,18 @@ class ParamValueChecker(object):
     def __init__(self, default_value, required_type, is_required=False,
                  min=None, max=None, units=None, possible_values=None,
                  doc_str=None,
-                 obsolete = None):
+                 obsolete = None,expert = False):
 
         # todo add crumb trail param
 
         if default_value is not None and type(default_value) == dict:
             raise ValueError('"value" of default set by ParamValueChecker (PVC) can not be a dictionary, as all dict in default_params are assumed to also be parameter dict in their own right')
 
-        i = dict(default_value=default_value,
-                 doc_str=doc_str,
-                 type=required_type,
-                 min=min,
-                 max=max,
-                 units=units,
-                 possible_values=possible_values,
-                 is_required=is_required,
-                 obsolete = obsolete)
+        self.info = get_method_args_as_dict(self.__init__, locals())
 
-        if required_type == bool: i['possible_values'] = [True, False]  # set possible values for boolean
+        i = self.info
+        if i['required_type'] == bool: i['possible_values'] = [True, False]  # set possible values for boolean
 
-        self.info = i
 
     def get_default(self):
         return self.info['default_value']
@@ -130,31 +122,38 @@ class ParamValueChecker(object):
             if info['is_required']:
                 msg_logger.msg('Required parameter: user parameter is required ',
                                 crumbs = crumbs,caller= caller,
-                               hint= ', must be type' + str(info['type']) + ', Variable description:' + str(self.info['doc_str']),fatal_error=True)
+                               hint= ', must be type' + str(info['required_type']) + ', Variable description:' + str(self.info['doc_str']),fatal_error=True)
 
             value = info['default_value']  # this might be a None default
 
-        elif info['type'] == str:
+        elif info['required_type'] == str:
             if type(value) in [np.str_]:
                 value = str(value)
             elif type(value) != str:
                 msg_logger.msg('Value must be a string, value is  "' + str(value) + '"', caller= caller,
                                fatal_error=True, crumbs = crumbs)
 
-        elif info['type'] == float and type(value) == int:
+        elif info['required_type'] == float and type(value) == int:
             # ensure  ints are floats
             value = float(value)
 
 
         # deal with numpy versions of params, convert to python types
-        elif info['type'] == int:
+        elif info['required_type'] == int:
             # ensure all at int32 as default int is int64 on  linux
             value = np.int32(value)
 
-        elif info['type'] == 'iso8601date':
+        elif info['required_type'] == 'iso8601date':
             try:
                 #test if convertable
-                time_util.isostr_to_seconds(value) # leave as a string
+                if type(value) == str:
+                    value = time_util.isostr_to_seconds(value) # leave as a string
+                elif type(value) == float or type(value) == np.float64:
+                    # seconds since 1970
+                    value = value
+                else:
+                    msg_logger.msg('Value must be iso8601 date string or seconds since 1/1/1970 as  a float got value = ' + str(value) + 'type='+ str(type(value)), caller=caller,
+                                   fatal_error=True, crumbs=crumbs)
             except Exception as e:
                 msg_logger.msg( 'Failed to convert to date as iso8601str got value = ' + str(value),caller= caller,
                                 fatal_error=True, crumbs = crumbs)
@@ -162,8 +161,8 @@ class ParamValueChecker(object):
         # if not one of special types above then value unchanged
         # check  value and type if not a None
         if value is not None:
-            if type(info['type']) != str and not type(value) != info['type'] and not isinstance(value, info['type']):
-                msg_logger.msg( 'Parameter data must be of type ' + str(info['type']) + ' got type= ' + str(type(value)) + ' , value given =' +str(value),
+            if type(info['required_type']) != str and not type(value) != info['required_type'] and not isinstance(value, info['required_type']):
+                msg_logger.msg( 'Parameter data must be of type ' + str(info['required_type']) + ' got type= ' + str(type(value)) + ' , value given =' +str(value),
                                 caller= caller,  fatal_error=True, crumbs = crumbs)
 
             if (type(value) in [float, int]):
@@ -189,17 +188,12 @@ class ParameterListChecker(object):
     #todo do add option to allow appending to default only if requested
     def __init__(self, default_list, acceptable_types, is_required=False, can_be_empty_list= True, default_value=None,
                   fixed_len =None, min_length=None, max_length=None, doc_str=None, make_list_unique=None, obsolete = None,
-                 possible_values=None, units=None,min=None, max=None,
+                 possible_values=None, units=None,min=None, max=None,    expert = False
                  ):
+
         if default_list is None: default_list =[]
 
-        self.info= dict(locals()) # get keyword args as dict
-        self.info.pop('self') # dont want self param
-
-        requiredKW= ['default_list', 'acceptable_types']
-        for name in requiredKW:
-            if name not in self.info:
-                raise ValueError('ParameterListChecker > default_list, required key words ' + str(requiredKW))
+        self.info = get_method_args_as_dict(self.__init__,locals())
 
     def check_list(self, name, user_list, msg_logger, crumbs):
         info =self.info
@@ -280,20 +274,10 @@ class ParameterListChecker(object):
 class ParameterCoordsChecker(object):
     # checks input cords or array is a set of N by 2 or 3 values
     def __init__(self,default_value, dtype=np.float64, is3D=False, single_cord=False, doc_str=None,one_or_more_points=False,
-                  is_required=False, units='meters or , degrees if long_lat codes detected', min = None, obsolete = None):
-        self.info={}
-        info = self.info
-        info['default_value'] = default_value
-        info['dtype']= dtype
-        info['is3D'] = is3D
-        info['single_cord'] = single_cord
-        info['is_required'] = is_required
-        info['units'] = units
-        info['min'] = min
-        info['doc_str'] = doc_str
-        info['one_or_more_points'] = one_or_more_points
-        info['type'] = 'coordinates'
-        info['obsolete'] = obsolete
+                  is_required=False, units='meters or , degrees if long_lat codes detected', min = None, obsolete = None,
+                 expert=False):
+
+        self.info = get_method_args_as_dict(self.__init__, locals())
 
     def get_default(self):
         return self.info['default_value']
@@ -302,7 +286,7 @@ class ParameterCoordsChecker(object):
         # check given value against defaults  in class instance info
         info = self.info
         if crumbs is None: crumbs = ''
-        crumb_trail= crumbs + '> coordinate checker'
+        crumb_trail= crumbs + '> coordinate params checker'
         # a position, eg release location, needs to be a numpy array
 
         if info['obsolete'] is not None :
@@ -311,7 +295,7 @@ class ParameterCoordsChecker(object):
             return None
 
         if type(value) not in [list, np.ndarray]:
-            msg_logger.msg(f' expected param of type list or numppy array got type {type(value)}',
+            msg_logger.msg(f' expected param of type list or numpy array got type {type(value)}',
                            fatal_error=True, caller=caller, crumbs=crumb_trail)
             return None
 
@@ -368,5 +352,10 @@ class ParameterCoordsChecker(object):
             return None
 
         return value
+
+def get_method_args_as_dict(m,locals):
+    # get all args and values but self from method
+    return {key:locals[key] for key in getfullargspec(m).args[1:]}
+
 # old versions
 

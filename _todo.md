@@ -6,9 +6,9 @@
 2. relese groups
     1.  flag if point or polygon all outside domain, 
     4.  flag if none released ie always dry, 
-    5.  warn if partial relese due to wet/dryinging 
-2. 1. check if no release found stop 
-3. 1. flag error if any end  before start in scheduler
+
+2.  ~~run and warn of non releasses~~, improve repotring of releases errors at run end
+3.  flag error if any end  before start in scheduler
 4. try to write partial json if error
 5. better way to note release errors, only flag any points that never released at end, or show release success?
 1. Stats to work on list of acceptable statuses, not min max?
@@ -23,12 +23,13 @@
     1. . ??
 1. Nested grids
     1.. ??
+1. in case runner create all user requested instances and merge params in one step
 1. build check that all classes are initialised and finalized
 1. Docs
-    1. ???
+    1. check all how to note books run, set up code to run all notebooks
     
     
-    
+  
 
 ##  Internal Structure
 
@@ -54,6 +55,7 @@
     1. master.py to run all tests 
 1. check pointing of run to enable restart
 1. native global lon-lat  models
+1. used np.datetime64, milli sec internally
     
 
 ## Niggles that need sorting some time
@@ -69,13 +71,15 @@
 1. List check makes default values of None into [], should be None? Look at merging list params, better to remove, or keep for building polygon lists ?
 1. all final_setup()' s done??
 1. inside polygon class over writes given points with closed polygon 
-1. cope with time dependent water depth to write to grid
+1. cope with time dependent water depth in write to grid
     
 ## Nice to haves
 1. attach name of method to message loggers crumb trail
 1.  read polygons with fiona?
 1. ~~Write islands to net cdf as packed varaible~~
 1. make param keys case insensitive
+1. allow starts/ends to be float , sec since 1970, isostr, datetime, np.datetime64, durations to be floats, time delta or np.time delta
+
 
 1. cleaner to make write plot function from returned plot?
 2. web links to help on error

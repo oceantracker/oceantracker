@@ -35,6 +35,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # give shared access to params
         si.run_builder = run_builder
         si.working_params = run_builder['working_params']
+        si.case_summary=dict(case_info_file=None)
 
         # setup shared info and message logger
         si._setup() # clear out classes from class instance of SharedInfo if running series of mains
@@ -94,8 +95,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up profiling
         #profiling_util.set_profile_mode(si.settings['profiler'])
 
-        case_info_file = None
-        return_msgs = {'errors': si.msg_logger.errors_list, 'warnings': si.msg_logger.warnings_list, 'notes': si.msg_logger.notes_list}
+        si.case_summary['return_msgs'] = {'errors': si.msg_logger.errors_list,
+                       'warnings': si.msg_logger.warnings_list,
+                       'notes': si.msg_logger.notes_list}
 
         # run info
         ri = si.run_info
@@ -148,8 +150,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # write grid if first case
             if ri.caseID == 0:
                 si.core_roles.field_group_manager.write_hydro_model_grid()
-            case_info_file = ri.output_file_base + '_caseInfo.json'
-            json_util.write_JSON(path.join(ri.run_output_dir, case_info_file), case_info)
+            si.case_summary['case_info_file'] = ri.output_file_base +'_caseInfo.json'
+            json_util.write_JSON(path.join(ri.run_output_dir,  si.case_summary['case_info_file'] ), case_info)
 
         except GracefulError as e:
             si.msg_logger.show_all_warnings_and_errors()
@@ -161,7 +163,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 si.msg_logger.write_error_log_file(e)
                 si.msg_logger.write_error_log_file(traceback.print_exc())
             si.msg_logger.close()
-            return None, return_msgs
+            return si.case_summary
 
         except Exception as e:
             si.msg_logger.show_all_warnings_and_errors()
@@ -169,7 +171,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             si.msg_logger.write_error_log_file(traceback.print_exc())
             si.msg_logger.msg(f' Unexpected error in case number [{ri.caseID:2}] ', fatal_error=True,hint='check above or .err file')
             si.msg_logger.close()
-            return  None, return_msgs
+            return  si.case_summary
 
         # reshow warnings
         si.msg_logger.show_all_warnings_and_errors()
@@ -184,8 +186,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         self.close()  # close al classes and msg logger
         si.msg_logger.close()
-        case_info_file = path.join(ri.run_output_dir,case_info_file)
-        return case_info_file,  return_msgs
+        si.case_summary['run_info'] = si.run_info.as_dict()
+        return si.case_summary
 
 
 
@@ -222,27 +224,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.msg_logger.exit_if_prior_errors('errors found in _do_run_integrity_checks')
 
-    def dev_setup_dispersion_and_resuspension(self):
-        # these depend on which variables are available inb the hydro file
-        fgm = si.core_roles.field_group_manager
-        fmap = reader.params['field_variable_map']
-        info = self.info
-
-        nc = reader.open_first_file()
-
-        # set up dispersion using vertical profiles of A_Z if available
-        self._setup_dispersion_params(nc)
-        si.add_core_role('dispersion', si.working_params['core_roles']['dispersion'],
-                         default_classID='dispersion_random_walk', initialise=True)
-
-        # add resuspension based on friction velocity
-        if info['is3D']:
-            # add friction velocity from bottom stress or near seabed vel
-            self._setup_resupension_params(nc)
-            si.add_core_role('resuspension', si.working_params['core_roles']['resuspension'],
-                             default_classID='resuspension_basic', initialise=True)
-
-        nc.close()
 
     def _setup_particle_release_groups_and_start_end_times(self, particle_release_groups_params_dict):
         # particle_release groups setup and instances,
@@ -285,6 +266,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         ri.times    = ri.start_time  + md * np.arange(0., duration + si.settings.time_step, si.settings.time_step)
         ri.end_time = ri.times[-1] # adjust end to nearest time step
 
+        # useful information
+        ri.duration = abs(ri.times[-1] - ri.times[0])
+        ri.start_date = time_util.seconds_to_isostr(ri.times[0])
+        ri.end_date = time_util.seconds_to_isostr(ri.times[-1])
+        ri.dates = time_util.seconds_to_isostr(ri.times)
+        ri.duration_str = time_util.seconds_to_pretty_duration_string(ri.duration)
+
         # setup scheduler for each release group, how start and model times known
         #   this will round start times and release interval to be integer number of model time steps after the start
         for name, rg in si.roles.release_groups.items():
@@ -294,11 +282,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # guard against there being no release groups
             si.msg_logger.msg('No valid release groups' , fatal_error=True, exit_now=True, caller=self)
 
-        # useful information
-        ri.duration = abs(ri.times[-1] - ri.times[0])
-        ri.start_date = time_util.seconds_to_isostr(ri.times[0])
-        ri.end_date = time_util.seconds_to_isostr(ri.times[-1])
-        ri.dates = time_util.seconds_to_isostr(ri.times)
+
 
         si.msg_logger.progress_marker('Set up run start and end times, plus release groups and their schedulers', start_time=t0)
 

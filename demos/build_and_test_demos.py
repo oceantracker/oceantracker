@@ -302,7 +302,7 @@ params.append (s56)
 
 # schsim 3D, don't resupend lateral boundary test
 s57 = deepcopy(s50)
-s57.update(dict(use_A_Z_profile=True,USE_random_seed= False))
+s57.update(dict(use_A_Z_profile=True,use_random_seed= False))
 s57.update({'output_file_base' : 'demo57_SCHISM_3D_lateralBoundaryTest'})
 s57['dispersion'].update({'A_H':10,'A_V': 10})
 s57['velocity_modifiers']= {'terminal_velocity':

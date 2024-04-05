@@ -143,7 +143,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
         environ['NUMBA_BOUNDSCHECK'] = '1'
         environ['NUMBA_FULL_TRACEBACKS'] = '1'
 
-    if settings['USE_random_seed']:
+    if settings['use_random_seed']:
             np.random.seed(0)  # set numpy
             set_seed(0) # set numba seed which is different from numpys
             msg_logger.msg('Using numpy.random.seed(0),seed_numba_random(0) makes results reproducible (only use for testing developments give the same results!)', warning=True)
