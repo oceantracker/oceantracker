@@ -104,10 +104,9 @@
             
   <section id="residentinpolygon">
 <h1>ResidentInPolygon<a class="headerlink" href="#residentinpolygon" title="Permalink to this heading">¶</a></h1>
-<p><strong>Description:</strong></p>
-<p><strong>full class_name :</strong> oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon</p>
+<p><strong>Doc:</strong></p>
 <p><strong>short class_name:</strong> ResidentInPolygon</p>
-<p>docs&gt;&gt;</p>
+<p><strong>full class_name :</strong> oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon</p>
 <p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseParticleLocationStats&gt; ResidentInPolygon</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
@@ -117,6 +116,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class name as string A.B.C, used to import this class from python path</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -125,7 +126,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">coords_allowed_in_lat_lon_order</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -134,8 +137,10 @@
 <dt><code class="docutils literal notranslate"><span class="pre">duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: How long to do counting after start time, can be used instead of “end” parameter</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
 <li><p>units: <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -144,6 +149,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">end</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Stop particle counting from this iso date-time, default is end of model run</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">iso8601date</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -152,6 +159,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">name_of_polygon_release_group</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: “name” parameter of polygon release group to count paticles for residence time , (release group “name”  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -163,6 +172,7 @@
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -170,6 +180,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">role_output_file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">residence</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -178,6 +190,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">start</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Start particle counting from this date-time, default is start of model run</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">iso8601date</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -186,7 +200,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">status_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with status  &lt;= to this value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">moving</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'stationary',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -195,7 +211,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">status_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with status &gt;= to this value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">stationary</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'stationary',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -204,7 +222,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">update_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">3600.0</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>units: <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -213,6 +233,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">user_instance_info</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -220,6 +242,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -228,7 +252,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">water_depth_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles in water depths less than this value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -237,7 +263,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">water_depth_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles in water depths greater than this value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -246,7 +274,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">write</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Write statistcs to disk</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -255,7 +285,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">z_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &lt;= to this value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>units: <code class="docutils literal notranslate"><span class="pre">meters</span> <span class="pre">above</span> <span class="pre">mean</span> <span class="pre">water</span> <span class="pre">level,</span> <span class="pre">so</span> <span class="pre">is</span> <span class="pre">&lt;</span> <span class="pre">0</span> <span class="pre">at</span> <span class="pre">depth</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -264,13 +296,18 @@
 <dt><code class="docutils literal notranslate"><span class="pre">z_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with vertical position &gt;=  to this value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>units: <code class="docutils literal notranslate"><span class="pre">meters</span> <span class="pre">above</span> <span class="pre">mean</span> <span class="pre">water</span> <span class="pre">level,</span> <span class="pre">so</span> <span class="pre">is</span> <span class="pre">&lt;</span> <span class="pre">0</span> <span class="pre">at</span> <span class="pre">depth</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
 </div></blockquote>
+</section>
+<section id="expert-parameters">
+<h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this heading">¶</a></h2>
 </section>
 </section>
 

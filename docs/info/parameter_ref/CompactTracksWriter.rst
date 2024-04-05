@@ -2,13 +2,11 @@
 CompactTracksWriter
 ####################
 
-**Description:** 
-
-**full class_name :** oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter
+**Doc:** 
 
 **short class_name:** CompactTracksWriter
 
-docs>>
+**full class_name :** oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter
 
 **Inheritance:** > ParameterBaseClass> _BaseWriter> CompactTracksWriter
 
@@ -20,33 +18,45 @@ Parameters:
 		Description: number of particles per time chunk in the netcdf file
 
 		- default: ``100000``
+		- required_type: ``<class 'int'>``
 		- min: ``1000``
+		- expert: ``False``
 
 	* ``NCDF_time_chunk`` :   ``<class 'int'>``   *<optional>*
 		Description: number of time steps per time chunk in the netcdf file
 
 		- default: ``24``
+		- required_type: ``<class 'int'>``
 		- min: ``1``
+		- expert: ``False``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- required_type: ``<class 'str'>``
+		- expert: ``False``
 
 	* ``retain_compact_files`` :   ``<class 'bool'>``   *<optional>*
 		Description: keep  compact tracks files after conversion to rectangular format
 
 		- default: ``False``
+		- required_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
+		- expert: ``False``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``tracks_compact``
+		- required_type: ``<class 'str'>``
+		- expert: ``False``
 
 	* ``time_steps_per_per_file`` :   ``<class 'int'>``   *<optional>*
 		Description: Split track output into files with given number of time integer steps
 
 		- default: ``None``
+		- required_type: ``<class 'int'>``
 		- min: ``1``
+		- expert: ``False``
 
 	* ``turn_off_write_particle_properties_list``:  *<optional>*
 		Description: - Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually
@@ -54,6 +64,7 @@ Parameters:
 		- a list containing type:  ``[<class 'str'>]``
 		- default list : ``['water_velocity', 'particle_velocity', 'velocity_modifier']``
 		- can_be_empty_list: ``True``
+		- expert: ``False``
 
 	* ``turn_on_write_particle_properties_list``:  *<optional>*
 		Description: - Change default write param of particle properties to write to tracks file, ie  tweak write flags individually
@@ -61,25 +72,40 @@ Parameters:
 		- a list containing type:  ``[<class 'str'>]``
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
+		- expert: ``False``
 
 	* ``update_interval`` :   ``[<class 'int'>, <class 'float'>]``   *<optional>*
 		Description: the time in model seconds between writes (will be rounded to model time step)
 
 		- default: ``None``
+		- required_type: ``[<class 'int'>, <class 'float'>]``
 		- min: ``0.01``
 		- units: ``sec``
+		- expert: ``False``
 
 	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
 		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
 
 		- default: ``None``
+		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
+		- expert: ``False``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- required_type: ``<class 'str'>``
+		- expert: ``False``
 
 	* ``write_dry_cell_flag`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down
 
 		- default: ``False``
+		- required_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
+		- expert: ``False``
+
+
+
+Expert Parameters:
+*******************
+
 

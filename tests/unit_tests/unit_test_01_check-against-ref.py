@@ -13,8 +13,6 @@ def main(args):
     ot.settings(time_step=1800,include_dispersion=False,
              use_A_Z_profile=False, )
 
-
-
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
                  NCDF_particle_chunk= 500) # keep file small
 
@@ -22,8 +20,9 @@ def main(args):
     ot.add_class('reader',**test_definitions.reader1)
 
     # add a point release
-    ot.add_class('release_groups',**test_definitions.rg0)
-
+    ot.add_class('release_groups',**test_definitions.rg_release_interval0)
+    ot.add_class('release_groups', **test_definitions.rg_start_in_middle)
+    ot.add_class('release_groups', **test_definitions.rg_start_in_middle)
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
@@ -41,8 +40,8 @@ def main(args):
     tracks= test_definitions.read_tracks(case_info_file)
     tracks_ref = test_definitions.read_tracks(reference_case_info_file)
     dx = np.abs(tracks['x']- tracks_ref['x'])
-    print('x diffs max ', np.nanmax(dx, axis=1))
-    print('x diffs mean', np.nanmean(dx, axis=1))
+    print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
+
 
 
 

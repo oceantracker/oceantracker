@@ -125,7 +125,7 @@ class GenericUnstructuredReader(_BaseGenericReader):
         time = nc.read_a_variable(vname, sel=file_index)
 
         if self.params['isodate_of_hindcast_time_zero'] is not None:
-            time += time_util.isostr_to_seconds(self.params['isodate_of_hindcast_time_zero'])
+            time += self.params['isodate_of_hindcast_time_zero']
         return time
 
     def read_horizontal_grid_coords(self, nc, grid):

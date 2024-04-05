@@ -2,13 +2,11 @@
 BasicResuspension
 ##################
 
-**Description:** 
-
-**full class_name :** oceantracker.resuspension.resuspension.BasicResuspension
+**Doc:** 
 
 **short class_name:** BasicResuspension
 
-docs>>
+**full class_name :** oceantracker.resuspension.resuspension.BasicResuspension
 
 **Inheritance:** > ParameterBaseClass> _BaseResuspension> BasicResuspension
 
@@ -20,18 +18,32 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- required_type: ``<class 'str'>``
+		- expert: ``False``
 
 	* ``critical_friction_velocity`` :   ``<class 'float'>``   *<optional>*
 		Description: Critical friction velocity, u_* in m/s defined in terms of bottom stress (this param is not the same as near seabed velocity)
 
 		- default: ``0.0``
+		- required_type: ``<class 'float'>``
 		- min: ``0.0``
+		- expert: ``False``
 
 	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
 		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
 
 		- default: ``None``
+		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
+		- expert: ``False``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- required_type: ``<class 'str'>``
+		- expert: ``False``
+
+
+
+Expert Parameters:
+*******************
+
 

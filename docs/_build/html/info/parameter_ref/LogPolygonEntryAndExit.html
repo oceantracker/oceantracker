@@ -104,10 +104,9 @@
             
   <section id="logpolygonentryandexit">
 <h1>LogPolygonEntryAndExit<a class="headerlink" href="#logpolygonentryandexit" title="Permalink to this heading">¶</a></h1>
-<p><strong>Description:</strong></p>
-<p><strong>full class_name :</strong> oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit</p>
+<p><strong>Doc:</strong></p>
 <p><strong>short class_name:</strong> LogPolygonEntryAndExit</p>
-<p>docs&gt;&gt;</p>
+<p><strong>full class_name :</strong> oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit</p>
 <p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseEventLogger&gt; LogPolygonEntryAndExit</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
@@ -116,7 +115,9 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">chunk_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">500000</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -125,6 +126,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class name as string A.B.C, used to import this class from python path</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -134,6 +137,7 @@
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">['ID',</span> <span class="pre">'x',</span> <span class="pre">'IDpulse',</span> <span class="pre">'IDrelease_group',</span> <span class="pre">'user_release_groupID',</span> <span class="pre">'status',</span> <span class="pre">'age']</span></code></p></li>
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -147,6 +151,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">role_output_file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">inside_polygon_events</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -155,6 +161,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">user_instance_info</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -162,6 +170,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -169,13 +179,18 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">write</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
 </div></blockquote>
+</section>
+<section id="expert-parameters">
+<h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this heading">¶</a></h2>
 </section>
 </section>
 

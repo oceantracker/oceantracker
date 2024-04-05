@@ -10,102 +10,90 @@ class Scheduler(object):
                  start=None, end=None, duration=None,
                  interval = None, times=None,cancel_when_done=True):
 
-        interval_rounded_to_time_step = False
-        times_rounded_to_time_step =  False
-        times_outside_run_times = False
 
         self.cancel_when_done = cancel_when_done
-
-
-        # deal with None and isodates
-        if start is None: start = run_info.start_time
-        if type(start) is str: start = time_util.isostr_to_seconds(start)
-
-        if end is None: end = run_info.end_time
-        if type(end) is str: end = time_util.isostr_to_seconds(end)
-
+        md = run_info.model_direction
         dt = settings.time_step
-        tol = 0.05
 
-        if times is not None:
-            # use times given
-            # check if at model time steps
-            n = (times - run_info.start_time)/settings.time_step
-            times_rounded = run_info.start_time + np.round(n) * settings.time_step
-
-            if np.any(np.abs(times-times_rounded)/dt > tol * dt):
-                times_rounded_to_time_step = True
-            self.scheduled_times = times_rounded
-            rounded_interval = None
-        else:
+        if times is None:
             # make from start time and interval
-            if start is None: start = run_info.start_time # start ast model sart
-            if type(start) == str: start = time_util.isostr_to_seconds(start)
+            times,interval = self._start_end_from_interval(settings, run_info, start, end, duration, interval)
+        else:
+            # use times given, but round
+            n = (times - run_info.start_time)/dt
+            times = run_info.start_time + np.round(n) * dt
+            times = np.sort(times,order=not settings.backtracking) # ensure they are in right order
+            interval = None
 
-            n =(start- run_info.start_time)/dt  # number of model steps since the start
-            start_rounded = run_info.start_time + round(n)*dt
-            if  abs(start_rounded-start)/dt > tol:
-                times_rounded_to_time_step = True
-            start = start_rounded
+        start_time_outside_run_times = times[0]*md < run_info.start_time*md or times[-1]*md > run_info.end_time*md
 
-            if not ( hindcast_info['start_time'] <= start  <= hindcast_info['end_time']):
-                self.start_time_outside_hydro_model_times = True
-
-            # round interval
-            if interval is None: interval = settings.time_step
-            interval = abs(interval)  # ensure positive
-            rounded_interval = round(interval/dt)*dt
-
-            # if given iterval is zero then only one release
-            if interval > 0:
-                # if non zero interval given, ensure at least 1 per model time step
-                rounded_interval = max( settings.time_step,rounded_interval)
-
-            if abs(interval-rounded_interval)/dt > tol:
-                interval_rounded_to_time_step = True
-
-            # look at duration from end if given
-            if duration is None:
-                if end is None: end = run_info['end_time'] # start ast model sart
-                if type(end) == str: end = time_util.isostr_to_seconds(end)
-                duration = abs(end-start)
-
-            # make even starting
-            if rounded_interval == 0:
-                # if interval is zero
-                rounded_interval = 0.
-                self.scheduled_times= np.asarray([start])
-            else:
-                rounded_interval = max(rounded_interval, dt)
-                self.scheduled_times = start + np.arange(0, abs(duration)+rounded_interval, rounded_interval)
+        # trim to fit inside the run
+        sel = np.logical_or( times >= run_info.start_time, times <= run_info.end_time)
+        self.scheduled_times = times[sel]
 
         # make a task flag for each time step of the model run
         self.task_flag = np.full_like(run_info.times,False, dtype=bool)
         nt_task = ((self.scheduled_times - run_info.start_time) / settings.time_step).astype(np.int32)
-
-        # now clip times to be within model start and end of run
-        sel = np.logical_and(nt_task >= 0, nt_task < self.task_flag.size)
-        self.task_flag[nt_task[sel]] = True
+        self.task_flag[nt_task] = True
 
         # flag times steps scheduler is active, ie start to end
         self.active_flag = np.full_like(run_info.times, False, dtype=bool)
         self.active_flag[nt_task[0]:nt_task[-1]+1] = True
 
-        if any(np.logical_or( self.scheduled_times < run_info.start_time,self.scheduled_times > run_info.end_time )):
-            times_outside_run_times = True
         # record info
-        self.info= dict(start_time=self.scheduled_times[0], interval=rounded_interval,
-                        given_interval=interval, end_time=self.scheduled_times[-1],
+        duration=abs(self.scheduled_times[-1] - self.scheduled_times[0]),
+        self.info= dict(start_time=self.scheduled_times[0], interval=interval,
+                        end_time=self.scheduled_times[-1],
+                        duration = duration,
+                        duration_str = time_util.seconds_to_pretty_duration_string(duration),
+                        interval_str = time_util.seconds_to_pretty_duration_string(interval),
                         start_date=time_util.seconds_to_isostr(self.scheduled_times[0]),
                         end_date=time_util.seconds_to_isostr(self.scheduled_times[-1]),
                         number_scheduled_times = self.scheduled_times.size,
                         cancel_when_done=cancel_when_done,
-                        interval_rounded_to_time_step=interval_rounded_to_time_step,
-                        times_rounded_to_time_step = times_rounded_to_time_step,
-                        times_outside_run_times= times_outside_run_times
+                        start_time_outside_run_times =start_time_outside_run_times,
                         )
-
+        i = self.info
+        b = f'{12*" "} Scheduler{15*" "}Run:{14*" "}Hindcast\n'
+        b += f'Start- {i["start_date"]} {hindcast_info["start_date"]}  {time_util.seconds_to_isostr(run_info.times[0])}  \n'
+        b += f'Ends - {i["end_date"]} {hindcast_info["end_date"]}  {time_util.seconds_to_isostr(run_info.times[-1])}]\n'
+        b += f'{10*" "}interval = {i["interval_str"]}, backtracking={settings.backtracking}'
+        i['bounds_table']= b
         pass
+
+    def _start_end_from_interval(self,settings,run_info, start,end, duration, interval):
+
+        md = run_info.model_direction
+        dt = settings.time_step
+        if start is None:
+            start = run_info.end_time if settings.backtracking else run_info.start_time
+        else:
+            # use given rounded to time step
+            n = (start - run_info.start_time) / dt  # number of model steps since the start
+            start = run_info.start_time + round(n) *  dt
+
+        if duration is not None:
+            # use duration for end if given
+            end = start + md * duration
+        elif end is None:
+            end = run_info.start_time if settings.backtracking else run_info.end_time
+
+        if interval is None:
+            interval=  dt
+        elif interval> dt:
+            # round interval to time step
+          interval=  round(interval/dt)*dt
+        else:
+            interval = 0.
+
+        duration = abs(start-end)
+        if interval ==0:
+            # only one event
+            times =np.asarray([start])
+        else:
+            times = start + md * np.arange(0,duration+settings.time_step,interval)
+
+        return  times, interval
 
     def do_task(self, n_time_step):
         # check if task flag is set

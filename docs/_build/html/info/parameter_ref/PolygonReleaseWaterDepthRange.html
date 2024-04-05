@@ -104,10 +104,9 @@
             
   <section id="polygonreleasewaterdepthrange">
 <h1>PolygonReleaseWaterDepthRange<a class="headerlink" href="#polygonreleasewaterdepthrange" title="Permalink to this heading">¶</a></h1>
-<p><strong>Description:</strong></p>
-<p><strong>full class_name :</strong> oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange</p>
+<p><strong>Doc:</strong></p>
 <p><strong>short class_name:</strong> PolygonReleaseWaterDepthRange</p>
-<p>docs&gt;&gt;</p>
+<p><strong>full class_name :</strong> oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange</p>
 <p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseReleaseGroup&gt; PointRelease&gt; PolygonRelease&gt; PolygonReleaseWaterDepthRange</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
@@ -117,7 +116,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">allow_release_in_dry_cells</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -126,6 +127,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class name as string A.B.C, used to import this class from python path</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -134,8 +137,10 @@
 <dt><code class="docutils literal notranslate"><span class="pre">duration</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: How long particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using “end”</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
 <li><p>units: <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -144,6 +149,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">end</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">iso8601date</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -152,7 +159,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">max_age</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Particles older than this age in seconds are culled,ie. status=dead, and removed from computation, very useful in reducing run time</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -161,7 +170,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">max_cycles_to_find_release_points</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">100</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -169,6 +180,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -182,7 +195,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">pulse_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Number of particles released in a single pulse, this number is released every release_interval.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -191,7 +206,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">release_at_bottom</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: 3D release particles at bottom, with  offset given by release_offset_from_surface_or_bottom param, overrides any given release z value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -200,7 +217,9 @@
 <dt><code class="docutils literal notranslate"><span class="pre">release_at_surface</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: 3D release particles at free surface, ie tide height, with  offset given by release_offset_from_surface_or_bottom param, overrides any given release z value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -209,8 +228,10 @@
 <dt><code class="docutils literal notranslate"><span class="pre">release_interval</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Time interval between released pulses. To release at only one time use release_interval=0.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
 <li><p>units: <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -219,8 +240,10 @@
 <dt><code class="docutils literal notranslate"><span class="pre">release_offset_from_surface_or_bottom</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: 3D release particles at offset from free surface or bottom, if release_at_surface or  release_at_bottom = True</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;]</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
 <li><p>units: <code class="docutils literal notranslate"><span class="pre">m</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -229,6 +252,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">start</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: start date of release, Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">iso8601date</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -237,6 +262,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">user_instance_info</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -244,6 +271,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -251,7 +280,9 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_polygonID</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -260,6 +291,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">user_release_groupID</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -268,6 +301,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">user_release_group_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: User given name/label to attached to this release groups to make it easier to distinguish.</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -275,6 +310,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">water_depth_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">1e+37</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -282,6 +319,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">water_depth_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">-1e+37</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -290,6 +329,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">z_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: max/ highest z vale release for to randomly release in 3D, overrides any given release z value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -298,6 +339,8 @@
 <dt><code class="docutils literal notranslate"><span class="pre">z_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: min/ deepest z value to release for to randomly release in 3D, overrides any given release z value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -309,12 +352,16 @@
 <li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>min_length: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
 <li><p>obsolete: <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">z_min</span> <span class="pre">and/or</span> <span class="pre">z_max</span></code></p></li>
+<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
 </div></blockquote>
+</section>
+<section id="expert-parameters">
+<h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this heading">¶</a></h2>
 </section>
 </section>
 

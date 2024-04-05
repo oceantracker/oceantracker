@@ -4,7 +4,7 @@ dispersion:
   A_H: 0.2
   A_V: 0.001
 integrated_model:
-  class_name: LagarangianStructuresFTLE2D
+  class_name: dev_LagarangianStructuresFTLE2D
   floating: true
   grid_center:
   - 1596500

@@ -61,27 +61,29 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS' )
     display_grid_at_start = PVC(False, bool,
                 doc_str='Pause during strat up to plot the grid for checking using matplotlib, clicking om image will print a coord' )
-    dev_debug_plots = PVC(False, bool, doc_str='show any debug plot generated at give dbug_level, not for general use' )
+    dev_debug_plots = PVC(False, bool,expert=True, doc_str='show any debug plot generated at give dbug_level, not for general use' )
     debug = PVC(False, bool, doc_str= 'more info on errors' )
-    dev_debug_opt = PVC(0, int,doc_str= 'does extra checks given by integer, not for general use' )
+    dev_debug_opt = PVC(0, int,expert=True,doc_str= 'does extra checks given by integer, not for general use' )
     minimum_total_water_depth = PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering' )
                 #'write_output_files =     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web' )
     write_dry_cell_flag = PVC(True, bool,
-                doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots, currently cannot be used with nested grids ' )
+                doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots,may create large grid file, currently cannot be used with nested grids ' )
     max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing' )  # limit all cases to this duration
-    max_particles = PVC(10**10, int, min=1,  doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
+    max_particles = PVC(10**10, int, min=1, doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
     processors = PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel' )
     max_warnings = PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps' )  # dont record more that this number of warnings, to keep caseInfo.json finite
-    USE_random_seed = PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!' )
-    NUMBA_function_cache_size = PVC(4048, int, min=128, doc_str='Size of memory cache for compiled numba functions in kB' )
-    NUMBA_cache_code = PVC(False, bool,  doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
-    multiprocessing_case_start_delay = PVC(None, float, min=0., doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
+    use_random_seed = PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!' )
+    NUMBA_function_cache_size = PVC(4048, int, min=128, expert=True,
+                                    doc_str='Size of memory cache for compiled numba functions in kB' )
+    NUMBA_cache_code = PVC(False, bool, expert=True,
+                           doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
+    multiprocessing_case_start_delay = PVC(None, float, min=0.,expert=True,
+                                           doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
     EPSG_code_metres_grid = PVC(None, int,
                 doc_str='If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM' )
     write_tracks = PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes' )
     user_note = PVC('No user note', str, doc_str='Any run note to store in case info file' )
-    case_output_file_tag = PVC(None, str, doc_str='insert this tag into output files name for each case, for parallel runs this is set to C000, C001...' )  # todo make this only settable in a case, caselist params?
-    z0 = PVC(0.005, float, units='m', doc_str='Bottom roughness in meters, used for tolerance and log layer calcs. ', min=0.0001 )  # default bottom roughness
+    z0 = PVC(0.005, float, units='m', doc_str='Bottom roughness, used for tolerance and log layer calcs. ', min=0.0001 )  # default bottom roughness
     water_density = PVC(1025., float, units='kg/m^3', doc_str='Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900. )
     open_boundary_type = PVC(0, int, min=0, max=1, doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS ' )
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )
@@ -89,7 +91,8 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file' )
     include_dispersion = PVC(True, bool,
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
-    NCDF_time_chunk = PVC(24, int, min=1, doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
+    NCDF_time_chunk = PVC(24, int, min=1,expert=True,
+                          doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
 
 
 
@@ -352,19 +355,20 @@ class _SharedInfoClass():
     def add_scheduler_to_class(self, name_scheduler, param_class_instance, start=None, end=None, duration=None,
                                interval =None, times=None,
                                caller=None, crumbs=''):
-        ''' Add a scheduler opject to given param_class_instance, with boolean task_flag attribute for each time step,
+        ''' Add a scheduler object to given param_class_instance, with boolean task_flag attribute for each time step,
             which is true if  task is to be carried out.
             Rounds times interval and times to nearest time step'''
         s = Scheduler(self.settings,self.run_info,self.hindcast_info, start=start, end=end,duration=duration,
                             interval =interval, times=times)
         crumbs += '> adding scheduler'
-        if s.info['interval_rounded_to_time_step']:
-            self.msg_logger.msg('Making scheduler: update interval rounded to be integer number of time steps',
-                                hint=f'{s.info["given_interval"]:.0f} sec. rounded to = {s.info["interval"]:.0f} sec.',
-                                caller=caller, warning=True, crumbs= crumbs )
-        if s.info['times_outside_run_times']:
-                self.msg_logger.msg('Making scheduler: some times are outside run times',
-                                caller=caller, warning=True, crumbs=crumbs)
+
+        if s.info['start_time_outside_run_times']:
+                self.msg_logger.msg('Making scheduler: start time is outside model run times',
+                        hint = s.info['bounds_table'], caller=caller, warning=True, crumbs=crumbs)
+
+        if s.scheduled_times.size==0:
+            self.msg_logger.msg('No scheduled times within model run times',
+                                hint=s.info['bounds_table'], caller=caller, warning=True, crumbs=crumbs)
         # add to the class
         setattr(param_class_instance, name_scheduler, s)
         # add info about scheduler to in

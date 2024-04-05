@@ -1,5 +1,4 @@
 NUMBA_cache_code: false
-USE_random_seed: false
 debug: true
 dispersion:
   A_H: 10
@@ -64,6 +63,7 @@ release_groups:
 root_output_dir: output
 time_step: 120
 use_A_Z_profile: true
+use_random_seed: false
 velocity_modifiers:
   terminal_velocity:
     class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity

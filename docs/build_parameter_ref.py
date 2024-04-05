@@ -87,30 +87,27 @@ class RSTfileBuilder(object):
 
         self.toc_dict[toc_name]['body'].append(linked_toc.file_name.replace('\\', '/'))
 
-    def write_param_dict_defaults(self, params):
-        self.add_lines()
-        #self.add_directive('warning', body='Lots more to add here and work on layout!!')
+    def add_params_from_dict(self,params, indent=0, expert=False):
 
-        self.add_heading('Parameters:', level=0)
+        if expert:
+            p =       {key: item for key, item in params.items() if hasattr(item,'info') and item.info['expert']}
+            self.add_heading('Expert Parameters:', level=0)
+        else:
+            p = {key: item for key, item in params.items() if not hasattr(item,'info') or not item.info['expert']}
+            self.add_heading('Parameters:', level=0)
 
-        self.add_params_from_dict(params)
-
-        self.write()
-
-    def add_params_from_dict(self,params, indent=0):
-
-        for key in sorted(params.keys()):
-            item= params[key]
+        for key in sorted(p.keys()):
+            item= p[key]
 
             if type(item) == dict:
                 self.add_lines('* ``' + key + '``:' + ' nested parameter dictionary' , indent=indent+1)
-                self.add_params_from_dict( item, indent=1)
+                self.add_params_from_dict( item, indent=1,expert=False) # dont split expert for nested params
                 continue
 
             if type(item) == PVC:
 
                 if item.info['obsolete'] is not None: continue # dont write obsolete params
-                self.add_lines('* ``' + key + '`` :   ``' + str(item.info['type']) + '`` '
+                self.add_lines('* ``' + key + '`` :   ``' + str(item.info['required_type']) + '`` '
                                + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
 
                 if item.info['doc_str'] is not None:
@@ -149,7 +146,7 @@ class RSTfileBuilder(object):
                 self.add_lines()
             else:
                 self.add_lines()
-                self.add_lines(key +': still working on display  of default params of  type ' + str(type(params[key])),indent=indent+0)
+                self.add_lines(key +': still working on display  of default params of  type ' + str(type(p[key])),indent=indent+0)
                 self.add_lines()
 
 
@@ -166,14 +163,16 @@ def make_class_sub_pages(class_role, link_tag=''):
         if name[0] == '_':   continue  # ignore internal/base classes flagged with underscore
         instance= info['class_obj']()
         p = RSTfileBuilder(name, name)
+        doc_str = info["class_obj"].__doc__
 
-        p.add_lines('**Description:** ' + (instance.docs['description'] if instance.docs['description'] is not None else '' ) )
+        p.add_lines('**Doc:** ' + ('' if doc_str is None else doc_str.replace("\n","")) )
+        p.add_lines()
+        short_name = info["mod_str"].split(".")[-1]
+        p.add_lines(f'**short class_name:** {short_name}')
         p.add_lines()
         p.add_lines(f'**full class_name :** {info["mod_str"]}')
         p.add_lines()
-        short_name =info["mod_str"].split(".")[-1]
-        p.add_lines(f'**short class_name:** {short_name}')
-        p.add_lines()
+
         if short_name.lower().startswith('dev'):
             p.add_directive('warning', body='Class is under development may not yet work in all cases, if errors contact developer')
 
@@ -181,17 +180,17 @@ def make_class_sub_pages(class_role, link_tag=''):
         parents=''
         for b in info['class_obj'].__mro__[:-2][::-1]:
             parents = parents  + '> ' + b.__name__
-        doc_str = info["class_obj"].__doc__
-        # should not do this is doc strs are in native rst
-        ds = "docs>>" if doc_str is None else doc_str.replace("\n","")
-        p.add_lines(f'{ds}')
-        p.add_lines()
+
         p.add_lines(f'**Inheritance:** {parents}')
         p.add_lines()
 
-        p.add_heading('Parameters:', level=0)
 
-        p.add_params_from_dict(instance.default_params)
+
+        params = instance.default_params
+        p.add_params_from_dict(params,expert=False)
+        p.add_lines()
+        p.add_params_from_dict(params, expert=True)
+        p.add_lines()
 
         p.write()
         toc.add_toc_link(class_role,p)
@@ -215,12 +214,13 @@ def build_param_ref():
     sp = RSTfileBuilder('settings', 'Settings')
     settings_dict = si.settings.as_dict()
     sp.add_heading('Top level settings/parameters', level=2)
-    sp.write_param_dict_defaults(settings_dict)
+    sp.add_params_from_dict(settings_dict,expert=False)
+    sp.add_params_from_dict(settings_dict, expert=True)
+    sp.write()
 
     page.add_heading('Top level settings', level=2)
     page.add_new_toc_to_page('Settings', maxdepth=1)
     page.add_toc_link('Settings',sp)
-
 
     # core classes
     page.add_heading('Core "class" roles',level=2)

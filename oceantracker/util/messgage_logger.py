@@ -103,7 +103,13 @@ class MessageLogger(object ):
 
         # first line complete
         if hint is not None:
-            m.append(msg_str('hint: ' + hint, tabs + 3))
+            if '\n' in hint:
+                # multi line hint
+                for l in hint.split('\n'):
+                    m.append(msg_str('hint: ' + l, tabs + 3))
+            else:
+                m.append(msg_str('hint: ' + hint, tabs + 3))
+
         # make crumb trail
         if crumbs is not None and crumbs != '':
             m.append(msg_str(f'in: {crumbs}', tabs + 3))
