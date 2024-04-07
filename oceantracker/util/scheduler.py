@@ -22,18 +22,18 @@ class Scheduler(object):
             # use times given, but round
             n = (times - run_info.start_time)/dt
             times = run_info.start_time + np.round(n) * dt
-            times = np.sort(times,order=not settings.backtracking) # ensure they are in right order
+            times = md* np.sort(md*times) # ensure they are in right order for backwards/forwards
             interval = None
 
         start_time_outside_run_times = times[0]*md < run_info.start_time*md or times[-1]*md > run_info.end_time*md
 
         # trim to fit inside the run
-        sel = np.logical_or( times >= run_info.start_time, times <= run_info.end_time)
+        sel = np.logical_and( times * md  >= run_info.start_time * md, times * md  <= run_info.end_time * md )
         self.scheduled_times = times[sel]
 
         # make a task flag for each time step of the model run
         self.task_flag = np.full_like(run_info.times,False, dtype=bool)
-        nt_task = ((self.scheduled_times - run_info.start_time) / settings.time_step).astype(np.int32)
+        nt_task = (np.abs(self.scheduled_times - run_info.start_time) / settings.time_step).astype(np.int32)
         self.task_flag[nt_task] = True
 
         # flag times steps scheduler is active, ie start to end
@@ -66,9 +66,9 @@ class Scheduler(object):
         md = run_info.model_direction
         dt = settings.time_step
         if start is None:
-            start = run_info.end_time if settings.backtracking else run_info.start_time
+            start = run_info.start_time
         else:
-            # use given rounded to time step
+            # use given start rounded to time step
             n = (start - run_info.start_time) / dt  # number of model steps since the start
             start = run_info.start_time + round(n) *  dt
 
@@ -76,13 +76,13 @@ class Scheduler(object):
             # use duration for end if given
             end = start + md * duration
         elif end is None:
-            end = run_info.start_time if settings.backtracking else run_info.end_time
+            end = run_info.end_time
 
         if interval is None:
             interval=  dt
-        elif interval> dt:
-            # round interval to time step
-          interval=  round(interval/dt)*dt
+        elif interval > 0.:
+            # round interval to time step, but not less than one per time step
+            interval=  max(round(interval/dt)*dt, dt)
         else:
             interval = 0.
 

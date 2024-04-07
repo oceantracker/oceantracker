@@ -164,6 +164,8 @@ class _RunInfo(_SharedStruct):
     output_file_base = None
     caseID = None
     time_of_nominal_first_occurrence = None
+    total_alive_particles = 0
+    time_steps_completed = 0
 
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
@@ -364,11 +366,11 @@ class _SharedInfoClass():
 
         if s.info['start_time_outside_run_times']:
                 self.msg_logger.msg('Making scheduler: start time is outside model run times',
-                        hint = s.info['bounds_table'], caller=caller, warning=True, crumbs=crumbs)
+                        hint = s.info['bounds_table'], caller=caller, fatal_error=True, crumbs=crumbs)
 
         if s.scheduled_times.size==0:
             self.msg_logger.msg('No scheduled times within model run times',
-                                hint=s.info['bounds_table'], caller=caller, warning=True, crumbs=crumbs)
+                                hint=s.info['bounds_table'], caller=caller, fatal_error=True, crumbs=crumbs)
         # add to the class
         setattr(param_class_instance, name_scheduler, s)
         # add info about scheduler to in

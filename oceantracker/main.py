@@ -264,18 +264,25 @@ class _OceanTrackerRunner(object):
     def _main_run_end(self,case_summary,run_builder):
         # final info output
 
+        ml = msg_logger
+        ml.set_screen_tag('End')
+        ml.print_line('Summary')
+        ml.msg('Run summary with case file names in "*_runInfo.json"',  tabs=2, note=True)
+        ml.show_all_warnings_and_errors()
+        ml.print_line( )
         # count total messages
         num_case_errors,num_case_warnings,num_case_notes = 0,0,0
         for c in case_summary if type(case_summary) ==list else [case_summary]:
             num_case_errors +=  len(c['return_msgs']['errors'])
             num_case_warnings +=  len(c['return_msgs']['warnings'])
             num_case_notes += len(c['return_msgs']['notes'])
+            if c['run_info']['time_steps_completed']> 0 and len(c['non_release_groups'])> 0:
+                # note non- releses
+                ml.msg(f'In Case ={ c["run_info"]["caseID"]} no particles were release by groups named {str(c["non_release_groups"])}',
+                               hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)',
+                               fatal_error=True)
 
-        ml = msg_logger
-        ml.set_screen_tag('End')
         case_info_files= self._write_run_info_json(case_summary,run_builder, self.start_t0)
-
-        ml.show_all_warnings_and_errors()
 
         ml.print_line()
         ml.msg(f'OceanTracker summary:  elapsed time =' + str(datetime.now() - self.start_date),)
@@ -287,7 +294,8 @@ class _OceanTrackerRunner(object):
         ml.print_line()
         total_errors = num_case_errors + len(ml.errors_list)
         if total_errors > 0:
-            ml.print_line('Found errors, so some cases may not have completed, see above')
+            ml.print_line('Found errors, so some cases may not have completed')
+            ml.print_line(' see above or  *_caseLog_log.txt and *_caseLog_log.err files')
         ml.close()
         return case_info_files
 
@@ -453,7 +461,7 @@ class _OceanTrackerRunner(object):
                              'caseInfo_files':case_info_list
                              }
         json_util.write_JSON(path.join(o['run_output_dir'],o['runInfo_file']),  d)
-        ml.msg('run summary with case file names   "' + o['runInfo_file'] + '"',  tabs=2, note=True)
+
 
         case_files= [path.join(run_builder['output_files']['run_output_dir'],f) for f in case_info_list]
         return case_files if len(case_files) > 1 else case_files[0]

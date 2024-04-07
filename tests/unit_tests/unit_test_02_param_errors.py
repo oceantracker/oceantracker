@@ -18,7 +18,7 @@ def main(args):
     ot.add_class('reader',**test_definitions.reader1)
 
     # add a point release
-    ot.add_class('release_groups',start_date='hh', **test_definitions.rg0)
+    ot.add_class('release_groups',start_date='hh', **test_definitions.rg_start_in_middle)
 
     ot.add_class('tracks_writer',update_interval_1 = 1*3600, write_dry_cell_flag=False,
                  NCDF_particle_chunk= 500) # keep file small

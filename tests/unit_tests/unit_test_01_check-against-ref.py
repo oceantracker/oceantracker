@@ -22,7 +22,7 @@ def main(args):
     # add a point release
     ot.add_class('release_groups',**test_definitions.rg_release_interval0)
     ot.add_class('release_groups', **test_definitions.rg_start_in_middle)
-    ot.add_class('release_groups', **test_definitions.rg_start_in_middle)
+    ot.add_class('release_groups', **test_definitions.rg_outside_domain)
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role

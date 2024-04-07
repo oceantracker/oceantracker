@@ -190,27 +190,18 @@ class MessageLogger(object ):
                 if self.log_file is not None:
                     self.log_file.write(l + '\n')
 
-    def write_error_log_file(self, e=None):
-
-        if self.log_file is None : return
-
+    def write_error_log_file(self, e,traceback_str):
+        sleep(.5)
         with open(path.normpath(self.error_file_name),'w') as f:
             f.write('_____ Known warnings and Errors ________________________________\n')
             for t in [self.notes_list, self.warnings_list, self.errors_list]:
                 for l in t:
-                    print(self.screen_tag + ' ' + l)
-                    if self.log_file is not None:
-                        self.log_file.write(l + '\n')
-
+                    f.write(self.screen_tag + ' ' + l + '\n')
 
             f.write('________Trace back_____________________________\n')
+            f.write(str(e))
+            f.write(traceback_str)
 
-            if e is not None:
-                f.write(str(e))
-                self.msg(str(e))
-                s = traceback.format_exc()
-                f.write(s)
-                self.msg(s)
 
     def spell_check(self, msg, value: str, possible_values: list, **kwargs):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
