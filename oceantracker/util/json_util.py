@@ -12,13 +12,13 @@ def write_JSON(file_name,d, indent=4):
     else:
         fn=file_name+'.json'
     try:
-        with open(fn, 'w') as fp:
+        with open(fn, mode='w') as fp:
             json.dump(d, fp, cls=MyEncoder, indent=indent)
 
     except Exception as e:
         print('Error>>  Failed to write json file ="' + file_name +'"')
         raise(e)
-
+    pass
 
 def read_JSON(file_name):
     # avoid changing given file name
