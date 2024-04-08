@@ -53,7 +53,7 @@ class MessageLogger(object ):
     def set_up_files(self, run_output_dir, output_file_base, append=False):
         # log file
 
-        log_file_name = output_file_base + '_log.txt'
+        log_file_name = output_file_base + '.txt'
         self.log_file_name = path.join(run_output_dir, log_file_name)
 
         self.log_file = open(self.log_file_name, 'w')
@@ -66,7 +66,6 @@ class MessageLogger(object ):
 
         return  log_file_name, error_file_name
 
-    #todo add abilty to return excecption/traceback?
     def msg(self, msg_text, warning=False, note=False,
             hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
             fatal_error=False, exit_now=False, exception = None, traceback_str=None, dev=False):

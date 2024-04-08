@@ -188,8 +188,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             tb = traceback.format_exc()
             ml.write_error_log_file(e, tb)
             # printout out trace back
-            self.msg(str(e))
-            self.msg(tb)
+            ml.msg(str(e))
+            ml.msg(tb)
 
         finally:
             # reshow warnings

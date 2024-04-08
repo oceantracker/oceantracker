@@ -295,7 +295,7 @@ class _OceanTrackerRunner(object):
         total_errors = num_case_errors + len(ml.errors_list)
         if total_errors > 0:
             ml.print_line('Found errors, so some cases may not have completed')
-            ml.print_line(' see above or  *_caseLog_log.txt and *_caseLog_log.err files')
+            ml.print_line(' see above or  *_caseLog.txt and *_caseLog_log.err files')
         ml.close()
         return case_info_files
 

@@ -22,9 +22,9 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
         self.add_default_params({
             'start': PVC(None, 'iso8601date', doc_str='start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
             'end': PVC(None, 'iso8601date', doc_str=' end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
-            'update_interval': PVC(3600.,float,units='sec',
+            'update_interval': PVC(3600.,float,units='sec',min=0.,
                                     doc_str='Time in seconds between calculating statistics, will be rounded to be a multiple of the particle tracking time step'),
-            'lags': PLC(None, [float,int], units='sec',min=1,
+            'lags': PLC(None, [float,int], units='sec',min=1,min_length=1,
                         doc_str='List of one or more times after particle release to calculate Lagarangian Coherent Structures, default is 1 day'),
             'grid_size':           PLC([100, 99],[int], fixed_len=2,  min=1, max=10 ** 5,
                                             doc_str='number of rows and columns in grid'),
@@ -74,22 +74,37 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
             else:
                 si.msg_logger.msg('LCS not yet working for non-floating particles',
                                   fatal_error=True, exit_now=True,caller=self)
-        # get time for releases
-        a = si.get_regular_events_within_hindcast(params['update_interval'], caller=self,
-                    start=params['start'],end=params['end'],crumbs='LCS add_settings_and_class_params : ')
-        info.update(a)
+
+        # get time for releases within hindcast
+        if params['start'] is None: params['start'] = si.hindcast_info['end_time'] if si.settings.backtracking else si.hindcast_info['start_time']
+        if params['end'] is None: params['end'] = si.hindcast_info['start_time'] if si.settings.backtracking else si.hindcast_info['end_time']
+        params['lags'] = np.sort(np.asarray(params['lags']))
+
+        # round interval to time step
+        params['update_interval'] = round(params['update_interval']/ si.settings.time_step)* si.settings.time_step
+
+        if params['update_interval'] == 0:
+            info['times']= np.asarray([params['start']])
+        else:
+            # do not release closer than max lag size from end
+            duration = abs(params['end'] - params['start']) - params['lags'][-1]
+            info['times'] = params['start'] + si.run_info.model_direction*np.arange(0, duration+params['update_interval'],params['update_interval'] )
+
+        info['dates'] = time_util.seconds_to_isostr(info['times'])
+
         for n_grid in range(params['grid_center'].shape[0]):
             rp = deepcopy(release_params)
             rp['grid_center'] = params['grid_center'][n_grid]
             rp['grid_span'] = params['grid_span'][n_grid]
 
             for n_pulse in range(info['times'].size):
-                rp['start'] = time_util.seconds_to_isostr(info['times'][n_pulse])
+                rp['start'] = info['times'][n_pulse]
                 rp['user_instance_info'] = (n_grid, n_pulse) # tag with grid and pulse number
                 # add param dict as keyword arguments
 
                 self.add_class('release_groups', name= f'LCS_grid{n_grid:03d}_time_step{n_pulse:04d}', **rp)
-                pass
+
+            pass
 
     def initial_setup(self):
         params = self.params
@@ -107,9 +122,11 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
         self.x_LSC_grid = np.full((params['grid_center'].shape[0], r , c , 2), np.nan, dtype=np.float64)
         # add lag schedular
         time = []
+        md = si.run_info.model_direction
         for name, rg in si.roles.release_groups.items():
             # time of lags after start of release group
             t = rg.release_scheduler.info['start_time'] + params['lags']
+
             si.add_scheduler_to_class('LCScalculation_scheduler', rg, times=t, caller=self, crumbs='Adding LCS calculation scheduler ')
             rg.info['next_lag_to_calculate'] = 0 # counter for the lag to work on
 
@@ -207,10 +224,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
                                 ['grid_dim', 'rows', 'cols','vector2D'],
                              description='x,y locations of calculationed LCS',
                              attributes=dict(units='meters or longitude deg.'))
-        nc.write_a_new_variable('x_release_grid', self.x_release_grids,
-                                ['grid_dim', 'release_grid_rows', 'release_grid_cols','vector2D'],
-                             description='x,y locations of grid release',
-                             attributes=dict(units='meters or longitude deg.'))
+
 
         nc.create_a_variable('FTLE', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols'],
                              np.float32, description=' Largest Eigen value of 2D strain matrix', fill_value=np.nan,
@@ -224,6 +238,10 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
 
         # optional output
         if params['write_intermediate_results']:
+            nc.write_a_new_variable('x_release_grid', self.x_release_grids,
+                                    ['grid_dim', 'release_grid_rows', 'release_grid_cols', 'vector2D'],
+                                    description='x,y locations of grid release',
+                                    attributes=dict(units='meters or longitude deg.'))
             nc.create_a_variable('x_at_lag',['time_dim','grid_dim', 'lag_dim','release_grid_rows','release_grid_cols','vector2D'],
                              np.float32, description='x,y locations of particles at given lags', fill_value=np.nan,
                              attributes=dict(units='meters or (lon, lat)  deg.') )

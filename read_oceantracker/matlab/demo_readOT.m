@@ -8,6 +8,7 @@ info= OTreadInfo([output_dir,'demo02_animation_caseInfo.json']);
 % read grid file, using name from info
 grid= OTreadGrid([output_dir,info.output_files.grid]);
 
+release_groups= OTreadReleaseGroups([output_dir,info.output_files.release_group_info]);
 
 %% plot tracks
 % read tracks file, using name from info, if tracks a split into time steps may be more
@@ -22,12 +23,15 @@ hold on
 plot(tracks.x(:,:,1),tracks.x(:,:,2))
 
 % plot release points or polygons from  info.release_group
-for fn = fieldnames(info.release_groups)'
-    rg = info.release_groups.(fn{1}); % get release group from structure by name fn{1}
-    if rg.is_polygon==1
+for rg  = release_groups
+    switch rg.release_type
+        case 'point'    
+            plot(rg.points(:,1), rg.points(:,2),'g.','markersize',18)
+            
+        case 'polygon'
             plot(rg.points(:,1), rg.points(:,2),'g-','linewidth',2)
-    else
-        plot(rg.points(:,1), rg.points(:,2),'g.','markersize',18)
+        case 'grid'
+            plot(rg.points(:,:,1), rg.points(:,:, 2),'g.','markersize',18)
     end
 end
 title('Tracks in demo domain')
@@ -43,8 +47,8 @@ datetick
 output_dir = '../../demos/output/demo03_heatmaps/';
 info= OTreadInfo([output_dir,'demo03_heatmaps_caseInfo.json']);
 %get info from user given name "gridstats1"
-gridstats1 = info.class_roles_info.particle_statistics.gridstats1; 
-s = OTreadStats([output_dir,gridstats1.output_file]);
+fn = info.output_files.particle_statistics.gridstats1;
+s = OTreadStats([output_dir,fn]);
 
 % plot counts for release group 1 at last time step on log scale
 % counts are dim(time, release_group,x,y)
@@ -74,9 +78,9 @@ hold on
 triplot(grid.triangles,grid.x,grid.y,'color',.8*[ 1 1 1]);
 hold off
 
-%% read polygons stats and cacl conectivity probalities
-poly_stats = info.class_roles_info.particle_statistics.polystats1;
-p = OTreadStats([output_dir,poly_stats.output_file]);
+%% read polygons stats and  conectivity probalities
+fn = info.output_files.particle_statistics.polystats1;
+p = OTreadStats([output_dir,fn]);
 
 % calc connectity betwen each release group and this polygon, number 1 as a
 % time series

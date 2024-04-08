@@ -182,6 +182,15 @@ def load_residence_file(case_info_file_name=None,name=None, var_list=[]):
     d['grid'] = load_grid(case_info_file_name)
     return d
 
+def load_LSC(case_info_file_name):
+    # load LCS
+    case_info = read_case_info_file(case_info_file_name)
+    fn = path.join(case_info['output_files']['run_output_dir'],case_info['output_files']['integrated_model'])
+    d = read_ncdf_output_files.read_LCS(fn)
+    d = _extract_useful_info(case_info, d)
+    d['grid'] = load_grid(case_info_file_name)
+    return d
+
 def _get_role_dict_name(caseinfo, class_dict, name= None):
     o = caseinfo['output_files']
     c = o[class_dict]

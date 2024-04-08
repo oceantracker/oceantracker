@@ -17,7 +17,7 @@ def main(args):
                  NCDF_particle_chunk= 500) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)
-    ot.add_class('reader',**test_definitions.reader1)
+    ot.add_class('reader', **test_definitions.demo_schisim)
 
     # add a point release
     ot.add_class('release_groups',**test_definitions.rg_release_interval0)

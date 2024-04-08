@@ -15,7 +15,7 @@ def main(args):
 
 
     #ot.settings(NUMBA_cache_code = True)
-    ot.add_class('reader',**test_definitions.reader1)
+    ot.add_class('reader', **test_definitions.demo_schisim)
 
     # add a point release outside domain
     rg =  deepcopy(test_definitions.rg0)

@@ -17,11 +17,11 @@ color_palette={'land': (np.asarray([146, 179, 140])/256).tolist(), 'land_edge': 
 def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
                   show_grid=False, back_ground_color_map='Blues', title=None, text1=None, credit=None):
 
-    # get grid bounds to fill a recgtangle
-    xbounds = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0])])
-    ybounds = np.asarray([np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
-    bounds= [np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])]
-    dx,dy = xbounds[1]- xbounds[0], ybounds[1]- ybounds[0]
+    # get grid bounds to fill a rectangle, copes with node and grid values
+    x = grid['x'][:, 0].ravel()
+    y = grid['x'][:, 1].ravel()
+    xbounds = np.asarray([np.min(x), np.max(y)])
+    ybounds = np.asarray([np.min(y), np.max(y)])
     f= 0.05
     b = np.asarray([ [xbounds[0], ybounds[0]],
                     [xbounds[1], ybounds[0]],
