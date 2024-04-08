@@ -28,7 +28,7 @@
 1. Docs
     1. check all how to note books run, set up code to run all notebooks
     
-    
+1. partical write of case info file even if errors, trap json encoding erorrs 
   
 
 ##  Internal Structure
@@ -79,7 +79,7 @@
 1. ~~Write islands to net cdf as packed varaible~~
 1. make param keys case insensitive
 1. allow starts/ends to be float , sec since 1970, isostr, datetime, np.datetime64, durations to be floats, time delta or np.time delta
-
+1. only put files with output fies claseses in case info output_files
 
 1. cleaner to make write plot function from returned plot?
 2. web links to help on error
@@ -88,7 +88,7 @@
 1. make al reader inherit from unstructured or structured based class
 1. error handling and log file permission errors when reunning cells in note books
 1. read write polygons from geo-jsons, release groups poly stats
-
+1. date/time param checker allowing stat end times as double, isostring, datetime , np.datetime64
 
 # Other
 

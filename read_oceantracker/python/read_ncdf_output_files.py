@@ -205,6 +205,15 @@ def read_stats_file(file_name):
     nc.close()
     return d
 
+def read_LCS(file_name):
+    # read stats files
+
+    nc = NetCDFhandler(file_name, mode='r')
+    d = nc.read_variables(nc.all_var_names())
+    d['dimensions'] = nc.dims()
+    nc.close()
+    return d
+
 def read_concentration_file(file_name):
     # read concentration et cdf
     d={}

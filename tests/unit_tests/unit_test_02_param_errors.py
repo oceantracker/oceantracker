@@ -15,7 +15,7 @@ def main(args):
 
 
     #ot.settings(NUMBA_cache_code = True)
-    ot.add_class('reader',**test_definitions.reader1)
+    ot.add_class('reader', **test_definitions.demo_schisim)
 
     # add a point release
     ot.add_class('release_groups',start_date='hh', **test_definitions.rg_start_in_middle)

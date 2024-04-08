@@ -41,12 +41,11 @@ class Scheduler(object):
         self.active_flag[nt_task[0]:nt_task[-1]+1] = True
 
         # record info
-        duration=abs(self.scheduled_times[-1] - self.scheduled_times[0]),
+        duration=abs(self.scheduled_times[-1] - self.scheduled_times[0])
         self.info= dict(start_time=self.scheduled_times[0], interval=interval,
                         end_time=self.scheduled_times[-1],
                         duration = duration,
                         duration_str = time_util.seconds_to_pretty_duration_string(duration),
-                        interval_str = time_util.seconds_to_pretty_duration_string(interval),
                         start_date=time_util.seconds_to_isostr(self.scheduled_times[0]),
                         end_date=time_util.seconds_to_isostr(self.scheduled_times[-1]),
                         number_scheduled_times = self.scheduled_times.size,
@@ -55,9 +54,9 @@ class Scheduler(object):
                         )
         i = self.info
         b = f'{12*" "} Scheduler{15*" "}Run:{14*" "}Hindcast\n'
-        b += f'Start- {i["start_date"]} {hindcast_info["start_date"]}  {time_util.seconds_to_isostr(run_info.times[0])}  \n'
-        b += f'Ends - {i["end_date"]} {hindcast_info["end_date"]}  {time_util.seconds_to_isostr(run_info.times[-1])}]\n'
-        b += f'{10*" "}interval = {i["interval_str"]}, backtracking={settings.backtracking}'
+        b += f'Start- {i["start_date"]} | {hindcast_info["start_date"]} | {time_util.seconds_to_isostr(run_info.times[0])}  \n'
+        b += f'Ends - {i["end_date"]} | {hindcast_info["end_date"]} | {time_util.seconds_to_isostr(run_info.times[-1])}]\n'
+        b += f'{10*" "}interval = {i["interval"]}, backtracking={settings.backtracking}'
         i['bounds_table']= b
         pass
 

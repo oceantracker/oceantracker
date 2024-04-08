@@ -24,11 +24,11 @@ def base_settings(fn):
     return d
 
 image_dir= 'output'
-reader1=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
+demo_schisim=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
                  input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                  file_mask='demoHindcastSchism*.nc')  # file mask to search for
 
-reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.GenericStructuredReader',
+reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.dev_GenericStructuredReader',
              input_dir=f'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\generic2D_structured_DoubleGyre',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
              file_mask='Double_gyre.nc',
              dimension_map=dict(time='t', rows='y', cols='x'),

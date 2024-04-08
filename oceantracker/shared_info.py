@@ -378,13 +378,7 @@ class _SharedInfoClass():
         param_class_instance.scheduler_info[name_scheduler] = s.info
         return s
 
-    def get_regular_events_within_hindcast(self, interval, start=None, end=None, duration=None,
-                           crumbs='',caller=None):
-      # wrapper to give regular event times within hindcast end
 
-      d = time_util.get_regular_events_within_hindcast(self,self.msg_logger, interval,
-                            start=start,end=end,crumbs=crumbs,caller=caller)
-      return d
 
 # make the instance used throughout code
 SharedInfo = _SharedInfoClass()

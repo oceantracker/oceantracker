@@ -139,6 +139,48 @@ def plot_heat_map(stats_data,  release_group, nt=-1, axis_lims=None,show_grid=Fa
 
     return fig
 
+def plot_LCS(LCS_data, n_grid=0,n_lag=-1,  axis_lims=None, credit=None, heading=None,
+                     vmin=None, vmax=None,show_grid=False,title=None,logscale=False, caxis= None,cmap='viridis',
+                     movie_file= None, fps=15, dpi=300,  back_ground_depth=True, back_ground_color_map= None):
+
+    def draw_frame(nt):
+        pc.set_array(z[nt,:,:])
+        pc.set_clim(caxis[0],caxis[1])
+        time_text.set_text(time_util.seconds_to_pretty_str(LCS_data['time'][nt],seconds=False))
+        return pc, time_text
+
+    fig = plt.gcf()
+    ax = plt.gca()
+
+    x = LCS_data['x_LSC_grid'][n_grid, 0, :, 0]
+    y = LCS_data['x_LSC_grid'][n_grid, :, 0, 1]
+    z = LCS_data['FTLE'][:, n_grid, n_lag, :, :]
+    zmin = np.nanmin(z)
+    zmax = np.nanmax(z)
+    caxis = [zmin if vmin is None else vmin, zmax if vmax is None else vmax]
+
+    if not back_ground_depth:
+        z[np.isnan(z)]= vmin
+
+    print('animate_LSC_map> colour axis limits',[zmin,zmax], caxis)
+    pc = ax.pcolormesh(x,y, z[0,...], shading='gouraud', zorder= 2, cmap=cmap, edgecolor='none')
+
+    if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
+
+    plot_utilities.draw_base_map(LCS_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
+                                 back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
+
+
+    plot_utilities.add_heading(heading)
+
+    time_text = plt.text(.05, .05, '', transform=ax.transAxes,c='k', zorder=5)
+
+    fig.tight_layout()
+
+    anim = animation.FuncAnimation(fig, draw_frame, frames=LCS_data['time'].size, blit=False)
+    plot_utilities.animation_output(anim, movie_file, fps=fps, dpi=dpi)
+
+    return anim
 
 def _get_stats_data(nt, d, var, release_group, logscale, zmin=None):
     # get count or variable patch Nan in zero counts
