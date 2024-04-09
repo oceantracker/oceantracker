@@ -1,5 +1,5 @@
 from oceantracker.main import run
-from plot_oceantracker import plot_tracks
+from plot_oceantracker import plot_tracks, plot_utilities
 from read_oceantracker.python import load_output_files
 from oceantracker.util import  cord_transforms
 from os import path
@@ -22,11 +22,11 @@ def default_params():
         'particle_properties': {'part_decay':
                                     {'class_name': 'AgeDecay', 'decay_time_scale': 1. * 3600 * 24}},
         'release_groups': {'P1': {'points': [], 'pulse_size': 10,
-                                  'coords_allowed_in_lat_lon_order': True, # only used if hydro-model is in
+                             #     'coords_allowed_in_lat_lon_order': True, # only used if hydro-model is in
                                   'release_interval': 3600,'z_min':-1.},
                         'Poly1': {'class_name':'PolygonRelease',
                                             'points': [], 'pulse_size': 10,
-                                         'coords_allowed_in_lat_lon_order': True,  # only used if hydro-model is in
+                               #          'coords_allowed_in_lat_lon_order': True,  # only used if hydro-model is in
                                          'release_interval': 3600, 'z_min': -1.}},
         'dispersion': {'A_H': 1.0, 'A_V': 0.001},
         'reader': {'file_mask':None,
@@ -111,9 +111,9 @@ def get_case(n):
             title = 'test schisim v5 - Calvin'
 
         case 150:
-            root_input_dir = r'F:\Hindcasts\2023_Pelorus\Preliminary outputs'
+            root_input_dir = r'F:\Hindcast_parts\pelorus2024'
             output_file_base = 'Pelourus_prelim'
-            file_mask = 'schout*.nc'
+            file_mask = 'pack2017*.nc'
 
             x0 = [[-41.26352277695916, 173.80657335148985],
                   [-41.07330690449923, 173.99402755852105],
@@ -310,7 +310,7 @@ def get_case(n):
                                           'grid_size': [120, 121]}
                                      }
 
-    params.update(note=title,output_file_base=output_file_base,
+    params.update(user_note=title,output_file_base=output_file_base,
                   max_run_duration= max_days*24*3600, time_step= time_step, open_boundary_type=open_boundary_type)
     params['reader'].update(input_dir=root_input_dir,
                             file_mask=file_mask,
@@ -362,7 +362,7 @@ if __name__ == '__main__':
         #params['display_grid_at_start'] = True # ti use giput to get cords
         params.update( root_output_dir = root_output_dir,
                     regrid_z_to_uniform_sigma_levels = args.uniform,
-                    debug_plots = args.debug_plots,
+                    dev_debug_plots = args.debug_plots,
                     use_A_Z_profile = True,
                     debug=True,
                     #NUMBA_cache_code=True

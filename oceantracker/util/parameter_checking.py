@@ -22,13 +22,13 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
 
     if type(default_params) != dict:
         msg_logger.msg('merge_with_defaults, parameter ' + crumbs + 'default_params must be a dictionary,  got type' + str(type(default_params)), fatal_error= True,exit_now=True)
-
+    pass
     # first check if any keys in base or case params are not in defaults
     if check_for_unknown_keys:
         for key in list(params.keys()):
            if  key not in default_params :
                 # get possible values without obsolete params
-               possible_params=  [key for key, item in default_params.items() if item.info['obsolete'] is None]
+               possible_params=  [key for key, item in default_params.items() if isinstance(item,_CheckerBaseClass) and  item.info['obsolete'] is None]
                msg_logger.spell_check('Parameter not recognised.',key,possible_params,caller=caller,
                            crumbs= crumbs + crumb_seperator + f'"{key}"', fatal_error=True)
     # add crumbs
@@ -84,8 +84,8 @@ def  CheckParameterValues(key,value_checker, user_param, crumbs, msg_logger,call
 
 
     return value
-
-class ParamValueChecker(object):
+class _CheckerBaseClass(object):pass # duumy base to check if instance of this type
+class ParamValueChecker(_CheckerBaseClass):
     #todo change dtype to a list of possible types, and if not a list make a list
 
     def __init__(self, default_value, required_type, is_required=False,
@@ -181,7 +181,7 @@ class ParamValueChecker(object):
 
         return value  # value may be None if default or given value is None
 
-class ParameterListChecker(object):
+class ParameterListChecker(_CheckerBaseClass):
     # checks parameter list values
     # if default_list is None then list wil be None if user_list is not given
     # todo do should default value be a PVC() instance, to get control over  possible values in list , max, min etc?
@@ -271,7 +271,7 @@ class ParameterListChecker(object):
         return complete_list
 
 
-class ParameterCoordsChecker(object):
+class ParameterCoordsChecker(_CheckerBaseClass):
     # checks input cords or array is a set of N by 2 or 3 values
     def __init__(self,default_value, dtype=np.float64, is3D=False, single_cord=False, doc_str=None,one_or_more_points=False,
                   is_required=False, units='meters or , degrees if long_lat codes detected', min = None, obsolete = None,

@@ -20,7 +20,7 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
     # get grid bounds to fill a rectangle, copes with node and grid values
     x = grid['x'][:, 0].ravel()
     y = grid['x'][:, 1].ravel()
-    xbounds = np.asarray([np.min(x), np.max(y)])
+    xbounds = np.asarray([np.min(x), np.max(x)])
     ybounds = np.asarray([np.min(y), np.max(y)])
     f= 0.05
     b = np.asarray([ [xbounds[0], ybounds[0]],
