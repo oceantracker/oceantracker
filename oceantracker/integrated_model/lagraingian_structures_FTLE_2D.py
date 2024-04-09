@@ -25,11 +25,12 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
             'update_interval': PVC(3600.,float,units='sec',min=0.,
                                     doc_str='Time in seconds between calculating statistics, will be rounded to be a multiple of the particle tracking time step'),
             'lags': PLC(None, [float,int], units='sec',min=1,min_length=1,
+                        is_required=True,
                         doc_str='List of one or more times after particle release to calculate Lagarangian Coherent Structures, default is 1 day'),
             'grid_size':           PLC([100, 99],[int], fixed_len=2,  min=1, max=10 ** 5,
                                             doc_str='number of rows and columns in grid'),
             'grid_center': PCC(None, one_or_more_points=True, is3D=False, doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
-            'grid_span': PCC(None, one_or_more_points=True, min=1., is3D=False, doc_str='(width, height)  of the grid release, must be > 0.', units='meters or decimal degrees'),
+            'grid_span': PCC(None, one_or_more_points=True, min=.001, is3D=False, doc_str='(width, height)  of the grid release, must be > 0.', units='meters or decimal degrees'),
             'floating': PVC(True, bool, doc_str='Particles will float at free surface if a 3D model'),
             'z_min': PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
             'z_max': PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
@@ -86,8 +87,10 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
         if params['update_interval'] == 0:
             info['times']= np.asarray([params['start']])
         else:
-            # do not release closer than max lag size from end
+            # do not release params['update_interval']closer than max lag size from end,
             duration = abs(params['end'] - params['start']) - params['lags'][-1]
+            duration = min(duration, si.settings.max_run_duration - params['lags'][-1]) # clip to max run time
+            # dont release last update
             info['times'] = params['start'] + si.run_info.model_direction*np.arange(0, duration+params['update_interval'],params['update_interval'] )
 
         info['dates'] = time_util.seconds_to_isostr(info['times'])
@@ -125,7 +128,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
         md = si.run_info.model_direction
         for name, rg in si.roles.release_groups.items():
             # time of lags after start of release group
-            t = rg.release_scheduler.info['start_time'] + params['lags']
+            t = rg.release_scheduler.info['start_time'] + md*params['lags']
 
             si.add_scheduler_to_class('LCScalculation_scheduler', rg, times=t, caller=self, crumbs='Adding LCS calculation scheduler ')
             rg.info['next_lag_to_calculate'] = 0 # counter for the lag to work on

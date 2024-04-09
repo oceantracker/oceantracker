@@ -139,13 +139,13 @@ def plot_heat_map(stats_data,  release_group, nt=-1, axis_lims=None,show_grid=Fa
 
     return fig
 
-def plot_LCS(LCS_data, n_grid=0,n_lag=-1,  axis_lims=None, credit=None, heading=None,
-                     vmin=None, vmax=None,show_grid=False,title=None,logscale=False, caxis= None,cmap='viridis',
-                     movie_file= None, fps=15, dpi=300,  back_ground_depth=True, back_ground_color_map= None):
+def plot_LCS(LCS_data, n_grid=0, n_lag=-1, n_time_step=None, axis_lims=None, credit=None, heading=None,
+             vmin=None, vmax=None, show_grid=False, title=None, cmap='viridis',
+             movie_file= None, fps=15, dpi=300, back_ground_depth=True, back_ground_color_map= None):
 
     def draw_frame(nt):
         pc.set_array(z[nt,:,:])
-        pc.set_clim(caxis[0],caxis[1])
+        #pc.set_clim(caxis[0],caxis[1])
         time_text.set_text(time_util.seconds_to_pretty_str(LCS_data['time'][nt],seconds=False))
         return pc, time_text
 
@@ -155,15 +155,9 @@ def plot_LCS(LCS_data, n_grid=0,n_lag=-1,  axis_lims=None, credit=None, heading=
     x = LCS_data['x_LSC_grid'][n_grid, 0, :, 0]
     y = LCS_data['x_LSC_grid'][n_grid, :, 0, 1]
     z = LCS_data['FTLE'][:, n_grid, n_lag, :, :]
-    zmin = np.nanmin(z)
-    zmax = np.nanmax(z)
-    caxis = [zmin if vmin is None else vmin, zmax if vmax is None else vmax]
 
     if not back_ground_depth:
         z[np.isnan(z)]= vmin
-
-    print('animate_LSC_map> colour axis limits',[zmin,zmax], caxis)
-    pc = ax.pcolormesh(x,y, z[0,...], shading='gouraud', zorder= 2, cmap=cmap, edgecolor='none')
 
     if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
 
@@ -176,11 +170,30 @@ def plot_LCS(LCS_data, n_grid=0,n_lag=-1,  axis_lims=None, credit=None, heading=
     time_text = plt.text(.05, .05, '', transform=ax.transAxes,c='k', zorder=5)
 
     fig.tight_layout()
+    if n_time_step is None:
+        z_lims = [np.nanmin(z), np.nanmax(z)]
+        pc = ax.pcolormesh(x, y, z[0, ...], shading='gouraud', zorder=2,
+                           vmin=z_lims[0] if vmin is None else vmin,
+                           vmax=z_lims[1] if vmax is None else vmax,
+                           cmap=cmap, edgecolor='none')
+        fig.colorbar(pc, ax=ax)
+        anim = animation.FuncAnimation(fig, draw_frame, frames=LCS_data['time'].size, blit=False)
+        plot_utilities.animation_output(anim, movie_file, fps=fps, dpi=dpi)
+        return anim
+    else:
+        # plot single time step
+        z = z[n_time_step, ...]
+        z_lims=[np.nanmin(z),np.nanmax(z)]
+        print('LCS',np.nanmin(z), np.nanmax(z))
+        pc = ax.pcolormesh(x, y, z, shading='gouraud', zorder=2, cmap=cmap, edgecolor='none',
+                           vmin=z_lims[0] if vmin is None else vmin,
+                           vmax=z_lims[1] if vmax is None else vmax,
+                            )
+        fig.colorbar(pc,ax=ax)
+        plt.show()
+        return pc
 
-    anim = animation.FuncAnimation(fig, draw_frame, frames=LCS_data['time'].size, blit=False)
-    plot_utilities.animation_output(anim, movie_file, fps=fps, dpi=dpi)
 
-    return anim
 
 def _get_stats_data(nt, d, var, release_group, logscale, zmin=None):
     # get count or variable patch Nan in zero counts

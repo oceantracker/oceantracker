@@ -6,6 +6,7 @@ import  argparse
 import shutil
 import numpy as np
 from oceantracker import definitions
+from oceantracker.util import cord_transforms
 
 def set_output_loc(fn):
     d =  dict(output_file_base=path.split(fn)[-1].split('.')[0],
@@ -13,8 +14,11 @@ def set_output_loc(fn):
             )
     return d
 
-def base_settings(fn):
-    d =  dict(output_file_base=path.split(fn)[-1].split('.')[0],
+def base_settings(fn,args=None,label=None):
+    s = path.split(fn)[-1].split('.')[0]
+    if args is not None: s+=f'_{args.variant:02d}'
+    if label is not None: s += f'_{label}'
+    d =  dict(output_file_base=s,
             root_output_dir=path.join(path.dirname(fn), 'output'),
             time_step=600.,  # 10 min time step
             use_random_seed = True,
@@ -24,7 +28,7 @@ def base_settings(fn):
     return d
 
 image_dir= 'output'
-demo_schisim=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
+reader_demo_schisim=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
                  input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                  file_mask='demoHindcastSchism*.nc')  # file mask to search for
 
@@ -35,6 +39,24 @@ reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_read
              grid_variable_map=dict(time='Time', x=['x_grid', 'y_grid']),
              field_variable_map=dict(water_depth='Depth', water_velocity=['U', 'V'], tide='Tide'),
              hydro_model_cords_in_lat_long=False)
+
+reader_NZnational=dict(  input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01',
+            file_mask = 'NZfinite*.nc')
+reader_Sounds =dict(  input_dir = r'G:\Hindcasts_large\MalbroughSounds_10year_benPhD\2017',
+            file_mask = 'schism_marl201701*.nc')
+hydro_model = dict(demoSchism=dict(reader= reader_demo_schisim, axis_lims=[1591000, 1601500, 5478500, 5491000]),
+                doubleGyre=dict(reader= reader_double_gyre,axis_lims=[0, 2, 0, 1]),
+                NZnational=dict(reader= reader_NZnational,axis_lims= [1727860, 1823449, 5878821, 5957660],
+                                 x0=[[1750624.1218, 5921952.0475],
+                                      [1814445.5871, 5882261.7676],
+                                      [1838293.4656, 5940629.8263],
+                                      [1788021.4244, 5940860.2283]
+                                      ]),
+                sounds = dict(reader=reader_Sounds,
+                              axis_lims=None,#[1727860, 1823449, 5878821, 5957660],
+                            x0=[[1667563.4554392125, 5431675.08653105],
+                                [1683507.1281506484, 5452629.160486231]])
+                   )
 
 rg_release_interval0 = dict( name='release_interval0',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
