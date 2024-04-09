@@ -28,7 +28,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
         for key in list(params.keys()):
            if  key not in default_params :
                 # get possible values without obsolete params
-               possible_params=  [key for key, item in default_params.items() if isinstance(item,_CheckerBaseClass) and  item.info['obsolete'] is None]
+               possible_params=  [key for key, item in default_params.items() if not isinstance(item,_CheckerBaseClass) or  item.info['obsolete'] is None]
                msg_logger.spell_check('Parameter not recognised.',key,possible_params,caller=caller,
                            crumbs= crumbs + crumb_seperator + f'"{key}"', fatal_error=True)
     # add crumbs
