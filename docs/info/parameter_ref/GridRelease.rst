@@ -19,7 +19,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
@@ -91,7 +90,6 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``release_at_surface`` :   ``<class 'bool'>``   *<optional>*
@@ -99,7 +97,6 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``release_interval`` :   ``<class 'float'>``   *<optional>*

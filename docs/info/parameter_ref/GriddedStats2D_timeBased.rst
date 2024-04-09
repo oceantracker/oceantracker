@@ -26,7 +26,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``duration`` :   ``<class 'float'>``   *<optional>*
@@ -74,7 +73,6 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 	* ``release_group_centered_grids`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
@@ -146,7 +144,6 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``z_max`` :   ``<class 'float'>``   *<optional>*

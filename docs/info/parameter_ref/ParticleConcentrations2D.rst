@@ -44,7 +44,6 @@ Parameters:
 	* ``only_update_concentrations_on_write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``particle_properties_to_track``:  *<optional>*
@@ -75,7 +74,6 @@ Parameters:
 		- required_type: ``<class 'bool'>``
 		- min: ``1``
 		- units: ``sec``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
@@ -93,7 +91,6 @@ Parameters:
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 

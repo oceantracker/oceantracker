@@ -35,125 +35,8 @@ Parameters:
 		- required_type: ``<class 'str'>``
 		- expert: ``False``
 
-	* ``dimension_map``: nested parameter dictionary
 
-Parameters:
-************
-
-		* ``cols`` :   ``<class 'str'>`` **<isrequired>**
-			Description: Column dimension name, x cord of grid
-
-			- default: ``cols``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``rows`` :   ``<class 'str'>`` **<isrequired>**
-			Description: Row dimension name ie y cord of grid
-
-			- default: ``rows``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``time`` :   ``<class 'str'>`` **<isrequired>**
-			- default: ``time``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``vector2D`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``vector3D`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``z`` :   ``<class 'str'>``   *<optional>*
-			Description: name of dim for vertical layer boundaries
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``z_water_velocity`` :   ``<class 'str'>``   *<optional>*
-			Description: z dimension of water velocity
-
-			- default: ``z``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-	* ``field_variable_map``: nested parameter dictionary
-
-Parameters:
-************
-
-		* ``A_Z_profile`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``bottom_stress`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``salinity`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``tide`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``water_depth`` :   ``<class 'str'>`` **<isrequired>**
-			Description: maps standard internal field name to file variable name
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``water_temperature`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``water_velocity``:**<isrequired>**
-			Description: - maps standard internal field name to file variable names for velocity components
-
-			- a list containing type:  ``[<class 'str'>, None]``
-			- default list : ``[]``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``3``
-			- expert: ``False``
-
-		* ``water_velocity_depth_averaged``:  *<optional>*
-			Description: - maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available
-
-			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``[]``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``2``
-			- expert: ``False``
-
-		* ``wind_stress`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
+dev_test: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterTimeChecker'>
 
 	* ``field_variables``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``
@@ -170,43 +53,11 @@ Parameters:
 		- required_type: ``<class 'str'>``
 		- expert: ``False``
 
-	* ``grid_variable_map``: nested parameter dictionary
-
-Parameters:
-************
-
-		* ``is_dry_cell`` :   ``<class 'numpy.int8'>``   *<optional>*
-			Description: Time variable flag of when cell is dry, 1= is dry cell
-
-			- default: ``None``
-			- required_type: ``<class 'numpy.int8'>``
-			- expert: ``False``
-
-		* ``time`` :   ``<class 'str'>`` **<isrequired>**
-			Description: time variable nae in file
-
-			- default: ``time``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``x``:**<isrequired>**
-			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['x', 'y']``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``2``
-			- expert: ``False``
-
-		* ``zlevel`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
 	* ``hydro_model_cords_in_lat_long`` :   ``<class 'bool'>``   *<optional>*
 		Description: Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
@@ -243,7 +94,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
@@ -269,7 +119,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 

@@ -270,17 +270,14 @@ class _OceanTrackerRunner(object):
         ml.msg('Run summary with case file names in "*_runInfo.json"',  tabs=2, note=True)
         ml.show_all_warnings_and_errors()
         ml.print_line( )
+
         # count total messages
         num_case_errors,num_case_warnings,num_case_notes = 0,0,0
         for c in case_summary if type(case_summary) ==list else [case_summary]:
-            num_case_errors +=  len(c['return_msgs']['errors'])
-            num_case_warnings +=  len(c['return_msgs']['warnings'])
-            num_case_notes += len(c['return_msgs']['notes'])
-            if c['run_info']['time_steps_completed']> 0 and len(c['non_release_groups'])> 0:
-                # note non- releses
-                ml.msg(f'In Case ={ c["run_info"]["caseID"]} no particles were release by groups named {str(c["non_release_groups"])}',
-                               hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)',
-                               fatal_error=True)
+            m = c['msg_counts']
+            num_case_errors +=  m['errors']
+            num_case_warnings +=  m['warnings']
+            num_case_notes += m['notes']
 
         case_info_files= self._write_run_info_json(case_summary,run_builder, self.start_t0)
 

@@ -40,7 +40,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 
@@ -60,12 +59,13 @@ grid_center: still working on display  of default params of  type <class 'oceant
 
 grid_span: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterCoordsChecker'>
 
-	* ``lags``:  *<optional>*
+	* ``lags``:**<isrequired>**
 		Description: - List of one or more times after particle release to calculate Lagarangian Coherent Structures, default is 1 day
 
 		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
 		- default list : ``[]``
 		- can_be_empty_list: ``True``
+		- min_length: ``1``
 		- units: ``sec``
 		- min: ``1``
 		- expert: ``False``
@@ -89,6 +89,7 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 
 		- default: ``3600.0``
 		- required_type: ``<class 'float'>``
+		- min: ``0.0``
 		- units: ``sec``
 		- expert: ``False``
 
@@ -109,7 +110,6 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``write_tracks`` :   ``<class 'bool'>``   *<optional>*
@@ -117,7 +117,6 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``z_max`` :   ``<class 'float'>``   *<optional>*

@@ -57,7 +57,6 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 

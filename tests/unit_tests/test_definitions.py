@@ -1,3 +1,4 @@
+import datetime
 from os import path, sep
 from oceantracker.main import OceanTracker
 from read_oceantracker.python import load_output_files
@@ -8,15 +9,16 @@ import numpy as np
 from oceantracker import definitions
 from oceantracker.util import cord_transforms
 
+
 def set_output_loc(fn):
     d =  dict(output_file_base=path.split(fn)[-1].split('.')[0],
             root_output_dir=path.join(path.dirname(fn), 'output'),
             )
     return d
 
-def base_settings(fn,args=None,label=None):
+def base_settings(fn,args,label=None):
     s = path.split(fn)[-1].split('.')[0]
-    if args is not None: s+=f'_{args.variant:02d}'
+    if args.variant is not None: s+=f'_{args.variant:02d}'
     if label is not None: s += f'_{label}'
     d =  dict(output_file_base=s,
             root_output_dir=path.join(path.dirname(fn), 'output'),
@@ -30,7 +32,9 @@ def base_settings(fn,args=None,label=None):
 image_dir= 'output'
 reader_demo_schisim=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
                  input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                 file_mask='demoHindcastSchism*.nc')  # file mask to search for
+                 file_mask='demoHindcastSchism*.nc',
+                dev_test_time = '2017-01-01T03:30:00'
+)  # file mask to search for
 
 reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.dev_GenericStructuredReader',
              input_dir=f'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\generic2D_structured_DoubleGyre',  # folder to search for hindcast files, sub-dirs will, by default, also be searched

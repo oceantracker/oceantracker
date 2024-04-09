@@ -1,4 +1,4 @@
-from datetime import  datetime
+from datetime import datetime
 import dateutil.parser
 import math
 
@@ -6,6 +6,7 @@ import numpy as np
 # deal with date time operations,
 
 def seconds_to_datetime64(s):  return np.asarray(s).astype('datetime64[s]')
+
 
 
 def seconds_to_isostr(s): return str(seconds_to_datetime64(s))

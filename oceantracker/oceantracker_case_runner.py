@@ -97,9 +97,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up profiling
         #profiling_util.set_profile_mode(si.settings['profiler'])
 
-        si.case_summary['return_msgs'] = {'errors': ml.errors_list,
-                       'warnings': ml.warnings_list,
-                       'notes': ml.notes_list}
+
 
         # run info
         ri = si.run_info
@@ -160,8 +158,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             self._do_a_run()
 
-            # warn if not al particle were relesed due to dry cells or points being outside the domain
-            self._check_if_all_particles_released()
 
             # close all instances, eg their files if not close etc
             for i in si._all_class_instance_pointers_iterator():
@@ -174,6 +170,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             case_info = self._get_case_info(d0, t_start)
             json_util.write_JSON(path.join(ri.run_output_dir,  si.case_summary['case_info_file'] ), case_info)
 
+            # check for non-releases
+            # flag if some release groups did not release
+            for name, i in si.roles.release_groups.items():
+                if i.info['number_released'] == 0:
+                    ml.msg(f'No particles were release by group name= "{name}"', fatal_error=True,
+                           caller= i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
 
             ml.show_all_warnings_and_errors()
 
@@ -205,12 +207,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         ml.close()
         si.case_summary['run_info'] = si.run_info.as_dict()
+        si.case_summary['msg_counts'] = {'errors': ml.error_count,
+                                         'warnings': ml.warning_count,
+                                         'notes': ml.note_count}
 
-        # flag if some release groups did not release
-        si.case_summary['release_groups_summary']= []
-        rg = si.roles.release_groups
-        if rg is not None and len(rg) > 0 :
-            si.case_summary['non_release_groups'] = [name for name, i in rg.items() if i.info['number_released'] ==0 ]
+
+
+
+
 
         return si.case_summary
 
@@ -374,19 +378,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         pass
 
-    def _check_if_all_particles_released(self):
-        # warn if al request particle pules were not relesed.
-        pass
-        for name, rg in si.roles.release_groups.items():
-            h2 =  f', parameter "allow_release_in_dry_cells" = {rg.params["allow_release_in_dry_cells"]}'
-
-            if rg.info['number_released']==0:
-                si.msg_logger.msg(f'No particles were released from release group {name}', warning = True, caller=rg,
-                                  hint= f'Points/polygon or grid could be fully outside the domain or permanently with dry cells' + h2)
-            elif  rg.info['number_released'] < rg.info['total_number_required'] :
-                si.msg_logger.msg(f'Releases group  {name}, only released {rg.info["number_released"] / rg.info["total_number_required"]:.1%} of required particles', warning=True, caller=rg,
-                                  hint='Parts of release area are sometimes dry?. If a polygon releases, polygon makes up too small a fraction of bounding box, try increasing release param "max_cycles_to_find_release_points"')
-            pass
 
     # ____________________________
     # internal methods below

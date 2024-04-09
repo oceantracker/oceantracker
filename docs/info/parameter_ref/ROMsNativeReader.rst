@@ -28,67 +28,8 @@ Parameters:
 		- required_type: ``<class 'str'>``
 		- expert: ``False``
 
-	* ``field_variable_map``: nested parameter dictionary
 
-Parameters:
-************
-
-		* ``A_Z_profile`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``bottom_stress`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``salinity`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``tide`` :   ``<class 'str'>``   *<optional>*
-			- default: ``zeta``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``water_depth`` :   ``<class 'str'>``   *<optional>*
-			- default: ``h``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``water_temperature`` :   ``<class 'str'>``   *<optional>*
-			- default: ``temp``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``water_velocity``:  *<optional>*
-			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['u', 'v', 'w']``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``3``
-			- expert: ``False``
-
-		* ``water_velocity_depth_averaged``:  *<optional>*
-			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['ubar', 'vbar']``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``2``
-			- expert: ``False``
-
-		* ``wind_stress`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``None``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
+dev_test: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterTimeChecker'>
 
 	* ``field_variables``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``
@@ -110,7 +51,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
@@ -158,7 +98,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 

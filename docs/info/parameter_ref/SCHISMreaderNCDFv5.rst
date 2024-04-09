@@ -28,75 +28,8 @@ Parameters:
 		- required_type: ``<class 'str'>``
 		- expert: ``False``
 
-	* ``field_variable_map``: nested parameter dictionary
 
-Parameters:
-************
-
-		* ``A_Z_profile`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files
-
-			- default: ``diffusivity``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``bottom_stress`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``bottom_stress``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``salinity`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``salt``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``tide`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``elevation``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``water_depth`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``depth``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``water_temperature`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``temp``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``water_velocity``:  *<optional>*
-			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['horizontalVelX', 'horizontalVelY', 'verticalVelocity']``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``2``
-			- expert: ``False``
-
-		* ``water_velocity_depth_averaged``:  *<optional>*
-			Description: - maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available
-
-			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['dahv']``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``2``
-			- expert: ``False``
-
-		* ``wind_stress`` :   ``<class 'str'>``   *<optional>*
-			Description: maps standard internal field name to file variable name
-
-			- default: ``wind_stress``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
+dev_test: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterTimeChecker'>
 
 	* ``field_variables``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``
@@ -105,45 +38,6 @@ Parameters:
 		- make_list_unique: ``True``
 		- obsolete: `` parameter obsolete, use "load_fields" parameter, with field_variable_map if needed``
 		- expert: ``False``
-
-	* ``grid_variable_map``: nested parameter dictionary
-
-Parameters:
-************
-
-		* ``bottom_cell_index`` :   ``<class 'str'>``   *<optional>*
-			- default: ``bottom_index_node``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``is_dry_cell`` :   ``<class 'numpy.int8'>``   *<optional>*
-			Description: Time variable flag of when cell is dry, 1= is dry cell
-
-			- default: ``dryFlagElement``
-			- required_type: ``<class 'numpy.int8'>``
-			- expert: ``False``
-
-		* ``time`` :   ``<class 'str'>``   *<optional>*
-			- default: ``time``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``triangles`` :   ``<class 'str'>``   *<optional>*
-			- default: ``SCHISM_hgrid_face_nodes``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
-
-		* ``x``:  *<optional>*
-			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y']``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``2``
-			- expert: ``False``
-
-		* ``zlevel`` :   ``<class 'str'>``   *<optional>*
-			- default: ``zCoordinates``
-			- required_type: ``<class 'str'>``
-			- expert: ``False``
 
 	* ``hgrid_file_name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
@@ -155,7 +49,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
@@ -203,7 +96,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 
