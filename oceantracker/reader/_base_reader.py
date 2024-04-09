@@ -1,6 +1,6 @@
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC, ParameterTimeChecker as PTC
 from oceantracker.util import time_util
 from os import path
 from oceantracker.util.ncdf_util import NetCDFhandler
@@ -43,7 +43,8 @@ class _BaseReader(ParameterBaseClass):
                                                                         doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'EPSG': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
-            'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run')
+            'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
+            'dev_test_time' :PTC(expert=True)
         })  # list of normal required dimensions
 
         self.info['buffer_info'] = {}

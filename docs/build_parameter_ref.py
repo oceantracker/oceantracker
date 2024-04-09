@@ -4,7 +4,7 @@ from glob import  glob
 import inspect
 import importlib
 
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC, _CheckerBaseClass,_ParameterBaseDataClassChecker
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
 from oceantracker.shared_info import SharedInfo as si
@@ -90,10 +90,10 @@ class RSTfileBuilder(object):
     def add_params_from_dict(self,params, indent=0, expert=False):
 
         if expert:
-            p =       {key: item for key, item in params.items() if hasattr(item,'info') and item.info['expert']}
+            p = {key: item for key, item in params.items() if isinstance(item,(_CheckerBaseClass, _ParameterBaseDataClassChecker)) and item.expert}
             self.add_heading('Expert Parameters:', level=0)
         else:
-            p = {key: item for key, item in params.items() if not hasattr(item,'info') or not item.info['expert']}
+            p = {key: item for key, item in params.items() if isinstance(item,(_CheckerBaseClass, _ParameterBaseDataClassChecker) ) and not item.expert}
             self.add_heading('Parameters:', level=0)
 
         for key in sorted(p.keys()):
@@ -106,12 +106,12 @@ class RSTfileBuilder(object):
 
             if type(item) == PVC:
 
-                if item.info['obsolete'] is not None: continue # dont write obsolete params
-                self.add_lines('* ``' + key + '`` :   ``' + str(item.info['required_type']) + '`` '
-                               + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
+                if item.obsolete is not None: continue # dont write obsolete params
+                self.add_lines('* ``' + key + '`` :   ``' + str(item.required_type) + '`` '
+                               + ('  *<optional>*' if not item.is_required else '**<isrequired>**') , indent=indent+1)
 
-                if item.info['doc_str'] is not None:
-                    self.add_lines('Description: ' + str(item.info['doc_str'].strip()), indent=indent+2)
+                if item.doc_str is not None:
+                    self.add_lines('Description: ' + str(item.doc_str.strip()), indent=indent+2)
                     self.add_lines()
 
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)

@@ -35,13 +35,15 @@ class MessageLogger(object ):
             self.links[l[0]]= docs_base_url + l[1]
 
     def reset(self):
-        self.fatal_error_count = 0
+
         self.warnings_list=[]
         self.errors_list=[]
         self.notes_list = []
         self.log_file = None
-        self.error_warning_count = 0
-        self.screen_tag = '???'
+        self.error_count = 0
+        self.warning_count = 0
+        self.note_count = 0
+        self.screen_tag = 'prelim'
         self.max_warnings = 25
 
 
@@ -75,20 +77,20 @@ class MessageLogger(object ):
             fatal_error = True
             exit_now = True
 
-        if fatal_error: self.fatal_error_count +=1
 
         m = ['']
         if dev: m[0] +='Core developer '
         # first line of message
         if fatal_error:
             m[0] += msg_str( '>>> Error: ', tabs)
-            self.error_warning_count += 1
+            self.error_count += 1
 
         elif warning:
             m[0] += msg_str('>>> Warning: ' , tabs)
-            self.error_warning_count += 1
+            self.warning_count += 1
         elif note:
             m[0] += msg_str('>>> Note: ', tabs)
+            self.note_count += 1
         else:
             m[0] += msg_str('', tabs)
 
@@ -153,7 +155,7 @@ class MessageLogger(object ):
             raise GracefulError('Fatal error cannot continue')
 
 
-    def has_fatal_errors(self): return  self.fatal_error_count > 0
+    def has_fatal_errors(self): return  self.error_count > 0
 
     def exit_if_prior_errors(self,msg, caller=None, crumbs=''):
         if self.has_fatal_errors():

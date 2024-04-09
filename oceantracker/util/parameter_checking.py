@@ -1,7 +1,9 @@
 from copy import deepcopy, copy
+from dataclasses import  dataclass, field
 import numpy as np
 from oceantracker.util import  time_util
 from inspect import getfullargspec
+import  datetime
 crumb_seperator= ' >> '
 
 def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
@@ -28,7 +30,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
         for key in list(params.keys()):
            if  key not in default_params :
                 # get possible values without obsolete params
-               possible_params=  [key for key, item in default_params.items() if not isinstance(item,_CheckerBaseClass) or  item.info['obsolete'] is None]
+               possible_params=  [key for key, item in default_params.items() if not isinstance(item,_CheckerBaseClass) or  item.obsolete is None]
                msg_logger.spell_check('Parameter not recognised.',key,possible_params,caller=caller,
                            crumbs= crumbs + crumb_seperator + f'"{key}"', fatal_error=True)
     # add crumbs
@@ -40,12 +42,15 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
         if type(item) in [ParamValueChecker, ParameterCoordsChecker]:
             params[key] = CheckParameterValues(key, item, params[key], crumbs, msg_logger, caller= caller)
 
+        elif type(item) == ParameterTimeChecker:
+            params[key] = item.get_value(params[key],msg_logger, crumbs,  caller)
+
         elif type(item) == ParameterListChecker:
             params[key] = item.check_list(key,params[key],  msg_logger, crumbs)
 
             # process list of param dicts and merge with default param dict
-            if item.info['acceptable_types'] == dict:
-                dd = {} if item.info['default_value'] is None else item.info['default_value']
+            if item.acceptable_types == dict:
+                dd = {} if item.default_value is None else item.default_value
                 for n in range(len(params[key])):
                     params[key][n]= merge_params_with_defaults(params[key][n], dd, msg_logger, crumbs=parent_crumb + crumb_seperator + key + '[#' + str(n) + ']')
 
@@ -67,9 +72,9 @@ def  CheckParameterValues(key,value_checker, user_param, crumbs, msg_logger,call
     if crumbs is None: crumbs = ''
     crumb_trail =f'{crumbs} {crumb_seperator} {key} '
     if user_param is None:
-        if value_checker.info['is_required']:
+        if value_checker.is_required:
             msg_logger.msg('Required parameter: user parameter "' + crumb_trail +'" is required, must be type '
-                           + str(value_checker.info['required_type']) + ', Variable description:' + str(value_checker.info['doc_str']),
+                           + str(value_checker.required_type) + ', Variable description:' + str(value_checker.doc_str),
                            fatal_error = True, caller=caller)
             value = None
         else:
@@ -84,7 +89,15 @@ def  CheckParameterValues(key,value_checker, user_param, crumbs, msg_logger,call
 
 
     return value
-class _CheckerBaseClass(object):pass # duumy base to check if instance of this type
+class _CheckerBaseClass(object): # duumy base to check if instance of this type
+    def get_method_args_as_dict(self,m,locals):
+        # get all args and values but self from method
+        d={}
+        for key in getfullargspec(m).args[1:]:
+            d[key] = locals[key]
+            setattr(self,key,locals[key])
+        return d
+
 class ParamValueChecker(_CheckerBaseClass):
     #todo change dtype to a list of possible types, and if not a list make a list
 
@@ -98,22 +111,21 @@ class ParamValueChecker(_CheckerBaseClass):
         if default_value is not None and type(default_value) == dict:
             raise ValueError('"value" of default set by ParamValueChecker (PVC) can not be a dictionary, as all dict in default_params are assumed to also be parameter dict in their own right')
 
-        self.info = get_method_args_as_dict(self.__init__, locals())
+        self.info = self.get_method_args_as_dict(self.__init__, locals())
 
-        i = self.info
-        if i['required_type'] == bool: i['possible_values'] = [True, False]  # set possible values for boolean
+        if self.required_type == bool: self.possible_values = [True, False]  # set possible values for boolean
 
 
     def get_default(self):
-        return self.info['default_value']
+        return self.default_value
 
 
     def check_value(self,value, msg_logger, crumbs='', caller = None):
         # check given value against defaults  in class instance info
         info = self.info
         crumbs = crumbs + ' > checking value against default'
-        if value is not None and info['obsolete'] is not None:
-            msg_logger.msg(f'Parameter is obsolete- "{info["obsolete"]}"',
+        if value is not None and self.obsolete is not None:
+            msg_logger.msg(f'Parameter is obsolete- "{self.obsolete}"',
                            fatal_error=True,crumbs= crumbs, caller= caller)
             return  None
 
@@ -122,7 +134,7 @@ class ParamValueChecker(_CheckerBaseClass):
             if info['is_required']:
                 msg_logger.msg('Required parameter: user parameter is required ',
                                 crumbs = crumbs,caller= caller,
-                               hint= ', must be type' + str(info['required_type']) + ', Variable description:' + str(self.info['doc_str']),fatal_error=True)
+                               hint= ', must be type' + str(info['required_type']) + ', Variable description:' + str(self.doc_str),fatal_error=True)
 
             value = info['default_value']  # this might be a None default
 
@@ -193,7 +205,7 @@ class ParameterListChecker(_CheckerBaseClass):
 
         if default_list is None: default_list =[]
 
-        self.info = get_method_args_as_dict(self.__init__,locals())
+        self.info = self.get_method_args_as_dict(self.__init__,locals())
 
     def check_list(self, name, user_list, msg_logger, crumbs):
         info =self.info
@@ -209,13 +221,13 @@ class ParameterListChecker(_CheckerBaseClass):
             msg_logger.msg(f'ParameterListChecker: must be a list, not type={str(type(user_list))} ',
                            fatal_error=True,crumbs=crumb_trail)
 
-        if self.info['is_required'] and user_list is None:
+        if self.is_required and user_list is None:
             msg_logger.msg('ParameterListChecker: is a required parameter ',
                            fatal_error=True, crumbs=crumb_trail)
             
         # check default_value type
-        if self.info['default_list'] is not None:
-            for v in self.info['default_list']:
+        if self.default_list is not None:
+            for v in self.default_list:
                 if v is not None and type(v) not in info['acceptable_types']:
                     msg_logger.msg('ParameterListChecker: default list, type of item  ' + str(v) + ', must match list_type ' ,
                                    crumbs= crumb_trail,
@@ -277,10 +289,10 @@ class ParameterCoordsChecker(_CheckerBaseClass):
                   is_required=False, units='meters or , degrees if long_lat codes detected', min = None, obsolete = None,
                  expert=False):
 
-        self.info = get_method_args_as_dict(self.__init__, locals())
+        self.info = self.get_method_args_as_dict(self.__init__, locals())
 
     def get_default(self):
-        return self.info['default_value']
+        return self.default_value
 
     def check_value(self,  value, msg_logger, crumbs='', caller=None):
         # check given value against defaults  in class instance info
@@ -353,9 +365,40 @@ class ParameterCoordsChecker(_CheckerBaseClass):
 
         return value
 
-def get_method_args_as_dict(m,locals):
-    # get all args and values but self from method
-    return {key:locals[key] for key in getfullargspec(m).args[1:]}
+
+@dataclass
+class _ParameterBaseDataClassChecker():
+    default: any = None
+    type  : any = None
+    expert : bool= False
+    is_required: bool = False
+    possible_values : list = field(default_factory=list)
+
+    def __post_init__(self):
+        #ensure type is a list as may be more than one accepable type
+        if self.type != list: self.type = []
+        pass
+@dataclass
+class ParameterTimeChecker(_ParameterBaseDataClassChecker):
+    def get_value(self, value, msg_logger, crumbs,  caller):
+        try:
+            match value:
+                case str():
+                    value = time_util.isostr_to_seconds(value) # convert iso string
+
+                case float() | np.float64():
+                    # seconds since 1970
+                    value = float(value)
+                case datetime.datetime():
+                    value = datetime.utcfromtimestamp(value)
+
+        except Exception as e:
+                msg_logger.msg( f'Failed to convert to date got value = "{str(value)}", type = "{str(type(value))}"',caller= caller,
+                                hint='Must be ISO string eg, 2017-01-01T03:30:00, or int or float as seconds since 1/1/1970',
+                                fatal_error=True, crumbs = crumbs)
+        pass
+
+
 
 # old versions
 
