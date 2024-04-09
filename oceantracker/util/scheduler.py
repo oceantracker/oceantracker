@@ -8,7 +8,8 @@ class Scheduler(object):
     # all times in seconds
     def __init__(self,settings, run_info,hindcast_info,
                  start=None, end=None, duration=None,
-                 interval = None, times=None,cancel_when_done=True):
+                 interval = None, times=None,cancel_when_done=True,
+                 msg_logger=None,caller=None,crumbs=''):
 
 
         self.cancel_when_done = cancel_when_done
@@ -17,7 +18,7 @@ class Scheduler(object):
 
         if times is None:
             # make from start time and interval
-            times,interval = self._start_end_from_interval(settings, run_info, start, end, duration, interval)
+            times, interval = self._start_end_from_interval(settings, run_info, start, end, duration, interval)
         else:
             # use times given, but round
             n = (times - run_info.start_time)/dt
@@ -38,16 +39,23 @@ class Scheduler(object):
 
         # flag times steps scheduler is active, ie start to end
         self.active_flag = np.full_like(run_info.times, False, dtype=bool)
-        self.active_flag[nt_task[0]:nt_task[-1]+1] = True
-
+        if nt_task.size >0:
+            self.active_flag[nt_task[0]:nt_task[-1]+1] = True
+            duration = abs(self.scheduled_times[-1] - self.scheduled_times[0])
+            start= self.scheduled_times[0]
+            end=self.scheduled_times[-1]
+        else:
+            duration=None
+            start=times[0]
+            end= times[-1]
         # record info
-        duration=abs(self.scheduled_times[-1] - self.scheduled_times[0])
-        self.info= dict(start_time=self.scheduled_times[0], interval=interval,
-                        end_time=self.scheduled_times[-1],
+
+        self.info= dict(start_time=start, interval=interval,
+                        end_time=end,
                         duration = duration,
                         duration_str = time_util.seconds_to_pretty_duration_string(duration),
-                        start_date=time_util.seconds_to_isostr(self.scheduled_times[0]),
-                        end_date=time_util.seconds_to_isostr(self.scheduled_times[-1]),
+                        start_date=time_util.seconds_to_isostr(start),
+                        end_date=time_util.seconds_to_isostr(end),
                         number_scheduled_times = self.scheduled_times.size,
                         cancel_when_done=cancel_when_done,
                         start_time_outside_run_times =start_time_outside_run_times,
@@ -58,6 +66,15 @@ class Scheduler(object):
         b += f'Ends - {i["end_date"]} | {hindcast_info["end_date"]} | {time_util.seconds_to_isostr(run_info.times[-1])}]\n'
         b += f'{10*" "}interval = {i["interval"]}, backtracking={settings.backtracking}'
         i['bounds_table']= b
+
+        if i['start_time_outside_run_times']:
+            msg_logger.msg('Making scheduler: start time is outside model run times',
+                                hint=i['bounds_table'], caller=caller, fatal_error=True, crumbs=crumbs)
+
+        if self.scheduled_times.size == 0:
+            msg_logger.msg('No scheduled times within model run times',
+                                hint=i['bounds_table'], caller=caller, fatal_error=True, crumbs=crumbs)
+
         pass
 
     def _start_end_from_interval(self,settings,run_info, start,end, duration, interval):
@@ -71,11 +88,17 @@ class Scheduler(object):
             n = (start - run_info.start_time) / dt  # number of model steps since the start
             start = run_info.start_time + round(n) *  dt
 
-        if duration is not None:
-            # use duration for end if given
-            end = start + md * duration
-        elif end is None:
-            end = run_info.end_time
+        if duration is None:
+            duration = abs(run_info.end_time-start)
+        if end is not None:
+            #use end time instead to give duration
+            duration = abs(end-start)
+
+        #trim within max duration
+        duration = min(settings.max_run_duration, duration)
+
+        # adjust end time to fit duration
+        end = start + md * duration
 
         if interval is None:
             interval=  dt

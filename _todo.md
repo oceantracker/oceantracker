@@ -39,8 +39,8 @@
 1. Cleaner exiting when error
     1. trace backs
     1. always get secondary case.json info error?
- 1. move setup dispersion and re-suspension to oceantracker_case_runner
-
+1. move setup dispersion and re-suspension to oceantracker_case_runner
+1. 
 
 ### Breaking internal changes
 1. convert to part_ops.set_values( part_prop,,.. active) form
@@ -56,12 +56,13 @@
 1. check pointing of run to enable restart
 1. native global lon-lat  models
 1. used np.datetime64, milli sec internally
+2. Add positive=True to param checker to enzure vale is >0
+1. asarray option to numerical param list checker
     
 
 ## Niggles that need sorting some time
 
-1. Message logger
-    1. tidy up exit if prior error
+1. Message logger ~~tidy up exit if prior error~~
 1. better flows in parameter checking crumb trail
     1.??? 
 1. Release group is dry some of the time so fails to release, some times and gives , fatal error if none released?
@@ -89,6 +90,7 @@
 1. error handling and log file permission errors when reunning cells in note books
 1. read write polygons from geo-jsons, release groups poly stats
 1. date/time param checker allowing stat end times as double, isostring, datetime , np.datetime64
+1. add netcdf variable atributes. dimesions etc when reading output
 
 # Other
 

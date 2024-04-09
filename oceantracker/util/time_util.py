@@ -20,6 +20,7 @@ def isostr_to_seconds(s):
     return np.datetime64(d).astype('datetime64[s]').astype(float)
 
 def seconds_to_pretty_duration_string(s,seconds=True):
+    if s is None: return None
     td = np.timedelta64(int(np.round(s)),'s')
     days = td.astype('timedelta64[D]').astype(int)
     hours = (td.astype('timedelta64[h]') - days * 24).astype(int)

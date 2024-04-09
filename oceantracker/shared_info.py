@@ -68,7 +68,7 @@ class _DefaultSettings(_SharedStruct):
                 #'write_output_files =     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web' )
     write_dry_cell_flag = PVC(True, bool,
                 doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots,may create large grid file, currently cannot be used with nested grids ' )
-    max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing' )  # limit all cases to this duration
+    max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,min=.00001,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing' )  # limit all cases to this duration
     max_particles = PVC(10**10, int, min=1, doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
     processors = PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel' )
     max_warnings = PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps' )  # dont record more that this number of warnings, to keep caseInfo.json finite
@@ -361,17 +361,10 @@ class _SharedInfoClass():
             which is true if  task is to be carried out.
             Rounds times interval and times to nearest time step'''
         s = Scheduler(self.settings,self.run_info,self.hindcast_info, start=start, end=end,duration=duration,
-                            interval =interval, times=times)
-        crumbs += '> adding scheduler'
-
-        if s.info['start_time_outside_run_times']:
-                self.msg_logger.msg('Making scheduler: start time is outside model run times',
-                        hint = s.info['bounds_table'], caller=caller, fatal_error=True, crumbs=crumbs)
-
-        if s.scheduled_times.size==0:
-            self.msg_logger.msg('No scheduled times within model run times',
-                                hint=s.info['bounds_table'], caller=caller, fatal_error=True, crumbs=crumbs)
-        # add to the class
+                            interval =interval, times=times,
+                      caller=caller,msg_logger=self.msg_logger,
+                      crumbs=crumbs + '> adding scheduler')
+    # add to the class
         setattr(param_class_instance, name_scheduler, s)
         # add info about scheduler to in
         if not hasattr(param_class_instance,'scheduler_info'): setattr(param_class_instance,'scheduler_info',dict())

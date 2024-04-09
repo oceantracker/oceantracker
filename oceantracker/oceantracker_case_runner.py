@@ -289,7 +289,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         if si.settings.max_run_duration is not None:  duration = min(si.settings.max_run_duration,duration)
 
         ri.times    = ri.start_time  + md * np.arange(0., duration + si.settings.time_step, si.settings.time_step)
-        ri.end_time = ri.times[-1] # adjust end to nearest time step
+        ri.end_time = ri.times[-1] # adjust end to last time step
 
         # useful information
         ri.duration = abs(ri.times[-1] - ri.times[0])
