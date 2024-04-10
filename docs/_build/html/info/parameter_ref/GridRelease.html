@@ -117,7 +117,6 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 <li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
@@ -146,11 +145,10 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">end</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
+<dt><code class="docutils literal notranslate"><span class="pre">end</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">['str',</span> <span class="pre">'float',</span> <span class="pre">'int']</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: date/time of lase release, ignored if duration given</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">iso8601date</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>units: <code class="docutils literal notranslate"><span class="pre">ISO</span> <span class="pre">8601</span>&#160; <span class="pre">date</span> <span class="pre">as</span> <span class="pre">string</span> <span class="pre">eg.</span> <span class="pre">&quot;2017-01-01T00:30:00,</span> <span class="pre">or</span> <span class="pre">float</span> <span class="pre">of</span> <span class="pre">seconds</span> <span class="pre">since</span> <span class="pre">1/1/1970</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -217,7 +215,6 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 <li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
@@ -228,7 +225,6 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 <li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
@@ -259,11 +255,10 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">start</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: start date of release, Must be an ISO date as string eg. “2017-01-01T00:30:00”</p>
+<dt><code class="docutils literal notranslate"><span class="pre">start</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">['str',</span> <span class="pre">'float',</span> <span class="pre">'int']</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: start date/time of first release”</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">iso8601date</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>units: <code class="docutils literal notranslate"><span class="pre">ISO</span> <span class="pre">8601</span>&#160; <span class="pre">date</span> <span class="pre">as</span> <span class="pre">string</span> <span class="pre">eg.</span> <span class="pre">&quot;2017-01-01T00:30:00,</span> <span class="pre">or</span> <span class="pre">float</span> <span class="pre">of</span> <span class="pre">seconds</span> <span class="pre">since</span> <span class="pre">1/1/1970</span></code></p></li>
 </ul>
 </dd>
 </dl>

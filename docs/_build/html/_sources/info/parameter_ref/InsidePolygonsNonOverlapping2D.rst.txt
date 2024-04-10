@@ -61,7 +61,6 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``type`` :   ``<class 'str'>``   *<optional>*
@@ -80,7 +79,6 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
@@ -106,7 +104,6 @@ polygon_list: still working on display  of lists of dict, eg nested polygon list
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 

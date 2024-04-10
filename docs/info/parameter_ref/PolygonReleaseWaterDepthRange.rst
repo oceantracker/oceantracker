@@ -37,12 +37,11 @@ Parameters:
 		- units: ``sec``
 		- expert: ``False``
 
-	* ``end`` :   ``iso8601date``   *<optional>*
-		Description: Date to stop releasing particles, ignored if release_duration give Must be an ISO date as string eg. "2017-01-01T00:30:00"
+	* ``end`` :   ``['str', 'float', 'int']``   *<optional>*
+		Description: date/time of lase release, ignored if duration given
 
 		- default: ``None``
-		- required_type: ``iso8601date``
-		- expert: ``False``
+		- units: ``ISO 8601  date as string eg. "2017-01-01T00:30:00, or float of seconds since 1/1/1970``
 
 	* ``max_age`` :   ``<class 'float'>``   *<optional>*
 		Description: Particles older than this age in seconds are culled,ie. status=dead, and removed from computation, very useful in reducing run time
@@ -108,12 +107,11 @@ points: still working on display  of default params of  type <class 'oceantracke
 		- units: ``m``
 		- expert: ``False``
 
-	* ``start`` :   ``iso8601date``   *<optional>*
-		Description: start date of release, Must be an ISO date as string eg. "2017-01-01T00:30:00"
+	* ``start`` :   ``['str', 'float', 'int']``   *<optional>*
+		Description: start date/time of first release"
 
 		- default: ``None``
-		- required_type: ``iso8601date``
-		- expert: ``False``
+		- units: ``ISO 8601  date as string eg. "2017-01-01T00:30:00, or float of seconds since 1/1/1970``
 
 	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
 		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple

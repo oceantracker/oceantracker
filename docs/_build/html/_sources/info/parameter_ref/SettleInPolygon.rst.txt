@@ -21,14 +21,6 @@ Parameters:
 		- required_type: ``<class 'str'>``
 		- expert: ``False``
 
-	* ``polygon``: nested parameter dictionary
-
-Parameters:
-************
-
-
-	points: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterCoordsChecker'>
-
 	* ``probability_of_settlement`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
 		- required_type: ``<class 'float'>``

@@ -26,7 +26,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``duration`` :   ``<class 'float'>``   *<optional>*
@@ -130,7 +129,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``z_max`` :   ``<class 'float'>``   *<optional>*

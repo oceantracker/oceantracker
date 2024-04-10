@@ -50,7 +50,6 @@ Parameters:
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
@@ -74,7 +73,6 @@ Parameters:
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 

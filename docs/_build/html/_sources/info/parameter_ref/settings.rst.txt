@@ -22,7 +22,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``backtracking`` :   ``<class 'bool'>``   *<optional>*
@@ -30,7 +29,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``block_dry_cells`` :   ``<class 'bool'>``   *<optional>*
@@ -38,7 +36,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``debug`` :   ``<class 'bool'>``   *<optional>*
@@ -46,7 +43,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``display_grid_at_start`` :   ``<class 'bool'>``   *<optional>*
@@ -54,7 +50,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``include_dispersion`` :   ``<class 'bool'>``   *<optional>*
@@ -62,7 +57,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``max_particles`` :   ``<class 'int'>``   *<optional>*
@@ -78,6 +72,7 @@ Parameters:
 
 		- default: ``31536000000``
 		- required_type: ``<class 'float'>``
+		- min: ``1e-05``
 		- units: ``sec``
 		- expert: ``False``
 
@@ -127,7 +122,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``root_output_dir`` :   ``<class 'str'>``   *<optional>*
@@ -158,7 +152,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``use_random_seed`` :   ``<class 'bool'>``   *<optional>*
@@ -166,7 +159,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
@@ -190,7 +182,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``write_tracks`` :   ``<class 'bool'>``   *<optional>*
@@ -198,7 +189,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``z0`` :   ``<class 'float'>``   *<optional>*
@@ -227,7 +217,6 @@ Expert Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``True``
 
 	* ``NUMBA_function_cache_size`` :   ``<class 'int'>``   *<optional>*
@@ -250,7 +239,6 @@ Expert Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``True``
 
 	* ``multiprocessing_case_start_delay`` :   ``<class 'float'>``   *<optional>*

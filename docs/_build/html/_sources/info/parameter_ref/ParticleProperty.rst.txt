@@ -57,7 +57,6 @@ Parameters:
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``type`` :   ``<class 'str'>``   *<optional>*
@@ -76,7 +75,6 @@ Parameters:
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
@@ -102,7 +100,6 @@ Parameters:
 
 		- default: ``True``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 

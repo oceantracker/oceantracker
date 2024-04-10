@@ -136,111 +136,6 @@
 </dd>
 </dl>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">field_variable_map</span></code>: nested parameter dictionary</p></li>
-</ul>
-</div></blockquote>
-</section>
-<section id="id1">
-<h2>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
-<blockquote>
-<div><blockquote>
-<div><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">A_Z_profile</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">diffusivity</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">bottom_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">bottom_stress</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">salinity</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">salt</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">tide</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">mesh2d_s1</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">mesh2d_node_z</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">water_temperature</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">temp</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">water_velocity</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['mesh2d_ucx',</span> <span class="pre">'mesh2d_ucy',</span> <span class="pre">'mesh2d_ucz']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">3</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">water_velocity_depth_averaged</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - maps standard internal field name to file variable names for depth averaged velocity components, used if 3D “water_velocity” variables not available</p>
-<ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['mesh2d_ucx',</span> <span class="pre">'mesh2d_ucy']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">wind_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: maps standard internal field name to file variable name</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">wind_stress</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</div></blockquote>
-<ul>
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">field_variables</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
@@ -263,92 +158,11 @@
 </dd>
 </dl>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">grid_variable_map</span></code>: nested parameter dictionary</p></li>
-</ul>
-</div></blockquote>
-</section>
-<section id="id2">
-<h2>Parameters:<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
-<blockquote>
-<div><blockquote>
-<div><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">bottom_cell_index</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">is_dry_cell</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'numpy.int8'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Time variable flag of when cell is dry, 1= is dry cell</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">wetdry_elem</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'numpy.int8'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">triangles</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">mesh2d_face_nodes</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">x</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['mesh2d_node_x',</span> <span class="pre">'mesh2d_node_y']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">x_cell</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['mesh2d_face_x',</span> <span class="pre">'mesh2d_face_y']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">zlevel</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</div></blockquote>
-<ul>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">hydro_model_cords_in_lat_long</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 <li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
@@ -419,7 +233,6 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 <li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>

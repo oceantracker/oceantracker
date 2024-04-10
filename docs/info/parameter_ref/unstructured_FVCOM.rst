@@ -28,9 +28,6 @@ Parameters:
 		- required_type: ``<class 'str'>``
 		- expert: ``False``
 
-
-dev_test: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterTimeChecker'>
-
 	* ``field_variables``:  *<optional>*
 		- a list containing type:  ``[<class 'str'>]``
 		- default list : ``[]``

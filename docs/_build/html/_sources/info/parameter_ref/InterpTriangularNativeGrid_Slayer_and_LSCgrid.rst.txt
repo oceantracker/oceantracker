@@ -32,7 +32,6 @@ Parameters:
 
 		- default: ``False``
 		- required_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 		- expert: ``False``
 
 	* ``max_search_steps`` :   ``<class 'int'>``   *<optional>*
