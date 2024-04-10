@@ -292,15 +292,14 @@ class _OceanTrackerRunner(object):
         total_errors = num_case_errors + len(ml.errors_list)
         if total_errors > 0:
             ml.print_line('Found errors, so some cases may not have completed')
-            ml.print_line(' see above or  *_caseLog.txt and *_caseLog_log.err files')
+            ml.print_line(' ** see above or  *_caseLog.txt and *_caseLog.err files')
+            ml.print_line()
         ml.close()
         return case_info_files
 
     def _run_parallel(self,base_case_params, case_list_params, run_builder):
         # run list of case params
         ml = msg_logger
-
-
         # below setting can only be set in base case , and not in parralel cases
         shared_settings_list = [
             'root_output_dir', 'output_file_base', 'add_date_to_run_output_dir',

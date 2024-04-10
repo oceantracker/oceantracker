@@ -28,7 +28,7 @@
 1. Docs
     1. check all how to note books run, set up code to run all notebooks
     
-1. partical write of case info file even if errors, trap json encoding erorrs 
+1. write of case info file even if errors, trap json encoding erorrs 
   
 
 ##  Internal Structure

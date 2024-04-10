@@ -33,7 +33,6 @@ image_dir= 'output'
 reader_demo_schisim=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
                  input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                  file_mask='demoHindcastSchism*.nc',
-                dev_test_time = '2017-01-01T03:30:00'
 )  # file mask to search for
 
 reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.dev_GenericStructuredReader',

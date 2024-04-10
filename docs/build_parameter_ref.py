@@ -4,7 +4,8 @@ from glob import  glob
 import inspect
 import importlib
 
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC, _CheckerBaseClass,_ParameterBaseDataClassChecker
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import _CheckerBaseClass,_ParameterBaseDataClassChecker, ParameterTimeChecker as PTC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
 from oceantracker.shared_info import SharedInfo as si
@@ -118,6 +119,25 @@ class RSTfileBuilder(object):
 
                 for k, v in item.info.items():
                     if k not in ['type', 'default_value', 'is_required', 'doc_str'] and v is not None:
+                        self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
+                self.add_lines()
+
+            elif type(item) == PTC:
+
+                if item.obsolete: continue # dont write obsolete params
+                self.add_lines('* ``' + key + '`` :   ``' + str([x.__name__ for x in item.possible_types ]) + '`` '
+                               + ('  *<optional>*' if not item.is_required else '**<isrequired>**') , indent=indent+1)
+
+                if item.doc_str is not None:
+                    self.add_lines('Description: ' + str(item.doc_str.strip()), indent=indent+2)
+                    self.add_lines()
+
+                self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
+                if hasattr(item,'possible_values')  and len(item.possible_values) > 0:
+                    self.add_lines('- ' + 'possible_values' + ': ``' + str(v) + '``', indent=indent + 2)
+
+                for k, v in item.asdict().items():
+                    if k not in ['type','possible_types', 'default_value', 'is_required', 'doc_str','expert','obsolete','possible_values'] and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 
                 self.add_lines()

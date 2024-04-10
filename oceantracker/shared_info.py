@@ -3,6 +3,8 @@ from typing import TypedDict
 from oceantracker import definitions
 from oceantracker.util.parameter_checking import merge_params_with_defaults, time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checkingV2 import ParameterValueChecker2 as PVC2, ParameterTimeChecker as PTC
+
 from oceantracker.util import shared_info_util, class_importer_util
 from oceantracker.util.messgage_logger import  MessageLogger
 
@@ -50,8 +52,7 @@ class _SharedStruct():
 
 class _DefaultSettings(_SharedStruct):
     root_output_dir=  PVC('root_output_dir', str, doc_str='base dir for all output files')
-    add_date_to_run_output_dir =  PVC(False, bool,
-                doc_str='Append the date to the output dir. name to help in keeping output from different runs separate' )
+    add_date_to_run_output_dir =  PVC(False,bool, doc_str='Append the date to the output dir. name to help in keeping output from different runs separate' )
     output_file_base =    PVC('output_file_base', str,
                 doc_str= 'The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written' )
     time_step = PVC(3600., float, min=0.001, units='sec',doc_str='Time step in seconds for all cases' )
