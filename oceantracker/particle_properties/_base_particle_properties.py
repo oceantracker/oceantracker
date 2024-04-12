@@ -4,7 +4,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 from oceantracker.shared_info import SharedInfo as si
-
+from oceantracker.util.numpy_util import possible_dtypes
 class _BaseParticleProperty(ParameterBaseClass):
     # property of each particle individually, eg x, time released etc , status
     # or non-time varying parameter eg ID,
@@ -19,15 +19,14 @@ class _BaseParticleProperty(ParameterBaseClass):
                                     'time_varying':PVC(True, bool),
                                     'vector_dim': PVC(1, int, min = 1 ),
                                     'prop_dim3': PVC(1, int, min=1),
-                                    'dtype':PVC(np.float64, np.dtype),
+                                    'dtype':PVC('float64', str,possible_values=possible_dtypes),
                                     'initial_value':PVC(0.,float),
-                                    'fill_value': PVC(None,[int,float]),
                                     'update':PVC(True,bool),
                                     'write': PVC(True, bool, doc_str='Write particle property to tracks or event files file'),
                                     'type': PVC('user', str,
                                                 doc_str='type of particle property, used to manage how to update particle property',
                                                 possible_values=si.info.known_prop_types),
-                                     'release_group_parameters':PVC([], list, doc_str='In development: release group specific particle prop params'),
+                                     'release_group_parameters':PLC(None, str, expert=True, doc_str='In development: release group specific particle prop params'),
               })
 
         self.role_doc('Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
@@ -64,7 +63,8 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def num_vector_dimensions(self):  return 0 if self.data.ndim == 1 else self.data.shape[1]
 
-    def get_dtype(self): return self.params['dtype']
+    def get_dtype(self):
+        return np.dtype(self.params['dtype'])
 
     def set_values(self, values, active):
 

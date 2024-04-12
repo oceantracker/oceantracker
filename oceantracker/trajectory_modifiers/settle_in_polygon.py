@@ -36,7 +36,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
 
         # add particle prop to track which are inside polygon, which will be automatically written to output
         pgm= si.core_roles.particle_group_manager
-        pgm.add_particle_property('is_stationary_in_polygon', 'manual_update',dict( dtype=np.int8))
+        pgm.add_particle_property('is_stationary_in_polygon', 'manual_update',dict( dtype='int8'))
 
         # ad a parameter to record when last released
         pgm.add_particle_property('time_of_settlement','manual_update',dict(  initial_value=0.))

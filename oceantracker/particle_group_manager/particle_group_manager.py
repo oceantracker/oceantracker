@@ -6,6 +6,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 from  oceantracker.particle_group_manager.util import  pgm_util
 from oceantracker.shared_info import SharedInfo as si
+from oceantracker.util import  basic_util
 
 # holds and provides access to different types a group of particle properties, eg position, field properties, custom properties
 class ParticleGroupManager(ParameterBaseClass):
@@ -34,7 +35,7 @@ class ParticleGroupManager(ParameterBaseClass):
         #  time dependent core  properties
         self.add_time_varying_info('time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
         self.add_time_varying_info('num_part_released_so_far', description='number of particles released up to the given time',
-                                   dtype=np.int32)  # time has only one value at each time step
+                                   dtype='int32')  # time has only one value at each time step
 
         # core particle props. , write at each required time step
         self.add_particle_property('x','manual_update',dict(vector_dim=nDim))  # particle location
@@ -45,20 +46,20 @@ class ParticleGroupManager(ParameterBaseClass):
         self.add_particle_property('particle_velocity','manual_update',dict(vector_dim=nDim))
         self.add_particle_property('velocity_modifier','manual_update', dict(vector_dim=nDim))
 
-        self.add_particle_property('status','manual_update',dict( dtype=np.int8,   fill_value=si.particle_status_flags.notReleased))
+        self.add_particle_property('status','manual_update',dict( dtype='int8',))
         self.add_particle_property('age','manual_update',dict(  initial_value=0.))
 
         # parameters are set once and then don't change with time
-        self.add_particle_property('ID','manual_update',dict( dtype=np.int32, initial_value=-1, time_varying= False,
+        self.add_particle_property('ID','manual_update',dict( dtype='int32', initial_value=-1, time_varying= False,
                                       description='unique particle ID number, zero based'))
-        self.add_particle_property('IDrelease_group', 'manual_update',dict( dtype=np.int32, initial_value=-1, time_varying=False,
+        self.add_particle_property('IDrelease_group', 'manual_update',dict( dtype='int32', initial_value=-1, time_varying=False,
                                            description='ID of group release particle is part of  is in, zero based'))
-        self.add_particle_property('user_release_groupID', 'manual_update',dict( dtype=np.int32, initial_value=-1, time_varying= False,
+        self.add_particle_property('user_release_groupID', 'manual_update',dict( dtype='int32', initial_value=-1, time_varying= False,
                                       description='user given integer ID of release group'))
-        self.add_particle_property('IDpulse','manual_update',dict(  dtype=np.int32, initial_value=-1, time_varying= False,
+        self.add_particle_property('IDpulse','manual_update',dict(  dtype='int32', initial_value=-1, time_varying= False,
                                       description='ID of pulse particle was released within its release group, zero based'))
         # ID used when nested grids only
-        self.add_particle_property('hydro_model_gridID', 'manual_update', dict(write=False, time_varying=True, dtype=np.int8, initial_value=-1,
+        self.add_particle_property('hydro_model_gridID', 'manual_update', dict(write=False, time_varying=True, dtype='int8', initial_value=-1,
                                          description='ID for which grid, outer (ID=0) or nested (ID >0),  each particle resides in '))
 
         self.add_particle_property('time_released', 'manual_update',dict(time_varying= False, description='time (sec) each particle was released'))
@@ -82,7 +83,7 @@ class ParticleGroupManager(ParameterBaseClass):
         i.final_setup()
 
         # max_ages needed for culling operations
-        max_age = np.inf if i.params['max_age'] is None else i.params['max_age']
+        max_age = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
 
         self.info['max_age_for_each_release_group'] =np.append(self.info['max_age_for_each_release_group'],max_age)
 
@@ -250,7 +251,7 @@ class ParticleGroupManager(ParameterBaseClass):
             if i.params['write']:
                 w.create_variable_to_write(name, is_time_varying=i.params['time_varying'],
                                            is_part_prop=True,
-                                           fill_value= i.params['fill_value'],
+                                           fill_value= basic_util.fillvalue(i.params['dtype']),
                                            vector_dim=i.params['vector_dim'],
                                            attributes={'description': i.params['description']},
                                            dtype=i.params['dtype'])
@@ -273,12 +274,16 @@ class ParticleGroupManager(ParameterBaseClass):
         # first interpolate to give particle properties from reader derived  fields
         for name,i in si.roles.particle_properties.items():
             if i.info['type'] == 'from_fields':
+                i.start_update_timer()
                 si.core_roles.field_group_manager.interp_field_at_particle_locations(name, active)
+                i.stop_update_timer()
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for name, i in si.roles.particle_properties.items():
             if i.info['type'] == 'user':
+                i.start_update_timer()
                 i.update(n_time_step, time_sec, active)
+                i.stop_update_timer()
         si.block_timer('Update particle properties',t0)
 
     def status_counts_and_kill_old_particles(self, t):

@@ -39,74 +39,71 @@ def read_JSON(file_name):
 #Store as JSON a numpy.ndarray or any nested-list composition.
 class MyEncoder(json.JSONEncoder):
     def __int__(self):
-        super().__int__(allow_nan=False)
+        super().__int__(allow_nan=False) # file fox wont parse nan
 
     def default(self, obj):
         val =  deepcopy(obj)
         try :
-
             # first numpy types
             if isinstance(obj, np.ndarray):
                 if np.all(np.isfinite(obj)):
                     if obj.dtype == np.datetime64:
-                        return  str(obj)
+                        val =  str(obj)
                     elif obj.dtype in [np.bool_,bool]:
-                        return   obj.astype(np.int8).tolist()
+                        val =   obj.astype(np.int8).tolist()
                     else:
-                        return   obj.tolist()
+                        val =   obj.tolist()
                 else:
                     # fire fox cant read nan in json so make an object array, with nan as none
                     sel = ~np.isfinite(obj)
-                    val[sel]= 9.99999e32
-                    return  val.tolist()
+                    val[sel]= -9.99999e32
+                    val =  val.tolist()
 
             elif isinstance(obj,(np.int8, np.int16, np.int32,np.int64)):
                 # make single numpy int values
-                return  int(obj)
+                val =  int(obj)
             elif type(obj) in (np.float16, np.float32, np.float64):
                 # make single numpy float values
                 if not np.isfinite(obj):
-                    return  None
+                    val =  None
                 else:
-                    return  float(obj)
+                    val =  float(obj)
             elif type(obj) == float:
                 if not np.isfinite(obj):
-                    return  None
+                    val =  None
                 else:
-                    return  float(obj)
+                    val =  float(obj)
 
             elif  type(obj) in [np.bool_,bool]:
                 # make single numpy int values
-                return  int(obj)
+                val =  int(obj)
             # date/time strings
             elif isinstance(obj, (datetime, date)):
-                return  obj.isoformat()
+                val =  obj.isoformat()
 
             elif isinstance(obj,type):
-                return  obj.__name__
+                val =  obj.__name__
 
             elif type(obj) == np.datetime64:
-                return  str(obj)
+                val =  str(obj)
 
             elif type(obj) == np.timedelta64:
-                return  str(obj.astype(timedelta)) # timedelta has better formating
+                val =  str(obj.astype(timedelta)) # timedelta has better formating
 
             elif isinstance(obj,np.dtype):
-                return  str(obj)
+                val =  str(obj)
             elif type(obj) == timedelta:
-                return  str(obj)
+                val =  str(obj)
 
             elif np.isnan(obj) or not np.isfinite(obj):
-                return  None
-            else:
-                return str(val)
+                val = None
 
-            return super().default(self, val)
+            return val
 
         except Exception as e:
-            #print(str(e))
-            print(' warning  basic_util- oceantracker catch JSON encode error- object type ' + str(type(obj)) + ' value=' + str(obj))
-            return f'Bad json value, not json decodable type {str(type(obj))}  values= {str(obj)}'
+            print(str(e))
+            print(' JSON encode error- oceantracker ignoring object type ' + str(type(obj)) + ' value=' + str(obj))
+            return f'Bad json value, unencodable type {str(type(obj))}  values= {str(obj)}'
 
 # geojson polygons
 #todo make reader to/from internal polygon format

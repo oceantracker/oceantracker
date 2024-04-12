@@ -2,7 +2,7 @@ import numpy as np
 from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
-
+from oceantracker.util.numpy_util import possible_dtypes
 from oceantracker.util import time_util
 
 class _BaseTimeVaringInfo(ParameterBaseClass):
@@ -16,11 +16,10 @@ class _BaseTimeVaringInfo(ParameterBaseClass):
 
         self.add_default_params({   'description': PVC(None,str),
                                     'write': PVC(True, bool),
-                                    'dtype':PVC(np.float64, np.dtype),
+                                    'dtype':PVC('float64', str, possible_values=possible_dtypes),
                                     'vector_dim': PVC(1, int, min=1),
                                     'prop_dim3': PVC(1, int, min=1),
                                     'initial_value':PVC(0.,float),
-                                    'fill_value': PVC(None,[int,float]),
                                     'update':PVC(True,bool)
               })
 
@@ -36,7 +35,7 @@ class _BaseTimeVaringInfo(ParameterBaseClass):
 
     def initial_value_at_birth(self, released_IDs):  pass
 
-    def get_dtype(self):  return self.params['dtype']
+    def get_dtype(self):  return np.dtype(self.params['dtype'])
 
 
 class TimeVaryingInfo(_BaseTimeVaringInfo):

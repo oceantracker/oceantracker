@@ -69,7 +69,6 @@ class ClassImporter():
             self.msg_logger.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
                                 hint= f'possible values={self.class_tree.keys()}',
                                 fatal_error=True, exit_now=True, caller=caller)
-
         if default_classID is None: default_classID = class_role # try using clas role as defaultID, used for core classes mainly
 
         # get class name

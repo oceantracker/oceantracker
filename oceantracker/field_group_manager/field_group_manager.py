@@ -110,15 +110,17 @@ class FieldGroupManager(ParameterBaseClass):
                 pgm.add_particle_property(name, 'from_fields', dict(
                                             write=i.params['write_interp_particle_prop_to_tracks_file'],
                                             vector_dim = i.get_number_components(),
-                                            time_varying=True, dtype=np.float64, initial_value=0.))
+                                            time_varying=True, dtype='float64', initial_value=0.))
     def update_reader(self, time_sec):
         # check if all interpolators have the time steps they need
 
         reader = self.reader
         if not reader.are_time_steps_in_buffer(time_sec):
             t0 = perf_counter()
+            reader.start_update_timer()
             reader.fill_time_buffer(self.fields, self.grid, time_sec)  # get next steps into buffer if not in buffer
             si.block_timer('Fill reader buffers',t0)
+            reader.stop_update_timer()
 
     def update_tidal_stranding_status(self, time_sec, alive):
         self.tidal_stranding.update(self.grid, time_sec, alive)
@@ -276,8 +278,7 @@ class FieldGroupManager(ParameterBaseClass):
         info = self.info
 
         self.reader  = si.make_instance_from_params('reader', reader_builder['params'],
-                                        si.msg_logger,caller=self,
-                                        crumbs=f'setup_hydro_fields> reader class ')
+                                       caller=self, crumbs=f'setup_hydro_fields> reader class ')
 
         reader = self.reader
         reader.initial_setup(reader_builder['file_info'])
@@ -542,6 +543,5 @@ class FieldGroupManager(ParameterBaseClass):
         return sel
     
     def close(self):
-
         self.info.update(self.reader.info)
 

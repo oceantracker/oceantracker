@@ -6,7 +6,7 @@ from  numba import njit
 from copy import  deepcopy, copy
 import traceback
 
-from oceantracker.util.parameter_base_class import ParameterBaseClass, merge_params_with_defaults
+from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 

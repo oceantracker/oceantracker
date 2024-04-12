@@ -105,7 +105,7 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
                        fatal_error=True, crumbs=crumbs)
             w['roles_dict'][k] = item
         else:
-            msg_logger.spell_check('Unkown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
+            msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
                            crumbs=crumbs, link='parameter_ref_toc', fatal_error=True)
 
     msg_logger.exit_if_prior_errors('Errors in decomposing parameters into settings, and classes')
@@ -165,16 +165,16 @@ def merge_critical_settings_with_defaults(settings, default_settings, critical_s
 def merge_settings(settings, default_settings, settings_to_merge, msg_logger, crumbs='', caller=None):
     crumbs += '> merge_settings'
     all_settings = default_settings.possible_values()
-    for name in settings_to_merge:
-        pvc = getattr(default_settings, name)
-        if name not in settings or settings[name] is None:
-            settings[name] = pvc.get_default()
-        elif name in all_settings:
-            settings[name] = pvc.check_value(settings[name], msg_logger,
-                                             crumbs= crumbs + f'> setting = "{name}"', caller=caller)
+    for key in settings_to_merge:
+        pvc = getattr(default_settings, key)
+        if key not in settings or settings[key] is None:
+            settings[key] = pvc.get_default()
+        elif key in all_settings:
+            settings[key] = pvc.check_value(key, settings[key], msg_logger,
+                                             crumbs= crumbs + f'> setting = "{key}"', caller=caller)
         else:
-            msg_logger.spell_check(f'Unrecognized setting "{name}"',name, all_settings,
-                            crumbs = crumbs + f'> {name}', caller=caller, fatal_error=True)
+            msg_logger.spell_check(f'Unrecognized setting "{key}"',key, all_settings,
+                            crumbs = crumbs + f'> {key}', caller=caller, fatal_error=True)
         pass
     return settings
 

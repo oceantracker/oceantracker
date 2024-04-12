@@ -14,7 +14,7 @@ class CompactTracksWriter(_BaseWriter):
         super().__init__()  # required in children to get parent defaultsults
 
         self.add_default_params({
-                                 'NCDF_particle_chunk': PVC(100_000, int, min=1000, doc_str=' number of particles per time chunk in the netcdf file'),
+                                 'NCDF_particle_chunk': PVC(100_000, int, min=100, doc_str=' number of particles per time chunk in the netcdf file'),
                                  #'convert': PVC(False, bool, doc_str='convert compact tracks file to rectangular for at end of the run'),
                                  'retain_compact_files': PVC(False, bool,
                                                              doc_str='keep  compact tracks files after conversion to rectangular format'),

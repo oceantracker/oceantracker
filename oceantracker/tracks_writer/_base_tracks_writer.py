@@ -20,14 +20,14 @@ class _BaseWriter(ParameterBaseClass):
 
         self.add_default_params(
                         role_output_file_tag =  PVC('tracks', str),
-                        update_interval =  PVC(None, [int,float], min=.01, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
-                        output_step_count =  PVC(None,int,min=1, obsolete='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
-                        turn_on_write_particle_properties_list =  PLC(None, [str],doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
-                        turn_off_write_particle_properties_list =  PLC(['water_velocity', 'particle_velocity','velocity_modifier'], [str],
+                        update_interval =  PVC(None, float, min=0.01, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
+                        output_step_count =  PVC(None,int,min=1,  obsolete=True,  doc_str='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
+                        turn_on_write_particle_properties_list =  PLC(None, str,doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
+                        turn_off_write_particle_properties_list =  PLC(['water_velocity', 'particle_velocity','velocity_modifier'], str,
                                     doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),
                         time_steps_per_per_file =  PVC(None, int,min=1, doc_str='Split track output into files with given number of time integer steps'),
                         write_dry_cell_flag =  PVC(False, bool, doc_str='Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down '),
-                        write_dry_cell_index=PVC(True, bool,obsolete='Replaced by write_dry_cell_flag, set to false by default'),
+                        write_dry_cell_index=PVC(True, bool, obsolete=True,  doc_str='Replaced by write_dry_cell_flag, set to false by default'),
                         NCDF_time_chunk = PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file'),
                                 )
         self.info.update(output_file= [])
@@ -150,6 +150,7 @@ class _BaseWriter(ParameterBaseClass):
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none the a forced write
         # write time vary info , eg "time"
+        self.start_update_timer()
         self.pre_time_step_write_book_keeping()
 
         # write group data
@@ -172,6 +173,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.time_steps_written_to_current_file += 1 # time steps in current file
         self.total_time_steps_written  += 1 # time steps written since the start
+        self.stop_update_timer()
 
     def close(self):
         if si.settings.write_tracks:

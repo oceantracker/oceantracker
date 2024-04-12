@@ -80,12 +80,14 @@ class NetCDFhandler(object):
 
     def read_variables(self, var_list=None, required_var=[], output=None):
         # read a list of variables into a dictionary, if output is a dictionary its add to that one
-        if output is None:  output={}
+        if output is None:  output=dict(variable_attributes=dict())
         if var_list is None:  var_list = self.all_var_names()
 
         name_list = list(set(var_list+required_var))
         for name in name_list:
             output[name] = self.read_a_variable(name)
+            output['variable_attributes'][name] = self.all_var_attr(name)
+        output['global_attributes'] = self.global_attrs()
         return output
 
     def write_a_new_variable(self, name, X, dimList, description=None, attributes=None,dtype=None, chunksizes=None,

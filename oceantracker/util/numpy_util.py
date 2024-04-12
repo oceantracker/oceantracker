@@ -1,6 +1,8 @@
 import numpy as np
 
-
+possible_dtypes=['float64','float32',
+                 'int32','int16','int8','int64',
+                 ]
 def numpy_structure_from_dict(d):
     # return a numpy sturcture with fields give by dict keys and copy of  from dictionary
 

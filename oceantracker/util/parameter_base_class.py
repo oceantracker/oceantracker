@@ -2,7 +2,7 @@ from  oceantracker.util import basic_util
 import numpy as np
 import traceback
 from time import perf_counter
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, merge_params_with_defaults
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.shared_info import SharedInfo as si
 # root class needed to avoid circular imports when building class trees
 from .__root_parameter_base_class__ import _RootParameterBaseClass
@@ -36,8 +36,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
                                   'user_note': PVC(None, str),
-                                 'user_instance_info': PVC(None, [str,int, float, tuple,list],doc_str='a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple'),
-                                 })
+                                  })
 
         self.partID_buffers={} # dict of int32 ID number buffers
         self.shared_info = None

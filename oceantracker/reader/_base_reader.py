@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.util.parameter_checkingV2 import ParameterValueChecker2 as PVC2, ParameterTimeChecker as PTC
+from oceantracker.util.parameter_checking import ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 
 from oceantracker.util import time_util
 from os import path
@@ -29,11 +29,11 @@ class _BaseReader(ParameterBaseClass):
             'hydro_model_cords_in_lat_long': PVC(False, bool, doc_str='Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected'),
             'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
             'time_buffer_size': PVC(24, int, min=2),
-            'load_fields': PLC(None, [str],
+            'load_fields': PLC(None, str,
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
-            'field_variables': PLC(None, [str], obsolete=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',                              make_list_unique=True),
-            'field_variable_map': {'water_velocity': PLC(None, [str, None], fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
+            'field_variables': PLC(None, str,  obsolete=True,  doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',                              make_list_unique=True),
+            'field_variable_map': {'water_velocity': PLC(None, str, fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
                                    'tide': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC(None, str, is_required=True, doc_str='maps standard internal field name to file variable name'),
                                    'A_Z_profile': PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
@@ -41,7 +41,7 @@ class _BaseReader(ParameterBaseClass):
                                    'salinity': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'wind_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'bottom_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
-                                   'water_velocity_depth_averaged': PLC(None, [str], fixed_len=2,
+                                   'water_velocity_depth_averaged': PLC(None, str, fixed_len=2,
                                                                         doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'EPSG': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),

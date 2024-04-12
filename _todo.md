@@ -40,7 +40,7 @@
     1. trace backs
     1. always get secondary case.json info error?
 1. move setup dispersion and re-suspension to oceantracker_case_runner
-1. 
+1. Have aperchet check default values in type, range etc as coding errors
 
 ### Breaking internal changes
 1. convert to part_ops.set_values( part_prop,,.. active) form

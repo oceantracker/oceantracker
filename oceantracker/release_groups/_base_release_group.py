@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC, ParameterCoordsChecker as PCC
-from oceantracker.util.parameter_checkingV2 import ParameterValueChecker2 as PVC2, ParameterTimeChecker as PTC
+from oceantracker.util.parameter_checking import  ParameterListChecker as PLC, ParameterCoordsChecker as PCC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 
@@ -14,8 +14,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         self.add_default_params(
                 pulse_size =  PVC(1, int, min=1, doc_str='Number of particles released in a single pulse, this number is released every release_interval.'),
                 release_interval =  PVC(0., float, min=0., units='sec', doc_str='Time interval between released pulses. To release at only one time use release_interval=0.'),
-               # start =  PVC(None, 'iso8601date', doc_str='start date of release, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
-                start=PTC(None,doc_str='start date/time of first release" '),
+                start =PTC(None,doc_str='start date/time of first release" '),
                 end =  PTC(None,doc_str='date/time of lase release, ignored if duration given'),
                 duration =  PVC(None, float, min=0.,units='sec',
                                     doc_str='How long particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "end"'),
@@ -25,10 +24,10 @@ class _BaseReleaseGroup(ParameterBaseClass):
                 user_release_group_name =  PVC(None, str, doc_str='User given name/label to attached to this release groups to make it easier to distinguish.'),
                 allow_release_in_dry_cells =  PVC(False, bool,
                             doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.'),
-               z_range =  PLC(None, [float, int], min_length=2, obsolete='use z_min and/or z_max'),
+               z_range =  PLC(None, float, min_len=2,  obsolete=True,  doc_str='use z_min and/or z_max'),
                z_min =  PVC(None, float, doc_str='min/ deepest z value to release for to randomly release in 3D, overrides any given release z value'),
                z_max =  PVC(None, float, doc_str='max/ highest z vale release for to randomly release in 3D, overrides any given release z value'),
-               release_offset_from_surface_or_bottom =  PVC(0., [float, int], min=0.,
+               release_offset_from_surface_or_bottom =  PVC(0., float, min=0.,
                                                             doc_str=' 3D release particles at offset from free surface or bottom, if release_at_surface or  release_at_bottom = True', units='m'),
                release_at_surface =  PVC(False, bool, doc_str=' 3D release particles at free surface, ie tide height, with  offset given by release_offset_from_surface_or_bottom param, overrides any given release z value'),
                release_at_bottom =  PVC(False, bool, doc_str=' 3D release particles at bottom, with  offset given by release_offset_from_surface_or_bottom param, overrides any given release z value'),
@@ -37,9 +36,9 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
                # Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value =  5.}
                 max_cycles_to_find_release_points =  PVC(1000, int, min=100, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
-                release_duration =  PVC(None, float, min=0., obsolete='use "duration" parameter instead'),
-                release_start_date =  PVC(None, 'iso8601date', obsolete='use "start" parameter instead'),
-                release_end_date =  PVC(None, 'iso8601date',  obsolete='use "end" parameter instead' ),
+                release_duration = PTC(None,   obsolete=True,  doc_str='use "duration" parameter instead'),
+                release_start_date = PTC(None,   obsolete=True,  doc_str='use "start" parameter instead'),
+                release_end_date = PTC(None,    obsolete=True,  doc_str='use "end" parameter instead' ),
                 )
 
         self.role_doc('Release particles at 1 or more given locations. A pulse_size of particles are released every release_interval. All these particles have ID properties for their release_group and the pulese they were released in.')

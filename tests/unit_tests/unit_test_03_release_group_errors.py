@@ -9,16 +9,18 @@ from tests.unit_tests import test_definitions
 
 def main(args):
     ot = OceanTracker()
-    ot.settings(**test_definitions.base_settings(__file__))
-    ot.settings(time_step=1800,include_dispersion=False,backwards=True,
+    ot.settings(**test_definitions.base_settings(__file__, args))
+    hm = test_definitions.hydro_model['demoSchism']
+
+    ot.settings(time_step=1800,include_dispersion=False,backtracking=True,
              use_A_Z_profile=False, )
 
 
     #ot.settings(NUMBA_cache_code = True)
-    ot.add_class('reader', **test_definitions.demo_schisim)
+    ot.add_class('reader', **hm['reader'])
 
     # add a point release outside domain
-    rg =  deepcopy(test_definitions.rg0)
+    rg =  deepcopy(test_definitions.rg_start_in_middle)
     rg['points'] = [0,0,1]
     rg['z_min'] = -2
     ot.add_class('release_groups', **rg)

@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
         plot_tracks.animate_particles(track_data, axis_lims=ax, title='Jilian Schism test, fall velocity and critical friction  resuspension')
 
-        plot_statistics.animate_heat_map(m,'mypoints', axis_lims=ax,
+        plot_statistics.animate_heat_map(m, axis_lims=ax,
                                        title='Jilian Schism, time based particle count heatmaps, built on the fly,  log scale', logscale=True)
 
 
