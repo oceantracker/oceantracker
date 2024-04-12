@@ -1,4 +1,5 @@
 # utils for particle tracking
+import numpy as np
 def deep_dict_update(d, d_updates):
     # recursively update dictionary tree d, ie a dictionary which may contain dictionaries with d_updates or listes of dictionaries
     # with corressponding key values in dictionary d_updates, d_updates may be a dictionary of dictionaries
@@ -42,3 +43,18 @@ def atLeast_Nby1(y):
         return y
 
 
+def fillvalue(dtype:str):
+    '''value to fill array '''
+
+    if dtype in ['float64','float32', 'int64', 'int32','int16']:
+        v = -32768
+    elif dtype in ['int8','bool']:
+        v = -128
+    else:
+        CodingError('Need to add another numpy dtype  as string', hint=f'got type {dtype}')
+    return v
+
+def CodingError(message='-no error message given',hint=None, info=None):
+    # Call the base class constructor with the parameters it needs
+    msg= f'Coding error >> {message} \n hint= {hint} \n info= {info}'
+    raise Exception(msg)

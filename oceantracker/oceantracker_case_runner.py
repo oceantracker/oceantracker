@@ -43,24 +43,24 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml = si.msg_logger # shortcut for logger
 
-
         # merge settings with defaults
         si.working_params['settings'] = setup_util.merge_settings(si.working_params['settings'], si.default_settings, si.settings.possible_values(),
-                                                               ml, crumbs= crumbs +'> case settings', caller=self)
-        ml.exit_if_prior_errors('Errors in settings??', caller=self)
-        # transfer all settings to shared_info.settings to allow tab hints
-        ri = si.run_info
+                                                                  ml, crumbs=crumbs + '> case settings', caller=self)
         for key in si.settings.possible_values():
             setattr(si.settings, key, si.working_params['settings'][key])
-
 
         # set numba config environment variables, before any import of numba, eg by readers,
         # also done in main but also needed here for parallel runs
         config_numba_environment_and_random_seed(si.working_params['settings'], ml, crumbs='Starting case_runner', caller=self)  # must be done before any numba imports
 
-        # basic  shortcuts
-        ri.caseID = run_builder['caseID']
+        ml.exit_if_prior_errors('Errors in settings??', caller=self)
+        # transfer all settings to shared_info.settings to allow tab hints
 
+
+
+        # basic  shortcuts
+        ri = si.run_info
+        ri.caseID = run_builder['caseID']
         si.output_files = run_builder['output_files']
 
         # move stuff to run info as central repository
@@ -400,6 +400,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'computer_info': get_versions_computer_info.get_computer_info(),
              'hindcast_info': si.hindcast_info,
              'timing':dict(block_timings=[], function_timers= {}),
+             'update_timers': {},
              'settings' : si.settings.as_dict(),
              'run_info' : info,
              'particle_status_flags': si.particle_status_flags.as_dict(),
@@ -408,7 +409,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'notes': si.msg_logger.notes_list,
              'release_group_info': {},
              'scheduler_info': {},
-             #'class_roles_info': {},
+             'class_roles_info': {},
              }
 
         # sweep up any output files from al used classes
@@ -417,10 +418,15 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if i is None : continue
             class_info[key] = {}
             d['scheduler_info'][key] = {}
+            d['update_timers'][key] = {}
             d['output_files'][key] = {}
             # interate over dict
             for key2, i2 in i.items():
                 class_info[key][key2]= i2.info
+                d['update_timers'][key][key2] =dict( time_spent_updating= i2.info[ 'time_spent_updating'],
+                                                     update_calls= i2.info[ 'update_calls'],
+                                                     time_first_update_call=i2.info['time_first_update_call'],
+                                                     )
                 d['output_files'][key][key2]= i2.info['output_file'] if 'output_file' in i2.info else None
                 if hasattr(i2,'scheduler_info'):
                     d['scheduler_info'][key][key2] = i2.scheduler_info
@@ -433,6 +439,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             class_info[key] = {}
             class_info[key] = i.info
             d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
+            d['update_timers'][key] = dict(time_spent_updating= i.info['time_spent_updating'],
+                                                 update_calls= i.info['update_calls'],
+                                                 time_first_update_call= i.info['time_first_update_call'] )
             if hasattr(i, 'scheduler_info'):
                 d['scheduler_info'][key]= i.scheduler_info
 
@@ -456,6 +465,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             l = f' {100*b[key]["time"]/elapsed_time_sec:5.1f}% {key} : calls {b[key]["calls"]:4d}, {time_util.seconds_to_pretty_duration_string(b[key]["time"])}'
             d['timing']['block_timings'].append(l)
         d['timing']['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
+
+        d['class_roles_info'] = class_info
 
         # check numba code for SIMD
         if True:

@@ -27,8 +27,6 @@ import numpy as np
 from oceantracker.util import setup_util, class_importer_util
 from oceantracker import definitions
 
-from oceantracker.util.parameter_checking import merge_params_with_defaults
-
 from oceantracker.util import json_util ,yaml_util, get_versions_computer_info
 from oceantracker.util.messgage_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import get_hydro_model_info
@@ -260,7 +258,6 @@ class _OceanTrackerRunner(object):
                            hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
                            fatal_error=True, crumbs='case_run_set_up', caller=self)
 
-
     def _main_run_end(self,case_summary,run_builder):
         # final info output
 
@@ -276,17 +273,15 @@ class _OceanTrackerRunner(object):
         for c in case_summary if type(case_summary) ==list else [case_summary]:
             m = c['msg_counts']
             num_case_errors +=  m['errors']
-            num_case_warnings +=  m['warnings']
+            num_case_warnings += m['warnings']
             num_case_notes += m['notes']
 
         case_info_files= self._write_run_info_json(case_summary,run_builder, self.start_t0)
 
         ml.print_line()
         ml.msg(f'OceanTracker summary:  elapsed time =' + str(datetime.now() - self.start_date),)
-
         ml.msg(f'Cases - {num_case_errors:3d} errors, {num_case_warnings:3d} warnings, {num_case_notes:3d} notes, check above', tabs=3)
-
-        ml.msg(f'Main  - {len(ml.errors_list):3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes, check above', tabs=3)
+        ml.msg(f'Main  - {ml.error_count:3d} errors, {ml.warning_count:3d} warnings, {ml.note_count:3d} notes, check above', tabs=3)
         ml.msg(f'Output in {shared_info.run_info.run_output_dir}', tabs=1)
         ml.print_line()
         total_errors = num_case_errors + len(ml.errors_list)

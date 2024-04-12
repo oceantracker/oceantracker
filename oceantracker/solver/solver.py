@@ -21,8 +21,8 @@ class Solver(ParameterBaseClass):
 
         self.add_default_params({
                         'RK_order':                   PVC(4, int, possible_values=[1, 2, 4]),
-                        'n_sub_steps': PVC(None, int, obsolete='use shared_parameter "time_step", run may not have required time step'),
-                        'screen_output_step_count': PVC(None, int, obsolete='use shared_parameter "screen_output_time_interval" in seconds')
+                        'n_sub_steps': PVC(None, int, obsolete=True,  doc_str ='use shared_parameter "time_step", run may not have required time step'),
+                        'screen_output_step_count': PVC(None, int, obsolete=True,  doc_str='use shared_parameter "screen_output_time_interval" in seconds')
                             })
 
     def final_setup(self):
@@ -65,7 +65,7 @@ class Solver(ParameterBaseClass):
 
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()
-
+            self.start_update_timer()
             time_sec = model_times[n_time_step]
 
             # release particles
@@ -98,11 +98,16 @@ class Solver(ParameterBaseClass):
             # update particle velocity modification
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
             for name, i in si.roles.velocity_modifiers.items():
+                i.start_update_timer()
                 i.update(n_time_step, time_sec, is_moving)
+                i.stop_update_timer()
 
             # dispersion is done by random walk velocity modification prior to integration step
             if si.settings['include_dispersion']:
-                si.core_roles.dispersion.update(n_time_step, time_sec, is_moving)
+                i = si.core_roles.dispersion
+                i.start_update_timer()
+                i.update(n_time_step, time_sec, is_moving)
+                i.stop_update_timer()
 
             #  Main integration step
             #--------------------------------------
@@ -118,7 +123,7 @@ class Solver(ParameterBaseClass):
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             ri.time_steps_completed += 1
             si.block_timer('Time stepping',t0_step)
-
+            self.stop_update_timer()
             if abs(t2 - ri.start_time) > ri.duration: break
 
 

@@ -16,7 +16,7 @@ class GridRelease(_BaseReleaseGroup):
         self.add_default_params(
             grid_center= PCC(None, single_cord=True, is_required=True, is3D=False, doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
             grid_span= PCC(None, single_cord=True,is_required=True, is3D=False, doc_str='(width, height)  of the grid release', units='meters or decimal degrees'),
-            grid_size= PLC([100, 99], [int], fixed_len=2,
+            grid_size= PLC([100, 99], int, fixed_len=2,
                             min =1,max=10**6,  doc_str='number of rows and columns in grid'),
                 )
 
@@ -48,8 +48,9 @@ class GridRelease(_BaseReleaseGroup):
         # add particle prop fort row column only if nor already added by another grid release
         if 'grid_release_row_col' not in si.roles.particle_properties:
             pgm = si.core_roles.particle_group_manager
-            pgm.add_particle_property('grid_release_row_col','manual_update', dict(write=True, time_varying= False, vector_dim=2,dtype=np.int32,
-                                                                                  description='(row , column) of grid point which released the particle' ))
+            pgm.add_particle_property('grid_release_row_col','manual_update',
+                        dict(write=True, time_varying= False, vector_dim=2,dtype='int32',
+                                                    description='(row , column) of grid point which released the particle' ))
             pass
 
         pass

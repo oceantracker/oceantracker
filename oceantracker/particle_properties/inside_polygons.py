@@ -14,12 +14,9 @@ class InsidePolygonsNonOverlapping2D(ParticleProperty):
     def __init__(self):
         super().__init__()
         self.add_default_params({'initial_value': PVC(-1, int),
-                                 'dtype':PVC(np.int32,type)})
+                                 'dtype':PVC('int32',str)})
 
-
-        self.add_default_params({'polygon_list':PLC(None, [dict], default_value=si.default_polygon_dict_params,
-                                                    can_be_empty_list=False)
-                                 })
+        self.add_default_params({'polygon_list':[]})
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x'])

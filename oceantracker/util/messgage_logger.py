@@ -117,10 +117,10 @@ class MessageLogger(object ):
 
         if caller is not None and (fatal_error or warning) :
             if hasattr(caller,'__class__'):
-                origin=  f' {caller.__class__.__name__} '
+                origin=  f'role= {caller.__class__.__name__} '
                 if hasattr(caller,'info'):
                     # add internal name if not None
-                    origin +=  ' ' if caller.info["name"] is None else f'"{caller.info["name"]}"'
+                    origin +=  ' ' if caller.info["name"] is None else f', name="{caller.info["name"]}"'
                     origin += f', instance #[{caller.info["instanceID"]}]'
                 origin += f', class= {caller.__class__.__module__}.{caller.__class__.__name__} '
 
@@ -204,14 +204,13 @@ class MessageLogger(object ):
             f.write(traceback_str)
 
 
-    def spell_check(self, msg, value: str, possible_values: list, **kwargs):
+    def spell_check(self, msg, key: str, possible_values: list, **kwargs):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
 
         if 'fatal_error' not in kwargs: kwargs['warning']= True
         if 'exit_now' not in kwargs: kwargs['warning'] = True
-        msg = msg + f'. The "{value}" is not recognised, '
-        self.msg(msg,
-                 hint=f'"Closest matches to "{value}" = {difflib.get_close_matches(value, list(possible_values), cutoff=0.4)} ?? ',
+        msg = msg + f', parameter "{key}" is not recognised, '
+        self.msg(msg,  hint=f'"Closest matches to "{key}" = {difflib.get_close_matches(key, list(possible_values), cutoff=0.4)} ?? ',
                   **kwargs)
 
     def close(self):

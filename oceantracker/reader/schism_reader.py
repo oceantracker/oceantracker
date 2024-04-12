@@ -17,12 +17,12 @@ class SCHISMreaderNCDF(_BaseReader):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
              'grid_variable_map': {'time': PVC('time', str),
-                               'x': PLC(['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y'], [str], fixed_len=2),
+                               'x': PLC(['SCHISM_hgrid_node_x', 'SCHISM_hgrid_node_y'], str, fixed_len=2),
                                'zlevel': PVC('zcor', str),
                                'triangles': PVC('SCHISM_hgrid_face_nodes', str),
                                'bottom_cell_index': PVC('node_bottom_index', str),
-                               'is_dry_cell': PVC('wetdry_elem', np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-            'field_variable_map': {'water_velocity': PLC(['hvel', 'vertical_velocity'], [str], fixed_len=2),
+                               'is_dry_cell': PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
+            'field_variable_map': {'water_velocity': PLC(['hvel', 'vertical_velocity'], str, fixed_len=2),
                                 'tide': PVC('elev', str,doc_str='maps standard internal field name to file variable name'),
                                 'water_depth': PVC('depth', str,doc_str='maps standard internal field name to file variable name'),
                                 'water_temperature': PVC('temp', str,doc_str='maps standard internal field name to file variable name'),
@@ -30,7 +30,7 @@ class SCHISMreaderNCDF(_BaseReader):
                                 'wind_stress': PVC('wind_stress', str,doc_str='maps standard internal field name to file variable name'),
                                 'bottom_stress': PVC('bottom_stress', str,doc_str='maps standard internal field name to file variable name'),
                                 'A_Z_profile':  PVC('diffusivity', str,doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                'water_velocity_depth_averaged': PLC(['dahv'], [str],  fixed_len=2,
+                                'water_velocity_depth_averaged': PLC(['dahv'], str,  fixed_len=2,
                                                                      doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'hgrid_file_name': PVC(None, str),

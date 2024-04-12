@@ -149,20 +149,7 @@ def load_stats_data(case_info_file_name, name = None):
     case_info = read_case_info_file(case_info_file_name)
     name = _get_role_dict_name(case_info, 'particle_statistics', name)
     stat_nc_file_name = _get_role_dict_file_name(case_info, 'particle_statistics', name)
-    d= read_ncdf_output_files.read_stats_file(stat_nc_file_name)
-
-
-    d['info']= case_info['class_roles_info']['particle_statistics'][name]
-    d['params'] = case_info['full_case_params']['roles_dict']['particle_statistics'][name]
-
-    if 'release_group_centered_grids' in d['params'] and d['params']['release_group_centered_grids']:
-        d['release_group_centered_grids'] = True
-    else:
-        d['release_group_centered_grids'] = False
-
-    # add stats polygons to output, if stats grid its loaded by
-    if 'polygon_list' in d['params']:
-        d['polygon_list'] = d['params']['polygon_list']
+    d = read_ncdf_output_files.read_stats_file(stat_nc_file_name)
 
     d = _extract_useful_info(case_info, d)
     d['grid'] = load_grid(case_info_file_name)
@@ -175,7 +162,7 @@ def load_residence_file(case_info_file_name=None,name=None, var_list=[]):
     name = _get_role_dict_name(case_info, 'particle_statistics', name)
     nc_file_name =  _get_role_dict_file_name(case_info, 'particle_statistics', name)
     d = read_ncdf_output_files.read_residence_file(nc_file_name, var_list)
-    d['info']= case_info['class_roles_info']['particle_statistics'][name]
+    #d['info']= case_info['class_roles_info']['particle_statistics'][name]
     d['params'] = case_info['full_case_params']['roles_dict']['particle_statistics'][name]
 
     d = _extract_useful_info(case_info, d)

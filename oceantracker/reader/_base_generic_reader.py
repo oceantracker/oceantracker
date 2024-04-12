@@ -1,5 +1,5 @@
 import numpy as np
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC, ParameterTimeChecker as PTC
 from oceantracker.util import time_util, json_util
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
 from oceantracker.reader.util import reader_util
@@ -16,9 +16,9 @@ class _BaseGenericReader(_BaseReader):
 
             'one_based_indices': PVC(False, bool, doc_str='indices in hindcast start at 1, not zero, eg. triangulation nodes start at 1 not zero as in python'),
             'grid_variable_map': {'time': PVC('time',str, doc_str='time variable nae in file', is_required=True ),
-                               'x': PLC(['x', 'y'], [str], fixed_len=2, is_required=True ),
+                               'x': PLC(['x', 'y'], str, fixed_len=2, is_required=True ),
                                'zlevel': PVC(None, str),
-                               'is_dry_cell': PVC(None, np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
+                               'is_dry_cell': PVC(None, str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
 
             'dimension_map': dict(
                             time =PVC('time', str, is_required=True),
@@ -27,7 +27,7 @@ class _BaseGenericReader(_BaseReader):
                             vector2D = PVC(None, str),
                             vector3D = PVC(None, str),
                                   ),
-            'isodate_of_hindcast_time_zero': PVC(None, 'iso8601date', doc_str='use to offset times to required times zone'),
+            'isodate_of_hindcast_time_zero': PTC(None, doc_str='use to offset times to required times zone'),
              })  # list of normal required dimensions
 
         self.info['field_variable_info'] = {}
@@ -166,11 +166,6 @@ class _BaseGenericReader(_BaseReader):
 
 
         return grid
-
-
-
-
-
 
 
     def set_up_uniform_sigma(self, nc, grid):

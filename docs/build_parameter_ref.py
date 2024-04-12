@@ -5,7 +5,7 @@ import inspect
 import importlib
 
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.util.parameter_checking import _CheckerBaseClass,_ParameterBaseDataClassChecker, ParameterTimeChecker as PTC
+from oceantracker.util.parameter_checking import _ParameterBaseDataClassChecker, ParameterTimeChecker as PTC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
 from oceantracker.shared_info import SharedInfo as si
@@ -91,10 +91,10 @@ class RSTfileBuilder(object):
     def add_params_from_dict(self,params, indent=0, expert=False):
 
         if expert:
-            p = {key: item for key, item in params.items() if isinstance(item,(_CheckerBaseClass, _ParameterBaseDataClassChecker)) and item.expert}
+            p = {key: item for key, item in params.items() if isinstance(item,_ParameterBaseDataClassChecker) and item.expert}
             self.add_heading('Expert Parameters:', level=0)
         else:
-            p = {key: item for key, item in params.items() if isinstance(item,(_CheckerBaseClass, _ParameterBaseDataClassChecker) ) and not item.expert}
+            p = {key: item for key, item in params.items() if isinstance(item,_ParameterBaseDataClassChecker ) and not item.expert}
             self.add_heading('Parameters:', level=0)
 
         for key in sorted(p.keys()):
@@ -107,7 +107,7 @@ class RSTfileBuilder(object):
 
             if type(item) == PVC:
 
-                if item.obsolete is not None: continue # dont write obsolete params
+                if item.obsolete : continue # dont write obsolete params
                 self.add_lines('* ``' + key + '`` :   ``' + str(item.required_type) + '`` '
                                + ('  *<optional>*' if not item.is_required else '**<isrequired>**') , indent=indent+1)
 

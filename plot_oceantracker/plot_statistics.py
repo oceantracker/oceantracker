@@ -203,7 +203,7 @@ def _get_stats_data(nt, d, var, release_group, logscale, zmin=None):
     count = d['count'][nt, :, :, :]
 
     # get ID of named release group
-    release_groupID = d['release_groupID'][release_group]
+    release_groupID = d['particle_release_groups'][release_group]['instanceID']
     z = z[release_groupID, :, :]
 
     count = count[release_groupID, :, :]

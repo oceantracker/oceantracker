@@ -24,7 +24,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
                                  'update_interval': PVC(3600., int, min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
                                  'update_values_every_time_step': PVC(False, bool, min=1, units='sec', doc_str='update values in memory every time step, needed if using concentrations within modelling to change particle behaviour or properties. Output interval still sep by update_interval')
                                  })
-        self.info['time_last_stats_recorded'] = -np.inf
+        self.info['time_last_stats_recorded'] = -si.info.large_float
 
     def initial_setup(self):
         # set up data buffer and output variables

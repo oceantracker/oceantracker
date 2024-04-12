@@ -47,14 +47,19 @@ reader_NZnational=dict(  input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\
             file_mask = 'NZfinite*.nc')
 reader_Sounds =dict(  input_dir = r'G:\Hindcasts_large\MalbroughSounds_10year_benPhD\2017',
             file_mask = 'schism_marl201701*.nc')
-hydro_model = dict(demoSchism=dict(reader= reader_demo_schisim, axis_lims=[1591000, 1601500, 5478500, 5491000]),
+hydro_model = dict(demoSchism=dict(reader= reader_demo_schisim,
+                            axis_lims=[1591000, 1601500, 5478500, 5491000],
+                            x0=[[1594000, 5484200] ],
+                            polygon=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
+                                    [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
+                            ),
                 doubleGyre=dict(reader= reader_double_gyre,axis_lims=[0, 2, 0, 1]),
                 NZnational=dict(reader= reader_NZnational,axis_lims= [1727860, 1823449, 5878821, 5957660],
-                                 x0=[[1750624.1218, 5921952.0475],
-                                      [1814445.5871, 5882261.7676],
-                                      [1838293.4656, 5940629.8263],
-                                      [1788021.4244, 5940860.2283]
-                                      ]),
+                             x0=[[1750624.1218, 5921952.0475],
+                                  [1814445.5871, 5882261.7676],
+                                  [1838293.4656, 5940629.8263],
+                                  [1788021.4244, 5940860.2283]
+                                  ]),
                 sounds = dict(reader=reader_Sounds,
                               axis_lims=None,#[1727860, 1823449, 5878821, 5957660],
                             x0=[[1667563.4554392125, 5431675.08653105],
@@ -67,8 +72,9 @@ rg_release_interval0 = dict( name='release_interval0',  # name used internal to 
          # the below are optional settings/parameters
          release_interval=0,  # seconds between releasing particles
          pulse_size=5)  # how many are released each interval
-rg_dates = dict( name='start_in_middle',  # name used internal to refer to this release
+rg_datetime = dict( name='start_in_middle1',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
+        start=np.datetime64('2017-01-01T03:30:00'),
         points=[[1594000, 5484200, -2]],
         #    tim=['2017-01-01T08:30:00','2017-01-01T01:30:00'],
          # the below are optional settings/parameters
@@ -82,7 +88,7 @@ rg_outside_domain = dict( name='outside_domain',  # name used internal to refer 
          release_interval=3600,  # seconds between releasing particles
          pulse_size=5)  # how many are released each interval
 
-rg_start_in_middle = dict( name='start_in_middle',  # name used internal to refer to this release
+rg_start_in_middle = dict( name='start_in_middl21',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
         points=[[1594000, 5484200, -2]],
         start='2017-01-01T03:30:00',
@@ -124,6 +130,17 @@ ps1 = dict(name='my_heatmap',
          status_min='moving',  # only count the particles which are moving
          z_min=-10.,  # only count particles at locations above z=-2m
          start='2017-01-01T02:30:00',
+         )
+
+poly_stats =dict(
+        class_name='PolygonStats2D_timeBased',
+        update_interval= 3600,
+        particle_property_list=['water_depth'],
+        status_min= 'moving',
+        z_min= -2,
+        grid_size= [120, 121])
+LCS = dict(name='LSC test',
+           class_name='dev_LagarangianStructuresFTLE2D',
          )
 ax = [1591000, 1601500, 5478500, 5491000]
 def read_tracks(case_info_file):

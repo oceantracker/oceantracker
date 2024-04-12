@@ -45,19 +45,19 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
         pgm = si.core_roles.particle_group_manager
 
-        pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
-        pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # start with cell number guess of zero
-        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=si.cell_search_status_flags.ok, dtype=np.int8))
+        pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype='int32', initial_value=0))  # start with cell number guess of zero
+        pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype='int32', initial_value=0))  # start with cell number guess of zero
+        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=si.cell_search_status_flags.ok, dtype='int8'))
 
-        pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype=np.float32))
+        pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype='float32'))
 
         # BC walk info
         if si.run_info.is3D_run:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
-            pgm.add_particle_property('nz_cell', 'manual_update', dict(write=False, dtype=np.int32, initial_value=0))  # todo  create  initial serach for vertical cell
-            pgm.add_particle_property('z_fraction', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0.))
-            pgm.add_particle_property('z_fraction_water_velocity', 'manual_update', dict(write=False, dtype=np.float32, initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
+            pgm.add_particle_property('nz_cell', 'manual_update', dict(write=False, dtype='int32', initial_value=0))  # todo  create  initial serach for vertical cell
+            pgm.add_particle_property('z_fraction', 'manual_update', dict(write=False, dtype='float32', initial_value=0.))
+            pgm.add_particle_property('z_fraction_water_velocity', 'manual_update', dict(write=False, dtype='float32', initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
 
     def final_setup(self, grid):
 

@@ -4,7 +4,7 @@ from oceantracker.util.numba_util import njitOT
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-
+#from oceantracker.util.parameter_checking import ParameterListCheckerV2 as PLC2
 from oceantracker.shared_info import SharedInfo as si
 
 class GriddedStats2D_timeBased(_BaseParticleLocationStats):
@@ -15,7 +15,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         super().__init__()
         # set up info/attributes
         self.add_default_params({
-                 'grid_size':  PLC([100, 99],[int], fixed_len=2, min=1, max=10 ** 5, doc_str='number of rows and columns in grid'),
+                 'grid_size':  PLC([100, 99],int, fixed_len=2, min=1, max=10 ** 5, doc_str='number of rows and columns in grid'),
                  'release_group_centered_grids': PVC(False, bool),
                  'grid_center':         PCC(None, single_cord=True, is3D=False, doc_str='center of the statitics grid as (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
                  'grid_span':           PCC(None, single_cord=True, is3D=False,doc_str='(width, height)  of the statistics grid', units='meters or decimal degrees'),

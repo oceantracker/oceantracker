@@ -180,6 +180,8 @@ def read_stats_file(file_name):
 
     if nc.is_dim('polygon_dim'):
         d['stats_type'] = 'polygon'
+        d = unpack_polygon_list('Polygon_', d)
+
     else:
         d['stats_type'] = 'grid'
 
@@ -205,6 +207,18 @@ def read_stats_file(file_name):
     nc.close()
     return d
 
+def unpack_polygon_list(tag,d):
+    # make polygon list from variables starting with d
+    out = []
+    for key in d.keys():
+        if key.startswith(tag):
+            a = d['variable_attributes'][key]
+            out.append(dict(points=d[key],name=a['polygon_name'],
+                            user_polygonID=a['user_polygonID'],
+                            instanceID = a['instanceID'] ))
+    d['polygon_list'] = out
+    d={key: item for key, item in d.items() if not key.startswith(tag) }
+    return d
 def read_LCS(file_name):
     # read stats files
 

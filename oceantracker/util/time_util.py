@@ -7,12 +7,10 @@ import numpy as np
 
 def seconds_to_datetime64(s):  return np.asarray(s).astype('datetime64[s]')
 
-
-
 def seconds_to_isostr(s): return str(seconds_to_datetime64(s))
 
 def datetime64_to_seconds(dt64):
-    return dt64.astype(np.float64)
+    return dt64.astype('datetime64[s]').astype(np.float64)
 
 def isostr_to_seconds(s):
     # seconds since epoch of 1970-01-01

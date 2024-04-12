@@ -8,7 +8,6 @@ package_fancy_name= 'OceanTracker'
 from os import path
 import subprocess, sys
 
-
 version= dict(major= 0.5, revision  = 1, date = '2024-03-30', parameter_ver=0.5)
 version['str'] = f"{version['major']:.2f}.{version['revision']:04.0f}-{version['date']}"
 

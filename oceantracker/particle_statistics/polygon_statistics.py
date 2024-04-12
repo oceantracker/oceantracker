@@ -4,7 +4,7 @@ from numba import njit
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC,merge_params_with_defaults
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.util.numba_util import njitOT
-
+from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
 from oceantracker.shared_info import SharedInfo as si
 
 class _CorePolygonMethods(ParameterBaseClass):
@@ -12,8 +12,7 @@ class _CorePolygonMethods(ParameterBaseClass):
     def __init__(self):
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'polygon_list': PLC(None, [dict], default_value= si.default_polygon_dict_params,doc_str='List of dict with polygon cords and optional nmmes, min is  {"points": [[2.,3.],....]}',
-                                                     can_be_empty_list=True),
+        self.add_default_params({'polygon_list': [],
                                  'use_release_group_polygons': PVC(False, bool,doc_str = 'Omit polygon_list param and use all polygon release polygons as statistics/counting polygons, useful for building release group polygon to polygon connectivity matrix.'),
                                  })
 
@@ -66,6 +65,8 @@ class _CorePolygonMethods(ParameterBaseClass):
                                                 write=False))
         nc.add_dimension('polygon_dim', len(self.params['polygon_list']))
 
+        add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
+
 class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_timeBased):
     # class to hold counts of particles inside 2D polygons squares
 
@@ -101,6 +102,8 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
                 nc.create_a_variable( 'sum_' + p_name, dim_names, np.float64,  description='sum of particle property inside polygon  ' + p_name)
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
+
+
 
     def do_counts(self,n_time_step, time_sec, sel):
 
