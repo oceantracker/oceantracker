@@ -123,7 +123,10 @@ class FieldGroupManager(ParameterBaseClass):
             reader.stop_update_timer()
 
     def update_tidal_stranding_status(self, time_sec, alive):
-        self.tidal_stranding.update(self.grid, time_sec, alive)
+        i = self.tidal_stranding
+        i.start_update_timer()
+        i.update(self.grid, time_sec, alive)
+        i.stop_update_timer()
 
     def setup_time_step(self, time_sec, xq, active, fix_bad=True):
         # set up stuff needed by all fields before any 2D interpolation

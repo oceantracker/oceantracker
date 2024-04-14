@@ -49,7 +49,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
     for key in possible_params:
         item = default_params[key]
         msg =f'Parameter "{key}"'
-        parent_crumb = msg + f', in {crumbs}{crumb_seperator}"{key}"'
+        parent_crumb = f'{msg}, in {crumbs}{crumb_seperator}"{key}"'
 
         if key not in params: params[key] = None  # add Noe /not given if not present
 
@@ -98,37 +98,6 @@ class _ParameterBaseDataClassChecker():
         return value
 
 
-@dataclass
-class ParameterTimeChecker(_ParameterBaseDataClassChecker):
-    possible_types: List =  field(default_factory=lambda: [str, float, np.datetime64,int, np.float64, np.float32])
-    expert : bool= False
-    obsolete: bool = False
-    is_required: bool = False
-    doc_str : str = None
-    units: str = 'ISO8601  date as string eg. "2017-01-01T00:30:00",np.datetime64, or float of seconds since 1/1/1970'
-    def check_value(self, key, value, msg_logger, crumbs,  caller):
-
-        crumbs = 'ParameterTimeChecker > ' + crumbs
-        try:
-            if type(value) == str:
-                return time_util.isostr_to_seconds(value) # convert iso string
-            if type(value) in [int, float,  np.float64, np.float32]:
-                return float(value)
-
-            if type(value) == np.datetime64:
-                return time_util.datetime64_to_seconds(value)
-
-            #should never get here
-            msg_logger.msg(f'Parameter "{key}", unexpected value = "{str(value)}", type = "{str(type(value))}"', caller=caller,
-                           hint= f'Must be {self.units}',
-                           fatal_error=True, crumbs=crumbs)
-
-        except Exception as e:
-                msg_logger.msg( f'Failed to convert to date got value = "{str(value)}", type = "{str(type(value))}"',caller= caller,
-                                hint=f'Must be {self.units}', fatal_error=True, crumbs = crumbs)
-        pass
-
-
 # the ecognised types that a parameter can contain
 # and what types can be converted to each fundamental type
 _fundamental_types= {str:(str,),
@@ -174,12 +143,11 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
 
         # check type
         if not isinstance(value,_fundamental_types[self.data_type]):
-            msg_logger.msg(f'is not required data type, got type {type(value)}, value given =  {str(value)}',
+            msg_logger.msg(f'{msg}, is not required data type, got type {type(value)}, value given =  {str(value)}',
                            hint =f'Must be one of types {_fundamental_types[self.data_type]}',
                            caller=caller, fatal_error=True, crumbs=crumbs)
-
         if self.possible_values is not None and value not in self.possible_values:
-            msg_logger.msg(msg +f', unexpected value={str(value)}',
+            msg_logger.msg(f'{msg}, unexpected value={str(value)}',
                            hint=f'Must be one of {str(self.possible_values)}',
                            caller=caller, fatal_error=True, crumbs=crumbs)
             return None
@@ -189,11 +157,42 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
         # check max/mins
         if self.data_type in [ float, int]:
             if self.min is not None and value < self.min:
-                msg_logger.msg(msg + f', value {str(value)} must  be greater than {str(self.min)}', caller=caller, fatal_error=True, crumbs=crumbs)
+                msg_logger.msg(f'{msg}, value {str(value)} must  be greater than {str(self.min)}', caller=caller, fatal_error=True, crumbs=crumbs)
             if self.max is not None and value > self.max:
-                msg_logger.msg(msg + f', value {str(value)} must  be less than {str(self.max)}', caller=caller, fatal_error=True, crumbs=crumbs)
+                msg_logger.msg(f'{msg}, value {str(value)} must  be less than {str(self.max)}', caller=caller, fatal_error=True, crumbs=crumbs)
 
         return value
+
+@dataclass
+class ParameterTimeChecker(_ParameterBaseDataClassChecker):
+    possible_types: List =  field(default_factory=lambda: [str, float, np.datetime64,int, np.float64, np.float32])
+    expert : bool= False
+    obsolete: bool = False
+    is_required: bool = False
+    doc_str : str = None
+    units: str = 'ISO8601  date as string eg. "2017-01-01T00:30:00",np.datetime64, or float of seconds since 1/1/1970'
+    def check_value(self, key, value, msg_logger, crumbs,  caller):
+
+        crumbs = 'ParameterTimeChecker > ' + crumbs
+        msg = f'Parameter "{key}"'
+        try:
+            if type(value) == str:
+                return time_util.isostr_to_seconds(value) # convert iso string
+            if type(value) in [int, float,  np.float64, np.float32]:
+                return float(value)
+
+            if type(value) == np.datetime64:
+                return time_util.datetime64_to_seconds(value)
+
+            #should never get here
+            msg_logger.msg(f'{msg }, unexpected value = "{str(value)}", type = "{str(type(value))}"', caller=caller,
+                           hint= f'Must be {self.units}',
+                           fatal_error=True, crumbs=crumbs)
+
+        except Exception as e:
+                msg_logger.msg( f'{msg }, failed to convert to date got value = "{str(value)}", type = "{str(type(value))}"',caller= caller,
+                                hint=f'Must be {self.units}', fatal_error=True, crumbs = crumbs)
+        pass
 
 @dataclass
 class ParameterListChecker(ParamValueChecker):
