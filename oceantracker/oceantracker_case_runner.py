@@ -1,4 +1,5 @@
 import os
+import psutil
 from copy import deepcopy
 from os import path, environ, remove
 from oceantracker.util.parameter_base_class import ParameterBaseClass
@@ -33,6 +34,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         crumbs = 'OceanTrackerCaseRunner setup'
 
         # give shared access to params
+
+        #todo add memory monitor
+        #python_process = psutil.Process(os.getpid())
+        #si.mem_monitor = dict(python_procssID=python_process , updates=0,initial_men_used=python_process.memory_info().rss, total_mem_used=0) # use to monitot memory usage
+
         si.run_builder = run_builder
         si.working_params = run_builder['working_params']
         si.case_summary=dict(case_info_file=None)
