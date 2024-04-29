@@ -19,12 +19,12 @@ class DummyDataReader(_BaseReader):
             ))
 
         self.add_default_params({
-            'load_fields' : PLC(['water_depth'], [str], doc_str='always load tide and water depth, for dry cells id 2D'),
+            'load_fields' : PLC(['water_depth'], str, doc_str='always load tide and water depth, for dry cells id 2D'),
             'field_variable_map': {
-                                   'water_velocity': PLC(['u', 'v', 'w'], [str], fixed_len=3),
+                                   'water_velocity': PLC(['u', 'v', 'w'], str, fixed_len=3),
                                    'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
-                                   'water_velocity_depth_averaged': PLC(['mesh2d_ucx','mesh2d_ucy'], [str], fixed_len=2,
+                                   'water_velocity_depth_averaged': PLC(['mesh2d_ucx','mesh2d_ucy'], str, fixed_len=2,
                                                                       doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
                         })
