@@ -39,13 +39,13 @@ class ROMsNativeReader(_BaseReader):
     def __init__(self):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({ 'field_variable_map': {'water_velocity': PLC(['u','v','w'], [str], fixed_len=3),
+        self.add_default_params({ 'field_variable_map': {'water_velocity': PLC(['u','v','w'], str, fixed_len=3),
                                                     'water_depth': PVC('h', str),
                                                     'tide': PVC('zeta', str),
                                                     'water_temperature': PVC('temp', str) ,
                                                     'bottom_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                                     'A_Z_profile': PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                                    'water_velocity_depth_averaged':PLC(['ubar','vbar'], [str], fixed_len=2),
+                                                    'water_velocity_depth_averaged':PLC(['ubar','vbar'], str, fixed_len=2),
                                   }
                                   })
 

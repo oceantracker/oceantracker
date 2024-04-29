@@ -25,7 +25,7 @@ if __name__ == "__main__":
     ot.add_class('reader',  input_dir = input_dir,    file_mask = 'NZfinite*.nc',
                  time_buffer_size=12)
 
-    x0 = [-35.922300421719214, 174.665532083399]  # hen and chickes, in outer grid
+    x0 = [-35.922300421719214, 174.665532083399]  # hen and chickens, in outer grid
     ot.add_class('release_groups', name='my_release_point',  # user must provide a name for release group
                  points=[[1838293.4656, 5940629.8263]],
                  release_interval=0,  # seconds between releasing particles

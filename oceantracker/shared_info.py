@@ -144,7 +144,7 @@ class _ParticleStatusFlags(_SharedStruct):
 
 class _CellSearchStatusFlags(_SharedStruct):
         ok =0
-        outside_domain=1
+        outside_open_boundary=1
         blocked_domain=-5
         blocked_dry_cell=-4
         bad_cord=-20

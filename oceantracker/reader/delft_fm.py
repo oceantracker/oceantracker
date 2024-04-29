@@ -16,15 +16,15 @@ class dev_DELFTFM(_BaseReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
-            'load_fields' : PLC(['water_depth'], [str], doc_str='always load tide and water depth, for dry cells id 2D'),
+            'load_fields' : PLC(['water_depth'], str, doc_str='always load tide and water depth, for dry cells id 2D'),
             'grid_variable_map': {'time': PVC('time', str),
-                                  'x': PLC(['mesh2d_node_x', 'mesh2d_node_y'], [str], fixed_len=2),
-                                  'x_cell': PLC(['mesh2d_face_x', 'mesh2d_face_y'], [str], fixed_len=2),
+                                  'x': PLC(['mesh2d_node_x', 'mesh2d_node_y'], str, fixed_len=2),
+                                  'x_cell': PLC(['mesh2d_face_x', 'mesh2d_face_y'], str, fixed_len=2),
                                   'zlevel': PVC(None, str),
                                   'triangles': PVC('mesh2d_face_nodes', str),
                                   'bottom_cell_index': PVC(None, str),
-                                  'is_dry_cell': PVC('wetdry_elem', np.int8, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-            'field_variable_map': {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ucz'], [str], fixed_len=3),
+                                  'is_dry_cell': PVC('wetdry_elem', int, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
+            'field_variable_map': {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ucz'], str, fixed_len=3),
                                    'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_temperature': PVC('temp', str, doc_str='maps standard internal field name to file variable name'),
@@ -32,7 +32,7 @@ class dev_DELFTFM(_BaseReader):
                                    'wind_stress': PVC('wind_stress', str, doc_str='maps standard internal field name to file variable name'),
                                    'bottom_stress': PVC('bottom_stress', str, doc_str='maps standard internal field name to file variable name'),
                                    'A_Z_profile': PVC('diffusivity', str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                   'water_velocity_depth_averaged': PLC(['mesh2d_ucx','mesh2d_ucy'], [str], fixed_len=2,
+                                   'water_velocity_depth_averaged': PLC(['mesh2d_ucx','mesh2d_ucy'], str, fixed_len=2,
                                                                         doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
 

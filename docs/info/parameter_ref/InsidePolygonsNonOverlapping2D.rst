@@ -18,97 +18,109 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
-	* ``dtype`` :   ``<class 'type'>``   *<optional>*
-		- default: ``<class 'numpy.int32'>``
-		- required_type: ``<class 'type'>``
+	* ``dtype`` :   ``<class 'str'>``   *<optional>*
+		- default: ``int32``
+		- default: ``int32``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
-
-	* ``fill_value`` :   ``[<class 'int'>, <class 'float'>]``   *<optional>*
-		- default: ``None``
-		- required_type: ``[<class 'int'>, <class 'float'>]``
-		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``initial_value`` :   ``<class 'int'>``   *<optional>*
 		- default: ``-1``
-		- required_type: ``<class 'int'>``
+		- default: ``-1``
+		- data_type: ``<class 'int'>``
 		- expert: ``False``
-
-	* ``polygon_list``:  *<optional>*
-
-polygon_list: still working on display  of lists of dict, eg nested polygon list 
+		- obsolete: ``False``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
-		- required_type: ``<class 'int'>``
+		- default: ``1``
+		- data_type: ``<class 'int'>``
+		- expert: ``False``
+		- obsolete: ``False``
 		- min: ``1``
-		- expert: ``False``
-
-	* ``release_group_parameters`` :   ``<class 'list'>``   *<optional>*
-		Description: In development: release group specific particle prop params
-
-		- default: ``[]``
-		- required_type: ``<class 'list'>``
-		- expert: ``False``
 
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- required_type: ``<class 'bool'>``
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``type`` :   ``<class 'str'>``   *<optional>*
 		Description: type of particle property, used to manage how to update particle property
 
 		- default: ``user``
-		- required_type: ``<class 'str'>``
-		- possible_values: ``['manual_update', 'from_fields', 'user']``
+		- default: ``user``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``['manual_update', 'from_fields', 'user']``
 
 	* ``units`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- required_type: ``<class 'bool'>``
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- expert: ``False``
-
-	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
-		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
-
-		- default: ``None``
-		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
-		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``vector_dim`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
-		- required_type: ``<class 'int'>``
-		- min: ``1``
+		- default: ``1``
+		- data_type: ``<class 'int'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- min: ``1``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write particle property to tracks or event files file
 
 		- default: ``True``
-		- required_type: ``<class 'bool'>``
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``[True, False]``
 
 
 
 Expert Parameters:
 *******************
+
+	* ``release_group_parameters``:  *<optional>*
+		Description: - In development: release group specific particle prop params
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- expert: ``True``
+		- obsolete: ``False``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
 
 

@@ -266,21 +266,24 @@ def get_case(n):
                 [-35.87936265079254, 174.52205865417034], # harbour jet
                 [-35.94290227656262, 174.4761188861907],  # nearshore brembay
                 [-35.91960370397214, 174.59610759097396],
+                [-35.922300421719214, 174.665532083399],  # hen and chickes, in outer grid
                 [-35.922300421719214, 174.665532083399], # hen and chickes, in outer grid
                 ]
             x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
-
-            ax = [1727860, 1823449, 5878821, 5957660]  # Auck
-            ax= None
-            title = 'NZ national test'
+            x0_A=[   [ 1727195 ,    6035149],
+                    [1737357,     6029638],
+                    [1742484 ,    6021345],
+                    [1743472 ,    6019861]]
+            ax=  [  1715000 ,    1755000 ,    6015000 ,    6050000] # northland
+            title = 'nested test'
             nested_readers= dict(nest1=dict(
                     class_name='oceantracker.reader.schism_reader.SCHISMreaderNCDF',
-                   input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard',
+
+                input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard',
+                hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard\hgrid_Whangarei.gr3',
+                # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',
+                #  hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
                     file_mask = 'schout*.nc',
-                    hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard\hgrid_Whangarei.gr3',
-                #          input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\resampled_outputs',
-                    #file_mask = 'Whangarei*.nc',
-                   #hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\resampled_outputs\hgrid_Whangarei.gr3'
 
             ))
 

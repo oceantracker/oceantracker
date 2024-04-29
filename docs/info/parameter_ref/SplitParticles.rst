@@ -18,45 +18,47 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``probability_of_splitting`` :   ``<class 'float'>``   *<optional>*
 		- default: ``1.0``
-		- required_type: ``<class 'float'>``
+		- default: ``1.0``
+		- data_type: ``<class 'float'>``
+		- expert: ``False``
+		- obsolete: ``False``
 		- min: ``0.0``
 		- max: ``1.0``
-		- expert: ``False``
 
 	* ``split_status_equal_to`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``split_status_greater_than`` :   ``<class 'str'>``   *<optional>*
 		- default: ``dead``
-		- required_type: ``<class 'str'>``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- default: ``dead``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``splitting_interval`` :   ``<class 'float'>``   *<optional>*
 		- default: ``3600``
-		- required_type: ``<class 'float'>``
+		- default: ``3600``
+		- data_type: ``<class 'float'>``
+		- expert: ``False``
+		- obsolete: ``False``
 		- min: ``1``
-		- expert: ``False``
-
-	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
-		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
-
-		- default: ``None``
-		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
-		- expert: ``False``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 
 

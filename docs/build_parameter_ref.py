@@ -108,7 +108,7 @@ class RSTfileBuilder(object):
             if type(item) == PVC:
 
                 if item.obsolete : continue # dont write obsolete params
-                self.add_lines('* ``' + key + '`` :   ``' + str(item.required_type) + '`` '
+                self.add_lines('* ``' + key + '`` :   ``' + str(item.data_type) + '`` '
                                + ('  *<optional>*' if not item.is_required else '**<isrequired>**') , indent=indent+1)
 
                 if item.doc_str is not None:
@@ -117,7 +117,7 @@ class RSTfileBuilder(object):
 
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
 
-                for k, v in item.info.items():
+                for k, v in item.asdict().items():
                     if k not in ['type', 'default_value', 'is_required', 'doc_str'] and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
                 self.add_lines()
@@ -144,22 +144,17 @@ class RSTfileBuilder(object):
 
             elif type(item) == PLC:
 
-                self.add_lines('* ``' + key + '``:' + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**'), indent=indent + 1)
-                if item.info['doc_str'] is not None:
-                    self.add_lines('Description: - ' + str(item.info['doc_str'].strip()), indent=indent + 2)
+                self.add_lines('* ``' + key + '``:' + ('  *<optional>*' if not item.is_required else '**<isrequired>**'), indent=indent + 1)
+                if item.doc_str is not None:
+                    self.add_lines('Description: - ' + str(item.doc_str.strip()), indent=indent + 2)
                     self.add_lines()
 
-                if  type(item.info['acceptable_types']) == dict or type(item.info['default_list']) == dict or type(item.info['default_value']) == dict:
-                    self.add_lines()
-                    self.add_lines(key + ': still working on display  of lists of dict, eg nested polygon list ', indent=indent+0)
-                    self.add_lines()
-                    continue
 
-                self.add_lines('- a list containing type:  ``' + str(item.info['acceptable_types']) + '``', indent=indent+2)
+                self.add_lines('- a list containing type:  ``' + str(item.possible_types) + '``', indent=indent+2)
                 self.add_lines('- default list : ``'
-                               + str(item.info['default_list']) + '``', indent=indent+2)
+                               + str(item.default) + '``', indent=indent+2)
 
-                for k, v in item.info.items():
+                for k, v in item.asdict().items():
                     if k not in ['default_list','acceptable_types', 'default_value', 'is_required', 'doc_str'] and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 

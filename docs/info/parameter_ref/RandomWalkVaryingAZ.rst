@@ -16,39 +16,41 @@ Parameters:
 
 	* ``A_H`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.1``
-		- required_type: ``<class 'float'>``
-		- min: ``0.0``
+		- default: ``0.1``
+		- data_type: ``<class 'float'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- min: ``0.0``
 
 	* ``A_V`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.01``
-		- required_type: ``<class 'float'>``
-		- min: ``0.0``
+		- default: ``0.01``
+		- data_type: ``<class 'float'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- min: ``0.0``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
-		- required_type: ``<class 'bool'>``
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
 		- expert: ``False``
-
-	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
-		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
-
-		- default: ``None``
-		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
-		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 
 

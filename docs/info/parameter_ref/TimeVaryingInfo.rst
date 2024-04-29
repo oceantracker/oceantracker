@@ -18,62 +18,68 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
-	* ``dtype`` :   ``<class 'numpy.dtype'>``   *<optional>*
-		- default: ``<class 'numpy.float64'>``
-		- required_type: ``<class 'numpy.dtype'>``
+	* ``dtype`` :   ``<class 'str'>``   *<optional>*
+		- default: ``float64``
+		- default: ``float64``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
-
-	* ``fill_value`` :   ``[<class 'int'>, <class 'float'>]``   *<optional>*
-		- default: ``None``
-		- required_type: ``[<class 'int'>, <class 'float'>]``
-		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``['float64', 'float32', 'int32', 'int16', 'int8', 'int64']``
 
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
-		- required_type: ``<class 'float'>``
+		- default: ``0.0``
+		- data_type: ``<class 'float'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
-		- required_type: ``<class 'int'>``
-		- min: ``1``
+		- default: ``1``
+		- data_type: ``<class 'int'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- min: ``1``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- required_type: ``<class 'bool'>``
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- expert: ``False``
-
-	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
-		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
-
-		- default: ``None``
-		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
-		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``vector_dim`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
-		- required_type: ``<class 'int'>``
-		- min: ``1``
+		- default: ``1``
+		- data_type: ``<class 'int'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- min: ``1``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- required_type: ``<class 'bool'>``
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``[True, False]``
 
 
 

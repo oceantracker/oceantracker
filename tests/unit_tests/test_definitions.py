@@ -80,7 +80,7 @@ rg_datetime = dict( name='start_in_middle1',  # name used internal to refer to t
          # the below are optional settings/parameters
          release_interval=3600,  # seconds between releasing particles
          pulse_size=5)  # how many are released each interval
-rg_outside_domain = dict( name='outside_domain',  # name used internal to refer to this release
+rg_outside_domain = dict( name='outside_open_boundary',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
         points=[[1594000, 0, -2]],
         #    dates=['2017-01-01T08:30:00','2017-01-01T01:30:00'],

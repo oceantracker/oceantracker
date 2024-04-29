@@ -390,12 +390,12 @@ class _OceanTrackerRunner(object):
 
         # get file info for nested readers
         run_builder['nested_reader_builders']= {}
-        if 'nested_readers' not in working_params: working_params['nested_readers'] ={}
+        if 'nested_readers' not in working_params['roles_dict']: working_params['roles_dict']['nested_readers'] ={}
 
-        for name, params in working_params['nested_readers'].items():
+        for name, params in working_params['roles_dict']['nested_readers'].items():
             t0 = perf_counter()
             nested_params, nested_file_list = get_hydro_model_info.find_file_format_and_file_list(params,class_importer, ml)
-            nested_reader = class_importer.new_make_class_instance_from_params( nested_params,'reader', default_classID='reader', crumbs=f'nested reader{name}>')
+            nested_reader = class_importer.new_make_class_instance_from_params('reader', nested_params, crumbs=f'nested reader{name}>')
 
             d= dict(params=nested_params,
                     file_info= nested_reader.get_hindcast_files_info(nested_file_list, ml)

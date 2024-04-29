@@ -158,12 +158,12 @@ print('stats',stats_data.keys())
 
 # use stats_data variable to plot heat map at last time step, by default plots var= "count"
 ax= [1591000, 1601500, 5478500, 5491000] 
-anim= plot_statistics.animate_heat_map(stats_data, release_group=0, axis_lims=ax,
+anim= plot_statistics.animate_heat_map(stats_data, release_group='my_release_point', axis_lims=ax,
                     heading='Particle count heatmap built on the fly, no tracks recorded', fps=1)
 HTML(anim.to_html5_video())# this is slow to build!
 
 # animate the pollutant
-anim= plot_statistics.animate_heat_map(stats_data, var='a_pollutant',release_group= 0, axis_lims=ax,
+anim= plot_statistics.animate_heat_map(stats_data, var='a_pollutant',release_group= 'my_release_point', axis_lims=ax,
                     heading='Decaying particle property , a_pollutant built on the fly, no tracks recorded', fps=1)
 HTML(anim.to_html5_video())# this is slow to build!
 

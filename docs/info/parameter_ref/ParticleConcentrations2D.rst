@@ -16,82 +16,98 @@ Parameters:
 
 	* ``class_name`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``count_status_equal_to`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``initial_particle_load`` :   ``<class 'float'>``   *<optional>*
 		Description: initial load of particles on release
 
 		- default: ``1.0``
-		- required_type: ``<class 'float'>``
-		- units: ``non-dimensional``
+		- default: ``1.0``
+		- data_type: ``<class 'float'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- units: ``non-dimensional``
 
 	* ``load_decay_time_scale`` :   ``<class 'float'>``   *<optional>*
 		Description: time scale of exponential decay of particle load
 
 		- default: ``86400``
-		- required_type: ``<class 'float'>``
-		- units: ``sec``
+		- default: ``86400``
+		- data_type: ``<class 'float'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- units: ``sec``
 
 	* ``only_update_concentrations_on_write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- required_type: ``<class 'bool'>``
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``particle_properties_to_track``:  *<optional>*
-		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``[]``
-		- can_be_empty_list: ``True``
-		- make_list_unique: ``True``
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_types: ``[]``
+		- make_list_unique: ``True``
+		- min_len: ``0``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``_concentrations_``
-		- required_type: ``<class 'str'>``
+		- default: ``_concentrations_``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``update_interval`` :   ``<class 'int'>``   *<optional>*
 		Description: the time in model seconds between writes (will be rounded to model time step)
 
 		- default: ``3600.0``
-		- required_type: ``<class 'int'>``
-		- min: ``1``
-		- units: ``sec``
+		- default: ``3600.0``
+		- data_type: ``<class 'int'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- units: ``sec``
+		- min: ``1``
 
 	* ``update_values_every_time_step`` :   ``<class 'bool'>``   *<optional>*
 		Description: update values in memory every time step, needed if using concentrations within modelling to change particle behaviour or properties. Output interval still sep by update_interval
 
 		- default: ``False``
-		- required_type: ``<class 'bool'>``
-		- min: ``1``
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- expert: ``False``
+		- obsolete: ``False``
 		- units: ``sec``
-		- expert: ``False``
-
-	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
-		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
-
-		- default: ``None``
-		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
-		- expert: ``False``
+		- min: ``1``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- required_type: ``<class 'bool'>``
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``[True, False]``
 
 
 
