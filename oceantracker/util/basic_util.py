@@ -1,5 +1,6 @@
 # utils for particle tracking
 import numpy as np
+from time import sleep
 def deep_dict_update(d, d_updates):
     # recursively update dictionary tree d, ie a dictionary which may contain dictionaries with d_updates or listes of dictionaries
     # with corressponding key values in dictionary d_updates, d_updates may be a dictionary of dictionaries
@@ -57,4 +58,5 @@ def fillvalue(dtype:str):
 def CodingError(message='-no error message given',hint=None, info=None):
     # Call the base class constructor with the parameters it needs
     msg= f'Coding error >> {message} \n hint= {hint} \n info= {info}'
+    sleep(.5)
     raise Exception(msg)

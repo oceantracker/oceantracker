@@ -141,10 +141,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             # set up particle properties associated with fields etc
             fgm.add_part_prop_from_fields_plus_book_keeping()
-            core_role_params = si.working_params['core_roles']
 
             # make other core classes
-            si.add_core_role('solver', core_role_params['solver'], crumbs='core class solver ')
+            core_role_params = si.working_params['core_roles']
+            si.add_core_role('solver', core_role_params['solver'], crumbs='adding core class solver ')
+            si.add_core_role('dispersion', core_role_params['dispersion'],  default_classID='dispersion_random_walk', initialise=True)
+            si.add_core_role('resuspension', core_role_params['resuspension'], default_classID='resuspension_basic', initialise=True)
 
             if si.settings.time_step > si.hindcast_info['time_step']:
                 ml.msg(f'Results may not be accurate as, time step param={si.settings.time_step:2.0f} sec,  > hydo model time step = {si.hindcast_info["time_step"]:2.0f}',
@@ -193,6 +195,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         except Exception as e:
             ml.show_all_warnings_and_errors()
             ml.msg(f' Unexpected error in case number [{ri.caseID:2}] ', fatal_error=True,hint='check above or .err file')
+            raise Exception()
             tb = traceback.format_exc()
             ml.write_error_log_file(e, tb)
             # printout out trace back
@@ -331,7 +334,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
         # chose fiel manager for normal or nested readers
         if len(si.working_params['roles_dict']['nested_readers']) > 0:
-            # use devopment nested readers class
+            # use development nested readers class
             si.working_params['core_roles']['field_group_manager'].update(dict(class_name='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields'))
 
         # set up feilds
@@ -339,10 +342,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         fgm.initial_setup()  # needed here to add reader fields inside reader build
         si.run_info.is3D_run = fgm.info['is3D']
 
-        fgm.setup_dispersion_and_resuspension()  # setup files required for didpersion etc, depends on what variables are in the hydro-files
+        fgm.setup_dispersion_and_resuspension_fields()  # setup fields required for dispersion based on  what variables are in the hydro-files
         fgm.final_setup()
 
-        si.hindcast_info = fgm.get_hydro_model_info()
+        si.hindcast_info = fgm.get_hindcast_info()
         si.msg_logger.progress_marker('Setup field group manager', start_time=t0)
 
 

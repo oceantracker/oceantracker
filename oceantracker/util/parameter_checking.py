@@ -104,6 +104,7 @@ _fundamental_types= {str:(str,),
                 float:(float,int, np.float, np.integer),
                 int : (int, np.integer),
                 bool: (bool, np.bool_),
+                     dict: (dict, ),
                 }
 
 _all_convertible_types = tuple([x for x1 in _fundamental_types.values() for x in x1])
@@ -240,6 +241,8 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
     one_or_more_points: bool = False
     single_cord: bool = False
     is3D: bool = False
+    min: float = None
+    max: float = None
 
     def check_value(self, key, value, msg_logger, crumbs,  caller):
 
@@ -298,6 +301,12 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
                    crumbs=crumbs,
                    hint =f'got size "{str(value.shape)}"', fatal_error=True)
             return None
+
+        #check min max
+        if self.min is not None and np.any(value< self.min):
+            msg_logger.msg(f'{msg}, value {str(value)} must  be greater than {str(self.min)}', caller=caller, fatal_error=True, crumbs=crumbs)
+        if self.max is not None and np.any(value > self.max):
+            msg_logger.msg(f'{msg}, value {str(value)} must  be less than {str(self.max)}', caller=caller, fatal_error=True, crumbs=crumbs)
 
         return value
 

@@ -22,12 +22,12 @@ class unstructured_FVCOM(_BaseReader):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({ 'field_variable_map': {
-                                                'water_velocity': PLC(['u','v','ww'], [str], fixed_len=2),
+                                                'water_velocity': PLC(['u','v','ww'], str, fixed_len=2),
                                                 'water_depth': PVC('h', str,doc_str='maps standard internal field name to file variable name'),
                                                 'tide': PVC('zeta', str,doc_str='maps standard internal field name to file variable name'),
                                                 'water_temperature': PVC('temp', str, doc_str='maps standard internal field name to file variable name'),
                                                  'salinity': PVC('salinity', str, doc_str='maps standard internal field name to file variable name'),
-                                                 'wind_velocity': PLC(['uwind_speed', 'vwind_speed'], [str], doc_str='maps standard internal field name to file variable name'),
+                                                 'wind_velocity': PLC(['uwind_speed', 'vwind_speed'], str, doc_str='maps standard internal field name to file variable name'),
                                             'bottom_stress': PVC('not_known', str, doc_str='maps standard internal field name to file variable name'),
                                             'A_Z_profile': PVC('not_known', str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
                                 }

@@ -11,7 +11,7 @@
 3.  flag error if any end  before start in scheduler
 4. try to write partial json if error
 5. better way to note release errors, only flag any points that never released at end, or show release success?
-1. Stats to work on list of acceptable statuses, not min max?
+
 1. ScishimV5 reader
     1. Bug fix in sigma profile builder for WHOI hindcast
 1. DEFT3D FM
@@ -23,12 +23,17 @@
     1. . ??
 1. Nested grids
     1.. ??
+1. Stats
+    1. Stats to work on list of acceptable statuses, not min max?
+    1. matab read polygon
+    1. general rebuild?
 1. in case runner create all user requested instances and merge params in one step
 1. build check that all classes are initialised and finalized
 1. Docs
     1. check all how to note books run, set up code to run all notebooks
     
 1. write of case info file even if errors, trap json encoding erorrs 
+2. zeros in tracks seen in matlab output
   
 
 ##  Internal Structure
@@ -58,6 +63,7 @@
 1. used np.datetime64, milli sec internally
 2. Add positive=True to param checker to enzure vale is >0
 1. asarray option to numerical param list checker
+
     
 
 ## Niggles that need sorting some time
@@ -73,6 +79,7 @@
 1. all final_setup()' s done??
 1. inside polygon class over writes given points with closed polygon 
 1. cope with time dependent water depth in write to grid
+1. unit test cope with dispersion on 
     
 ## Nice to haves
 1. attach name of method to message loggers crumb trail

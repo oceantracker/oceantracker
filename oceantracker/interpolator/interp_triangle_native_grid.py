@@ -95,28 +95,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
 
 
 
-    def fix_bad_cell_search(self, current_buffer_steps,fractional_time_steps, open_boundary_type,  active):
 
-        part_prop = si.roles.particle_properties
-
-        # deal with open boundary
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', si.cell_search_status_flags.outside_domain, out=self.get_partID_subset_buffer('cell_status'))
-        if sel.size > 0:
-            if open_boundary_type > 0:
-                part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel)
-                part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell, but not the location
-            else:
-                # outside so move back
-                part_prop['x'].copy('x_last_good', sel)  # move back location
-                part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
-
-        # do move backs for blocked and bad
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', si.cell_search_status_flags.ok, out=self.get_partID_subset_buffer('cell_status'))
-        if sel.size > 0:
-            part_prop['x'].copy('x_last_good', sel)  # move back location
-            part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
-
-        #debug_util.plot_walk_step(xq, si.core_roles.reader.grid, part_prop)
 
     #@function_profiler(__name__)
     def _interp_field2D(self,field_name, field_instance,grid, current_buffer_steps, fractional_time_steps,
@@ -326,29 +305,15 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
         cell_search_status = part_prop['cell_search_status'].data
         params = self.params
 
-        # used 2D or 3D walk chosen above
-        if False:
-            x_last_good = part_prop['x_last_good'].data
-            n_cell_last_good = part_prop['n_cell_last_good'].data
-            status = part_prop['status'].data
-            tri_interp_util.BCwalk_with_move_backs(
-                           xq,
-                           grid['tri_walk_AOS'], grid['dry_cell_index'],
-                           x_last_good, n_cell, n_cell_last_good, status, bc_cords,
-                           self.walk_counts,
-                           params['max_search_steps'], params['bc_walk_tol'], open_boundary_type,si.settings['block_dry_cells'],
-                           active)
-            sel = part_prop['status'].find_subset_where(active, 'eq', si.particle_status_flags.cell_search_failed, out=self.get_partID_subset_buffer('B1'))
-
-        else:
-            tri_interp_util.BCwalk(
+        tri_interp_util.BCwalk(
                 xq,
                 grid['tri_walk_AOS'], grid['dry_cell_index'],
                 n_cell, cell_search_status,bc_cords,
                 self.walk_counts,
                 params['max_search_steps'], params['bc_walk_tol'], open_boundary_type, si.settings['block_dry_cells'], active)
 
-            sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', si.cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
+        # try to fix any failed walks
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', si.cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
 
         if sel.size > 0:
             # si.msg_logger.msg(f'Search retried for {sel.size} cells')

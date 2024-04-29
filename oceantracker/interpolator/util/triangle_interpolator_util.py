@@ -25,7 +25,7 @@ search_ok= int(si.cell_search_status_flags['ok'])
 search_blocked_domain= int(si.cell_search_status_flags['blocked_domain'])
 search_blocked_dry_cell= int(si.cell_search_status_flags['blocked_dry_cell'])
 search_bad_cord= int(si.cell_search_status_flags['bad_cord'])
-search_outside_domain= int(si.cell_search_status_flags['outside_domain'])
+outside_open_boundary= int(si.cell_search_status_flags['outside_open_boundary'])
 search_failed= int(si.cell_search_status_flags['failed'])
 
 #below is called by another numba function which will work out signature on first call
@@ -95,7 +95,7 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
                 # keep n_cell, bc  unchanged
                 if open_boundary_type > 0 and next_tri == -2:  # outside domain
                     # leave x, bc, cell, location  unchanged as outside
-                    cell_search_status[n] = search_outside_domain
+                    cell_search_status[n] = outside_open_boundary
                     break
                 else:  # n_tri == -1 outside domain and any future
                     # solid boundary, so just move back

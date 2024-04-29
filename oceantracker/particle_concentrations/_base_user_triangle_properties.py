@@ -16,7 +16,7 @@ class _BaseTriangleProperties(ParameterBaseClass):
         super().__init__()
         # set up info/attributes
         self.add_default_params({'class_name' : PVC(None, str,is_required=True),
-                                 'particle_properties_to_track': PLC(None,[str],  make_list_unique=True),
+                                 'particle_properties_to_track': PLC(None,str,  make_list_unique=True),
                                  'write': PVC(True, bool),
                                  'role_output_file_tag': PVC('_concentrations_', str),
                                  'count_status_equal_to': PVC(None, str, possible_values=si.particle_status_flags.possible_values()),

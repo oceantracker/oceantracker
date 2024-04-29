@@ -213,16 +213,6 @@ class Solver(ParameterBaseClass):
         dt = si.settings.time_step*si.run_info.model_direction
         self.RK_step(time_sec, dt,is_moving)
 
-        # for failed walks try half step
-        bad = part_prop['cell_search_status'].find_subset_where(is_moving, 'lt', si.cell_search_status_flags['ok'], out=self.get_partID_subset_buffer('bad_walk'))
-        if bad.size> 0:
-            self.RK_step(time_sec, dt/2.0, bad)
-            #bad2 = part_prop['cell_search_status'].find_subset_where(is_moving, 'lt', si.cell_search_status_flags['ok'])
-            pass
-
-        # fix any still bad
-        fgm.fix_time_step(is_moving) # fix and particles bloched by boundiues etc
-
 
         # check bc coords correct
         if si.settings['dev_debug_opt'] ==10:
@@ -256,7 +246,7 @@ class Solver(ParameterBaseClass):
 
 
         #  step 1 from current location and time
-        fgm.setup_time_step(time_sec, x1, is_moving, fix_bad=False)
+        fgm.setup_time_step(time_sec, x1, is_moving)
 
         if RK_order==1:
             fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v)
@@ -271,7 +261,7 @@ class Solver(ParameterBaseClass):
 
         # step 2, get improved half step velocity
         t2= time_sec + 0.5 * dt
-        fgm.setup_time_step(t2, x2, is_moving, fix_bad=False)
+        fgm.setup_time_step(t2, x2, is_moving)
 
         if RK_order==2:
             fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v)
@@ -286,14 +276,14 @@ class Solver(ParameterBaseClass):
 
         # step 3, a second half step
         t2 = time_sec + 0.5 * dt
-        fgm.setup_time_step(t2, x2, is_moving, fix_bad=False)
+        fgm.setup_time_step(t2, x2, is_moving)
         fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
         solver_util.euler_substep( x1, v_temp, velocity_modifier, dt, is_moving, x2)  # improve half step position values
         particle_operations_util.add_to(v, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity from step 3
 
         # step 4, full step
         t2 = time_sec + dt
-        fgm.setup_time_step(t2,  x2, is_moving, fix_bad=False)
+        fgm.setup_time_step(t2,  x2, is_moving)
         fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
         particle_operations_util.add_to(v, v_temp, is_moving, scale=1.0 / 6.0)  # last accumulation of velocity for v4
 

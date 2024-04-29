@@ -32,7 +32,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
                                             doc_str='number of rows and columns in grid'),
             'grid_center': PCC(None, one_or_more_points=True, is3D=False,is_required=True,
                                doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
-            'grid_span': PCC(None, one_or_more_points=True, min=.001, is3D=False, is_required=True,
+            'grid_span': PCC(None, one_or_more_points=True, min=.0001, is3D=False, is_required=True,
                              doc_str='(width, height)  of the grid release, must be > 0.', units='meters or decimal degrees'),
             'floating': PVC(True, bool, doc_str='Particles will float at free surface if a 3D model'),
             'z_min': PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),

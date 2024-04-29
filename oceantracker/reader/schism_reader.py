@@ -30,8 +30,7 @@ class SCHISMreaderNCDF(_BaseReader):
                                 'wind_stress': PVC('wind_stress', str,doc_str='maps standard internal field name to file variable name'),
                                 'bottom_stress': PVC('bottom_stress', str,doc_str='maps standard internal field name to file variable name'),
                                 'A_Z_profile':  PVC('diffusivity', str,doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                'water_velocity_depth_averaged': PLC(['dahv'], str,  fixed_len=2,
-                                                                     doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
+                                'water_velocity_depth_averaged': PLC(['dahv'], str,   doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'hgrid_file_name': PVC(None, str),
              })
