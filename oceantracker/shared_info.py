@@ -72,15 +72,15 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots,may create large grid file, currently cannot be used with nested grids ' )
     max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,min=.00001,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing' )  # limit all cases to this duration
     max_particles = PVC(10**10, int, min=1, doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
-    processors = PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list run in parallel' )
+    processors = PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list to run in parallel' )
     max_warnings = PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps' )  # dont record more that this number of warnings, to keep caseInfo.json finite
-    use_random_seed = PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!' )
+    use_random_seed = PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!', expert=True )
     NUMBA_function_cache_size = PVC(4048, int, min=128, expert=True,
                                     doc_str='Size of memory cache for compiled numba functions in kB' )
     NUMBA_cache_code = PVC(False, bool, expert=True,
                            doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
     multiprocessing_case_start_delay = PVC(None, float, min=0.,expert=True,
-                                           doc_str='Delay start of each case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
+                                           doc_str='Delay start of each sucessive case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
     EPSG_code_metres_grid = PVC(None, int,
                 doc_str='If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM' )
     write_tracks = PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes' )
@@ -95,8 +95,8 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                           doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
-
-
+    multi_processing_method = PVC('spawn', str, expert=True,possible_values=['fork','spawn'],
+                          doc_str='How  mutil procing is implemeted, spawn= separate work spaces, fork = has copy on parents memory space')
 
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
@@ -185,7 +185,7 @@ class _SharedInfoClass():
         eg SharedInfo.particle_properties is a dictionary of named particle property instances
 
     """
-    settings = _DefaultSettings() # wil be overwritten with actual values by case runner
+    settings = _DefaultSettings() # will be overwritten with actual values by case runner
     roles = _ClassRoles()
     core_roles = _CoreClassRoles()
     particle_operations = particle_operations

@@ -14,6 +14,7 @@ import sys
 # do first to ensure its right
 import multiprocessing
 
+
 from copy import deepcopy
 from datetime import datetime
 
@@ -295,15 +296,6 @@ class _OceanTrackerRunner(object):
     def _run_parallel(self,base_case_params, case_list_params, run_builder):
         # run list of case params
         ml = msg_logger
-        # below setting can only be set in base case , and not in parralel cases
-        shared_settings_list = [
-            'root_output_dir', 'output_file_base', 'add_date_to_run_output_dir',
-            'backtracking', 'debug', 'dev_debug_plots',
-            'EPSG_code_metres_grid', 'write_tracks', 'display_grid_at_start',
-            'NUMBA_cache_code', 'NUMBA_function_cache_size',
-            'processors', 'multiprocessing_case_start_delay',
-            'max_warnings', 'use_random_seed',
-            'write_dry_cell_flag']
 
         # split base_case_params into shared and case params
         base_working_params = setup_util.decompose_params(shared_info, base_case_params, ml, caller=self, crumbs='_run_parallel decompose base case params')
@@ -312,6 +304,7 @@ class _OceanTrackerRunner(object):
 
         bs= base_working_params['settings']
         num_processors = bs['processors'] if 'processors' in bs and bs['processors'] is not None else  max(int(.75*comp_info['CPUs_hardware']),1)
+        multi_processing_method =  bs['multi_processing_method'] if 'multi_processing_method' in bs and bs['processors'] else 'spawn'
 
         case_run_builder_list=[]
 
@@ -335,6 +328,8 @@ class _OceanTrackerRunner(object):
 
         # do runs num_processors
         ml.progress_marker(' oceantracker:multiProcessing: processors:' + str(num_processors))
+
+        multiprocessing.set_start_method(multi_processing_method)
 
         # run // cases
         with multiprocessing.Pool(processes=num_processors) as pool:
