@@ -55,7 +55,7 @@ def add_polygon_list_to_group_netcdf(nc,polygon_list):
         dim_name = f'poly_{ID:04d}'
         points = np.asarray(p['points'])
         nc.add_dimension(dim_name, points.shape[0])
-        attr = dict(user_polygonID=p['user_polygonID'],instanceID=ID,
+        attr = dict(user_polygonID=p['user_polygonID'] if 'user_polygonID' in p else 0 , instanceID=ID,
                     polygon_name=f'polygon{ID:04d}' if p['name'] is None else p['name'])
         nc.write_a_new_variable(v_name, points, [dim_name,'vector2D'],
                                 units='meters or decimal deg. as  (lon, lat)',

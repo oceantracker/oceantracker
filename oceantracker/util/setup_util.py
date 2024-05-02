@@ -1,5 +1,4 @@
 from os import  environ, path, mkdir
-from oceantracker import definitions as common_info
 from copy import copy, deepcopy
 from datetime import datetime
 import shutil
@@ -121,10 +120,10 @@ def check_python_version(msg_logger):
         p_minor= v['python_minor_version']
         install_hint = 'Install Python 3.10 or used environment.yml to build a Conda virtual environment named oceantracker'
         if not ( p_major > 2 and p_minor >= 9):
-            ml.msg(common_info.package_fancy_name + ' requires Python 3 , version >= 3.9  and < 3.11',
+            ml.msg('Oceantracker requires Python 3 , version >= 3.9  and < 3.11',
                          hint=install_hint, warning=True, tabs=1)
         if (p_major == 3 and p_minor >= 11):
-            ml.msg(common_info.package_fancy_name + ' is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4', warning=True)
+            ml.msg('Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4', warning=True)
 
 
 def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', caller = None):
@@ -153,18 +152,12 @@ def set_seed(value):
 @njit
 def test_random():
     return  np.random.rand()
-def merge_critical_settings_with_defaults(settings, default_settings, critical_settings, msg_logger, crumbs='', caller=None):
-    # check setting or set equal to  default value if not in params
-    # used for simple settings only no dict or list
-    crumbs += '> merge_critical_settings_with_defaults'
-    # add numba settings to critical settings
-    critical_settings += [key for key in default_settings.possible_values() if 'numba' in key.lower()]
-    settings= merge_settings(settings, default_settings, critical_settings, msg_logger, crumbs='', caller=None)
-    return settings, critical_settings
+
 
 def merge_settings(settings, default_settings, settings_to_merge, msg_logger, crumbs='', caller=None):
     crumbs += '> merge_settings'
     all_settings = default_settings.possible_values()
+
     for key in settings_to_merge:
         pvc = getattr(default_settings, key)
         if key not in settings or settings[key] is None:
@@ -178,12 +171,12 @@ def merge_settings(settings, default_settings, settings_to_merge, msg_logger, cr
         pass
     return settings
 
-def merge_base_and_case_working_params(base_working_params, case_working_params, msg_logger, crumbs='', caller=None):
+def merge_base_and_case_working_params(base_working_params, case_working_params,base_case_only_params, msg_logger, crumbs='', caller=None):
 
     # check any case settings are not in the ones that can only be shared
     for key in case_working_params['settings'].keys():
         pass
-        if key in common_info.shared_settings_defaults:
+        if key in base_case_only_params:
             msg_logger.msg(f'Setting {key} cannot be set with a case', crumbs= crumbs,
                           hint='Move parameter from cases to the base case', caller=caller, fatal_error=True)
 

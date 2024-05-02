@@ -79,7 +79,7 @@ class _DefaultSettings(_SharedStruct):
                                     doc_str='Size of memory cache for compiled numba functions in kB' )
     NUMBA_cache_code = PVC(False, bool, expert=True,
                            doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
-    multiprocessing_case_start_delay = PVC(None, float, min=0.,expert=True,
+    multiprocessing_case_start_delay = PVC(0., float, min=0.,expert=True,
                                            doc_str='Delay start of each sucessive case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
     EPSG_code_metres_grid = PVC(None, int,
                 doc_str='If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM' )
@@ -95,8 +95,8 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                           doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
-    multi_processing_method = PVC('spawn', str, expert=True,possible_values=['fork','spawn'],
-                          doc_str='How  mutil procing is implemeted, spawn= separate work spaces, fork = has copy on parents memory space')
+    multi_processing_method = PVC('spawn', str, expert=True, possible_values=['fork','spawn'],
+                          doc_str='How  multiprocessing is implemented, ie. sets  multiprocessing.set_start_method(str),  spawn= separate work spaces, fork = has copy on parents memory space')
 
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
@@ -198,6 +198,13 @@ class _SharedInfoClass():
     block_timers={}
     classes = {}  # todo deprecated
     info = _UseFullInfo
+
+    # list of params only setable in base case
+    base_case_only_params = ['root_output_dir', 'output_file_base', 'processors', 'max_warnings',
+                                  'multi_processing_method', 'multiprocessing_case_start_delay',
+                                  'backtracking', 'add_date_to_run_output_dir', 'debug', 'use_random_seed']
+    base_case_only_params += [key for key in default_settings.possible_values() if 'numba' in key.lower()]
+
 
     def __init__(self):
 

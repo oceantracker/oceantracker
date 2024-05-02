@@ -34,7 +34,6 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
                                doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
             'grid_span': PCC(None, one_or_more_points=True, min=.0001, is3D=False, is_required=True,
                              doc_str='(width, height)  of the grid release, must be > 0.', units='meters or decimal degrees'),
-            'floating': PVC(True, bool, doc_str='Particles will float at free surface if a 3D model'),
             'z_min': PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
             'z_max': PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
             'output_file_tag': PVC('LCS', str, doc_str='tag on output file'),
@@ -67,7 +66,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
         # set up release grid is padded by one all around
         release_params = dict(class_name='oceantracker.release_groups.grid_release.GridRelease',
                               pulse_size=1, z_min=params['z_min'], z_max=params['z_max'],
-                              grid_size= [r+2,c+2],
+                              grid_size= [r+2, c+2],
                               max_age = params['lags'][-1],  # run each to largest lag
                               release_interval=0.  )
         # if 3D sort out depth range and always resuspend
@@ -116,8 +115,9 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
     def initial_setup(self):
         params = self.params
 
+        
         if si. hydro_model_cords_in_lat_long:
-            si.msg_logger.msg(' to do LCS not yet working for hydro models ',fatal_error=True, exit_now=True)
+            si.msg_logger.msg(' to do LCS not yet working for lon-lat hydro models ',fatal_error=True, exit_now=True)
 
         if params['lags'] is None: params['lags']  = [24*3600.]
         params['lags'] = np.asarray(params['lags']) # easier as an array

@@ -35,7 +35,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                         water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
                         water_depth_max =  PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
                         particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
-                        coords_allowed_in_lat_lon_order =  PVC(False, bool,
+                        coords_in_lat_lon_order =  PVC(False, bool,
                             doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
                         )
         self.add_default_params(count_start_date= PTC(None,  obsolete=True,  doc_str='Use "start" parameter'),

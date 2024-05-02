@@ -31,7 +31,7 @@ known_readers = dict(
                 schisim_v5 =  'oceantracker.reader.schism_reader_v5.SCHISMreaderNCDFv5',
                 fvcom =  'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
                 roms =  'oceantracker.reader.ROMS_reader.ROMsNativeReader',
-                delft3d_fm =  'oceantracker.reader.dev_delft_fm.DELFTFM',
+                delft3d_fm =  'oceantracker.reader.delft_fm.dev_DELFTFM',
                 generic =  'oceantracker.reader.generic_ncdf_reader.GenericUnstructuredReader',
                 dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',
                  )

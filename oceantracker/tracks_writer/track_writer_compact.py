@@ -4,7 +4,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.tracks_writer._base_tracks_writer import  _BaseWriter
 from oceantracker.tracks_writer.dev_convert_compact_tracks import convert_to_rectangular
 from oceantracker.util import  output_util
-import oceantracker.definitions as common_info
+
 
 from oceantracker.shared_info import SharedInfo as si
 
