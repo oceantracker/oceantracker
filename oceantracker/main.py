@@ -178,12 +178,10 @@ class _OceanTrackerRunner(object):
         run_builder['version'] = definitions.version
 
         #  merge defaults of settings which have to be the same for all cases
-        critical_settings = ['root_output_dir', 'output_file_base', 'processors', 'max_warnings',
-                             'backtracking','add_date_to_run_output_dir','debug','use_random_seed']
         working_params = run_builder['working_params']
-        working_params['settings'], self.settings_only_set_in_base_case = setup_util.merge_critical_settings_with_defaults(
-                                                                                            working_params['settings'], shared_info.default_settings,
-                                                                                            critical_settings,ml, crumbs=crumbs, caller=self)
+        working_params['settings'] = setup_util.merge_settings(working_params['settings'], shared_info.default_settings,
+                                                            shared_info.base_case_only_params,ml, crumbs=crumbs, caller=self)
+
         ml.exit_if_prior_errors('Errors in merge_critcal_settings_with_defaults',caller=self, crumbs=crumbs)
 
         # setup output dir and msg files
@@ -214,7 +212,7 @@ class _OceanTrackerRunner(object):
             case_info_file = self._run_single(run_builder)
         else:
             # run // case list with params as base case defaults for each run
-            case_info_file = self._run_parallel(params, case_list_params, run_builder)
+            case_info_file = self._run_parallel(run_builder, case_list_params, )
 
         ml.close()
         return case_info_file
@@ -293,25 +291,18 @@ class _OceanTrackerRunner(object):
         ml.close()
         return case_info_files
 
-    def _run_parallel(self,base_case_params, case_list_params, run_builder):
+    def _run_parallel(self,run_builder, case_list_params):
         # run list of case params
         ml = msg_logger
 
-        # split base_case_params into shared and case params
-        base_working_params = setup_util.decompose_params(shared_info, base_case_params, ml, caller=self, crumbs='_run_parallel decompose base case params')
-
-        comp_info= get_versions_computer_info.get_computer_info()
-
-        bs= base_working_params['settings']
-        num_processors = bs['processors'] if 'processors' in bs and bs['processors'] is not None else  max(int(.75*comp_info['CPUs_hardware']),1)
-        multi_processing_method =  bs['multi_processing_method'] if 'multi_processing_method' in bs and bs['processors'] else 'spawn'
+        base_working_params= run_builder['working_params']
 
         case_run_builder_list=[]
 
         for n_case, case_params in enumerate(case_list_params):
 
             case_working_params = setup_util.decompose_params(shared_info,case_params, msg_logger=ml, caller=self)
-            case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, case_working_params, ml,
+            case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, case_working_params,shared_info.base_case_only_params, ml,
                                                                                  crumbs=f'_run_parallel case #[{n_case}]', caller=None)
 
 
@@ -327,12 +318,12 @@ class _OceanTrackerRunner(object):
             case_run_builder_list.append(case_run_builder)
 
         # do runs num_processors
-        ml.progress_marker(' oceantracker:multiProcessing: processors:' + str(num_processors))
+        ml.progress_marker('oceantracker:multiProcessing: processors:' + str(base_working_params['settings']['processors']))
 
-        multiprocessing.set_start_method(multi_processing_method)
+        multiprocessing.set_start_method( base_working_params['settings']['multi_processing_method'] )
 
         # run // cases
-        with multiprocessing.Pool(processes=num_processors) as pool:
+        with multiprocessing.Pool(processes=base_working_params['settings']['processors']) as pool:
             case_summaries = pool.map(self._run1_case, case_run_builder_list)
 
         ml.progress_marker('parallel pool complete')

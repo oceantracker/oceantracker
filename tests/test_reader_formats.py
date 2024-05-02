@@ -22,11 +22,11 @@ def default_params():
         'particle_properties': {'part_decay':
                                     {'class_name': 'AgeDecay', 'decay_time_scale': 1. * 3600 * 24}},
         'release_groups': {'P1': {'points': [], 'pulse_size': 10,
-                             #     'coords_allowed_in_lat_lon_order': True, # only used if hydro-model is in
+                             #     'coords_in_lat_lon_order': True, # only used if hydro-model is in
                                   'release_interval': 3600,'z_min':-1.},
                         'Poly1': {'class_name':'PolygonRelease',
                                             'points': [], 'pulse_size': 10,
-                               #          'coords_allowed_in_lat_lon_order': True,  # only used if hydro-model is in
+                               #          'coords_in_lat_lon_order': True,  # only used if hydro-model is in
                                          'release_interval': 3600, 'z_min': -1.}},
         'dispersion': {'A_H': 1.0, 'A_V': 0.001},
         'reader': {'file_mask':None,
@@ -176,8 +176,8 @@ def get_case(n):
                  [-2.788645108730445, 123.88768495956097]]
 
             file_mask = 'NSulawesi_*.nc'
-            output_file_base = 'DELF3D-FM'
-            title = 'DELF3D-FM test'
+            output_file_base = 'DELF3D-FM-z-layer'
+            title = 'DELF3D-FM test-z-layer'
             is3D = False
 
         case 401:
@@ -191,18 +191,18 @@ def get_case(n):
             #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = False
             show_grid = False
-
         case 402:
-            # DELFT FM AIMS_Grenvelingen
-            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\AIMS_Grenvelingen'
+            # DELFT FM -sigma
+            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\AIMS_FlowFM'
 
-            x0=[[57706.375512704304, 421967.24984360463]]
-            file_mask = 'Grevelingen-FM_*_map.nc'
-            output_file_base = 'DELF3D-FM_Grevelingen'
-            title = 'DELF3D-FM test'
+            x0=[[230372.0534805571, 7581341.601568772]]
+            file_mask = 'FlowFM_map*.nc'
+            output_file_base = 'DELF3D-FM-sigma'
+            title = 'DELF3D-FM sigma'
             #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
-            is3D = True
-            show_grid = False
+
+            show_grid = True
+
         case 403:
             # DELFT FM AIMS_Uralia
             root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\AIMS_Uralia'
@@ -214,6 +214,18 @@ def get_case(n):
             #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = False
             show_grid = False
+        case 404:
+            # Grenvelingen
+            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\Grenvelingen'
+
+            x0=[[57706.375512704304, 421967.24984360463]]
+            file_mask = 'Grevelingen-FM_*_map.nc'
+            output_file_base = 'DELF3D-FM_Grevelingen'
+            title = 'DELF3D-FM test'
+            #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
+            is3D = True
+            show_grid = False
+
         case 1100:
             #OCEANUM GLORYS
             x0 =  [
@@ -301,13 +313,13 @@ def get_case(n):
     params['particle_statistics'] = {'grid1':
                                       {'class_name': 'GriddedStats2D_timeBased',
                                        'grid_center': x0[0],
-                                       'coords_allowed_in_lat_lon_order': True,
+                                       'coords_in_lat_lon_order': True,
                                        'grid_span' : [.1,.15] if geo_cords else [10000,10000],
                                        'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min': 'moving', 'z_min': -2,
                                        'grid_size': [120, 121]},
                                      'poly1':
                                          {'class_name': 'PolygonStats2D_timeBased',
-                                          'coords_allowed_in_lat_lon_order': True,
+                                          'coords_in_lat_lon_order': True,
                                           'polygon_list':[dict(points=poly_points)],
                                             'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min': 'moving', 'z_min': -2,
                                           'grid_size': [120, 121]}

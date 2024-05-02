@@ -90,7 +90,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         ml.print_line()
 
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
-        if si.settings['multiprocessing_case_start_delay'] is not None:
+        if si.settings['multiprocessing_case_start_delay'] > 0:
             delay = si.settings['multiprocessing_case_start_delay'] * (si.run_info.caseID % si.settings['processors'])
             ml.progress_marker('Delaying start by  ' + str(delay) + ' sec')
             sleep(delay)
@@ -220,15 +220,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                                          'warnings': ml.warning_count,
                                          'notes': ml.note_count}
 
-
-
-
-
-
         return si.case_summary
-
-
-
 
     #@function_profiler(__name__)
     def _do_a_run(self):

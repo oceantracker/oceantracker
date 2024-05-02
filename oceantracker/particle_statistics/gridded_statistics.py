@@ -68,14 +68,14 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         else:
             if si.hydro_model_cords_in_lat_long:
                 info['grid_center_lon_lat'] = params['grid_center'].copy()
-                info['grid_center']= si._transform_lon_lat_to_meters( info['grid_center_lon_lat'], in_lat_lon_order=self.params['coords_allowed_in_lat_lon_order'])
+                info['grid_center']= si._transform_lon_lat_to_meters( info['grid_center_lon_lat'], in_lat_lon_order=self.params['coords_in_lat_lon_order'])
             else:
                 info['grid_center'] =   params['grid_center']
 
         # get grid span as (2,) array
         if si.hydro_model_cords_in_lat_long:
             info['grid_span_lon_lat'] = params['grid_span'].copy()
-            info['grid_span'] = si._transform_lon_lat_deltas(info['grid_span_lon_lat'], info['grid_center_lon_lat'], deltas_in_lat_lon_order=self.params['coords_allowed_in_lat_lon_order'])
+            info['grid_span'] = si._transform_lon_lat_deltas(info['grid_span_lon_lat'], info['grid_center_lon_lat'], deltas_in_lat_lon_order=self.params['coords_in_lat_lon_order'])
         else:
             info['grid_span'] = params['grid_span']
 

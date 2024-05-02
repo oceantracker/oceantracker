@@ -90,7 +90,7 @@ class _BaseReader(ParameterBaseClass):
 
     # default setup
     def setup_water_velocity(self,nc,grid):
-        # tweak to be depth avearged
+        # tweak to be depth averaged
         fm = self.params['field_variable_map']
 
         if nc.is_var(fm['water_velocity'][0]):

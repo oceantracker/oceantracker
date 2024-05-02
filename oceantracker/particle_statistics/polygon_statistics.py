@@ -42,7 +42,7 @@ class _CorePolygonMethods(ParameterBaseClass):
                                 si.msg_logger, crumbs='polygon_statistics_merging polygon list')
                 if si.hydro_model_cords_in_lat_long:
                     p['points_lon_lat'] = p['points'].copy()
-                    p['points'] = si._transform_lon_lat_to_meters(p['points_lon_lat'], in_lat_lon_order=params['coords_allowed_in_lat_lon_order'])
+                    p['points'] = si._transform_lon_lat_to_meters(p['points_lon_lat'], in_lat_lon_order=params['coords_in_lat_lon_order'])
 
         if len(params['polygon_list'])==0:
             ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,

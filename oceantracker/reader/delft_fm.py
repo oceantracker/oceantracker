@@ -23,7 +23,7 @@ class dev_DELFTFM(_BaseReader):
                                   'zlevel': PVC(None, str),
                                   'triangles': PVC('mesh2d_face_nodes', str),
                                   'bottom_cell_index': PVC(None, str),
-                                  'is_dry_cell': PVC('wetdry_elem', int, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
+                                  'is_dry_cell': PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
             'field_variable_map': {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ucz'], str, fixed_len=3),
                                    'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
@@ -44,10 +44,12 @@ class dev_DELFTFM(_BaseReader):
         nc = NetCDFhandler(file_name,'r')
         is_file_type= nc.is_var('mesh2d_node_x') and nc.is_var('mesh2d_face_nodes')
 
-        mesh2d_face_nodes = nc.read_a_variable('mesh2d_face_nodes')
-        if mesh2d_face_nodes.shape[1] > 4:
-            ml.msg(f'Reader currently only works with triangle and quad cells, not cells with {mesh2d_face_nodes.shape[1]} sides',
-                     fatal_error=True, exit_now= True, caller=self)
+        # further checks
+        if is_file_type:
+            mesh2d_face_nodes = nc.read_a_variable('mesh2d_face_nodes')
+            if mesh2d_face_nodes.shape[1] > 4:
+                ml.msg(f'DELFT3D FM-reader currently only works with triangle and quad cells, not cells with {mesh2d_face_nodes.shape[1]} sides',
+                         fatal_error=True, exit_now= True, caller=self)
         nc.close()
         return is_file_type
 

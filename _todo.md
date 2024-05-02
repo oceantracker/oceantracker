@@ -2,16 +2,6 @@
 
 # Required for version 0.5
 
-1. ~~exit if using obsolete  params~~
-2. relese groups
-    1.  flag if point or polygon all outside domain, 
-    4.  flag if none released ie always dry, 
-
-2.  ~~run and warn of non releasses~~, improve repotring of releases errors at run end
-3.  flag error if any end  before start in scheduler
-4. try to write partial json if error
-5. better way to note release errors, only flag any points that never released at end, or show release success?
-
 1. ScishimV5 reader
     1. Bug fix in sigma profile builder for WHOI hindcast
 1. DEFT3D FM
@@ -51,13 +41,9 @@
 1. convert to part_ops.set_values( part_prop,,.. active) form
 
 
-
 ## New additions
 
 1. helper method to add to  polygon lists of a class
-2. unit tests
-    1. write ref case option
-    1. master.py to run all tests 
 1. check pointing of run to enable restart
 1. native global lon-lat  models
 1. used np.datetime64, milli sec internally
@@ -68,11 +54,6 @@
 
 ## Niggles that need sorting some time
 
-1. Message logger ~~tidy up exit if prior error~~
-1. better flows in parameter checking crumb trail
-    1.??? 
-1. Release group is dry some of the time so fails to release, some times and gives , fatal error if none released?
-2. readerr grid variable map in base_ reader?
 3. tracks eadfer to reain dead particle locations in retangular form
 1. isodate time zero param for all readers? apply it outside reader_read_time() method, put as time offsets in hours to merge nested readers?
 1. List check makes default values of None into [], should be None? Look at merging list params, better to remove, or keep for building polygon lists ?
