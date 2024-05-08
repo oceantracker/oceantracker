@@ -1,14 +1,14 @@
 import numpy as np
 
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
-from oceantracker.release_groups._base_release_group import _BaseReleaseGroup
+from oceantracker.release_groups._base_release_group import BaseReleaseGroup
 from oceantracker.util.numba_util import njitOT
 
 
 from oceantracker.shared_info import SharedInfo as si
 
 
-class PointRelease(_BaseReleaseGroup):
+class PointRelease(BaseReleaseGroup):
     '''
     Release pulse of particles at given points, or in cicile around points.
     '''

@@ -10,7 +10,7 @@ from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import SharedInfo as si
 
 from oceantracker.util import time_util
-class _BaseParticleLocationStats(ParameterBaseClass):
+class BaseParticleLocationStats(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes

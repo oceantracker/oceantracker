@@ -1,10 +1,10 @@
-from oceantracker.release_groups._base_release_group import _BaseReleaseGroup
+from oceantracker.release_groups._base_release_group import BaseReleaseGroup
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC,ParameterCoordsChecker as PCC
 
 from oceantracker.shared_info import SharedInfo as si
 
-class GridRelease(_BaseReleaseGroup):
+class GridRelease(BaseReleaseGroup):
     '''
     Release pules of particles on a regular grid.
     '''

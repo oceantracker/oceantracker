@@ -259,6 +259,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # particle_release groups setup and instances,
         # find extremes of  particle existence to calculate model start time and duration
         t0 = perf_counter()
+
+        if len(particle_release_groups_params_dict) ==0:
+            si.msg_logger.msg('No particle "release_groups" parameters found', fatal_error=True,exit_now=True)
+
         pgm = si.core_roles.particle_group_manager
         ri = si.run_info
         # set up to start end times based on release_groups
@@ -373,7 +377,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         for user_type in ['velocity_modifiers','trajectory_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
             for name, params in si.working_params['roles_dict'][user_type].items():
-                i = si.add_user_class(user_type,name, params,class_type= 'user',   crumbs=' making class type ' + user_type + ' ')
+                i = si.add_user_class(user_type,name, params,class_type= 'user',   crumbs=' making class type ' + user_type + ' ', caller=self)
                 i.initial_setup()  # some require instanceID from above add class to initialise
 
 

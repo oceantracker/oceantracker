@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.spatial import cKDTree
 
-from oceantracker.interpolator._base_interp import _BaseInterp
+from oceantracker.interpolator._base_interp import BaseInterp
 from oceantracker.util import basic_util
 from oceantracker.util.profiling_util import function_profiler
 from time import perf_counter
@@ -15,7 +15,7 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
 
 from oceantracker.shared_info import SharedInfo as si
 
-class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(_BaseInterp):
+class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
 
     # uses tweaked sci py which allows using start triangle location
 

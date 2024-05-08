@@ -2,7 +2,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 import oceantracker.util.basic_util  as basic_util
 
-class _BaseInterp(ParameterBaseClass):
+class BaseInterp(ParameterBaseClass):
     # prototype for interplotor
 
     def __init__(self):

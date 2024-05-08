@@ -3,12 +3,12 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from oceantracker.util import time_util, json_util
 from oceantracker.reader.util.hydromodel_grid_transforms import convert_regular_grid_to_triangles
 from oceantracker.reader.util import reader_util
-from oceantracker.reader._base_generic_reader import _BaseGenericReader
+from oceantracker.reader._base_generic_reader import BaseGenericReader
 from copy import  deepcopy
 
 from oceantracker.shared_info import SharedInfo as si
 
-class dev_GenericStructuredReader(_BaseGenericReader):
+class dev_GenericStructuredReader(BaseGenericReader):
 
     def __init__(self):
         super().__init__()

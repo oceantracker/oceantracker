@@ -8,7 +8,7 @@ from oceantracker.util.numba_util import njitOT
 from oceantracker.util.basic_util import nopass
 from oceantracker.shared_info import SharedInfo as si
 
-class _BaseReleaseGroup(ParameterBaseClass):
+class BaseReleaseGroup(ParameterBaseClass):
     def __init__(self):
         super().__init__() # get parent defaults
         self.add_default_params(

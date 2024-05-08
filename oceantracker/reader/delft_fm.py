@@ -1,4 +1,4 @@
-from oceantracker.reader._base_reader import _BaseReader
+from oceantracker.reader._base_reader import BaseReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
 from oceantracker.reader.util.hydromodel_grid_transforms import convert_regular_grid_to_triangles
 import  oceantracker.util.time_util as time_util
@@ -11,7 +11,7 @@ from oceantracker.reader.util import  hydromodel_grid_transforms
 
 from oceantracker.shared_info import SharedInfo as si
 
-class dev_DELFTFM(_BaseReader):
+class dev_DELFTFM(BaseReader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params

@@ -2,14 +2,14 @@ import numpy as np
 from os import path
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.ncdf_util import NetCDFhandler
-from oceantracker.integrated_model._base_model import  _BaseModel
+from oceantracker.integrated_model._base_model import  BaseModel
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
 #from oceantracker.util.parameter_checking import ParameterListCheckerV2 as PLC2
 from oceantracker.util import time_util
 from copy import  deepcopy
 from oceantracker.shared_info import SharedInfo as si
 
-class dev_LagarangianStructuresFTLE2D(_BaseModel):
+class dev_LagarangianStructuresFTLE2D(BaseModel):
     '''Time series of Lagrangian Coherent Structures heat maps,
      calculated as Finite-Time Lyapunov exponents (FTLEs) at given lag times,
      see Haller, G., 2015. Lagrangian coherent structures.
@@ -20,27 +20,27 @@ class dev_LagarangianStructuresFTLE2D(_BaseModel):
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        self.add_default_params({
-            'start': PTC(None, doc_str='start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
-            'end': PTC(None, doc_str=' end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
-            'update_interval': PVC(3600.,float,units='sec',min=0.,
+        self.add_default_params(
+            start=  PTC(None, doc_str='start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
+            end=  PTC(None, doc_str=' end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
+            update_interval=  PVC(3600.,float,units='sec',min=0.,
                                     doc_str='Time in seconds between calculating statistics, will be rounded to be a multiple of the particle tracking time step'),
-            'lags': PLC(None, float, units='sec',min=1,min_len=1,
+            lags=  PLC(None, float, units='sec',min=1,min_len=1,
                         is_required=True,
                         doc_str='List of one or more times after particle release to calculate Lagarangian Coherent Structures, default is 1 day'),
-            'grid_size': PLC([100, 99],int, fixed_len=2,  min=1, max=10 ** 5,
+            grid_size=  PLC([100, 99],int, fixed_len=2,  min=1, max=10 ** 5,
                                             doc_str='number of rows and columns in grid'),
-            'grid_center': PCC(None, one_or_more_points=True, is3D=False,is_required=True,
+            grid_center=  PCC(None, one_or_more_points=True, is3D=False,is_required=True,
                                doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
-            'grid_span': PCC(None, one_or_more_points=True, min=.0001, is3D=False, is_required=True,
+            grid_span=  PCC(None, single_cord=True, min=.0001, is3D=False, is_required=True,
                              doc_str='(width, height)  of the grid release, must be > 0.', units='meters or decimal degrees'),
-            'z_min': PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
-            'z_max': PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
-            'output_file_tag': PVC('LCS', str, doc_str='tag on output file'),
-            #'backwards': PVC(False, bool, doc_str='Do LCS backwards in time'),
-            'write_intermediate_results': PVC(False, bool, doc_str='write intermediate arrays, x_lag, strain_matrix. Useful for checking results'),
-            'write_tracks':             PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off by default for LCS'),
-        })
+            z_min=  PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
+            z_max=  PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
+            output_file_tag=  PVC('LCS', str, doc_str='tag on output file'),
+            #'backwards=  PVC(False, bool, doc_str='Do LCS backwards in time'),
+            write_intermediate_results=  PVC(False, bool, doc_str='write intermediate arrays, x_lag, strain_matrix. Useful for checking results'),
+            write_tracks=  PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off by default for LCS'),
+        )
     def add_settings_and_class_params(self):
         # change parameters
         info = self.info

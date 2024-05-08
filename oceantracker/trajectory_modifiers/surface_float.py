@@ -1,13 +1,13 @@
 import numpy as np
 from numba import njit
 from oceantracker.util.numba_util import njitOT
-from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import BaseTrajectoryModifier
 
 from oceantracker.shared_info import SharedInfo as si
 
 #  keeps particles at the free surface/tide height
 
-class SurfaceFloat(_BaseTrajectoryModifier):
+class SurfaceFloat(BaseTrajectoryModifier):
 
     def update(self,n_time_step, time_sec, active):
          

@@ -5,7 +5,7 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.util.numpy_util import possible_dtypes
 from oceantracker.util import time_util
 
-class _BaseTimeVaringInfo(ParameterBaseClass):
+class BaseTimeVaringInfo(ParameterBaseClass):
     # single valued time varying information, ie not a particle property
     # eg  "time" data, numer released so far
     # properties which are maintained in memory and may be written out, eg group and particle
@@ -38,7 +38,7 @@ class _BaseTimeVaringInfo(ParameterBaseClass):
     def get_dtype(self):  return np.dtype(self.params['dtype'])
 
 
-class TimeVaryingInfo(_BaseTimeVaringInfo):
+class TimeVaryingInfo(BaseTimeVaringInfo):
     pass
 
 

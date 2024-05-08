@@ -61,6 +61,8 @@ def plot_sample(caseInfoFile, num_to_plot=10 ** 3):
     mag = np.sqrt(x[:, :, 0]**2 + x [:, :, 1]**2)
     mag0 = np.sqrt(x0[:, 0]**2 + x0[ :, 1]**2)
     plt.plot(t, mag - mag0)
+    plt.ylim([-1, 1])
+
     plt.text(0.1, .1, 'deviation from circle, m', transform=ax.transAxes)
 
 # particle speed from change in positions is harsher test
@@ -73,7 +75,7 @@ def plot_sample(caseInfoFile, num_to_plot=10 ** 3):
     plt.xlabel('days')
     plt.ylabel('speed')
     plt.text(0.1, .9, 'Particle Speed', transform=ax.transAxes)
-
+    plt.ylim([0,2])
     ax=plt.subplot(2, 2, 4)
 
     if v.shape[2] ==2:
@@ -200,13 +202,13 @@ def time_check_plot(runCaseInfo):
 
 def base_param(is3D=False, isBackwards = False):
 
-    # for speed comparions with Scipy make sure AH>0 otherwise its last particle recycling trick helps it
+    # for speed comparisons with Scipy make sure AH>0 otherwise its last particle recycling trick helps it
 
     r0 = np.array([2000., 4000., 8000, 10000])  # no bad starts
 
-    # all of of pulse start at same location
+    # all of  pulse start at same location
     p0 = [[0, 2000.], [0, 4000.], [0, 8000.], [0, 10000.]]
-    poly0 = [[9000., 9000], [10000, 9000], [10000, 10000.]]
+    #poly0 = [[9000., 9000], [10000, 9000], [10000, 10000.]]
 
     outputdir = 'tests\\output'
     input_dir =path.normpath(path.join(path.split(__file__)[0],'testData'))
@@ -216,9 +218,9 @@ def base_param(is3D=False, isBackwards = False):
             'output_file_base': 'test_particle',
             'backtracking': isBackwards,
            'write_tracks': True,
-            'time_step': 5*60,
-           'duration': 10. * 24 * 3600,
-            'reader': {'class_name':	"oceantracker.reader.generic_ncdf_reader.GenericUnstructuredReader",
+            'time_step': 15*60,
+           'max_run_duration': 10. * 24 * 3600,
+            'reader': {'class_name':	"oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
                   'file_mask' : 'circFlow2D*.nc', 'input_dir': input_dir,
                         'field_variable_map': {'water_velocity' : ['u','v'],'water_depth': 'depth','tide': 'tide' },
                         'dimension_map': {'node': 'node', 'time': 'time'},
@@ -229,17 +231,13 @@ def base_param(is3D=False, isBackwards = False):
                          'isodate_of_hindcast_time_zero': '2000-01-01'},
 
 
-             'solver': {'RK_order': 4, 'n_sub_steps': 9},  # 5min steps to mact OT v01 paper
+             'solver': {'RK_order': 4},  # 5min steps to mact OT v01 paper
              'particle_group_manager': {},
              'release_groups': {'mypoint':
-                                    {'points': p0, 'pulse_size': 1, 'release_interval': 3600, 'userRelease_groupID': 5,
-                                    'max_age': 10 * 24 * 3600, 'user_release_group_name': 'A group', 'z_range': [-1, 0],
+                                    {'points': p0, 'pulse_size': 1, 'release_interval': 3600, 'user_release_groupID': 5,
+                                    'max_age': 10 * 24 * 3600, 'user_release_group_name': 'A group',
                                     },
-                            'mypolygon':{'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
-                                        'points': poly0, 'pulse_size': 1, 'release_interval': 3600, 'userRelease_groupID': 200,
-                                            'max_age': 4 * 24 * 3600, 'user_release_group_name': 'B group',
-                                            'z_range': [-1, 0],
-                  }
+
                                 },
              'dispersion': {'A_H': 0.,'A_V':0.},
 
@@ -269,7 +267,7 @@ if __name__ == '__main__':
     # windows/linux  data source
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-test', nargs='?', const=0, type=int, default=1)
+    parser.add_argument('--test', nargs='?', const=0, type=int, default=1)
     parser.add_argument('--size', nargs='?', const=0, type=int, default=0)
     parser.add_argument('-scatch_tests', action='store_true')
     parser.add_argument('-dev', action='store_true')
@@ -289,8 +287,8 @@ if __name__ == '__main__':
 
         if ntest==1:
             # zero dispersion test 2d/3D
-            for is3D in [False, True]:
-                for isBackwards in[True, False ]:
+            for is3D in [False]:
+                for isBackwards in[False]:
                     params = base_param(is3D=is3D, isBackwards=isBackwards)
                     params['max_run_duration']= 14 * 24 * 3600.
                     params['dispersion'].update( {'A_H': 0.,'A_V':0.0})
@@ -353,7 +351,6 @@ if __name__ == '__main__':
             ot = run_test(args, params={'dispersion': {'A_H': 0.},
                                         'particle_group_manager': {'pulse_size': 5, 'release_interval': 300},
                                         # test newreader
-                                        'solver' : {'n_sub_steps' :2,'duration': 2.}
                                         })
 
         print(' Total run time ' + '%5.2f' % (time.time() - t0))

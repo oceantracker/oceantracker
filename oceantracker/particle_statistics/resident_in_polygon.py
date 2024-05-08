@@ -1,4 +1,4 @@
-from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
+from oceantracker.particle_statistics._base_location_stats import BaseParticleLocationStats
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC, merge_params_with_defaults
 from copy import  deepcopy
 from oceantracker.release_groups.polygon_release import PolygonRelease
@@ -10,7 +10,7 @@ import numpy as np
 from numba import njit
 #todo much clearner to  have user define polygon list for residewnce time per polygon like stats polygon!
 
-class ResidentInPolygon(_BaseParticleLocationStats):
+class ResidentInPolygon(BaseParticleLocationStats):
     def __init__(self):
         # set up info/attributes
         super().__init__()

@@ -1,4 +1,4 @@
-from oceantracker.reader._base_reader import _BaseReader
+from oceantracker.reader._base_reader import BaseReader
 from oceantracker.reader.util import reader_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
 from oceantracker.util import  time_util
@@ -11,7 +11,7 @@ from oceantracker.definitions import node_types
 
 from oceantracker.shared_info import SharedInfo as si
 
-class SCHISMreaderNCDF(_BaseReader):
+class SCHISMreaderNCDF(BaseReader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params

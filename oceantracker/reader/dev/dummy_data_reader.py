@@ -1,5 +1,5 @@
 import numpy as np
-from oceantracker.reader._base_reader import _BaseReader
+from oceantracker.reader._base_reader import BaseReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
 
 from oceantracker.util.triangle_utilities import split_quad_cells, get_quad_nodes
@@ -7,7 +7,7 @@ from oceantracker.util.triangle_utilities import split_quad_cells, get_quad_node
 #  mimicking a netcdf  utility NetCDFhandler class
 
 
-class DummyDataReader(_BaseReader):
+class DummyDataReader(BaseReader):
 
 
     def __init__(self):
@@ -60,7 +60,7 @@ class DummyDataReader(_BaseReader):
     def get_field_params(self, nc, name):
         return nc.get_field_params(name)
 
-class _BaseDummyNCDF(object):
+class BaseDummyNCDF(object):
 
     def __init__(self):
         self.grid = dict(time = np.arange(0,14*24*3600))
@@ -106,7 +106,7 @@ class _BaseDummyNCDF(object):
 
 
 
-class SingleOceanGyre2D(_BaseDummyNCDF):
+class SingleOceanGyre2D(BaseDummyNCDF):
 
     def is3D(self): return False
 

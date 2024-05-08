@@ -139,6 +139,8 @@ class FieldGroupManager(ParameterBaseClass):
         self._find_hori_cell(time_sec, xq, active)
         if info['is3D']:
             self._find_vertical_cell(time_sec, xq, active)
+
+        # only fix if single grid, nested grids get fixed by nested grid manager
         if fix_those_outside_open_boundary:
             self._fix_those_outside_open_boundary(active)# fix outside boundary
         self._fix_bad_cell_search(active) # those stil bad, eg nan etc
@@ -539,7 +541,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def are_points_inside_domain(self,x, include_dry_cells):
         # only primary/outer grid
-        is_inside, part_data = self.interpolator.are_points_inside_domain(self.grid,x)
+        is_inside, part_data = self.interpolator.are_points_inside_domain(self.grid, x)
         n = x.shape[0]
         part_data['hydro_model_gridID'] = np.zeros((n,), dtype=np.int8)
 

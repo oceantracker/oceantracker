@@ -10,7 +10,7 @@ import numpy as np
 
 from oceantracker.shared_info import SharedInfo as si
 
-class _BaseTriangleProperties(ParameterBaseClass):
+class BaseTriangleProperties(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()
