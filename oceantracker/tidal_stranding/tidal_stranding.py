@@ -1,5 +1,5 @@
 from numba import njit
-from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import BaseTrajectoryModifier
 from oceantracker.util.numba_util import njitOT
 
 from oceantracker.shared_info import SharedInfo as si
@@ -9,7 +9,7 @@ status_stranded_by_tide = int(si.particle_status_flags.stranded_by_tide)
 status_stationary = int(si.particle_status_flags.stationary)
 status_moving = int(si.particle_status_flags.moving)
 
-class TidalStranding(_BaseTrajectoryModifier):
+class TidalStranding(BaseTrajectoryModifier):
 
     def __init__(self):
         # set up info/attributes

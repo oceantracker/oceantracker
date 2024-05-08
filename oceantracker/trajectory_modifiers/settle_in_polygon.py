@@ -1,11 +1,11 @@
 import numpy as np
-from  oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+from  oceantracker.trajectory_modifiers._base_trajectory_modifers import BaseTrajectoryModifier
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParamValueChecker as PVC
 from oceantracker.util.polygon_util import  InsidePolygon
 
 from oceantracker.shared_info import SharedInfo as si
 
-class SettleInPolygon(_BaseTrajectoryModifier):
+class SettleInPolygon(BaseTrajectoryModifier):
     # fallows particles to freeze if inside a polygon
     def __init__(self):
         # set up info/attributes

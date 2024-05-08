@@ -3,11 +3,11 @@ from numba import njit
 from oceantracker.util.numba_util import njitOT
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
-from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
+from oceantracker.particle_statistics._base_location_stats import BaseParticleLocationStats
 #from oceantracker.util.parameter_checking import ParameterListCheckerV2 as PLC2
 from oceantracker.shared_info import SharedInfo as si
 
-class GriddedStats2D_timeBased(_BaseParticleLocationStats):
+class GriddedStats2D_timeBased(BaseParticleLocationStats):
     # class to hold counts of particles inside grid squares
 
     def __init__(self):

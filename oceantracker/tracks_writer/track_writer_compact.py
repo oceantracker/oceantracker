@@ -1,14 +1,14 @@
 import numpy as np
 from os import  path
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.tracks_writer._base_tracks_writer import  _BaseWriter
+from oceantracker.tracks_writer._base_tracks_writer import  BaseWriter
 from oceantracker.tracks_writer.dev_convert_compact_tracks import convert_to_rectangular
 from oceantracker.util import  output_util
 
 
 from oceantracker.shared_info import SharedInfo as si
 
-class CompactTracksWriter(_BaseWriter):
+class CompactTracksWriter(BaseWriter):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaultsults

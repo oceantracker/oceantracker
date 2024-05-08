@@ -1,12 +1,12 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import BaseTrajectoryModifier
 from oceantracker.particle_properties.util import particle_comparisons_util
 
 from oceantracker.shared_info import SharedInfo as si
 
 
-class CullParticles(_BaseTrajectoryModifier):
+class CullParticles(BaseTrajectoryModifier):
     '''
     Prototype for how to  cull particles, this version just culls random particles,
      inherit and change "def select_particles_to_cull(self, time_sec, active):" method to give other behaviors')

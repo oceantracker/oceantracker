@@ -5,7 +5,7 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.util import time_util
 from oceantracker.shared_info import SharedInfo as si
 from oceantracker.util.numpy_util import possible_dtypes
-class _BaseParticleProperty(ParameterBaseClass):
+class BaseParticleProperty(ParameterBaseClass):
     # property of each particle individually, eg x, time released etc , status
     # or non-time varying parameter eg ID,
     # properties which are maintained in memory and may be written out, eg group and particle
@@ -128,5 +128,5 @@ class _BaseParticleProperty(ParameterBaseClass):
         return found
 
 
-class ParticleProperty(_BaseParticleProperty):
+class ParticleProperty(BaseParticleProperty):
     pass

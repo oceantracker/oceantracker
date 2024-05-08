@@ -1,6 +1,6 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.dispersion._base_dispersion import _BaseTrajectoryModifer
+from oceantracker.dispersion._base_dispersion import BaseTrajectoryModifer
 from numba import njit, types as nbtypes
 from oceantracker.util.numba_util import njitOT
 
@@ -8,7 +8,7 @@ from random import normalvariate
 from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import SharedInfo as si
 
-class RandomWalk(_BaseTrajectoryModifer):
+class RandomWalk(BaseTrajectoryModifer):
     '''
     implements random walk of particles by adding equivalent random velocity
     '''

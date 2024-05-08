@@ -93,6 +93,8 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file' )
     include_dispersion = PVC(True, bool,
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
+    include_resuspension = PVC(True, bool,
+                doc_str='Allow particles to resuspend')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                           doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
     multi_processing_method = PVC('spawn', str, expert=True, possible_values=['fork','spawn'],
@@ -149,7 +151,6 @@ class _CellSearchStatusFlags(_SharedStruct):
         blocked_dry_cell=-4
         bad_cord=-20
         failed=-30
-
 
 class _RunInfo(_SharedStruct):
     is3D_run = None
@@ -263,6 +264,10 @@ class _SharedInfoClass():
                            crumbs=crumbs, exit_now= True)
 
         i =self.make_instance_from_params( class_role, params, name=name, default_classID=default_classID, crumbs=crumbs)
+
+        if i is None:
+            ml.msg('No "class_name" parameter given and no known default class_name ', caller=caller, crumbs=crumbs, fatal_error=True, exit_now=True)
+
         i.info['name'] = name
         i.info['type'] = class_type
         i.info['class_role'] = class_role

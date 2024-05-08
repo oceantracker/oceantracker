@@ -169,7 +169,7 @@ class Solver(ParameterBaseClass):
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
 
         # resuspension is a core trajectory modifier
-        if si.run_info.is3D_run:
+        if si.settings.include_resuspension and  si.run_info.is3D_run:
             # friction_velocity property  is now updated, so do resupension
             si.core_roles.resuspension.update(n_time_step,time_sec, alive)
 

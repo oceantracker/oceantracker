@@ -59,7 +59,9 @@ class ClassImporter():
         elif short_name in self.short_name_class_map:
             return self.short_name_class_map[short_name]['class_obj']
         else:
-            return self._import_module_from_string(class_name)
+            mod,_ ,c = class_name.rpartition('.')
+            m= self._import_module_from_string(mod)
+            return getattr(m,c) # get class as module attribute
 
 
     def new_make_class_instance_from_params(self, class_role, params, name = None,  default_classID=None,

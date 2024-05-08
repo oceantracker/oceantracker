@@ -4,7 +4,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 
-class _BaseResuspension(ParameterBaseClass):
+class BaseResuspension(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes

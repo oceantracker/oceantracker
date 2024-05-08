@@ -19,7 +19,7 @@ from oceantracker.definitions import node_types
 
 from oceantracker.shared_info import SharedInfo as si
 
-class _BaseReader(ParameterBaseClass):
+class BaseReader(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params

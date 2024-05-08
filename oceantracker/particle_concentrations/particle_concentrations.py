@@ -1,4 +1,4 @@
-from oceantracker.particle_concentrations._base_user_triangle_properties import _BaseTriangleProperties
+from oceantracker.particle_concentrations._base_user_triangle_properties import BaseTriangleProperties
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.util.numba_util import njitOT
 from numba import njit
@@ -6,7 +6,7 @@ from oceantracker.util.numba_util import njitOT
 import numpy as np
 from oceantracker.shared_info import SharedInfo as si
 
-class  ParticleConcentrations2D(_BaseTriangleProperties):
+class  ParticleConcentrations2D(BaseTriangleProperties):
     def __init__(self):
         super().__init__()
         # set up info/attributes

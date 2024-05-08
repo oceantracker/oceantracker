@@ -1,4 +1,4 @@
-from oceantracker.reader._base_reader import _BaseReader
+from oceantracker.reader._base_reader import BaseReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 from oceantracker.util.ncdf_util import NetCDFhandler
@@ -14,7 +14,7 @@ from oceantracker.shared_info import SharedInfo as si
 #todo use A_H and A_V fields in random walk
 #todo implement depth average mode using depth average variables in the file
 
-class unstructured_FVCOM(_BaseReader):
+class unstructured_FVCOM(BaseReader):
     # loads a standard SCHISM netcdf output file with nodal data
     # variable names can be tweaked via maps in shared_params, if non-standard names used
 

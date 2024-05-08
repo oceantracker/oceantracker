@@ -10,7 +10,7 @@ from oceantracker.shared_info import SharedInfo as si
 # class to write with, outline methods needed
 # a non-writer, as all methods are None
 
-class _BaseWriter(ParameterBaseClass):
+class BaseWriter(ParameterBaseClass):
     # particle property  write modes,   used to set when to write  properties to output, as well as if to calculate at all
 
 

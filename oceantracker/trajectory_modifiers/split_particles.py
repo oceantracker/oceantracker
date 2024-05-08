@@ -1,4 +1,4 @@
-from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import BaseTrajectoryModifier
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 from oceantracker.particle_properties.util import particle_comparisons_util
@@ -6,7 +6,7 @@ from oceantracker.particle_properties.util import particle_comparisons_util
 from oceantracker.shared_info import SharedInfo as si
 
 # proptype for how to  split particles
-class SplitParticles(_BaseTrajectoryModifier):
+class SplitParticles(BaseTrajectoryModifier):
     # splits all particles at given time interval
     def __init__(self):
         # set up info/attributes
