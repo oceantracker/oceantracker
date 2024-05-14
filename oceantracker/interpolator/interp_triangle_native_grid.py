@@ -12,7 +12,7 @@ from oceantracker.interpolator.util import triangle_interpolator_util as tri_int
 from oceantracker.particle_properties.util import  particle_operations_util
 
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
-
+from oceantracker.definitions import cell_search_status_flags
 from oceantracker.shared_info import SharedInfo as si
 
 class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
@@ -47,7 +47,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
 
         pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype='int32', initial_value=0))  # start with cell number guess of zero
         pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype='int32', initial_value=0))  # start with cell number guess of zero
-        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value=si.cell_search_status_flags.ok, dtype='int8'))
+        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value= cell_search_status_flags.ok, dtype='int8'))
 
         pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype='float32'))
 
@@ -313,7 +313,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
                 params['max_search_steps'], params['bc_walk_tol'], open_boundary_type, si.settings['block_dry_cells'], active)
 
         # try to fix any failed walks
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', si.cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
 
         if sel.size > 0:
             # si.msg_logger.msg(f'Search retried for {sel.size} cells')
@@ -329,7 +329,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
 
 
             # recheck for additional failures
-            sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', si.cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
+            sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
 
             if sel.size > 0:
                 wf = {'x0': part_prop['x_last_good'].get_values(sel),

@@ -7,7 +7,6 @@ import numpy as np
 from oceantracker.util.triangle_utilities import split_quad_cells
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
 from copy import deepcopy
-from oceantracker.definitions import node_types
 
 from oceantracker.shared_info import SharedInfo as si
 
@@ -210,7 +209,8 @@ class SCHISMreaderNCDF(BaseReader):
         # make boolen of whether node is an open boundary node
         # read schisim  hgrid file for open boundary data
 
-        if self.params['hgrid_file_name'] is None:    return  np.full((grid['x'].shape[0],), False)
+        if self.params['hgrid_file_name'] is None:
+            return  np.full((grid['x'].shape[0],), False)
 
         hgrid = read_hgrid_file(self.params['hgrid_file_name'])
 

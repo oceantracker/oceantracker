@@ -7,6 +7,7 @@ package_fancy_name= 'OceanTracker'
 
 from os import path
 import subprocess, sys
+from dataclasses import  dataclass, asdict
 
 version= dict(major= 0.5, revision  = 1, date = '2024-03-30', parameter_ver=0.5)
 version['str'] = f"{version['major']:.2f}.{version['revision']:04.0f}-{version['date']}"
@@ -36,8 +37,6 @@ known_readers = dict(
                 dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',
                  )
 
-node_types= dict(interior = 0,island_boundary = 1, domain_boundary= 2, open_boundary=3, land = 4)
-
 
 default_classes_dict = dict(
                 solver= 'oceantracker.solver.solver.Solver',
@@ -59,3 +58,42 @@ default_classes_dict = dict(
                 field_A_Z_profile_vertical_gradient='oceantracker.fields.field_vertical_gradient.VerticalGradient',
                 )
 
+# index values
+
+# below are mapping names to index name
+@dataclass
+class _base_values_class:
+    def asdict(self):
+        return asdict(self)
+
+# types of node
+@dataclass
+class _node_types_class(_base_values_class):
+    interior: int = 0
+    island_boundary: int = 1
+    domain_boundary: int = 2
+    open_boundary: int = 3
+    land: int = 4
+node_types = _node_types_class()
+
+
+# face types
+@dataclass
+class _face_types_class(_base_values_class):
+    domain_boundary: int = -1
+    open_boundary: int = -2
+face_types = _face_types_class()
+
+# status of cell search
+@dataclass
+class _CellSearchStatusFlags(_base_values_class):
+    ok: int = 0
+    outside_open_boundary: int = 1
+    blocked_domain: int = -5
+    blocked_dry_cell : int= -4
+    bad_cord: int = -20
+    failed: int = -30
+cell_search_status_flags = _CellSearchStatusFlags()
+
+# particle prop types
+particle_property_types = ['manual_update', 'from_fields', 'user']

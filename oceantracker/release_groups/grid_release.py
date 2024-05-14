@@ -1,7 +1,7 @@
 from oceantracker.release_groups._base_release_group import BaseReleaseGroup
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC,ParameterCoordsChecker as PCC
-
+from oceantracker.util import regular_grid_util
 from oceantracker.shared_info import SharedInfo as si
 
 class GridRelease(BaseReleaseGroup):
@@ -30,19 +30,14 @@ class GridRelease(BaseReleaseGroup):
         info = self.info
 
         # setup grid
-        gs =params['grid_span'] / 2.
-        x = params['grid_center'][0] + np.linspace(-gs[0], gs[0], params['grid_size'][1]).reshape(-1, 1)
-        y = params['grid_center'][1] + np.linspace(-gs[1], gs[1], params['grid_size'][0]).reshape(-1, 1)
-
-        xi, yi = np.meshgrid(x,y)
+        xi, yi, info['bounding_box_ll_ul'] = regular_grid_util.make_regular_grid(params['grid_center'], params['grid_size'], params['grid_span'])
         info['x_grid'] = np.stack((xi,yi),axis=2)
-        info['bounding_box_ll_ul'] = np.asarray([[x[0],y[0]],[ x[-1],y[-1]]] )
 
-        # add points param for othe parts of code
+        # add points param for other parts of code
         self.points = np.stack((xi.ravel(),yi.ravel()),axis=1)
 
         # build global grid index
-        ci, ri = np.meshgrid(range(x.size),range(y.size))
+        ci, ri = np.meshgrid(range(xi.shape[1]),range(xi.shape[0]))
         info['map_grid_index_to_row_column'] = np.stack((ri.ravel(), ci.ravel()),axis=1)
 
         # add particle prop fort row column only if nor already added by another grid release

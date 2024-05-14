@@ -3,6 +3,7 @@ from oceantracker.particle_properties.util import particle_operations_util, part
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
+from oceantracker.definitions import  particle_property_types
 from oceantracker.shared_info import SharedInfo as si
 from oceantracker.util.numpy_util import possible_dtypes
 class BaseParticleProperty(ParameterBaseClass):
@@ -18,14 +19,14 @@ class BaseParticleProperty(ParameterBaseClass):
                                     'units': PVC(None, str),
                                     'time_varying':PVC(True, bool),
                                     'vector_dim': PVC(1, int, min = 1 ),
-                                    'prop_dim3': PVC(1, int, min=1),
-                                    'dtype':PVC('float64', str,possible_values=possible_dtypes),
+                                    'prop_dim3': PVC(1, int, min=1,doc_str='size of a 3d dimesion of particle property'),
+                                    'dtype':PVC('float64', str,possible_values=possible_dtypes, ),
                                     'initial_value':PVC(0.,float),
                                     'update':PVC(True,bool),
                                     'write': PVC(True, bool, doc_str='Write particle property to tracks or event files file'),
                                     'type': PVC('user', str,
                                                 doc_str='type of particle property, used to manage how to update particle property',
-                                                possible_values=si.info.known_prop_types),
+                                                possible_values=particle_property_types),
                                      'release_group_parameters':PLC(None, str, expert=True, doc_str='In development: release group specific particle prop params'),
               })
 

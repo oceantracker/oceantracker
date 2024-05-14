@@ -8,7 +8,7 @@ from oceantracker.util.numba_util import  njitOT
 import os
 from copy import copy
 from oceantracker.shared_info import SharedInfo as si
-
+from oceantracker.definitions import face_types, cell_search_status_flags
 # globals
 
 # globals to complile into numba to save pass arguments
@@ -21,12 +21,15 @@ status_dead = int(psf['dead'])
 status_bad_cord = int(psf['bad_cord'])
 status_cell_search_failed = int(psf['cell_search_failed'])
 
-search_ok= int(si.cell_search_status_flags['ok'])
-search_blocked_domain= int(si.cell_search_status_flags['blocked_domain'])
-search_blocked_dry_cell= int(si.cell_search_status_flags['blocked_dry_cell'])
-search_bad_cord= int(si.cell_search_status_flags['bad_cord'])
-outside_open_boundary= int(si.cell_search_status_flags['outside_open_boundary'])
-search_failed= int(si.cell_search_status_flags['failed'])
+search_ok= int(cell_search_status_flags.ok)
+search_blocked_domain= int(cell_search_status_flags.blocked_domain)
+search_blocked_dry_cell= int(cell_search_status_flags.blocked_dry_cell)
+search_bad_cord= int(cell_search_status_flags.bad_cord)
+outside_open_boundary= int(cell_search_status_flags.outside_open_boundary)
+search_failed= int(cell_search_status_flags.failed)
+
+open_boundary_face = int(face_types.open_boundary)
+
 
 #below is called by another numba function which will work out signature on first call
 @njitOT
@@ -93,7 +96,7 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
             if next_tri < 0:
                 # if no new adjacent triangle, then are trying to exit domain at a boundary triangle,
                 # keep n_cell, bc  unchanged
-                if open_boundary_type > 0 and next_tri == -2:  # outside domain
+                if open_boundary_type > 0 and next_tri == open_boundary_face:  # outside domain
                     # leave x, bc, cell, location  unchanged as outside
                     cell_search_status[n] = outside_open_boundary
                     break

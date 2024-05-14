@@ -7,6 +7,8 @@ from oceantracker.util import time_util
 from oceantracker.shared_info import SharedInfo as si
 from time import  perf_counter
 from copy import copy, deepcopy
+from oceantracker.definitions import  cell_search_status_flags
+
 # run fields nested with outer main readers grid
 
 class DevNestedFields(ParameterBaseClass):
@@ -20,6 +22,8 @@ class DevNestedFields(ParameterBaseClass):
         ml = si.msg_logger
         # setup outer grid first
 
+        if si.settings.write_tracks:
+            pass
 
         fgm_outer_grid = si._class_importer.new_make_class_instance_from_params('field_group_manager',dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
                                                                                 crumbs='adding outer hydro-grid field manager for nested grid run')
@@ -85,14 +89,14 @@ class DevNestedFields(ParameterBaseClass):
             ml.msg('For nested grids must set "open_boundary_type" must be > to select an open boundary type', fatal_error=True, exit_now=True)
 
         # check nested grids
-        for n, fgm in enumerate(self.fgm_hydro_grids[1:]):
+        for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):
             if not fgm.info['has_open_boundary_nodes']:
                 ml.msg(f'Nested grids must tag open boundary nodes, nested grid {n+1} " does not',
                                   fatal_error=True, exit_now=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
 
         # outer grid is not required to have open boundary nodes, but can if provided
         fgm = self.fgm_hydro_grids[0]
-        if  not fgm.info['has_open_boundary_nodes']: fgm.info['open_boundary_type'] = 0
+        if not fgm.info['has_open_boundary_nodes']: fgm.info['open_boundary_type'] = 0
         pass
 
 
@@ -206,7 +210,7 @@ class DevNestedFields(ParameterBaseClass):
 
         return vals
 
-    def setup_time_step(self, time_sec, xq, active, fix_bad=True):
+    def setup_time_step(self, time_sec, xq, active):
 
         part_prop = si.roles.particle_properties
 
@@ -214,45 +218,53 @@ class DevNestedFields(ParameterBaseClass):
         # update outer grid
         fgm_outer_grid = self.fgm_hydro_grids[0]
         on_outer_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', 0, out=self.get_partID_buffer('fgmID0'))
-        fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid, fix_those_outside_open_boundary=False)
+        fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid, apply_open_boundary_condition=True)
 
-        # update inner grids and move any outside their domain to outer grid
+        # work through inner grids
         for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):  # loop over nested rids
 
-            # find any outer grid that are inside this inner grid
+            # find any on outer grid that are now inside this inner grid
             # todo faster- prebuild a index to show which cells overlap with an  inner and only check if these are inside the inner grid
+
             is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0), include_dry_cells=True)
 
             if np.any(is_inside):
                 # move those now inside inner grid and copy in values
-                print('xx moved to inner grid', n, np.count_nonzero(is_inside))
                 s = on_outer_grid[is_inside]
+                print('xx moved to inner grid', n, np.count_nonzero(is_inside), int(time_sec),part_prop['ID'].get_values(s[:5]))
+
                 part_prop['hydro_model_gridID'].set_values(n, s)  # put on inner grid
                 part_prop['n_cell'].set_values(pp['n_cell'][is_inside], s)
                 part_prop['n_cell_last_good'].set_values(pp['n_cell'][is_inside], s)
                 part_prop['bc_cords'].set_values(pp['bc_cords'][is_inside, ...], s)
                 on_outer_grid = on_outer_grid[~is_inside]  # found a grid so drop from consideration of moving to another inner grid
 
-            # now update existing and moved particles on this inner grid
+            # now update existing and those moved from outer to this inner grid
             on_inner_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', n, out=self.get_partID_buffer('fgmID1'))
 
             # update inner grid,without fixing open boundary
-            fgm.setup_time_step(time_sec, xq, on_inner_grid, fix_those_outside_open_boundary=False)
+            fgm.setup_time_step(time_sec, xq, on_inner_grid, apply_open_boundary_condition=False)
 
             # find those outside  this inner grid open boundary and move to outer
-            outside_inner = part_prop['cell_search_status'].find_subset_where(on_inner_grid, 'eq', si.cell_search_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('fgmID2'))
+            outside_inner = part_prop['cell_search_status'].find_subset_where(on_inner_grid, 'eq', cell_search_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('fgmID2'))
             if outside_inner.size > 0:
                 inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0), include_dry_cells=True)
                 if np.any(inside_outer):
                     # move those now inside inner grid and copy in values
-                    print('xx moved to outer grid=', n,'count=', np.count_nonzero(inside_outer))
-                    s = outside_inner[inside_outer] # IDs of those outside inner and inside outer
+                    s = outside_inner[inside_outer]  # IDs of those outside inner and inside outer
+                    print('xx moved to outer grid=', n,'count=', np.count_nonzero(inside_outer), int(time_sec),part_prop['ID'].get_values(s[:5]))
+
+                    part_prop['status'].set_values(si.particle_status_flags.moving, s)
                     part_prop['hydro_model_gridID'].set_values(0, s)  # put on outer grid
                     part_prop['n_cell'].set_values(pp['n_cell'][inside_outer], s)
                     part_prop['n_cell_last_good'].set_values(pp['n_cell'][inside_outer], s)
                     part_prop['bc_cords'].set_values(pp['bc_cords'][inside_outer, ...], s)
-                    fgm_outer_grid.setup_time_step(time_sec, xq, s, fix_those_outside_open_boundary=True) # setup outer grid and apply its open boundary condition
+
+                    # update those now on outer grid and apply its open boundary condition
+                    fgm_outer_grid.setup_time_step(time_sec, xq, s, apply_open_boundary_condition=True)
+                    pass
                 if np.any(~inside_outer):
+                    part_prop['hydro_model_gridID'].set_values(-1,outside_inner[~inside_outer] )
                     print('xx could not be moved to outer grid=',n,'count=', np.count_nonzero(~inside_outer))
 
             #todo any still outside the inner or outer grid? move back?
@@ -289,15 +301,6 @@ class DevNestedFields(ParameterBaseClass):
             fgm.tidal_stranding.update(fgm.grid, time_sec, sel)
 
 
-    def fix_time_step(self, alive):
-        # loop over grids to find those outside their grid and reassgin to new grid
-
-        part_prop = si.roles.particle_properties
-
-        for n, fgm in enumerate(self.fgm_hydro_grids):
-            # find particles in this hydro-grid
-            sel = part_prop['hydro_model_gridID'].find_subset_where(alive, 'eq', n, out=self.get_partID_subset_buffer('gridID'))  # those on this grid
-            fgm.fix_time_step(sel)
 
     def screen_info(self):
         # only for outer grid

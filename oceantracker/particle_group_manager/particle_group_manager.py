@@ -5,12 +5,12 @@ from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 from  oceantracker.particle_group_manager.util import  pgm_util
+from oceantracker.definitions import particle_property_types
 from oceantracker.shared_info import SharedInfo as si
 from oceantracker.util import  basic_util
 
 # holds and provides access to different types a group of particle properties, eg position, field properties, custom properties
 class ParticleGroupManager(ParameterBaseClass):
-    known_prop_types = si.info.known_prop_types
 
     def __init__(self):
         # set up info/attributes
@@ -59,7 +59,7 @@ class ParticleGroupManager(ParameterBaseClass):
         self.add_particle_property('IDpulse','manual_update',dict(  dtype='int32', initial_value=-1, time_varying= False,
                                       description='ID of pulse particle was released within its release group, zero based'))
         # ID used when nested grids only
-        self.add_particle_property('hydro_model_gridID', 'manual_update', dict(write=False, time_varying=True, dtype='int8', initial_value=-1,
+        self.add_particle_property('hydro_model_gridID', 'manual_update', dict(write=True, time_varying=True, dtype='int8', initial_value=-1,
                                          description='ID for which grid, outer (ID=0) or nested (ID >0),  each particle resides in '))
 
         self.add_particle_property('time_released', 'manual_update',dict(time_varying= False, description='time (sec) each particle was released'))
@@ -235,9 +235,9 @@ class ParticleGroupManager(ParameterBaseClass):
             ml.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ',caller=self,
                     hint= 'got parameters of type=' + str(type(prop_params)) +',  values='+str(prop_params), fatal_error=True, exit_now=True)
 
-        if prop_type not in self.known_prop_types:    #todo move all raise exception to msglogger
+        if prop_type not in particle_property_types:    #todo move all raise exception to msglogger
             ml.msg('ParticleGroupManager.create_particle_property, unknown prop_group name', caller=self,
-                   hint='prop_group must be one of ' + str(self.known_prop_types),   fatal_error=True, exit_now=True)
+                   hint='prop_group must be one of ' + str(particle_property_types),   fatal_error=True, exit_now=True)
 
         i = si.add_user_class('particle_properties',name,  prop_params,class_type=prop_type,
                                            crumbs=crumbs +' adding "particle_properties of type=' + prop_type)

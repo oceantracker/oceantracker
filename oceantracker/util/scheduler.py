@@ -26,7 +26,7 @@ class Scheduler(object):
             times = md* np.sort(md*times) # ensure they are in right order for backwards/forwards
             interval = None
 
-        start_time_outside_run_times = times[0]*md < run_info.start_time*md or times[-1]*md > run_info.end_time*md
+        start_time_outside_run_times = times[0]*md < run_info.start_time*md
 
         # trim to fit inside the run
         sel = np.logical_and( times * md  >= run_info.start_time * md, times * md  <= run_info.end_time * md )
@@ -61,7 +61,7 @@ class Scheduler(object):
                         start_time_outside_run_times =start_time_outside_run_times,
                         )
         i = self.info
-        b = f'{12*" "} Scheduler{15*" "}Run:{14*" "}Hindcast\n'
+        b = f'{12*" "} Scheduler{15*" "}Hindcast{14*" "}Run\n'
         b += f'Start- {i["start_date"]} | {hindcast_info["start_date"]} | {time_util.seconds_to_isostr(run_info.times[0])}  \n'
         b += f'Ends - {i["end_date"]} | {hindcast_info["end_date"]} | {time_util.seconds_to_isostr(run_info.times[-1])}]\n'
         b += f'{10*" "}interval = {i["interval"]}, backtracking={settings.backtracking}'

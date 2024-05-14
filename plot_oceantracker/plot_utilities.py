@@ -52,7 +52,7 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
     if show_grid:
         ax.triplot(grid['x'][:, 0], grid['x'][:, 1], grid['triangles'], color=(0.8, 0.8, 0.8), linewidth=.5, zorder=1)
 
-    sel = grid['node_type'] == node_types['open_boundary'] # open_boundary_nodes
+    sel = grid['node_type'] == node_types.open_boundary# open_boundary_nodes
     plt.scatter(grid['x'][sel, 0], grid['x'][sel, 1],s= 4,marker= '.',c='darkgreen')
 
     ax.set_xticklabels([])
