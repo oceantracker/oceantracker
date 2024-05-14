@@ -6,7 +6,7 @@ import numpy as np
 from oceantracker.util import time_util, ncdf_util, json_util
 from datetime import datetime
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.definitions import  node_types
+from oceantracker.definitions import  node_types, cell_search_status_flags
 from os import path
 from  oceantracker.interpolator.util.triangle_eval_interp import time_independent_2Dfield_scalar, time_dependent_2Dfield_scalar
 
@@ -87,7 +87,8 @@ class FieldGroupManager(ParameterBaseClass):
                    note=True)
 
         self.interpolator.final_setup(self.grid)
-        self.info['has_open_boundary_nodes'] = np.any(self.grid['node_type'] == node_types['open_boundary'])
+
+        self.info['has_open_boundary_nodes'] = np.any(self.grid['node_type'] == node_types.open_boundary)
         self.info['open_boundary_type'] = si.settings['open_boundary_type']
 
         # add tidal stranding class
@@ -128,7 +129,7 @@ class FieldGroupManager(ParameterBaseClass):
         i.update(self.grid, time_sec, alive)
         i.stop_update_timer()
 
-    def setup_time_step(self, time_sec, xq, active,fix_those_outside_open_boundary=True):
+    def setup_time_step(self, time_sec, xq, active,apply_open_boundary_condition=True):
 
         # set buffer index from this time and next inside stepinfo
         # get next two buffer time steps around the given time in reader ring buffer
@@ -141,9 +142,9 @@ class FieldGroupManager(ParameterBaseClass):
             self._find_vertical_cell(time_sec, xq, active)
 
         # only fix if single grid, nested grids get fixed by nested grid manager
-        if fix_those_outside_open_boundary:
-            self._fix_those_outside_open_boundary(active)# fix outside boundary
-        self._fix_bad_cell_search(active) # those stil bad, eg nan etc
+        if apply_open_boundary_condition:
+            self._apply_open_boundary_condition(active)# fix outside boundary
+        self._fix_bad_cell_search(active) # those still bad, eg nan etc
 
     def _find_hori_cell(self, time_sec, xq, active):
         # find hroizontal cell for xq, node list and weight for interp at calls
@@ -159,20 +160,20 @@ class FieldGroupManager(ParameterBaseClass):
     def _fix_bad_cell_search(self, active):
         # do move backs for blocked and bad
         part_prop = si.roles.particle_properties
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', si.cell_search_status_flags.ok, out=self.get_partID_subset_buffer('cell_status'))
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('cell_status'))
         if sel.size > 0:
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
 
         # debug_util.plot_walk_step(xq, si.core_roles.reader.grid, part_prop)
 
-    def _fix_those_outside_open_boundary(self, active):
+    def _apply_open_boundary_condition(self, active):
         part_prop = si.roles.particle_properties
 
         # deal with open boundary
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', si.cell_search_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('cell_statusIDs'))
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('cell_statusIDs'))
         if sel.size > 0:
-            if si.settings.open_boundary_type > 0:
+            if self.info['has_open_boundary_nodes'] and si.settings.open_boundary_type > 0:
                 part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel)
                 part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell, but not the location
             else:
@@ -515,7 +516,7 @@ class FieldGroupManager(ParameterBaseClass):
         nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
-        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': ' 0 = interior, 1 = island, 2=domain, 3=open boundary'})
+        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(node_types.asdict())})
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
 
         if 'water_depth' in self.fields:

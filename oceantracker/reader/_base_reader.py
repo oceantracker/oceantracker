@@ -15,7 +15,7 @@ from oceantracker.util import triangle_utilities
 
 from oceantracker.reader.util import reader_util
 from pathlib import Path as pathlib_Path
-from oceantracker.definitions import node_types
+from oceantracker.definitions import node_types, face_types
 
 from oceantracker.shared_info import SharedInfo as si
 
@@ -344,16 +344,16 @@ class BaseReader(ParameterBaseClass):
         msg_logger.progress_marker('built domain and island outlines', start_time=t0)
 
         # make island and domain nodes, not in regular grid some nodes may be unsed so mark as land
-        grid['node_type'] = np.full(grid['x'].shape[0],  node_types['land'],dtype=np.int8) # mark all as land
+        grid['node_type'] = np.full(grid['x'].shape[0],  node_types.land,dtype=np.int8) # mark all as land
 
         # now mark all active nodes, those in a triangle,  as inside model
-        grid['node_type'][np.unique(grid['triangles'])] = node_types['interior']
+        grid['node_type'][np.unique(grid['triangles'])] = node_types.interior
 
         # now mark boundary nodes
         for c in grid['grid_outline']['islands']:
-            grid['node_type'][c['nodes']] = node_types['island_boundary']
+            grid['node_type'][c['nodes']] = node_types.island_boundary
 
-        grid['node_type'][grid['grid_outline']['domain']['nodes']] = node_types['domain_boundary']
+        grid['node_type'][grid['grid_outline']['domain']['nodes']] = node_types.domain_boundary
 
         t0 = perf_counter()
         grid['triangle_area'] = triangle_utilities.calcuate_triangle_areas(grid['x'], grid['triangles'])
@@ -363,11 +363,11 @@ class BaseReader(ParameterBaseClass):
         # adjust node type and adjacent for open boundaries
         # todo define node and adjacent type values in dict, for single definition and case info output?
         is_open_boundary_node = self.read_open_boundary_data_as_boolean(grid)
-        grid['node_type'][is_open_boundary_node] = node_types['open_boundary']
+        grid['node_type'][is_open_boundary_node] = node_types.open_boundary
 
         is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'], grid['adjacency'], is_open_boundary_node)
 
-        grid['adjacency'][is_open_boundary_adjacent] = -2
+        grid['adjacency'][is_open_boundary_adjacent] = face_types.open_boundary
         grid['limits'] = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
 
         # now set up time buffers
@@ -384,8 +384,8 @@ class BaseReader(ParameterBaseClass):
 
         # make nodal version of water depth for faster interpolation in vertical cell search
         #grid['water_depth_at_nodes'] = np.full((grid['x'].shape[0],3), 0, dtype=np.float32)
-        for n  in range(3):
-            pass
+        #for n  in range(3):
+        #    pass
         return grid
 
     def build_vertical_grid(self, nc, grid):

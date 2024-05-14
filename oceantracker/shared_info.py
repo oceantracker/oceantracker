@@ -144,13 +144,7 @@ class _ParticleStatusFlags(_SharedStruct):
     on_bottom = 6
     moving =  10
 
-class _CellSearchStatusFlags(_SharedStruct):
-        ok =0
-        outside_open_boundary=1
-        blocked_domain=-5
-        blocked_dry_cell=-4
-        bad_cord=-20
-        failed=-30
+
 
 class _RunInfo(_SharedStruct):
     is3D_run = None
@@ -173,7 +167,7 @@ class _RunInfo(_SharedStruct):
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
 
-    known_prop_types = ['manual_update', 'from_fields', 'user']
+
     large_float = 1.0E32
 
 
@@ -192,7 +186,7 @@ class _SharedInfoClass():
     particle_operations = particle_operations
     default_settings = _DefaultSettings()
     particle_status_flags = _ParticleStatusFlags() # need to be instances to allow particle_status_flags[key] form
-    cell_search_status_flags = _CellSearchStatusFlags()
+
     run_info  = _RunInfo()
     hindcast_info = None
     msg_logger = MessageLogger()

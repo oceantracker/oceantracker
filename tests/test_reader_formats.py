@@ -10,7 +10,7 @@ import argparse
 def default_params():
     params = { 'user_note' : '',
         'debug' : True,
-        'time_step': 3600,
+        'time_step': 1800,
         'dev_debug_plots' :False,
         'use_A_Z_profile': True,
         'max_run_duration': 5. * 24 * 3600,
@@ -23,7 +23,7 @@ def default_params():
                                     {'class_name': 'AgeDecay', 'decay_time_scale': 1. * 3600 * 24}},
         'release_groups': {'P1': {'points': [], 'pulse_size': 10,
                              #     'coords_in_lat_lon_order': True, # only used if hydro-model is in
-                                  'release_interval': 3600,'z_min':-1.},
+                                  'release_interval': 1800,'z_min':-1.},
                         'Poly1': {'class_name':'PolygonRelease',
                                             'points': [], 'pulse_size': 10,
                                #          'coords_in_lat_lon_order': True,  # only used if hydro-model is in
@@ -268,10 +268,10 @@ def get_case(n):
         case 1000:
             # nested schisim
             pulse_size = 1
-            root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2012\07'
+            root_input_dir = r'G:\Hindcasts_large\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
             output_file_base = 'shared_reader'
             file_mask = 'NZfinite*.nc'
-            max_days = 7
+            max_days = 3
             open_boundary_type = 1
 
             x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri
@@ -282,17 +282,17 @@ def get_case(n):
                 [-35.922300421719214, 174.665532083399], # hen and chickes, in outer grid
                 ]
             x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
-            x0_A=[   [ 1727195 ,    6035149],
+            x0=[   [ 1727195 ,    6035149],
                     [1737357,     6029638],
                     [1742484 ,    6021345],
                     [1743472 ,    6019861]]
-            ax=  [  1715000 ,    1755000 ,    6015000 ,    6050000] # northland
+            ax=  [  1715000 ,    1755000 ,    6010000 ,    6050000] # northland
             title = 'nested test'
             nested_readers= dict(nest1=dict(
                     class_name='oceantracker.reader.schism_reader.SCHISMreaderNCDF',
 
-                input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard',
-                hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\sample_schism_standard\hgrid_Whangarei.gr3',
+                input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\Existing_Sep2012_temp',
+                hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
                 # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',
                 #  hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
                     file_mask = 'schout*.nc',
@@ -348,7 +348,10 @@ def get_case(n):
     if hgrid_file is not None:
         params['reader']['hgrid_file_name']= hgrid_file
 
-    if nested_readers is not None: params['nested_readers']=nested_readers
+
+    if nested_readers is not None:
+        params['nested_readers']=nested_readers
+
     plot_opt=dict(ax=ax,show_grid=show_grid)
     return params, plot_opt
 
@@ -407,9 +410,11 @@ if __name__ == '__main__':
             plot_file = plot_base + '_decay_01.mp4' if args.save_plot else None
             plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
                               title='Ross Sea',
-                              colour_using_data=track_data['part_decay'], part_color_map='hot_r',
-                              size_using_data=track_data['part_decay'],
-                              vmax=1.0, vmin=0,
+                              colour_using_data=track_data['hydro_model_gridID'],
+                           #part_color_map='hot_r',
+                            part_color_map='hot',
+                              #size_using_data=track_data['part_decay'],
+                              vmax=1, vmin=-1,
                               movie_file=plot_file,
                               fps=24,
                               aspect_ratio=None,

@@ -9,7 +9,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
 from oceantracker.util import numpy_util
-
+from oceantracker.definitions import  cell_search_status_flags
 
 from oceantracker.shared_info import SharedInfo as si
 
@@ -96,14 +96,15 @@ class Solver(ParameterBaseClass):
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
             is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.moving, out=self.get_partID_buffer('ID1'))
 
-            # update particle velocity modification
+            # update particle velocity modification prior to integration
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
             for name, i in si.roles.velocity_modifiers.items():
                 i.start_update_timer()
                 i.update(n_time_step, time_sec, is_moving)
                 i.stop_update_timer()
 
-            # dispersion is done by random walk velocity modification prior to integration step
+            # dispersion is done by random walk
+            # by adding to velocity modifier prior to integration step
             if si.settings['include_dispersion']:
                 i = si.core_roles.dispersion
                 i.start_update_timer()
@@ -207,7 +208,7 @@ class Solver(ParameterBaseClass):
 
         part_prop['x_last_good'].copy('x', is_moving)
         part_prop['n_cell_last_good'].copy('n_cell', is_moving)
-        part_prop['cell_search_status'].set_values(si.cell_search_status_flags['ok'], is_moving)
+        part_prop['cell_search_status'].set_values(cell_search_status_flags.ok, is_moving)
 
         # do time step
         dt = si.settings.time_step*si.run_info.model_direction
