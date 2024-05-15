@@ -13,6 +13,7 @@ from  oceantracker.interpolator.util.triangle_eval_interp import time_independen
 from time import  perf_counter
 from copy import deepcopy
 from oceantracker.shared_info import SharedInfo as si
+from  oceantracker.definitions import  face_types, node_types
 
 #TODO allow fields to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
@@ -136,50 +137,71 @@ class FieldGroupManager(ParameterBaseClass):
         # plus global time step locations and time ftactions od timre step and put results in interpolators step info numpy structure
         info = self.info
         info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self._time_step_and_buffer_offsets(time_sec)
+        part_prop = si.roles.particle_properties
 
+        # find hri cell
         self._find_hori_cell(time_sec, xq, active)
-        if info['is3D']:
-            self._find_vertical_cell(time_sec, xq, active)
+
+        # all those that need fixing, lateral boundries and bad, ie cell_stautus < blocked_dry_cell
+        sel_fix = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.blocked_dry_cell, out=self.get_partID_subset_buffer('B1'))
 
         # only fix if single grid, nested grids get fixed by nested grid manager
         if apply_open_boundary_condition:
-            self._apply_open_boundary_condition(active)# fix outside boundary
-        self._fix_bad_cell_search(active) # those still bad, eg nan etc
+            self._apply_open_boundary_condition(sel_fix)# fix outside boundary
+            # move back and unans and other errors
+
+        # move back bad cell searches
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('B2'))
+        self._move_back(sel) # those still bad, eg nan etc
+
+        if info['is3D']:
+            self._find_vertical_cell(time_sec, xq, active)
 
     def _find_hori_cell(self, time_sec, xq, active):
-        # find hroizontal cell for xq, node list and weight for interp at calls
+        # find horizontal cell for xq, node list and weight for interp at calls
 
         info = self.info
         self.interpolator.find_hori_cell(self.grid, self.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], self.info['open_boundary_type'], active)
 
-    def _find_vertical_cell(self, time_sec, xq, active):
-        # find vertical cell
-        info = self.info
-        self.interpolator.find_vertical_cell(self.grid, self.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
+    def _apply_lateral_boundary_condition(self, sel_bad):
+        part_prop = si.roles.particle_properties
 
-    def _fix_bad_cell_search(self, active):
+        # lateral boundary
+        sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.blocked_domain, out=self.get_partID_subset_buffer('B2'))
+        self._move_back(sel)
+
+        # dry cell boundary
+        if si.settings.block_dry_cells:
+            sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.blocked_domain, out=self.get_partID_subset_buffer('B2'))
+            self._move_back(sel)
+    def _apply_open_boundary_condition(self, active):
+        part_prop = si.roles.particle_properties
+
+        # deal with open boundary
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('B1'))
+        if sel.size > 0:
+            if self.info['has_open_boundary_nodes'] and si.settings.open_boundary_type > 0:
+                part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel)
+                part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell, but not the location
+            else:
+                # outside and no open boundary somove back
+                self._move_back(sel)
+
+    def _move_back(self, sel):
         # do move backs for blocked and bad
         part_prop = si.roles.particle_properties
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('cell_status'))
         if sel.size > 0:
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
 
         # debug_util.plot_walk_step(xq, si.core_roles.reader.grid, part_prop)
 
-    def _apply_open_boundary_condition(self, active):
-        part_prop = si.roles.particle_properties
 
-        # deal with open boundary
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('cell_statusIDs'))
-        if sel.size > 0:
-            if self.info['has_open_boundary_nodes'] and si.settings.open_boundary_type > 0:
-                part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel)
-                part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell, but not the location
-            else:
-                # outside so move back
-                part_prop['x'].copy('x_last_good', sel)  # move back location
-                part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
+    def _find_vertical_cell(self, time_sec, xq, active):
+        # find vertical cell
+        info = self.info
+        self.interpolator.find_vertical_cell(self.grid, self.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
+
 
     def _time_step_and_buffer_offsets(self, time_sec):
 
@@ -515,8 +537,8 @@ class FieldGroupManager(ParameterBaseClass):
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
         nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
-        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'))
-        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(node_types.asdict())})
+        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(face_types.asdict()))
+        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(node_types.asdict())}, description='type of node, types are' + str(node_types.asdict()))
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
 
         if 'water_depth' in self.fields:

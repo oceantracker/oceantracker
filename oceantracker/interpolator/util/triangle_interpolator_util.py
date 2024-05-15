@@ -68,7 +68,9 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
     for nn in prange(active.size):
         n= active[nn]
 
-        if cell_search_status[n] != search_ok : continue # if already outside domain or bad, bad or blocked, wil be fixed in solver
+        # start with good cell search
+        cell_search_status[n] = search_ok
+
 
         if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
             # if any is nan copy all and move on

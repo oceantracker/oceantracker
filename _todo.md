@@ -61,6 +61,8 @@
 1. inside polygon class over writes given points with closed polygon 
 1. cope with time dependent water depth in write to grid
 1. unit test cope with dispersion on 
+2. nest field group manager, use default only if none given
+3. 
     
 ## Nice to haves
 1. attach name of method to message loggers crumb trail
@@ -109,6 +111,7 @@
 1.   kernal RK solver
 1.    fraction to read use ::10 form to only read load a fraction of track/timestats time steps? can this work in compact filesode?
 1.   indepth look at circle test results
+1. nested grids, make check if indide inner grid faster by flaging outer grid tri overlaping inner grid
 
 #   STRUCTURE
 1.    hyperlinks to online docs where useful
@@ -122,6 +125,7 @@
 1.   full use of initial setup, final set up and update with timers
 1.   get rid of used nseq in favour of instanceID
 1.   add check for use of known class prop types, eg 'maunal_update'
+2.   1. faster to do dry celby updating adjacency matrix? aviods addtional decsion in cel serach
 
 
 1. add a convert compact at end if requested

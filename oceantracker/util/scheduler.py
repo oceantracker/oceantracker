@@ -29,7 +29,7 @@ class Scheduler(object):
         start_time_outside_run_times = times[0]*md < run_info.start_time*md
 
         # trim to fit inside the run
-        sel = np.logical_and( times * md  >= run_info.start_time * md, times * md  <= run_info.end_time * md )
+        sel = np.logical_and(times * md >= run_info.start_time * md, times * md <= run_info.end_time * md)
         self.scheduled_times = times[sel]
 
         # make a task flag for each time step of the model run
