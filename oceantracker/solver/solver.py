@@ -208,7 +208,7 @@ class Solver(ParameterBaseClass):
 
         part_prop['x_last_good'].copy('x', is_moving)
         part_prop['n_cell_last_good'].copy('n_cell', is_moving)
-        part_prop['cell_search_status'].set_values(cell_search_status_flags.ok, is_moving)
+
 
         # do time step
         dt = si.settings.time_step*si.run_info.model_direction

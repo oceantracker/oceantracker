@@ -7,10 +7,10 @@ from tests.unit_tests import test_definitions
 
 def main(args):
     ot = OceanTracker()
-    ot.settings(**test_definitions.base_settings(__file__))
-    ot.settings(time_step=120)
+    ot.settings(**test_definitions.base_settings(__file__,args))
+    ot.settings(time_step=240)
 
-    ot.add_class('reader', **test_definitions.demo_schisim)
+    ot.add_class('reader', **test_definitions.reader_demo_schisim)
 
     # add releasess
     poly_points = [[1597682.1237, 5489972.7479],

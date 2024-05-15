@@ -267,11 +267,11 @@ def get_case(n):
             params['particle_properties']['part_decay']['decay_time_scale']= 28*24*3600.
         case 1000:
             # nested schisim
-            pulse_size = 1
+            pulse_size = 5
             root_input_dir = r'G:\Hindcasts_large\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
             output_file_base = 'shared_reader'
             file_mask = 'NZfinite*.nc'
-            max_days = 3
+            max_days = 30
             open_boundary_type = 1
 
             x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri

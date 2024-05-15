@@ -231,7 +231,7 @@ class DevNestedFields(ParameterBaseClass):
             if np.any(is_inside):
                 # move those now inside inner grid and copy in values
                 s = on_outer_grid[is_inside]
-                print('xx moved to inner grid', n, np.count_nonzero(is_inside), int(time_sec),part_prop['ID'].get_values(s[:5]))
+                #print('xx moved to inner grid', n, np.count_nonzero(is_inside), int(time_sec),part_prop['ID'].get_values(s[:5]))
 
                 part_prop['hydro_model_gridID'].set_values(n, s)  # put on inner grid
                 part_prop['n_cell'].set_values(pp['n_cell'][is_inside], s)
@@ -252,7 +252,7 @@ class DevNestedFields(ParameterBaseClass):
                 if np.any(inside_outer):
                     # move those now inside inner grid and copy in values
                     s = outside_inner[inside_outer]  # IDs of those outside inner and inside outer
-                    print('xx moved to outer grid=', n,'count=', np.count_nonzero(inside_outer), int(time_sec),part_prop['ID'].get_values(s[:5]))
+                    #print('xx moved to outer grid=', n,'count=', np.count_nonzero(inside_outer), int(time_sec),part_prop['ID'].get_values(s[:5]))
 
                     part_prop['status'].set_values(si.particle_status_flags.moving, s)
                     part_prop['hydro_model_gridID'].set_values(0, s)  # put on outer grid
@@ -264,8 +264,9 @@ class DevNestedFields(ParameterBaseClass):
                     fgm_outer_grid.setup_time_step(time_sec, xq, s, apply_open_boundary_condition=True)
                     pass
                 if np.any(~inside_outer):
-                    part_prop['hydro_model_gridID'].set_values(-1,outside_inner[~inside_outer] )
-                    print('xx could not be moved to outer grid=',n,'count=', np.count_nonzero(~inside_outer))
+                    fgm._move_back(outside_inner[~inside_outer] ) # move back to last good position on inner grid
+                    #part_prop['hydro_model_gridID'].set_values(-1,outside_inner[~inside_outer] )
+                    #print('xx could not be moved to outer grid=',n,'count=', np.count_nonzero(~inside_outer))
 
             #todo any still outside the inner or outer grid? move back?
             #todo utside outer grid and all inner grids
