@@ -15,7 +15,7 @@ from oceantracker.util import triangle_utilities
 
 from oceantracker.reader.util import reader_util
 from pathlib import Path as pathlib_Path
-from oceantracker.definitions import node_types, face_types
+from oceantracker.definitions import node_types, cell_search_status_flags
 
 from oceantracker.shared_info import SharedInfo as si
 
@@ -367,7 +367,8 @@ class BaseReader(ParameterBaseClass):
 
         is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'], grid['adjacency'], is_open_boundary_node)
 
-        grid['adjacency'][is_open_boundary_adjacent] = face_types.open_boundary
+        grid['adjacency'][is_open_boundary_adjacent] = cell_search_status_flags.open_boundary_edge
+
         grid['limits'] = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
 
         # now set up time buffers
@@ -377,7 +378,7 @@ class BaseReader(ParameterBaseClass):
         grid['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
 
         # space for dry cell info
-        grid['is_dry_cell'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
+        grid['is_dry_cell_buffer'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
 
         # reader working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
@@ -512,7 +513,7 @@ class BaseReader(ParameterBaseClass):
                                         name == 'water_velocity')
 
                 # read dry cels which may need tide and water depth
-                self.read_dry_cell_data(nc, grid, fields, file_index, grid['is_dry_cell'], buffer_index)
+                self.read_dry_cell_data(nc, grid, fields, file_index, grid['is_dry_cell_buffer'], buffer_index)
 
                 # o = reader_util.get_values_at_bottom(junk, grid['bottom_cell_index'])
                 # pass

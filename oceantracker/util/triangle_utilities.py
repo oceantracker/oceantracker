@@ -5,6 +5,7 @@ from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.util import  basic_util
 from oceantracker.util.numba_util import njitOT
 
+
 # build node to cell map
 @njitOT
 def build_node_to_triangle_map(tri, x):

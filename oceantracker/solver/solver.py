@@ -161,7 +161,7 @@ class Solver(ParameterBaseClass):
             i.update(n_time_step, time_sec, alive)
 
         # modify status, eg tidal stranding
-        fgm.update_dry_cell_index()
+        fgm.update_dry_cell_values()
 
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('ID1'))

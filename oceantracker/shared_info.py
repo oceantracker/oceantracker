@@ -137,8 +137,8 @@ class _ParticleStatusFlags(_SharedStruct):
     bad_cord = -20
     cell_search_failed=  -19
     notReleased = -10
-    dead = -2
-    outside_open_boundary =-1
+    dead = -5
+    outside_open_boundary =-2
     stationary = 0
     stranded_by_tide = 3
     on_bottom = 6

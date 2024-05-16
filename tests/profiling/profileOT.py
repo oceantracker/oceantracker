@@ -18,13 +18,13 @@ def get_params(datasource=1):
     calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
-        input_dir =  r'G:\Hindcasts_large\MalbroughSounds_10year_benPhD'
+        input_dir =  r'G:\Hindcasts_large\2020_MalbroughSounds_10year_benPhD'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = 'F:\\OceanTrackerOtuput\\OceanTrackerProfiling'
 
     elif datasource==2:
         output_file_base= 'Sounds'
-        input_dir =  '/hpcfreenas/hindcast/MarlbroughSounds_hindcast_10years_BenPhd_2019ver/'
+        input_dir =  '/hpcfreenas/hindcast/MarlbroughSounds_hindcast_10years_BenPhd_2019ver'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = '/hpcfreenas/ross/oceanTrackerOutput/profiling/'
 
@@ -107,7 +107,7 @@ def run(profiler_name, params):
     ri = read_JSON(run_info_file)
     d = path.join(profile_dir, profiler_name, params['output_file_base'], platform.processor().replace(' ', '_').replace(',', '_'))
     makedirs(d, exist_ok=True)
-    fnn = path.join(d, results_file + '_CodeVer_' + ri['version_info']['version'].replace(' ', '_').replace(',', '_'))
+    fnn = path.join(d, results_file + '_CodeVer_' + ri['version_info']['str'].replace(' ', '_').replace(',', '_'))
 
     # copy case file
     ci = read_JSON(case_info_file)

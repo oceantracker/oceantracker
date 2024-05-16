@@ -10,28 +10,25 @@ ot.settings(output_file_base='OTpaper_exmaple_A',  root_output_dir='output', tim
 ot.add_class('reader',  input_dir=r'E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast',
                  file_mask=  'demoHindcastSchism*.nc')  # file mask to search for
 # add a point release
-ot.add_class('release_groups',name = 'my_point_release', class_name='PointRelease',
-        points= [[1595000, 5482600, -2], [1594000, 5484200, -2]], # (x,y,z) of release points
+ot.add_class('release_groups',name = 'my_point_release', class_name='PointRelease', # class to use
+        points= [[1595000, 5482600, -2], [1594000, 5484200, -2]], # one or more (x,y,z) of release points
         release_interval= 600, pulse_size= 5)
-# add polygon release at random depths between two z values
+# add polygon release
 ot.add_class('release_groups',  name = 'my_polygon_release',  class_name='PolygonRelease',
-        points=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
-                [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
-        release_interval= 600,  pulse_size= 50, z_min= -2., z_max = 0.5)
-# add grid releasing at random depths between two z values
+        points=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],  [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
+        release_interval= 600,  pulse_size= 50, z_min= -2., z_max = 0.5)   # release at random depth between these values
+# add grid release
 ot.add_class('release_groups',  name = 'my_grid_release', class_name='GridRelease', #
-        grid_center=[1592000, 5489200], grid_span=[500, 1000], grid_size=[3, 4],
-        release_interval= 1800,  pulse_size= 2, z_min= -2, z_max = -0.5)
+        grid_center=[1592000, 5489200], grid_span=[500, 1000], grid_size=[3, 4], # rows and columns in grid
+        release_interval= 1800,  pulse_size= 2, z_min= -2, z_max = -0.5)   # release at random depth between these values
 # add a decaying particle property,# with exponential decay based on age
-ot.add_class('particle_properties', name ='a_pollutant', class_name='AgeDecay',
-            initial_value= 1000, decay_time_scale = 7200.) # exponential decay time scale 2hours
+ot.add_class('particle_properties', name ='a_pollutant', class_name='oceantracker.particle_properties.age_decay.AgeDecay',
+            initial_value= 1000, decay_time_scale = 7200.) # 2 hour decay, property value decays as initial_value*exp(-age/decay_time_scale)
 # add a gridded particle statistic to use as heat map
 ot.add_class('particle_statistics', name = 'my_heatmap', class_name= 'GriddedStats2D_timeBased',
-        grid_size=[120, 121],  release_group_centered_grids = True, update_interval = 600,
+        grid_size=[120, 121],  release_group_centered_grids = True, update_interval = 600, # time interval in sec, between doing particle statists counts
         particle_property_list = ['a_pollutant'],  status_min ='moving', z_min =-10.)
 ot.add_class('resuspension', critical_friction_velocity=0.01) #set value for particle resupension
-
-# run OT and return file name useful in plotting
 run= True
 if run:
     case_info_file= ot.run()

@@ -101,7 +101,7 @@ class _ParameterBaseDataClassChecker():
 # the ecognised types that a parameter can contain
 # and what types can be converted to each fundamental type
 _fundamental_types= {str:(str,),
-                float:(float,int, np.float, np.integer),
+                float:(float,int, np.float64,np.float32, np.integer),
                 int : (int, np.integer),
                 bool: (bool, np.bool_),
                      dict: (dict, ),

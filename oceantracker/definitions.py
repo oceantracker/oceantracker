@@ -1,7 +1,5 @@
-# basic defions
+# basic definitions
 # to avoid circular imports definitions.py file cannot import any oceantracker modules
-
-
 
 package_fancy_name= 'OceanTracker'
 
@@ -9,7 +7,7 @@ from os import path
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5, revision  = 1, date = '2024-03-30', parameter_ver=0.5)
+version= dict(major= 0.5, revision  = 4, date = '2024-03-30', parameter_ver=0.5)
 version['str'] = f"{version['major']:.2f}.{version['revision']:04.0f}-{version['date']}"
 
 try:
@@ -77,22 +75,20 @@ class _node_types_class(_base_values_class):
 node_types = _node_types_class()
 
 
-# face types
-@dataclass
-class _face_types_class(_base_values_class):
-    domain_boundary: int = -1
-    open_boundary: int = -2
-face_types = _face_types_class()
 
 # status of cell search
 @dataclass
 class _CellSearchStatusFlags(_base_values_class):
     ok: int = 0
-    outside_open_boundary: int = 1
-    blocked_domain: int = -5
-    blocked_dry_cell : int= -4
+    domain_edge: int = -1
+    open_boundary_edge: int = -2
+    dry_cell_edge : int = -3
     bad_cord: int = -20
     failed: int = -30
+
+    def get_edge_vars(self):
+        return {key:item for key,item in self.asdict().items() if key in ['domain_edge']}
+
 cell_search_status_flags = _CellSearchStatusFlags()
 
 # particle prop types

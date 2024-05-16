@@ -83,10 +83,7 @@ class DevNestedFields(ParameterBaseClass):
         # do final setup for each grid
         for fgm in self.fgm_hydro_grids:
             fgm.final_setup()
-
-        # ensure nested grids have open boundary data and set open boundary type
-        if si.settings['open_boundary_type'] == 0:
-            ml.msg('For nested grids must set "open_boundary_type" must be > to select an open boundary type', fatal_error=True, exit_now=True)
+            fgm.info['open_boundary_type'] = 1 # do nothing open boundary condition for inner grids
 
         # check nested grids
         for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):
@@ -96,9 +93,8 @@ class DevNestedFields(ParameterBaseClass):
 
         # outer grid is not required to have open boundary nodes, but can if provided
         fgm = self.fgm_hydro_grids[0]
-        if not fgm.info['has_open_boundary_nodes']: fgm.info['open_boundary_type'] = 0
+        if not fgm.info['has_open_boundary_nodes']: fgm.info['open_boundary_type'] = si.settings.open_boundary_type
         pass
-
 
     def setup_dispersion_and_resuspension_fields(self):
         # see if al files have the required variables
@@ -246,7 +242,7 @@ class DevNestedFields(ParameterBaseClass):
             fgm.setup_time_step(time_sec, xq, on_inner_grid, apply_open_boundary_condition=False)
 
             # find those outside  this inner grid open boundary and move to outer
-            outside_inner = part_prop['cell_search_status'].find_subset_where(on_inner_grid, 'eq', cell_search_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('fgmID2'))
+            outside_inner = part_prop['cell_search_status'].find_subset_where(on_inner_grid, 'eq', cell_search_status_flags.open_boundary_edge, out=self.get_partID_subset_buffer('fgmID2'))
             if outside_inner.size > 0:
                 inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0), include_dry_cells=True)
                 if np.any(inside_outer):
@@ -288,7 +284,7 @@ class DevNestedFields(ParameterBaseClass):
     def update_dry_cell_index(self):
         # loop over all hydro-models to update dry cellss
         for n, fgm in enumerate(self.fgm_hydro_grids):
-            fgm.update_dry_cell_index()
+            fgm.update_dry_cell_values()
         pass
 
     def update_tidal_stranding_status(self, time_sec, alive):
