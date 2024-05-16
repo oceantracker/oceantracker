@@ -281,7 +281,7 @@ class DevNestedFields(ParameterBaseClass):
         pass
 
 
-    def update_dry_cell_index(self):
+    def update_dry_cell_values(self):
         # loop over all hydro-models to update dry cellss
         for n, fgm in enumerate(self.fgm_hydro_grids):
             fgm.update_dry_cell_values()
