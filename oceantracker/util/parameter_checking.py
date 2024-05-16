@@ -98,17 +98,15 @@ class _ParameterBaseDataClassChecker():
         return value
 
 
-# the ecognised types that a parameter can contain
+# for settings PVC, the recognised types that a parameter can contain
 # and what types can be converted to each fundamental type
 _fundamental_types= {str:(str,),
-                float:(float,int, np.float64,np.float32, np.integer),
+                float:(float, int, np.floating, np.integer),
                 int : (int, np.integer),
                 bool: (bool, np.bool_),
                      dict: (dict, ),
                 }
 
-_all_convertible_types = tuple([x for x1 in _fundamental_types.values() for x in x1])
-#  [x for xs in xss for x in xs]
 @dataclass
 class ParamValueChecker(_ParameterBaseDataClassChecker):
     data_type: any = None  # must be second
@@ -127,7 +125,7 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
         ok = list(_fundamental_types.keys())
         # ensure it is one of known fundamental types that can be checked
         if self.data_type not in ok:
-            s= f'Given type "{str(self.data_type)}" is not currently one of  the fundamental paramter checker can work with'
+            s= f'Given type "{str(self.data_type)}" is not currently one of  the fundamental parameter checker can work with'
             basic_util.CodingError(s, hint=f'Must be one  of {ok}' ,
                     info=f'class {self.__class__.__name__}(default value, data_type,...)')
 
@@ -153,8 +151,6 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
                            caller=caller, fatal_error=True, crumbs=crumbs)
             return None
 
-        if self.data_type == float:  value =  float(value) # make int, np.float64, np.float32 as  floats
-
         # check max/mins
         if self.data_type in [ float, int]:
             if self.min is not None and value < self.min:
@@ -162,7 +158,7 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
             if self.max is not None and value > self.max:
                 msg_logger.msg(f'{msg}, value {str(value)} must  be less than {str(self.max)}', caller=caller, fatal_error=True, crumbs=crumbs)
 
-        return value
+        return self.data_type(value) # return value as required type
 
 @dataclass
 class ParameterTimeChecker(_ParameterBaseDataClassChecker):
