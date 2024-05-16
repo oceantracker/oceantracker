@@ -21,22 +21,9 @@ def build_grid(grid):
     grid['is_boundary_triangle'] = triangle_utilities.get_boundary_triangles(grid['adjacency'])
     grid['grid_outline'] = triangle_utilities.build_grid_outlines(grid['triangles'][:,:3], grid['adjacency'],
                                                                        grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
+
     return  grid
-def triangles_have_node_of_another_grids_triangle_inside(x_grid,triangles, triangles_query,x_nodes_query ,bc_walk_tol =0.00):
-    @njitOT
-    def _work(nis):
-        bc = np.full((3,), -1, dtype=np.float64)
-        for ntri in range(n_tri):
-            found = False
-            for ntri_q in range(triangles_query.shape[0]): # loop over query triangles
-                for m in range(3): # nodes  of query triangle
-                    xq = x_nodes_query[triangles_query[ntri_q,m],:] # x being tested
-                    n_min, n_max =triangle_interpolator_util._get_single_BC_cord_numba(xq, BCtransform[ntri,:,:], bc)
-                    if bc[n_min] > -bc_walk_tol and bc[n_max] < 1. + bc_walk_tol:
-                        nis[ntri] = True
-                        found = True
-                        break
-                if found: break
+
 
 def triangles_with_points_inside(x_grid, triangles, x_query,  bc_walk_tol=0.00):
     @njitOT

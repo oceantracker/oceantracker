@@ -90,7 +90,9 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
         # build triangle walk array of structures
         grid['tri_walk_AOS'] =numpy_util.numpy_array_of_structures_from_dict(
                                      dict(bc_transform= grid['bc_transform'],
-                                        adjacency=  grid['adjacency']),
+                                        adjacency=  grid['adjacency'],
+                                          #   adjacency=grid['adjacency_with_dry_edges']
+                                          )
                                         )
 
 
@@ -381,18 +383,12 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
         # todo add interploted water depth, tide
         return is_inside, part_data # is inside if  magnitude of all BC < 1
 
-
-
     def get_bc_cords(self,grid, x,n_cells):
         # get BC cords for given x's
         bc_cords = np.full((x.shape[0],3), 0.)
         tri_interp_util.calc_BC_cords_numba(x, n_cells, grid['bc_transform'], bc_cords)
         return bc_cords
 
-    def update_dry_cell_index(self,grid, current_buffer_steps, fractional_time_steps):
-        # update 0-255 dry cell index
-        triangle_eval_interp.update_dry_cell_index(grid['is_dry_cell'], grid['dry_cell_index'],
-                                                   current_buffer_steps, fractional_time_steps)
     def close(self):
         info = self.info
         # transfer walk / step info from to class attributes to write in case_info file

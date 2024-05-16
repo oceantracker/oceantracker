@@ -80,8 +80,9 @@
 1. error handling and log file permission errors when reunning cells in note books
 1. read write polygons from geo-jsons, release groups poly stats
 1. date/time param checker allowing stat end times as double, isostring, datetime , np.datetime64
-1. add netcdf variable atributes. dimesions etc when reading output
-
+1. add netcdf variable atributes. dimensions etc when reading output
+2. make dry cel index 0/1 not 0-256?
+1. faster in plot util only plot dry cells, ie  dont mask
 # Other
 
 ## Docs

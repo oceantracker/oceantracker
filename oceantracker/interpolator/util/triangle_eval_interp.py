@@ -172,15 +172,7 @@ def time_dependent_3Dfield_LSC_grid(nb ,fractional_time_steps, F_data,
                 F_out[n, c] +=     bc_cords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*fractional_time_steps[0]  \
                                 +  bc_cords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step
 
-@njitOT
-def update_dry_cell_index(is_dry_cell,dry_cell_index, current_buffer_steps,fractional_time_steps):
-    # update 0-255 dry cell index, used to determine if cell dry at this time
-    # uses  reader buffer locations and time step fractions within step info structure
-    # vals > 127 are dry, vals <= 127 are wet
-    for n in range(dry_cell_index.size):
-        val  = fractional_time_steps[0]*is_dry_cell[current_buffer_steps[0], n]
-        val += fractional_time_steps[1]*is_dry_cell[current_buffer_steps[1], n]
-        dry_cell_index[n]  = int(255.*val)
+
 
 # below are development ideas
 #_______________________________________________

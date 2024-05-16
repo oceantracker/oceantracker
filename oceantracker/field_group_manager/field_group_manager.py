@@ -6,14 +6,14 @@ import numpy as np
 from oceantracker.util import time_util, ncdf_util, json_util
 from datetime import datetime
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.definitions import  node_types, cell_search_status_flags
+
 from os import path
 from  oceantracker.interpolator.util.triangle_eval_interp import time_independent_2Dfield_scalar, time_dependent_2Dfield_scalar
-
+from oceantracker.field_group_manager.util import field_group_manager_util
 from time import  perf_counter
 from copy import deepcopy
 from oceantracker.shared_info import SharedInfo as si
-from  oceantracker.definitions import  face_types, node_types
+from  oceantracker.definitions import  node_types, cell_search_status_flags
 
 #TODO allow fields to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
@@ -64,7 +64,7 @@ class FieldGroupManager(ParameterBaseClass):
     def final_setup(self):
         ml = si.msg_logger
         info = self.info
-
+        grid = self.grid
         reader = self.reader
         fmap = reader.params["field_variable_map"]
 
@@ -87,10 +87,15 @@ class FieldGroupManager(ParameterBaseClass):
             ml.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid',
                    note=True)
 
-        self.interpolator.final_setup(self.grid)
+
 
         self.info['has_open_boundary_nodes'] = np.any(self.grid['node_type'] == node_types.open_boundary)
-        self.info['open_boundary_type'] = si.settings['open_boundary_type']
+        self.info['open_boundary_type'] = si.settings.open_boundary_type
+
+        # set up dry cell adjacency space for triangle walk
+        grid['adjacency_with_dry_edges'] = grid['adjacency'].copy()  # working space to add dry cell boundaries to
+
+        self.interpolator.final_setup(grid)
 
         # add tidal stranding class
         i = si.add_core_role('tidal_stranding',{},crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ',
@@ -139,19 +144,23 @@ class FieldGroupManager(ParameterBaseClass):
         info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self._time_step_and_buffer_offsets(time_sec)
         part_prop = si.roles.particle_properties
 
-        # find hri cell
+        # find hori cell
         self._find_hori_cell(time_sec, xq, active)
 
-        # all those that need fixing, lateral boundries and bad, ie cell_stautus < blocked_dry_cell
-        sel_fix = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.blocked_dry_cell, out=self.get_partID_subset_buffer('B1'))
+        # all those that need fixing, lateral boundaries and bad, ie cell_status < blocked_dry_cell
+        sel_fix = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('B1'))
+
+        self._apply_domain_boundary_condition(sel_fix)
+
+        if si.settings.block_dry_cells:
+            self._apply_dry_cell_boundary_condition(sel_fix)
 
         # only fix if single grid, nested grids get fixed by nested grid manager
         if apply_open_boundary_condition:
             self._apply_open_boundary_condition(sel_fix)# fix outside boundary
-            # move back and unans and other errors
 
-        # move back bad cell searches
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('B2'))
+        # finally move back bad cell searches, nan etc
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel) # those still bad, eg nan etc
 
         if info['is3D']:
@@ -161,24 +170,26 @@ class FieldGroupManager(ParameterBaseClass):
         # find horizontal cell for xq, node list and weight for interp at calls
 
         info = self.info
-        self.interpolator.find_hori_cell(self.grid, self.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], self.info['open_boundary_type'], active)
-
-    def _apply_lateral_boundary_condition(self, sel_bad):
+        self.interpolator.find_hori_cell(self.grid, self.fields, xq, info['current_buffer_steps'],
+                                         info['fractional_time_steps'], self.info['open_boundary_type'], active)
+    def _apply_domain_boundary_condition(self, sel_bad):
         part_prop = si.roles.particle_properties
 
         # lateral boundary
-        sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.blocked_domain, out=self.get_partID_subset_buffer('B2'))
+        sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.domain_edge, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel)
 
+    def _apply_dry_cell_boundary_condition(self, sel_bad):
         # dry cell boundary
-        if si.settings.block_dry_cells:
-            sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.blocked_domain, out=self.get_partID_subset_buffer('B2'))
-            self._move_back(sel)
+        part_prop = si.roles.particle_properties
+        sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
+        self._move_back(sel)
+
     def _apply_open_boundary_condition(self, active):
         part_prop = si.roles.particle_properties
 
         # deal with open boundary
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('B1'))
+        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.open_boundary_edge, out=self.get_partID_subset_buffer('B1'))
         if sel.size > 0:
             if self.info['has_open_boundary_nodes'] and si.settings.open_boundary_type > 0:
                 part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel)
@@ -501,11 +512,17 @@ class FieldGroupManager(ParameterBaseClass):
         self.fields[name] = i
         return i
 
-    def update_dry_cell_index(self):
+    def update_dry_cell_values(self):
         # update 0-255 dry cell index for each interpolator
-
+        grid = self.grid
         info= self.info
-        self.interpolator.update_dry_cell_index(self.grid, info['current_buffer_steps'], info['fractional_time_steps'],)
+        field_group_manager_util.update_dry_cell_index( grid['is_dry_cell_buffer'], grid['dry_cell_index'],
+                                                   info['current_buffer_steps'], info['fractional_time_steps'])
+
+        # dev copy adjacency matrix and include dry cell lateral boundaries
+        #field_group_manager_util.update_dry_cell_adjacency(grid['adjacency'], grid['dry_cell_index'], grid['adjacency_with_dry_edges'])
+        #print('xx', np.count_nonzero(grid['adjacency_with_dry_edges']==-3))
+        pass
 
     def get_hindcast_info(self):
         d = dict(start_time=self.reader.info['file_info']['first_time'],
@@ -537,7 +554,7 @@ class FieldGroupManager(ParameterBaseClass):
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
         nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
-        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(face_types.asdict()))
+        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(cell_search_status_flags.get_edge_vars()))
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(node_types.asdict())}, description='type of node, types are' + str(node_types.asdict()))
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
 
