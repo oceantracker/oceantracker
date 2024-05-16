@@ -264,7 +264,7 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
 
 
         # now have an array
-        if not np.issubdtype(value.dtype, np.integer) and not np.issubdtype(value.dtype, np.float):
+        if not np.issubdtype(value.dtype, np.integer) and not np.issubdtype(value.dtype, np.floating):
             msg_logger.msg(f'{msg}, coordinates must only contain floats or ints, got type "{str(value.dtype)}" ',
                            hint=f'got values {str(value)}',caller = caller,
                            crumbs=crumbs, fatal_error=True)
