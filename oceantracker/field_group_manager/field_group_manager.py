@@ -60,8 +60,6 @@ class FieldGroupManager(ParameterBaseClass):
 
         self.set_up_interpolator()
 
-#'update_dry_cell_values'. Did you mean: 'update_dry_cell_index'?
-
     def final_setup(self):
         ml = si.msg_logger
         info = self.info
