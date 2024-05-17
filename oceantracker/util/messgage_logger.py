@@ -204,13 +204,14 @@ class MessageLogger(object ):
             f.write(traceback_str)
 
 
-    def spell_check(self, msg, key: str, possible_values: list, **kwargs):
+    def spell_check(self, msg, key: str, possible_values: list,hint=None, **kwargs):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
 
         if 'fatal_error' not in kwargs: kwargs['warning']= True
         if 'exit_now' not in kwargs: kwargs['warning'] = True
         msg = msg + f', parameter "{key}" is not recognised, '
-        self.msg(msg,  hint=f'"Closest matches to "{key}" = {difflib.get_close_matches(key, list(possible_values), cutoff=0.4)} ?? ',
+        if hint is None : hint= ''
+        self.msg(msg,  hint=hint + f' Closest matches to "{key}" = {difflib.get_close_matches(key, list(possible_values), cutoff=0.4)} ?? ',
                   **kwargs)
 
     def close(self):

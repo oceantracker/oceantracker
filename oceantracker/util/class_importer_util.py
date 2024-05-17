@@ -58,9 +58,19 @@ class ClassImporter():
 
         elif short_name in self.short_name_class_map:
             return self.short_name_class_map[short_name]['class_obj']
+
+        elif '.' not in class_name:
+            # error if not a known short name and error as not module.class form
+            self.msg_logger.spell_check(f' Cannot find module and class for class_name="{class_name}"',
+                        class_name,[x.split('.')[1] for x in self.short_name_class_map.keys()],
+                        hint='A miss-spelt short class_name?',
+                        fatal_error=True, exit_now=True)
+            pass
         else:
+            # split out package and module if class name as
             mod,_ ,c = class_name.rpartition('.')
-            m= self._import_module_from_string(mod)
+
+            m = self._import_module_from_string(mod)
             return getattr(m,c) # get class as module attribute
 
 
@@ -149,7 +159,12 @@ class ClassImporter():
         return tree
 
     def _import_module_from_string(self, mod):
-        m = importlib.import_module(mod)
+        try:
+            m = importlib.import_module(mod)
+        except Exception as e:
+            self.msg_logger.msg(f'Unexpected error dynamically loading module named "{mod}"',
+                                hint='Got error'+str(e),
+                                fatal_error=True,exit_now=True)
         return m
     def build_short_and_full_name_maps(self, class_tree):
         # build short and full name maps to oceantracker's parameter classes
