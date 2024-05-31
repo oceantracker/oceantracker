@@ -6,7 +6,6 @@ from read_oceantracker.python import read_ncdf_output_files
 from os import path
 from glob import glob
 
-
 def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0, run_output_dir= None):
     # get case_info.json file name from runInfo dict or json file name, can also set root_output_dir, if output moved to new location
     # ncase is one based
@@ -102,7 +101,8 @@ def load_track_data(case_info_file_name, var_list=None, release_group= None, fra
     return tracks
 
 def _extract_useful_info(case_info, d):
-    if 'version_info' in case_info and case_info['version_info']['major'] >= 0.5:
+    # get release group info
+    if 'version_info' in case_info and 'major' in case_info['version_info'] and case_info['version_info']['major'] >= 0.5:
         prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'] , case_info['output_files']['release_group_info']))
     else:
         #todo deprecated from version 0.5

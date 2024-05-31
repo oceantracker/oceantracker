@@ -36,6 +36,7 @@ def main(args):
     ot.add_class('particle_statistics', **test_definitions.poly_stats,
                  polygon_list=[dict(points=hm['polygon'])])
 
+
     ot.add_class('resuspension', critical_friction_velocity=0.01)
     case_info_file = ot.run()
 

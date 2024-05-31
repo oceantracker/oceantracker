@@ -146,7 +146,7 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
                            hint =f'Must be one of types {_fundamental_types[self.data_type]}',
                            caller=caller, fatal_error=True, crumbs=crumbs)
         if self.possible_values is not None and value not in self.possible_values:
-            msg_logger.msg(f'{msg}, unexpected value={str(value)}',
+            msg_logger.msg(f'{msg}, unexpected value="{str(value)}"',
                            hint=f'Must be one of {str(self.possible_values)}',
                            caller=caller, fatal_error=True, crumbs=crumbs)
             return None

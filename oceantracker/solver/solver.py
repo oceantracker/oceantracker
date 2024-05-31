@@ -92,6 +92,10 @@ class Solver(ParameterBaseClass):
             # do stats etc updates and write tracks
             self._pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
 
+            # print progress to screen
+            if n_time_step % nt_write_time_step_to_screen == 0:
+                self.screen_output(ri.time_steps_completed, time_sec, t0_model, t0_step)
+
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
             is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.moving, out=self.get_partID_buffer('ID1'))
@@ -115,10 +119,6 @@ class Solver(ParameterBaseClass):
             #--------------------------------------
             self.do_time_step(time_sec, is_moving)
             #--------------------------------------
-
-            # print progress to screen
-            if n_time_step % nt_write_time_step_to_screen == 0:
-                self.screen_output(ri.time_steps_completed, time_sec, t0_model, t0_step)
 
             t2 = time_sec + si.settings.time_step * ri.model_direction
 
@@ -162,7 +162,6 @@ class Solver(ParameterBaseClass):
 
         # modify status, eg tidal stranding
         fgm.update_dry_cell_values()
-
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('ID1'))
 

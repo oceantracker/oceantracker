@@ -114,6 +114,13 @@ rg3= dict(name='my_grid_release',  # name used internal to refer to this release
         release_interval=1800, pulse_size=2,
         z_min=-2, z_max=-0.5)  # release at random depth between these values
 
+rg3points= dict(name='three points',
+             points=[[1594500, 5487000, -1],
+                     [1594500, 5483000, -1],
+                     [1598000, 5486100, -1]],
+             release_interval=3600,
+             pulse_size=10)
+
 pp1= dict(name='a_pollutant',  # must have a user given name
          class_name='oceantracker.particle_properties.age_decay.AgeDecay',  # class_role is resuspension
          # the below are optional settings/parameters
@@ -143,6 +150,9 @@ LCS = dict(name='LSC test',
            class_name='dev_LagarangianStructuresFTLE2D',
          )
 ax = [1591000, 1601500, 5478500, 5491000]
+
+
+
 def read_tracks(case_info_file):
     return load_output_files.load_track_data(case_info_file)
 

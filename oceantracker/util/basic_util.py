@@ -60,3 +60,16 @@ def CodingError(message='-no error message given',hint=None, info=None):
     msg= f'Coding error >> {message} \n hint= {hint} \n info= {info}'
     sleep(.5)
     raise Exception(msg)
+
+
+def IDmapToArray(IDmap:dict, select_keys:list=None):
+    # converts a dict mapping names to integer IDs to a numpy array of integers
+    # for given keys of dictionary, eg convert particle status
+    # where array is used in numba code to check if status is one of given status values
+
+    keys= list(IDmap.keys()) if select_keys is None else select_keys
+    IDs =np.full((len(keys),),-32000, dtype=np.int32)
+    for n, key in enumerate(keys):
+        IDs[n] = IDmap[key]
+
+    return IDs
