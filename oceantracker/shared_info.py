@@ -168,7 +168,7 @@ class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
 
 
-    large_float = 1.0E32
+    large_float = 1.0E50
 
 
 

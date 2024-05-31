@@ -76,12 +76,12 @@ def _prop_subset_compared_to_value(active, part_prop,comparison_func,value, out)
 def random_selection(active, probability_of_selection, out):
     # from and array of active indices randomly select some indices
     # with probability of choosing any individual index of probability_of_selection
-    nfound = 0
+    found = 0
     for n in active:
         if np.random.rand() <= probability_of_selection:
-            out[nfound] = n
-            nfound += 1
-    return out[:nfound]
+            out[found] = n
+            found += 1
+    return out[:found]
 
 # dual comparisons
 @njitOT

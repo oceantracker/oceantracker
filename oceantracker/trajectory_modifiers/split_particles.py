@@ -1,57 +1,90 @@
+import numpy as np
+
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import BaseTrajectoryModifier
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 
 from oceantracker.particle_properties.util import particle_comparisons_util
-
+from oceantracker.util.basic_util import IDmapToArray
 from oceantracker.shared_info import SharedInfo as si
+from oceantracker.util.numba_util import njitOT
 
 # proptype for how to  split particles
 class SplitParticles(BaseTrajectoryModifier):
-    # splits all particles at given time interval
+    '''
+    Splits  particles in two at  given time interval,
+    for given status values and  given particle age range.
+    Simulates reproduction, but can produce large numbers fast!
+    '''
+
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'splitting_interval': PVC(3600, float, min = 1),
-                                 'split_status_greater_than' : PVC('dead', str, possible_values=si.particle_status_flags.possible_values()),
-                                 'split_status_equal_to': PVC(None,  str, possible_values=si.particle_status_flags.possible_values()),
-                                 'probability_of_splitting': PVC(1.0, float, min=0., max=1.)
-                                 })
+        self.add_default_params(interval= PVC(24*3600, float,doc_str='time interval between splits',units='sec', min = 60),
+                                statuses=PLC(['moving', 'on_bottom', 'stranded_by_tide', 'stationary'], str, min_len=1,
+                                             doc_str='list of status names to cull ', possible_values=si.particle_status_flags.possible_values()),
+                                min_age=PVC(None, float, doc_str='minumim particle age to start splitting', units='sec'),
+                                max_age = PVC(None, float, doc_str='maximum particle age to split', units='sec'),
+                probability =PVC(1.0, float,doc_str='probability of splitting at each given interval', min=0., max=1.),
+
+                split_status_greater_than = PVC('dead', str, obsolete='used statuses list'),
+                split_status_equal_to = PVC(None, str, obsolete='used statuses list'),
+                )
     def initial_setup(self):
 
         super().initial_setup()  # set up using regular grid for  stats
-        self.time_of_last_split = si.run_info.start_time
+        params = self.params
+        si.add_scheduler_to_class('splitter01', self, interval=params['interval'])
 
+        self.statuses_to_split = IDmapToArray(si.particle_status_flags, params['statuses'])
+
+        self.age_bounds= np.asarray([ 0. if params['min_age'] is None else params['min_age'],
+                                     si.info.large_float if params['max_age'] is None else params['max_age']
+                                     ])
+        pass
     def select_particles_to_split(self, time_sec, active):
         # get indices of particles to split
-         
-        part_prop = si.roles.particle_properties
-        if self.params['split_status_equal_to'] is None:
-            eligible_to_split = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags[self.params['split_status_greater_than']], out=self.get_partID_buffer('B1'))
-        else:
-            eligible_to_split = part_prop['status'].compare_all_to_a_value('eq',si.particle_status_flag[self.params['split_status_equal_to']], out=self.get_partID_buffer('B1'))
 
+        part_prop = si.roles.particle_properties
+        params = self.params
+
+        eligible_to_split = self._splitIDs(part_prop['status'].used_buffer(),  self.statuses_to_split,
+                                           part_prop['age'].used_buffer(),  self.age_bounds,
+                                          self.get_partID_buffer('B1'))
         # split those eligible_to_split with given probability
-        split = particle_comparisons_util.random_selection(eligible_to_split, self.params['probability_of_splitting'], self.get_partID_subset_buffer('B1'))
+        split = particle_comparisons_util.random_selection(eligible_to_split, params['probability'], self.get_partID_subset_buffer('B1'))
 
         return split
 
     def update(self,n_time_step, time_sec, active):
-         
-        part_prop = si.roles.particle_properties
 
-        if  abs(time_sec - self.time_of_last_split) <= self.params['splitting_interval']:  return
-         
-        self.time_of_last_split  = time_sec
+        if self.splitter01.do_task(n_time_step):
+            part_prop = si.roles.particle_properties
+            self.time_of_last_split  = time_sec
 
-        # split given fraction
-        split = self.select_particles_to_split(time_sec, active)
-        release_data= dict(
-                x = part_prop['x'].get_values(split),
-                user_release_groupID = part_prop['user_release_groupID'].get_values(split),
-                IDrelease_group = part_prop['IDrelease_group'].get_values(split),
-                n_cell = part_prop['n_cell'].get_values(split),
-                IDpulse = part_prop['IDpulse'].get_values(split),
-                bc_cords = part_prop['bc_cords'].get_values(split),
-                hydro_model_gridID = part_prop['hydro_model_gridID'].get_values(split),
-                )
-        si.core_roles.particle_group_manager.release_a_particle_group_pulse(release_data, time_sec )
+            # split given fraction
+            split = self.select_particles_to_split(time_sec, active)
+            release_data= dict(
+                    x = part_prop['x'].get_values(split),
+                    user_release_groupID = part_prop['user_release_groupID'].get_values(split),
+                    IDrelease_group = part_prop['IDrelease_group'].get_values(split),
+                    n_cell = part_prop['n_cell'].get_values(split),
+                    IDpulse = part_prop['IDpulse'].get_values(split),
+                    bc_cords = part_prop['bc_cords'].get_values(split),
+                    hydro_model_gridID = part_prop['hydro_model_gridID'].get_values(split),
+                    )
+            si.core_roles.particle_group_manager.release_a_particle_group_pulse(release_data, time_sec )
+
+    @staticmethod
+    @njitOT
+    def _splitIDs(status, statuses,age, age_bounds,out):
+
+        found = 0
+        for n in  range(status.shape[0]):
+            if age_bounds[0] <= age[n] <= age_bounds[1]: # only split if in age range
+                for m in range(len(statuses)):
+                    # check if in array of required status IDs
+                    if status[n] == statuses[m]:
+                        out[found] = n # index matching a
+                        found += 1
+                        break # is so move on to next
+        return out[:found]

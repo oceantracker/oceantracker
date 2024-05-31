@@ -92,7 +92,7 @@ class OceanTracker():
 
         if class_role not in known_class_roles:
             ml.spell_check(f'oceantracker.add_class, class_role parameter is not recognised, value ="{class_role}"',
-                           class_role,known_class_roles, fatal_error=True)
+                           class_role,known_class_roles, fatal_error=True, hint=f'Possible_values {str(known_class_roles)}')
             return
 
         existing_params = self._get_case_params_to_work_on(case)
@@ -148,7 +148,7 @@ class OceanTracker():
         msg_logger.progress_marker('Starting run using helper class')
         ot= _OceanTrackerRunner()
         # todo print helper message here at end??
-
+        msg_logger.exit_if_prior_errors('Found errors see above')
         case_info_file = ot.run(self.params, self.case_list_params)
 
         self.has_run = True
