@@ -5,7 +5,7 @@ import numpy as np
 from os import path
 
 class NetCDFhandler(object):
-    # wrapper for single necdf cdf file, to do common operations
+    # wrapper for single netcdf file, to do common operations
     # allows for only one unlimited dimension so far
     def __init__(self, file_name, mode='r'):
 
@@ -21,7 +21,7 @@ class NetCDFhandler(object):
             print('Ocean tracker does not have permission to create netCDF file="' + file_name + '"' + ', mode =' + mode +' try deleting file')
             raise (e)
 
-        self.max_bytes_per_chunk= 4*10**9 # looks like chunks cant exceeded 4gb each
+        self.max_bytes_per_chunk= 4*10**9 # looks like chunks can't exceeded 4gb each
 
         self.variable_info ={}
         if mode == 'r':
