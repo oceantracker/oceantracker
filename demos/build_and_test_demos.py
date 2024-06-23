@@ -115,7 +115,7 @@ params.append(p3)
 # demo 4 age based heat maps
 p4 = deepcopy(p3)
 p4['particle_statistics'] = {}
-p4['particle_statistics']['age_grid'] =  {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
+p4['particle_statistics']['age_grid'] =  {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased',
              'update_interval': 1800, 'particle_property_list': ['water_depth','water_depth_bad'],
              'grid_size': [220, 221],
              'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.}

@@ -52,7 +52,7 @@ class PointRelease(BaseReleaseGroup):
          
         x = np.repeat(self.params['points'], self.params['pulse_size'], axis=0)
 
-        if self.params['release_radius']> 0.:
+        if self.params['release_radius'] > 0.:
             rr = abs(float(self.params['release_radius']))
             n = x.shape[0]
             rr = np.repeat(rr, n, axis=0)

@@ -31,7 +31,7 @@ class RandomWalk(BaseTrajectoryModifer):
         if not si.run_info.is3D_run:
             info['random_walk_size'] = info['random_walk_size'][:2]
 
-        info['random_walk_velocity'] = info['random_walk_size'] /si.settings['time_step']  # velocity equivalent of random walk distance
+        info['random_walk_velocity'] = info['random_walk_size'] / si.settings['time_step']  # velocity equivalent of random walk distance
 
     def calc_walk(self, A_turb, dt):
         # this is variance of particle motion in each vector direction,

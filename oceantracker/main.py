@@ -176,6 +176,7 @@ class _OceanTrackerRunner(object):
         crumbs = 'Forming run builder'
         run_builder = dict(working_params=setup_util.decompose_params(shared_info, deepcopy(params), ml, crumbs= crumbs, caller=self))
         run_builder['version'] = definitions.version
+        run_builder['computer_info'] = get_versions_computer_info.get_computer_info()
 
         #  merge defaults of settings which have to be the same for all cases
         working_params = run_builder['working_params']
@@ -312,18 +313,25 @@ class _OceanTrackerRunner(object):
             case_run_builder['working_params'] = case_working_params
 
             # add and tweak output file info
+
             case_run_builder['output_files']['output_file_base'] += '_C%03.0f' % (n_case)
 
             # now add builder to list to run
             case_run_builder_list.append(case_run_builder)
 
         # do runs num_processors
-        ml.progress_marker('oceantracker:multiProcessing: processors:' + str(base_working_params['settings']['processors']))
+        n_proc= base_working_params['settings']['processors']
+        if n_proc is None:
+            n_proc= max(run_builder['computer_info']['CPUs_hardware']-2, 1)
 
-        multiprocessing.set_start_method( base_working_params['settings']['multi_processing_method'] )
+        n_proc = min(n_proc, len(case_list_params)) # limit to number of cases
+
+        ml.progress_marker('oceantracker:multiProcessing: processors:' + str(n_proc))
+        if base_working_params['settings']['multi_processing_method'] is not None:
+            multiprocessing.set_start_method( base_working_params['settings']['multi_processing_method'] )
 
         # run // cases
-        with multiprocessing.Pool(processes=base_working_params['settings']['processors']) as pool:
+        with multiprocessing.Pool(processes=n_proc) as pool:
             case_summaries = pool.map(self._run1_case, case_run_builder_list)
 
         ml.progress_marker('parallel pool complete')
@@ -417,7 +425,7 @@ class _OceanTrackerRunner(object):
         # JSON parallel run info data
         d = {'output_files' :{},
             'version_info': definitions.version,
-            'computer_info': get_versions_computer_info.get_computer_info(),
+            'computer_info':  run_builder['computer_info'],
             'num_cases': num_cases,
             'elapsed_time' :perf_counter() - t0,
             'average_active_particles': total_alive_particles / num_cases if num_cases > 0 else None,
@@ -431,6 +439,7 @@ class _OceanTrackerRunner(object):
         d['output_files'] = {'root_output_dir':  o['root_output_dir'],
                             'run_output_dir': o['run_output_dir'],
                             'output_file_base': o['output_file_base'],
+                            'raw_output_file_base' : o['raw_output_file_base'], # this is need for grid file so it does not get a case number in // runs
                             'runInfo_file': o['runInfo_file'],
                             'runLog_file': o['runLog_file'],
                             'run_error_file': o['run_error_file'],

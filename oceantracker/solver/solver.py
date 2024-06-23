@@ -8,8 +8,7 @@ from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
-from oceantracker.util import numpy_util
-from oceantracker.definitions import  cell_search_status_flags
+
 
 from oceantracker.shared_info import SharedInfo as si
 
@@ -63,6 +62,8 @@ class Solver(ParameterBaseClass):
 
         # run forwards through model time variable, which for backtracking are backwards in time
         t2 = model_times[0]
+        ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)} '
+                           + f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)} ')
 
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()

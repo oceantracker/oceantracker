@@ -121,7 +121,7 @@ class BaseParticleLocationStats(ParameterBaseClass):
         # set up list of part prop and sums to enable averaging of particle properties
 
         part_prop = si.roles.particle_properties
-        self.prop_list, self.sum_prop_list = [],[]
+        self.prop_data_list, self.sum_prop_data_list = [],[]
         # todo put this in numba uti;, for other classes to use
         names=[]
         for key, prop in self.sum_binned_part_prop.items():
@@ -134,22 +134,22 @@ class BaseParticleLocationStats(ParameterBaseClass):
 
             else:
                 names.append(names)
-                self.prop_list.append(part_prop[key].data) # must used dataptr here
-                self.sum_prop_list.append(self.sum_binned_part_prop[key][:])
+                self.prop_data_list.append(part_prop[key].data) # must used dataptr here
+                self.sum_prop_data_list.append(self.sum_binned_part_prop[key][:])
 
         # convert to a numba list
-        if len(self.prop_list) ==0:
+        if len(self.prop_data_list) ==0:
             # must set yp typed empty lists for numba to have right signatures of numba functions
             # make list the right shape and pop to make it empty
             #todo a cleaner way to do this with NumbaList.empty??
-            self.prop_list =  NumbaList([np.empty( (1,))])
-            self.prop_list.pop(0)
-            self.sum_prop_list = NumbaList([np.empty((1,1,1,1))])
-            self.sum_prop_list.pop(0)
+            self.prop_data_list =  NumbaList([np.empty((1,))])
+            self.prop_data_list.pop(0)
+            self.sum_prop_data_list = NumbaList([np.empty((1, 1, 1, 1))])
+            self.sum_prop_data_list.pop(0)
         else:
             # otherwise use types of arrays
-            self.prop_list = NumbaList(self.prop_list)
-            self.sum_prop_list = NumbaList(self.sum_prop_list)
+            self.prop_data_list = NumbaList(self.prop_data_list)
+            self.sum_prop_data_list = NumbaList(self.sum_prop_data_list)
         pass
 
 
@@ -181,7 +181,7 @@ class BaseParticleLocationStats(ParameterBaseClass):
         #todo do this only when expansion occurs??
         part_prop = si.roles.particle_properties
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
-            self.prop_list[n]= part_prop[name].data
+            self.prop_data_list[n]= part_prop[name].data
 
         self.do_counts(n_time_step, time_sec,sel)
 

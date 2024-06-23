@@ -84,7 +84,7 @@
     },
     "particle_statistics": {
         "age_grid": {
-            "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased",
+            "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased",
             "update_interval": 1800,
             "particle_property_list": [
                 "water_depth",

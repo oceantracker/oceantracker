@@ -48,7 +48,7 @@ class GriddedStats2D_timeBasedDepthRange(WaterDepthRangeStats, gridded_statistic
         # set up info/attributes
         self.add_default_params({'role_output_file_tag' : PVC('stats_gridded_time_depth_range', str)})
 
-class GriddedStats2D_ageBasedDepthRange(WaterDepthRangeStats, gridded_statistics.GriddedStats2D_agedBased):
+class GriddedStats2D_ageBasedDepthRange(WaterDepthRangeStats, gridded_statistics.GriddedStats2D_ageBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()

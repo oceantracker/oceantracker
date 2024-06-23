@@ -21,7 +21,7 @@ class BaseParticleProperty(ParameterBaseClass):
                                     'vector_dim': PVC(1, int, min = 1 ),
                                     'prop_dim3': PVC(1, int, min=1,doc_str='size of a 3d dimesion of particle property'),
                                     'dtype':PVC('float64', str,possible_values=possible_dtypes, ),
-                                    'initial_value':PVC(0.,float),
+                                    'initial_value':PVC(0.,float, doc_str='Value given to particle property on release'),
                                     'update':PVC(True,bool),
                                     'write': PVC(True, bool, doc_str='Write particle property to tracks or event files file'),
                                     'type': PVC('user', str,
@@ -42,7 +42,6 @@ class BaseParticleProperty(ParameterBaseClass):
         if self.params['prop_dim3'] > 0 and self.params['prop_dim3'] > 1:
             s += (self.params['prop_dim3'],)
 
-        self.info['array_size'] = s
         # set up data buffer
         self.data = np.full(s, self.params['initial_value'], dtype=self.get_dtype(), order='c')
 

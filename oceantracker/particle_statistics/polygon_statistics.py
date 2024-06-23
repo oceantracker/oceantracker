@@ -122,7 +122,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
 
         # do counts
         self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
-                                         p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
+                                         p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_data_list, self.sum_prop_data_list, sel)
 
 
     def info_to_write_at_end(self):pass  # nothing extra to write
@@ -149,7 +149,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
             for m in range(len(prop_list)):
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
 
-class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_agedBased):
+class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_ageBased):
 
     def __init__(self):
         super().__init__()
@@ -195,7 +195,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
         # loop over statistics polygons
         self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(), p_groupID, p_x, self.count_age_bins,
-                                         self.count_all_particles, self.prop_list, self.sum_prop_list, sel, stats_grid['age_bin_edges'], p_age)
+                                         self.count_all_particles, self.prop_data_list, self.sum_prop_data_list, sel, stats_grid['age_bin_edges'], p_age)
 
     def info_to_write_at_end(self):
         # write variables whole

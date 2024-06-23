@@ -172,8 +172,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 i.close()
 
             # write grid if first case
-            if ri.caseID == 0:
-                si.core_roles.field_group_manager.write_hydro_model_grid()
+            si.core_roles.field_group_manager.write_hydro_model_grid()
 
             case_info = self._get_case_info(d0, t_start)
             json_util.write_JSON(path.join(ri.run_output_dir,  si.case_summary['case_info_file'] ), case_info)
@@ -243,7 +242,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         solver.solve()
         # ------------------------------------------
 
-        si.output_files['release_group_info'] = output_util.write_release_group_netcdf()
+        si.output_files['release_groups'] = output_util.write_release_group_netcdf()
 
         pass
 
@@ -366,8 +365,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         pgm = si.core_roles.particle_group_manager
 
-
-
         # any custom particle properties added by user
         for name, p in si.working_params['roles_dict']['particle_properties'].items():
             pgm.add_particle_property(name, 'user',p)
@@ -400,9 +397,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         d = {'caseID' : si.run_info.caseID,
              'user_note': si.settings['user_note'],
              'file_written': datetime.now().isoformat(),
-             'output_files': si.output_files,
+             'output_files': deepcopy(si.output_files),
              'version_info':   si.run_builder['version'],
-             'computer_info': get_versions_computer_info.get_computer_info(),
+             'computer_info':  si.run_builder['computer_info'],
              'hindcast_info': si.hindcast_info,
              'timing':dict(block_timings=[], function_timers= {}),
              'update_timers': {},
@@ -436,6 +433,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 if hasattr(i2,'scheduler_info'):
                     d['scheduler_info'][key][key2] = i2.scheduler_info
 
+        # rewrite release groups in net cdf
+        d['output_files']['release_groups'] = si.output_files['release_groups']
+
         d['release_group_info'] = class_info['release_groups']
 
         # core roles
@@ -443,12 +443,15 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if i is None: continue
             class_info[key] = {}
             class_info[key] = i.info
+            #todo move all output files to si.output_files, not info
             d['output_files'][key] = i.info['output_file'] if 'output_file' in i.info else None
             d['update_timers'][key] = dict(time_spent_updating= i.info['time_spent_updating'],
                                                  update_calls= i.info['update_calls'],
                                                  time_first_update_call= i.info['time_first_update_call'] )
             if hasattr(i, 'scheduler_info'):
                 d['scheduler_info'][key]= i.scheduler_info
+
+
 
         keys= []
         times=[]

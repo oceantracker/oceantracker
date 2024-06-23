@@ -23,7 +23,7 @@ particle_properties:
 particle_statistics:
   age_grid:
     age_bin_size: 3600.0
-    class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased
+    class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased
     grid_size:
     - 220
     - 221

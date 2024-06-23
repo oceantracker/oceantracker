@@ -542,11 +542,20 @@ class FieldGroupManager(ParameterBaseClass):
         grid = self.grid
         output_files = si.output_files
 
-        # write grid file
-        key = 'grid' if gridID is None or gridID < 1 else f'grid{gridID:02d}'
-        output_files[key] = output_files['output_file_base'] + '_'+  key +'.nc'
+        # add to list of outptut files
+        if gridID is None or gridID ==0:
+            # primary/outer grid
+            f_name= output_files['raw_output_file_base'] + '_grid.nc'
+            output_files['grid'] = f_name
+        else:
+            if 'nested_grid' not in output_files: output_files['nested_grid'] = []
+            f_name = output_files['raw_output_file_base'] + f'_grid{gridID:03d}.nc'
+            output_files['nested_grids'].append(f_name)
 
-        nc = ncdf_util.NetCDFhandler(path.join(output_files['run_output_dir'], output_files[key]), 'w')
+        # only  write grid for first parallel cases
+        if si.run_info.caseID > 0: return
+
+        nc = ncdf_util.NetCDFhandler(path.join(output_files['run_output_dir'], f_name), 'w')
         nc.write_global_attribute('index_note', ' all indices are zero based')
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
 
