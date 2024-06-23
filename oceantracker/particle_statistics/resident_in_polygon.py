@@ -103,13 +103,13 @@ class ResidentInPolygon(BaseParticleLocationStats):
 
         # do counts
         self.do_counts_and_summing_numba(inside_poly_prop.data,
-                                    part_prop['IDrelease_group'].data,
-                                    part_prop['IDpulse'].data,
-                                    self.info['release_group_ID_to_count'],
-                                    self.info['z_range'],
-                                    part_prop['x'].data,
-                                    self.count_time_slice, self.count_all_particles_time_slice,
-                                    self.prop_list, self.sum_prop_list, sel)
+                                         part_prop['IDrelease_group'].data,
+                                         part_prop['IDpulse'].data,
+                                         self.info['release_group_ID_to_count'],
+                                         self.info['z_range'],
+                                         part_prop['x'].data,
+                                         self.count_time_slice, self.count_all_particles_time_slice,
+                                         self.prop_data_list, self.sum_prop_data_list, sel)
 
 
     def info_to_write_at_end(self):

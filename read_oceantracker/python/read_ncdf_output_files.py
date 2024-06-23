@@ -195,11 +195,11 @@ def read_stats_file(file_name):
             name = var.removeprefix('sum_')
             with np.errstate(divide='ignore', invalid='ignore'):
                 new_data[name] = d[var]/d['count'] # calc mean
-                d['limits'][name] = {'min' : np.nanmin(d[var]), 'max': np.nanmax(d[var])}
+                d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
 
     # get
     if d['stats_type'] == 'grid':
-        d['connectivity_matrix'] =d['connectivity_matrix'] = d['count'] / d['count_all_particles'][:, :, np.newaxis, np.newaxis]
+        d['connectivity_matrix'] = d['count'] / d['count_all_particles'][:, :, np.newaxis, np.newaxis]
     else:
         d['connectivity_matrix'] = d['count'] / d['count_all_particles'][:, :, np.newaxis]
 
@@ -307,14 +307,13 @@ def dev_read_event_file(file_name):
 
 def read_release_groups_info(file_name):
     nc = NetCDFhandler(file_name,mode='r')
-    d= dict(release_group_name_list=[])
+    d= dict()
     for name in nc.all_var_names():
         data = nc.read_a_variable(name)
         attr = nc.all_var_attr(name)
         rg_name= attr['release_group_name']
 
         # extract info
-        d['release_group_name_list'].append(rg_name)
         d[rg_name] = attr
         if attr['release_type'] =='grid':
             d[rg_name]['x_grid'] = data

@@ -15,7 +15,6 @@ class ParticleGroupManager(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # requir+ed in children to get parent defaults
-        self.add_default_params( { 'particle_buffer_chunk_size': PVC(500_000, int, min=1)})
 
         # set up pointer dict and lists
         self.status_flags= si.particle_status_flags
@@ -30,7 +29,7 @@ class ParticleGroupManager(ParameterBaseClass):
         info['max_age_for_each_release_group'] =np.zeros((0,),dtype=np.int32)
 
         nDim = 3 if si.run_info.is3D_run else  2
-        info['current_particle_buffer_size'] = self.params['particle_buffer_chunk_size']
+        info['current_particle_buffer_size'] = si.settings.particle_buffer_chunk_size
 
         #  time dependent core  properties
         self.add_time_varying_info('time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
@@ -134,40 +133,23 @@ class ParticleGroupManager(ParameterBaseClass):
     def release_a_particle_group_pulse(self, release_data, time_sec):
         # release one pulse of particles from given group
         info= self.info
+
+        # check if buffer needs expanding
         smax = info['particles_in_buffer'] + release_data['x'].shape[0]
-
-        if smax > si.settings['max_particles']: return
-
-        if smax >= self.info['current_particle_buffer_size']:
+        if smax > si.settings['max_particles']: return # no more can be released
+        if smax > self.info['current_particle_buffer_size']:
             self._expand_particle_buffers(smax)
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index
         new_buffer_indices= np.arange(info['particles_in_buffer'], smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
         num_released = new_buffer_indices.shape[0]
 
-        # before doing manual updates, ensure initial values are set for
-        # manually updated particle prop, so their initial value is correct,
-        # as in compact mode cant rely on initial value set at array creation, due to re use of buffer
-        # important for prop, for which initial values is meaning full, eg polygon events writer, where initial -1 means in no polygon
-
-        for name, i in si.roles.particle_properties.items():  # catch any not manually updated with their initial value
-            if i.info['type'] == 'manual_update':
-                i.initial_value_at_birth(new_buffer_indices)
-
-        #  set initial conditions/properties of new particles
-        # do manual_update updates
         part_prop = si.roles.particle_properties
 
-        # copy over release data to part props
+        # copy over release data to new part props
         for name in release_data.keys():
             part_prop[name].set_values(release_data[name], new_buffer_indices)
-        #part_prop['x'].set_values(release_data['x'], new_buffer_indices)
-        #part_prop['user_release_groupID'].set_values(release_data['user_release_groupID'], new_buffer_indices)  # ID of release location
-        #part_prop['IDrelease_group'].set_values(release_data['IDrelease_group'], new_buffer_indices)  # ID of release location
-        #part_prop['IDpulse'].set_values(release_data['IDpulse'], new_buffer_indices)  # gives a unique release ID, so that each pulse can be tracked
-        #part_prop['hydro_model_gridID'].set_values(release_data['hydro_model_gridID'], new_buffer_indices)  # which of outer and nested grid particles are in
-        #part_prop['bc_cords'].set_values(release_data['bc_cords'], new_buffer_indices)
-        #part_prop['n_cell'].set_values(release_data['n_cell'], new_buffer_indices)  # use x0's best guess  for starting point cell
+
 
         # record needed copies
         if new_buffer_indices.size >0:
@@ -186,19 +168,22 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def _expand_particle_buffers(self,num_particles):
         info = self.info
+        part_prop = si.roles.particle_properties
         # get number of chunks required rounded up
-        n_chunks = max(1,int(np.ceil(num_particles/self.params['particle_buffer_chunk_size'])))
-        info['current_particle_buffer_size']  = n_chunks*self.params['particle_buffer_chunk_size']
+        n_chunks = max(1,int(np.ceil(num_particles/si.settings.particle_buffer_chunk_size)))
+        info['current_particle_buffer_size'] = n_chunks*si.settings.particle_buffer_chunk_size
         num_in_buffer = info['particles_in_buffer']
         #print('xxy',num_particles,n_chunks,num_in_buffer,info['current_particle_buffer_size'])
         # copy property data
-        for key, i in si.roles.particle_properties.items():
+        for key, i in part_prop.items():
             #debug_util.print_referers(i.data,tag=key)
             s= list(i.data.shape)
             s[0] = info['current_particle_buffer_size']
-            new_data = np.zeros(s, dtype=i.data.dtype) # the new buffer
-            np.copyto(new_data[:num_in_buffer, ...], i.data[:num_in_buffer, ...])
+            old_data = i.data
+            new_data = np.zeros(s, dtype=old_data.dtype) # the new buffer
+            np.copyto(new_data[:num_in_buffer, ...], old_data[:num_in_buffer, ...])
             i.data = new_data
+            del old_data
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 
@@ -348,7 +333,7 @@ class ParticleGroupManager(ParameterBaseClass):
         s += f'S:{counts[sf.stranded_by_tide-128]:05d}  B:{counts[sf.on_bottom -128]:05d} '
         s += f'D:{counts[sf.dead - 128]:03d} O:{counts[sf.outside_open_boundary - 128]:02d} '
         s += f'N:{counts[sf.bad_cord - 128]:03d} Buffer:{info["particles_in_buffer"]:04d} '
-        s += '-%3.0f%%' % (100. * info['particles_in_buffer'] / si.core_roles.particle_group_manager.info['current_particle_buffer_size'])
+        s += '%3.0f%%' % (100. * info['particles_in_buffer'] / si.core_roles.particle_group_manager.info['current_particle_buffer_size'])
         s += self.screen_msg
         return s
 

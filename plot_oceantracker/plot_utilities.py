@@ -15,7 +15,8 @@ from oceantracker.util import time_util
 color_palette={'land': (np.asarray([146, 179, 140])/256).tolist(), 'land_edge': [.5, .5, .5]}
 
 def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
-                  show_grid=False, back_ground_color_map='Blues', title=None, text1=None, credit=None):
+                  show_grid=False, back_ground_color_map='Blues',
+                  title=None, text1=None, credit=None):
 
     # get grid bounds to fill a rectangle, copes with node and grid values
     x = grid['x'][:, 0].ravel()
@@ -47,7 +48,7 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
     ax.plot(grid['grid_outline']['domain']['points'][:, 0], grid['grid_outline']['domain']['points'][:, 1], c=color_palette['land_edge'], linewidth=0.5, zorder=3)
 
     if 'water_depth' in grid and back_ground_depth:
-        plot_coloured_depth(grid, ax=ax,color_map= back_ground_color_map,zorder=1)
+        plot_coloured_depth(grid, ax=ax,color_map= back_ground_color_map,zorder=0)
 
     if show_grid:
         ax.triplot(grid['x'][:, 0], grid['x'][:, 1], grid['triangles'], color=(0.8, 0.8, 0.8), linewidth=.5, zorder=1)
@@ -133,7 +134,7 @@ def plot_release_points_and_polygons(d, release_group=None, ax = plt.gca(), colo
     # release_group is 1 based
     if release_group is None :
         # plot all release groups
-        sel = d['particle_release_groups']['release_group_name_list']
+        sel = d['particle_release_groups'].keys()
 
     else:
         sel= [release_group]
@@ -187,9 +188,9 @@ def add_heading(txt):
     if txt is not None:
         text_norm(.025, .95, txt, fontsize=6)
 
-def add_map_scale_bar(axis_lims, ax=plt.gca()):
+def add_map_scale_bar(axis_lims, ax=plt.gca(),x_size_fraction=10 ):
     dx= axis_lims[1]- axis_lims[0]
-    ds = np.power(10, np.floor(np.log10(dx / 10)))
+    ds = np.power(10, np.ceil(np.log10(dx / x_size_fraction)))
     lab = '%1.0f m' % ds if ds < 1000 else  '%1.0f km' % (ds/1000)
     fontprops = font_manager.FontProperties(size=8)
     scalebar = AnchoredSizeBar(ax.transData,

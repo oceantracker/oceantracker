@@ -18,10 +18,13 @@ class BaseReleaseGroup(ParameterBaseClass):
                 end =  PTC(None,doc_str='date/time of lase release, ignored if duration given'),
                 duration =  PVC(None, float, min=0.,units='sec',
                                     doc_str='How long particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "end"'),
+                coords_in_lat_lon_order=PVC(False, bool,
+                            doc_str='If hindcast is in geographic coords, allow user to give release point locations in (lat, lon) order rather than default (lon,lat) order.'),
+
                 max_age =  PVC(None, float, min=1.,
                               doc_str='Particles older than this age in seconds are culled,ie. status=dead, and removed from computation, very useful in reducing run time'),
                 user_release_groupID =  PVC(0, int, doc_str='User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.'),
-                user_release_group_name =  PVC(None, str, doc_str='User given name/label to attached to this release groups to make it easier to distinguish.'),
+                user_release_group_name =  PVC('no_given', str, doc_str='User given name/label to attached to this release groups to make it easier to distinguish.'),
                 allow_release_in_dry_cells =  PVC(False, bool,
                             doc_str='Allow releases in cells which are currently dry, ie. either permanently dry or temporarily dry due to the tide.'),
                z_range =  PLC(None, float, min_len=2,  obsolete=True,  doc_str='use z_min and/or z_max'),
@@ -35,7 +38,7 @@ class BaseReleaseGroup(ParameterBaseClass):
                # 'water_depth_max =  PVC(None, float, doc_str='max water depth to release in', units='m'),
 
                # Todo implement release group particle with different parameters, eg { 'oxygen' : {'decay_rate: 0.01, 'initial_value =  5.}
-                max_cycles_to_find_release_points =  PVC(1000, int, min=100, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
+                max_cycles_to_find_release_points =  PVC(1000, int, min=1, doc_str='Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc '),
                 release_duration = PTC(None,   obsolete=True,  doc_str='use "duration" parameter instead'),
                 release_start_date = PTC(None,   obsolete=True,  doc_str='use "start" parameter instead'),
                 release_end_date = PTC(None,    obsolete=True,  doc_str='use "end" parameter instead' ),
@@ -179,23 +182,21 @@ class BaseReleaseGroup(ParameterBaseClass):
             return release_part_prop
 
         if si.run_info.is3D_run:
-            if release_part_prop['x'].shape[1] <= 2:
-                # expand x0 to 3D if needed
-                release_part_prop['x'] = np.concatenate((release_part_prop['x'], np.zeros((release_part_prop['x'].shape[0], 1), dtype=x0.dtype)), axis=1)
+
 
             if params['release_at_surface']:
                 release_part_prop['x'][:, 2] = release_part_prop['tide'] - params['release_offset_from_surface_or_bottom']
             elif params['release_at_bottom']:
                 release_part_prop['x'][:, 2] = release_part_prop['water_depth'] + params['release_offset_from_surface_or_bottom']
 
-            elif params['z_min'] is not None or  params['z_max'] is not None:
-                z_min = -si.info.large_float if params['z_min'] is None else params['z_min']
-                z_max =  si.info.large_float if params['z_max'] is None else params['z_max']
+            elif params['z_min'] is not None or params['z_max'] is not None:
+                # release in random depth range if no given points have no z value, or zmin and/or zmax is set
+                z_min = -si.info.large_float if params['z_min'] is None or release_part_prop['x'].shape[1] <= 2 else params['z_min']
+                z_max =  si.info.large_float if params['z_max'] is None or release_part_prop['x'].shape[1] <= 2 else params['z_max']
 
                 if z_min > z_max:
                     ml.msg(f'Must have zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
-                                      hint='z=0 is mean tide level and z < 0 below the mean tide level',
-                                      fatal_error=True, exit_now=True, caller=self)
+                                      hint='z=0 is mean tide level and z < 0 below the mean tide level',   fatal_error=True, exit_now=True, caller=self)
                 release_part_prop['x']  = self.get_z_release_in_depth_range(release_part_prop['x'] ,z_min,z_max,
                                                                    release_part_prop['water_depth'],release_part_prop['tide'])
         return release_part_prop

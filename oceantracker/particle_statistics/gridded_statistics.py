@@ -15,10 +15,11 @@ class GriddedStats2D_timeBased(BaseParticleLocationStats):
         super().__init__()
         # set up info/attributes
         self.add_default_params({
-                 'grid_size':  PLC([100, 99],int, fixed_len=2, min=1, max=10 ** 5, doc_str='number of rows and columns in grid'),
+                 'grid_size':  PLC([100, 99],int, fixed_len=2, min=1, max=10 ** 5, doc_str='number of (rows, columns) in grid, where rows is y size, cols x size, values should be odd, so will be rounded up to next '),
                  'release_group_centered_grids': PVC(False, bool),
-                 'grid_center':         PCC(None, single_cord=True,is3D=False, doc_str='center of the statitics grid as (x,y) or (lon, lat) if hydromodel in geographic coords. If not give grids are centered on release group locations', units='meters or decimal degrees'),
-                 'grid_span':           PCC([10000,10000], single_cord=True, is3D=False,doc_str='(width, height)  of the statistics grid', units='meters or decimal degrees'),
+                 'grid_center':         PCC(None, single_cord=True,is3D=False, doc_str='center of the statistics grid as (x,y), must be given if not using  release_group_centered_grids',
+                                            units='meters'),
+                 'grid_span':           PCC([10000,10000], single_cord=True, is3D=False,doc_str='(width-x, height-y)  of the statistics grid', units='meters only'),
                  'role_output_file_tag' :    PVC('stats_gridded_time',str),
                     })
         self.grid = {}
@@ -70,56 +71,53 @@ class GriddedStats2D_timeBased(BaseParticleLocationStats):
                 info['grid_center_lon_lat'] = params['grid_center'].copy()
                 info['grid_center']= si._transform_lon_lat_to_meters( info['grid_center_lon_lat'], in_lat_lon_order=self.params['coords_in_lat_lon_order'])
             else:
-                info['grid_center'] =   params['grid_center']
+                info['grid_center'] =  params['grid_center']
 
-        # get grid span as (2,) array
-        if si.hydro_model_cords_in_lat_long:
-            info['grid_span_lon_lat'] = params['grid_span'].copy()
-            info['grid_span'] = si._transform_lon_lat_deltas(info['grid_span_lon_lat'], info['grid_center_lon_lat'], deltas_in_lat_lon_order=self.params['coords_in_lat_lon_order'])
-        else:
-            info['grid_span'] = params['grid_span']
+        gsize = np.asarray(params['grid_size'])
+        gsize = gsize + (gsize+1) % 2  # grid size must be odd to ensure middle of center cell at mid point , a required by re
+        gspan = params['grid_span']
 
-        # ensure grid sizes are odd, so grid center is in middle of center cell
-        for n in range(len(params['grid_size'])):
-            if params['grid_size'][n] %2 != 0: params['grid_size'][n]+=1
+        # make bin edges grid one larger than given grid_size  as (row, col), (y,x) size
+        dx, dy = float(gspan[0]/gsize[1]), float(gspan[1]/gsize[0])
 
-        # uncentered bin edges as N by 1 to allow replication
-        base_x = np.linspace(-info['grid_span'][0]/2., info['grid_span'][0]/2., params['grid_size'][1]).reshape(-1,1)
-        base_y = np.linspace(-info['grid_span'][1]/2., info['grid_span'][1]/2., params['grid_size'][0]).reshape(-1,1)
+        base_x_bin_edges = np.linspace(-gspan[0]/2, gspan[0]/2, gsize[1] + 1)
+        base_y_bin_edges = np.linspace(-gspan[1]/2, gspan[1]/2, gsize[0] + 1)
 
-        # center of grid cells
-        ngroups= len(si.roles.release_groups)
+        # make bin centers
+        base_x = 0.5*(base_x_bin_edges[1:] + base_x_bin_edges[0:-1])
+        base_y = 0.5*(base_y_bin_edges[1:] + base_y_bin_edges[0:-1])
+
+
+        # make copies for each release group
+        s= (len(si.roles.release_groups), 1)
+        stats_grid['x'] = np.tile(base_x[np.newaxis,:], s)
+        stats_grid['y'] = np.tile(base_y[np.newaxis, :], s)
+        stats_grid['x_bin_edges'] = np.tile(base_x_bin_edges[np.newaxis, :], s)
+        stats_grid['y_bin_edges'] = np.tile(base_y_bin_edges[np.newaxis, :], s)
+        stats_grid['cell_area'] = dx * dy
 
         if params['release_group_centered_grids']:
             # form grids around mean of each release group locations
-
-            stats_grid['x_bin_edges'] = np.full((ngroups,len(base_x)), 0., dtype=np.float64)
-            stats_grid['y_bin_edges'] = np.full((ngroups,len(base_y)), 0., dtype=np.float64)
-
             # loop over release groups to get bin edges
             for ngroup, name  in enumerate(si.roles.release_groups.keys()):
                 rg = si.roles.release_groups[name]
                 x0 = rg.info['bounding_box_ll_ul'] # works for point and polygon releases,
                 x_release_group_center= np.nanmean(x0[:,:2], axis=0)
-                stats_grid['x_bin_edges'][ngroup, :] = base_x.T + x_release_group_center[0]
-                stats_grid['y_bin_edges'][ngroup, :] = base_y.T + x_release_group_center[1]
-
+                stats_grid['x'][ngroup, :] += x_release_group_center[0]
+                stats_grid['y'][ngroup, :] += x_release_group_center[1]
+                stats_grid['x_bin_edges'][ngroup, :] += x_release_group_center[0]
+                stats_grid['y_bin_edges'][ngroup, :] += x_release_group_center[1]
         else:
             # used same grid with single  given center for all particle release groups
-            stats_grid['x_bin_edges'] = np.tile(base_x.T, (ngroups, 1)) + info['grid_center'][0]
-            stats_grid['y_bin_edges'] = np.tile(base_y.T, (ngroups, 1)) + info['grid_center'][1]
-
-        #  bin centers for each release group
-        stats_grid['x'] = (stats_grid['x_bin_edges'][:, 1:] + stats_grid['x_bin_edges'][:, 0:-1]) / 2.
-        stats_grid['y'] = (stats_grid['y_bin_edges'][:, 1:] + stats_grid['y_bin_edges'][:, 0:-1]) / 2.
-
-        # assumes equal spacing
-        stats_grid['cell_area'] = np.diff(base_y,axis=0) * np.diff(base_x,axis=0).T
+            stats_grid['x'] += info['grid_center'][0]
+            stats_grid['y'] += info['grid_center'][1]
+            stats_grid['x_bin_edges'] += info['grid_center'][0]
+            stats_grid['y_bin_edges'] += info['grid_center'][1]
+        pass
 
         if self.params['write']:
             nc.add_dimension('x_dim', stats_grid['x'].shape[1])
             nc.add_dimension('y_dim', stats_grid['y'].shape[1])
-
 
     def set_up_binned_variables(self,nc):
         if not self.params['write']: return
@@ -153,7 +151,7 @@ class GriddedStats2D_timeBased(BaseParticleLocationStats):
         p_x= part_prop['x'].used_buffer()
 
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
-                                         self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
+                                         self.count_time_slice, self.count_all_particles_time_slice, self.prop_data_list, self.sum_prop_data_list, sel)
 
 
 
@@ -184,7 +182,7 @@ class GriddedStats2D_timeBased(BaseParticleLocationStats):
                 for m in range(len(prop_list)):
                     sum_prop_list[m][ng,r,c] += prop_list[m][n]
 
-class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
+class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
     # does grid stats  based on age, but must keep whole stats grid in memory so ages can bw bined
     # bins all particles across all times into age bins,
 
@@ -195,9 +193,9 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         super().__init__()
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('stats_gridded_age',str),
-                                 'min_age_to_bin':  PVC(0.,float),
-                                 'max_age_to_bin':  PVC(30.*24*3600 ,float),
-                                 'age_bin_size':    PVC(1.*24*3600.,float),
+                                 'min_age_to_bin':  PVC(0.,float,min=0., doc_str='Min. particle age to count', units='sec'),
+                                 'max_age_to_bin':  PVC(si.info.large_float , float, min=1., doc_str='Max. particle age to count', units='sec'),
+                                 'age_bin_size':    PVC(7*24*3600.,float,doc_str='Size of bins to count ages into, default= 1 week', units='sec'),
                                 })
 
     def initial_setup(self):
@@ -215,22 +213,16 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
 
         # ages to bin particle ages into,  equal bins in given range
         age_min = abs(self.params['min_age_to_bin'])
-        age_max = abs(self.params['max_age_to_bin'])
-
-        # check age order and length
-        if age_min >  si.run_info['duration']:
-            ml.msg(' parameter min_age_to_bin must be > duration of model run (min,max) = '
-                                    + str([age_min, age_max]) + ', duration=' + str(si.run_info['duration']),
-                   caller=self, fatal_error=True)
+        age_max = min(abs(self.params['max_age_to_bin']), si.run_info.duration)
 
         if age_max <= age_min:
             ml.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
                                     + str([age_min,age_max ]) + ', duration=' + str(si.run_info['duration']),
                    caller=self,   fatal_error=True)
 
-        # arange requites one mere step beyong required max_age
-        dage= abs(int(self.params['age_bin_size']))
-        stats_grid['age_bin_edges'] =  float(si.run_info.model_direction) * np.arange(int(age_min), int(age_max+dage), dage)
+        # set up age bin edges
+        dage= abs((self.params['age_bin_size']))
+        stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(age_min, age_max+dage, dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
             ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
@@ -266,7 +258,8 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()
 
-        self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'], self.count_age_bins, self.count_all_particles, self.prop_list, self.sum_prop_list, stats_grid['age_bin_edges'], p_age, sel)
+        self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'], self.count_age_bins,
+                                         self.count_all_particles, self.prop_data_list, self.sum_prop_data_list, stats_grid['age_bin_edges'], p_age, sel)
 
 
     @staticmethod
@@ -286,7 +279,7 @@ class GriddedStats2D_agedBased(GriddedStats2D_timeBased):
             c = int(np.floor((x[n, 0] - x_edges[ng, 0]) / dx))
             na = int(np.floor((age[n] - age_bin_edges[0]) / da))
 
-            if  0 <= na < (age_bin_edges.shape[0] - 1):
+            if 0 <= na < (age_bin_edges.shape[0] - 1):
                 count_all_particles[na, ng] += 1 # count all in each age band
                 if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1 :
                     count[na, ng, r, c] += 1

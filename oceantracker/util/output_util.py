@@ -11,7 +11,7 @@ def add_particle_status_values_to_netcdf(nc):
 
 def write_release_group_netcdf():
     '''Write release groups data to own file for each case '''
-    fn =  si.run_info.output_file_base + '_release_group_info.nc'
+    fn =  si.run_info.output_file_base + '_release_groups.nc'
     nc = NetCDFhandler(path.join(si.run_info.run_output_dir, fn), mode= 'w')
 
     # loop over release groups
@@ -39,7 +39,9 @@ def write_release_group_netcdf():
         sc = rg.release_scheduler.info
         attr= dict(release_type=rg.info['release_type'], is3D = is3D,
                     release_group_name = name, instanceID= rg.info['instanceID'], pulses= rg.info['pulseID'],
-                    start =sc['start_time'], end =sc['end_time'], start_date= sc['start_date'], end_date =sc['end_date'],)
+                    start =sc['start_time'], end =sc['end_time'], start_date= sc['start_date'], end_date =sc['end_date'],
+                   user_release_groupID=rg.params['user_release_groupID'],
+                   user_release_group_name= rg.params['user_release_group_name'] )
         nc.write_a_new_variable(v_name, points, dims, units='meters or decimal deg. as  (lon, lat)',  attributes=attr)
     
     nc.close()

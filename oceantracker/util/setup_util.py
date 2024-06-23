@@ -45,6 +45,7 @@ def setup_output_dir(params, msg_logger, crumbs='', caller=None):
     output_files  = {'root_output_dir': root_output_dir,
                       'run_output_dir': run_output_dir,
                       'output_file_base': params['output_file_base'],
+                      'raw_output_file_base': copy(params['output_file_base']),  # this is need for grid file so it does not get a case number in // runs
                       'runInfo_file': params['output_file_base'] + '_runInfo.json',
                       'runLog_file': params['output_file_base'] + '_runScreen.log',
                       'run_error_file': params['output_file_base'] + '_run.err',
@@ -198,8 +199,8 @@ def merge_base_and_case_working_params(base_working_params, case_working_params,
             else:
                 # name appears in both base and case params
                 msg_logger.msg(f'In role {role} the classes named {name} is in both the case and base case params, ignoring base case version',
-                               crumbs=f'{crumbs} > case number {case_working_params["caseID"]}',
-                               hint='Delete either base case or case parameters of this name to remove this warning',  warning=True)
+                               #crumbs=f'{crumbs} > case number {case_working_params["caseID"]}',
+                               hint='Delete either base case or case parameters of this name to remove this warning',  fatal_error=True)
 
         pass
     return case_working_params

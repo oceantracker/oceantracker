@@ -103,11 +103,11 @@ def load_track_data(case_info_file_name, var_list=None, release_group= None, fra
 def _extract_useful_info(case_info, d):
     # get release group info
     if 'version_info' in case_info and 'major' in case_info['version_info'] and case_info['version_info']['major'] >= 0.5:
-        prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'] , case_info['output_files']['release_group_info']))
+        prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'] , case_info['output_files']['release_groups']))
+
     else:
         #todo deprecated from version 0.5
         prg_info = case_info['release_groups']
-        prg_info['release_group_name_list'] = [str(n) for n in case_info['release_groups'].keys()]
 
     d.update( particle_status_flags =case_info['particle_status_flags'],
               particle_release_groups= prg_info)

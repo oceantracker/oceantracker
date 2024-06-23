@@ -208,13 +208,18 @@ class ParameterListChecker(ParamValueChecker):
         crumbs += ' > ParameterListChecker'
         msg = f'Parameter "{key}"'
         pass
+
+        if type(values) != list:
+            msg_logger.msg(f'{msg}, must be  of type list',
+                           hint=f'got type={str(type(values))}', crumbs=crumbs, caller=caller, fatal_error=True)
+            return values
         # check length
         if self.fixed_len is not None and len(values) != self.fixed_len:
             msg_logger.msg(f'{msg}, list must be  exactly {self.fixed_len:d} long',
-                           hint= f'got list length={len(values) }', crumbs=crumbs,caller=caller)
+                           hint= f'got list length={len(values) }', crumbs=crumbs,caller=caller, fatal_error=True)
         if values is not None and len(values) < self.min_len:
             msg_logger.msg(f'{msg}, list must be  at least {self.fixed_len:d} long',
-                           hint= f'got list length={len(values) }', crumbs=crumbs,caller=caller)
+                           hint= f'got list length={len(values) }', crumbs=crumbs,caller=caller, fatal_error=True)
 
         # check each value in list and convert to fundamental types in parent checker
         for n, v in enumerate(values):
