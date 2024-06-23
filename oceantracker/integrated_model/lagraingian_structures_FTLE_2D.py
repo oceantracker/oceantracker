@@ -30,7 +30,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
                         doc_str='List of one or more times after particle release to calculate Lagarangian Coherent Structures, default is 1 day'),
             grid_size=  PLC([100, 99],int, fixed_len=2,  min=1, max=10 ** 5,
                                             doc_str='number of rows and columns in grid'),
-            grid_center=  PCC(None, one_or_more_points=True, is3D=False,is_required=True,
+            grid_center=  PCC(None, single_cord=True, is3D=False,is_required=True,
                                doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
             grid_span=  PCC(None, single_cord=True, min=.0001, is3D=False, is_required=True,
                              doc_str='(width, height)  of the grid release, must be > 0.', units='meters or decimal degrees'),
