@@ -22,7 +22,7 @@ def set_value(x1, value, active):
             for m in range(x1.shape[1]):
                 x1[n, m] = value
 
-#@njitOT
+@njitOT
 def set_values(x1, values, active, scale=1.0):
     # set values of active particles in working buffer,
     # values must be same size as active
