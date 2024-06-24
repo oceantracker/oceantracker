@@ -17,7 +17,7 @@ def _run(args):
                 grid_center = None,
                 update_interval = 0,
                 lags = None,
-                floating = True,
+                #floating = True,
                 )
     settings= dict(time_step=900, backtracking= args.backtracking)
 

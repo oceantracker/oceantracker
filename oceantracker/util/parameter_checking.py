@@ -194,7 +194,7 @@ class ParameterTimeChecker(_ParameterBaseDataClassChecker):
 @dataclass
 class ParameterListChecker(ParamValueChecker):
     # below relate to a list and its contents
-    # list must be all teh same fundamental type
+    # list must be all the same fundamental type
     possible_types: List = field(default_factory=lambda: [])
 
     make_list_unique: bool = False

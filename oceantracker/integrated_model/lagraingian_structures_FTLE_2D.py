@@ -30,16 +30,19 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
                         doc_str='List of one or more times after particle release to calculate Lagarangian Coherent Structures, default is 1 day'),
             grid_size=  PLC([100, 99],int, fixed_len=2,  min=1, max=10 ** 5,
                                             doc_str='number of rows and columns in grid'),
-            grid_center=  PCC(None, single_cord=True, is3D=False,is_required=True,
-                               doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
-            grid_span=  PCC(None, single_cord=True, min=.0001, is3D=False, is_required=True,
-                             doc_str='(width, height)  of the grid release, must be > 0.', units='meters or decimal degrees'),
+            grid_center=  PCC(None, one_or_more_points=True, is3D=False,is_required=True,
+                               doc_str='center of one or more LCS grid centers  or (lon, lat) if hydromodel in geographic coords., should be [x,y] or [[x1,y1],[x1,y1],...]',
+                              units='meters or decimal degrees'),
+            grid_span=  PCC(None, one_or_more_points=True, min=.0001, is3D=False, is_required=True,
+                             doc_str='(width, height)  of the grid release, should be single [dx,dy] or [[dx1,dy1],[dx1,dy1],...] with one pair for each grid center', units='meters only'),
+            floating=PVC(True, bool, doc_str='Do LCS for floating partyicles, in development currently only option '),
             z_min=  PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
             z_max=  PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
             output_file_tag=  PVC('LCS', str, doc_str='tag on output file'),
-            #'backwards=  PVC(False, bool, doc_str='Do LCS backwards in time'),
+            backwards=  PVC(False, bool, doc_str='Do LCS backwards in time'),
             write_intermediate_results=  PVC(False, bool, doc_str='write intermediate arrays, x_lag, strain_matrix. Useful for checking results'),
             write_tracks=  PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off by default for LCS'),
+
         )
     def add_settings_and_class_params(self):
         # change parameters
@@ -65,7 +68,8 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
 
         # set up release grid is padded by one all around
         release_params = dict(class_name='oceantracker.release_groups.grid_release.GridRelease',
-                              pulse_size=1, z_min=params['z_min'], z_max=params['z_max'],
+                              pulse_size=1,
+                              z_min=params['z_min'], z_max=params['z_max'],
                               grid_size= [r+2, c+2],
                               max_age = params['lags'][-1],  # run each to largest lag
                               release_interval=0.  )
@@ -105,10 +109,9 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
 
             for n_pulse in range(info['times'].size):
                 rp['start'] = info['times'][n_pulse]
-                rp['user_instance_info'] = (n_grid, n_pulse) # tag with grid and pulse number
                 # add param dict as keyword arguments
 
-                self.add_class('release_groups', name= f'LCS_grid{n_grid:03d}_time_step{n_pulse:04d}', **rp)
+                self.add_class('release_groups', name= f'LCS_grid_{n_grid:03d}_pulse_{n_pulse:04d}', **rp)
 
             pass
 
@@ -130,6 +133,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
         # add lag schedular
         time = []
         md = si.run_info.model_direction
+
         for name, rg in si.roles.release_groups.items():
             # time of lags after start of release group
             t = rg.release_scheduler.info['start_time'] + md*params['lags']
@@ -137,15 +141,17 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
             si.add_scheduler_to_class('LCScalculation_scheduler', rg, times=t, caller=self, crumbs='Adding LCS calculation scheduler ')
             rg.info['next_lag_to_calculate'] = 0 # counter for the lag to work on
 
-            # from first grid record start time of each pulse, as is the same for all grids
-            n_grid, n_pulse = rg.params['user_instance_info']
-            if n_grid == 0:  # first grid
+            # from get grid and pulse ID from the release group name
+            s = name.split('_')
+            rg.info['n_grid'],rg.info['n_pulse'] = int(s[2]), int(s[4])
+
+            if rg.info['n_grid'] == 0:  # first grid
                 time.append(rg.LCScalculation_scheduler.info['start_time']) # record start time of each pulse, is the same for all grids
 
             # record grid from first pulse of each grid
-            if n_pulse == 0:
-                self.x_release_grids[n_grid, ...] = rg.info['x_grid']
-                self.x_LSC_grid[n_grid, ...] = rg.info['x_grid'][1:-1,1:-1,:]
+            if rg.info['n_pulse'] == 0:
+                self.x_release_grids[rg.info['n_grid'], ...] = rg.info['x_grid']
+                self.x_LSC_grid[rg.info['n_grid'], ...] = rg.info['x_grid'][1:-1,1:-1,:]
 
         self.time= np.asarray(time) # times or t0 for LSC
 
@@ -165,10 +171,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
                 # find particles in this release group to do calculations at this lag
                 sel = part_prop['IDrelease_group'].compare_all_to_a_value('eq', rg.info['IDrelease_group'], out=self.get_partID_buffer('ID1'))
 
-                n_grid, n_pulse = rg.params['user_instance_info']
-
-                self._calculate_LCS(n_pulse, n_grid, rg.info['next_lag_to_calculate'],  sel)
-
+                self._calculate_LCS(rg.info['n_pulse'],rg.info['n_grid'], rg.info['next_lag_to_calculate'],  sel)
                 rg.info['next_lag_to_calculate'] += 1
                 pass
         pass
