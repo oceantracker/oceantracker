@@ -60,7 +60,7 @@ class BaseReleaseGroup(ParameterBaseClass):
         # return booleaon of keeped points
         return is_inside, release_part_prop
 
-    def add_bookeeping_particle_prop_data(self,release_part_prop):
+    def _add_bookeeping_particle_prop_data(self, release_part_prop):
         # add booking ID s before anny culling of candidates
         info = self.info
         # add release IDs as full arrays
@@ -95,7 +95,11 @@ class BaseReleaseGroup(ParameterBaseClass):
         else:
             duration = abs(params['duration'])
 
-        life_span =  duration + 0. if params['max_age'] is None else abs(params['max_age'])
+        life_span =  duration
+        #extend to ensure last release have a full life
+        if params['max_age'] is not None:
+            life_span += params['max_age']
+
         return start, life_span
 
     def _check_potential_release_locations_in_bounds(self, x):
@@ -137,7 +141,7 @@ class BaseReleaseGroup(ParameterBaseClass):
             rd = self.add_tide_and_depth_release_part_prop(rd,time_sec)
 
             # add booking IDs etrc before any culling of candidates
-            rd = self.add_bookeeping_particle_prop_data(rd)
+            rd = self._add_bookeeping_particle_prop_data(rd)
 
             #any filter added by child class added
             is_inside, rd = self.filter_release_points(is_inside,rd, time_sec=time_sec)
@@ -177,12 +181,15 @@ class BaseReleaseGroup(ParameterBaseClass):
         for key in release_part_prop.keys():
             release_part_prop[key] = release_part_prop[key][:n_required, ...]
 
-        # if nothing to release then return only 'x' is
+        # if nothing to release then return
         if release_part_prop['x'].shape[0] ==0:
             return release_part_prop
 
         if si.run_info.is3D_run:
 
+            # add z if not given
+            if  release_part_prop['x'].shape[1] < 3:
+                release_part_prop['x']= np.concatenate(( release_part_prop['x'],np.full( (release_part_prop['x'].shape[0],1), 0, dtype=release_part_prop['x'].dtype)),axis=1)
 
             if params['release_at_surface']:
                 release_part_prop['x'][:, 2] = release_part_prop['tide'] - params['release_offset_from_surface_or_bottom']
@@ -191,8 +198,8 @@ class BaseReleaseGroup(ParameterBaseClass):
 
             elif params['z_min'] is not None or params['z_max'] is not None:
                 # release in random depth range if no given points have no z value, or zmin and/or zmax is set
-                z_min = -si.info.large_float if params['z_min'] is None or release_part_prop['x'].shape[1] <= 2 else params['z_min']
-                z_max =  si.info.large_float if params['z_max'] is None or release_part_prop['x'].shape[1] <= 2 else params['z_max']
+                z_min = -si.info.large_float if params['z_min'] is None else params['z_min']
+                z_max =  si.info.large_float if params['z_max'] is None else params['z_max']
 
                 if z_min > z_max:
                     ml.msg(f'Must have zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
@@ -217,14 +224,7 @@ class BaseReleaseGroup(ParameterBaseClass):
                                                 hydro_model_gridID=release_part_prop['hydro_model_gridID'])
             return release_part_prop
 
-    def get_z_release_in_depth_range(x,z_min, z_max, water_depth,tide):
-        # get random release within z_min and z_max and with water depth and tide
 
-        for n in range(x.shape[0]):
-            z1  = max(-water_depth[n], z_min)
-            z2  = min(tide[n], z_max)
-            x[n, 2] = np.random.uniform(z1, z2, size=1)[0]
-        return x
 
     @staticmethod
     @njitOT

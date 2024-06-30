@@ -23,7 +23,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
         self.add_default_params(
             start=  PTC(None, doc_str='start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
             end=  PTC(None, doc_str=' end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
-            update_interval=  PVC(3600.,float,units='sec',min=0.,
+            release_interval=  PVC(3600.,float,units='sec',min=0.,
                                     doc_str='Time in seconds between calculating statistics, will be rounded to be a multiple of the particle tracking time step'),
             lags=  PLC(None, float, units='sec',min=1,min_len=1,
                         is_required=True,

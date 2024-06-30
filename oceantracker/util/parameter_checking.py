@@ -216,7 +216,7 @@ class ParameterListChecker(ParamValueChecker):
         # check length
         if self.fixed_len is not None and len(values) != self.fixed_len:
             msg_logger.msg(f'{msg}, list must be  exactly {self.fixed_len:d} long',
-                           hint= f'got list length={len(values) }', crumbs=crumbs,caller=caller, fatal_error=True)
+                           hint= f'got list length={len(values) }, with {str(values)}', crumbs=crumbs,caller=caller, fatal_error=True)
         if values is not None and len(values) < self.min_len:
             msg_logger.msg(f'{msg}, list must be  at least {self.fixed_len:d} long',
                            hint= f'got list length={len(values) }', crumbs=crumbs,caller=caller, fatal_error=True)

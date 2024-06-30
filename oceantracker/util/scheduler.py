@@ -88,11 +88,14 @@ class Scheduler(object):
             n = (start - run_info.start_time) / dt  # number of model steps since the start
             start = run_info.start_time + round(n) *  dt
 
-        if duration is None:
-            duration = abs(run_info.end_time-start)
         if end is not None:
-            #use end time instead to give duration
-            duration = abs(end-start)
+            # use end time instead to give duration
+            duration = abs(end - start)
+
+        elif duration is None:
+            #duration is start to
+            duration = abs(run_info.end_time-start)
+
 
         #trim within max duration
         duration = min(settings.max_run_duration, duration)

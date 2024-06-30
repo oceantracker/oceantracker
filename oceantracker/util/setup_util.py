@@ -172,14 +172,14 @@ def merge_settings(settings, default_settings, settings_to_merge, msg_logger, cr
         pass
     return settings
 
-def merge_base_and_case_working_params(base_working_params, case_working_params,base_case_only_params, msg_logger, crumbs='', caller=None):
+def merge_base_and_case_working_params(base_working_params,n_case, case_working_params,base_case_only_params, msg_logger, crumbs='', caller=None):
 
     # check any case settings are not in the ones that can only be shared
     for key in case_working_params['settings'].keys():
         pass
         if key in base_case_only_params:
             msg_logger.msg(f'Setting {key} cannot be set with a case', crumbs= crumbs,
-                          hint='Move parameter from cases to the base case', caller=caller, fatal_error=True)
+                          hint=f'Move parameter from cases to the base case #{n_case}', caller=caller, fatal_error=True)
 
     # merge the settings first
     for key, item in base_working_params['settings'].items():
@@ -200,7 +200,7 @@ def merge_base_and_case_working_params(base_working_params, case_working_params,
                 # name appears in both base and case params
                 msg_logger.msg(f'In role {role} the classes named {name} is in both the case and base case params, ignoring base case version',
                                #crumbs=f'{crumbs} > case number {case_working_params["caseID"]}',
-                               hint='Delete either base case or case parameters of this name to remove this warning',  fatal_error=True)
+                               hint=f'Delete base case parameters of this name, or in case #{n_case} e to remove this warning',  fatal_error=True)
 
         pass
     return case_working_params

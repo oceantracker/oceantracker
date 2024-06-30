@@ -62,8 +62,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         ml.exit_if_prior_errors('Errors in settings??', caller=self)
         # transfer all settings to shared_info.settings to allow tab hints
 
-
-
         # basic  shortcuts
         ri = si.run_info
         ri.caseID = run_builder['caseID']
@@ -102,9 +100,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # set up profiling
         #profiling_util.set_profile_mode(si.settings['profiler'])
-
-
-
         # run info
         ri = si.run_info
 
@@ -270,7 +265,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         first_time = []
         last_time = []
 
-
         md = ri.model_direction
 
         for name, rg_params in particle_release_groups_params_dict.items():
@@ -314,8 +308,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         if len(si.roles.release_groups) == 0:
             # guard against there being no release groups
             si.msg_logger.msg('No valid release groups' , fatal_error=True, exit_now=True, caller=self)
-
-
 
         si.msg_logger.progress_marker('Set up run start and end times, plus release groups and their schedulers', start_time=t0)
 
@@ -401,6 +393,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'version_info':   si.run_builder['version'],
              'computer_info':  si.run_builder['computer_info'],
              'hindcast_info': si.hindcast_info,
+             'working_params': dict(settings = si.settings.as_dict() ,core_roles={}, roles={}),
              'timing':dict(block_timings=[], function_timers= {}),
              'update_timers': {},
              'settings' : si.settings.as_dict(),
@@ -422,6 +415,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             d['scheduler_info'][key] = {}
             d['update_timers'][key] = {}
             d['output_files'][key] = {}
+            d['working_params']['roles'][key] = {}
             # interate over dict
             for key2, i2 in i.items():
                 class_info[key][key2]= i2.info
@@ -432,6 +426,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 d['output_files'][key][key2]= i2.info['output_file'] if 'output_file' in i2.info else None
                 if hasattr(i2,'scheduler_info'):
                     d['scheduler_info'][key][key2] = i2.scheduler_info
+
+                # full parameters
+                p = deepcopy(i2.params)
+                if key == 'release_groups':  # don't put release point locations which may make json too big
+                    p['points'] = 'points may be too large for json, read release_groups netCDF file, '
+                d['working_params']['roles'][key][key2] = p
 
         # rewrite release groups in net cdf
         d['output_files']['release_groups'] = si.output_files['release_groups']
@@ -451,7 +451,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if hasattr(i, 'scheduler_info'):
                 d['scheduler_info'][key]= i.scheduler_info
 
-
+            d['working_params']['core_roles'][key] = i.params
 
         keys= []
         times=[]

@@ -33,7 +33,7 @@ class BaseReader(ParameterBaseClass):
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
             'field_variables': PLC(None, str,  obsolete=True,  doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed',                              make_list_unique=True),
-            'field_variable_map': {'water_velocity': PLC(None, str, fixed_len=3, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
+            'field_variable_map': {'water_velocity': PLC(None, str, min_len=1, is_required=True, doc_str='maps standard internal field name to file variable names for velocity components'),
                                    'tide': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC(None, str, is_required=True, doc_str='maps standard internal field name to file variable name'),
                                    'A_Z_profile': PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
@@ -41,7 +41,7 @@ class BaseReader(ParameterBaseClass):
                                    'salinity': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'wind_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'bottom_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
-                                   'water_velocity_depth_averaged': PLC(None, str, fixed_len=2,
+                                   'water_velocity_depth_averaged': PLC(None, str,
                                                                         doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'EPSG': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),

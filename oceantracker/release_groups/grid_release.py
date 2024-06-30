@@ -57,8 +57,8 @@ class GridRelease(BaseReleaseGroup):
         x = np.repeat(self.points, self.params['pulse_size'], axis=0)
         return x
     
-    def add_bookeeping_particle_prop_data(self,release_part_prop):
-        super().add_bookeeping_particle_prop_data(release_part_prop) # get standard release bookeeping prop
+    def _add_bookeeping_particle_prop_data(self, release_part_prop):
+        super()._add_bookeeping_particle_prop_data(release_part_prop) # get standard release bookeeping prop
 
         # add row column origin part prop data, for each pulse
         release_part_prop['grid_release_row_col'] = np.repeat(self.info['map_grid_index_to_row_column'], self.params['pulse_size'], axis=0)

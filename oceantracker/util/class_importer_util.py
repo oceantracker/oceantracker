@@ -69,10 +69,14 @@ class ClassImporter():
         else:
             # split out package and module if class name as
             mod,_ ,c = class_name.rpartition('.')
-
-            m = self._import_module_from_string(mod)
-            return getattr(m,c) # get class as module attribute
-
+            try:
+                m = self._import_module_from_string(mod)
+                return getattr(m,c) # get class as module attribute
+            except Exception as e:
+                self.msg_logger.spell_check(f' Cannot find module "{mod}" or class within it="{c}"',
+                                            f'{mod}.{c}', [x.split('.')[1] for x in self.short_name_class_map.keys()],
+                                            hint='A miss-spelt short class_name? or missing custimn class',
+                                            fatal_error=True, exit_now=True)
 
     def new_make_class_instance_from_params(self, class_role, params, name = None,  default_classID=None,
                                     caller=None,   crumbs='', merge_params=True, check_for_unknown_keys=True):
