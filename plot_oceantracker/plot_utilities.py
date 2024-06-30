@@ -23,29 +23,19 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
     y = grid['x'][:, 1].ravel()
     xbounds = np.asarray([np.min(x), np.max(x)])
     ybounds = np.asarray([np.min(y), np.max(y)])
-    f= 0.05
-    b = np.asarray([ [xbounds[0], ybounds[0]],
-                    [xbounds[1], ybounds[0]],
-                   [xbounds[1], ybounds[1]],
-                    [xbounds[0], ybounds[1]],
-                        [xbounds[0], ybounds[0]]] )
-
-    # fill background land retangle
-    ax.fill(b[:,0] , b[:, 1],  facecolor=color_palette['land'],  zorder=0)
 
     if axis_lims is None: axis_lims=np.concatenate((xbounds, ybounds))
     ax.set_xlim(axis_lims[:2])
     ax.set_ylim(axis_lims[2:])
 
     # fill domain as white
-    ax.fill(grid['grid_outline']['domain']['points'][:,0], grid['grid_outline']['domain']['points'][:,1],
-            edgecolor= None, facecolor=(1., 1., 1.), linewidth=.5, zorder=0)
+    ax.fill(grid['grid_outline']['domain']['mask'][:,0], grid['grid_outline']['domain']['mask'][:,1],
+            edgecolor= None, facecolor=color_palette['land'], linewidth=.5, zorder=3)
 
     # plot islands from outline
     for g in grid['grid_outline']['islands']:
             ax.fill(g['points'][:, 0], g['points'][:, 1], edgecolor=color_palette['land_edge'],
                     facecolor=color_palette['land'], linewidth= 0.5, zorder= 3)
-    ax.plot(grid['grid_outline']['domain']['points'][:, 0], grid['grid_outline']['domain']['points'][:, 1], c=color_palette['land_edge'], linewidth=0.5, zorder=3)
 
     if 'water_depth' in grid and back_ground_depth:
         plot_coloured_depth(grid, ax=ax,color_map= back_ground_color_map,zorder=0)

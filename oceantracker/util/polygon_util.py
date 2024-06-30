@@ -202,6 +202,30 @@ def set_up_list_of_polygon_instances(polygon_list):
         poly.update({'points': p.points.tolist()})
     return polygons, msg
 
+
+
+def make_anticlockwise_polygon(xy):
+    # ensure points in polygon are ordered in anti-clockwise order
+    is_clockwise = np.sum(np.arctan2( xy[:,0],xy[:,1]  ),axis=0) > 0
+    if ~is_clockwise:
+        xy = xy [::-1,:]
+    return xy
+
+def make_domain_mask(xy):
+    # make fillable mask outside domain xy with columns (x,y)
+    xy= make_anticlockwise_polygon(xy)
+
+    # bounds
+    bx= [np.min(xy[:,0]),np.max(xy[:,0])]
+    by= [np.min(xy[:,1]),np.max(xy[:,1])]
+
+    # put box around domain spit at southern most point
+    n =np.argmin(xy[:,1])
+    xy= np.concatenate(( xy[:n,:],
+                    np.asarray([[bx[0],by[0]],[bx[0],by[1]], [bx[1],by[1]], [bx[1],by[0]]]),
+                    xy[n:,:] ), axis=0)
+    return xy
+
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     N=10**4

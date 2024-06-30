@@ -5,7 +5,7 @@ import numpy as np
 
 from oceantracker.util import json_util
 from oceantracker.util.numba_util import njitOT
-
+from oceantracker.util.polygon_util import make_domain_mask
 def read_particle_tracks_file(file_name, var_list=None, release_group= None, fraction_to_read=None):
     # release group is 1 based
     nc = NetCDFhandler(file_name, mode='r')
@@ -283,7 +283,9 @@ def read_grid_file(file_name):
         d[var]= nc.read_a_variable(var)
     if nc.is_var('domain_outline_nodes'):
         domain=dict(nodes=d['domain_outline_nodes'],
-                                       points= d['x'][d['domain_outline_nodes'],:])
+                    points= d['domain_outline_x'] if  'domain_outline_x' in d else d['x'][d['domain_outline_nodes'],:],
+                    )
+        domain['mask'] =  d['domain_mask_x'] if  'domain_mask_x' in d else make_domain_mask(domain['points'] )
 
         if nc.is_var('island_outline_nodes'):
             island_nodes = nc.un_packed_1Darrays('island_outline_nodes')

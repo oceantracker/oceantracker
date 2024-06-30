@@ -31,11 +31,13 @@ class ParameterBaseClass(_RootParameterBaseClass):
                     'time_spent_updating': 0.,
                    'update_calls': 0,
                    'time_first_update_call':0.}  # stores info about object
+
         self.docs={'description': None, 'role': None # role is only set in base class
                    }
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
                                   'user_note': PVC(None, str),
+                                 'development': PVC(False, bool, expert=True,doc_str='Class is under development and testing'),
                                   })
 
         self.partID_buffers={} # dict of int32 ID number buffers

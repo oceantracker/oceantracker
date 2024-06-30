@@ -62,6 +62,7 @@ class Solver(ParameterBaseClass):
 
         # run forwards through model time variable, which for backtracking are backwards in time
         t2 = model_times[0]
+        ml.print_line()
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)} '
                            + f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)} ')
 

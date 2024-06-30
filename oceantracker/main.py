@@ -303,7 +303,7 @@ class _OceanTrackerRunner(object):
         for n_case, case_params in enumerate(case_list_params):
 
             case_working_params = setup_util.decompose_params(shared_info,case_params, msg_logger=ml, caller=self)
-            case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, case_working_params,shared_info.base_case_only_params, ml,
+            case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, n_case, case_working_params,shared_info.base_case_only_params, ml,
                                                                                  crumbs=f'_run_parallel case #[{n_case}]', caller=None)
 
 
@@ -426,12 +426,13 @@ class _OceanTrackerRunner(object):
         d = {'output_files' :{},
             'version_info': definitions.version,
             'computer_info':  run_builder['computer_info'],
+             'hindcast_info': run_builder['reader_builder']['file_info'],
             'num_cases': num_cases,
             'elapsed_time' :perf_counter() - t0,
             'average_active_particles': total_alive_particles / num_cases if num_cases > 0 else None,
             'average_number_of_time_steps': n_time_steps/num_cases  if num_cases > 0 else None,
             'particles_processed_per_second': total_alive_particles /(perf_counter() - t0),
-             'case_summary' : case_summary
+             'case_summary' : case_summary,
              }
 
         # get output file names

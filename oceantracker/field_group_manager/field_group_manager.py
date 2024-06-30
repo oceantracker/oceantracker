@@ -14,6 +14,7 @@ from time import  perf_counter
 from copy import deepcopy
 from oceantracker.shared_info import SharedInfo as si
 from  oceantracker.definitions import  node_types, cell_search_status_flags
+from oceantracker.util.polygon_util import make_domain_mask
 
 #TODO allow fields to be spread across mutiple files and file types
 # todo  have field manager with each field having its own reader, grid and interpolator
@@ -566,16 +567,27 @@ class FieldGroupManager(ParameterBaseClass):
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(node_types.asdict())}, description='type of node, types are' + str(node_types.asdict()))
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
 
+
+
         if 'water_depth' in self.fields:
             nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
 
-        nc.write_a_new_variable('domain_outline_nodes', grid['grid_outline']['domain']['nodes'], ('domain_outline_nodes_dim',),
+        domain_nodes= grid['grid_outline']['domain']['nodes']
+        nc.write_a_new_variable('domain_outline_nodes', domain_nodes, ('domain_outline_nodes_dim',),
                                 description='node numbers in order around outer model domain')
+        domain_xy=  grid['x'][domain_nodes,:]
+        nc.write_a_new_variable('domain_outline_x', domain_xy, ('domain_outline_nodes_dim','vector2D'),
+                                description='coords of domain  a columns (x,y)', units='m')
+        domain_mask_xy = make_domain_mask(domain_xy)
+
+        nc.write_a_new_variable('domain_mask_x', domain_mask_xy, ('domain_mask_dim', 'vector2D'),
+                                description='coords of fillable mask of area outside the domain as columns (x,y)', units='m')
 
         if len( grid['grid_outline']['islands']) > 0:
             # write any islands
             array_list = [ a['nodes'] for a in grid['grid_outline']['islands']]
             nc.write_packed_1Darrays('island_outline_nodes', array_list, description='node numbers in order around islands')
+
 
         nc.close()
         # pre version 0.5 json outline
