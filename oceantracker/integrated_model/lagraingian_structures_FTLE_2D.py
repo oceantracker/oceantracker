@@ -89,16 +89,16 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
         params['lags'] = np.sort(np.asarray(params['lags']))
 
         # round interval to time step
-        params['update_interval'] = round(params['update_interval']/ si.settings.time_step)* si.settings.time_step
+        params['release_interval'] = round(params['release_interval']/ si.settings.time_step)* si.settings.time_step
 
-        if params['update_interval'] == 0:
+        if params['release_interval'] == 0:
             info['times']= np.asarray([params['start']])
         else:
-            # do not release params['update_interval']closer than max lag size from end,
+            # do not release params['release_interval'] closer than max lag size from end,
             duration = abs(params['end'] - params['start']) - params['lags'][-1]
             duration = min(duration, si.settings.max_run_duration - params['lags'][-1]) # clip to max run time
             # dont release last update
-            info['times'] = params['start'] + si.run_info.model_direction*np.arange(0, duration+params['update_interval'],params['update_interval'] )
+            info['times'] = params['start'] + si.run_info.model_direction*np.arange(0, duration+params['release_interval'],params['release_interval'] )
 
         info['dates'] = time_util.seconds_to_isostr(info['times'])
 
