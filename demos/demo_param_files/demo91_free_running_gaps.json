@@ -38,8 +38,9 @@
     "tracks_writer": {
         "write_dry_cell_flag": true
     },
-    "release_groups": {
-        "r1": {
+    "release_groups": [
+        {
+            "name": "r1",
             "points": [
                 [
                     1598000,
@@ -51,7 +52,8 @@
             "pulse_size": 1,
             "start": "2020-06-02T00:00:00"
         },
-        "r2": {
+        {
+            "name": "r2",
             "points": [
                 [
                     1598000,
@@ -63,7 +65,8 @@
             "pulse_size": 1,
             "start": "2020-06-03T00:00:00"
         },
-        "r3": {
+        {
+            "name": "r3",
             "points": [
                 [
                     1598000,
@@ -75,7 +78,8 @@
             "pulse_size": 1,
             "start": "2020-06-04T00:00:00"
         },
-        "r4": {
+        {
+            "name": "r4",
             "points": [
                 [
                     1598000,
@@ -87,25 +91,29 @@
             "pulse_size": 1,
             "start": "2020-06-03T03:00:00"
         }
-    },
-    "particle_properties": {
-        "Oxygen": {
+    ],
+    "particle_properties": [
+        {
+            "name": "Oxygen",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0,
             "initial_value": 20.0
         },
-        "distance_travelled": {
+        {
+            "name": "distance_travelled",
             "class_name": "DistanceTravelled"
         },
-        "age_decay": {
+        {
+            "name": "age_decay",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0
         },
-        "my_constant_prop": {
+        {
+            "name": "my_constant_prop",
             "class_name": "ParticleLoad",
             "initial_value": 100
         }
-    },
+    ],
     "block_dry_cells": true,
     "backtracking": true,
     "root_output_dir": "output"

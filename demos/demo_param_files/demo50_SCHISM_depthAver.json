@@ -16,8 +16,9 @@
         "A_H": 0.2,
         "A_V": 0.001
     },
-    "release_groups": {
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P1",
             "points": [
                 [
                     1595000,
@@ -35,7 +36,8 @@
             "allow_release_in_dry_cells": true,
             "start": "2017-01-01T01:30:00"
         },
-        "Poly1": {
+        {
+            "name": "Poly1",
             "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
             "points": [
                 [
@@ -67,15 +69,17 @@
             "pulse_size": 10,
             "release_interval": 3600
         }
-    },
-    "particle_properties": {
-        "age_decay": {
+    ],
+    "particle_properties": [
+        {
+            "name": "age_decay",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
-    },
-    "event_loggers": {
-        "inoutpoly": {
+    ],
+    "event_loggers": [
+        {
+            "name": "inoutpoly",
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [
                 "ID",
@@ -145,6 +149,6 @@
                 }
             ]
         }
-    },
+    ],
     "root_output_dir": "output"
 }

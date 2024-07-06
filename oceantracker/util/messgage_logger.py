@@ -120,7 +120,7 @@ class MessageLogger(object ):
                 origin=  f'role= {caller.__class__.__name__} '
                 if hasattr(caller,'info'):
                     # add internal name if not None
-                    origin +=  ' ' if caller.info["name"] is None else f', name="{caller.info["name"]}"'
+                    origin +=  ' ' if 'name' not in caller.params or caller.params["name"] is None else f', name="{caller.params["name"]}"'
                     origin += f', instance #[{caller.info["instanceID"]}]'
                 origin += f', class= {caller.__class__.__module__}.{caller.__class__.__name__} '
 

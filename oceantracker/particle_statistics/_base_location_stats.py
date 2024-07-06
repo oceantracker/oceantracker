@@ -85,7 +85,7 @@ class BaseParticleLocationStats(ParameterBaseClass):
             si.msg_logger.spell_check(f'Particle property name {name} not recognised',
                                      name, si.roles.particle_properties.keys(),
                                       hint='check parameter "particle_property_list"',
-                                      crumbs=f'Particle Statistic "{self.info["name"]}" >',
+                                      crumbs=f'Particle Statistic "{self.params["name"]}" >',
                                      caller = self,fatal_error=True, exit_now=True)
 
             if part_prop[name].is_vector():
@@ -106,7 +106,7 @@ class BaseParticleLocationStats(ParameterBaseClass):
 
         if self.params['write']:
             self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
-            self.info['output_file'] += '_' + self.info['name'] + '.nc'
+            self.info['output_file'] += f'_{self.info["instanceID"]}_{self.params["name"]}.nc'
             self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         else:
             self.nc = None

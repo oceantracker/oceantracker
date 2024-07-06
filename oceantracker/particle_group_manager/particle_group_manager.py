@@ -73,10 +73,10 @@ class ParticleGroupManager(ParameterBaseClass):
 
         pass
 
-    def add_release_group(self,name,params):
+    def add_release_group(self,params):
         #doto is this needed
-        i = si.add_user_class('release_groups',name, params,
-                              crumbs='Adding release groups', default_classID='release_groups')
+        i = si.add_user_class('release_groups',params,
+                              crumbs='Adding release group', default_classID='release_groups')
         i.initial_setup()
         # set up release times so duration of run known
         i.final_setup()
@@ -191,7 +191,8 @@ class ParticleGroupManager(ParameterBaseClass):
         # property for group of particles, ie not properties of individual particles, eg time, number released
         # **karwgs must have at least name
         params = kwargs
-        i = si.add_user_class('time_varying_info',name,params,  class_type='manual_update',  crumbs=' setup time varing reader info')
+        params['name'] = name
+        i = si.add_user_class('time_varying_info',params,  class_type='manual_update',  crumbs=' setup time varing reader info')
         i.initial_setup()
 
         if si.settings.write_tracks and i.params['write']:
@@ -200,33 +201,29 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def add_particle_property(self, name, prop_type, prop_params, crumbs=''):
         ml = si.msg_logger
-        # todo make name first compulsory argument of this function and create_class_dict_instance
-        if name is None:
-            ml.msg('ParticleGroupManager.create_particle_property, prop name cannot be None, must be unique str',
-                   hint='got prop_type of type=' + str(type(prop_type)), caller=self,
-                   fatal_error=True, exit_now=True)
+        if type(prop_params) != dict:
+            ml.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ', caller=self,
+                   hint='got parameters of type=' + str(type(prop_params)) + ',  values=' + str(prop_params), fatal_error=True, exit_now=True)
 
-        if name in si.roles.particle_properties:
-            ml.msg(f'particle property  name "{name}"is already in use', caller=self,
-                   hint='got prop_type of type=' + str(type(prop_type)), crumbs=crumbs + 'ParticleGroupManager.create_particle_property' + name,
-                   fatal_error=True)
+        if 'name' not in prop_params or prop_params['name'] is None:
+            prop_params['name'] = name
+
+        i = si.add_user_class('particle_properties', prop_params,class_type=prop_type,
+                                           crumbs=crumbs + f' adding "particle_properties of type={str(prop_type)} name={prop_params["name"]}')
+        i.initial_setup()
+        name = i.params['name']
 
         if type(prop_type) != str :
             ml.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str', caller=self,
                    hint='got prop_type of type=' + str(type(prop_type)),
                    fatal_error=True, exit_now=True)
 
-        if type(prop_params) != dict:
-            ml.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ',caller=self,
-                    hint= 'got parameters of type=' + str(type(prop_params)) +',  values='+str(prop_params), fatal_error=True, exit_now=True)
 
         if prop_type not in particle_property_types:    #todo move all raise exception to msglogger
             ml.msg('ParticleGroupManager.create_particle_property, unknown prop_group name', caller=self,
                    hint='prop_group must be one of ' + str(particle_property_types),   fatal_error=True, exit_now=True)
 
-        i = si.add_user_class('particle_properties',name,  prop_params,class_type=prop_type,
-                                           crumbs=crumbs +' adding "particle_properties of type=' + prop_type)
-        i.initial_setup()
+
 
         if si.settings.write_tracks:
             # tweak write flag if in param lists

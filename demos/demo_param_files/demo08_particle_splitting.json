@@ -38,8 +38,9 @@
     "tracks_writer": {
         "write_dry_cell_flag": true
     },
-    "release_groups": {
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P1",
             "points": [
                 [
                     1594500,
@@ -53,16 +54,18 @@
             "pulse_size": 1,
             "release_interval": 0
         }
-    },
-    "particle_properties": {
-        "age_decay": {
+    ],
+    "particle_properties": [
+        {
+            "name": "age_decay",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
-    },
+    ],
     "block_dry_cells": true,
-    "event_loggers": {
-        "in_out_poly": {
+    "event_loggers": [
+        {
+            "name": "in_out_poly",
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [
                 "ID",
@@ -132,20 +135,26 @@
                 }
             ]
         }
-    },
+    ],
     "max_particles": 1000,
-    "trajectory_modifiers": {
-        "part_spliting": {
+    "trajectory_modifiers": [
+        {
+            "name": "part_spliting",
             "class_name": "oceantracker.trajectory_modifiers.split_particles.SplitParticles",
-            "splitting_interval": 21600,
-            "split_status_greater_than": "stationary"
+            "interval": 21600,
+            "statuses": [
+                "moving"
+            ]
         },
-        "part_culling": {
+        {
+            "name": "part_culling",
             "class_name": "oceantracker.trajectory_modifiers.cull_particles.CullParticles",
-            "cull_interval": 21600,
-            "cull_status_greater_than": "dead",
-            "probability_of_culling": 0.05
+            "interval": 21600,
+            "statuses": [
+                "moving"
+            ],
+            "probability": 0.05
         }
-    },
+    ],
     "root_output_dir": "output"
 }

@@ -6,23 +6,23 @@ dispersion:
   A_H: 0.1
 output_file_base: demo10_polygon_residence_demo
 particle_properties:
-  Oxygen:
-    class_name: AgeDecay
-    decay_time_scale: 86400.0
-    initial_value: 20.0
-  age_decay:
-    class_name: AgeDecay
-    decay_time_scale: 86400.0
-  distance_travelled:
-    class_name: DistanceTravelled
-  my_constant_prop:
-    class_name: ParticleLoad
-    initial_value: 100
+- class_name: AgeDecay
+  decay_time_scale: 86400.0
+  initial_value: 20.0
+  name: Oxygen
+- class_name: DistanceTravelled
+  name: distance_travelled
+- class_name: AgeDecay
+  decay_time_scale: 86400.0
+  name: age_decay
+- class_name: ParticleLoad
+  initial_value: 100
+  name: my_constant_prop
 particle_statistics:
-  residentpoly:
-    class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
-    name_of_polygon_release_group: near_shore
-    update_interval: 1800
+- class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
+  name: residentpoly
+  name_of_polygon_release_group: near_shore
+  update_interval: 1800
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -45,23 +45,23 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   time_buffer_size: 15
 release_groups:
-  near_shore:
-    class_name: oceantracker.release_groups.polygon_release.PolygonRelease
-    points:
-    - - 1594682.1237
-      - 5483472.7479
-    - - 1595604.1667
-      - 5483775.5488
-    - - 1595886.4247
-      - 5482964.0424
-    - - 1594917.3387
-      - 5482500.0
-    - - 1594300.0
-      - 5482500.0
-    - - 1594682.1237
-      - 5483472.7479
-    pulse_size: 100
-    release_interval: 43200
+- class_name: oceantracker.release_groups.polygon_release.PolygonRelease
+  name: near_shore
+  points:
+  - - 1594682.1237
+    - 5483472.7479
+  - - 1595604.1667
+    - 5483775.5488
+  - - 1595886.4247
+    - 5482964.0424
+  - - 1594917.3387
+    - 5482500.0
+  - - 1594300.0
+    - 5482500.0
+  - - 1594682.1237
+    - 5483472.7479
+  pulse_size: 100
+  release_interval: 43200
 root_output_dir: output
 time_step: 600
 tracks_writer:

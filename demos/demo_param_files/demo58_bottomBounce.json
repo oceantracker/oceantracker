@@ -16,42 +16,11 @@
         "A_H": 0.1,
         "A_V": 0.005
     },
-    "release_groups": {
-        "poly1": {
-            "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
-            "points": [
-                [
-                    1597682.1237,
-                    5489972.7479
-                ],
-                [
-                    1598604.1667,
-                    5490275.5488
-                ],
-                [
-                    1598886.4247,
-                    5489464.0424
-                ],
-                [
-                    1597917.3387,
-                    5489000
-                ],
-                [
-                    1597300,
-                    5489000
-                ],
-                [
-                    1597682.1237,
-                    5489972.7479
-                ]
-            ],
-            "z_min": -1,
-            "z_max": -1,
-            "release_interval": 3660,
-            "start": "2017-01-01T00:31:30",
-            "pulse_size": 10
-        },
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P11",
+            "pulse_size": 10,
+            "release_interval": 0,
             "points": [
                 [
                     1593000.0,
@@ -59,31 +28,19 @@
                     -1
                 ]
             ],
-            "release_interval": 0,
-            "pulse_size": 10,
-            "release_at_surface": true
-        },
-        "P11": {
-            "points": [
-                [
-                    1593000.0,
-                    5486000.0,
-                    -1
-                ]
-            ],
-            "release_interval": 0,
-            "pulse_size": 10,
             "release_at_surface": true
         }
-    },
-    "particle_properties": {
-        "age_decay": {
+    ],
+    "particle_properties": [
+        {
+            "name": "age_decay",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
-    },
-    "event_loggers": {
-        "inoutpoly": {
+    ],
+    "event_loggers": [
+        {
+            "name": "inoutpoly",
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [
                 "ID",
@@ -153,9 +110,10 @@
                 }
             ]
         }
-    },
-    "particle_statistics": {
-        "grid1": {
+    ],
+    "particle_statistics": [
+        {
+            "name": "grid1",
             "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
             "update_interval": 3600,
             "particle_property_list": [
@@ -168,17 +126,18 @@
                 121
             ]
         }
-    },
+    ],
     "resuspension": {
         "critical_friction_velocity": 0.005
     },
-    "velocity_modifiers": {
-        "terminal_velocity": {
+    "velocity_modifiers": [
+        {
+            "name": "terminal_velocity",
             "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
             "value": -0.002,
             "variance": 0.0002
         }
-    },
+    ],
     "backtracking": false,
     "root_output_dir": "output"
 }

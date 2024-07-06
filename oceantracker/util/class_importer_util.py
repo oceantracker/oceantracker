@@ -97,7 +97,7 @@ class ClassImporter():
         if class_obj is None:
             return None
         i = class_obj() # make instance
-        i.info['name'] = name
+        i.params['name'] = name
         i.info['class_role'] = class_role
 
         if merge_params:

@@ -72,7 +72,7 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
     crumbs += '> decompose_params'
     w = {'settings': {},
          'core_roles': {k: {} for k in si.core_roles.possible_values()},  # insert full list and defaults
-         'roles_dict': {k: {} for k in si.roles.possible_values()},
+         'roles': {k: [] for k in si.roles.possible_values()},
          }
 
     setting_keys = si.default_settings.possible_values()
@@ -99,11 +99,7 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
             w['core_roles'][k] = item
 
         elif k in role_keys:
-            if type(item) is not dict:
-                msg_logger.msg('class dict type "' + key + '" must contain a dictionary, where key is name of class, value is a dictionary of parameters',
-                       hint=' for this key got type =' + str(type(item)),
-                       fatal_error=True, crumbs=crumbs)
-            w['roles_dict'][k] = item
+            w['roles'][k] = item
         else:
             msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
                            crumbs=crumbs, link='parameter_ref_toc', fatal_error=True)
@@ -191,18 +187,11 @@ def merge_base_and_case_working_params(base_working_params,n_case, case_working_
         if key not in case_working_params:
             case_working_params['core_roles'][key]= item
     # class dicts
-    for role, role_dict in base_working_params['roles_dict'].items():
+    for role, role_dict in base_working_params['roles'].items():
         # loop over named base case classes
-        for name, item in  base_working_params['roles_dict'][role].items():
-            if name not in case_working_params['roles_dict'][role]:
-                case_working_params['roles_dict'][role][name] = item
-            else:
-                # name appears in both base and case params
-                msg_logger.msg(f'In role {role} the classes named {name} is in both the case and base case params, ignoring base case version',
-                               #crumbs=f'{crumbs} > case number {case_working_params["caseID"]}',
-                               hint=f'Delete base case parameters of this name, or in case #{n_case} e to remove this warning',  fatal_error=True)
+        for item in base_working_params['roles'][role]:
+            case_working_params['roles'][role].append(item)
 
-        pass
     return case_working_params
 
 

@@ -39,32 +39,37 @@
         "tracks_writer": {
             "write_dry_cell_flag": true
         },
-        "particle_properties": {
-            "Oxygen": {
+        "particle_properties": [
+            {
+                "name": "Oxygen",
                 "class_name": "AgeDecay",
                 "decay_time_scale": 86400.0,
                 "initial_value": 20.0
             },
-            "distance_travelled": {
+            {
+                "name": "distance_travelled",
                 "class_name": "DistanceTravelled"
             },
-            "age_decay": {
+            {
+                "name": "age_decay",
                 "class_name": "AgeDecay",
                 "decay_time_scale": 86400.0
             },
-            "my_constant_prop": {
+            {
+                "name": "my_constant_prop",
                 "class_name": "ParticleLoad",
                 "initial_value": 100
             }
-        },
+        ],
         "block_dry_cells": true,
         "processors": 2,
         "root_output_dir": "output"
     },
     [
         {
-            "release_groups": {
-                "point1": {
+            "release_groups": [
+                {
+                    "name": "point1",
                     "allow_release_in_dry_cells": true,
                     "points": [
                         [
@@ -79,7 +84,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "poly1": {
+                {
+                    "name": "poly1",
                     "class_name": "PolygonRelease",
                     "points": [
                         [
@@ -110,7 +116,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "G1": {
+                {
+                    "name": "G1",
                     "class_name": "GridRelease",
                     "grid_size": [
                         3,
@@ -127,11 +134,12 @@
                     "pulse_size": 2,
                     "release_interval": 3600
                 }
-            }
+            ]
         },
         {
-            "release_groups": {
-                "point1": {
+            "release_groups": [
+                {
+                    "name": "point1",
                     "allow_release_in_dry_cells": true,
                     "points": [
                         [
@@ -146,7 +154,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "poly1": {
+                {
+                    "name": "poly1",
                     "class_name": "PolygonRelease",
                     "points": [
                         [
@@ -177,7 +186,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "G1": {
+                {
+                    "name": "G1",
                     "class_name": "GridRelease",
                     "grid_size": [
                         3,
@@ -194,11 +204,12 @@
                     "pulse_size": 2,
                     "release_interval": 3600
                 }
-            }
+            ]
         },
         {
-            "release_groups": {
-                "point1": {
+            "release_groups": [
+                {
+                    "name": "point1",
                     "allow_release_in_dry_cells": true,
                     "points": [
                         [
@@ -213,7 +224,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "poly1": {
+                {
+                    "name": "poly1",
                     "class_name": "PolygonRelease",
                     "points": [
                         [
@@ -244,7 +256,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "G1": {
+                {
+                    "name": "G1",
                     "class_name": "GridRelease",
                     "grid_size": [
                         3,
@@ -261,11 +274,12 @@
                     "pulse_size": 2,
                     "release_interval": 3600
                 }
-            }
+            ]
         },
         {
-            "release_groups": {
-                "point1": {
+            "release_groups": [
+                {
+                    "name": "point1",
                     "allow_release_in_dry_cells": true,
                     "points": [
                         [
@@ -280,7 +294,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "poly1": {
+                {
+                    "name": "poly1",
                     "class_name": "PolygonRelease",
                     "points": [
                         [
@@ -311,7 +326,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "G1": {
+                {
+                    "name": "G1",
                     "class_name": "GridRelease",
                     "grid_size": [
                         3,
@@ -328,11 +344,12 @@
                     "pulse_size": 2,
                     "release_interval": 3600
                 }
-            }
+            ]
         },
         {
-            "release_groups": {
-                "point1": {
+            "release_groups": [
+                {
+                    "name": "point1",
                     "allow_release_in_dry_cells": true,
                     "points": [
                         [
@@ -347,7 +364,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "poly1": {
+                {
+                    "name": "poly1",
                     "class_name": "PolygonRelease",
                     "points": [
                         [
@@ -378,7 +396,8 @@
                     "pulse_size": 10,
                     "release_interval": 10800
                 },
-                "G1": {
+                {
+                    "name": "G1",
                     "class_name": "GridRelease",
                     "grid_size": [
                         3,
@@ -395,7 +414,7 @@
                     "pulse_size": 2,
                     "release_interval": 3600
                 }
-            }
+            ]
         }
     ]
 ]

@@ -7,18 +7,18 @@ dispersion:
   A_H: 0.1
 output_file_base: demo91_free_running_gaps
 particle_properties:
-  Oxygen:
-    class_name: AgeDecay
-    decay_time_scale: 86400.0
-    initial_value: 20.0
-  age_decay:
-    class_name: AgeDecay
-    decay_time_scale: 86400.0
-  distance_travelled:
-    class_name: DistanceTravelled
-  my_constant_prop:
-    class_name: ParticleLoad
-    initial_value: 100
+- class_name: AgeDecay
+  decay_time_scale: 86400.0
+  initial_value: 20.0
+  name: Oxygen
+- class_name: DistanceTravelled
+  name: distance_travelled
+- class_name: AgeDecay
+  decay_time_scale: 86400.0
+  name: age_decay
+- class_name: ParticleLoad
+  initial_value: 100
+  name: my_constant_prop
 reader:
   class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
   dimension_map:
@@ -41,38 +41,38 @@ reader:
   isodate_of_hindcast_time_zero: '2020-06-01'
   time_buffer_size: 15
 release_groups:
-  r1:
-    max_age: 21600
-    points:
-    - - 1598000
-      - 5486100
-    pulse_size: 1
-    release_interval: 0
-    start: '2020-06-02T00:00:00'
-  r2:
-    max_age: 21600
-    points:
-    - - 1598000
-      - 5486100
-    pulse_size: 1
-    release_interval: 0
-    start: '2020-06-03T00:00:00'
-  r3:
-    max_age: 21600
-    points:
-    - - 1598000
-      - 5486100
-    pulse_size: 1
-    release_interval: 0
-    start: '2020-06-04T00:00:00'
-  r4:
-    max_age: 21600
-    points:
-    - - 1598000
-      - 5486100
-    pulse_size: 1
-    release_interval: 0
-    start: '2020-06-03T03:00:00'
+- max_age: 21600
+  name: r1
+  points:
+  - - 1598000
+    - 5486100
+  pulse_size: 1
+  release_interval: 0
+  start: '2020-06-02T00:00:00'
+- max_age: 21600
+  name: r2
+  points:
+  - - 1598000
+    - 5486100
+  pulse_size: 1
+  release_interval: 0
+  start: '2020-06-03T00:00:00'
+- max_age: 21600
+  name: r3
+  points:
+  - - 1598000
+    - 5486100
+  pulse_size: 1
+  release_interval: 0
+  start: '2020-06-04T00:00:00'
+- max_age: 21600
+  name: r4
+  points:
+  - - 1598000
+    - 5486100
+  pulse_size: 1
+  release_interval: 0
+  start: '2020-06-03T03:00:00'
 root_output_dir: output
 time_step: 900
 tracks_writer:

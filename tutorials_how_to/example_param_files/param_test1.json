@@ -6,8 +6,9 @@
         "input_dir": "../demos/demo_hindcast",
         "file_mask": "demoHindcastSchism*.nc"
     },
-    "release_groups": {
-        "my_release_point": {
+    "release_groups": [
+        {
+            "name": "my_release_point",
             "points": [
                 [
                     1595000,
@@ -21,7 +22,8 @@
             "release_interval": 3600,
             "pulse_size": 10
         },
-        "my_polygon_release": {
+        {
+            "name": "my_polygon_release",
             "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
             "points": [
                 [
@@ -52,15 +54,16 @@
             "release_interval": 7200,
             "pulse_size": 20
         }
-    },
+    ],
     "resuspension": {
         "critical_friction_velocity": 0.005
     },
-    "velocity_modifiers": {
-        "fall_velocity": {
-            "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
+    "velocity_modifiers": [
+        {
+            "name": "fall_velocity",
+            "class_name": "TerminalVelocity",
             "value": -0.001,
             "variance": 0.0002
         }
-    }
+    ]
 }

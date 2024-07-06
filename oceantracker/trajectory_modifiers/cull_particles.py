@@ -30,8 +30,8 @@ class CullParticles(BaseTrajectoryModifier):
                 probability=PVC(1.0, float, min=0, max=1.),
 
                 # obsolete
-                cull_status_greater_than=PVC(None,str,obsolete='Use param "statuses"  '),
-                cull_status_equal_to= PVC(None,str,obsolete='Use param "statuses"  '),
+                cull_status_greater_than=PVC(None,str,obsolete='use "statuses" list param'),
+                cull_status_equal_to= PVC(None,str,obsolete='use "statuses" list param'),
                                   )
 
     def initial_setup(self):

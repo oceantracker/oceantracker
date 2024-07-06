@@ -234,11 +234,12 @@ class _SharedInfoClass():
 
         ml= self.msg_logger
         crumbs  =crumbs + f' >>> adding core class type >> "{class_role}" '
+        # check if known role
         ml.spell_check(f'Role "{class_role}" is not known', class_role,  self.core_roles.possible_values(), exit_now=True, crumbs=crumbs)
-        # make instance  and merge params
 
+        # make instance  and merge params
         i = self.make_instance_from_params(class_role, params,default_classID=default_classID,
-                                            crumbs=crumbs, caller = caller, name = None)
+                                            crumbs=crumbs, caller = caller)
         if initialise: i.initial_setup()
 
         setattr(self.core_roles,class_role, i) # add to shared info
@@ -249,27 +250,31 @@ class _SharedInfoClass():
 
         return i
 
-    def add_user_class(self, class_role, name, params,  class_type='user' ,crumbs='', initialise=False, default_classID=None, caller=None):
+    def add_user_class(self, class_role, params,  class_type='user' ,crumbs='', initialise=False, default_classID=None, caller=None):
         ml = self.msg_logger
-
-        crumbs  =crumbs+ f' >>> adding core class type >> "{class_role}.{name}"  '
+        n_instance = len(self.roles[class_role]) #
+        crumbs  =crumbs+ f' >>> adding core class type >> "{class_role} #{n_instance}"  '
         ml.spell_check(f'Role "{class_role}" is not ', class_role, self.roles.possible_values(),
                        crumbs=crumbs, exit_now= True,fatal_error=True)
+        if type(params) != dict:
+            ml.msg('Params must be type=dict',
+                   hint=f'Got type{str( type(params))},value={str(params)}',
+               caller=caller, crumbs=crumbs, fatal_error=True, exit_now=True)
 
-        i =self.make_instance_from_params( class_role, params, name=name, default_classID=default_classID, crumbs=crumbs)
-
+        i =self.make_instance_from_params( class_role, params, default_classID=default_classID, crumbs=crumbs)
         if i is None:
             ml.msg('No "class_name" parameter given and no known default class_name ', caller=caller, crumbs=crumbs, fatal_error=True, exit_now=True)
 
-        i.info['name'] = name
+        # if not named give a default name
+        if i.params['name'] is None: i.params['name'] = f'{class_role}_{n_instance:05d}'
         i.info['type'] = class_type
         i.info['class_role'] = class_role
 
         #if not hasattr(self.roles,class_role): setattr(self.roles, class_role,Object())
         #setattr(getattr(self.roles, class_role), name, i)
+        name = params['name']
         if name in self.roles[class_role]:
-            self.msg_logger.msg('Class type"' + class_role + '" already has a class with name = "' + i.info['name']
-                   + '", "name" parameter must be unique',
+            self.msg_logger.msg(f'Class type"{class_role}" already has a class with name = "{name}", "name" parameter must be unique',
                    caller=caller, crumbs=crumbs, fatal_error=True)
         else:
             # add to roles dictionary
@@ -291,12 +296,11 @@ class _SharedInfoClass():
         i = pgm. add_release_group(name,kwargs)
 
         return i
-    def make_instance_from_params(self, class_role,params,  name = None, default_classID=None,
+    def make_instance_from_params(self, class_role,params, default_classID=None,
                                caller=None, crumbs=''):
 
         i = self._class_importer.new_make_class_instance_from_params(
-                    class_role, params, default_classID=default_classID,
-                    name = name, crumbs=crumbs,caller=caller)
+                    class_role, params, default_classID=default_classID, crumbs=crumbs,caller=caller)
         return  i
     def _all_class_instance_pointers_iterator(self):
         # build list of all points for iteration, eg in calling all close methods

@@ -23,7 +23,7 @@ class ParticleLoad(ParticleProperty):
         info= self.info
         pgm = si.core_roles.particle_group_manager
 
-        pgm.add_particle_property(self.info['name']+'_initial_value','manual_update',dict(time_varying=False, write=False))
+        pgm.add_particle_property(self.params['name']+'_initial_value','manual_update',dict(time_varying=False, write=False))
 
     def initial_value_at_birth(self, new_part_IDs):
 

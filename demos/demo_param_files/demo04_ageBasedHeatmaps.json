@@ -41,8 +41,9 @@
         ],
         "write_dry_cell_flag": true
     },
-    "release_groups": {
-        "myP1": {
+    "release_groups": [
+        {
+            "name": "myP1",
             "points": [
                 [
                     1596000,
@@ -53,7 +54,8 @@
             "release_interval": 7200,
             "release_radius": 100.0
         },
-        "myP2": {
+        {
+            "name": "myP2",
             "points": [
                 [
                     1596000,
@@ -63,32 +65,36 @@
             "pulse_size": 2000,
             "release_interval": 7200
         }
-    },
-    "particle_properties": {
-        "Oxygen": {
+    ],
+    "particle_properties": [
+        {
+            "name": "Oxygen",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0,
             "initial_value": 20.0
         },
-        "distance_travelled": {
+        {
+            "name": "distance_travelled",
             "class_name": "DistanceTravelled"
         },
-        "age_decay": {
+        {
+            "name": "age_decay",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0
         },
-        "my_constant_prop": {
+        {
+            "name": "my_constant_prop",
             "class_name": "ParticleLoad",
             "initial_value": 100
         }
-    },
-    "particle_statistics": {
-        "age_grid": {
+    ],
+    "particle_statistics": [
+        {
+            "name": "age_grid",
             "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased",
             "update_interval": 1800,
             "particle_property_list": [
-                "water_depth",
-                "water_depth_bad"
+                "water_depth"
             ],
             "grid_size": [
                 220,
@@ -98,7 +104,8 @@
             "max_age_to_bin": 259200.0,
             "age_bin_size": 3600.0
         },
-        "age_poly": {
+        {
+            "name": "age_poly",
             "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased",
             "update_interval": 1800,
             "particle_property_list": [
@@ -139,10 +146,8 @@
                 }
             ]
         }
-    },
-    "particle_group_manager": {
-        "particle_buffer_chunk_size": 20000
-    },
+    ],
+    "particle_buffer_chunk_size": 20000,
     "write_tracks": false,
     "max_run_duration": 259200,
     "root_output_dir": "output"

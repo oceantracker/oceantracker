@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 from os import path, makedirs
 import shutil
 from time import perf_counter
-from copy import  copy
+from copy import  copy, deepcopy
 import numpy as np
 
 
@@ -45,14 +45,14 @@ help_url_base = 'https://oceantracker.github.io/oceantracker/_build/html/info/'
 def run(params):
     '''Run a single OceanTracker case using given parameters'''
     ot = _OceanTrackerRunner()
-    case_info_files = ot.run(params)
+    case_info_files = ot.run(deepcopy(params))  # run on copy to preserve external state
     return case_info_files
 
 def run_parallel(base_case_params, case_list_params=[{}]):
     ot = _OceanTrackerRunner()
-    case_info_files  = ot.run(base_case_params, case_list_params)
+    # run on copy to preserve external state
+    case_info_files  = ot.run(deepcopy(base_case_params), deepcopy(case_list_params))
     return case_info_files
-
 
 class OceanTracker():
     def __init__(self,params=None):
@@ -86,7 +86,7 @@ class OceanTracker():
             return
 
         if type(class_role) != str:
-            ml.msg(f'oceantracker.add_class, class_role must be a string', fatal_error=True, caller=self,
+            ml.msg('oceantracker.add_class, class_role must be a string got ', fatal_error=True, caller=self,
                    hint='Given type =' + str(type(class_role)))
             return
 
@@ -96,52 +96,44 @@ class OceanTracker():
             return
 
         existing_params = self._get_case_params_to_work_on(case)
-        if class_role not in existing_params: existing_params[class_role] = {}
 
-        #add class name  if given
+        #add class name and name if given
         if class_name is not None: kwargs['class_name'] = class_name
+        if name is not None: kwargs['name'] = name
 
         # add new params to core or other roles
         if class_role in shared_info.core_roles.possible_values():
+            if class_role not in existing_params: existing_params[class_role] = {}
             existing_params[class_role].update(kwargs)
         else:
-            #add to mulit component role
-            # auto name if needed with camel case role
-            if name is None:
-                s = class_role.split('_')
-                s = [x.title() for x in s]
-                s = ''.join(s)
-                name = f'{s}_{len(existing_params[class_role]):04d}'
+            #add to mulit component role list
+            if class_role not in existing_params: existing_params[class_role] = []
+            if type(existing_params[class_role]) != list:
+                ml.msg(f'oceantracker.add_class {class_role} must be a list of dictionaries, with optional name key',
+                       fatal_error=True, caller=self,  hint='Given type =' + str(type(existing_params[class_role])))
 
-            if 'name' in existing_params[class_role]:# auto name
-                msg_logger.msg(f'Class role  "{class_role}" already has a component named "{name}", only using last one given',   warning= True)
+            existing_params[class_role].append(kwargs) # add users params
 
-            # add users class name or None
-            existing_params[class_role][name] = dict(class_name=class_name)
-            # add other params to existing params for role and name
-            for key in kwargs:
-                  existing_params[class_role][name][key] = kwargs[key]
         return
 
     def _get_case_params_to_work_on(self, case):
         # work out whether to work on base of given case
         if case is None:
+            # base case only
             return self.params
         else:
             if type(case) != int or case < 0:
                 msg_logger.msg(f'Case keyword must be an integer >=0', fatal_error=True, hint=f'Got value :{str(case)}')
 
-
             if case < len(self.case_list_params):
                 return self.case_list_params[case] # work on existing case
-            elif case >= len(self.case_list_params):
-                # expand and fill in any extra cases as empty
-                for n in range(len(self.case_list_params), case + 1):  self.case_list_params.append({})
+            elif case == len(self.case_list_params):
+                # next in line case
+                self.case_list_params.append({}) # expand by  one extra cases as empty
                 return self.case_list_params[case] # work on new last one
-
             else:
-                msg_logger.msg(f'Cases must be added in order, have case = {case}',
-                               fatal_error=True, hint=f"This would be the {case + 1}'th case added, but only :{len(self.case_list_params)} cases have been added so far" )
+                msg_logger.msg(f'New cases must be added in order, have case = {case}',fatal_error=True,
+                     hint=f"This would be the {case + 1}'th case added, but only :{len(self.case_list_params)} cases have been added so far" )
                 return {}
 
     def run(self):
@@ -174,12 +166,12 @@ class _OceanTrackerRunner(object):
 
         # start forming the run builder
         crumbs = 'Forming run builder'
-        run_builder = dict(working_params=setup_util.decompose_params(shared_info, deepcopy(params), ml, crumbs= crumbs, caller=self))
-        run_builder['version'] = definitions.version
-        run_builder['computer_info'] = get_versions_computer_info.get_computer_info()
+        working_params = setup_util.decompose_params(shared_info, deepcopy(params), ml, crumbs=crumbs, caller=self)
+        run_builder = dict( working_params = working_params,
+                            version = definitions.version,
+                            computer_info = get_versions_computer_info.get_computer_info())
 
         #  merge defaults of settings which have to be the same for all cases
-        working_params = run_builder['working_params']
         working_params['settings'] = setup_util.merge_settings(working_params['settings'], shared_info.default_settings,
                                                             shared_info.base_case_only_params,ml, crumbs=crumbs, caller=self)
 
@@ -239,11 +231,13 @@ class _OceanTrackerRunner(object):
             traceback.print_exc()
             return None
 
+        case_info_files = self._main_run_end(case_summary, run_builder)
+
         # check is case ran
         if  case_summary['case_info_file'] is None:
             ml.msg('case_info_file is None, run may not have completed', fatal_error=True)
 
-        case_info_files = self._main_run_end( case_summary,run_builder)
+
 
         return case_info_files
 
@@ -384,18 +378,16 @@ class _OceanTrackerRunner(object):
 
         # get file info for nested readers
         run_builder['nested_reader_builders']= {}
-        if 'nested_readers' not in working_params['roles_dict']: working_params['roles_dict']['nested_readers'] ={}
+        if 'nested_readers' not in working_params['roles']: working_params['roles']['nested_readers'] =[]
 
-        for name, params in working_params['roles_dict']['nested_readers'].items():
+        for n, params in enumerate(working_params['roles']['nested_readers']):
             t0 = perf_counter()
             nested_params, nested_file_list = get_hydro_model_info.find_file_format_and_file_list(params,class_importer, ml)
-            nested_reader = class_importer.new_make_class_instance_from_params('reader', nested_params, crumbs=f'nested reader{name}>')
+            nested_reader = class_importer.new_make_class_instance_from_params('reader', nested_params, crumbs=f'nested reader#{n:d}>')
 
-            d= dict(params=nested_params,
-                    file_info= nested_reader.get_hindcast_files_info(nested_file_list, ml)
-                    )
-            run_builder['nested_reader_builders'][name]=d
-            ml.progress_marker(f'sorted nested hyrdo-model files in time order{name}', start_time=t0)
+            d= dict(params=nested_params, file_info= nested_reader.get_hindcast_files_info(nested_file_list, ml))
+            run_builder['nested_reader_builders'].append(d)
+            ml.progress_marker(f'sorted nested hyrdo-model #{n} files in time order ', start_time=t0)
 
         return reader_builder
 
