@@ -21,13 +21,13 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
         # set up info/attributes
         super().__init__()
         self.add_default_params(
-            start=  PTC(None, doc_str='start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
-            end=  PTC(None, doc_str=' end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
+            start=  PTC(None, doc_str='start date of LSC releases, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
+            end=  PTC(None, doc_str=' end date of LSC releases. Model should run max(lags) beyond this send date to calculate LSC for last pulse of grid release.  Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
             release_interval=  PVC(3600.,float,units='sec',min=0.,
-                                    doc_str='Time in seconds between calculating statistics, will be rounded to be a multiple of the particle tracking time step'),
+                        doc_str='Time in seconds between grid releases of pulses of particles. For each pulse an LCS will be calculated at the given lag times. This creates a LCS time series for each lag at this time interval'),
             lags=  PLC(None, float, units='sec',min=1,min_len=1,
                         is_required=True,
-                        doc_str='List of one or more times after particle release to calculate Lagarangian Coherent Structures, default is 1 day'),
+                        doc_str='List of one or more times after each pulse is released to calculate LCS.'),
             grid_size=  PLC([100, 99],int, fixed_len=2,  min=1, max=10 ** 5,
                                             doc_str='number of rows and columns in grid'),
             grid_center=  PCC(None, one_or_more_points=True, is3D=False,is_required=True,
@@ -72,7 +72,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
                               z_min=params['z_min'], z_max=params['z_max'],
                               grid_size= [r+2, c+2],
                               max_age = params['lags'][-1],  # run each to largest lag
-                              release_interval=0.  )
+                              release_interval=0. )
         # if 3D sort out depth range and always resuspend
         if si.run_info.is3D_run:
             self.add_class('resuspension', critical_friction_velocity=0.0)  # always resuspend

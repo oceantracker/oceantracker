@@ -211,8 +211,10 @@ class MessageLogger(object ):
         if 'exit_now' not in kwargs: kwargs['warning'] = True
         msg = msg + f', parameter "{key}" is not recognised, '
         if hint is None : hint= ''
-
-        self.msg(msg,  hint=hint + f'\n Closest matches to "{key}" = {difflib.get_close_matches(key, list(possible_values), cutoff=0.4)} ?? ',
+        known = list(possible_values)
+        if key not in known:
+            # flag if unknown
+            self.msg(msg,  hint=hint + f'\n Closest matches to "{key}" = {difflib.get_close_matches(key, known, cutoff=0.4)} ?? ',
                   **kwargs)
 
     def close(self):

@@ -78,12 +78,15 @@ class BaseParticleLocationStats(ParameterBaseClass):
     def check_part_prop_list(self):
 
         part_prop = si.roles.particle_properties
-        pgm = si.core_roles.particle_group_manager
+
         names=[]
         for name in self.params['particle_property_list']:
 
-            if not pgm.is_particle_property(name,crumbs=f'Particle Statistic "{self.info["name"]}" >'):
-                continue
+            si.msg_logger.spell_check(f'Particle property name {name} not recognised',
+                                     name, si.roles.particle_properties.keys(),
+                                      hint='check parameter "particle_property_list"',
+                                      crumbs=f'Particle Statistic "{self.info["name"]}" >',
+                                     caller = self,fatal_error=True, exit_now=True)
 
             if part_prop[name].is_vector():
                 si.msg_logger.msg('On the fly statistical Binning of vector particle property  "' + name + '" not yet implemented', warning=True)
@@ -130,7 +133,7 @@ class BaseParticleLocationStats(ParameterBaseClass):
 
             elif part_prop[key].get_dtype() != np.float64:
                 si.msg_logger.msg(f'On the fly statistics  can currently only track float64 particle properties, ignoring property  "{key}", of type "{str(part_prop[key].get_dtype())}"',
-                                  warning=True)
+                                  fatal_error=True)
 
             else:
                 names.append(names)

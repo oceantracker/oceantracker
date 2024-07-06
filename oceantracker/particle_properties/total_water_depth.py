@@ -9,6 +9,7 @@ class TotalWaterDepth(ParticleProperty):
     def __init__(self):
         super().__init__()
         self.add_default_params({'time_varying': PVC(True,bool),
+                                 #'name': PVC('total_water_depth', str,doc_str='name used within code and in output'),
                                  'is3D': PVC(False,bool)})
 
     def check_requirements(self):
@@ -27,4 +28,4 @@ class TotalWaterDepth(ParticleProperty):
     def get_time_dependent_total_water_depth_from_tide_and_water_depth(tide, water_depth, total_water_depth, active):
         # get total time dependent water depth as 4D field  from top and bottom cell of LSC grid zlevels
         for n in active:
-            total_water_depth[n] = tide[n] + water_depth[n]
+            total_water_depth[n] = abs(tide[n] + water_depth[n])
