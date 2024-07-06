@@ -80,13 +80,17 @@ class GriddedStats2D_timeBased(BaseParticleLocationStats):
         # make bin edges grid one larger than given grid_size  as (row, col), (y,x) size
         dx, dy = float(gspan[0]/gsize[1]), float(gspan[1]/gsize[0])
 
-        base_x_bin_edges = np.linspace(-gspan[0]/2, gspan[0]/2, gsize[1] + 1)
-        base_y_bin_edges = np.linspace(-gspan[1]/2, gspan[1]/2, gsize[0] + 1)
-
         # make bin centers
-        base_x = 0.5*(base_x_bin_edges[1:] + base_x_bin_edges[0:-1])
-        base_y = 0.5*(base_y_bin_edges[1:] + base_y_bin_edges[0:-1])
+        base_x = np.linspace(-gspan[0] / 2, gspan[0] / 2, gsize[1] )
+        base_y = np.linspace(-gspan[1] / 2, gspan[1] / 2, gsize[0])
 
+        # make bin edges for counting inside, which is one grid cell larger
+        # deal with special case of unit grid
+        dx = gspan[0] if gsize[1] == 1 else float(np.diff(base_x[:2]))
+        dy = gspan[1] if gsize[0] == 1 else float(np.diff(base_y[:2]))
+        gspan_edges = gspan + np.asarray([dx,dy]) #  edges are one cell larger
+        base_x_bin_edges = np.linspace(-gspan_edges[0]/2, gspan_edges[0]/2, gsize[1] + 1)
+        base_y_bin_edges = np.linspace(-gspan_edges[1]/2, gspan_edges[1]/2, gsize[0] + 1)
 
         # make copies for each release group
         s= (len(si.roles.release_groups), 1)

@@ -70,7 +70,8 @@ class _DefaultSettings(_SharedStruct):
                 #'write_output_files =     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web' )
     write_dry_cell_flag = PVC(True, bool,
                 doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots,may create large grid file, currently cannot be used with nested grids ' )
-    max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,min=.00001,units='sec',doc_str='Maximum duration in seconds of model run, this sets a maximum, useful in testing' )  # limit all cases to this duration
+    max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,min=.00001,units='sec',
+                           doc_str='Useful in testing setup with shorter runs, as normally run duration is determined from release groups. This  limits the maximum duration in seconds of model runs.' )  # limit all cases to this duration
     max_particles = PVC(10**10, int, min=1, doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
     processors = PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list to run in parallel' )
     max_warnings = PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps' )  # dont record more that this number of warnings, to keep caseInfo.json finite
@@ -233,8 +234,7 @@ class _SharedInfoClass():
 
         ml= self.msg_logger
         crumbs  =crumbs + f' >>> adding core class type >> "{class_role}" '
-        if class_role not in self.core_roles.possible_values():
-            ml.spell_check(f'Role "{class_role}" is not known', class_role,  self.core_roles.possible_values(), exit_now=True, crumbs=crumbs)
+        ml.spell_check(f'Role "{class_role}" is not known', class_role,  self.core_roles.possible_values(), exit_now=True, crumbs=crumbs)
         # make instance  and merge params
 
         i = self.make_instance_from_params(class_role, params,default_classID=default_classID,
@@ -253,9 +253,8 @@ class _SharedInfoClass():
         ml = self.msg_logger
 
         crumbs  =crumbs+ f' >>> adding core class type >> "{class_role}.{name}"  '
-        if class_role not in self.roles.possible_values():
-            ml.spell_check(f'Role "{class_role}" is not ', class_role, self.roles,
-                           crumbs=crumbs, exit_now= True)
+        ml.spell_check(f'Role "{class_role}" is not ', class_role, self.roles.possible_values(),
+                       crumbs=crumbs, exit_now= True,fatal_error=True)
 
         i =self.make_instance_from_params( class_role, params, name=name, default_classID=default_classID, crumbs=crumbs)
 
@@ -290,6 +289,7 @@ class _SharedInfoClass():
         '''Add a release group with given name as an instance to computational pipeline, not the same as add_class, which just adds parameters'''
         pgm= self.core_roles.particle_group_manager
         i = pgm. add_release_group(name,kwargs)
+
         return i
     def make_instance_from_params(self, class_role,params,  name = None, default_classID=None,
                                caller=None, crumbs=''):

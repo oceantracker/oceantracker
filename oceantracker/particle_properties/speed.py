@@ -12,6 +12,7 @@ class Speed(ParticleProperty):
         super().__init__()
         self.add_default_params(variable= PVC('water_velocity', str,possible_values=['water_velocity', 'particle_velocity'],
                                           doc_str='Which speed to calculate'),
+                                #name = PVC('total_water_depth', str,doc_str='name used within code and in output'),
                                 )
 
     def update(self,n_time_step, time_sec,active):

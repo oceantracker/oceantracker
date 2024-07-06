@@ -27,7 +27,6 @@ class ClassImporter():
         ml = self.msg_logger
         crumbs += '> get_class_obj'
 
-
         cls_obj = self.get_class_obj_from_class_name(class_role, params['class_name'])
 
         if cls_obj is  None:

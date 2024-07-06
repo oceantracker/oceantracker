@@ -37,11 +37,16 @@ def write_release_group_netcdf():
 
         nc.add_dimension(dim_name,points.shape[0])
         sc = rg.release_scheduler.info
+        # add useful info to variable atributes
         attr= dict(release_type=rg.info['release_type'], is3D = is3D,
                     release_group_name = name, instanceID= rg.info['instanceID'], pulses= rg.info['pulseID'],
-                    start =sc['start_time'], end =sc['end_time'], start_date= sc['start_date'], end_date =sc['end_date'],
+                   pulse_size =rg.params['pulse_size'],
+                   release_interval=rg.params['release_interval'],
+                   start =sc['start_time'], end =sc['end_time'], start_date= sc['start_date'], end_date =sc['end_date'],
+                   max_age = si.info.large_float if rg.params['max_age'] is None else rg.params['max_age'],
                    user_release_groupID=rg.params['user_release_groupID'],
-                   user_release_group_name= rg.params['user_release_group_name'] )
+                   user_release_group_name= rg.params['user_release_group_name'],
+                   number_released= rg.info['number_released'])
         nc.write_a_new_variable(v_name, points, dims, units='meters or decimal deg. as  (lon, lat)',  attributes=attr)
     
     nc.close()

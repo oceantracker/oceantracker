@@ -314,14 +314,6 @@ class ParticleGroupManager(ParameterBaseClass):
     # below return  info about particle group
     #__________________________________
 
-    def is_particle_property(self,name, crumbs=''):
-        #todo make si.roles.particle_properties = self.particle_properties
-        if name in list( si.roles.particle_properties.keys()):
-            return   True
-        else:
-            si.msg_logger.spell_check(' particle property, ignoring', name,si.roles.particle_properties.keys(),
-                                         crumbs = crumbs, caller=self)
-            return False
 
     def screen_info(self):
         sf= si.particle_status_flags

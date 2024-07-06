@@ -16,7 +16,7 @@ import multiprocessing
 
 
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from os import path, makedirs
 import shutil
@@ -25,7 +25,7 @@ from copy import  copy
 import numpy as np
 
 
-from oceantracker.util import setup_util, class_importer_util
+from oceantracker.util import setup_util, class_importer_util, time_util
 from oceantracker import definitions
 
 from oceantracker.util import json_util ,yaml_util, get_versions_computer_info
@@ -276,7 +276,7 @@ class _OceanTrackerRunner(object):
             num_case_warnings += m['warnings']
             num_case_notes += m['notes']
 
-        case_info_files= self._write_run_info_json(case_summary,run_builder, self.start_t0)
+        case_info_files= self._write_run_info_json(case_summary,run_builder)
 
         ml.print_line()
         ml.msg(f'OceanTracker summary:  elapsed time =' + str(datetime.now() - self.start_date),)
@@ -399,7 +399,7 @@ class _OceanTrackerRunner(object):
 
         return reader_builder
 
-    def _write_run_info_json(self, case_summary,run_builder, t0):
+    def _write_run_info_json(self, case_summary,run_builder):
         # read first case info for shared info
         ml = msg_logger
         o = run_builder['output_files']
@@ -423,12 +423,19 @@ class _OceanTrackerRunner(object):
         num_cases = len(ci)
 
         # JSON parallel run info data
+        t0 = self.start_t0
+        t1 = perf_counter()
+        d0 = self.start_date
+        d1 = d0 + timedelta(seconds=t1-t0)
         d = {'output_files' :{},
             'version_info': definitions.version,
             'computer_info':  run_builder['computer_info'],
              'hindcast_info': run_builder['reader_builder']['file_info'],
             'num_cases': num_cases,
-            'elapsed_time' :perf_counter() - t0,
+            'elapsed_time' : t1- t0,
+             'run_start': d0.isoformat(),
+             'run_end': d1.isoformat(),
+             'run_duration': time_util.seconds_to_pretty_duration_string(t1- t0),
             'average_active_particles': total_alive_particles / num_cases if num_cases > 0 else None,
             'average_number_of_time_steps': n_time_steps/num_cases  if num_cases > 0 else None,
             'particles_processed_per_second': total_alive_particles /(perf_counter() - t0),
