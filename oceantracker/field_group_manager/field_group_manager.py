@@ -103,8 +103,8 @@ class FieldGroupManager(ParameterBaseClass):
         self.tidal_stranding = i
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
-        for name, params in si.working_params['roles_dict']['fields'].items():
-            self.add_custom_field(name, params, crumbs=f'adding custom field {name}')
+        for n,  params in enumerate(si.working_params['roles']['fields']):
+            self.add_custom_field(params, crumbs=f'adding custom field #{n:d}')
     def add_part_prop_from_fields_plus_book_keeping(self):
 
         pgm = si.core_roles.particle_group_manager
@@ -469,13 +469,13 @@ class FieldGroupManager(ParameterBaseClass):
         if type(fmap[name]) != list: fmap[name] = [fmap[name]]  # make a list so all maps the same
 
         field_params = reader.get_field_params(nc, name)
+        field_params['name'] = name
         field_params['write_interp_particle_prop_to_tracks_file'] = write_interp_particle_prop_to_tracks_file
 
         i =  si._class_importer.new_make_class_instance_from_params('fields',field_params,default_classID='field_reader',
                                 caller=self,   crumbs=f'Field Group Manager > adding reader field "{name}"')
 
         i.info['type'] = 'reader_field'
-        i.info['name'] = name
         i.initial_setup(self.grid, self.fields)
 
 
@@ -507,7 +507,7 @@ class FieldGroupManager(ParameterBaseClass):
         i = si._class_importer.new_make_class_instance_from_params('fields', params,   default_classID=default_classID,
                         caller = self, crumbs=crumbs+ f'Field group manager > custom field setup > "{name}"')
         i.info['type'] = 'custom_field'
-        i.info['name'] = name
+        i.params['name'] = name
         i.initial_setup(self.grid, self.fields)
         self.fields[name] = i
         return i

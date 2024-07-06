@@ -16,8 +16,9 @@
         "A_H": 0.1,
         "A_V": 0.005
     },
-    "release_groups": {
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P1",
             "points": [
                 [
                     1594500,
@@ -28,15 +29,17 @@
             "pulse_size": 1,
             "release_interval": 0
         }
-    },
-    "particle_properties": {
-        "age_decay": {
+    ],
+    "particle_properties": [
+        {
+            "name": "age_decay",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
-    },
-    "event_loggers": {
-        "inoutpoly": {
+    ],
+    "event_loggers": [
+        {
+            "name": "inoutpoly",
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [
                 "ID",
@@ -106,9 +109,10 @@
                 }
             ]
         }
-    },
-    "particle_statistics": {
-        "grid1": {
+    ],
+    "particle_statistics": [
+        {
+            "name": "grid1",
             "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
             "update_interval": 3600,
             "particle_property_list": [
@@ -121,16 +125,17 @@
                 121
             ]
         }
-    },
+    ],
     "resuspension": {
         "critical_friction_velocity": 0.005
     },
-    "velocity_modifiers": {
-        "terminal_velocity": {
+    "velocity_modifiers": [
+        {
+            "name": "terminal_velocity",
             "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
             "value": -0.002
         }
-    },
+    ],
     "backtracking": false,
     "root_output_dir": "output"
 }

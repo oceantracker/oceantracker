@@ -145,7 +145,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
                                                    data, triangles,
                                                    n_cell, bc_cords, active)
         else:
-            ml.msg(f'2D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
+            ml.msg(f'2D interpolation currently only works for scalar and vector fields "{field_instance.params["name"]}" has {data.shape[3]} components',
                               fatal_error=True, exit_now=True)
 
     #@function_profiler(__name__)
@@ -208,7 +208,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
                                                                           n_cell, bc_cords, nz_cell, z_fraction,
                                                                           output, active)
         else:
-            ml.msg(f'3D interpolation currently only works for scalar and vector fields "{field_instance.info["name"]}" has {data.shape[3]} components',
+            ml.msg(f'3D interpolation currently only works for scalar and vector fields "{field_instance.params["name"]}" has {data.shape[3]} components',
                               fatal_error=True, exit_now=True, caller=self)
 
     #@function_profiler(__name__)

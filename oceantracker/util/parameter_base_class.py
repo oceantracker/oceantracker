@@ -37,6 +37,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.default_params={}
         self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
                                   'user_note': PVC(None, str),
+                                 'name': PVC(None, str,doc_str='Name used to refer to class in code and output, = None for core claseses'),
                                  'development': PVC(False, bool, expert=True,doc_str='Class is under development and testing'),
                                   })
 
@@ -78,12 +79,12 @@ class ParameterBaseClass(_RootParameterBaseClass):
         si = self.shared_info
         for name in required_props_list:
             if name not in si.roles.particle_properties:
-                si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.info['name']
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.params['name']
                                 + '" requires particle property  "' + name + '"'
                                 + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', fatal_error=True,crumbs=crumbs)
 
         if requires3D and not si.run_info.is3D_run:
-                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.info['name'] + ' can only be used with 3D hindcast ', fatal_error=True,crumbs=crumbs)
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', fatal_error=True,crumbs=crumbs)
 
     def remove_default_params(self, name_list):
         # used to get rid if paramters of parent class which are not used by a child class

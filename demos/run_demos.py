@@ -196,7 +196,7 @@ if __name__ == "__main__":
                 params['output_file_base'] = 'Demo90backward'
                 params['backtracking'] = True
                 params['include_dispersion']= False
-                params['release_groups']['P1'].update({ 'points': d90['x'][-1, :, :], 'start': start_date})
+                params['release_groups'][0].update({ 'points': d90['x'][-1, :, :], 'start': start_date})
 
                 print('backtracking start', start_date)
 

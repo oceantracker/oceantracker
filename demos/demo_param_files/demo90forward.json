@@ -39,8 +39,9 @@
     "tracks_writer": {
         "write_dry_cell_flag": true
     },
-    "release_groups": {
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P1",
             "pulse_size": 1,
             "release_interval": 0,
             "points": [
@@ -58,25 +59,29 @@
                 ]
             ]
         }
-    },
-    "particle_properties": {
-        "Oxygen": {
+    ],
+    "particle_properties": [
+        {
+            "name": "Oxygen",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0,
             "initial_value": 20.0
         },
-        "distance_travelled": {
+        {
+            "name": "distance_travelled",
             "class_name": "DistanceTravelled"
         },
-        "age_decay": {
+        {
+            "name": "age_decay",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0
         },
-        "my_constant_prop": {
+        {
+            "name": "my_constant_prop",
             "class_name": "ParticleLoad",
             "initial_value": 100
         }
-    },
+    ],
     "block_dry_cells": true,
     "max_run_duration": 172800.0,
     "include_dispersion": false,

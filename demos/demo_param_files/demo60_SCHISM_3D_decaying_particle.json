@@ -16,8 +16,9 @@
         "A_H": 0.2,
         "A_V": 0.001
     },
-    "release_groups": {
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P1",
             "points": [
                 [
                     1594500,
@@ -39,12 +40,13 @@
             "release_interval": 150.0,
             "max_age": 17280.000000000004
         }
-    },
-    "particle_properties": {
-        "age_decay": {
+    ],
+    "particle_properties": [
+        {
+            "name": "age_decay",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 25714.28571428571
         }
-    },
+    ],
     "root_output_dir": "output"
 }

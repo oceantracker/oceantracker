@@ -38,8 +38,9 @@
     "tracks_writer": {
         "write_dry_cell_flag": true
     },
-    "release_groups": {
-        "near_shore": {
+    "release_groups": [
+        {
+            "name": "near_shore",
             "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
             "points": [
                 [
@@ -70,32 +71,37 @@
             "pulse_size": 100,
             "release_interval": 43200
         }
-    },
-    "particle_properties": {
-        "Oxygen": {
+    ],
+    "particle_properties": [
+        {
+            "name": "Oxygen",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0,
             "initial_value": 20.0
         },
-        "distance_travelled": {
+        {
+            "name": "distance_travelled",
             "class_name": "DistanceTravelled"
         },
-        "age_decay": {
+        {
+            "name": "age_decay",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0
         },
-        "my_constant_prop": {
+        {
+            "name": "my_constant_prop",
             "class_name": "ParticleLoad",
             "initial_value": 100
         }
-    },
+    ],
     "block_dry_cells": true,
-    "particle_statistics": {
-        "residentpoly": {
+    "particle_statistics": [
+        {
+            "name": "residentpoly",
             "class_name": "oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon",
             "name_of_polygon_release_group": "near_shore",
             "update_interval": 1800
         }
-    },
+    ],
     "root_output_dir": "output"
 }

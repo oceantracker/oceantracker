@@ -41,22 +41,20 @@ class BaseModel(ParameterBaseClass):
 
         if class_role in si.roles.possible_values():
 
-            if class_role not in  si.working_params['roles_dict']:  si.working_params['roles_dict'][class_role] ={}
+            if class_role not in  si.working_params['roles']:  si.working_params['roles'][class_role] ={}
             # those with mutil classes
-            classes_in_role = si.working_params['roles_dict'][class_role]
+            classes_in_role = si.working_params['roles'][class_role]
             if name is None:
                 #todo remove block by giving default name??
                 si.msg_logger.msg('added class must have a name ', fatal_error=True, exit_now=True,
                                     crumbs=' add_class method:', caller=self)
-
-            classes_in_role[name] = kwargs
+            kwargs['name'] = name
+            classes_in_role.append(kwargs)
 
         elif class_role in si.core_roles.possible_values():
             # update core class params, no name needed
-            si.working_params['roles_dict'][class_role] = kwargs
-            #si.msg_logger.msg(f'can not core class paramters in in role {class_role} used in "add_settings_and_class_params" method', fatal_error=True, exit_now=True,
-            #                  hint= 'add these parameters as ordinary, top level parameters',
-            #                  crumbs=' add_class method:', caller=self)
+            si.working_params['core_roles'][class_role] = kwargs
+
         else:
             si.msg_logger.spell_check(f'Do not recognise class role "{class_role}" used in "add_settings_and_class_params" method',
                                       class_role, si.core_roles.possible_values()+ si.roles.possible_values(),
@@ -67,12 +65,12 @@ class BaseModel(ParameterBaseClass):
 
         # remove any existing release groups
     def clear_class_role(self, class_role):
-        # clears all user added classes in thatrole, to alolw model to add its version
+        # clears all user added classes in that role, to alolw model to add its version
         if class_role in si.roles.possible_values():
-            if len(si.working_params['roles_dict'][class_role]) > 0:
+            if len(si.working_params['roles'][class_role]) > 0:
                 si.msg_logger.msg(f'Found existing classes in role {class_role} cannot run with existing classes, these have been removed',
                                   warning=True, caller=self, crumbs='clear_class_role> ')
-            si.working_params['roles_dict'][class_role] = dict()
+            si.working_params['roles'][class_role] = []
         else:
             si.msg_logger.msg(f'Cannot clear core class role {class_role} or unkown role, ignoring',
                               warning=True, caller=self, crumbs='clear_class_role> ')

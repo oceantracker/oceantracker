@@ -16,8 +16,9 @@
         "A_H": 0.2,
         "A_V": 0.001
     },
-    "release_groups": {
-        "poly1": {
+    "release_groups": [
+        {
+            "name": "poly1",
             "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
             "points": [
                 [
@@ -51,7 +52,8 @@
             "start": "2017-01-01T00:31:30",
             "pulse_size": 10
         },
-        "P1": {
+        {
+            "name": "P1",
             "points": [
                 [
                     1594500,
@@ -72,15 +74,17 @@
             "release_interval": 3600,
             "pulse_size": 10
         }
-    },
-    "particle_properties": {
-        "age_decay": {
+    ],
+    "particle_properties": [
+        {
+            "name": "age_decay",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
-    },
-    "event_loggers": {
-        "inoutpoly": {
+    ],
+    "event_loggers": [
+        {
+            "name": "inoutpoly",
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [
                 "ID",
@@ -150,9 +154,10 @@
                 }
             ]
         }
-    },
-    "particle_statistics": {
-        "grid1": {
+    ],
+    "particle_statistics": [
+        {
+            "name": "grid1",
             "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
             "update_interval": 3600,
             "particle_property_list": [
@@ -165,15 +170,16 @@
                 121
             ]
         }
-    },
+    ],
     "resuspension": {
         "critical_friction_velocity": 0.005
     },
-    "velocity_modifiers": {
-        "terminal_velocity": {
+    "velocity_modifiers": [
+        {
+            "name": "terminal_velocity",
             "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
             "value": -0.001
         }
-    },
+    ],
     "root_output_dir": "output"
 }

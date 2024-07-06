@@ -26,8 +26,8 @@ class SplitParticles(BaseTrajectoryModifier):
                                 max_age = PVC(None, float, doc_str='maximum particle age to split', units='sec'),
                 probability =PVC(1.0, float,doc_str='probability of splitting at each given interval', min=0., max=1.),
 
-                split_status_greater_than = PVC('dead', str, obsolete='used statuses list'),
-                split_status_equal_to = PVC(None, str, obsolete='used statuses list'),
+                split_status_greater_than = PVC('dead', str, obsolete='use "statuses" list param'),
+                split_status_equal_to = PVC(None, str, obsolete='use "statuses" list param'),
                 )
     def initial_setup(self):
 

@@ -4,70 +4,30 @@ dispersion:
   A_H: 0.2
   A_V: 0.001
 event_loggers:
-  inoutpoly:
-    class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
-    particle_prop_to_write_list:
-    - ID
-    - x
-    - IDrelease_group
-    - status
-    - age
-    polygon_list:
-    - points:
-      - - 1592682.1237
-        - 5489972.7479
-      - - 1593604.1667
-        - 5490275.5488
-      - - 1593886.4247
-        - 5489464.0424
-      - - 1592917.3387
-        - 5489000.0
-      - - 1592300.0
-        - 5489000.0
-      - - 1592682.1237
-        - 5489972.7479
-      user_polygon_name: A
-    - points:
-      - - 1597682.1237
-        - 5489972.7479
-      - - 1598604.1667
-        - 5490275.5488
-      - - 1598886.4247
-        - 5489464.0424
-      - - 1597917.3387
-        - 5487000
-      - - 1597300
-        - 5487000
-      - - 1597682.1237
-        - 5489972.7479
-      user_polygon_name: B
-output_file_base: demo50_SCHISM_depthAver
-particle_properties:
-  age_decay:
-    class_name: oceantracker.particle_properties.age_decay.AgeDecay
-    decay_time_scale: 86400.0
-reader:
-  file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
-  load_fields:
-  - water_temperature
-regrid_z_to_uniform_sigma_levels: true
-release_groups:
-  P1:
-    allow_release_in_dry_cells: true
-    points:
-    - - 1595000
-      - 5482600
-      - -1
-    - - 1599000
-      - 5486200
-      - -1
-    pulse_size: 10
-    release_interval: 3600
-    start: '2017-01-01T01:30:00'
-  Poly1:
-    class_name: oceantracker.release_groups.polygon_release.PolygonRelease
-    points:
+- class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
+  name: inoutpoly
+  particle_prop_to_write_list:
+  - ID
+  - x
+  - IDrelease_group
+  - status
+  - age
+  polygon_list:
+  - points:
+    - - 1592682.1237
+      - 5489972.7479
+    - - 1593604.1667
+      - 5490275.5488
+    - - 1593886.4247
+      - 5489464.0424
+    - - 1592917.3387
+      - 5489000.0
+    - - 1592300.0
+      - 5489000.0
+    - - 1592682.1237
+      - 5489972.7479
+    user_polygon_name: A
+  - points:
     - - 1597682.1237
       - 5489972.7479
     - - 1598604.1667
@@ -75,14 +35,54 @@ release_groups:
     - - 1598886.4247
       - 5489464.0424
     - - 1597917.3387
-      - 5489000
+      - 5487000
     - - 1597300
-      - 5489000
+      - 5487000
     - - 1597682.1237
       - 5489972.7479
-    pulse_size: 10
-    release_interval: 3600
-    start: '2017-01-01T01:30:00'
+    user_polygon_name: B
+output_file_base: demo50_SCHISM_depthAver
+particle_properties:
+- class_name: oceantracker.particle_properties.age_decay.AgeDecay
+  decay_time_scale: 86400.0
+  name: age_decay
+reader:
+  file_mask: demoHindcastSchism3D.nc
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  load_fields:
+  - water_temperature
+regrid_z_to_uniform_sigma_levels: true
+release_groups:
+- allow_release_in_dry_cells: true
+  name: P1
+  points:
+  - - 1595000
+    - 5482600
+    - -1
+  - - 1599000
+    - 5486200
+    - -1
+  pulse_size: 10
+  release_interval: 3600
+  start: '2017-01-01T01:30:00'
+- class_name: oceantracker.release_groups.polygon_release.PolygonRelease
+  name: Poly1
+  points:
+  - - 1597682.1237
+    - 5489972.7479
+  - - 1598604.1667
+    - 5490275.5488
+  - - 1598886.4247
+    - 5489464.0424
+  - - 1597917.3387
+    - 5489000
+  - - 1597300
+    - 5489000
+  - - 1597682.1237
+    - 5489972.7479
+  pulse_size: 10
+  release_interval: 3600
+  start: '2017-01-01T01:30:00'
 root_output_dir: output
 time_step: 120
 use_A_Z_profile: false

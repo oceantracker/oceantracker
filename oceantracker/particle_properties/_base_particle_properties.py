@@ -18,6 +18,7 @@ class BaseParticleProperty(ParameterBaseClass):
         self.add_default_params({   'description': PVC(None,str),
                                     'units': PVC(None, str),
                                     'time_varying':PVC(True, bool),
+                                    'name' :PVC(None, str,doc_str='Name used to refer to this particle property in code and output',is_required=True),
                                     'vector_dim': PVC(1, int, min = 1 ),
                                     'prop_dim3': PVC(1, int, min=1,doc_str='size of a 3d dimesion of particle property'),
                                     'dtype':PVC('float64', str,possible_values=possible_dtypes, ),
@@ -102,7 +103,7 @@ class BaseParticleProperty(ParameterBaseClass):
         # if out is None, given result returns a view of new variable
 
         if self.is_vector():
-            raise Exception('compare_all_to_a_value: particle property ' + self.info['name'] +'>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
+            raise Exception('compare_all_to_a_value: particle property ' + self.params['name'] +'>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
 
         # to search only those in buffer use used_buffer()
         data = self.used_buffer()
@@ -116,7 +117,7 @@ class BaseParticleProperty(ParameterBaseClass):
         # if out is None, given result returns a view of new variable
 
         if self.is_vector():
-            raise Exception('find_subset_where: particle property ' + self.info['name'] + '>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
+            raise Exception('find_subset_where: particle property ' + self.params['name'] + '>> particle comparisons using compare_prop_to_value only possible for scalar particle properties, not vectors')
 
         return particle_comparisons_util.prop_subset_compared_to_value(active, self.used_buffer(), test, value, out)
 

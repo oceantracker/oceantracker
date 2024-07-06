@@ -90,7 +90,7 @@ def demo07_inside_polygon_events(case_info_file_name,output_file=None):
                                     vmax=1,
                                     movie_file=output_file + '.mp4' if output_file is not None else None,
                                     fps=15,
-                                    polygon_list_to_plot=caseInfo['full_case_params']['roles_dict']['event_loggers']['in_out_poly']['polygon_list'],
+                                    polygon_list_to_plot=caseInfo['working_params']['roles']['event_loggers']['in_out_poly']['polygon_list'],
                                     show_dry_cells=True, interval=30)
     return None
 

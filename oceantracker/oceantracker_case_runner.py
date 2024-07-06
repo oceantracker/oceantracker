@@ -24,7 +24,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required
-        self.info['name'] = 'OceanTrackerCaseRunner'
 
     def run_case(self, run_builder):
         # one case
@@ -147,7 +146,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 ml.msg(f'Results may not be accurate as, time step param={si.settings.time_step:2.0f} sec,  > hydo model time step = {si.hindcast_info["time_step"]:2.0f}',
                                   warning=True)
             # set up start time and duration based on particle releases
-            self._setup_particle_release_groups_and_start_end_times(si.working_params['roles_dict']['release_groups'])
+            self._setup_particle_release_groups_and_start_end_times(si.working_params['roles']['release_groups'])
 
             self._make_and_initialize_user_classes()
             self._finalize_classes()  # any setup actions that mus be done after other actions, eg shedulers
@@ -249,12 +248,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.msg_logger.exit_if_prior_errors('errors found in _do_run_integrity_checks')
 
 
-    def _setup_particle_release_groups_and_start_end_times(self, particle_release_groups_params_dict):
+    def _setup_particle_release_groups_and_start_end_times(self, particle_release_groups_params_list):
         # particle_release groups setup and instances,
         # find extremes of  particle existence to calculate model start time and duration
         t0 = perf_counter()
 
-        if len(particle_release_groups_params_dict) ==0:
+        if len(particle_release_groups_params_list) ==0:
             si.msg_logger.msg('No particle "release_groups" parameters found', fatal_error=True,exit_now=True)
 
         pgm = si.core_roles.particle_group_manager
@@ -267,9 +266,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         md = ri.model_direction
 
-        for name, rg_params in particle_release_groups_params_dict.items():
+        for rg_params in particle_release_groups_params_list:
             # make instance and initialise
-            rg = pgm.add_release_group(name, rg_params)
+            rg = pgm.add_release_group(rg_params)
             start, life_span = rg.get_start_time_and_life_span()
 
             first_time.append(start)
@@ -320,8 +319,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
         # chose fiel manager for normal or nested readers
-        if len(si.working_params['roles_dict']['nested_readers']) > 0:
+        if len(si.working_params['roles']['nested_readers']) > 0:
             # use development nested readers class
+            #todo add dev_nested_fields to  default claseses
             si.working_params['core_roles']['field_group_manager'].update(dict(class_name='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields'))
 
         # set up feilds
@@ -358,15 +358,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         pgm = si.core_roles.particle_group_manager
 
         # any custom particle properties added by user
-        for name, p in si.working_params['roles_dict']['particle_properties'].items():
-            pgm.add_particle_property(name, 'user',p)
+        for p in si.working_params['roles']['particle_properties']:
+            pgm.add_particle_property(None,'user',p)
 
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for user_type in ['velocity_modifiers','trajectory_modifiers',
                              'particle_statistics', 'particle_concentrations', 'event_loggers']:
-            for name, params in si.working_params['roles_dict'][user_type].items():
-                i = si.add_user_class(user_type,name, params,class_type= 'user',   crumbs=' making class type ' + user_type + ' ', caller=self)
+            for n, params in enumerate(si.working_params['roles'][user_type]):
+                i = si.add_user_class(user_type, params,class_type= 'user',
+                                      crumbs=f' making class role ={user_type} #{n}', caller=self)
                 i.initial_setup()  # some require instanceID from above add class to initialise
 
 
