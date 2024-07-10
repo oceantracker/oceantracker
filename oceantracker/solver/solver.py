@@ -25,9 +25,10 @@ class Solver(ParameterBaseClass):
                         'screen_output_step_count': PVC(None, int, obsolete=True,  doc_str='use shared_parameter "screen_output_time_interval" in seconds')
                             })
 
-    def final_setup(self):
-        si.core_roles.particle_group_manager.add_particle_property('v_temp','manual_update', dict( vector_dim=si.roles.particle_properties['x'].num_vector_dimensions(), write=False))
 
+    def initial_setup(self):
+        crumbs='Solver_initial_setup >'
+        si.add_class('particle_properties', name= 'v_temp',class_name='CoreParticleProperty', vector_dim= si.run_info.vector_components, write=False, crumbs=crumbs)
 
 
     def check_requirements(self):
@@ -197,8 +198,7 @@ class Solver(ParameterBaseClass):
                 tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
             # write tracks file
-            pass
-            if tracks_writer.write_scheduler.do_task(n_time_step):
+            if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
 
 
@@ -325,7 +325,7 @@ class Solver(ParameterBaseClass):
         t0 = perf_counter()
         for name, i in si.roles.particle_statistics.items():
             pass
-            if i.count_scheduler.do_task(n_time_step):
+            if i.schedulers['count_scheduler'].do_task(n_time_step):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec)
                 i.stop_update_timer()

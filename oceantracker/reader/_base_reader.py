@@ -130,11 +130,12 @@ class BaseReader(ParameterBaseClass):
     # -------------------------------------------------
     # core reader processes
 
-    def initial_setup(self,file_info):
+    def initial_setup(self):
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         ml = si.msg_logger
         info = self.info
+        file_info = si.run_builder['reader_builder']['file_info']
         self.info['file_info'] = file_info  # add file_info to reader info
 
         # set up ring buffer  info
@@ -187,8 +188,8 @@ class BaseReader(ParameterBaseClass):
                 v= grid[name]
                 if v.dtype != np.int32:
                     si.msg_logger.msg(f'Reader type error {name} must be dtype {np.int32} ', warning=True)
-
-        return grid, is3D_hydro
+        grid['is3D'] = is3D_hydro
+        return grid
 
 
     def sort_files_by_time(self, file_list, msg_logger):

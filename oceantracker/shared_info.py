@@ -13,7 +13,6 @@ from oceantracker.util import cord_transforms
 import numpy as np
 from oceantracker.util.scheduler import Scheduler
 from oceantracker.particle_properties import particle_operations
-from os import path
 
 # useful utility classes to enable auto complete
 class _Object(object):  pass
@@ -42,6 +41,7 @@ class _SharedStruct():
         for key in self.__dict__.keys():
             if not key.startswith('_'): d.append(key) 
         return d
+    def items(self): return self.as_dict().items()
 
     def __getitem__(self, name:str):
         return getattr(self,name)
@@ -109,28 +109,28 @@ class _DefaultSettings(_SharedStruct):
 
 # blocks that make up parts of shared info
 class _ClassRoles(_SharedStruct):
-    release_groups = {}
-    fields = {}  # user fields calculated from other fields  on reading
-    particle_properties =  {} # user added particle properties, eg DistanceTraveled
-    velocity_modifiers = {}  # user added velocity effects, eg TerminalVelocity
-    trajectory_modifiers = {}  # change particle paths, eg. re-suspension
-    particle_statistics = {}  # heat map inside polygon statistics calculated on the fly
-    particle_concentrations = {}  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
-    nested_readers = {}
-    event_loggers =  {} # writes events files ,eg PolygonEntryExit
-    time_varying_info = {} # particle info,eg. time,or  tide at at tide gauge, core example is particle time
+    release_groups =[]
+    fields = []  # user fields calculated from other fields  on reading
+    particle_properties =  [] # user added particle properties, eg DistanceTraveled
+    velocity_modifiers = []  # user added velocity effects, eg TerminalVelocity
+    trajectory_modifiers = []  # change particle paths, eg. re-suspension
+    particle_statistics = []  # heat map inside polygon statistics calculated on the fly
+    particle_concentrations = []  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
+    nested_readers = []
+    event_loggers =  [] # writes events files ,eg PolygonEntryExit
+    time_varying_info = [] # particle info,eg. time,or  tide at at tide gauge, core example is particle time
 
 class _CoreClassRoles(_SharedStruct):
-    reader = None
-    solver = None
-    field_group_manager = None
-    interpolator = None
-    particle_group_manager = None
-    tracks_writer = None
-    dispersion = None
-    tidal_stranding = None
-    resuspension = None
-    integrated_model = None # this is here as there can be only one at a time
+    reader = {}
+    solver = {}
+    field_group_manager = {}
+    interpolator = {}
+    particle_group_manager = {}
+    tracks_writer = {}
+    dispersion = {}
+    tidal_stranding = {}
+    resuspension = {}
+    integrated_model = {} # this is here as there can be only one at a time
 
 class _ParticleStatusFlags(_SharedStruct):
     '''Particle status flags mapped to integer values'''
@@ -149,6 +149,8 @@ class _ParticleStatusFlags(_SharedStruct):
 
 class _RunInfo(_SharedStruct):
     is3D_run = None
+    backtracking =None
+    vector_components = None
     model_direction = None
     free_wheeling = None
     start_time = None
@@ -167,10 +169,7 @@ class _RunInfo(_SharedStruct):
 
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
-
-
     large_float = 1.0E50
-
 
 
 # Shared class, build using the above
@@ -227,81 +226,42 @@ class _SharedInfoClass():
         for role in list(self.roles.as_dict().keys()) +  list(self.core_roles.as_dict().keys()):
             self.classes[role] = None if role in  self.core_roles.as_dict() else {}
 
+    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=True, **kwargs):
 
-
-    def add_core_role(self, class_role, params,default_classID=None,initialise=False,
-                      caller=None,crumbs =''):
-
-        ml= self.msg_logger
-        crumbs  =crumbs + f' >>> adding core class type >> "{class_role}" '
-        # check if known role
-        ml.spell_check(f'Role "{class_role}" is not known', class_role,  self.core_roles.possible_values(), exit_now=True, crumbs=crumbs)
-
-        # make instance  and merge params
-        i = self.make_instance_from_params(class_role, params,default_classID=default_classID,
-                                            crumbs=crumbs, caller = caller)
-        if initialise: i.initial_setup()
-
-        setattr(self.core_roles,class_role, i) # add to shared info
-        i.shared_info = self
-
-        #todo deprecated .classes
-        self.classes[class_role] = i
-
-        return i
-
-    def add_user_class(self, class_role, params,  class_type='user' ,crumbs='', initialise=False, default_classID=None, caller=None):
         ml = self.msg_logger
-        n_instance = len(self.roles[class_role]) #
-        crumbs  =crumbs+ f' >>> adding core class type >> "{class_role} #{n_instance}"  '
-        ml.spell_check(f'Role "{class_role}" is not ', class_role, self.roles.possible_values(),
-                       crumbs=crumbs, exit_now= True,fatal_error=True)
-        if type(params) != dict:
-            ml.msg('Params must be type=dict',
-                   hint=f'Got type{str( type(params))},value={str(params)}',
-               caller=caller, crumbs=crumbs, fatal_error=True, exit_now=True)
+        crumbs += f'Adding class {class_role}>'
+        if params is None: params ={}
+        if type(params) != dict :
+            ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}', fatal_error=True, crumbs=crumbs, caller=caller)
+            return None
 
-        i =self.make_instance_from_params( class_role, params, default_classID=default_classID, crumbs=crumbs)
-        if i is None:
-            ml.msg('No "class_name" parameter given and no known default class_name ', caller=caller, crumbs=crumbs, fatal_error=True, exit_now=True)
+        params= dict(params,**kwargs) # join params and kwargs
 
-        # if not named give a default name
-        if i.params['name'] is None: i.params['name'] = f'{class_role}_{n_instance:05d}'
-        i.info['type'] = class_type
-        i.info['class_role'] = class_role
+        if class_role in self.core_roles.possible_values():
+            #core  roles
+            params['name'] = None
+            i = self._class_importer.new_make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller)
+            i.info['instanceID'] = 0
+            self.core_roles[class_role] = i
 
-        #if not hasattr(self.roles,class_role): setattr(self.roles, class_role,Object())
-        #setattr(getattr(self.roles, class_role), name, i)
-        name = params['name']
-        if name in self.roles[class_role]:
-            self.msg_logger.msg(f'Class type"{class_role}" already has a class with name = "{name}", "name" parameter must be unique',
-                   caller=caller, crumbs=crumbs, fatal_error=True)
+        elif class_role in self.roles.possible_values():
+            #other roles
+            instanceID= len(self.roles[class_role])
+            params['name'] = f'{class_role}_{instanceID}' if 'name' not in params or params['name'] is None else params['name']
+            i = self._class_importer.new_make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller)
+            i.info['instanceID'] = instanceID
+            self.roles[class_role][params['name']] = i
+
         else:
-            # add to roles dictionary
-            getattr(self.roles, class_role)[name] = i
+            ml.msg(f'Unknown class role {class_role}', hint=f'Must be one of core_roles {str(self.core_roles.possible_values())} or other roles {str(self.roles.possible_values())}',
+                   fatal_error=True, crumbs=crumbs, caller=caller)
+            return None
+        # make instance and merge params
 
-            # todo deprecated .classes
-            self.classes[class_role][name] = i
-
-        i.info['instanceID'] = len(self.classes[class_role]) -1
-        i.shared_info = self
-
-        if initialise: i.initial_setup()
-
+        if initialize:
+            i.initial_setup()
         return i
 
-    def add_release_group_instance(self, name=None, **kwargs):
-        '''Add a release group with given name as an instance to computational pipeline, not the same as add_class, which just adds parameters'''
-        pgm= self.core_roles.particle_group_manager
-        i = pgm. add_release_group(name,kwargs)
-
-        return i
-    def make_instance_from_params(self, class_role,params, default_classID=None,
-                               caller=None, crumbs=''):
-
-        i = self._class_importer.new_make_class_instance_from_params(
-                    class_role, params, default_classID=default_classID, crumbs=crumbs,caller=caller)
-        return  i
     def _all_class_instance_pointers_iterator(self):
         # build list of all points for iteration, eg in calling all close methods
         p = []
@@ -315,7 +275,6 @@ class _SharedInfoClass():
                 for key, i in r.items():
                     if i is not None:  p.append(i)
         return p
-
     def block_timer(self,name,t0):
         b = self.block_timers
         if name not in b:
@@ -365,24 +324,6 @@ class _SharedInfoClass():
 
         out = np.asarray([float(x[1]-x[0]),float(y[1]-y[0])] )
         return out
-
-    def add_scheduler_to_class(self, name_scheduler, param_class_instance, start=None, end=None, duration=None,
-                               interval =None, times=None,
-                               caller=None, crumbs=''):
-        ''' Add a scheduler object to given param_class_instance, with boolean task_flag attribute for each time step,
-            which is true if  task is to be carried out.
-            Rounds times interval and times to nearest time step'''
-        s = Scheduler(self.settings,self.run_info,self.hindcast_info, start=start, end=end,duration=duration,
-                            interval =interval, times=times,
-                      caller=caller,msg_logger=self.msg_logger,
-                      crumbs=crumbs + '> adding scheduler')
-    # add to the class
-        setattr(param_class_instance, name_scheduler, s)
-        # add info about scheduler to in
-        if not hasattr(param_class_instance,'scheduler_info'): setattr(param_class_instance,'scheduler_info',dict())
-        param_class_instance.scheduler_info[name_scheduler] = s.info
-        return s
-
 
 
 # make the instance used throughout code

@@ -1,91 +1,92 @@
-- NUMBA_cache_code: false
-  add_date_to_run_output_dir: false
-  block_dry_cells: true
-  debug: true
-  dispersion:
-    A_H: 0.1
-  output_file_base: demo05_parallel
-  particle_properties:
-  - class_name: AgeDecay
-    decay_time_scale: 86400.0
-    initial_value: 20.0
-    name: Oxygen
-  - class_name: DistanceTravelled
-    name: distance_travelled
-  - class_name: AgeDecay
-    decay_time_scale: 86400.0
-    name: age_decay
-  - class_name: ParticleLoad
-    initial_value: 100
-    name: my_constant_prop
-  processors: 2
-  reader:
-    class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
-    dimension_map:
-      node: nodes
-      time: time
-    field_variable_map:
-      tide: tide
-      water_depth: depth
-      water_velocity:
-      - east_vel
-      - north_vel
-    file_mask: demoHindcast2D*.nc
-    grid_variable_map:
-      time: time_sec
-      triangles: tri
-      x:
-      - east
-      - north
-    input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
-    isodate_of_hindcast_time_zero: '2020-06-01'
-    time_buffer_size: 15
-  root_output_dir: output
-  time_step: 600
-  tracks_writer:
-    write_dry_cell_flag: true
-  user_note: test of notes
-- - release_groups: &id001
-    - allow_release_in_dry_cells: true
-      name: point1
-      points:
-      - - 1594500
-        - 5483000
-      - - 1598000
-        - 5486100
-      pulse_size: 10
-      release_interval: 10800
-    - class_name: PolygonRelease
-      name: poly1
-      points:
-      - - 1597682.1237
-        - 5489972.7479
-      - - 1598604.1667
-        - 5490275.5488
-      - - 1598886.4247
-        - 5489464.0424
-      - - 1597917.3387
-        - 5489000
-      - - 1597300
-        - 5489000
-      - - 1597682.1237
-        - 5489972.7479
-      pulse_size: 10
-      release_interval: 10800
-    - class_name: GridRelease
-      grid_center:
-      - 1592500
-      - 5486000
-      grid_size:
-      - 3
-      - 4
-      grid_span:
-      - 1000
-      - 1000
-      name: G1
-      pulse_size: 2
-      release_interval: 3600
-  - release_groups: *id001
-  - release_groups: *id001
-  - release_groups: *id001
-  - release_groups: *id001
+NUMBA_cache_code: false
+add_date_to_run_output_dir: false
+block_dry_cells: true
+case_list:
+- release_groups: &id001
+  - allow_release_in_dry_cells: true
+    name: point1
+    points:
+    - - 1594500
+      - 5483000
+    - - 1598000
+      - 5486100
+    pulse_size: 10
+    release_interval: 10800
+  - class_name: PolygonRelease
+    name: poly1
+    points:
+    - - 1597682.1237
+      - 5489972.7479
+    - - 1598604.1667
+      - 5490275.5488
+    - - 1598886.4247
+      - 5489464.0424
+    - - 1597917.3387
+      - 5489000
+    - - 1597300
+      - 5489000
+    - - 1597682.1237
+      - 5489972.7479
+    pulse_size: 10
+    release_interval: 10800
+  - class_name: GridRelease
+    grid_center:
+    - 1592500
+    - 5486000
+    grid_size:
+    - 3
+    - 4
+    grid_span:
+    - 1000
+    - 1000
+    name: G1
+    pulse_size: 2
+    release_interval: 3600
+- release_groups: *id001
+- release_groups: *id001
+- release_groups: *id001
+- release_groups: *id001
+debug: true
+dispersion:
+  A_H: 0.1
+output_file_base: demo05_parallel
+particle_properties:
+- class_name: AgeDecay
+  decay_time_scale: 86400.0
+  initial_value: 20.0
+  name: Oxygen
+- class_name: DistanceTravelled
+  name: distance_travelled
+- class_name: AgeDecay
+  decay_time_scale: 86400.0
+  name: age_decay
+- class_name: ParticleLoad
+  initial_value: 100
+  name: my_constant_prop
+processors: 2
+reader:
+  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
+  dimension_map:
+    node: nodes
+    time: time
+  field_variable_map:
+    tide: tide
+    water_depth: depth
+    water_velocity:
+    - east_vel
+    - north_vel
+  file_mask: demoHindcast2D*.nc
+  grid_variable_map:
+    time: time_sec
+    triangles: tri
+    x:
+    - east
+    - north
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  isodate_of_hindcast_time_zero: '2020-06-01'
+  time_buffer_size: 15
+root_output_dir: output
+time_step: 600
+tracks_writer:
+  write_dry_cell_flag: true
+user_note: test of notes

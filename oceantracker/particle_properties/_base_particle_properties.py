@@ -3,10 +3,13 @@ from oceantracker.particle_properties.util import particle_operations_util, part
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
+from oceantracker.util.basic_util import nopass
 from oceantracker.definitions import  particle_property_types
 from oceantracker.shared_info import SharedInfo as si
 from oceantracker.util.numpy_util import possible_dtypes
-class BaseParticleProperty(ParameterBaseClass):
+
+from oceantracker.util import  basic_util
+class _BaseParticleProperty(ParameterBaseClass):
     # property of each particle individually, eg x, time released etc , status
     # or non-time varying parameter eg ID,
     # properties which are maintained in memory and may be written out, eg group and particle
@@ -35,7 +38,7 @@ class BaseParticleProperty(ParameterBaseClass):
 
     def initial_setup(self):
 
-        s = (si.core_roles.particle_group_manager.info['current_particle_buffer_size'],)
+        s = (si.settings.particle_buffer_chunk_size,) # initial size one chunk
         if self.params['vector_dim'] > 1:
             s += (self.params['vector_dim'],)
 
@@ -46,7 +49,24 @@ class BaseParticleProperty(ParameterBaseClass):
         # set up data buffer
         self.data = np.full(s, self.params['initial_value'], dtype=self.get_dtype(), order='c')
 
-    def final_setup(self, **kwargs): pass  # stuff done after intiail setup of all classes/properties
+    def final_setup(self):
+        # stuff done after initial setup of all classes/properties
+        # set up property writes to particle track netcdf
+        params = self.params
+        name = params['name']
+        if si.settings.write_tracks:
+            # tweak write flag if in param lists
+            w = si.core_roles.tracks_writer
+            if name in w.params['turn_off_write_particle_properties_list']: params['write'] = False
+            if name in w.params['turn_on_write_particle_properties_list']:  params['write'] = True
+            if params['write']:
+                w.create_variable_to_write(name, is_time_varying=params['time_varying'],
+                                           is_part_prop=True,
+                                           fill_value=basic_util.fillvalue(params['dtype']),
+                                           vector_dim=params['vector_dim'],
+                                           attributes={'description': params['description']},
+                                           dtype=params['dtype'])
+
 
     def initial_value_at_birth(self, new_part_IDs):
         # need to set at birth, as in compact mode particle buffer changes,
@@ -128,6 +148,18 @@ class BaseParticleProperty(ParameterBaseClass):
         found= particle_comparisons_util._find_all_in_range(data, value1, value2, out)
         return found
 
+# three types of particle depending on update method
+class CoreParticleProperty(_BaseParticleProperty):
+    def update(self, n_time_step, time_sec, active): pass
 
-class ParticleProperty(BaseParticleProperty):
+class FieldParticleProperty(_BaseParticleProperty):
+    def update(self, n_time_step, time_sec, active):
+        si.core_roles.field_group_manager.interp_field_at_particle_locations(self.params['name'], active)
+
+
+class CustomParticleProperty(_BaseParticleProperty):
+    def update(self, n_time_step, time_sec, active): nopass('Custom particle epropr must have an update method')
+
+#todo remove below
+class old_ParticleProperty(_BaseParticleProperty):
     pass

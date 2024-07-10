@@ -33,7 +33,7 @@ class SplitParticles(BaseTrajectoryModifier):
 
         super().initial_setup()  # set up using regular grid for  stats
         params = self.params
-        si.add_scheduler_to_class('splitter01', self, interval=params['interval'])
+        self.add_scheduler('splitter01', interval=params['interval'], caller=self)
 
         self.statuses_to_split = IDmapToArray(si.particle_status_flags, params['statuses'])
 
@@ -57,7 +57,7 @@ class SplitParticles(BaseTrajectoryModifier):
 
     def update(self,n_time_step, time_sec, active):
 
-        if self.splitter01.do_task(n_time_step):
+        if self.schedulers['splitter01'].do_task(n_time_step):
             part_prop = si.roles.particle_properties
             self.time_of_last_split  = time_sec
 

@@ -30,12 +30,12 @@ class ClassImporter():
         cls_obj = self.get_class_obj_from_class_name(class_role, params['class_name'])
 
         if cls_obj is  None:
-            ml.msg(f'No class_name param for "{name}" given, and no known default class for type  "{class_role}"', fatal_error=True)
+            ml.msg(f'No class_name param for "{name}" given, and no known default class for type  "{class_role}"', fatal_error=True, crumbs=crumbs)
             return
             # check class comes from expected type
         this_class_type = cls_obj.__module__.split('.')[1]
         if this_class_type != class_role:
-            ml.msg(f'Class "{name}" of type "{this_class_type}", got "{cls_obj}", expected class with role "{class_role} ',
+            ml.msg(f'Class "{name}" of type "{this_class_type}", got "{cls_obj}", expected class with role "{class_role} ',crumbs=crumbs,
                    hint ='Has wrong class type or name been used for this type, or typo in "class_name" param?',fatal_error=True)
         pass
 
@@ -89,7 +89,7 @@ class ClassImporter():
         # get class name
         params['class_name'] = self.get_class_name(params, default_classID)
         if  params['class_name'] is  None:
-            ml.msg(f'No class_name param for "{name}" given, and no known default class for type  "{class_role}"', fatal_error=True)
+            ml.msg(f'No class_name param for "{name}" given, and no known default class for type  "{class_role}"', fatal_error=True, exit_now= True, crumbs=crumbs)
             return
 
         class_obj = self.get_class_obj_from_class_name(class_role, params['class_name'])

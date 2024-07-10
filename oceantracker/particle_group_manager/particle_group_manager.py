@@ -7,7 +7,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from  oceantracker.particle_group_manager.util import  pgm_util
 from oceantracker.definitions import particle_property_types
 from oceantracker.shared_info import SharedInfo as si
-from oceantracker.util import  basic_util
+from oceantracker.particle_properties._base_particle_properties import CoreParticleProperty,FieldParticleProperty,CustomParticleProperty
 
 # holds and provides access to different types a group of particle properties, eg position, field properties, custom properties
 class ParticleGroupManager(ParameterBaseClass):
@@ -26,67 +26,40 @@ class ParticleGroupManager(ParameterBaseClass):
         info['particles_in_buffer'] = 0
         info['particles_released'] = 0
         info['num_alive'] = 0
-        info['max_age_for_each_release_group'] =np.zeros((0,),dtype=np.int32)
 
-        nDim = 3 if si.run_info.is3D_run else  2
+        nDim = si.run_info.vector_components
         info['current_particle_buffer_size'] = si.settings.particle_buffer_chunk_size
-
-        #  time dependent core  properties
-        self.add_time_varying_info('time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
-        self.add_time_varying_info('num_part_released_so_far', description='number of particles released up to the given time',
-                                   dtype='int32')  # time has only one value at each time step
-
         # core particle props. , write at each required time step
-        self.add_particle_property('x','manual_update',dict(vector_dim=nDim))  # particle location
-        self.add_particle_property('x0', 'manual_update', dict(write=True, time_varying= False, vector_dim=nDim))  # location when last moving
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='x', vector_dim=nDim)  # particle location
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='x0', write=True, time_varying=False, vector_dim=nDim)  # location when last moving
 
-        self.add_particle_property('x_last_good', 'manual_update', dict(write=False, vector_dim=nDim))  # location when last moving
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='x_last_good', write=False, vector_dim=nDim)  # location when last moving
 
-        self.add_particle_property('particle_velocity','manual_update',dict(vector_dim=nDim))
-        self.add_particle_property('velocity_modifier','manual_update', dict(vector_dim=nDim))
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='particle_velocity', vector_dim=nDim)
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='velocity_modifier', vector_dim=nDim)
 
-        self.add_particle_property('status','manual_update',dict( dtype='int8',))
-        self.add_particle_property('age','manual_update',dict(  initial_value=0.))
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='status', dtype='int8', )
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='age', initial_value=0.)
 
         # parameters are set once and then don't change with time
-        self.add_particle_property('ID','manual_update',dict( dtype='int32', initial_value=-1, time_varying= False,
-                                      description='unique particle ID number, zero based'))
-        self.add_particle_property('IDrelease_group', 'manual_update',dict( dtype='int32', initial_value=-1, time_varying=False,
-                                           description='ID of group release particle is part of  is in, zero based'))
-        self.add_particle_property('user_release_groupID', 'manual_update',dict( dtype='int32', initial_value=-1, time_varying= False,
-                                      description='user given integer ID of release group'))
-        self.add_particle_property('IDpulse','manual_update',dict(  dtype='int32', initial_value=-1, time_varying= False,
-                                      description='ID of pulse particle was released within its release group, zero based'))
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='ID', dtype='int32', initial_value=-1, time_varying=False,
+                     description='unique particle ID number, zero based')
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='IDrelease_group', dtype='int32', initial_value=-1, time_varying=False,
+                     description='ID of group release particle is part of  is in, zero based')
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='user_release_groupID', dtype='int32', initial_value=-1, time_varying=False,
+                     description='user given integer ID of release group')
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='IDpulse', dtype='int32', initial_value=-1, time_varying=False,
+                     description='ID of pulse particle was released within its release group, zero based')
         # ID used when nested grids only
-        self.add_particle_property('hydro_model_gridID', 'manual_update', dict(write=True, time_varying=True, dtype='int8', initial_value=-1,
-                                         description='ID for which grid, outer (ID=0) or nested (ID >0),  each particle resides in '))
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='hydro_model_gridID', write=True, time_varying=True, dtype='int8', initial_value=-1,
+                     description='ID for which grid, outer (ID=0) or nested (ID >0),  each particle resides in ')
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='time_released', time_varying=False, description='time (sec) each particle was released')
 
-        self.add_particle_property('time_released', 'manual_update',dict(time_varying= False, description='time (sec) each particle was released'))
-
+        #  time dependent core  properties
+        si.add_class('time_varying_info',name='time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
+        si.add_class('time_varying_info',name='num_part_released_so_far', description='number of particles released up to the given time', dtype='int32')  # time has only one value at each time step
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
-
-    def final_setup(self):
-        # make a single block of memory from all particle properties
-        # as numpy dtype structured array
-        info = self.info
-
-        pass
-
-    def add_release_group(self,params):
-        #doto is this needed
-        i = si.add_user_class('release_groups',params,
-                              crumbs='Adding release group', default_classID='release_groups')
-        i.initial_setup()
-        # set up release times so duration of run known
-        i.final_setup()
-
-        # max_ages needed for culling operations
-        max_age = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
-
-        self.info['max_age_for_each_release_group'] =np.append(self.info['max_age_for_each_release_group'],max_age)
-
-        return i
 
     #@function_profiler(__name__)
     def release_particles(self,n_time_step, time_sec):
@@ -94,7 +67,7 @@ class ParticleGroupManager(ParameterBaseClass):
         new_buffer_indices = np.full((0,), 0, np.int32)
 
         for name, rg in si.roles.release_groups.items():
-            if rg.release_scheduler.do_task(n_time_step):
+            if rg.schedulers['release'].do_task(n_time_step):
                 release_part_prop = rg.get_release_locations(time_sec)
                 new_index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
@@ -107,12 +80,12 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # initial values  part prop derived from fields
         for name, i  in si.roles.particle_properties.items():
-            if i.info['type'] =='from_fields':
+            if isinstance(i, FieldParticleProperty) :
                 i.initial_value_at_birth(new_buffer_indices)
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
         for name, i  in si.roles.particle_properties.items():
-            if i.info['type'] == 'user':
+            if isinstance(i, CustomParticleProperty):
                 i.initial_value_at_birth(new_buffer_indices)
 
         # update new particles props
@@ -150,7 +123,6 @@ class ParticleGroupManager(ParameterBaseClass):
         for name in release_data.keys():
             part_prop[name].set_values(release_data[name], new_buffer_indices)
 
-
         # record needed copies
         if new_buffer_indices.size >0:
             part_prop['x0'].set_values(release_data['x'], new_buffer_indices)
@@ -187,57 +159,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 
-    def add_time_varying_info(self,name, **kwargs):
-        # property for group of particles, ie not properties of individual particles, eg time, number released
-        # **karwgs must have at least name
-        params = kwargs
-        params['name'] = name
-        i = si.add_user_class('time_varying_info',params,  class_type='manual_update',  crumbs=' setup time varing reader info')
-        i.initial_setup()
-
-        if si.settings.write_tracks and i.params['write']:
-            w = si.core_roles.tracks_writer
-            w.create_variable_to_write(name, 'time', None,i.params['vector_dim'], attributes=None, dtype=i.params['dtype'] )
-
-    def add_particle_property(self, name, prop_type, prop_params, crumbs=''):
-        ml = si.msg_logger
-        if type(prop_params) != dict:
-            ml.msg('ParticleGroupManager.create_particle_property, parameters must be type dict ', caller=self,
-                   hint='got parameters of type=' + str(type(prop_params)) + ',  values=' + str(prop_params), fatal_error=True, exit_now=True)
-
-        if 'name' not in prop_params or prop_params['name'] is None:
-            prop_params['name'] = name
-
-        i = si.add_user_class('particle_properties', prop_params,class_type=prop_type,
-                                           crumbs=crumbs + f' adding "particle_properties of type={str(prop_type)} name={prop_params["name"]}')
-        i.initial_setup()
-        name = i.params['name']
-
-        if type(prop_type) != str :
-            ml.msg('ParticleGroupManager.create_particle_property, prop_type must be type =str', caller=self,
-                   hint='got prop_type of type=' + str(type(prop_type)),
-                   fatal_error=True, exit_now=True)
-
-
-        if prop_type not in particle_property_types:    #todo move all raise exception to msglogger
-            ml.msg('ParticleGroupManager.create_particle_property, unknown prop_group name', caller=self,
-                   hint='prop_group must be one of ' + str(particle_property_types),   fatal_error=True, exit_now=True)
-
-
-
-        if si.settings.write_tracks:
-            # tweak write flag if in param lists
-            w = si.core_roles.tracks_writer
-            if name in w.params['turn_off_write_particle_properties_list']: i.params['write'] = False
-            if name in w.params['turn_on_write_particle_properties_list']:  i.params['write'] = True
-            if i.params['write']:
-                w.create_variable_to_write(name, is_time_varying=i.params['time_varying'],
-                                           is_part_prop=True,
-                                           fill_value= basic_util.fillvalue(i.params['dtype']),
-                                           vector_dim=i.params['vector_dim'],
-                                           attributes={'description': i.params['description']},
-                                           dtype=i.params['dtype'])
-
     def get_particle_time(self): return self.time_varying_group_info['time'].get_values()
 
     #@function_profiler(__name__)
@@ -255,14 +176,14 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # first interpolate to give particle properties from reader derived  fields
         for name,i in si.roles.particle_properties.items():
-            if i.info['type'] == 'from_fields':
+            if isinstance(i, FieldParticleProperty):
                 i.start_update_timer()
-                si.core_roles.field_group_manager.interp_field_at_particle_locations(name, active)
+                i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for name, i in si.roles.particle_properties.items():
-            if i.info['type'] == 'user':
+            if isinstance(i, CustomParticleProperty):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()

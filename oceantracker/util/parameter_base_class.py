@@ -6,6 +6,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.shared_info import SharedInfo as si
 # root class needed to avoid circular imports when building class trees
 from .__root_parameter_base_class__ import _RootParameterBaseClass
+from oceantracker.util.scheduler import Scheduler
 
 class ParameterBaseClass(_RootParameterBaseClass):
     # parameter dictionaries are nested dictionaries or lists of dictionaries
@@ -18,6 +19,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
     # 5)  ParamDictValueChecker checks give value against expectation or inserts default
     # 6) Defaults must be set in .__init__()  using method ._update_default_param_dictionary({})
     # 7) children must call   super().__init__()   to get defaults of parent
+
 
 
     def initial_setup(self): pass
@@ -35,14 +37,15 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.docs={'description': None, 'role': None # role is only set in base class
                    }
         self.default_params={}
-        self.add_default_params({'class_name': PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
-                                  'user_note': PVC(None, str),
-                                 'name': PVC(None, str,doc_str='Name used to refer to class in code and output, = None for core claseses'),
-                                 'development': PVC(False, bool, expert=True,doc_str='Class is under development and testing'),
-                                  })
+        self.add_default_params(class_name = PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
+                                  user_note = PVC(None, str),
+                                 name = PVC(None, str,doc_str='Name used to refer to class in code and output, = None for core claseses'),
+                                 development = PVC(False, bool, expert=True,doc_str='Class is under development and testing'),
+                                  )
 
         self.partID_buffers={} # dict of int32 ID number buffers
         self.shared_info = None
+        self.schedulers ={}
 
     def intitial_setup(self):
         # setup done before other classes set
@@ -135,3 +138,13 @@ class ParameterBaseClass(_RootParameterBaseClass):
         # note effect of any numba compilation on first call
         if self.info['update_calls'] == 1: self.info['time_first_update_call'] = dt
 
+    def add_scheduler(self, name_scheduler :str, start=None, end=None, duration=None,
+                                   interval =None, times=None,  caller=None, crumbs=''):
+        ''' Add a scheduler object to given param_class_instance, with boolean task_flag attribute for each time step,
+            which is true if  task is to be carried out.
+            Rounds times interval and times to nearest time step'''
+        s = Scheduler(si.settings, si.run_info, si.hindcast_info, start=start, end=end, duration=duration,
+                                                    interval =interval, times=times, caller=caller,
+                                                    msg_logger=si.msg_logger, crumbs=crumbs + f'> adding scheduler {name_scheduler}')
+        self.schedulers[name_scheduler]  = s
+        return s

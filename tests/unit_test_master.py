@@ -1,9 +1,10 @@
 import  argparse
-from os import path,chdir
+from os import path,chdir, mkdir
 from oceantracker import definitions
 from glob import glob
 import importlib
 import  sys
+from oceantracker.util import json_util, yaml_util
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -28,8 +29,14 @@ if __name__ == "__main__":
 
     sys.path.append(files_dir)
 
+    param_dir = path.join(files_dir,'test_param_files')
+    if not path.isdir(param_dir) : mkdir(param_dir)
+
+
     for n, name in info:
         if n in test_list:
             p = importlib.import_module(name)
-            p.main(args)
+            params = p.main(args)
+            json_util.write_JSON(path.join(param_dir,f'params_{name}.json'),params)
+            yaml_util.write_YAML(path.join(param_dir, f'params_{name}.yaml'), params)
 

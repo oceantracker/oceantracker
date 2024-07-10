@@ -126,8 +126,8 @@ base_case.update({'output_file_base' :'demo05_parallel',
 case_list=[]
 for n in range(5):
     case_list.append({ 'release_groups': p2['release_groups']})
-
-params.append([base_case,case_list])
+base_case['case_list'] = case_list
+params.append(base_case)
 
 # track animation with settlement on reef polygon
 # demo 6
@@ -195,7 +195,7 @@ p10['release_groups']= [ {'name': 'near_shore','class_name': 'oceantracker.relea
             'points': (np.asarray(poly_points) + np.asarray([[-3000.,-6500]])).tolist(),
             'pulse_size': 100, 'release_interval': 12 * 3600}]
 
-p10['particle_statistics']= [{'name':'residentpoly' ,'class_name': 'oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon',
+p10['particle_statistics']= [{'name':'residentpoly' ,'class_name': 'ResidentInPolygon',
                   'name_of_polygon_release_group':'near_shore', 'update_interval': 1800}]
 
 
@@ -341,7 +341,7 @@ p70.update({'output_file_base' :'demo70_LCS_test',
             'time_step':600 })
 
 p70['integrated_model']={'class_name': 'dev_LagarangianStructuresFTLE2D',
-           'grid_size': [45, 60],
+           'grid_size': [23, 30],
             'write_intermediate_results': True,
             'grid_span' : [ 10000, 9000],
            'grid_center': [1596500, 5486000],

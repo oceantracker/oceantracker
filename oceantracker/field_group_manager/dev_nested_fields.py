@@ -31,7 +31,7 @@ class DevNestedFields(ParameterBaseClass):
         hi = fgm_outer_grid.get_hindcast_info()
         self.hydro_time_step = hi['time_step']
         self.start_time, self.end_time = hi['start_time'], hi['end_time']
-        self.info['is3D'] = fgm_outer_grid.info['is3D']
+        self.grid['is3D'] = fgm_outer_grid.info['is3D']
 
         # todo  check if all hindcasts have same required info
 

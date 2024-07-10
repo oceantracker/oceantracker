@@ -1,7 +1,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
-from oceantracker.field_group_manager.util import  field_group_manager_util
+from oceantracker.particle_properties._base_particle_properties import  FieldParticleProperty
 import numpy as np
 from oceantracker.util import time_util, ncdf_util, json_util
 from datetime import datetime
@@ -49,7 +49,7 @@ class FieldGroupManager(ParameterBaseClass):
 
 
         reader= self.reader
-        ml.msg(f'Hydro-model is "{"3D" if info["is3D"] else "2D"}"  type "{reader.__class__.__name__}"', note=True,
+        ml.msg(f'Hydro-model is "{"3D" if grid["is3D"] else "2D"}"  type "{reader.__class__.__name__}"', note=True,
                           hint=f'Files found dir and sub-dirs of "{reader.params["input_dir"]}"')
 
         # note coord system
@@ -87,19 +87,16 @@ class FieldGroupManager(ParameterBaseClass):
             ml.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid',
                    note=True)
 
-
-
         self.info['has_open_boundary_nodes'] = np.any(self.grid['node_type'] == node_types.open_boundary)
         self.info['open_boundary_type'] = si.settings.open_boundary_type
 
         # set up dry cell adjacency space for triangle walk
         grid['adjacency_with_dry_edges'] = grid['adjacency'].copy()  # working space to add dry cell boundaries to
 
-        self.interpolator.final_setup(grid)
+        self.interpolator.final_setup()
 
         # add tidal stranding class
-        i = si.add_core_role('tidal_stranding',{},crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ',
-                           caller=self, initialise=True)
+        i = si.add_class('tidal_stranding', {}, crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', caller=self)
         self.tidal_stranding = i
 
         # initialize user supplied custom fields calculated from other fields which may depend on reader fields, eg friction velocity from velocity
@@ -109,15 +106,13 @@ class FieldGroupManager(ParameterBaseClass):
 
         pgm = si.core_roles.particle_group_manager
 
-        self.interpolator.add_part_prop_for_book_keeping()
-
         # add part prop for reader and custom fields
         for name, i in self.fields.items():
             if i.params['create_particle_property_with_same_name']:
-                pgm.add_particle_property(name, 'from_fields', dict(
+                si.add_class('particle_properties', class_name='FieldParticleProperty', name=name,
                                             write=i.params['write_interp_particle_prop_to_tracks_file'],
                                             vector_dim = i.get_number_components(),
-                                            time_varying=True, dtype='float64', initial_value=0.))
+                                            time_varying=True, dtype='float64', initial_value=0.)
     def update_reader(self, time_sec):
         # check if all interpolators have the time steps they need
 
@@ -141,6 +136,7 @@ class FieldGroupManager(ParameterBaseClass):
         # get next two buffer time steps around the given time in reader ring buffer
         # plus global time step locations and time ftactions od timre step and put results in interpolators step info numpy structure
         info = self.info
+        grid =self.grid
         info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self._time_step_and_buffer_offsets(time_sec)
         part_prop = si.roles.particle_properties
 
@@ -163,7 +159,7 @@ class FieldGroupManager(ParameterBaseClass):
         sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel) # those still bad, eg nan etc
 
-        if info['is3D']:
+        if grid['is3D']:
             self._find_vertical_cell(time_sec, xq, active)
 
     def _find_hori_cell(self, time_sec, xq, active):
@@ -256,7 +252,6 @@ class FieldGroupManager(ParameterBaseClass):
         n_cell = part_prop['n_cell'].data
         bc_cords = part_prop['bc_cords'].data
 
-
         if output is None:
             # over write current values
             output = part_prop[field_name].used_buffer()
@@ -275,7 +270,6 @@ class FieldGroupManager(ParameterBaseClass):
                                               n_cell, bc_cords,
                                               output, active)
             # print('xx interp',field_name, output[:5])
-
 
 
     def interp_named_field_at_given_locations_and_time(self, field_name, x, time_sec= None, n_cell=None,bc_cords=None, output=None, hydro_model_gridID=None):
@@ -328,12 +322,12 @@ class FieldGroupManager(ParameterBaseClass):
 
         info = self.info
 
-        self.reader  = si.make_instance_from_params('reader', reader_builder['params'],
-                                       caller=self, crumbs=f'setup_hydro_fields> reader class ')
+        self.reader  = si.add_class('reader', reader_builder['params'],
+                                caller=self, crumbs=f'setup_hydro_fields> reader class ')
 
-        reader = self.reader
-        reader.initial_setup(reader_builder['file_info'])
         # give acces to reader info
+        reader = self.reader
+
         info['file_info'] = reader.info['file_info']
         info['buffer_info'] = reader.info['buffer_info']
 
@@ -349,17 +343,15 @@ class FieldGroupManager(ParameterBaseClass):
         #reader.info['variables'] = nc.variable_info  # note all variable names
         #self.info['variables'] = nc.variable_info # note all variable names
 
-        self.grid, self.info['is3D'] = reader.set_up_grid(nc)
+        self.grid = reader.set_up_grid(nc)
         grid = self.grid
         si.hydro_model_cords_in_lat_long = grid['hydro_model_cords_in_lat_long']
 
         reader.setup_water_velocity(nc,grid)
 
-
-
         # setup request to load compulsory fields
         reader.params['load_fields'] = list(set(['water_velocity'] + reader.params['load_fields']))
-        if info['is3D']:
+        if grid['is3D']:
             # request load of water depth and tide fields which are required  in 3D
             reader.params['load_fields'] = list(set(['tide', 'water_depth'] + reader.params['load_fields']))
         else:
@@ -374,12 +366,13 @@ class FieldGroupManager(ParameterBaseClass):
 
         nc.close()
 
+    def is_field(self, name): return  name in self.fields
 
     def set_up_interpolator(self):
 
-        i = si.make_instance_from_params('interpolator',si.working_params['core_roles']['interpolator'],
-                                                default_classID='interpolator', caller= self,
-                                                crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
+        i = si.add_class('interpolator', si.working_params['core_roles']['interpolator'],initialize=False,
+                                             default_classID='interpolator', caller= self,
+                                             crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
         i.initial_setup(self.grid)
         self.interpolator = i
 
@@ -387,19 +380,17 @@ class FieldGroupManager(ParameterBaseClass):
         # these depend on which variables are available inb the hydro file
         reader = self.reader
         fmap = reader.params['field_variable_map']
-        info = self.info
+        grid= self.grid
 
         nc = reader.open_first_file()
 
         # set up dispersion using vertical profiles of A_Z if available
         self._setup_required_dispersion_fields(nc)
 
-
         # add resuspension based on friction velocity
-        if info['is3D']:
+        if grid['is3D']:
             # add friction velocity from bottom stress or near seabed vel
             self._setup_required_resupension_fields(nc)
-
 
         nc.close()
 
@@ -407,6 +398,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         ml = si.msg_logger
         info = self.info
+        grid = self.grid
         fmap = self.reader.params['field_variable_map']
 
         # has_A_Z_profile can optionally be set by nested readers if all
@@ -414,7 +406,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         info['has_A_Z_profile'] = False
 
-        if not info['is3D']:
+        if not grid['is3D']:
             si.settings['use_A_Z_profile'] = False
             return
 
@@ -464,7 +456,7 @@ class FieldGroupManager(ParameterBaseClass):
         reader= self.reader
 
         # ensure all field maps are lists, and if not given use name as the field map
-        fmap = reader.params['field_variable_map']
+        fmap = deepcopy(reader.params['field_variable_map'])
         if name not in fmap or fmap[name] is None:  fmap[name] = name  # if no field map given to use given name as field map
         if type(fmap[name]) != list: fmap[name] = [fmap[name]]  # make a list so all maps the same
 

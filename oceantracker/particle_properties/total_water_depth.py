@@ -1,11 +1,11 @@
-from oceantracker.particle_properties._base_particle_properties import ParticleProperty
+from oceantracker.particle_properties._base_particle_properties import CustomParticleProperty
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 import numpy as np
 from oceantracker.shared_info import SharedInfo as si
 
-class TotalWaterDepth(ParticleProperty):
+class TotalWaterDepth(CustomParticleProperty):
     def __init__(self):
         super().__init__()
         self.add_default_params({'time_varying': PVC(True,bool),

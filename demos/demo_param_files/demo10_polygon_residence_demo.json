@@ -98,7 +98,7 @@
     "particle_statistics": [
         {
             "name": "residentpoly",
-            "class_name": "oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon",
+            "class_name": "ResidentInPolygon",
             "name_of_polygon_release_group": "near_shore",
             "update_interval": 1800
         }

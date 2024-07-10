@@ -1,71 +1,68 @@
-[
-    {
-        "output_file_base": "demo05_parallel",
-        "add_date_to_run_output_dir": false,
-        "NUMBA_cache_code": false,
-        "time_step": 600,
-        "debug": true,
-        "reader": {
-            "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
-            "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-            "file_mask": "demoHindcast2D*.nc",
-            "dimension_map": {
-                "time": "time",
-                "node": "nodes"
-            },
-            "grid_variable_map": {
-                "time": "time_sec",
-                "x": [
-                    "east",
-                    "north"
-                ],
-                "triangles": "tri"
-            },
-            "field_variable_map": {
-                "water_velocity": [
-                    "east_vel",
-                    "north_vel"
-                ],
-                "water_depth": "depth",
-                "tide": "tide"
-            },
-            "time_buffer_size": 15,
-            "isodate_of_hindcast_time_zero": "2020-06-01"
+{
+    "output_file_base": "demo05_parallel",
+    "add_date_to_run_output_dir": false,
+    "NUMBA_cache_code": false,
+    "time_step": 600,
+    "debug": true,
+    "reader": {
+        "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
+        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "demoHindcast2D*.nc",
+        "dimension_map": {
+            "time": "time",
+            "node": "nodes"
         },
-        "user_note": "test of notes",
-        "dispersion": {
-            "A_H": 0.1
+        "grid_variable_map": {
+            "time": "time_sec",
+            "x": [
+                "east",
+                "north"
+            ],
+            "triangles": "tri"
         },
-        "tracks_writer": {
-            "write_dry_cell_flag": true
+        "field_variable_map": {
+            "water_velocity": [
+                "east_vel",
+                "north_vel"
+            ],
+            "water_depth": "depth",
+            "tide": "tide"
         },
-        "particle_properties": [
-            {
-                "name": "Oxygen",
-                "class_name": "AgeDecay",
-                "decay_time_scale": 86400.0,
-                "initial_value": 20.0
-            },
-            {
-                "name": "distance_travelled",
-                "class_name": "DistanceTravelled"
-            },
-            {
-                "name": "age_decay",
-                "class_name": "AgeDecay",
-                "decay_time_scale": 86400.0
-            },
-            {
-                "name": "my_constant_prop",
-                "class_name": "ParticleLoad",
-                "initial_value": 100
-            }
-        ],
-        "block_dry_cells": true,
-        "processors": 2,
-        "root_output_dir": "output"
+        "time_buffer_size": 15,
+        "isodate_of_hindcast_time_zero": "2020-06-01"
     },
-    [
+    "user_note": "test of notes",
+    "dispersion": {
+        "A_H": 0.1
+    },
+    "tracks_writer": {
+        "write_dry_cell_flag": true
+    },
+    "particle_properties": [
+        {
+            "name": "Oxygen",
+            "class_name": "AgeDecay",
+            "decay_time_scale": 86400.0,
+            "initial_value": 20.0
+        },
+        {
+            "name": "distance_travelled",
+            "class_name": "DistanceTravelled"
+        },
+        {
+            "name": "age_decay",
+            "class_name": "AgeDecay",
+            "decay_time_scale": 86400.0
+        },
+        {
+            "name": "my_constant_prop",
+            "class_name": "ParticleLoad",
+            "initial_value": 100
+        }
+    ],
+    "block_dry_cells": true,
+    "processors": 2,
+    "case_list": [
         {
             "release_groups": [
                 {
@@ -416,5 +413,6 @@
                 }
             ]
         }
-    ]
-]
+    ],
+    "root_output_dir": "output"
+}

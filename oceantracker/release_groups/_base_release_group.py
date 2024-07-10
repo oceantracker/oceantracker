@@ -71,36 +71,6 @@ class BaseReleaseGroup(ParameterBaseClass):
         release_part_prop['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)
         return release_part_prop
 
-    def get_start_time_and_life_span(self):
-        # gets relese start end and last ime allive from params
-        # and any start and end times, or a duration
-
-        hi = si.hindcast_info
-        ri = si.run_info
-        params = self.params
-
-        if params['start'] is None:
-            start =  si.hindcast_info['end_time'] if si.settings.backtracking else si.hindcast_info['start_time']
-        else:
-            start = params['start']
-
-        # work out release duration
-        if params['duration'] is None :
-            # look at end date
-            if params['end'] is None:
-                end = si.hindcast_info['start_time'] if si.settings.backtracking else si.hindcast_info['end_time']
-            else:
-                end = params['end']
-            duration = abs(end-start)
-        else:
-            duration = abs(params['duration'])
-
-        life_span =  duration
-        #extend to ensure last release have a full life
-        if params['max_age'] is not None:
-            life_span += params['max_age']
-
-        return start, life_span
 
     def _check_potential_release_locations_in_bounds(self, x):
         # check cadiated in bound

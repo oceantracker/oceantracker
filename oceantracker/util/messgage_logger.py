@@ -4,6 +4,8 @@ from time import  perf_counter
 from oceantracker.definitions import docs_base_url
 import difflib
 from time import sleep
+import inspect
+
 class GracefulError(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
@@ -72,6 +74,7 @@ class MessageLogger(object ):
             hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
             fatal_error=False, exit_now=False, exception = None, traceback_str=None, dev=False):
 
+
         if exit_now : fatal_error = True
         if exception is not None:
             fatal_error = True
@@ -91,6 +94,7 @@ class MessageLogger(object ):
         elif note:
             m[0] += msg_str('>>> Note: ', tabs)
             self.note_count += 1
+
         else:
             m[0] += msg_str('', tabs)
 
@@ -128,7 +132,7 @@ class MessageLogger(object ):
                 origin = caller.__name__
             m.append(msg_str(f'caller: {origin}', tabs + 3))
 
-
+        #self.build_stack()
 
         if link is not None:
             m.append(msg_str('see user documentation: ' + self.links[link], tabs + 3))
@@ -216,6 +220,14 @@ class MessageLogger(object ):
             # flag if unknown
             self.msg(msg,  hint=hint + f'\n Closest matches to "{key}" = {difflib.get_close_matches(key, known, cutoff=0.4)} ?? ',
                   **kwargs)
+
+    def build_stack(self):
+
+        #todo useful to print crumbs automatically?
+        stack = inspect.stack(1)
+        stack = [l for l in stack if path.basename(l[1]) not in ['messgage_logger.py','main.py']]
+        for l in stack:
+            print('msg warning  stack', l)
 
     def close(self):
         if self.log_file is not None:

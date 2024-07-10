@@ -30,7 +30,7 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
     def initial_setup(self, grid):
         super().initial_setup()  # children must call this parent class to default shared_params etc
         params = self.params
-
+        self.grid = grid
 
         # make barcentric transform matrix for the grid,  typee to match numba signature
         t0 = perf_counter()
@@ -41,28 +41,31 @@ class  InterpTriangularNativeGrid_Slayer_and_LSCgrid(BaseInterp):
         #todo deleteself.KDtree = cKDTree(xy_centriod)
         self.KDtree = cKDTree(grid['x'])
 
-    def add_part_prop_for_book_keeping(self):
+        # classes need by this class
+        crumbs ='interpolator intitial_setup>'
+        si.add_class('particle_properties', name ='n_cell', class_name='CoreParticleProperty',  write=False, dtype='int32',
+                     initial_value=0, caller=self,crumbs=crumbs)  # start with cell number guess of zero
+        si.add_class('particle_properties', name ='n_cell_last_good',  class_name='CoreParticleProperty',write=False, dtype='int32',
+                     initial_value=0, caller=self,crumbs=crumbs)
+        si.add_class('particle_properties', name ='cell_search_status', class_name='CoreParticleProperty', write=False,
+                     initial_value=cell_search_status_flags.ok, dtype='int8', caller=self,crumbs=crumbs)
+        si.add_class('particle_properties', name ='bc_cords', class_name='CoreParticleProperty', write=False,
+                     initial_value=0., vector_dim=3, dtype='float32', caller=self,crumbs=crumbs)
 
-        pgm = si.core_roles.particle_group_manager
-
-        pgm.add_particle_property('n_cell', 'manual_update', dict(write=False, dtype='int32', initial_value=0))  # start with cell number guess of zero
-        pgm.add_particle_property('n_cell_last_good', 'manual_update', dict(write=False, dtype='int32', initial_value=0))  # start with cell number guess of zero
-        pgm.add_particle_property('cell_search_status', 'manual_update', dict(write=False, initial_value= cell_search_status_flags.ok, dtype='int8'))
-
-        pgm.add_particle_property('bc_cords', 'manual_update', dict(write=False, initial_value=0., vector_dim=3, dtype='float32'))
-
-        # BC walk info
-        if si.run_info.is3D_run:
+        if grid['is3D']:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
-            pgm.add_particle_property('nz_cell', 'manual_update', dict(write=False, dtype='int32', initial_value=0))  # todo  create  initial serach for vertical cell
-            pgm.add_particle_property('z_fraction', 'manual_update', dict(write=False, dtype='float32', initial_value=0.))
-            pgm.add_particle_property('z_fraction_water_velocity', 'manual_update', dict(write=False, dtype='float32', initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer'))
+            si.add_class('particle_properties', name ='nz_cell', class_name='CoreParticleProperty',write=False, dtype='int32',
+                         initial_value=0, caller=self,crumbs=crumbs) # todo  create  initial serach for vertical cell
+            si.add_class('particle_properties', name ='z_fraction',class_name='CoreParticleProperty',write=False, dtype='float32',
+                         initial_value=0., caller=self,crumbs=crumbs)
+            si.add_class('particle_properties', name ='z_fraction_water_velocity',class_name='CoreParticleProperty',write=False, dtype='float32',
+                         initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer', caller=self,crumbs=crumbs)
 
-    def final_setup(self, grid):
+    def final_setup(self):
 
         # set up a grid class,part_prop and vertical cell find functions to minimise numba function arguments
-
+        grid = self.grid
         info = self.info
 
         # create particle properties to  store history of current triangle  for reuse

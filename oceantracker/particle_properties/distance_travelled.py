@@ -1,10 +1,10 @@
 import numpy as np
-from oceantracker.particle_properties._base_particle_properties import ParticleProperty
+from oceantracker.particle_properties._base_particle_properties import CustomParticleProperty
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.shared_info import SharedInfo as si
 
-class DistanceTravelled(ParticleProperty):
+class DistanceTravelled(CustomParticleProperty):
 
     def __init__(self):
         super().__init__()

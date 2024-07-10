@@ -58,6 +58,6 @@ def main(args):
 
     #plot_tracks.plot_utilities.animation_output(anim, 'output\test.mp4', fps=15, dpi=600, show=True)
 
-    return case_info_file
+    return ot.params
 
 
