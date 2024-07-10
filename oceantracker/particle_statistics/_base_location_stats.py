@@ -72,7 +72,7 @@ class BaseParticleLocationStats(ParameterBaseClass):
             ml.msg(f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
                      caller=self,fatal_error=True)
 
-        si.add_scheduler_to_class('count_scheduler', self, start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
+        self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
         pass
 
     def check_part_prop_list(self):

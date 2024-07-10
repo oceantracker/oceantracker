@@ -80,8 +80,8 @@
     "integrated_model": {
         "class_name": "dev_LagarangianStructuresFTLE2D",
         "grid_size": [
-            45,
-            60
+            23,
+            30
         ],
         "write_intermediate_results": true,
         "grid_span": [

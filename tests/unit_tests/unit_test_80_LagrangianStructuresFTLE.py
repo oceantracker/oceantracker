@@ -15,7 +15,7 @@ def _run(args):
                 write_intermediate_results = True,
                 grid_span = None,
                 grid_center = None,
-                update_interval = 0,
+                release_interval = 0,
                 lags = None,
                 #floating = True,
                 )
@@ -26,10 +26,10 @@ def _run(args):
             label='demoSchism'
             hm = test_definitions.hydro_model['demoSchism']
             model_settings.update(
-                grid_size=[50, 100],
+                grid_size=[90, 120],
                 grid_span=[6000, 8000],
                 grid_center=[1594000, 5484200],
-                update_interval=1800,
+                release_interval=1800,
                 lags=[3 * 3600])
 
         case 1:
@@ -50,7 +50,7 @@ def _run(args):
                 grid_size=[100, 100],
                 grid_span=[60000, 60000],
                 grid_center=hm['x0'][2],
-                update_interval=3600,
+                release_interval=3600,
                 lags=[12.42* 3600])
             settings.update(max_run_duration=7*24*3600, time_step=3600)
         case 3:
@@ -60,7 +60,7 @@ def _run(args):
                 grid_size=[100, 100],
                 grid_span=[10000, 10000],
                 grid_center=hm['x0'][1],
-                update_interval=3600,
+                release_interval=3600,
                 lags=[2*24* 3600])
             settings.update(max_run_duration=7*24*3600, time_step=3600)
     #setup run
@@ -79,7 +79,7 @@ def _run(args):
 
     match args.variant:
         case 0:
-            plot_statistics.plot_LCS(LCS_data, n_time_step=30)
+            plot_statistics.plot_LCS(LCS_data, n_time_step=None)
         case 1:
             plot_statistics.plot_LCS(LCS_data, n_time_step=-1)
         case 2:

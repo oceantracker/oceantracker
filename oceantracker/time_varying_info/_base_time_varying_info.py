@@ -1,9 +1,8 @@
 import numpy as np
-from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.numpy_util import possible_dtypes
-from oceantracker.util import time_util
+from oceantracker.shared_info import SharedInfo as si
 
 class BaseTimeVaringInfo(ParameterBaseClass):
     # single valued time varying information, ie not a particle property
@@ -28,6 +27,10 @@ class BaseTimeVaringInfo(ParameterBaseClass):
     def initial_setup(self, **kwargs):
         s=(1,)
         self.data = self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype(),order='c')
+
+        if si.settings.write_tracks and self.params['write']:
+            w = si.core_roles.tracks_writer
+            w.create_variable_to_write(self.params['name'], 'time', None, self.params['vector_dim'], attributes=None, dtype=self.params['dtype'])
 
     def update(self,n_time_step, time_sec, active): pass # manual update by default
     def set_values(self, value): self.data[0]=value

@@ -113,11 +113,11 @@ class SCHISMreaderNCDF(BaseReader):
     def get_field_params(self,nc, name, crumbs=''):
         # work out if feild is 3D ,etc
 
-        fmap = self.params['field_variable_map']
-
-        f_params = dict(time_varying = nc.is_var_dim(fmap[name][0], 'time'),
-                        is3D = nc.is_var_dim(fmap[name][0], 'nSCHISM_vgrid_layers'),
-                        is_vector = nc.is_var_dim(fmap[name][0], 'two') or len(fmap[name] ) > 1
+        fmap = deepcopy(self.params['field_variable_map'][name])
+        fmap = fmap if type(fmap) == list else [fmap]
+        f_params = dict(time_varying = nc.is_var_dim(fmap[0], 'time'),
+                        is3D = nc.is_var_dim(fmap[0], 'nSCHISM_vgrid_layers'),
+                        is_vector = nc.is_var_dim(fmap[0], 'two') or len(fmap) > 1
                         )
         return f_params
 

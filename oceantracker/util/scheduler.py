@@ -1,3 +1,4 @@
+import signal
 from inspect import signature
 import numpy as np
 from oceantracker.util import  time_util
@@ -18,7 +19,7 @@ class Scheduler(object):
 
         if times is None:
             # make from start time and interval
-            times, interval = self._start_end_from_interval(settings, run_info, start, end, duration, interval)
+            times, interval = self._start_end_from_interval(settings,hindcast_info,  run_info,start, end, duration, interval)
         else:
             # use times given, but round
             n = (times - run_info.start_time)/dt
@@ -77,12 +78,13 @@ class Scheduler(object):
 
         pass
 
-    def _start_end_from_interval(self,settings,run_info, start,end, duration, interval):
+    def _start_end_from_interval(self,settings,hindcast_info,run_info, start,end, duration, interval):
 
         md = run_info.model_direction
         dt = settings.time_step
+
         if start is None:
-            start = run_info.start_time
+            start = hindcast_info['start_time'] if run_info.start_time is None else run_info.start_time
         else:
             # use given start rounded to time step
             n = (start - run_info.start_time) / dt  # number of model steps since the start
@@ -93,9 +95,8 @@ class Scheduler(object):
             duration = abs(end - start)
 
         elif duration is None:
-            #duration is start to
+            # duration is start to
             duration = abs(run_info.end_time-start)
-
 
         #trim within max duration
         duration = min(settings.max_run_duration, duration)

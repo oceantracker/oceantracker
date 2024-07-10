@@ -53,27 +53,20 @@ def setup_output_dir(params, msg_logger, crumbs='', caller=None):
                                       }
     return output_files
 
-def write_raw_user_params(output_files, params,msg_logger, case_list=None):
-
-    # different if run in parallel
-    if case_list is None:
-        out = params
-    else:
-        out = {'base_case_params': params, 'case_list_params': case_list}
-    out['_version'] = definitions.version
-
+def write_raw_user_params(output_files, params,msg_logger):
     fn= output_files['output_file_base']+'_raw_user_params.json'
     output_files['raw_user_params'] = fn
-    json_util.write_JSON(path.join(output_files['run_output_dir'],fn),out)
+    json_util.write_JSON(path.join(output_files['run_output_dir'],fn),params)
     msg_logger.msg('to help with debugging, parameters as given by user  are in "' + fn + '"',  tabs=2, note=True)
 
 def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
     si = shared_info
     crumbs += '> decompose_params'
-    w = {'settings': {},
-         'core_roles': {k: {} for k in si.core_roles.possible_values()},  # insert full list and defaults
-         'roles': {k: [] for k in si.roles.possible_values()},
-         }
+    w = dict(settings= {},
+         core_roles = {k: None for k in si.core_roles.possible_values() },  # insert full list and defaults
+         roles = {k: [] for k in si.roles.possible_values()},
+         )
+
 
     setting_keys = si.default_settings.possible_values()
     core_role_keys = si.core_roles.possible_values()

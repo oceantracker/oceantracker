@@ -102,10 +102,7 @@ if __name__ == "__main__":
 
 
         elif not args.skiprun:
-            if type(params) == list:
-                case_info_file_name = main.run_parallel(params[0], params[1])
-            else:
-                case_info_file_name = main.run(params)
+            case_info_file_name = main.run(params)
 
             if case_info_file_name is None:
                 print('Error during demo')

@@ -50,10 +50,8 @@ class ResidentInPolygon(BaseParticleLocationStats):
         # create resident in polygon for single release group
         pgm = si.core_roles.particle_group_manager
         self.info['inside_polygon_particle_prop'] = f'resident_in_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
-        pgm.add_particle_property(self.info['inside_polygon_particle_prop'],'manual_update',dict(
-                                               class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
-                                               polygon_list=[polygon],
-                                                write=False))
+        si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D', name=self.info['inside_polygon_particle_prop'],
+                                               polygon_list=[polygon],write=False)
 
 
         # tag file with release group number
@@ -74,7 +72,7 @@ class ResidentInPolygon(BaseParticleLocationStats):
         if not self.params['write']: return
 
         dim_names = ('time_dim', 'pulse_dim')
-        num_pulses= self.release_group_to_count.release_scheduler.info['number_scheduled_times']
+        num_pulses= self.schedulers['count_scheduler'] .info['number_scheduled_times']
         nc.add_dimension('pulse_dim', dim_size=num_pulses)
         nc.create_a_variable('count', dim_names, np.int64, description='counts of particles in each pulse of release group inside release polygon at given times')
         nc.create_a_variable('count_all_particles', ['time_dim', 'pulse_dim'], np.int64, description='counts of particles in each, whether inside polygon or not at given times')
@@ -114,7 +112,7 @@ class ResidentInPolygon(BaseParticleLocationStats):
 
     def info_to_write_at_end(self):
         nc = self.nc
-        nc.write_a_new_variable('release_times', self.release_group_to_count.release_scheduler.scheduled_times,['pulse_dim'], dtype=np.float64,attributes={'times_pulses_released': ' times in seconds since 1970'})
+        nc.write_a_new_variable('release_times',self.schedulers['count_scheduler'].scheduled_times,['pulse_dim'], dtype=np.float64,attributes={'times_pulses_released': ' times in seconds since 1970'})
 
     @staticmethod
     @njitOT

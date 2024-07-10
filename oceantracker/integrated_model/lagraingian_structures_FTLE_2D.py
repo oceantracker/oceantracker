@@ -31,7 +31,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
             grid_size=  PLC([100, 99],int, fixed_len=2,  min=1, max=10 ** 5,
                                             doc_str='number of rows and columns in grid'),
             grid_center=  PCC(None, one_or_more_points=True, is3D=False,is_required=True,
-                               doc_str='center of one or more LCS grid centers  or (lon, lat) if hydromodel in geographic coords., should be [x,y] or [[x1,y1],[x1,y1],...]',
+                               doc_str='center of one or more LCS grid centers  or (lon, lat) if hydromodel in geographic coords., should be [x,y] or [[x1,y1],[x1,y1],...] for multiple grids, which may have different spans, but all must have same number of rows and columns ',
                               units='meters or decimal degrees'),
             grid_span=  PCC(None, one_or_more_points=True, min=.0001, is3D=False, is_required=True,
                              doc_str='(width, height)  of the grid release, should be single [dx,dy] or [[dx1,dy1],[dx1,dy1],...] with one pair for each grid center', units='meters only'),
@@ -44,17 +44,18 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
             write_tracks=  PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off by default for LCS'),
 
         )
-    def add_settings_and_class_params(self):
+    def add_release_groups_and_settings(self,crumbs=''):
         # change parameters
         info = self.info
         params = self.params
-
+        params['lags'] = np.asarray(params['lags'] )
         # turn off dispersion
-        self.settings(include_dispersion=False)
+        si.settings.include_dispersion = False
         #, backtracking= params['backwards'])and ste forrad/mackwads
 
         # make a grid release group at each time interval and grid
-        self.clear_class_role('release_groups') # cannot use with other releases
+        # clear existing releases
+        si.roles.release_groups={} # not use with other releases
 
         # checks on params
         if params['grid_center'].shape[0] != params['grid_span'].shape[0]:
@@ -75,33 +76,27 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
                               release_interval=0. )
         # if 3D sort out depth range and always resuspend
         if si.run_info.is3D_run:
-            self.add_class('resuspension', critical_friction_velocity=0.0)  # always resuspend
+            si.add_class('resuspension', critical_friction_velocity=0.0)  # always resuspend
             if params['floating']:
-                self.add_class('trajectory_modifiers',
-                               name='floater',class_name='SurfaceFloat')
+                si.add_class('trajectory_modifiers',name='floater',class_name='SurfaceFloat')
             else:
-                si.msg_logger.msg('LCS not yet working for non-floating particles',
-                                  fatal_error=True, exit_now=True,caller=self)
+                si.msg_logger.msg('LCS not yet working for non-floating particles', fatal_error=True, exit_now=True,caller=self)
 
-        # get time for releases within hindcast
+        # get time for pulse releases within hindcast
         if params['start'] is None: params['start'] = si.hindcast_info['end_time'] if si.settings.backtracking else si.hindcast_info['start_time']
-        if params['end'] is None: params['end'] = si.hindcast_info['start_time'] if si.settings.backtracking else si.hindcast_info['end_time']
-        params['lags'] = np.sort(np.asarray(params['lags']))
+        if params['end']   is None: params['end']   = si.hindcast_info['start_time'] if si.settings.backtracking else si.hindcast_info['end_time']
+        params['release_interval'] = round(params['release_interval']/si.settings.time_step,0 )*si.settings.time_step
 
-        # round interval to time step
-        params['release_interval'] = round(params['release_interval']/ si.settings.time_step)* si.settings.time_step
+        duration = abs(params['end']-params['start'])
+        info['times']= params['start'] + si.run_info.model_direction * np.arange(0, duration - params['lags'].max() + params['release_interval'] , params['release_interval'] )
+        if info['times'].size ==0:
+            si.msg_logger.msg('LSC/FTLE model duration is less than largest requested lag', hint=f'Check hindcast duration, or start end parameters lags={str(params["lags"])}',
+                              crumbs='Setting up release times', caller=self,fatal_error=True, exit_now=True)
 
-        if params['release_interval'] == 0:
-            info['times']= np.asarray([params['start']])
-        else:
-            # do not release params['release_interval'] closer than max lag size from end,
-            duration = abs(params['end'] - params['start']) - params['lags'][-1]
-            duration = min(duration, si.settings.max_run_duration - params['lags'][-1]) # clip to max run time
-            # dont release last update
-            info['times'] = params['start'] + si.run_info.model_direction*np.arange(0, duration+params['release_interval'],params['release_interval'] )
+        sel = np.logical_and(info['times'] >= si.hindcast_info['start_time'],info['times'] <= si.hindcast_info['end_time'], )
+        info['times'] =  info['times'][sel]
 
-        info['dates'] = time_util.seconds_to_isostr(info['times'])
-
+        # set up release group for each pulse
         for n_grid in range(params['grid_center'].shape[0]):
             rp = deepcopy(release_params)
             rp['grid_center'] = params['grid_center'][n_grid]
@@ -109,10 +104,8 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
 
             for n_pulse in range(info['times'].size):
                 rp['start'] = info['times'][n_pulse]
-                # add param dict as keyword arguments
-
-                self.add_class('release_groups', name= f'LCS_grid_{n_grid:03d}_pulse_{n_pulse:04d}', **rp)
-
+                # add param dict as keyword arguments, must not initialize yet, ie delay initial_setup till al release groups added
+                si.add_class('release_groups', name= f'LCS_grid_{n_grid:03d}_pulse_{n_pulse:04d}', **rp, initialize=False)
             pass
 
     def initial_setup(self):
@@ -136,9 +129,9 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
 
         for name, rg in si.roles.release_groups.items():
             # time of lags after start of release group
-            t = rg.release_scheduler.info['start_time'] + md*params['lags']
+            t = rg.schedulers['release'].info['start_time'] + md*params['lags']
 
-            si.add_scheduler_to_class('LCScalculation_scheduler', rg, times=t, caller=self, crumbs='Adding LCS calculation scheduler ')
+            rg.add_scheduler('LCScalculation_scheduler', times=t, caller=self, crumbs=f'Adding LCS calculation scheduler release group "{name}" ')
             rg.info['next_lag_to_calculate'] = 0 # counter for the lag to work on
 
             # from get grid and pulse ID from the release group name
@@ -146,7 +139,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
             rg.info['n_grid'],rg.info['n_pulse'] = int(s[2]), int(s[4])
 
             if rg.info['n_grid'] == 0:  # first grid
-                time.append(rg.LCScalculation_scheduler.info['start_time']) # record start time of each pulse, is the same for all grids
+                time.append(rg.schedulers['LCScalculation_scheduler'].info['start_time']) # record start time of each pulse, is the same for all grids
 
             # record grid from first pulse of each grid
             if rg.info['n_pulse'] == 0:
@@ -167,7 +160,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
 
         # do LSC calculation on schedule
         for n, rg in enumerate(si.roles.release_groups.values()):
-             if rg.LCScalculation_scheduler.do_task(n_time_step):
+             if rg.schedulers['LCScalculation_scheduler'].do_task(n_time_step):
                 # find particles in this release group to do calculations at this lag
                 sel = part_prop['IDrelease_group'].compare_all_to_a_value('eq', rg.info['IDrelease_group'], out=self.get_partID_buffer('ID1'))
 

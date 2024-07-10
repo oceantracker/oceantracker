@@ -19,7 +19,7 @@ particle_properties:
   initial_value: 100
   name: my_constant_prop
 particle_statistics:
-- class_name: oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
+- class_name: ResidentInPolygon
   name: residentpoly
   name_of_polygon_release_group: near_shore
   update_interval: 1800

@@ -48,16 +48,10 @@ def run(params):
     case_info_files = ot.run(deepcopy(params))  # run on copy to preserve external state
     return case_info_files
 
-def run_parallel(base_case_params, case_list_params=[{}]):
-    ot = _OceanTrackerRunner()
-    # run on copy to preserve external state
-    case_info_files  = ot.run(deepcopy(base_case_params), deepcopy(case_list_params))
-    return case_info_files
 
 class OceanTracker():
     def __init__(self,params=None):
         self.params= {}
-        self.case_list_params=[]
         msg_logger.set_screen_tag('helper')
         msg_logger.print_line()
         msg_logger.msg('Starting OceanTracker helper class')
@@ -122,26 +116,29 @@ class OceanTracker():
             # base case only
             return self.params
         else:
+            if 'case_list' not in self.params: self.params['case_list'] = []
+            case_list = self.params['case_list']
             if type(case) != int or case < 0:
                 msg_logger.msg(f'Case keyword must be an integer >=0', fatal_error=True, hint=f'Got value :{str(case)}')
 
-            if case < len(self.case_list_params):
-                return self.case_list_params[case] # work on existing case
-            elif case == len(self.case_list_params):
+            if case < len(case_list):
+                return case_list[case] # work on existing case
+            elif case == len(case_list):
                 # next in line case
-                self.case_list_params.append({}) # expand by  one extra cases as empty
-                return self.case_list_params[case] # work on new last one
+                case_list.append({}) # expand by  one extra cases as empty
+                return case_list[case] # work on new last one
             else:
                 msg_logger.msg(f'New cases must be added in order, have case = {case}',fatal_error=True,
-                     hint=f"This would be the {case + 1}'th case added, but only :{len(self.case_list_params)} cases have been added so far" )
+                     hint=f"This would be the {case + 1}'th case added, but only :{len(case_list)} cases have been added so far" )
                 return {}
 
     def run(self):
         msg_logger.progress_marker('Starting run using helper class')
-        ot= _OceanTrackerRunner()
+        ot_runner= _OceanTrackerRunner()
         # todo print helper message here at end??
         msg_logger.exit_if_prior_errors('Found errors see above')
-        case_info_file = ot.run(self.params, self.case_list_params)
+
+        case_info_file = ot_runner.run(self.params)
 
         self.has_run = True
         # todo flag use so params can be reset if needed if same OceanTracker instance used more than once
@@ -151,11 +148,11 @@ class _OceanTrackerRunner(object):
     def __init__(self):
         pass
     
-    def run(self, params, case_list_params = None):
+    def run(self, user_given_params):
         ml = msg_logger
         ml.reset()
         ml.set_screen_tag('Main')
-
+        setup_util.check_python_version(ml)
         self.start_t0 = perf_counter()
         self.start_date = datetime.now()
 
@@ -166,16 +163,18 @@ class _OceanTrackerRunner(object):
 
         # start forming the run builder
         crumbs = 'Forming run builder'
-        working_params = setup_util.decompose_params(shared_info, deepcopy(params), ml, crumbs=crumbs, caller=self)
+        working_params, working_case_list_params = self._build_working_params(deepcopy(user_given_params), ml, crumbs=crumbs)
+
+        # base case run builder
         run_builder = dict( working_params = working_params,
                             version = definitions.version,
                             computer_info = get_versions_computer_info.get_computer_info())
 
-        #  merge defaults of settings which have to be the same for all cases
+        #  merge defaults of bee case settings which have to be the same for all cases
         working_params['settings'] = setup_util.merge_settings(working_params['settings'], shared_info.default_settings,
                                                             shared_info.base_case_only_params,ml, crumbs=crumbs, caller=self)
 
-        ml.exit_if_prior_errors('Errors in merge_critcal_settings_with_defaults',caller=self, crumbs=crumbs)
+        ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults',caller=self, crumbs=crumbs)
 
         # setup output dir and msg files
         t0 = perf_counter()
@@ -186,7 +185,7 @@ class _OceanTrackerRunner(object):
         ml.msg(f'Output is in dir "{o["run_output_dir"]}"', hint='see for copies of screen output and user supplied parameters, plus all other output')
 
         # write raw params to a file
-        setup_util.write_raw_user_params(run_builder['output_files'], params, ml, case_list=case_list_params)
+        setup_util.write_raw_user_params(run_builder['output_files'], user_given_params, ml)
 
         # set numba config environment variables, before any import of numba, eg by readers,
         setup_util.config_numba_environment_and_random_seed(working_params['settings'], ml, crumbs='main setup', caller=self)  # must be done before any numba imports
@@ -194,21 +193,51 @@ class _OceanTrackerRunner(object):
         ml.print_line()
         ml.msg(f' {OTname} version {definitions.version["str"]} - preliminary setup')
 
-        self._prelimary_checks(params)
         ml.exit_if_prior_errors('parameters have errors')
 
         # get list of files etc in time order
         run_builder['reader_builder'] = self._get_hindcast_file_info(run_builder)
 
-        if case_list_params is  None or len(case_list_params) == 0:
+        if len(working_case_list_params) == 0 or working_params['settings']['processors'] == 1:
             # no case list
             case_info_file = self._run_single(run_builder)
         else:
             # run // case list with params as base case defaults for each run
-            case_info_file = self._run_parallel(run_builder, case_list_params, )
+            case_info_file = self._run_parallel(run_builder, working_case_list_params, )
 
         ml.close()
         return case_info_file
+    def _build_working_params(self, params, ml, crumbs=''):
+
+        if type(params) != dict:
+            ml.msg('Parameters must be of type dict, ', hint=f'Got type {str(type(params))} ', fatal_error=True, exit_now=True)
+
+        # check for reder classes
+        if 'reader' not in params or len(params['reader']) < 2:
+            ml.msg('Parameter "reader" is required, or missing required parameters',
+                   hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
+                   fatal_error=True, crumbs='case_run_set_up', caller=self)
+
+        #split apart params and case list
+
+        if 'case_list' in params:
+            case_list = params['case_list']
+            if type(case_list) != list:
+                ml.msg('Parameter "case_list"  must be of type list, ', hint=f'Got type {str(type(case_list))} ', fatal_error=True, exit_now=True)
+
+            params.pop( 'case_list')
+        else:
+             case_list =[]
+
+        working_params = setup_util.decompose_params(shared_info, params, msg_logger=ml, crumbs=crumbs + ' Forming working params ', caller=self)
+
+        # decomopse ech cae
+        working_case_list_params =[]
+        for n, c in enumerate(case_list):
+            p = setup_util.decompose_params(shared_info, c, msg_logger=ml, crumbs=crumbs + f' Forming working params from case list #{n}', caller=self)
+            working_case_list_params.append(p)
+
+        return working_params, working_case_list_params
 
     def _run_single(self, run_builder):
 
@@ -237,20 +266,7 @@ class _OceanTrackerRunner(object):
         if  case_summary['case_info_file'] is None:
             ml.msg('case_info_file is None, run may not have completed', fatal_error=True)
 
-
-
         return case_info_files
-
-    def _prelimary_checks(self,params):
-        ml = msg_logger
-
-        setup_util.check_python_version(ml)
-        # check for compulsory classes
-        # check reader params
-        if 'reader' not in params or len(params['reader']) < 2:
-            ml.msg('Parameter "reader" is required, or missing required parameters',
-                           hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
-                           fatal_error=True, crumbs='case_run_set_up', caller=self)
 
     def _main_run_end(self,case_summary,run_builder):
         # final info output
@@ -264,11 +280,13 @@ class _OceanTrackerRunner(object):
 
         # count total messages
         num_case_errors,num_case_warnings,num_case_notes = 0,0,0
+        failed_count = 0
         for c in case_summary if type(case_summary) ==list else [case_summary]:
             m = c['msg_counts']
             num_case_errors +=  m['errors']
             num_case_warnings += m['warnings']
             num_case_notes += m['notes']
+            failed_count += c['has_errors']
 
         case_info_files= self._write_run_info_json(case_summary,run_builder)
 
@@ -284,9 +302,9 @@ class _OceanTrackerRunner(object):
             ml.print_line(' ** see above or  *_caseLog.txt and *_caseLog.err files')
             ml.print_line()
         ml.close()
-        return case_info_files
+        return case_info_files if failed_count == 0 else None
 
-    def _run_parallel(self,run_builder, case_list_params):
+    def _run_parallel(self,run_builder, working_case_list_params):
         # run list of case params
         ml = msg_logger
 
@@ -294,13 +312,10 @@ class _OceanTrackerRunner(object):
 
         case_run_builder_list=[]
 
-        for n_case, case_params in enumerate(case_list_params):
+        for n_case, case_params in enumerate(working_case_list_params):
 
-            case_working_params = setup_util.decompose_params(shared_info,case_params, msg_logger=ml, caller=self)
-            case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, n_case, case_working_params,shared_info.base_case_only_params, ml,
+            case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, n_case, case_params,shared_info.base_case_only_params, ml,
                                                                                  crumbs=f'_run_parallel case #[{n_case}]', caller=None)
-
-
             ml.exit_if_prior_errors(f'Errors in setting up case #{n_case}')
             case_run_builder = deepcopy(run_builder)
             case_run_builder['caseID'] = n_case
@@ -318,7 +333,7 @@ class _OceanTrackerRunner(object):
         if n_proc is None:
             n_proc= max(run_builder['computer_info']['CPUs_hardware']-2, 1)
 
-        n_proc = min(n_proc, len(case_list_params)) # limit to number of cases
+        n_proc = min(n_proc, len(working_case_list_params)) # limit to number of cases
 
         ml.progress_marker('oceantracker:multiProcessing: processors:' + str(n_proc))
         if base_working_params['settings']['multi_processing_method'] is not None:

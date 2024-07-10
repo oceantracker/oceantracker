@@ -36,7 +36,7 @@ def write_release_group_netcdf():
             raise('write_release_group_netcdf> unknown release group type')
 
         nc.add_dimension(dim_name,points.shape[0])
-        sc = rg.release_scheduler.info
+        sc = rg.schedulers['release'].info
         # add useful info to variable atributes
         attr= dict(release_type=rg.info['release_type'], is3D = is3D,
                     release_group_name = name, instanceID= rg.info['instanceID'], pulses= rg.info['pulseID'],

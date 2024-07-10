@@ -105,7 +105,7 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
                         f = (np.log(f + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
 
                 for m in range(out.shape[3]):
-                    out[nt,node,nz,m] = (1-f) *data[nt,node,nz_data,m] + f *data[nt,node,nz_data+1,m]
+                    out[nt,node,nz,m] = (1-f) *data[nt,node,nz_data,m] + f * data[nt,node,nz_data+1,m]
 
         # do top value at sigma= 1
             for m in range(out.shape[3]):

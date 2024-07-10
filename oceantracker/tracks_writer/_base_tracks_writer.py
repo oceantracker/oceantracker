@@ -40,13 +40,8 @@ class BaseWriter(ParameterBaseClass):
         self.add_dimension('vector3D', 3)
         self.nc = None
 
-    def initial_setup(self):
+    def initial_setup(self):pass
 
-        if si.settings['write_dry_cell_flag']:
-            grid = si.core_roles.field_group_manager.grid
-            self.add_dimension('triangle_dim', grid['triangles'].shape[0])
-            self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
-                                  dtype=np.uint8, chunking=[si.settings.NCDF_time_chunk,grid['triangles'].shape[0]])
 
     def final_setup(self):
         params = self.params
@@ -54,7 +49,12 @@ class BaseWriter(ParameterBaseClass):
         if params['update_interval'] is None :
             params['update_interval'] = si.settings.time_step
 
-        si.add_scheduler_to_class('write_scheduler', self, interval=self.params['update_interval'], caller=self)
+        if si.settings['write_dry_cell_flag']:
+            grid = si.core_roles.field_group_manager.grid
+            self.add_dimension('triangle_dim', grid['triangles'].shape[0])
+            self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
+                                  dtype=np.uint8, chunking=[si.settings.NCDF_time_chunk,grid['triangles'].shape[0]])
+        self.add_scheduler('write_scheduler', interval=self.params['update_interval'], caller=self)
         pass
 
     def add_dimension(self, name, size):
