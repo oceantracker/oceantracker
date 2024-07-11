@@ -6,7 +6,7 @@ from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, 
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 
 from oceantracker.util import shared_info_util, class_importer_util, basic_util
-from oceantracker.util.messgage_logger import  MessageLogger
+from oceantracker.util.message_logger import  MessageLogger
 
 from time import  perf_counter
 from oceantracker.util import cord_transforms
