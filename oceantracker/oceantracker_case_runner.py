@@ -5,7 +5,7 @@ from os import path, environ, remove
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 
 from time import  perf_counter
-from oceantracker.util.messgage_logger import MessageLogger, GracefulError
+from oceantracker.util.message_logger import MessageLogger, GracefulError
 from oceantracker.util import profiling_util, get_versions_computer_info
 import numpy as np
 from oceantracker.util import time_util, numba_util, output_util
@@ -105,7 +105,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # case set up
         has_errors = False
         try:
+            # - -------- start set up---------------------------------------------------------------------
             self._setup_fields(si.working_params)  # setup fields to get hindcast info, ie its starts and ends
+
             self._add_release_groups_to_get_run_start_end(si.working_params)
 
             self._initial_setup_all_classes(si.working_params)
@@ -114,26 +116,15 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             ml.exit_if_prior_errors('Errors in setup??', caller=self)
 
-            self._do_a_run()
+            # -----------run-------------------------------
+            self.info['model_run_started'] = datetime.now()
+            si.msg_logger.print_line()
+            si.msg_logger.progress_marker('Starting ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
+            # ------------------------------------------
 
-            # close all instances, eg their files if not close etc
-            for i in si._all_class_instance_pointers_iterator():
-                i.close()
+            si.core_roles.solver.solve() # do time stepping
 
-            # write grid if first case
-            si.core_roles.field_group_manager.write_hydro_model_grid()
-
-            case_info = self._get_case_info(d0, t_start)
-            json_util.write_JSON(path.join(ri.run_output_dir,  si.case_summary['case_info_file'] ), case_info)
-
-            # check for non-releases
-            # flag if some release groups did not release
-            for name, i in si.roles.release_groups.items():
-                if i.info['number_released'] == 0:
-                    ml.msg(f'No particles were release by group name= "{name}"', fatal_error=True,
-                           caller= i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
-
-            ml.show_all_warnings_and_errors()
+            # ----------ended--------------------------------
 
         except GracefulError as e:
             ml.show_all_warnings_and_errors()
@@ -150,51 +141,46 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             ml.msg(str(e))
             ml.msg(tb)
             has_errors = True
+
         finally:
-            # reshow warnings
+            # ----- wrap up ---------------------------------
+
+            si.output_files['release_groups'] = output_util.write_release_group_netcdf()      # write release groups
+            for i in si._all_class_instance_pointers_iterator(): i.close()     # close all instances, eg their files if not close etc
+
+            # write grid if first case
+            si.core_roles.field_group_manager.write_hydro_model_grid()
+
+            case_info = self._get_case_info(d0, t_start)
+            json_util.write_JSON(path.join(ri.run_output_dir,  si.case_summary['case_info_file'] ), case_info)
+
+            # check for non-releases
+            # flag if some release groups did not release
+            for name, i in si.roles.release_groups.items():
+                if i.info['number_released'] == 0:
+                    ml.msg(f'No particles were release by group name= "{name}"', fatal_error=True,
+                           caller= i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
+
+            ml.show_all_warnings_and_errors() # reshow warnings
             ml.print_line()
             ml.progress_marker('Finished case number %3.0f, ' % ri.caseID + ' '
                                           + si.run_info.output_file_base
-                                          + ' started: ' + str(d0)
-                                          + ', ended: ' + str(datetime.now()))
+                                          + ' started: ' + str(d0) + ', ended: ' + str(datetime.now()))
             ml.msg('Computational time =' + str(datetime.now() - d0), tabs=3)
             ml.print_line(f'End case {ri.caseID}')
 
-        self.close()  # close all classes and msg logger
-        ml.close()
+            self.close()  # close all classes and msg logger
+            ml.close()
 
-        # complete case summary, add run_info without times and dates to make smaller
-        ri = deepcopy(si.run_info.as_dict())
-        ri.pop('times')
-        ri.pop('dates')
-        si.case_summary.update(dict(has_errors=has_errors, run_info= ri,
-                msg_counts= dict( errors =ml.error_count,warnings= ml.warning_count,notes= ml.note_count)))
+            # complete case summary, add run_info without times and dates to make smaller
+            ri = deepcopy(si.run_info.as_dict())
+            ri.pop('times')
+            ri.pop('dates')
+            si.case_summary.update(dict(has_errors=has_errors, run_info= ri,
+                    msg_counts= dict( errors =ml.error_count,warnings= ml.warning_count,notes= ml.note_count)))
+
         return si.case_summary
 
-    #@function_profiler(__name__)
-    def _do_a_run(self):
-        # build and run solver from parameter dictionary
-        # run from a given dictionary to enable particle tracking on demand from JSON type parameter set
-        # also used for parallel  version
-        info= self.info
-        info['model_run_started'] = datetime.now()
-
-        solver = si.core_roles.solver
-
-        # fill and process buffer until there is less than 2 steps
-        si.msg_logger.print_line()
-        si.msg_logger.progress_marker('Starting ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
-
-        t0 = perf_counter()
-        si.msg_logger.progress_marker('Initialized Solver Class', start_time=t0)
-
-        # ------------------------------------------
-        solver.solve()
-        # ------------------------------------------
-
-        si.output_files['release_groups'] = output_util.write_release_group_netcdf()
-
-        pass
 
     def _do_run_integrity_checks(self):
          # check all have required, fields, part props and grid data
@@ -491,7 +477,3 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                         d['numba_code_info']['SMID_code'][name].append(numba_util.count_simd_intructions(func, sig=nsig))
                     pass
         return d
-
-    def close(self):
-        pass
-

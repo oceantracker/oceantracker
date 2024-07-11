@@ -29,7 +29,7 @@ from oceantracker.util import setup_util, class_importer_util, time_util
 from oceantracker import definitions
 
 from oceantracker.util import json_util ,yaml_util, get_versions_computer_info
-from oceantracker.util.messgage_logger import GracefulError, MessageLogger
+from oceantracker.util.message_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import get_hydro_model_info
 
 import traceback

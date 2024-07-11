@@ -47,10 +47,6 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.shared_info = None
         self.schedulers ={}
 
-    def intitial_setup(self):
-        # setup done before other classes set
-        pass
-
     def final_setup(self):
         # setup done after all other classes have intitial_setup, ie things that depend on settingas of othe classes
         # eg particle buffer size

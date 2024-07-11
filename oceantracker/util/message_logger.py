@@ -132,7 +132,7 @@ class MessageLogger(object ):
                 origin = caller.__name__
             m.append(msg_str(f'caller: {origin}', tabs + 3))
 
-        #self.build_stack()
+
 
         if link is not None:
             m.append(msg_str('see user documentation: ' + self.links[link], tabs + 3))
@@ -147,6 +147,7 @@ class MessageLogger(object ):
             # keeplist ond warnings errors etc to print at end
             if fatal_error:
                     self.errors_list.append(l)
+                    #self.build_stack()
             if warning :
                 if len(self.warnings_list) <= self.max_warnings:
                     self.warnings_list.append(l)
@@ -225,9 +226,14 @@ class MessageLogger(object ):
 
         #todo useful to print crumbs automatically?
         stack = inspect.stack(1)
-        stack = [l for l in stack if path.basename(l[1]) not in ['messgage_logger.py','main.py']]
-        for l in stack:
-            print('msg warning  stack', l)
+        #stack = [l for l in stack if path.basename(l[1]) not in ['message_logger.py','main.py']]
+        stack.reverse()
+        stack = [l for l in stack if 'oceantracker' in path.dirname(l[1])]
+        msg = ''
+        for n, l in enumerate(stack[-6:-2]):
+            msg +=  f'{path.basename(l[1])}#{l[2]}-.{l[3]}()>\n\t\t'+ n*'\t'
+        self.msg('Traceback > '+ msg)
+        pass
 
     def close(self):
         if self.log_file is not None:

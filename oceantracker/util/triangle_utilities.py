@@ -241,7 +241,7 @@ if __name__ == "__main__":
     # testing and timing of above routines
     from oceantracker.util import ncdf_util
     from matplotlib import pyplot as plt
-    from oceantracker.util import messgage_logger
+    from oceantracker.util import message_logger
     from time import perf_counter
     fn = 'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2008\\schism_marl20080101_00z_3D.nc'
     nc = ncdf_util.NetCDFhandler(fn)
