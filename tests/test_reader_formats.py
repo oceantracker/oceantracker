@@ -225,7 +225,17 @@ def get_case(n):
             #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = True
             show_grid = False
+        case 500:
+            # NEMO
+            root_input_dir = r'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\nemo'
 
+            x0=[[57706.375512704304, 421967.24984360463]]
+            file_mask = 'ORCA025*.nc'
+            output_file_base = 'Nemo01'
+            title = 'Nemo test'
+            reader = 'oceantracker.reader.dev.dev_nemo_reader.NemoReader'
+            is3D = True
+            show_grid = False
         case 1100:
             #OCEANUM GLORYS
             x0 =  [

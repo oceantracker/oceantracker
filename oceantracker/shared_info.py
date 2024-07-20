@@ -247,7 +247,7 @@ class _SharedInfoClass():
         elif class_role in self.roles.possible_values():
             #other roles
             instanceID= len(self.roles[class_role])
-            params['name'] = f'{class_role}_{instanceID}' if 'name' not in params or params['name'] is None else params['name']
+            params['name'] = f'{class_role}_{instanceID:04d}' if 'name' not in params or params['name'] is None else params['name']
             i = self._class_importer.new_make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller)
             i.info['instanceID'] = instanceID
             self.roles[class_role][params['name']] = i
@@ -309,7 +309,7 @@ class _SharedInfoClass():
 
         if np.any(~np.isfinite(out.ravel())):
             self.msg_logger.msg('Could not convert some lon_lat to meters, values out of bounds, or values in lat lon order?',
-                            crumbs=crumbs,fatal_error=True,exit_now=True)
+                            crumbs=crumbs,fatal_error=True,exit_now=True, hint='values='+str(out))
         return out
 
     def _transform_lon_lat_deltas(self,ll_deltas, ref_lon_lat,  deltas_in_lat_lon_order=False):
