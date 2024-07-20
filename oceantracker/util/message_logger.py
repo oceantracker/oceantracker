@@ -121,9 +121,10 @@ class MessageLogger(object ):
 
         if caller is not None and (fatal_error or warning) :
             if hasattr(caller,'__class__'):
-                origin=  f'role= {caller.__class__.__name__} '
+                origin=  f'Class = {caller.__class__.__name__} '
                 if hasattr(caller,'info'):
                     # add internal name if not None
+                    origin += f'role="{caller.info["class_role"]}"' if 'class_role' in caller.info else ''
                     origin +=  ' ' if 'name' not in caller.params or caller.params["name"] is None else f', name="{caller.params["name"]}"'
                     origin += f', instance #[{caller.info["instanceID"]}]'
                 origin += f', class= {caller.__class__.__module__}.{caller.__class__.__name__} '

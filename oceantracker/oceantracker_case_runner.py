@@ -258,7 +258,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # add release groups from params or intergated model
         crumbs = 'adding release groups'
         for params in working_params['roles']['release_groups']:
-            si.add_class('release_groups',params,caller=self,crumbs=crumbs)
+            si.add_class('release_groups',params,caller=self,crumbs=crumbs, initialize=False)
 
         if working_params['core_roles']['integrated_model']is not None:
             i = si.add_class('integrated_model', working_params['core_roles']['integrated_model'], crumbs=crumbs + ' Adding integrated_model release groups', caller=self, initialize=False)

@@ -31,7 +31,7 @@ class CullParticles(BaseTrajectoryModifier):
 
                 # obsolete
                 cull_status_greater_than=PVC(None,str,obsolete=True, doc_str='use "statuses" list param'),
-                cull_status_equal_to= PVC(None,str,obsolete=True, docstr='use "statuses" list param'),
+                cull_status_equal_to= PVC(None,str,obsolete=True, doc_str='use "statuses" list param'),
                                   )
 
     def initial_setup(self):

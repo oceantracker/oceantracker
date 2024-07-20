@@ -68,24 +68,24 @@ class NetCDFhandler(object):
                 setattr(self.file_handle.variables[name], key, self._sanitize_attribute(value))
         return v
 
-    def read_a_variable(self,name, sel=None, time_first_dim=True):
+    def read_a_variable(self,name, sel=None):
+        # read all of variables or sel of first dimension
         if sel is None:
             data= self.file_handle.variables[name][:]   # read whole variable
         else:
-            if time_first_dim:
-                data = self.file_handle.variables[name][sel, ...] # selection from first dimension
-            else:
-                data = self.file_handle.variables[name][..., sel]  # selection from last dimension
+            data = self.file_handle.variables[name][sel, ...] # selection from first dimension
+
         return np.array(data)
 
-    def read_variables(self, var_list=None, required_var=[], output=None):
+    def read_variables(self, var_list=None, required_var=[], output=None, sel=None):
         # read a list of variables into a dictionary, if output is a dictionary its add to that one
+        # sel is which values to read from first dimension
         if output is None:  output=dict(variable_attributes=dict())
         if var_list is None:  var_list = self.all_var_names()
 
         name_list = list(set(var_list+required_var))
         for name in name_list:
-            output[name] = self.read_a_variable(name)
+            output[name] = self.read_a_variable(name, sel=sel)
             output['variable_attributes'][name] = self.all_var_attr(name)
         output['global_attributes'] = self.global_attrs()
         return output

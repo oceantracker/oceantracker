@@ -159,7 +159,7 @@ def _filIinDeadParticles(data, last_recordedID, missing_status):
         for nrow in range(n_last_write+1,data.shape[0]):
             data[nrow, n, ...] =  data[n_last_write, n, ...]
 
-def read_stats_file(file_name):
+def read_stats_file(file_name,nt=None):
     # read stats files
 
     nc = NetCDFhandler(file_name, mode='r')
@@ -167,7 +167,7 @@ def read_stats_file(file_name):
     d['dimensions'] = nc.dims()
     d['limits']=  {}
 
-    data = nc.read_variables()
+    data = nc.read_variables(sel=nt)
     d.update(data)
 
     if 'time' in data:
