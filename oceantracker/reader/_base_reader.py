@@ -11,10 +11,10 @@ from oceantracker.util.basic_util import nopass
 import oceantracker.reader.util.hydromodel_grid_transforms as hydromodel_grid_transforms
 
 from oceantracker.util.cord_transforms import get_Metcator_info
-from oceantracker.util import triangle_utilities
+from oceantracker.util import triangle_utilities, basic_util
 
 from oceantracker.reader.util import reader_util
-from pathlib import Path as pathlib_Path
+
 from oceantracker.definitions import node_types, cell_search_status_flags
 
 from oceantracker.shared_info import SharedInfo as si
@@ -80,12 +80,8 @@ class BaseReader(ParameterBaseClass):
     def set_up_uniform_sigma(self,nc, grid):nopass()
 
     def get_file_list(self):
-
         params = self.params
-        file_list = []
-        for fn in pathlib_Path(params['input_dir']).rglob(params['file_mask']):
-            file_list.append(path.abspath(fn))
-
+        file_list = basic_util.get_file_list(params['input_dir'],params['file_mask'] )
         return file_list
 
     # default setup
@@ -311,9 +307,6 @@ class BaseReader(ParameterBaseClass):
             a3= calcuate_triangle_areas(xutm, grid['triangles'])
             ru = a3 / a1
             pass
-
-
-
 
         return grid
 

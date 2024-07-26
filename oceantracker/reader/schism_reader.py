@@ -32,6 +32,12 @@ class SCHISMreaderNCDF(BaseReader):
                                 'water_velocity_depth_averaged': PLC(['dahv'], str,   doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'hgrid_file_name': PVC(None, str),
+            'dimension_map': dict(
+                time=PVC('time', str, doc_str='name of time dimension in files'),
+                z=PLC(['nSCHISM_vgrid_layers'], str, doc_str='name of dimensions for z, may be more than one eg z for layer centers or faces'),
+                vector2D=PVC('two', str,doc_str='name of dimension names for 2D vectors'),
+                vector3D=PVC(None, str),
+            ),
              })
         pass
 

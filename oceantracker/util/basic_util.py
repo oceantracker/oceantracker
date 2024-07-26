@@ -1,6 +1,8 @@
 # utils for particle tracking
 import numpy as np
 from time import sleep
+from os import path
+from pathlib import Path as pathlib_Path
 def deep_dict_update(d, d_updates):
     # recursively update dictionary tree d, ie a dictionary which may contain dictionaries with d_updates or listes of dictionaries
     # with corressponding key values in dictionary d_updates, d_updates may be a dictionary of dictionaries
@@ -35,7 +37,7 @@ def nopass(msg=''):
     raise Exception("Missing method, base method must be overwritten" +msg)
 
 
-
+def dummy_fuction(): pass
 def atLeast_Nby1(y):
     # create a view of output with at least one vector component
     if y.ndim == 1:
@@ -61,7 +63,12 @@ def CodingError(message='-no error message given',hint=None, info=None):
     sleep(.5)
     raise Exception(msg)
 
+def get_file_list(root_dir,mask):
+    file_list = []
+    for fn in pathlib_Path(root_dir).rglob(mask):
+        file_list.append(path.abspath(fn))
 
+    return file_list
 def IDmapToArray(IDmap:dict, select_keys:list=None):
     # converts a dict mapping names to integer IDs to a numpy array of integers
     # for given keys of dictionary, eg convert particle status
