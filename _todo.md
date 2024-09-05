@@ -3,40 +3,25 @@
 # Required for version 0.5
 1. check all required variables are present at end of setup
 2. 1. check key read variables have required types 
-1. ScishimV5 reader
-    1. Bug fix in sigma profile builder for WHOI hindcast
 1. DEFT3D FM
-   1. 2D reader
    1. 3D sigma reader
-   1. Fixed z reader as LSC grid
-1. Matlab release group reader
-1. Restructure case info 
-    1. . ??
-1. Nested grids
-    1.. ??
 1. Stats
     1. Stats to work on list of acceptable statuses, not min max?
     1. matab read polygon
     1. general rebuild?
 1. in case runner create all user requested instances and merge params in one step
 1. build check that all classes are initialised and finalized
-1. Docs
-    1. check all how to note books run, set up code to run all notebooks
-    
 1. write of case info file even if errors, trap json encoding erorrs 
-2. zeros in tracks seen in matlab output
   
 
 ##  Internal Structure
 
 1. Ensure all classes call final setup (core_roles first) 
-2. Move all schedulers to final set up
-2. add group to make instance.info instead of 'type', to should type be group?
+2. Move all schedulers to final set up?
 1. Cleaner exiting when error
     1. trace backs
     1. always get secondary case.json info error?
 1. move setup dispersion and re-suspension to oceantracker_case_runner
-1. Have aperchet check default values in type, range etc as coding errors
 
 ### Breaking internal changes
 1. convert to part_ops.set_values( part_prop,,.. active) form
@@ -48,15 +33,13 @@
 1. check pointing of run to enable restart
 1. native global lon-lat  models
 1. used np.datetime64, milli sec internally
-2. Add positive=True to param checker to enzure vale is >0
-1. asarray option to numerical param list checker
-
-    
+2. Add positive=True to param checker to ensure vale is >0
+2. faster to do dry cellby updating adjacency matrix? aviods addtional decsion in cel serach
+   
 
 ## Niggles that need sorting some time
 
 3. tracks eadfer to reain dead particle locations in retangular form
-1. isodate time zero param for all readers? apply it outside reader_read_time() method, put as time offsets in hours to merge nested readers?
 1. List check makes default values of None into [], should be None? Look at merging list params, better to remove, or keep for building polygon lists ?
 1. all final_setup()' s done??
 1. inside polygon class over writes given points with closed polygon 
@@ -72,36 +55,23 @@
 1. make param keys case insensitive
 1. allow starts/ends to be float , sec since 1970, isostr, datetime, np.datetime64, durations to be floats, time delta or np.time delta
 1. only put files with output fies claseses in case info output_files
-
 1. cleaner to make write plot function from returned plot?
 2. web links to help on error
 1. Readers,  get data from function,  to use for gyre test cases
 1. tidal constituents reader
-1. make al reader inherit from unstructured or structured based class
-1. error handling and log file permission errors when reunning cells in note books
 1. read write polygons from geo-jsons, release groups poly stats
-1. date/time param checker allowing stat end times as double, isostring, datetime , np.datetime64
 1. add netcdf variable atributes. dimensions etc when reading output
-2. make dry cel index 0/1 not 0-256?
-1. faster in plot util only plot dry cells, ie  dont mask
+1.  add message logging to post processing
+2. 
+
 # Other
 
 ## Docs
 
-1. split params into basic and advanced based on capitalized first letter
 1. put  class doc str on page
 
-1. Add units to Parameter check and show in user docs
-1.  add message logging to post processing
 1.   add read case info file with not found errors
         #    add doc string for improtant methods and classes
-
-
-
-## checks
-1. setup of using AZ profiles from hindcast
-
-
 
 ##   TUTORIALS
 1.   Reader param and adding fields
@@ -118,16 +88,7 @@
 #   STRUCTURE
 1.    hyperlinks to online docs where useful
 1.   much cleaner to  do residence times/stats for all polygon release groups given!
-1.   or better get user to define polygons like polygon statistcs, or merge with polygon stats
-1.    use update_interval everywhere as parmateter fo periodic actions
-1.    revert to index zero for all IDs and data loading
-1.   show defauls on param eros?
-
-1.    move particle comparison methods to wrapper methods
-1.   full use of initial setup, final set up and update with timers
-1.   get rid of used nseq in favour of instanceID
-1.   add check for use of known class prop types, eg 'maunal_update'
-2.   1. faster to do dry celby updating adjacency matrix? aviods addtional decsion in cel serach
+2.   1. faster to do dry cellby updating adjacency matrix? aviods addtional decsion in cel serach
 
 
 1. add a convert compact at end if requested
@@ -181,12 +142,4 @@
 1.    check in no if main for parralel case, to avoid  error on windows if running in //
 1.   case info not found on graceful exit error
 
-##   SIMPLIFY
 
-1. add part property from field wwhich checks if field exists
-1.  field type reader, derived from reader field ,  or custom
-
-
-##   ISSUES
-1.     in making custom fields how do i know fiels have been added before i use i
-1.    how doi know part prop which depend on others are up to date before use
