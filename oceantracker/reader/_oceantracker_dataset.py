@@ -272,7 +272,7 @@ class OceanTrackerDataSet(object):
 
         #round down/up to time step for forward backwards
         info = self.catalog['info']
-        nt = info['total_time_steps']*abs(time-info['start_time'])/abs(info['end_time']-info['start_time'])
+        nt = (info['total_time_steps']-1)*abs(time-info['start_time'])/abs(info['end_time']-info['start_time'])
         nt = np.ceil(nt) if backtracking else np.floor(nt)
         return int(nt)
 

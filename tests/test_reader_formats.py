@@ -331,10 +331,10 @@ def get_case(n):
             pulse_size = 1
             is3D = True
 
-        case 1001:
+        case 2000:
             # nested schisim
             pulse_size = 5
-            root_input_dir = r'G:\Hindcasts_large\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
+            root_input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
             output_file_base = 'shared_reader'
             file_mask = 'NZfinite*.nc'
             max_days =5# 30
@@ -354,16 +354,15 @@ def get_case(n):
                     [1743472 ,    6019861]]
             ax=  [  1715000 ,    1755000 ,    6010000 ,    6050000] # northland
             title = 'nested test'
-            nested_readers= dict(nest1=dict(
+            nested_readers= [dict(name='nest1',
                     class_name='oceantracker.reader.schism_reader.SCHISMreaderNCDF',
-
-                input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\Existing_Sep2012_temp',
-                hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
-                # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',
-                #  hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
+                    input_dir = r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\Existing_Sep2012_temp',
+                    hgrid_file_name=r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\hgrid.gr3',
+                    # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',
+                    #  hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
                     file_mask = 'schout*.nc',
 
-            ))
+            )]
 
         case 2000:
             root_input_dir = 'dummy_data_dir'
