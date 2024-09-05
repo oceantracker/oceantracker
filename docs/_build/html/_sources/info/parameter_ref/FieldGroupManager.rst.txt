@@ -18,24 +18,28 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-		- required_type: ``<class 'str'>``
-		- expert: ``False``
+		- data_type: ``<class 'str'>``
 
-	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
-		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
 
 		- default: ``None``
-		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
-		- expert: ``False``
+		- data_type: ``<class 'str'>``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
-		- expert: ``False``
+		- data_type: ``<class 'str'>``
 
 
 
 Expert Parameters:
 *******************
+
+	* ``development`` :   ``<class 'bool'>``   *<optional>*
+		Description: Class is under development and testing
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 

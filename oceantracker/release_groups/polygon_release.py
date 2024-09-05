@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.release_groups.point_release import PointRelease
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 class PolygonRelease(PointRelease):
     '''

@@ -1,10 +1,10 @@
-from oceantracker.release_groups._base_release_group import BaseReleaseGroup
+from oceantracker.release_groups._base_release_group import _BaseReleaseGroup
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC,ParameterCoordsChecker as PCC
 from oceantracker.util import regular_grid_util
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_properties._base_particle_properties import  CoreParticleProperty
-class GridRelease(BaseReleaseGroup):
+class GridRelease(_BaseReleaseGroup):
     '''
     Release pules of particles on a regular grid.
     '''
@@ -41,7 +41,7 @@ class GridRelease(BaseReleaseGroup):
         info['map_grid_index_to_row_column'] = np.stack((ri.ravel(), ci.ravel()),axis=1)
 
         # add particle prop fort row column only if nor already added by another grid release
-        if 'grid_release_row_col' not in si.roles.particle_properties:
+        if 'grid_release_row_col' not in si.class_roles.particle_properties:
             si.add_class('particle_properties',name='grid_release_row_col', class_name='CoreParticleProperty',
                             write=True, time_varying= False, vector_dim=2,dtype='int32',
                             description='(row , column) of grid point which released the particle' )

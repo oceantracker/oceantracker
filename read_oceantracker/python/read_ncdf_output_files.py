@@ -83,7 +83,6 @@ def _read_compact_tracks(nc, var_list, release_groupID):
 
     # todo status is special as last value for each particle when it is alive is needed to continue after death???
     # '_FillValue'
-    missing_status= -99
     d['status'] =  np.full((time_steps_written, num_released), nc.global_attr('status_notReleased'), dtype=nc.var_dtype('status'))
     _insertMatrixValues(d['status'], n_time_step, particle_IDs, nc.read_a_variable('status'))
     last_recordedID = _get_last_alive(d['status'], nc.global_attr('status_notReleased'), nc.global_attr('status_dead'))
@@ -281,11 +280,13 @@ def read_grid_file(file_name):
     nc = NetCDFhandler(file_name,'r')
     for var in nc.file_handle.variables.keys():
         d[var]= nc.read_a_variable(var)
+
     if nc.is_var('domain_outline_nodes'):
         domain=dict(nodes=d['domain_outline_nodes'],
                     points= d['domain_outline_x'] if  'domain_outline_x' in d else d['x'][d['domain_outline_nodes'],:],
                     )
-        domain['mask'] =  d['domain_mask_x'] if  'domain_mask_x' in d else make_domain_mask(domain['points'] )
+        domain_masking_polygon =  d['domain_masking_polygon'] if 'domain_masking_polygon' in d\
+                                                    else make_domain_mask(domain['points'])
 
         if nc.is_var('island_outline_nodes'):
             island_nodes = nc.un_packed_1Darrays('island_outline_nodes')
@@ -293,7 +294,8 @@ def read_grid_file(file_name):
         else:
             islands =[]
 
-        d['grid_outline'] = dict(domain= domain, islands=islands)
+        d['grid_outline'] = dict(domain= domain, islands=islands,
+                                 domain_masking_polygon=domain_masking_polygon)
     nc.close()
 
     return d

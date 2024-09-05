@@ -3,7 +3,7 @@ import numpy as np
 import traceback
 from time import perf_counter
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 # root class needed to avoid circular imports when building class trees
 from .__root_parameter_base_class__ import _RootParameterBaseClass
 from oceantracker.util.scheduler import Scheduler
@@ -46,6 +46,22 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.partID_buffers={} # dict of int32 ID number buffers
         self.shared_info = None
         self.schedulers ={}
+        self.required_fields_info = dict(reader=[], custom={})
+
+    def add_any_required_fields(self,settings,mapped_reader_fields, message_logger):
+        # this adds field required by this a class, this must be done before model is built to assemble reader
+        # these are added with self.add_field() method
+        pass
+
+    def add_required_custom_field(self, name:str, class_name:str, msg_logger,
+                           params:dict ={},  crumbs:str =''):
+        # allows uses to add fields within the code , with given name and class_name
+        # kwargs arguments are the field's parameters, eg class_name
+        params.update(params,class_name=class_name)
+        self.required_fields_info['custom'][name] = params
+
+    def add_required_reader_field(self, reader_field_name):
+        self.required_fields_info['reader'].append(reader_field_name)
 
     def final_setup(self):
         # setup done after all other classes have intitial_setup, ie things that depend on settingas of othe classes
@@ -77,7 +93,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
                                              requires3D=None, crumbs=''):
         si = self.shared_info
         for name in required_props_list:
-            if name not in si.roles.particle_properties:
+            if name not in si.class_roles.particle_properties:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.params['name']
                                 + '" requires particle property  "' + name + '"'
                                 + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', fatal_error=True,crumbs=crumbs)
@@ -106,7 +122,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
         #  a selection of particle IDs is made, eg status == moving
         # WARNING never refer directly to the partID_buffers, alawys use this method
         #         to access buffer, as buffer size is dynamically changing
-        current_particle_buffer_size = si.core_roles.particle_group_manager.info['current_particle_buffer_size']
+        current_particle_buffer_size = si.core_class_roles.particle_group_manager.info['current_particle_buffer_size']
 
         if name not in self.partID_buffers:
             # create a new ID buffer

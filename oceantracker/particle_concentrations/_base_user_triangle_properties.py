@@ -8,9 +8,9 @@ from os import path
 from datetime import datetime
 import numpy as np
 
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
-class BaseTriangleProperties(ParameterBaseClass):
+class _BaseTriangleProperties(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()
@@ -36,7 +36,7 @@ class BaseTriangleProperties(ParameterBaseClass):
     def set_up_output_file(self):
         # set up output file
 
-        grid = si.core_roles.field_group_manager.grid
+        grid = si.core_class_roles.field_group_manager.grid
 
         self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag'] + '_' + self.params['name'] + '.nc'
         si.msg_logger.progress_marker('opening concentrations output to : ' + self.info['output_file'])
@@ -53,7 +53,7 @@ class BaseTriangleProperties(ParameterBaseClass):
         self.info['time_last_stats_recorded'] = si.run_info.time_of_nominal_first_occurrence
 
     def select_particles_to_count(self):
-        part_prop =  si.roles.particle_properties
+        part_prop =  si.class_roles.particle_properties
         return part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
 
     def write(self, time_sec): nopass()

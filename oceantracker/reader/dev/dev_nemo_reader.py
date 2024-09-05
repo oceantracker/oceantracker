@@ -1,5 +1,4 @@
-from oceantracker.reader.generic_stuctured_reader import dev_GenericStructuredReader
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.reader.dev.generic_stuctured_reader import dev_GenericStructuredReader
 from oceantracker.util.ncdf_util import NetCDFhandler
 
 class NemoReader(dev_GenericStructuredReader):

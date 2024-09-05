@@ -5,31 +5,9 @@
     "time_step": 60,
     "debug": true,
     "reader": {
-        "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
-        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "demoHindcast2D*.nc",
-        "dimension_map": {
-            "time": "time",
-            "node": "nodes"
-        },
-        "grid_variable_map": {
-            "time": "time_sec",
-            "x": [
-                "east",
-                "north"
-            ],
-            "triangles": "tri"
-        },
-        "field_variable_map": {
-            "water_velocity": [
-                "east_vel",
-                "north_vel"
-            ],
-            "water_depth": "depth",
-            "tide": "tide"
-        },
-        "time_buffer_size": 2,
-        "isodate_of_hindcast_time_zero": "2020-06-01"
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "Random_order_*.nc",
+        "time_buffer_size": 2
     },
     "user_note": "test of notes",
     "dispersion": {
@@ -84,7 +62,7 @@
     ],
     "block_dry_cells": true,
     "max_run_duration": 172800.0,
-    "include_dispersion": false,
+    "use_dispersion": false,
     "backtracking": false,
     "root_output_dir": "output"
 }

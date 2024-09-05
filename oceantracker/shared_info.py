@@ -92,9 +92,9 @@ class _DefaultSettings(_SharedStruct):
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )
     use_A_Z_profile = PVC(True, bool,
                 doc_str='Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file' )
-    include_dispersion = PVC(True, bool,
+    use_dispersion = PVC(True, bool,
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
-    include_resuspension = PVC(True, bool,
+    use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                           doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
@@ -131,6 +131,7 @@ class _CoreClassRoles(_SharedStruct):
     tidal_stranding = {}
     resuspension = {}
     integrated_model = {} # this is here as there can be only one at a time
+from dataclasses import dataclass
 
 class _ParticleStatusFlags(_SharedStruct):
     '''Particle status flags mapped to integer values'''
@@ -145,7 +146,12 @@ class _ParticleStatusFlags(_SharedStruct):
     on_bottom = 6
     moving =  10
 
-
+class _VerticalGridTypes(_SharedStruct):
+    '''Particle status flags mapped to integer values'''
+    Slayer  = 'Slayer'
+    LSC = 'LSC'
+    Sigma = 'Sigma'
+    Zfixed = 'Zfixed'
 
 class _RunInfo(_SharedStruct):
     is3D_run = None
@@ -181,12 +187,12 @@ class _SharedInfoClass():
 
     """
     settings = _DefaultSettings() # will be overwritten with actual values by case runner
-    roles = _ClassRoles()
-    core_roles = _CoreClassRoles()
+    class_roles = _ClassRoles()
+    core_class_roles = _CoreClassRoles()
     particle_operations = particle_operations
     default_settings = _DefaultSettings()
     particle_status_flags = _ParticleStatusFlags() # need to be instances to allow particle_status_flags[key] form
-
+    vertical_grid_types = _VerticalGridTypes()
     run_info  = _RunInfo()
     hindcast_info = None
     msg_logger = MessageLogger()
@@ -207,24 +213,27 @@ class _SharedInfoClass():
                                        'name': PVC(None, str),
                                        'points': PCC(None, is_required=True, doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
                                        }
-
         pass
+    def add_settings(self, settings):
+        for key in self.settings.possible_values():
+            setattr(self.settings, key, settings[key])
+
     def _setup(self):
         # this allows shared info to make a class importer when needed
         self.msg_logger.set_screen_tag('Prelim')
         self.msg_logger.reset()
-        self._class_importer = class_importer_util.ClassImporter(self, self.msg_logger)
+        self.class_importer = class_importer_util.ClassImporter(self.msg_logger)
 
         # empty out roles and core roles in case of rerunning and shared info import only happens once
-        for role in self.core_roles.as_dict().keys():
-            setattr(self.core_roles, role, None)
-        for role in self. roles.as_dict().keys():
-            setattr(self.roles,role,{})
+        for role in self.core_class_roles.as_dict().keys():
+            setattr(self.core_class_roles, role, None)
+        for role in self. class_roles.as_dict().keys():
+            setattr(self.class_roles, role, {})
 
         # todo deprecated .classes
         self.classes = {}
-        for role in list(self.roles.as_dict().keys()) +  list(self.core_roles.as_dict().keys()):
-            self.classes[role] = None if role in  self.core_roles.as_dict() else {}
+        for role in list(self.class_roles.as_dict().keys()) + list(self.core_class_roles.as_dict().keys()):
+            self.classes[role] = None if role in  self.core_class_roles.as_dict() else {}
 
     def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=True, **kwargs):
 
@@ -237,23 +246,23 @@ class _SharedInfoClass():
 
         params= dict(params,**kwargs) # join params and kwargs
 
-        if class_role in self.core_roles.possible_values():
+        if class_role in self.core_class_roles.possible_values():
             #core  roles
             params['name'] = None
-            i = self._class_importer.new_make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller)
+            i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller)
             i.info['instanceID'] = 0
-            self.core_roles[class_role] = i
+            self.core_class_roles[class_role] = i
 
-        elif class_role in self.roles.possible_values():
+        elif class_role in self.class_roles.possible_values():
             #other roles
-            instanceID= len(self.roles[class_role])
+            instanceID= len(self.class_roles[class_role])
             params['name'] = f'{class_role}_{instanceID:04d}' if 'name' not in params or params['name'] is None else params['name']
-            i = self._class_importer.new_make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller)
+            i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller)
             i.info['instanceID'] = instanceID
-            self.roles[class_role][params['name']] = i
+            self.class_roles[class_role][params['name']] = i
 
         else:
-            ml.msg(f'Unknown class role {class_role}', hint=f'Must be one of core_roles {str(self.core_roles.possible_values())} or other roles {str(self.roles.possible_values())}',
+            ml.msg(f'Unknown class role {class_role}', hint=f'Must be one of core_roles {str(self.core_class_roles.possible_values())} or other roles {str(self.class_roles.possible_values())}',
                    fatal_error=True, crumbs=crumbs, caller=caller)
             return None
         # make instance and merge params
@@ -265,12 +274,12 @@ class _SharedInfoClass():
     def _all_class_instance_pointers_iterator(self):
         # build list of all points for iteration, eg in calling all close methods
         p = []
-        for role in self.core_roles.possible_values():
-            i = getattr(self.core_roles,role)
+        for role in self.core_class_roles.possible_values():
+            i = getattr(self.core_class_roles, role)
             if i is not None: p.append(i)
 
-        for role in self.roles.possible_values():
-            r = getattr(self.roles, role)
+        for role in self.class_roles.possible_values():
+            r = getattr(self.class_roles, role)
             if r is not None:
                 for key, i in r.items():
                     if i is not None:  p.append(i)
@@ -327,5 +336,5 @@ class _SharedInfoClass():
 
 
 # make the instance used throughout code
-SharedInfo = _SharedInfoClass()
+shared_info = _SharedInfoClass()
 pass

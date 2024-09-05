@@ -2,13 +2,13 @@
 ReaderField
 ############
 
-**Doc:** 
+**Doc:** Feild to hold ring buffer of a variable read from hindcast files
 
 **short class_name:** ReaderField
 
-**full class_name :** oceantracker.fields._base_field.ReaderField
+**full class_name :** oceantracker.fields.reader_field.ReaderField
 
-**Inheritance:** > ParameterBaseClass> ReaderField
+**Inheritance:** > ParameterBaseClass> _BaseField> ReaderField
 
 
 Parameters:
@@ -19,58 +19,56 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``create_particle_property_with_same_name`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- default: ``True``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
+	* ``is3D`` :   ``<class 'bool'>`` **<isrequired>**
+		Description: is field 3D
+
 		- default: ``False``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``is_vector`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
-		- default: ``False``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
-	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
+	* ``name`` :   ``<class 'str'>`` **<isrequired>**
+		Description: Name used internally to refer to this field within the code
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``time_varying`` :   ``<class 'bool'>`` **<isrequired>**
+		Description: Does field vary with time
+
 		- default: ``False``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``write_interp_particle_prop_to_tracks_file`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- default: ``True``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 
 
 Expert Parameters:
 *******************
+
+	* ``development`` :   ``<class 'bool'>``   *<optional>*
+		Description: Class is under development and testing
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 

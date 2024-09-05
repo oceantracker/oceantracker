@@ -77,7 +77,7 @@ There are two types of “class_role”.
 When
 
 a) Only a single class is required, these have singular “class_role”,
-   eg.”reader” and “solver”.
+   eg.“reader” and “solver”.
 
 b) One or more classes can be added. These have plural “class_role” (eg.
    can add multiple “release_groups”). Users must give a unique name to

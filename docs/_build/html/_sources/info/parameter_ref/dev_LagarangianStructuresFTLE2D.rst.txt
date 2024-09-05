@@ -15,32 +15,38 @@ dev_LagarangianStructuresFTLE2D
 
 
 
-**Inheritance:** > ParameterBaseClass> _BaseModel> dev_LagarangianStructuresFTLE2D
+**Inheritance:** > ParameterBaseClass> _BaseIntegratedModel> dev_LagarangianStructuresFTLE2D
 
 
 Parameters:
 ************
 
+	* ``backwards`` :   ``<class 'bool'>``   *<optional>*
+		Description: Do LCS backwards in time
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
+
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-		- required_type: ``<class 'str'>``
-		- expert: ``False``
+		- data_type: ``<class 'str'>``
 
-	* ``end`` :   ``iso8601date``   *<optional>*
-		Description: end date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"
+	* ``end`` :   ``['str', 'float', 'datetime64', 'int', 'float64', 'float32']``   *<optional>*
+		Description: end date of LSC releases. Model should run max(lags) beyond this send date to calculate LSC for last pulse of grid release.  Must be an ISO date as string eg. "2017-01-01T00:30:00"
 
 		- default: ``None``
-		- required_type: ``iso8601date``
-		- expert: ``False``
+		- possible_types: ``[<class 'str'>, <class 'float'>, <class 'numpy.datetime64'>, <class 'int'>, <class 'numpy.float64'>, <class 'numpy.float32'>]``
+		- units: ``ISO8601  date as string eg. "2017-01-01T00:30:00",np.datetime64, or float of seconds since 1/1/1970``
 
 	* ``floating`` :   ``<class 'bool'>``   *<optional>*
-		Description: Particles will float at free surface if a 3D model
+		Description: Do LCS for floating partyicles, in development currently only option
 
 		- default: ``True``
-		- required_type: ``<class 'bool'>``
-		- expert: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 
 grid_center: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterCoordsChecker'>
@@ -48,96 +54,100 @@ grid_center: still working on display  of default params of  type <class 'oceant
 	* ``grid_size``:  *<optional>*
 		Description: - number of rows and columns in grid
 
-		- a list containing type:  ``[<class 'int'>]``
+		- a list containing type:  ``[]``
 		- default list : ``[100, 99]``
-		- can_be_empty_list: ``True``
-		- fixed_len: ``2``
+		- data_type: ``<class 'int'>``
 		- min: ``1``
 		- max: ``100000``
-		- expert: ``False``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- fixed_len: ``2``
+		- min_len: ``0``
 
 
 grid_span: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterCoordsChecker'>
 
 	* ``lags``:**<isrequired>**
-		Description: - List of one or more times after particle release to calculate Lagarangian Coherent Structures, default is 1 day
+		Description: - List of one or more times after each pulse is released to calculate LCS.
 
-		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
-		- default list : ``[]``
-		- can_be_empty_list: ``True``
-		- min_length: ``1``
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'float'>``
 		- units: ``sec``
 		- min: ``1``
-		- expert: ``False``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``1``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		Description: tag on output file
 
 		- default: ``LCS``
-		- required_type: ``<class 'str'>``
-		- expert: ``False``
+		- data_type: ``<class 'str'>``
 
-	* ``start`` :   ``iso8601date``   *<optional>*
-		Description: start date of LSC calculation, Must be an ISO date as string eg. "2017-01-01T00:30:00"
-
-		- default: ``None``
-		- required_type: ``iso8601date``
-		- expert: ``False``
-
-	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
-		Description: Time in seconds between calculating statistics, will be rounded to be a multiple of the particle tracking time step
+	* ``release_interval`` :   ``<class 'float'>``   *<optional>*
+		Description: Time in seconds between grid releases of pulses of particles. For each pulse an LCS will be calculated at the given lag times. This creates a LCS time series for each lag at this time interval
 
 		- default: ``3600.0``
-		- required_type: ``<class 'float'>``
-		- min: ``0.0``
+		- data_type: ``<class 'float'>``
 		- units: ``sec``
-		- expert: ``False``
+		- min: ``0.0``
 
-	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
-		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
+	* ``start`` :   ``['str', 'float', 'datetime64', 'int', 'float64', 'float32']``   *<optional>*
+		Description: start date of LSC releases, Must be an ISO date as string eg. "2017-01-01T00:30:00"
 
 		- default: ``None``
-		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
-		- expert: ``False``
+		- possible_types: ``[<class 'str'>, <class 'float'>, <class 'numpy.datetime64'>, <class 'int'>, <class 'numpy.float64'>, <class 'numpy.float32'>]``
+		- units: ``ISO8601  date as string eg. "2017-01-01T00:30:00",np.datetime64, or float of seconds since 1/1/1970``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
-		- expert: ``False``
+		- data_type: ``<class 'str'>``
 
 	* ``write_intermediate_results`` :   ``<class 'bool'>``   *<optional>*
 		Description: write intermediate arrays, x_lag, strain_matrix. Useful for checking results
 
 		- default: ``False``
-		- required_type: ``<class 'bool'>``
-		- expert: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 	* ``write_tracks`` :   ``<class 'bool'>``   *<optional>*
 		Description: Flag if "True" will write particle tracks to disk. This is off by default for LCS
 
 		- default: ``False``
-		- required_type: ``<class 'bool'>``
-		- expert: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 	* ``z_max`` :   ``<class 'float'>``   *<optional>*
 		Description: Only allow particles to be below this vertical position
 
 		- default: ``None``
-		- required_type: ``<class 'float'>``
+		- data_type: ``<class 'float'>``
 		- units: ``meters above mean water level, so is < 0 at depth``
-		- expert: ``False``
 
 	* ``z_min`` :   ``<class 'float'>``   *<optional>*
 		Description: Only allow particles to be above this vertical position
 
 		- default: ``None``
-		- required_type: ``<class 'float'>``
+		- data_type: ``<class 'float'>``
 		- units: ``meters above mean water level, so is < 0 at depth``
-		- expert: ``False``
 
 
 
 Expert Parameters:
 *******************
+
+	* ``development`` :   ``<class 'bool'>``   *<optional>*
+		Description: Class is under development and testing
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 

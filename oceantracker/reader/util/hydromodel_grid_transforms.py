@@ -25,16 +25,14 @@ def convert_regular_grid_to_triangles(grid,mask):
 
     # keep  quad cells with less than 3 land nodes
     sel = np.sum(mask.flatten('C')[quad_cells], axis=1) < 3
-    quad_cells = quad_cells[sel, :]
+    grid['triangles'] = quad_cells[sel, :]
 
-    grid['quad_cells_to_split'] = np.arange(quad_cells.shape[0]).astype(np.int32)
-    grid['triangles'] = split_quad_cells(quad_cells, grid['quad_cells_to_split']).astype(np.int32)
-    grid['active_nodes'] = np.unique(grid['triangles'])  # the nodes that are used in triangulation ( ie owithout land)
+    return grid['triangles']
 
-    return grid
+
 @njitOT
 def convert_zlevels_to_fractions(zlevels,bottom_cell_index,z0):
-    # get zlevels as fraction of water depth
+    # get zlevels (nodes, depths) as fraction of water depth
     z_fractions= np.full_like(zlevels,np.nan,dtype=np.float32)
     for n in range(zlevels.shape[0]): # loop over nodes
         z_surface = float(zlevels[n, -1])
@@ -116,7 +114,7 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
     return out
 
 @njitOT
-def convert_layer_field_to_levels_from_fixed_depth_fractions(data, sigma_layer, sigma):
+def convert_mid_layer_sigma_top_bot_layer_values(data, sigma_layer, sigma):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
     # used in FVCOM reader
     data_levels = np.full((data.shape[0],) + (data.shape[1],) + (sigma.shape[0],), 0., dtype=np.float32)
@@ -136,6 +134,39 @@ def convert_layer_field_to_levels_from_fixed_depth_fractions(data, sigma_layer, 
     return data_levels
 
 @njitOT
+def convert_mid_layer_fixedZ_top_bot_layer_values(data_zlayer, z_layer, z, bottom_cell_index,water_depth):
+    # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
+    # used in FVCOM reader
+
+    # interface values have one more level than mid_layer data
+    data_z = np.full((data_zlayer.shape[0],data_zlayer.shape[1],data_zlayer.shape[2]+1), np.nan, dtype=np.float32)
+
+    for nt in range(2,data_zlayer.shape[0]):
+        for n in range(data_zlayer.shape[1]):
+            pass
+            for nz in range(bottom_cell_index[n]+1, data_zlayer.shape[2]-1):
+                # linear interp levels not, first or last boundary from surronding mid-layer values
+                data_z[nt, n, nz+1] = kernal_linear_interp1D(z_layer[nz], data_zlayer[nt,n, nz],
+                                                    z_layer[nz+1], data_zlayer[nt,n, nz+1], z[nz+1])
+
+            # make top level same as middle of top layer value, ie no shear
+            data_z[nt, n, -1] = data_zlayer[nt, n, -1]
+
+            # extrapolate to first z_interface above the bottom, ie top surface of bottom layer, if enough cells
+            nz1 = bottom_cell_index[n]+1
+            if nz1+1 < z_layer.size:
+                data_z[nt, n, nz1] = kernal_linear_interp1D(z_layer[nz1], data_zlayer[nt, n, nz1],
+                                                z_layer[nz1+1], data_zlayer[nt, n, nz1+1],
+                                                        z[bottom_cell_index[n]])
+
+            # make seabed values same as top of bottom layer
+            data_z[nt, n, bottom_cell_index[n]] = data_z[nt, n, nz1]
+                    # note - preprocessing will make water_velocity zero at seabed
+            pass
+        pass
+    return data_z
+
+@njitOT
 def get_nodal_values_from_weighted_data(data, node_to_tri_map, tri_per_node, cell_center_weights):
     # get nodal values from 4D data in surrounding cells based in distance weighting
     # used in FVCOM, DELFT3D FM  reader
@@ -150,8 +181,7 @@ def get_nodal_values_from_weighted_data(data, node_to_tri_map, tri_per_node, cel
                 # loop over cells containing this node
                 for m in range(tri_per_node[node]):
                     cell = node_to_tri_map[node, m]
-                    for n_comp in range(s[3]):
-                        data_nodes[nt, node, nz,n_comp] += data[nt, cell, nz,n_comp]*cell_center_weights[node, m] # weight this cell value
+                    data_nodes[nt, node, nz] += data[nt, cell, nz]*cell_center_weights[node, m] # weight this cell value
 
     return data_nodes
 
@@ -221,3 +251,5 @@ def calculate_inv_dist_weights_at_node_locations(x_node, x_data, node_to_data_ma
         for m in range(n_data): weights[n,m]=weights[n,m] /s
 
     return weights
+
+

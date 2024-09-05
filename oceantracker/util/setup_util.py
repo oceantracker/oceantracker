@@ -55,22 +55,22 @@ def setup_output_dir(params, msg_logger, crumbs='', caller=None):
 
 def write_raw_user_params(output_files, params,msg_logger):
     fn= output_files['output_file_base']+'_raw_user_params.json'
-    output_files['raw_user_params'] = fn
-    json_util.write_JSON(path.join(output_files['run_output_dir'],fn),params)
-    msg_logger.msg('to help with debugging, parameters as given by user  are in "' + fn + '"',  tabs=2, note=True)
+    output_files['raw_user_params'] = 'user_given_params.json'
+    json_util.write_JSON(path.join(output_files['run_output_dir'],   output_files['raw_user_params']),params)
+    msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
 
 def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
     si = shared_info
     crumbs += '> decompose_params'
     w = dict(settings= {},
-         core_roles = {k: None for k in si.core_roles.possible_values() },  # insert full list and defaults
-         roles = {k: [] for k in si.roles.possible_values()},
-         )
+             core_roles = {k: None for k in si.core_class_roles.possible_values()},  # insert full list and defaults
+             roles = {k: [] for k in si.class_roles.possible_values()},
+             )
 
 
     setting_keys = si.default_settings.possible_values()
-    core_role_keys = si.core_roles.possible_values()
-    role_keys =  si.roles.possible_values()
+    core_role_keys = si.core_class_roles.possible_values()
+    role_keys =  si.class_roles.possible_values()
     known_top_level_keys =  setting_keys + core_role_keys + role_keys
 
     # split and check for unknown keys
@@ -92,6 +92,11 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
             w['core_roles'][k] = item
 
         elif k in role_keys:
+            if type(item) != list:
+                msg_logger.msg(f'Params under role key "{k}" must be a list of parameter dictionaries with "class_name" and optional internal "name"'
+                               +'\n Roles changed from dict type to list type in new version',
+                                       hint =f'Got type {str(type(item))}, value={str(item)}' ,
+                                       crumbs=crumbs, fatal_error=True)
             w['roles'][k] = item
         else:
             msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
@@ -108,7 +113,7 @@ def check_python_version(msg_logger):
         ml.msg(' Python version: ' + v['python_version'], tabs=2)
         p_major =v['python_major_version']
         p_minor= v['python_minor_version']
-        install_hint = 'Install Python 3.10 or used environment.yml to build a Conda virtual environment named oceantracker'
+        install_hint = 'Install Python 3.10 or used environment310.yml to build a Conda virtual environment named oceantracker'
         if not ( p_major > 2 and p_minor >= 9):
             ml.msg('Oceantracker requires Python 3 , version >= 3.9  and < 3.11',
                          hint=install_hint, warning=True, tabs=1)
@@ -144,9 +149,13 @@ def test_random():
     return  np.random.rand()
 
 
-def merge_settings(settings, default_settings, settings_to_merge, msg_logger, crumbs='', caller=None):
+def merge_settings(settings, default_settings, msg_logger, settings_to_merge=None, crumbs='', caller=None):
     crumbs += '> merge_settings'
     all_settings = default_settings.possible_values()
+
+    # for base case merge all settings
+    if settings_to_merge is None:
+        settings_to_merge = all_settings
 
     for key in settings_to_merge:
         pvc = getattr(default_settings, key)

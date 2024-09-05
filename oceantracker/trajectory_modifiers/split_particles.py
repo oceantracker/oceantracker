@@ -1,15 +1,15 @@
 import numpy as np
 
-from oceantracker.trajectory_modifiers._base_trajectory_modifers import BaseTrajectoryModifier
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 
 from oceantracker.particle_properties.util import particle_comparisons_util
 from oceantracker.util.basic_util import IDmapToArray
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 from oceantracker.util.numba_util import njitOT
 
 # proptype for how to  split particles
-class SplitParticles(BaseTrajectoryModifier):
+class SplitParticles(_BaseTrajectoryModifier):
     '''
     Splits  particles in two at  given time interval,
     for given status values and  given particle age range.
@@ -44,7 +44,7 @@ class SplitParticles(BaseTrajectoryModifier):
     def select_particles_to_split(self, time_sec, active):
         # get indices of particles to split
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         params = self.params
 
         eligible_to_split = self._splitIDs(part_prop['status'].used_buffer(),  self.statuses_to_split,
@@ -58,7 +58,7 @@ class SplitParticles(BaseTrajectoryModifier):
     def update(self,n_time_step, time_sec, active):
 
         if self.schedulers['splitter01'].do_task(n_time_step):
-            part_prop = si.roles.particle_properties
+            part_prop = si.class_roles.particle_properties
             self.time_of_last_split  = time_sec
 
             # split given fraction
@@ -72,7 +72,7 @@ class SplitParticles(BaseTrajectoryModifier):
                     bc_cords = part_prop['bc_cords'].get_values(split),
                     hydro_model_gridID = part_prop['hydro_model_gridID'].get_values(split),
                     )
-            si.core_roles.particle_group_manager.release_a_particle_group_pulse(release_data, time_sec )
+            si.core_class_roles.particle_group_manager.release_a_particle_group_pulse(release_data, time_sec)
 
     @staticmethod
     @njitOT

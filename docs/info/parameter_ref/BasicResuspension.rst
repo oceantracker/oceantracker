@@ -8,7 +8,7 @@ BasicResuspension
 
 **full class_name :** oceantracker.resuspension.resuspension.BasicResuspension
 
-**Inheritance:** > ParameterBaseClass> _BaseResuspension> BasicResuspension
+**Inheritance:** > ParameterBaseClass> BaseResuspension> BasicResuspension
 
 
 Parameters:
@@ -19,28 +19,34 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``critical_friction_velocity`` :   ``<class 'float'>``   *<optional>*
 		Description: Critical friction velocity, u_* in m/s defined in terms of bottom stress (this param is not the same as near seabed velocity)
 
 		- default: ``0.0``
-		- default: ``0.0``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``0.0``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 
 
 Expert Parameters:
 *******************
+
+	* ``development`` :   ``<class 'bool'>``   *<optional>*
+		Description: Class is under development and testing
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 

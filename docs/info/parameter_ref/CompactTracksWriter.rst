@@ -18,20 +18,14 @@ Parameters:
 		Description: number of particles per time chunk in the netcdf file
 
 		- default: ``100000``
-		- default: ``100000``
 		- data_type: ``<class 'int'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``100``
 
 	* ``NCDF_time_chunk`` :   ``<class 'int'>``   *<optional>*
 		Description: number of time steps per time chunk in the netcdf file
 
 		- default: ``24``
-		- default: ``24``
 		- data_type: ``<class 'int'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``1``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
@@ -39,33 +33,29 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``retain_compact_files`` :   ``<class 'bool'>``   *<optional>*
 		Description: keep  compact tracks files after conversion to rectangular format
 
 		- default: ``False``
-		- default: ``False``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``tracks_compact``
-		- default: ``tracks_compact``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``time_steps_per_per_file`` :   ``<class 'int'>``   *<optional>*
 		Description: Split track output into files with given number of time integer steps
 
 		- default: ``None``
 		- data_type: ``<class 'int'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``1``
 
 	* ``turn_off_write_particle_properties_list``:  *<optional>*
@@ -73,10 +63,7 @@ Parameters:
 
 		- a list containing type:  ``[]``
 		- default list : ``['water_velocity', 'particle_velocity', 'velocity_modifier']``
-		- default: ``['water_velocity', 'particle_velocity', 'velocity_modifier']``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``
 		- min_len: ``0``
@@ -87,8 +74,6 @@ Parameters:
 		- a list containing type:  ``[]``
 		- default list : ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``
 		- min_len: ``0``
@@ -98,30 +83,30 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- units: ``sec``
 		- min: ``0.01``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``write_dry_cell_flag`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down
 
 		- default: ``False``
-		- default: ``False``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 
 
 Expert Parameters:
 *******************
+
+	* ``development`` :   ``<class 'bool'>``   *<optional>*
+		Description: Class is under development and testing
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 

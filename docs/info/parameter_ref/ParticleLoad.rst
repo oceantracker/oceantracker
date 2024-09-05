@@ -8,7 +8,7 @@ ParticleLoad
 
 **full class_name :** oceantracker.particle_properties.load_carrying.ParticleLoad
 
-**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ParticleProperty> ParticleLoad
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> CustomParticleProperty> ParticleLoad
 
 
 Parameters:
@@ -19,94 +19,70 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``dtype`` :   ``<class 'str'>``   *<optional>*
 		- default: ``float64``
-		- default: ``float64``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
-		- possible_values: ``['float64', 'float32', 'int32', 'int16', 'int8', 'int64']``
+		- possible_values: ``['float64', 'float32', 'bool', 'int32', 'int16', 'int8', 'int64']``
 
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
 		Description: Value of the particle property when it is released
 
 		- default: ``1.0``
-		- default: ``1.0``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
+
+	* ``name`` :   ``<class 'str'>`` **<isrequired>**
+		Description: Name used to refer to this particle property in code and output
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
-		- default: ``1``
+		Description: size of a 3d dimesion of particle property
+
 		- default: ``1``
 		- data_type: ``<class 'int'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``1``
 
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- default: ``True``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``type`` :   ``<class 'str'>``   *<optional>*
 		Description: type of particle property, used to manage how to update particle property
 
 		- default: ``user``
-		- default: ``user``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``['manual_update', 'from_fields', 'user']``
 
 	* ``units`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
-		- default: ``True``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``vector_dim`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
-		- default: ``1``
 		- data_type: ``<class 'int'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``1``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write particle property to tracks or event files file
 
 		- default: ``True``
-		- default: ``True``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 
@@ -114,14 +90,19 @@ Parameters:
 Expert Parameters:
 *******************
 
+	* ``development`` :   ``<class 'bool'>``   *<optional>*
+		Description: Class is under development and testing
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
+
 	* ``release_group_parameters``:  *<optional>*
 		Description: - In development: release group specific particle prop params
 
 		- a list containing type:  ``[]``
 		- default list : ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``True``
-		- obsolete: ``False``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``
 		- min_len: ``0``

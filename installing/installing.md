@@ -36,7 +36,7 @@ Note: In Windows may need to run conda prompt window as administrator to install
 
    From root dir of oceantracker package run 
      
-     ``conda env create -f installing/environment.yml``
+     ``conda env create -f installing/ot_conda_env.yml``
     
    Activate new environment
 
@@ -45,9 +45,9 @@ Note: In Windows may need to run conda prompt window as administrator to install
     
 5. Or : Manually build Conda environment
 
-        ``conda create -n oceantracker python=3.10`` 
+        ``conda create -n oceantracker python=3.11`` 
 
-    Note: Must use python version 3.10 (not 3.11 yet) and NumPy versions 1.21–1.23
+    Note: Must use python version 3.10 or 3.11 NumPy versions 1.21–1.26
 
     Activate new environment
 
@@ -56,27 +56,25 @@ Note: In Windows may need to run conda prompt window as administrator to install
    Then install these packages
 
 
-      ``conda install -c conda-forge numba``  
+      ``conda install anaconda::numpy=1.26``
 
-      ``conda install -c conda-forge netcdf4``
+      ``conda install conda-forge::numba``
+ 
+      ``conda install conda-forge::netcdf4``
+
+      ``conda install anaconda::xarray``     
         
-      ``conda install -c anaconda scipy``
+      ``conda install anaconda::scipy``
 
-      ``conda install -c conda-forge pyproj``
+      ``pip install pyproj``
 
-      ``conda install -c anaconda pyyaml``
+      ``conda install anaconda::pyyaml``
 
-      ``conda install -c anaconda psutil``
+      ``conda install conda-forge::psutil``
 
-      ``conda install -c conda-forge matplotlib``
-      
-      ``conda install -c conda-forge fiona``
+      ``conda install conda-forge::python-dateutil``
 
-Notes: 
-   - numba should also install compatible version of numpy, if not use conda install -c anaconda numpy 
-   - the fiona module, which reads geojson and shape files, can be very slow finding a conda repository, alternative ways at
-https://anaconda.org/conda-forge/fiona, or use faster to use pip install fiona
-   - oceantracker does work with python 3.11, however netcdf4 does not install properly and fails to find a dll when importing in windows, but using pip install netcdf4 does allow netcdf4 to be imported. Hopefully netcdf at conda will soon be compatible with faster python 3.11  
+      ``conda install conda-forge::matplotlib``
 
 7. Make oceantracker package findable
    
@@ -86,8 +84,8 @@ https://anaconda.org/conda-forge/fiona, or use faster to use pip install fiona
 
 8. To add ability to make animation movies if needed
 
-   ``conda install -c conda-forge ffmpeg``
+   ``conda install conda-forge::ffmpeg``
 
 9. To work with iPython/Jupyter notebooks
 
-   ``conda install -c anaconda ipykernel``
+   ``conda install anaconda::ipykernel``

@@ -1,23 +1,22 @@
 
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Change log &#8212; OceanTracker Beta 0.4 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <title>Change log &#8212; OceanTracker Beta 0.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Future development" href="future_dev.html" />
-    <link rel="prev" title="VelocityModiferBase" href="parameter_ref/VelocityModiferBase.html" />
+    <link rel="prev" title="TerminalVelocity" href="parameter_ref/TerminalVelocity.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -51,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
@@ -74,7 +73,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="users_guide.html">Users guide</a><ul>
-      <li>Previous: <a href="parameter_ref/VelocityModiferBase.html" title="previous chapter">VelocityModiferBase</a></li>
+      <li>Previous: <a href="parameter_ref/TerminalVelocity.html" title="previous chapter">TerminalVelocity</a></li>
       <li>Next: <a href="future_dev.html" title="next chapter">Future development</a></li>
   </ul></li>
   </ul></li>
@@ -84,12 +83,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -99,15 +98,15 @@
           <div class="body" role="main">
             
   <section id="change-log">
-<h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this heading">¶</a></h1>
+<h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h1>
 <section id="known-issues">
-<h2>Known issues<a class="headerlink" href="#known-issues" title="Permalink to this heading">¶</a></h2>
+<h2>Known issues<a class="headerlink" href="#known-issues" title="Permalink to this headline">¶</a></h2>
 </section>
 <section id="version-0-5-0-000-2024-03-07">
-<h2>Version ‘0.5.0.000 2024-03-07’<a class="headerlink" href="#version-0-5-0-000-2024-03-07" title="Permalink to this heading">¶</a></h2>
+<h2>Version ‘0.5.0.000 2024-03-07’<a class="headerlink" href="#version-0-5-0-000-2024-03-07" title="Permalink to this headline">¶</a></h2>
 <p>Faster and simplified internal structure</p>
 <section id="new-features">
-<h3>New features<a class="headerlink" href="#new-features" title="Permalink to this heading">¶</a></h3>
+<h3>New features<a class="headerlink" href="#new-features" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Most expensive step in 3D finding vertical cell is now 5 times faster, so code net 2-3 times faster, as by default regrids  3D data to uniform Sigma grid, to speed vertical cell search by factor of 5. Original slower native vertical grid short vertical walk search still available.</p></li>
 <li><p>By default uses diffusivity vertical profile for A_Z in random walk if variable mapped to A_Z_profile is found in the hydro file</p></li>
@@ -129,17 +128,17 @@
 </section>
 </section>
 <section id="behaviour-changes">
-<h2>Behaviour changes<a class="headerlink" href="#behaviour-changes" title="Permalink to this heading">¶</a></h2>
+<h2>Behaviour changes<a class="headerlink" href="#behaviour-changes" title="Permalink to this headline">¶</a></h2>
 <p>#. All user give intervals are now rounded to the an integer number of particle tracking  time steps after the models starting time, eg. release_interval, update_interval( particle statistics and others)
 As these updates can only happen at a model time step.</p>
 </section>
 <section id="known-breaking-changes-ask-for-help-if-needed-to-transition">
-<h2>Known breaking changes- ask for help if needed to transition<a class="headerlink" href="#known-breaking-changes-ask-for-help-if-needed-to-transition" title="Permalink to this heading">¶</a></h2>
+<h2>Known breaking changes- ask for help if needed to transition<a class="headerlink" href="#known-breaking-changes-ask-for-help-if-needed-to-transition" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Reader param load_fields replaces ‘field_variables’ param, to load variables to names used internally. These internal names may be mapped to file variables in  new  ‘field_variable_map’. If a special variable, eg concentration field, no map is needed.</p></li>
 <li><p>z range parameter for release and stats, replaced by z_min and z_max, warning is given</p></li>
 <li><p>the frozen particle status name is now stationary, the numerical value remains the same, it is rarely used and is not the same status as stranded by tide</p></li>
-<li><p>post_processing read and plot code has moved, so import statements need to change. read code imports are now “from read_oceantracker.python import <a href="#id1"><span class="problematic" id="id2">*</span></a>” and for plots “from plot_oceantracker import <a href="#id3"><span class="problematic" id="id4">*</span></a>”</p></li>
+<li><p>post_processing read and plot code has moved, so import statements need to change. read code imports are now “from read_oceantracker.python import <a href="#system-message-1"><span class="problematic" id="problematic-1">*</span></a>” and for plots “from plot_oceantracker import <a href="#system-message-2"><span class="problematic" id="problematic-2">*</span></a>”</p></li>
 <li><p>Matlab code to read output is now in read_oceantracker.matlab</p></li>
 </ol>
 <p>Breaking changes for coders</p>
@@ -152,16 +151,16 @@ As these updates can only happen at a model time step.</p>
 </ol>
 </section>
 <section id="internal-changes">
-<h2>Internal changes<a class="headerlink" href="#internal-changes" title="Permalink to this heading">¶</a></h2>
+<h2>Internal changes<a class="headerlink" href="#internal-changes" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li></li>
 </ol>
 </section>
 <section id="version-0-4-major-upgrade">
-<h2>Version 0.4 Major upgrade<a class="headerlink" href="#version-0-4-major-upgrade" title="Permalink to this heading">¶</a></h2>
+<h2>Version 0.4 Major upgrade<a class="headerlink" href="#version-0-4-major-upgrade" title="Permalink to this headline">¶</a></h2>
 <p>Major upgrade to simplify use and parameter in repose to user input. This has breaking changes, happy to help with transition. Tried to include all changes which affect use of parameters in this upgrade</p>
 <section id="main-new-features">
-<h3>Main new features<a class="headerlink" href="#main-new-features" title="Permalink to this heading">¶</a></h3>
+<h3>Main new features<a class="headerlink" href="#main-new-features" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>tutorials/how to notebooks to help with getting started ( in draft form).</p></li>
 <li><p>“helper class” to build parameters without using dictionaries, using keyword arguments of two methods of helper class.</p></li>
@@ -176,8 +175,8 @@ As these updates can only happen at a model time step.</p>
 </ol>
 </section>
 </section>
-<section id="id5">
-<h2>Known breaking changes- ask for help if needed to transition<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<section id="known-breaking-changes-ask-for-help-if-needed-to-transition-1">
+<h2>Known breaking changes- ask for help if needed to transition<a class="headerlink" href="#known-breaking-changes-ask-for-help-if-needed-to-transition-1" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>new flatter parameter structure</p></li>
 <li><p>solver sub-stepping replaced by time_step in seconds param</p></li>
@@ -186,16 +185,16 @@ As these updates can only happen at a model time step.</p>
 <li><p>adding a resuspension trajectory modifier, or friction vel. field</p></li>
 </ol>
 </section>
-<section id="id6">
-<h2>Internal changes<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<section id="internal-changes-1">
+<h2>Internal changes<a class="headerlink" href="#internal-changes-1" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>reader uses ring buffer based on hindcast step mod buffer size,  needed for shared reader development</p></li>
 </ol>
 </section>
 <section id="version-0-3-03-000-2023-01-03">
-<h2>Version 0.3.03.000 2023-01-03<a class="headerlink" href="#version-0-3-03-000-2023-01-03" title="Permalink to this heading">¶</a></h2>
-<section id="id7">
-<h3>New features<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<h2>Version 0.3.03.000 2023-01-03<a class="headerlink" href="#version-0-3-03-000-2023-01-03" title="Permalink to this headline">¶</a></h2>
+<section id="new-features-1">
+<h3>New features<a class="headerlink" href="#new-features-1" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>FVCOM reader built and passed tests so far</p></li>
 <li><p>ROMS reade started but not workng</p></li>
@@ -203,7 +202,7 @@ As these updates can only happen at a model time step.</p>
 </ol>
 </section>
 <section id="changes">
-<h3>Changes<a class="headerlink" href="#changes" title="Permalink to this heading">¶</a></h3>
+<h3>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>non-varying grid data is shared memory amongst cases, no change to how grid variables are accessed</p></li>
 <li><p>caserunner grid variables and buffers are  built from reader_build_info, as step towards developing a shared reader</p></li>
@@ -211,13 +210,13 @@ As these updates can only happen at a model time step.</p>
 </section>
 </section>
 <section id="version-0-3-01-04-06-oct-04-2022">
-<h2>Version 0.3.01.04-06, Oct 04 2022<a class="headerlink" href="#version-0-3-01-04-06-oct-04-2022" title="Permalink to this heading">¶</a></h2>
-<section id="id8">
-<h3>New features<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<h2>Version 0.3.01.04-06, Oct 04 2022<a class="headerlink" href="#version-0-3-01-04-06-oct-04-2022" title="Permalink to this headline">¶</a></h2>
+<section id="new-features-2">
+<h3>New features<a class="headerlink" href="#new-features-2" title="Permalink to this headline">¶</a></h3>
 <p>#.?? internal rebuilt of buffered reader, as step towards using ring buffer needed for share reader</p>
 </section>
-<section id="id9">
-<h3>Changes<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<section id="changes-1">
+<h3>Changes<a class="headerlink" href="#changes-1" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>internal rebuilt of buffered reader, as step towards developing ring buffer for hindcast needed for share reader</p></li>
 <li><p>grid variable now attached to reader, ie si.grid is now si.classes[‘reader’].grid</p></li>
@@ -226,38 +225,38 @@ As these updates can only happen at a model time step.</p>
 </ol>
 </section>
 <section id="bug-fixes">
-<h3>Bug fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this heading">¶</a></h3>
+<h3>Bug fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>trapped error with warning if netcdf chunk size of tracks file variable is over 4gb</p></li>
 </ol>
 </section>
 </section>
 <section id="version-0-3-01-02-sept-13-2022">
-<h2>Version 0.3.01.02 Sept 13 2022<a class="headerlink" href="#version-0-3-01-02-sept-13-2022" title="Permalink to this heading">¶</a></h2>
-<section id="id10">
-<h3>New features<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<h2>Version 0.3.01.02 Sept 13 2022<a class="headerlink" href="#version-0-3-01-02-sept-13-2022" title="Permalink to this headline">¶</a></h2>
+<section id="new-features-3">
+<h3>New features<a class="headerlink" href="#new-features-3" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Added residence count particle statistic, counts number of particles still inside designated release polygon at given time inervals, . Can be used to find residence time with release polygon, eg residence time in an estuary. See new demo 10</p></li>
 </ol>
 </section>
-<section id="id11">
-<h3>Changes<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<section id="changes-2">
+<h3>Changes<a class="headerlink" href="#changes-2" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>in stats classes count_staus_equal_to and count_status_greater tha, replae by ‘count_status_in_range’ param, see github pages</p></li>
 <li><p>post proceesing plot_heat_maps module now names plot_statistics</p></li>
 </ol>
 </section>
-<section id="id12">
-<h3>Bug fixes<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<section id="bug-fixes-1">
+<h3>Bug fixes<a class="headerlink" href="#bug-fixes-1" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>??</p></li>
 </ol>
 </section>
 </section>
 <section id="version-0-3-01-00-sept-6-2022">
-<h2>Version 0.3.01.00 Sept 6 2022<a class="headerlink" href="#version-0-3-01-00-sept-6-2022" title="Permalink to this heading">¶</a></h2>
-<section id="id13">
-<h3>New features<a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
+<h2>Version 0.3.01.00 Sept 6 2022<a class="headerlink" href="#version-0-3-01-00-sept-6-2022" title="Permalink to this headline">¶</a></h2>
+<section id="new-features-4">
+<h3>New features<a class="headerlink" href="#new-features-4" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>3D water_velocity in bottom bin  now uses loglayer interpolation (as in schisim), by adjusting fraction of cell to make linear vertical interp behave like log layer interp</p></li>
 <li><dl class="simple">
@@ -272,8 +271,8 @@ As these updates can only happen at a model time step.</p>
 <li><p>Track animation colours dry cells, tracks_writer adds grid dry cell data to file, set tracks_writer param ‘write_dry_cell_index’ to false to stop writing dry cell data</p></li>
 </ol>
 </section>
-<section id="id14">
-<h3>Changes<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<section id="changes-3">
+<h3>Changes<a class="headerlink" href="#changes-3" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>class AddTerminalVelocity is now TerminalVelocity in module oceantracker.velocity_modifiers.terminal_velocity</p></li>
 <li><p>friction velocity is now a custom field (no longer a particle property), to do resuspension user must now add friction_velocity to custom field parameter list,eg ‘fields’ : [{‘class_name’: ‘oceantracker.fields.friction_velocity.FrictionVelocity’}],</p></li>
@@ -282,8 +281,8 @@ As these updates can only happen at a model time step.</p>
 <li><p>???</p></li>
 </ol>
 </section>
-<section id="id15">
-<h3>Bug fixes<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h3>
+<section id="bug-fixes-2">
+<h3>Bug fixes<a class="headerlink" href="#bug-fixes-2" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>divide by zero in depth cell search when grid has zero vertical thickness</p></li>
 <li><p>fixed- could  not read uncommented hgrid.gr3 files  for open boundary data, can now read whether hgrid file is with or without trailing comments on lines giving</p></li>
@@ -291,38 +290,38 @@ As these updates can only happen at a model time step.</p>
 </section>
 </section>
 <section id="version-0-3-00-23-30-7-22">
-<h2>Version 0.3.00.23 30/7/22<a class="headerlink" href="#version-0-3-00-23-30-7-22" title="Permalink to this heading">¶</a></h2>
-<section id="id16">
-<h3>New features<a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h3>
+<h2>Version 0.3.00.23 30/7/22<a class="headerlink" href="#version-0-3-00-23-30-7-22" title="Permalink to this headline">¶</a></h2>
+<section id="new-features-5">
+<h3>New features<a class="headerlink" href="#new-features-5" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>added ability to split track output files into blocks with given number of time steps per file</p></li>
 <li><p>added individual timers to stats, events classes written to case info file</p></li>
 </ol>
 </section>
-<section id="id17">
-<h3>Changes<a class="headerlink" href="#id17" title="Permalink to this heading">¶</a></h3>
+<section id="changes-4">
+<h3>Changes<a class="headerlink" href="#changes-4" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>re ordered to ensue last time step is written to tracks files</p></li>
 </ol>
 </section>
-<section id="id18">
-<h3>Bug fixes<a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h3>
+<section id="bug-fixes-3">
+<h3>Bug fixes<a class="headerlink" href="#bug-fixes-3" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>??</p></li>
 </ol>
 </section>
 </section>
 <section id="version-0-2-774-20-7-22">
-<h2>Version 0.2.774 20/7/22<a class="headerlink" href="#version-0-2-774-20-7-22" title="Permalink to this heading">¶</a></h2>
-<section id="id19">
-<h3>New features<a class="headerlink" href="#id19" title="Permalink to this heading">¶</a></h3>
+<h2>Version 0.2.774 20/7/22<a class="headerlink" href="#version-0-2-774-20-7-22" title="Permalink to this headline">¶</a></h2>
+<section id="new-features-6">
+<h3>New features<a class="headerlink" href="#new-features-6" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>polygon release only releases into wet cells, not just those inside domain</p></li>
 <li><p>added pages giving full most of default parameters for each class to doc</p></li>
 </ol>
 </section>
-<section id="id20">
-<h3>Changes<a class="headerlink" href="#id20" title="Permalink to this heading">¶</a></h3>
+<section id="changes-5">
+<h3>Changes<a class="headerlink" href="#changes-5" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Restructured to move all core classes up one level and delete core dir</p></li>
 <li><dl class="simple">
@@ -337,15 +336,15 @@ As these updates can only happen at a model time step.</p>
 </li>
 </ol>
 </section>
-<section id="id21">
-<h3>Bug fixes<a class="headerlink" href="#id21" title="Permalink to this heading">¶</a></h3>
+<section id="bug-fixes-4">
+<h3>Bug fixes<a class="headerlink" href="#bug-fixes-4" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><p>reintroduced a lost feature, that blocked movement of particles into dry cells</p></li>
 </ol>
 </section>
 </section>
 <section id="version-0-2-772-11-7-22">
-<h2>Version 0.2.772 11/7/22<a class="headerlink" href="#version-0-2-772-11-7-22" title="Permalink to this heading">¶</a></h2>
+<h2>Version 0.2.772 11/7/22<a class="headerlink" href="#version-0-2-772-11-7-22" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Name changes for split  and cull classes and module names</p></li>
 <li><p>oceantracker_main is now just main and running is now  just main.run(params)</p></li>
@@ -353,14 +352,14 @@ As these updates can only happen at a model time step.</p>
 </ol>
 </section>
 <section id="version-0-2-768-01-7-2022">
-<h2>Version 0.2.768 01/7/2022<a class="headerlink" href="#version-0-2-768-01-7-2022" title="Permalink to this heading">¶</a></h2>
+<h2>Version 0.2.768 01/7/2022<a class="headerlink" href="#version-0-2-768-01-7-2022" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>fixed bug in calculating depth average velocity, which meant it was zero and resupension would not happen for non zero critcal frict vel</p></li>
 <li><p>created _base_reader and simplified reader as basis for making a structured grid reader</p></li>
 </ol>
 </section>
 <section id="version-0-2-760-28-6-2022">
-<h2>Version 0.2.760, 28/6/2022<a class="headerlink" href="#version-0-2-760-28-6-2022" title="Permalink to this heading">¶</a></h2>
+<h2>Version 0.2.760, 28/6/2022<a class="headerlink" href="#version-0-2-760-28-6-2022" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>bug fix: where velocity modifiers were not being used after restructure, eg terminal velocity</p></li>
 <li><p>added open boundary condition, die on exit, for schism if hgrid file is available</p></li>
@@ -381,7 +380,7 @@ As these updates can only happen at a model time step.</p>
 </ol>
 </section>
 <section id="version-0-2-751-22-6-2022">
-<h2>Version 0.2.751, 22/6/2022<a class="headerlink" href="#version-0-2-751-22-6-2022" title="Permalink to this heading">¶</a></h2>
+<h2>Version 0.2.751, 22/6/2022<a class="headerlink" href="#version-0-2-751-22-6-2022" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Addition of triangle based concentrations fields required more uniform way for coding users to cite all classes by name, (as already done for particle and fields ) , so as to use their values in altering particle behaviour, so class referencing and iteration are now split
 - All classes can now be accessed by name through self.shared_info.classes , eg self.shared_info.classes[‘solver’] or self.shared_info.classes[‘particle_properties’][‘x’],
@@ -410,7 +409,7 @@ As these updates can only happen at a model time step.</p>
     <ul>
         <li>
           &larr;
-          <a href="parameter_ref/VelocityModiferBase.html" title="Previous document">VelocityModiferBase</a>
+          <a href="parameter_ref/TerminalVelocity.html" title="Previous document">TerminalVelocity</a>
         </li>
         <li>
           <a href="future_dev.html" title="Next document">Future development</a>
@@ -428,7 +427,7 @@ As these updates can only happen at a model time step.</p>
       &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

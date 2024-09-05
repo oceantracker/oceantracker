@@ -8,15 +8,14 @@ from oceantracker import  definitions
 import importlib
 from timeit import  timeit
 class ClassImporter():
-    def __init__(self,shared_info, msg_logger, crumbs='', caller=None):
-        self.shared_info = shared_info
+    def __init__(self,msg_logger, crumbs='', caller=None):
         self.crumbs = crumbs
         self.msg_logger =msg_logger
         ml = msg_logger
         ml.msg(f'Starting package set up',tabs=2, caller=self)
         t0 = perf_counter()
 
-        # build clas tree of al package parameter classes, with short, long name maps
+        # build class tree of al package parameter classes, with short, long name maps
         self.class_tree = self.scan_package_for_classes(crumbs='Package set up', caller=self)
         self.short_name_class_map, self.full_name_class_map =  self.build_short_and_full_name_maps(self.class_tree)
 
@@ -42,7 +41,6 @@ class ClassImporter():
         return cls_obj
 
     def get_class_name(self,params,default_classID):
-        si = self.shared_info
         if 'class_name' in params and params['class_name'] is not None:
             return params['class_name']
         elif default_classID in definitions.default_classes_dict :
@@ -77,8 +75,8 @@ class ClassImporter():
                                             hint='A miss-spelt short class_name? or missing custimn class',
                                             fatal_error=True, exit_now=True)
 
-    def new_make_class_instance_from_params(self, class_role, params, name = None,  default_classID=None,
-                                    caller=None,   crumbs='', merge_params=True, check_for_unknown_keys=True):
+    def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None,
+                                        caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):
         ml = self.msg_logger
         if class_role not in self.class_tree:
             self.msg_logger.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
@@ -166,7 +164,7 @@ class ClassImporter():
             m = importlib.import_module(mod)
         except Exception as e:
             self.msg_logger.msg(f'Unexpected error dynamically loading module named "{mod}"',
-                                hint='Got error'+str(e),
+                                hint='Got error- '+str(e),
                                 fatal_error=True,exit_now=True)
         return m
     def build_short_and_full_name_maps(self, class_tree):

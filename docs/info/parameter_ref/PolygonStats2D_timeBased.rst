@@ -19,17 +19,12 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
-	* ``coords_allowed_in_lat_lon_order`` :   ``<class 'bool'>``   *<optional>*
+	* ``coords_in_lat_lon_order`` :   ``<class 'bool'>``   *<optional>*
 		Description: Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees
 
 		- default: ``False``
-		- default: ``False``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``duration`` :   ``<class 'float'>``   *<optional>*
@@ -37,8 +32,6 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- units: ``sec``
 		- min: ``0.0``
 
@@ -46,17 +39,15 @@ Parameters:
 		Description: Stop particle counting from this iso date-time, default is end of model run
 
 		- default: ``None``
+		- possible_types: ``[<class 'str'>, <class 'float'>, <class 'numpy.datetime64'>, <class 'int'>, <class 'numpy.float64'>, <class 'numpy.float32'>]``
 		- units: ``ISO8601  date as string eg. "2017-01-01T00:30:00",np.datetime64, or float of seconds since 1/1/1970``
 
 	* ``grid_size``:  *<optional>*
-		Description: - number of rows and columns in grid
+		Description: - number of (rows, columns) in grid, where rows is y size, cols x size, values should be odd, so will be rounded up to next
 
 		- a list containing type:  ``[]``
 		- default list : ``[100, 99]``
-		- default: ``[100, 99]``
 		- data_type: ``<class 'int'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``1``
 		- max: ``100000``
 		- possible_types: ``[]``
@@ -64,84 +55,70 @@ Parameters:
 		- fixed_len: ``2``
 		- min_len: ``0``
 
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
 	* ``particle_property_list``:  *<optional>*
 		Description: - Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions
 
 		- a list containing type:  ``[]``
 		- default list : ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_types: ``[]``
 		- make_list_unique: ``True``
 		- min_len: ``0``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``stats_polygon_time``
-		- default: ``stats_polygon_time``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``start`` :   ``['str', 'float', 'datetime64', 'int', 'float64', 'float32']``   *<optional>*
 		Description: Start particle counting from this date-time, default is start of model run
 
 		- default: ``None``
+		- possible_types: ``[<class 'str'>, <class 'float'>, <class 'numpy.datetime64'>, <class 'int'>, <class 'numpy.float64'>, <class 'numpy.float32'>]``
 		- units: ``ISO8601  date as string eg. "2017-01-01T00:30:00",np.datetime64, or float of seconds since 1/1/1970``
 
 	* ``status_max`` :   ``<class 'str'>``   *<optional>*
 		Description: Count only those particles with status  <= to this value
 
 		- default: ``moving``
-		- default: ``moving``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``status_min`` :   ``<class 'str'>``   *<optional>*
 		Description: Count only those particles with status >= to this value
 
 		- default: ``stationary``
-		- default: ``stationary``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step
 
 		- default: ``3600.0``
-		- default: ``3600.0``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- units: ``sec``
 
 	* ``use_release_group_polygons`` :   ``<class 'bool'>``   *<optional>*
 		Description: Omit polygon_list param and use all polygon release polygons as statistics/counting polygons, useful for building release group polygon to polygon connectivity matrix.
 
 		- default: ``False``
-		- default: ``False``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``water_depth_max`` :   ``<class 'float'>``   *<optional>*
 		Description: Count only those particles in water depths less than this value
 
 		- default: ``None``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``0.0``
 
 	* ``water_depth_min`` :   ``<class 'float'>``   *<optional>*
@@ -149,18 +126,13 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``0.0``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write statistcs to disk
 
 		- default: ``True``
-		- default: ``True``
 		- data_type: ``<class 'bool'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``z_max`` :   ``<class 'float'>``   *<optional>*
@@ -168,8 +140,6 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- units: ``meters above mean water level, so is < 0 at depth``
 
 	* ``z_min`` :   ``<class 'float'>``   *<optional>*
@@ -177,13 +147,18 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- units: ``meters above mean water level, so is < 0 at depth``
 
 
 
 Expert Parameters:
 *******************
+
+	* ``development`` :   ``<class 'bool'>``   *<optional>*
+		Description: Class is under development and testing
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 

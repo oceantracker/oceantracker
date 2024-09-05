@@ -3,7 +3,7 @@ from numba import njit
 import numpy as np
 from oceantracker.fields._base_field import CustomFieldBase
 from oceantracker.util.numba_util import njitOT
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 class TotalWaterDepth(CustomFieldBase):
     def __init__(self):

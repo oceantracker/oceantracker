@@ -1,5 +1,4 @@
 from os import path, mkdir, getcwd, chdir
-import shutil
 import subprocess
 import argparse
 import numpy as np
@@ -25,21 +24,17 @@ poly_points_large=[[1597682.1237, 5489972.7479],
                         [1597300, 5487000],
                        [1597682.1237, 5489972.7479]]
 
-from oceantracker.reader.generic_unstructured_reader import GenericUnstructuredReader
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
     'NUMBA_cache_code': False,
 
    'time_step' : 900,
     'debug': True,
-    'reader': {"class_name": 'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
-                'input_dir': '.',
-                'file_mask': 'demoHindcast2D*.nc',
-                'dimension_map': {'time': 'time', 'node': 'nodes'},
-                'grid_variable_map'  : {'time': 'time_sec', 'x':['east','north'],  'triangles': 'tri'},
-                'field_variable_map': {'water_velocity' : ['east_vel','north_vel'],'water_depth': 'depth','tide':'tide'},
-                'time_buffer_size': 15,
-                'isodate_of_hindcast_time_zero': '2020-06-01'},
+    'reader': {
+                'input_dir': 'demo_hindcast\schsim2D',
+                'file_mask': 'Random_order_*.nc',
+                 'time_buffer_size': 15,
+                },
     'user_note':'test of notes',
     #'numba_caching': False,
     'dispersion': {'A_H': .1},
@@ -91,7 +86,6 @@ p3['release_groups']= [{'name': 'myP1','points': [[1596000, 5486000]], 'pulse_si
 
 p3['particle_statistics'] = [{'name':'gridstats1','class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
-                   'start': '2020-06-01 21:16:07',
                       'grid_size': [220, 221]},
                 {'name':'polystats1','class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
@@ -210,15 +204,15 @@ schsim_base_params=\
             'regrid_z_to_uniform_sigma_levels': True,
                 #'numba_caching': False,
         'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
-                    'input_dir': 'demo_hindcast',
-                             'file_mask': 'demoHindcastSchism3D.nc',
+                    'input_dir': 'demo_hindcast\schsim3D',
+                             'file_mask': 'demo_hindcast_schisim3D_00.nc',
                      'load_fields':['water_temperature']
                           },
         'dispersion': {'A_H': .2, 'A_V': 0.001},
         'release_groups':[ {'name': 'P1','points': [[1595000, 5482600, -1],[1599000, 5486200, -1] ],
                                              'pulse_size': 10, 'release_interval': 3600,
                                             'allow_release_in_dry_cells': True,
-                          'start': '2017-01-01T01:30:00'},
+                         },
                     {'name':'Poly1','class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
                             'points': poly_points,
                             'start': '2017-01-01T01:30:00',
@@ -357,7 +351,7 @@ params.append(p70)
 p90= deepcopy(p2)
 
 p90.update({'max_run_duration': 2*24*3600.,'output_file_base': 'demo90forward',
-            'include_dispersion':False,
+            'use_dispersion':False,
             'backtracking': False,'debug': True,'time_step' :60 })
 p90['reader']['time_buffer_size']=2  # test with  tiny buffer
 p90['release_groups']= [{'name':'P1','pulse_size': 1, 'release_interval': 0,
@@ -377,12 +371,12 @@ p91['release_groups']=[{'name':'r1','points':[two_points[1]],
                       'max_age':6*3600,
                      'release_interval':0,
                      'pulse_size' : 1,
-                    'start':'2020-06-02T00:00:00' # start 1 day in 2020-06-02T21:16:07
+                    'start':'2017-01-02T00:00:00' # start 1 day in 2017-01-02T21:16:07
                         }]
-# 2020-06-01T05:16:07 to 2020-06-06T03:16:07
-p91['release_groups'].append(dict(deepcopy(p91['release_groups'][0]),name='r2',start='2020-06-03T00:00:00'))
-p91['release_groups'].append(dict(deepcopy(p91['release_groups'][0]),name='r3',start='2020-06-04T00:00:00'))
-p91['release_groups'].append(dict(deepcopy(p91['release_groups'][0]),name='r4',start='2020-06-03T03:00:00'))
+# 2017-01-01T05:16:07 to 2017-01-06T03:16:07
+p91['release_groups'].append(dict(deepcopy(p91['release_groups'][0]),name='r2',start='2017-01-03T00:00:00'))
+p91['release_groups'].append(dict(deepcopy(p91['release_groups'][0]),name='r3',start='2017-01-04T00:00:00'))
+p91['release_groups'].append(dict(deepcopy(p91['release_groups'][0]),name='r4',start='2017-01-03T03:00:00'))
 
 params.append(p91)
 

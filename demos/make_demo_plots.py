@@ -202,7 +202,7 @@ def demo57_SCHISM_3D_lateralBoundaryTest(case_info_file_name,output_file=None):
 def demo58_bottomBounce(case_info_file_name,output_file=None):
     from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
     from plot_oceantracker.plot_tracks import animate_particles
-    from plot_oceantracker.plot_vertical_tracks import plot_path_in_vertical_section, plot_relative_height
+    from plot_oceantracker.plot_tracks import plot_path_in_vertical_section, plot_relative_height
 
     track_data = load_track_data(case_info_file_name, var_list=['tide', 'water_depth'])
 
@@ -217,7 +217,7 @@ def demo58_bottomBounce(case_info_file_name,output_file=None):
 
 def demo59_crit_shear_resupension(case_info_file_name,output_file=None):
     from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
-    from plot_oceantracker.plot_vertical_tracks import plot_path_in_vertical_section
+    from plot_oceantracker.plot_tracks import plot_path_in_vertical_section
 
     track_data = load_track_data(case_info_file_name, var_list=['tide', 'water_depth'])
 

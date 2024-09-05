@@ -16,41 +16,43 @@ Parameters:
 
 	* ``bc_walk_tol`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0001``
-		- required_type: ``<class 'float'>``
-		- min: ``0.0``
+		- default: ``0.0001``
+		- data_type: ``<class 'float'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- min: ``0.0``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``debug_check_cell`` :   ``<class 'bool'>``   *<optional>*
 		Description: checks particles are inside the cell found by interp
 
 		- default: ``False``
-		- required_type: ``<class 'bool'>``
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
 		- expert: ``False``
+		- obsolete: ``False``
+		- possible_values: ``[True, False]``
 
 	* ``max_search_steps`` :   ``<class 'int'>``   *<optional>*
 		- default: ``500``
-		- required_type: ``<class 'int'>``
+		- default: ``500``
+		- data_type: ``<class 'int'>``
+		- expert: ``False``
+		- obsolete: ``False``
 		- min: ``1``
-		- expert: ``False``
-
-	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
-		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
-
-		- default: ``None``
-		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
-		- expert: ``False``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
+		- data_type: ``<class 'str'>``
 		- expert: ``False``
+		- obsolete: ``False``
 
 
 

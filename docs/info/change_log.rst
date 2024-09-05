@@ -47,6 +47,8 @@ New features
 
 #. For coders using IDEs (Pycharm, VS code) the shared info structure variables and methods now auto completes/hints variable/method names, with doc_strs where available.
 
+#. use of xarray to read individual files
+
 Behaviour changes
 ______________________________________________________________
 

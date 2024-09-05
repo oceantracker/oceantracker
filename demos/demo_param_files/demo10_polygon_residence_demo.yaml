@@ -24,25 +24,8 @@ particle_statistics:
   name_of_polygon_release_group: near_shore
   update_interval: 1800
 reader:
-  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
-  dimension_map:
-    node: nodes
-    time: time
-  field_variable_map:
-    tide: tide
-    water_depth: depth
-    water_velocity:
-    - east_vel
-    - north_vel
-  file_mask: demoHindcast2D*.nc
-  grid_variable_map:
-    time: time_sec
-    triangles: tri
-    x:
-    - east
-    - north
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
-  isodate_of_hindcast_time_zero: '2020-06-01'
+  file_mask: Random_order_*.nc
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   time_buffer_size: 15
 release_groups:
 - class_name: oceantracker.release_groups.polygon_release.PolygonRelease

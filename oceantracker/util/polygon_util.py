@@ -216,8 +216,8 @@ def make_domain_mask(xy):
     xy= make_anticlockwise_polygon(xy)
 
     # bounds
-    bx= [np.min(xy[:,0]),np.max(xy[:,0])]
-    by= [np.min(xy[:,1]),np.max(xy[:,1])]
+    bx= [np.min(xy[:, 0]),np.max(xy[:, 0])]
+    by= [np.min(xy[:, 1]),np.max(xy[:, 1])]
 
     # put box around domain spit at southern most point
     n =np.argmin(xy[:,1])

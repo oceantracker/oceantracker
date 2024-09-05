@@ -18,7 +18,7 @@ def get_params(datasource=1):
     calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
-        input_dir =  r'G:\Hindcasts_large\2020_MalbroughSounds_10year_benPhD'
+        input_dir =  r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2008'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = 'F:\\OceanTrackerOtuput\\OceanTrackerProfiling'
 
@@ -66,29 +66,32 @@ def get_params(datasource=1):
                     },
         'write_tracks': False,
         'dispersion': {'A_H': .2, 'A_V': 0.001},
-        'release_groups': {'p1':{'points': points,
+        'release_groups': [
+                {'name':'p1','points': points,
                                 'pulse_size': pulse_size, 'release_interval': release_interval,
                                 'allow_release_in_dry_cells': True},
-                           'p12': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
-                                     'points': poly_points,
-                                      'pulse_size': pulse_size, 'release_interval': release_interval}
-                                                 },
-                            'particle_properties': {'decay1':{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
-                                                       'decay_time_scale': 1. * 3600 * 24}},
-            'event_loggers': {'event1': {'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
-                                                 'particle_prop_to_write_list': ['ID', 'x', 'IDrelease_group', 'status', 'age'],
-                                                 'polygon_list': [{'user_polygon_name': 'A', 'points': (np.asarray(poly_points) + np.asarray([-5000, 0])).tolist()},                                                                                                                ]
-                                                 }},
-            'particle_statistics' : { 'statas1':  {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased',
+                {'name': 'p12' ,'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
+                            'points': poly_points,
+                            'pulse_size': pulse_size,
+                            'release_interval': release_interval}
+                            ],
+            'particle_properties': [ {'name':'decay1','class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
+                                    'decay_time_scale': 1. * 3600 * 24}],
+
+            'event_loggers':[ {'name':'event1','class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
+                                'particle_prop_to_write_list': ['ID', 'x', 'IDrelease_group', 'status', 'age'],
+                                'polygon_list': [{'user_polygon_name': 'A', 'points': (np.asarray(poly_points) + np.asarray([-5000, 0])).tolist()},                                                                                                                ]
+                                                 }],
+            'particle_statistics' :[ {'name': 'statas1','class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'grid_size': [220, 221],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},
-                                        'statas2':  {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
+                                     {'name': 'statas2', 'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.,
                                          'polygon_list': [{'points': poly_points}]}
-                                                        }
-                                                         }
+                                        ]
+                    }
 
 
     return params

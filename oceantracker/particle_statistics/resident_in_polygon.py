@@ -1,16 +1,16 @@
-from oceantracker.particle_statistics._base_location_stats import BaseParticleLocationStats
+from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC, merge_params_with_defaults
 from copy import  deepcopy
 from oceantracker.release_groups.polygon_release import PolygonRelease
 from oceantracker.util.numba_util import njitOT
 
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 import numpy as np
 from numba import njit
 #todo much clearner to  have user define polygon list for residewnce time per polygon like stats polygon!
 
-class ResidentInPolygon(BaseParticleLocationStats):
+class ResidentInPolygon(_BaseParticleLocationStats):
     def __init__(self):
         # set up info/attributes
         super().__init__()
@@ -28,12 +28,12 @@ class ResidentInPolygon(BaseParticleLocationStats):
         super().initial_setup()  # set up using regular grid for  stats
 
         # find associated release group
-        if params['name_of_polygon_release_group']  not in si.roles.release_groups:
+        if params['name_of_polygon_release_group']  not in si.class_roles.release_groups:
             ml.msg(params['class_name'].split('.')[-1] + ' no polygon release group of name ' + params['name_of_polygon_release_group'] +
-                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.roles.release_groups.keys())),
-                                caller=self, fatal_error=True)
+                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.class_roles.release_groups.keys())),
+                   caller=self, fatal_error=True)
 
-        rg = si.roles.release_groups[params['name_of_polygon_release_group']]
+        rg = si.class_roles.release_groups[params['name_of_polygon_release_group']]
         if not isinstance(rg, PolygonRelease) :
             ml.msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params['name_of_polygon_release_group'] +
                                   '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ',
@@ -48,7 +48,7 @@ class ResidentInPolygon(BaseParticleLocationStats):
                                              'points': self.release_group_to_count.params['points']},si.default_polygon_dict_params ,
                                              si.msg_logger)
         # create resident in polygon for single release group
-        pgm = si.core_roles.particle_group_manager
+        pgm = si.core_class_roles.particle_group_manager
         self.info['inside_polygon_particle_prop'] = f'resident_in_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
         si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D', name=self.info['inside_polygon_particle_prop'],
                                                polygon_list=[polygon],write=False)
@@ -82,7 +82,7 @@ class ResidentInPolygon(BaseParticleLocationStats):
         self.count_all_particles_time_slice = np.full_like(self.count_time_slice, 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
-            if p_name in si.roles.particle_properties:
+            if p_name in si.class_roles.particle_properties:
                 self.sum_binned_part_prop[p_name] = np.full(num_pulses, 0.)  # zero for  summing
                 nc.create_a_variable('sum_' + p_name, dim_names, np.float64, description= 'sum of particle property inside polygon  ' + p_name)
             else:
@@ -92,7 +92,7 @@ class ResidentInPolygon(BaseParticleLocationStats):
 
     def do_counts(self,n_time_step, time_sec, sel):
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         rg  = self.release_group_to_count
 
         # manual update which polygon particles are inside

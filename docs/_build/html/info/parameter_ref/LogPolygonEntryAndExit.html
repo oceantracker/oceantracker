@@ -1,23 +1,22 @@
 
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>LogPolygonEntryAndExit &#8212; OceanTracker Beta 0.4 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <title>LogPolygonEntryAndExit &#8212; OceanTracker Beta 0.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="fields" href="fields_toc.html" />
-    <link rel="prev" title="event_loggers" href="event_loggers_toc.html" />
+    <link rel="prev" title="BaseEventLogger" href="BaseEventLogger.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -51,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -76,7 +75,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="event_loggers_toc.html">event_loggers</a><ul>
-      <li>Previous: <a href="event_loggers_toc.html" title="previous chapter">event_loggers</a></li>
+      <li>Previous: <a href="BaseEventLogger.html" title="previous chapter">BaseEventLogger</a></li>
       <li>Next: <a href="fields_toc.html" title="next chapter">fields</a></li>
   </ul></li>
   </ul></li>
@@ -88,12 +87,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -103,21 +102,20 @@
           <div class="body" role="main">
             
   <section id="logpolygonentryandexit">
-<h1>LogPolygonEntryAndExit<a class="headerlink" href="#logpolygonentryandexit" title="Permalink to this heading">¶</a></h1>
+<h1>LogPolygonEntryAndExit<a class="headerlink" href="#logpolygonentryandexit" title="Permalink to this headline">¶</a></h1>
 <p><strong>Doc:</strong></p>
 <p><strong>short class_name:</strong> LogPolygonEntryAndExit</p>
 <p><strong>full class_name :</strong> oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit</p>
-<p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseEventLogger&gt; LogPolygonEntryAndExit</p>
+<p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; BaseEventLogger&gt; LogPolygonEntryAndExit</p>
 <section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">chunk_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">500000</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -126,43 +124,48 @@
 <dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class name as string A.B.C, used to import this class from python path</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Name used to refer to class in code and output, = None for core claseses</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">particle_prop_to_write_list</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">['ID',</span> <span class="pre">'x',</span> <span class="pre">'IDpulse',</span> <span class="pre">'IDrelease_group',</span> <span class="pre">'user_release_groupID',</span> <span class="pre">'status',</span> <span class="pre">'age']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>min_len: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">polygon_list</span></code>:  <em>&lt;optional&gt;</em></p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">polygon_list</span></code>:<strong>&lt;isrequired&gt;</strong></dt><dd><ul class="simple">
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">{'user_polygonID':</span> <span class="pre">ParamValueChecker(default=0,</span> <span class="pre">data_type=&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">expert=False,</span> <span class="pre">obsolete=False,</span> <span class="pre">is_required=False,</span> <span class="pre">doc_str=None,</span> <span class="pre">units=None,</span> <span class="pre">min=0,</span> <span class="pre">max=None,</span> <span class="pre">possible_values=None),</span> <span class="pre">'name':</span> <span class="pre">ParamValueChecker(default=None,</span> <span class="pre">data_type=&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">expert=False,</span> <span class="pre">obsolete=False,</span> <span class="pre">is_required=False,</span> <span class="pre">doc_str=None,</span> <span class="pre">units=None,</span> <span class="pre">min=None,</span> <span class="pre">max=None,</span> <span class="pre">possible_values=None),</span> <span class="pre">'points':</span> <span class="pre">ParameterCoordsChecker(default=None,</span> <span class="pre">possible_types=[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.datetime64'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float64'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float32'&gt;],</span> <span class="pre">expert=False,</span> <span class="pre">obsolete=False,</span> <span class="pre">is_required=True,</span> <span class="pre">doc_str='Points</span> <span class="pre">making</span> <span class="pre">up</span> <span class="pre">the</span> <span class="pre">polygon</span> <span class="pre">as,</span> <span class="pre">N</span> <span class="pre">by</span> <span class="pre">2</span> <span class="pre">or</span> <span class="pre">3</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">locations</span> <span class="pre">where</span> <span class="pre">particles</span> <span class="pre">are</span> <span class="pre">released.</span> <span class="pre">eg</span> <span class="pre">for</span> <span class="pre">2D</span> <span class="pre">``[[25,10],[23,2],....]</span></code>, must be convertible into N by 2 or 3 numpy array’, units=’metres, or (lon, lat) as  decimal degrees if hindcast in (lon, lat) ‘, one_or_more_points=False, single_cord=False, is3D=False, min=None, max=None)}``</p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'dict'&gt;</span></code></p></li>
+<li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>min_len: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
 </ul>
-</div></blockquote>
-<p>polygon_list: still working on display  of lists of dict, eg nested polygon list</p>
-<blockquote>
-<div><ul>
+</dd>
+</dl>
+</li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">role_output_file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">inside_polygon_events</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">user_instance_info</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tuple'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'list'&gt;]</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -170,8 +173,7 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -179,8 +181,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">write</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>required_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>expert: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -189,7 +191,21 @@
 </div></blockquote>
 </section>
 <section id="expert-parameters">
-<h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this heading">¶</a></h2>
+<h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">development</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class is under development and testing</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
 </section>
 </section>
 
@@ -201,7 +217,7 @@
     <ul>
         <li>
           &larr;
-          <a href="event_loggers_toc.html" title="Previous document">event_loggers</a>
+          <a href="BaseEventLogger.html" title="Previous document">BaseEventLogger</a>
         </li>
         <li>
           <a href="fields_toc.html" title="Next document">fields</a>
@@ -219,7 +235,7 @@
       &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -1,15 +1,17 @@
 
 from copy import deepcopy
 from oceantracker.definitions import known_readers
+from os import path
+
 
 def find_file_format_and_file_list(reader_params, class_importer, msg_logger, crumbs='', caller = None):
     found=False
     # first see if it matches known formats
     crumbs += '> find_file_format_and_file_list'''
     if 'class_name' in reader_params:
-        reader = class_importer.new_make_class_instance_from_params('reader', reader_params,  default_classID='reader', check_for_unknown_keys=False)
+        reader = class_importer.make_class_instance_from_params('reader', reader_params, default_classID='reader', check_for_unknown_keys=False)
         if reader is None:
-            msg_logger.msg(f'Error loading given reader  hydro-model files of type  "{reader_params["class_name"]}"', exit_now= True)
+            msg_logger.msg(f'Error loading given reader  hydro-model class name is  "{reader_params["class_name"]}"',fatal_error=True, exit_now= True)
         file_list = reader.get_file_list()
         return reader_params, file_list
 
@@ -17,8 +19,8 @@ def find_file_format_and_file_list(reader_params, class_importer, msg_logger, cr
     for r_name, r in known_readers.items():
         params= deepcopy(reader_params)
         params['class_name'] = r
-        reader = class_importer.new_make_class_instance_from_params('reader',params,  default_classID='reader',
-                                        check_for_unknown_keys=False, crumbs = crumbs + f'> loading reader {r_name}', caller=caller)
+        reader = class_importer.make_class_instance_from_params('reader', params, default_classID='reader',
+                                                                check_for_unknown_keys=False, crumbs = crumbs + f'> loading reader {r_name}', caller=caller)
         file_list = reader.get_file_list()
 
         if len(file_list) ==0:

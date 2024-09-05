@@ -19,15 +19,13 @@ def default_params():
         'root_output_dir': None,
          'EPSG_code_metres_grid': None,
         'regrid_z_to_uniform_sigma_levels': True,
-        'particle_properties': {'part_decay':
-                                    {'class_name': 'AgeDecay', 'decay_time_scale': 1. * 3600 * 24}},
-        'release_groups': {'P1': {'points': [], 'pulse_size': 10,
+        'particle_properties': [{'name':'part_decay',  'class_name': 'AgeDecay',
+                                'decay_time_scale': 1. * 3600 * 24}],
+        'release_groups':[ {'name':'P1', 'points': [], 'pulse_size': 10,
                              #     'coords_in_lat_lon_order': True, # only used if hydro-model is in
-                                  'release_interval': 1800,'z_min':-1.},
-                        'Poly1': {'class_name':'PolygonRelease',
-                                            'points': [], 'pulse_size': 10,
-                               #          'coords_in_lat_lon_order': True,  # only used if hydro-model is in
-                                         'release_interval': 3600, 'z_min': -1.}},
+                                'release_interval': 1800,'z_min':-2.},
+
+                            ],
         'dispersion': {'A_H': 1.0, 'A_V': 0.001},
         'reader': {'file_mask':None,
                    'input_dir': None,
@@ -48,11 +46,10 @@ def get_case(n):
     max_days = 5
     ax = None
 
-    nested_readers={}
+    nested_readers=[]
     hgrid_file=None
     time_step=3600.
-    fall_vel=0.
-    reader_class = None
+    fall_vel= -0.01
     pulse_size = 10
     open_boundary_type = 0
     reader= None
@@ -62,13 +59,13 @@ def get_case(n):
     title = ''
 
     params= default_params()
-    show_grid = True
+    show_grid = False
     geo_cords= False
   
 
     match n:
         case 100:
-            root_input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01'
+            root_input_dir = r'G:\Hindcasts_large\2024_OceanNumNZ-2022-06-20\final_version\2022\01'
             output_file_base = 'NZnational'
             file_mask = 'NZfinite*.nc'
 
@@ -89,27 +86,42 @@ def get_case(n):
                 [-36.70276297564815, 174.81729496997661]]
             ax = None # Auck
             title = 'Auckland test'
-            poly_points=[[-36.80778038251076, 175.17304722424294],
-                        [-36.78224101024911, 175.19670975597626],
-                         [-36.78141701777142, 175.16790319560525],
-                         [-36.80778038251076, 175.17304722424294]]
+
             geo_cords = True
 
+        case 121:
+            root_input_dir = r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2009'
+            output_file_base = 'SoundsBen_Phd'
+            file_mask = 'schism_marl2009*.nc'
+            params['EPSG_code_metres_grid'] = 2193
+            x0=[[-40.788387332710876, 172.8418709119585],
+                [-40.905652106497435, 173.88863555540422]]
+            x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
+            ax = None # Auck
+            title = 'Auckland test'
+
+            geo_cords = True
         case 141:
             #schism v5,
-            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\WHOI_calvin\SCHISM_v2'
+            root_input_dir = r'F:\Hindcast_reader_tests\Schimsv5\WHOI_calvin\SCHISM_v5'
             output_file_base = 'Xlavin Schim v5'
             file_mask = '*.nc'
 
-            x0 = [[-36.81612195216445, 174.82731398519584],
-                  [-37.070731274878, 175.39302783837365],
-                  [-36.4051733326401, 174.7771263023033],
-                  [-36.85502113978176, 174.6807647189683]
+            x0 = [[-41.26352277695916, 173.80657335148985],
+                  [-41.07330690449923, 173.99402755852105],
                   ]
-            x0= cord_transforms.WGS84_to_UTM(np.flip(np.asarray(x0),axis=1)).tolist()
+            x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
             ax = None # Auck
             title = 'test schisim v5 - Calvin'
-
+        case 142:
+            #schism v5 auckland,
+            root_input_dir = r'F:\Hindcast_reader_tests\Schimsv5\HaurakiGulfv5\01'
+            output_file_base = 'SchismV5 test Hauarki'
+            file_mask = '*.nc'
+            x0=[[-36.832885812299395, 174.76309434822716]]
+            x0= np.flip(np.asarray(x0),axis=1)
+            ax = None # Auck
+            title = 'test schisim v5 - Auck'
         case 150:
             root_input_dir = r'F:\Hindcast_parts\pelorus2024'
             output_file_base = 'Pelourus_prelim'
@@ -153,32 +165,53 @@ def get_case(n):
 
         case 200:
             # FVCOM
-            root_input_dir=r'F:\Hindcasts\colaborations\LakeSuperior\historical_sample\2022'
-            x0 = [[439094.44415005075, 5265627.962025132, -10]]
+            root_input_dir=r'F:\Hindcast_reader_tests\FVCOM_LakeSuperior\historical_sample\2022'
+            x0 = [[47.540046778478064, -87.64392022390314]]
+            x0 = np.flip(np.asarray(x0), axis=1)
             file_mask = 'nos.lsofs.fields.n000*.nc'
             output_file_base = 'FVCOM_Lake_Superior'
 
             max_days=30
             title = 'FVCOM test'
         case 300:
-            #ROMS
-            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\ROMS_samples'
-            x0 =  [[616042, 4219971, -1], [616042, 4729971, -1], [616042, 4910000, -1],
-                   [387649.9416260512, 4636593.611571449, -1], [-132118.97253055905, 4375233.36585782, -1], [-178495.6601573273, 4132294.9876834783, -1]]
+            #ROMS test
+            root_input_dir = r'F:\Hindcast_reader_tests\ROMS_samples'
+            x0 = [[41.91527213998341, -70.33170368895726], # cape code
+                 [44.78577529626732, -66.39180546827933],
+                  [33.85502775199189, -73.47506471772721],
+                  [37.01033167397936, -75.88494735794337],
+                  ]
+
+            x0 = np.flip(np.asarray(x0), axis=1)
             file_mask  =  'DopAnV2R3-ini2007_da_his.nc'
             output_file_base= 'ROMS'
             title = 'ROMS test'
-
+            show_grid = True
+        case 301:
+            #ROMS MOANA
+            root_input_dir = r'F:\Hindcast_reader_tests\MOANA_project_National_hindcast\Hourly_nestfiles'
+            x0 =  [[616042, 4219971, -1], [616042, 4729971, -1], [616042, 4910000, -1],
+                   [387649.9416260512, 4636593.611571449, -1], [-132118.97253055905, 4375233.36585782, -1], [-178495.6601573273, 4132294.9876834783, -1]]
+            x0 = [[-36.81612195216445, 174.82731398519584],
+                  [-37.070731274878, 175.39302783837365],
+                  [-36.4051733326401, 174.7771263023033],
+                  [-36.85502113978176, 174.6807647189683]
+                  ]
+            x0 = np.flip(np.asarray(x0),axis=1)
+            file_mask  =  'nz5km_his*.nc'
+            output_file_base= 'ROMS'
+            title = 'ROMS test'
+            show_grid = True
         case 400:
             # DELFT FM
             root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\DELF3DFM_silawasi'
             x0= [[-0.4876992148036644, 129.18935660697986],
                  [-2.788645108730445, 123.88768495956097]]
-
+            x0 = np.flip(np.asarray(x0),axis=1)
             file_mask = 'NSulawesi_*.nc'
             output_file_base = 'DELF3D-FM-z-layer'
             title = 'DELF3D-FM test-z-layer'
-            is3D = False
+            is3D = True
 
         case 401:
             # DELFT FM exmouth
@@ -188,7 +221,7 @@ def get_case(n):
             file_mask = 'Exmouth_FlowFM*.nc'
             output_file_base = 'DELF3D-FM_Exmouth'
             title = 'DELF3D-FM test'
-            #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
+            reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = False
             show_grid = False
         case 402:
@@ -227,16 +260,41 @@ def get_case(n):
             show_grid = False
         case 500:
             # NEMO
-            root_input_dir = r'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\nemo'
-
+            root_input_dir = r'F:\Hindcast_reader_tests\NEMO\NemoNorthSeaORCA025-N006_data'
+            file_mask = '*.nc'
             x0=[[57706.375512704304, 421967.24984360463]]
-            file_mask = 'ORCA025*.nc'
+
             output_file_base = 'Nemo01'
             title = 'Nemo test'
             reader = 'oceantracker.reader.dev.dev_nemo_reader.NemoReader'
             is3D = True
-            show_grid = False
-        case 1100:
+
+        case   1100:
+            # batic sea GLORYS
+
+
+            x0 = [
+                [58.36351222050503, 21.7318678553635],
+                [55.54839701166633, 16.870008930959628],
+
+                   ]
+            x0=np.asarray(x0)
+            x0[:,:2] = np.flip(x0[:,:2], axis=1)
+            # x0[:,0] += -90. + 360 # todo hack to get ross sea right acros date line in utm transform
+
+            file_mask = '*.nc'
+            output_file_base = 'GLORYS'
+            title = 'GLORYS test'
+            root_input_dir = r'F:\Hindcast_reader_tests\Glorys\BalticSea'
+            # reader = 'oceantracker.reader.dev.dev_ross_sea_GLORYS_reader.GLORYSreader'
+            open_boundary_type = 1
+            max_days =10
+            time_step = 1800.
+            pulse_size = 10
+            fall_vel = -0.01
+            is3D =True
+
+        case 1101:
             #OCEANUM GLORYS
             x0 =  [
                 #[-73.48272505246274, -173.7097571108972],
@@ -260,22 +318,20 @@ def get_case(n):
 
             x0 = np.flip(np.asarray(x0), axis=1)
             #x0[:,0] += -90. + 360 # todo hack to get ross sea right acros date line in utm transform
-            x0 = cord_transforms.WGS84_to_UTM(x0).tolist()
-
 
             file_mask  =  'RossSea*.nc'
             output_file_base= 'GLORYS'
             title = 'GLORYS test'
-            root_input_dir = r'F:\Hindcasts\Hindcast_samples_tests\Glorys\Antartica'
-            reader = 'oceantracker.reader.dev.dev_ross_sea_GLORYS_reader.GLORYSreaderSurface'
-            is3D = False
-            water_depth_file = r'F:\Hindcasts\Hindcast_samples_tests\Glorys\Ross_sea2D\static.nc'
+            #root_input_dir = r'F:\Hindcast_reader_tests\Glorys\Antartica'
+            root_input_dir =r'F:\Hindcast_reader_tests\Glorys\BalticSea'
+            #reader = 'oceantracker.reader.dev.dev_ross_sea_GLORYS_reader.GLORYSreader'
             open_boundary_type = 1
             max_days = 90
             time_step = 3600.
-            pulse_size = 5
-            params['particle_properties']['part_decay']['decay_time_scale']= 28*24*3600.
-        case 1000:
+            pulse_size = 1
+            is3D = True
+
+        case 1001:
             # nested schisim
             pulse_size = 5
             root_input_dir = r'G:\Hindcasts_large\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
@@ -317,25 +373,17 @@ def get_case(n):
                    ]
             reader ='oceantracker.reader.dummy_data_reader.DummyDataReader'
 
-    params['release_groups']['P1']['points'] = x0
-    params['release_groups']['Poly1']['points'] = poly_points
+    params['release_groups'][0]['points'] = x0
 
-    params['particle_statistics'] = {'grid1':
-                                      {'class_name': 'GriddedStats2D_timeBased',
-                                       'grid_center': x0[0],
-                                       'coords_in_lat_lon_order': True,
+    params['particle_statistics'] = [{ 'name' :'grid1','class_name': 'GriddedStats2D_timeBased',
+                                       'grid_center': x0[0][:2],
                                        'grid_span' : [.1,.15] if geo_cords else [10000,10000],
                                        'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min': 'moving', 'z_min': -2,
                                        'grid_size': [120, 121]},
-                                     'poly1':
-                                         {'class_name': 'PolygonStats2D_timeBased',
-                                          'coords_in_lat_lon_order': True,
-                                          'polygon_list':[dict(points=poly_points)],
-                                            'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min': 'moving', 'z_min': -2,
-                                          'grid_size': [120, 121]}
-                                     }
+                                     ]
 
     params.update(user_note=title,output_file_base=output_file_base,
+
                   max_run_duration= max_days*24*3600, time_step= time_step, open_boundary_type=open_boundary_type)
     params['reader'].update(input_dir=root_input_dir,
                             file_mask=file_mask,
@@ -346,14 +394,14 @@ def get_case(n):
 
     if params['reader']['class_name'] is  None:   del params['reader']['class_name']
 
-    if poly_points is None:
-        del params['release_groups']['Poly1']
-        del params['particle_statistics']['poly1']
 
-    params['release_groups']['P1'].update(pulse_size=pulse_size)
+    params['release_groups'][0].update(pulse_size=pulse_size)
 
     if is3D:
-        params['velocity_modifiers'] = {'fall_vel': {'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': fall_vel}}
+        params['velocity_modifiers'] = [
+           {'name':'fall_vel',
+              'class_name': 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity',
+              'value': fall_vel}]
 
     if hgrid_file is not None:
         params['reader']['hgrid_file_name']= hgrid_file
@@ -371,13 +419,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', default=None, type= int)
     parser.add_argument('-uniform', action='store_false')
+    parser.add_argument('-gridplot', action='store_true')
     parser.add_argument('-noplots', action='store_true')
     parser.add_argument('-skip_run', action='store_true')
     parser.add_argument('-debug_plots', action='store_true')
     parser.add_argument('-save_plot', action='store_true')
     args = parser.parse_args()
 
-    root_output_dir = r'F:\OceanTrackerOutput\test_reader_formats'
+    root_output_dir = r'D:\OceanTrackerOutput\test_reader_formats'
 
     if args.test is None:
         tests =[100]
@@ -393,6 +442,7 @@ if __name__ == '__main__':
                     dev_debug_plots = args.debug_plots,
                     use_A_Z_profile = True,
                     debug=True,
+                       display_grid_at_start=args.gridplot,
                     #NUMBA_cache_code=True
                     #display_grid_at_start=True
                        )
@@ -405,7 +455,7 @@ if __name__ == '__main__':
                                     params['output_file_base']+'_caseInfo.json')
 
         # do plot
-        if not args.noplots:
+        if not args.noplots and caseInfoFile is not None:
             track_data = load_output_files.load_track_data(caseInfoFile)
             if False:
                 plot_utilities.display_grid(track_data['grid'], ginput=3, axis_lims=None)
@@ -413,9 +463,11 @@ if __name__ == '__main__':
 
             plot_file = plot_base + '_tracks_01.mp4' if args.save_plot else None
 
-            plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
+            plot_tracks.animate_particles(track_data, axis_lims=None,
                                           title=params['user_note'], movie_file=plot_file, aspect_ratio=None,
                                           show_grid=plot_opt['show_grid'])
+
+            plot_tracks.plot_path_in_vertical_section(track_data, particleID=0,)
 
             plot_file = plot_base + '_decay_01.mp4' if args.save_plot else None
             plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],

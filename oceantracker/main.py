@@ -12,29 +12,20 @@ import sys
 # python -m cProfile -s cumtime
 
 # do first to ensure its right
-import multiprocessing
 
-
-from copy import deepcopy
-from datetime import datetime, timedelta
-
-from os import path, makedirs
-import shutil
-from time import perf_counter
 from copy import  copy, deepcopy
-import numpy as np
 
 
 from oceantracker.util import setup_util, class_importer_util, time_util
 from oceantracker import definitions
-
 from oceantracker.util import json_util ,yaml_util, get_versions_computer_info
 from oceantracker.util.message_logger import GracefulError, MessageLogger
-from oceantracker.reader.util import get_hydro_model_info
+
+from oceantracker._oceantracker_main_runner import _OceanTrackerRunner
 
 import traceback
 
-from  oceantracker.shared_info import SharedInfo as shared_info
+from  oceantracker.shared_info import shared_info
 
 # use separate message logger for actions in main, cases use si.msg_logger
 msg_logger = MessageLogger()
@@ -73,7 +64,7 @@ class OceanTracker():
         :param case: Add this instance to this case ID (>=0) to be run in parallel.
         '''
         ml = msg_logger
-        known_class_roles = shared_info.core_roles.possible_values() + shared_info.roles.possible_values()
+        known_class_roles = shared_info.core_class_roles.possible_values() + shared_info.class_roles.possible_values()
 
         if class_role is None:
             ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True, caller =self)
@@ -96,7 +87,7 @@ class OceanTracker():
         if name is not None: kwargs['name'] = name
 
         # add new params to core or other roles
-        if class_role in shared_info.core_roles.possible_values():
+        if class_role in shared_info.core_class_roles.possible_values():
             if class_role not in existing_params: existing_params[class_role] = {}
             existing_params[class_role].update(kwargs)
         else:
@@ -144,330 +135,4 @@ class OceanTracker():
         # todo flag use so params can be reset if needed if same OceanTracker instance used more than once
         return case_info_file
 
-class _OceanTrackerRunner(object):
-    def __init__(self):
-        pass
-    
-    def run(self, user_given_params):
-        ml = msg_logger
-        ml.reset()
-        ml.set_screen_tag('Main')
-        setup_util.check_python_version(ml)
-        self.start_t0 = perf_counter()
-        self.start_date = datetime.now()
-
-        ml.print_line()
-        ml.msg(f'{OTname} starting main:')
-        # add package tree to shared info
-
-
-        # start forming the run builder
-        crumbs = 'Forming run builder'
-        working_params, working_case_list_params = self._build_working_params(deepcopy(user_given_params), ml, crumbs=crumbs)
-
-        # base case run builder
-        run_builder = dict( working_params = working_params,
-                            version = definitions.version,
-                            computer_info = get_versions_computer_info.get_computer_info())
-
-        #  merge defaults of bee case settings which have to be the same for all cases
-        working_params['settings'] = setup_util.merge_settings(working_params['settings'], shared_info.default_settings,
-                                                            shared_info.base_case_only_params,ml, crumbs=crumbs, caller=self)
-
-        ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults',caller=self, crumbs=crumbs)
-
-        # setup output dir and msg files
-        t0 = perf_counter()
-        o = setup_util.setup_output_dir(working_params['settings'], ml, crumbs= crumbs + '> Setting up output dir')
-
-        o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base']+'_run') # message logger output file setup
-        run_builder['output_files'] = o
-        ml.msg(f'Output is in dir "{o["run_output_dir"]}"', hint='see for copies of screen output and user supplied parameters, plus all other output')
-
-        # write raw params to a file
-        setup_util.write_raw_user_params(run_builder['output_files'], user_given_params, ml)
-
-        # set numba config environment variables, before any import of numba, eg by readers,
-        setup_util.config_numba_environment_and_random_seed(working_params['settings'], ml, crumbs='main setup', caller=self)  # must be done before any numba imports
-
-        ml.print_line()
-        ml.msg(f' {OTname} version {definitions.version["str"]} - preliminary setup')
-
-        ml.exit_if_prior_errors('parameters have errors')
-
-        # get list of files etc in time order
-        run_builder['reader_builder'] = self._get_hindcast_file_info(run_builder)
-
-        if len(working_case_list_params) == 0 or working_params['settings']['processors'] == 1:
-            # no case list
-            case_info_file = self._run_single(run_builder)
-        else:
-            # run // case list with params as base case defaults for each run
-            case_info_file = self._run_parallel(run_builder, working_case_list_params, )
-
-        ml.close()
-        return case_info_file
-    def _build_working_params(self, params, ml, crumbs=''):
-
-        if type(params) != dict:
-            ml.msg('Parameters must be of type dict, ', hint=f'Got type {str(type(params))} ', fatal_error=True, exit_now=True)
-
-        # check for reder classes
-        if 'reader' not in params or len(params['reader']) < 2:
-            ml.msg('Parameter "reader" is required, or missing required parameters',
-                   hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
-                   fatal_error=True, crumbs='case_run_set_up', caller=self)
-
-        #split apart params and case list
-
-        if 'case_list' in params:
-            case_list = params['case_list']
-            if type(case_list) != list:
-                ml.msg('Parameter "case_list"  must be of type list, ', hint=f'Got type {str(type(case_list))} ', fatal_error=True, exit_now=True)
-
-            params.pop( 'case_list')
-        else:
-             case_list =[]
-
-        working_params = setup_util.decompose_params(shared_info, params, msg_logger=ml, crumbs=crumbs + ' Forming working params ', caller=self)
-
-        # decomopse ech cae
-        working_case_list_params =[]
-        for n, c in enumerate(case_list):
-            p = setup_util.decompose_params(shared_info, c, msg_logger=ml, crumbs=crumbs + f' Forming working params from case list #{n}', caller=self)
-            working_case_list_params.append(p)
-
-        return working_params, working_case_list_params
-
-    def _run_single(self, run_builder):
-
-        ml = msg_logger
-        run_builder['caseID'] = 0 # tag case
-
-        # try catch is needed in notebooks to ensure mesage loger file is close,
-        # which allows rerunning in notebook without  permission file errors
-        try:
-            # keep oceantracker_case_runner out of main namespace
-            from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
-            # make instance of case runer and run it with decomposed working params
-            ot_case_runner = OceanTrackerCaseRunner()
-            case_summary= ot_case_runner.run_case(run_builder)
-
-        except Exception as e:
-            # ensure message loggers are closed
-
-            print(str(e))
-            traceback.print_exc()
-            return None
-
-        case_info_files = self._main_run_end(case_summary, run_builder)
-
-        # check is case ran
-        if  case_summary['case_info_file'] is None:
-            ml.msg('case_info_file is None, run may not have completed', fatal_error=True)
-
-        return case_info_files
-
-    def _main_run_end(self,case_summary,run_builder):
-        # final info output
-
-        ml = msg_logger
-        ml.set_screen_tag('End')
-        ml.print_line('Summary')
-        ml.msg('Run summary with case file names in "*_runInfo.json"',  tabs=2, note=True)
-        ml.show_all_warnings_and_errors()
-        ml.print_line( )
-
-        # count total messages
-        num_case_errors,num_case_warnings,num_case_notes = 0,0,0
-        failed_count = 0
-        for c in case_summary if type(case_summary) ==list else [case_summary]:
-            m = c['msg_counts']
-            num_case_errors +=  m['errors']
-            num_case_warnings += m['warnings']
-            num_case_notes += m['notes']
-            failed_count += c['has_errors']
-
-        case_info_files= self._write_run_info_json(case_summary,run_builder)
-
-        ml.print_line()
-        ml.msg(f'OceanTracker summary:  elapsed time =' + str(datetime.now() - self.start_date),)
-        ml.msg(f'Cases - {num_case_errors:3d} errors, {num_case_warnings:3d} warnings, {num_case_notes:3d} notes, check above', tabs=3)
-        ml.msg(f'Main  - {ml.error_count:3d} errors, {ml.warning_count:3d} warnings, {ml.note_count:3d} notes, check above', tabs=3)
-        ml.msg(f'Output in {shared_info.run_info.run_output_dir}', tabs=1)
-        ml.print_line()
-        total_errors = num_case_errors + len(ml.errors_list)
-        if total_errors > 0:
-            ml.print_line('Found errors, so some cases may not have completed')
-            ml.print_line(' ** see above or  *_caseLog.txt and *_caseLog.err files')
-            ml.print_line()
-        ml.close()
-        return case_info_files if failed_count == 0 else None
-
-    def _run_parallel(self,run_builder, working_case_list_params):
-        # run list of case params
-        ml = msg_logger
-
-        base_working_params= run_builder['working_params']
-
-        case_run_builder_list=[]
-
-        for n_case, case_params in enumerate(working_case_list_params):
-
-            case_working_params =  setup_util.merge_base_and_case_working_params(base_working_params, n_case, case_params,shared_info.base_case_only_params, ml,
-                                                                                 crumbs=f'_run_parallel case #[{n_case}]', caller=None)
-            ml.exit_if_prior_errors(f'Errors in setting up case #{n_case}')
-            case_run_builder = deepcopy(run_builder)
-            case_run_builder['caseID'] = n_case
-            case_run_builder['working_params'] = case_working_params
-
-            # add and tweak output file info
-
-            case_run_builder['output_files']['output_file_base'] += '_C%03.0f' % (n_case)
-
-            # now add builder to list to run
-            case_run_builder_list.append(case_run_builder)
-
-        # do runs num_processors
-        n_proc= base_working_params['settings']['processors']
-        if n_proc is None:
-            n_proc= max(run_builder['computer_info']['CPUs_hardware']-2, 1)
-
-        n_proc = min(n_proc, len(working_case_list_params)) # limit to number of cases
-
-        ml.progress_marker('oceantracker:multiProcessing: processors:' + str(n_proc))
-        if base_working_params['settings']['multi_processing_method'] is not None:
-            multiprocessing.set_start_method( base_working_params['settings']['multi_processing_method'] )
-
-        # run // cases
-        with multiprocessing.Pool(processes=n_proc) as pool:
-            case_summaries = pool.map(self._run1_case, case_run_builder_list)
-
-        ml.progress_marker('parallel pool complete')
-
-        case_info_files = self._main_run_end(case_summaries,run_builder)
-        return case_info_files
-
-    @staticmethod
-    def _run1_case(working_params):
-        # run one process on a particle based on given family class parameters
-        # by creating an independent instances of  model classes, with given parameters
-
-        # keep oceantracker_case_runner out of main namespace
-        from oceantracker.oceantracker_case_runner import OceanTrackerCaseRunner
-
-        ot = OceanTrackerCaseRunner()
-        case_summary= ot.run_case(deepcopy(working_params))
-        return case_summary
-
-
-    def _get_hindcast_file_info(self, run_builder ):
-        # created a dict which can be used to build a reader
-
-        ml = msg_logger
-        working_params = run_builder['working_params']
-        reader_params =  working_params['core_roles']['reader']
-        crumbs = 'Getting hydro-model file info.'
-        class_importer = class_importer_util.ClassImporter(shared_info, msg_logger, crumbs=crumbs +'> build class_importer', caller=self)
-
-        t0 = perf_counter()
-        if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
-            ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',
-                                    fatal_error=True, exit_now=True , crumbs=crumbs)
-        # check input dir exists
-
-        if path.isdir(reader_params['input_dir']):
-            ml.progress_marker(f'Found input dir "{reader_params["input_dir"]}"')
-        else:
-            ml.msg(f' Could not find input dir "{reader_params["input_dir"]}"',
-                   hint ='Check reader parameter "input_dir"', fatal_error=True, exit_now=True)
-
-        reader_params, file_list = get_hydro_model_info.find_file_format_and_file_list(reader_params, class_importer, ml)
-
-        reader = class_importer.new_make_class_instance_from_params('reader', reader_params, default_classID='reader', crumbs= crumbs + '> primary reader import',caller=self)
-
-        ml.exit_if_prior_errors('failed to get  hydo-model file info') # class name missing or missing required variables
-        reader_builder =dict(params=reader_params, file_info= reader.get_hindcast_files_info(file_list, ml) )
-
-        ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
-
-        # get file info for nested readers
-        run_builder['nested_reader_builders']= {}
-        if 'nested_readers' not in working_params['roles']: working_params['roles']['nested_readers'] =[]
-
-        for n, params in enumerate(working_params['roles']['nested_readers']):
-            t0 = perf_counter()
-            nested_params, nested_file_list = get_hydro_model_info.find_file_format_and_file_list(params,class_importer, ml)
-            nested_reader = class_importer.new_make_class_instance_from_params('reader', nested_params, crumbs=f'nested reader#{n:d}>')
-
-            d= dict(params=nested_params, file_info= nested_reader.get_hindcast_files_info(nested_file_list, ml))
-            run_builder['nested_reader_builders'].append(d)
-            ml.progress_marker(f'sorted nested hyrdo-model #{n} files in time order ', start_time=t0)
-
-        return reader_builder
-
-    def _write_run_info_json(self, case_summary,run_builder):
-        # read first case info for shared info
-        ml = msg_logger
-        o = run_builder['output_files']
-        ci = deepcopy(case_summary) # dont alter input
-        if type(ci) is not list: ci= [ci]
-
-        # finally get run totals of steps and particles across al cases and write
-        n_time_steps = 0.
-        total_alive_particles = 0
-        case_info_list=[]
-        # load log files to get info on run from solver info
-        for n, c  in enumerate(ci) :
-            n_time_steps += c['run_info']['current_model_time_step']
-            total_alive_particles += c['run_info']['total_alive_particles']
-            if c['case_info_file'] is not None :
-                case_info_list.append(path.join(path.basename(c['case_info_file'])))
-            else:
-                case_info_list.append(None)
-                ml.msg(f'Case #{n:d} has no case info file, likely has crashed',warning=True)
-
-        num_cases = len(ci)
-
-        # JSON parallel run info data
-        t0 = self.start_t0
-        t1 = perf_counter()
-        d0 = self.start_date
-        d1 = d0 + timedelta(seconds=t1-t0)
-        d = {'output_files' :{},
-            'version_info': definitions.version,
-            'computer_info':  run_builder['computer_info'],
-             'hindcast_info': run_builder['reader_builder']['file_info'],
-            'num_cases': num_cases,
-            'elapsed_time' : t1- t0,
-             'run_start': d0.isoformat(),
-             'run_end': d1.isoformat(),
-             'run_duration': time_util.seconds_to_pretty_duration_string(t1- t0),
-            'average_active_particles': total_alive_particles / num_cases if num_cases > 0 else None,
-            'average_number_of_time_steps': n_time_steps/num_cases  if num_cases > 0 else None,
-            'particles_processed_per_second': total_alive_particles /(perf_counter() - t0),
-             'case_summary' : case_summary,
-             }
-
-        # get output file names
-
-        d['output_files'] = {'root_output_dir':  o['root_output_dir'],
-                            'run_output_dir': o['run_output_dir'],
-                            'output_file_base': o['output_file_base'],
-                            'raw_output_file_base' : o['raw_output_file_base'], # this is need for grid file so it does not get a case number in // runs
-                            'runInfo_file': o['runInfo_file'],
-                            'runLog_file': o['runLog_file'],
-                            'run_error_file': o['run_error_file'],
-                            'users_params_json': o['raw_user_params'],
-                             'caseInfo_files':case_info_list
-                             }
-        json_util.write_JSON(path.join(o['run_output_dir'],o['runInfo_file']),  d)
-
-
-        case_files= [path.join(run_builder['output_files']['run_output_dir'],f) for f in case_info_list]
-        return case_files if len(case_files) > 1 else case_files[0]
-
-    def close(self):
-
-        msg_logger.close()
 

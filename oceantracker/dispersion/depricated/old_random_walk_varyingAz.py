@@ -5,7 +5,7 @@ from oceantracker.dispersion.random_walk import RandomWalk
 #from oceantracker.interpolator.util.scatch_tests.vertical_walk_at_particle_location_eval_interp import _evalBCinterp
 import numpy as np
 from oceantracker.util.numba_util import njitOT
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 class RandomWalkVaryingAZ(RandomWalk):
     # dispersion for PDE of  the form d(A_z d(V)/dz)/dz if turbulent eddy viscosity A_z depends on z adds
@@ -29,7 +29,7 @@ class RandomWalkVaryingAZ(RandomWalk):
     def update(self,n_time_step,  time_sec, active):
         # add up 2D/3D diffusion coeff as random walk vector, plus vertical advection given by
 
-        prop = si.roles.particle_properties
+        prop = si.class_roles.particle_properties
         self._add_random_walk_velocity_modifier(prop['A_Z_profile'].data, prop['A_Z_profile_vertical_gradient'].data,
                                                 self.info['random_walk_velocity'],
                                                 np.abs(si.settings['time_step']),

@@ -19,33 +19,36 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``probability_of_settlement`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
-		- default: ``0.0``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 	* ``settlement_duration`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
-		- default: ``0.0``
 		- data_type: ``<class 'float'>``
-		- expert: ``False``
-		- obsolete: ``False``
 		- min: ``0.0``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- expert: ``False``
-		- obsolete: ``False``
 
 
 
 Expert Parameters:
 *******************
+
+	* ``development`` :   ``<class 'bool'>``   *<optional>*
+		Description: Class is under development and testing
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 

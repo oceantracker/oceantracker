@@ -5,7 +5,7 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.util import time_util
 from oceantracker.util.basic_util import nopass
 from oceantracker.definitions import  particle_property_types
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 from oceantracker.util.numpy_util import possible_dtypes
 
 from oceantracker.util import  basic_util
@@ -37,17 +37,18 @@ class _BaseParticleProperty(ParameterBaseClass):
         self.role_doc('Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
 
     def initial_setup(self):
-
+        params = self.params
         s = (si.settings.particle_buffer_chunk_size,) # initial size one chunk
-        if self.params['vector_dim'] > 1:
-            s += (self.params['vector_dim'],)
+        if params['vector_dim'] > 1:
+            s += (params['vector_dim'],)
 
         # third matrix dim, so far only used recording vertical cell at each node  3D for 2 time steps
-        if self.params['prop_dim3'] > 0 and self.params['prop_dim3'] > 1:
-            s += (self.params['prop_dim3'],)
+        if params['prop_dim3'] > 0 and params['prop_dim3'] > 1:
+            s += (params['prop_dim3'],)
 
         # set up data buffer
-        self.data = np.full(s, self.params['initial_value'], dtype=self.get_dtype(), order='c')
+        params['dtype'] = self.get_dtype() # convert strings dtypes to instance
+        self.data = np.full(s, params['initial_value'], dtype=params['dtype'], order='c')
 
     def final_setup(self):
         # stuff done after initial setup of all classes/properties
@@ -56,7 +57,7 @@ class _BaseParticleProperty(ParameterBaseClass):
         name = params['name']
         if si.settings.write_tracks:
             # tweak write flag if in param lists
-            w = si.core_roles.tracks_writer
+            w = si.core_class_roles.tracks_writer
             if name in w.params['turn_off_write_particle_properties_list']: params['write'] = False
             if name in w.params['turn_on_write_particle_properties_list']:  params['write'] = True
             if params['write']:
@@ -64,7 +65,8 @@ class _BaseParticleProperty(ParameterBaseClass):
                                            is_part_prop=True,
                                            fill_value=basic_util.fillvalue(params['dtype']),
                                            vector_dim=params['vector_dim'],
-                                           attributes={'description': params['description']},
+                                           attributes=dict(description= params['description'],
+                                                       units= params['units']),
                                            dtype=params['dtype'])
 
 
@@ -99,11 +101,11 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def copy(self, prop_name, active):
         # copy from named particle
-        part_prop= si.roles.particle_properties
+        part_prop= si.class_roles.particle_properties
         particle_operations_util.copy(self.data, part_prop[prop_name].data, active)
 
     def fill_buffer(self,value):
-        n_in_buffer = si.core_roles.particle_group_manager.info['particles_in_buffer']
+        n_in_buffer = si.core_class_roles.particle_group_manager.info['particles_in_buffer']
         self.data[:n_in_buffer,...] = value
 
 
@@ -111,7 +113,7 @@ class _BaseParticleProperty(ParameterBaseClass):
         # get property values using indices sel
         return np.take(self.data,sel, axis=0)  # for integer index sel, take is faster than numpy fancy indexing and numba
 
-    def used_buffer(self): return self.data[:si.core_roles.particle_group_manager.info['particles_in_buffer'], ...]
+    def used_buffer(self): return self.data[:si.core_class_roles.particle_group_manager.info['particles_in_buffer'], ...]
 
     def full_buffer(self):  return self.data
 
@@ -154,7 +156,7 @@ class CoreParticleProperty(_BaseParticleProperty):
 
 class FieldParticleProperty(_BaseParticleProperty):
     def update(self, n_time_step, time_sec, active):
-        si.core_roles.field_group_manager.interp_field_at_particle_locations(self.params['name'], active)
+        si.core_class_roles.field_group_manager.interp_field_at_particle_locations(self.params['name'], active)
 
 
 class CustomParticleProperty(_BaseParticleProperty):

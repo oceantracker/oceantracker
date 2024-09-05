@@ -1,18 +1,17 @@
 
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>On-the-fly statistics &#8212; OceanTracker Beta 0.4 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <title>On-the-fly statistics &#8212; OceanTracker Beta 0.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -51,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -86,12 +85,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -101,7 +100,7 @@
           <div class="body" role="main">
             
   <section id="on-the-fly-statistics">
-<h1>On-the-fly statistics<a class="headerlink" href="#on-the-fly-statistics" title="Permalink to this heading">¶</a></h1>
+<h1>On-the-fly statistics<a class="headerlink" href="#on-the-fly-statistics" title="Permalink to this headline">¶</a></h1>
 <p>[This note-book is in oceantracker/tutorials_how_to/]</p>
 <p>Scaling up particle numbers to millions will create large volumes of
 particle track data. Storing and analyzing these tracks is slow and
@@ -132,7 +131,7 @@ statistics classes, each counting particles in different layers, or
 classes to separately count those moving and those on the bottom hoping
 to be re-suspended.</p>
 <section id="gridded-statistics">
-<h2>Gridded statistics<a class="headerlink" href="#gridded-statistics" title="Permalink to this heading">¶</a></h2>
+<h2>Gridded statistics<a class="headerlink" href="#gridded-statistics" title="Permalink to this headline">¶</a></h2>
 <p>These are heat maps of counts binned into cells of a regular grid. Along
 with heat maps of particle counts, users can optionally build a heat
 maps of named particle properties, eg. the value decaying particle
@@ -141,7 +140,7 @@ by default grids are centred on each release group, thus there are
 different grid locations for each release group.</p>
 </section>
 <section id="polygon-statistics">
-<h2>Polygon statistics<a class="headerlink" href="#polygon-statistics" title="Permalink to this heading">¶</a></h2>
+<h2>Polygon statistics<a class="headerlink" href="#polygon-statistics" title="Permalink to this headline">¶</a></h2>
 <p>These particle counts can be used to calculate the connectivity between
 each release group and a user given list of “statistics” polygons. Also,
 used to estimate the influence of each release group on a particle
@@ -156,7 +155,7 @@ within each statistics polygon at each ‘update_interval’ as one way to
 estimate particle residence time for each release group.</p>
 </section>
 <section id="particle-property-statistics">
-<h2>Particle property statistics<a class="headerlink" href="#particle-property-statistics" title="Permalink to this heading">¶</a></h2>
+<h2>Particle property statistics<a class="headerlink" href="#particle-property-statistics" title="Permalink to this headline">¶</a></h2>
 <p>Both types of statistics can also record sums of user designated
 particle properties within each given grid cell or statistics polygon,
 which originate from each release group. These sums enabling mean values
@@ -169,7 +168,7 @@ property values and particle counts in each grid cell or polygon, for
 each release group.</p>
 </section>
 <section id="gridded-heat-map-example">
-<h2>Gridded/Heat map example<a class="headerlink" href="#gridded-heat-map-example" title="Permalink to this heading">¶</a></h2>
+<h2>Gridded/Heat map example<a class="headerlink" href="#gridded-heat-map-example" title="Permalink to this headline">¶</a></h2>
 <p>The below uses the helper class method to extends the minimal_example to
 add</p>
 <ul class="simple">
@@ -318,7 +317,7 @@ Main       Cases -   0 errors,   4 warnings,   5 notes, check above
 Main       Main  -   0 errors,   1 warnings,   2 notes, check above
 Main --------------------------------------------------------------------------</pre>
 <section id="read-and-plot-heat-maps">
-<h3>Read and plot heat maps<a class="headerlink" href="#read-and-plot-heat-maps" title="Permalink to this heading">¶</a></h3>
+<h3>Read and plot heat maps<a class="headerlink" href="#read-and-plot-heat-maps" title="Permalink to this headline">¶</a></h3>
 <p>The statistics output from the above run is in file
 output:raw-latex:<cite>heat</cite>_map_example:raw-latex:<cite>heat</cite>_map_example_stats_gridded_time_my_heatmap.nc</p>
 <p>This netcdf file can be read and organized as a python dictionary by
@@ -370,11 +369,11 @@ etc for plotting</p>
 </section>
 </section>
 <section id="polygon-example">
-<h2>Polygon example<a class="headerlink" href="#polygon-example" title="Permalink to this heading">¶</a></h2>
+<h2>Polygon example<a class="headerlink" href="#polygon-example" title="Permalink to this headline">¶</a></h2>
 </section>
 </section>
 <section id="add-polygon-stats-example-with-plotting">
-<h1>add polygon stats example with plotting<a class="headerlink" href="#add-polygon-stats-example-with-plotting" title="Permalink to this heading">¶</a></h1>
+<h1>add polygon stats example with plotting<a class="headerlink" href="#add-polygon-stats-example-with-plotting" title="Permalink to this headline">¶</a></h1>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Polygon Statistics example.py run using dictionary of parameters</span>
 <span class="c1">#------------------------------------------------</span>
 <span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
@@ -515,7 +514,7 @@ Main       Cases -   0 errors,   8 warnings,  10 notes, check above
 Main       Main  -   0 errors,   2 warnings,   4 notes, check above
 Main --------------------------------------------------------------------------</pre>
 <section id="read-polygon-connectivity-statistics">
-<h2>Read polygon/connectivity statistics<a class="headerlink" href="#read-polygon-connectivity-statistics" title="Permalink to this heading">¶</a></h2>
+<h2>Read polygon/connectivity statistics<a class="headerlink" href="#read-polygon-connectivity-statistics" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Read polygon stats and calculate connectivity matrix</span>
 <span class="kn">from</span> <span class="nn">read_oceantracker.python</span> <span class="kn">import</span> <span class="n">load_output_files</span>
 
@@ -538,7 +537,7 @@ Main --------------------------------------------------------------------------<
 <img alt="info/how_to/G_onthefly_statistics_files%5CG_onthefly_statistics_8_2.png" src="info/how_to/G_onthefly_statistics_files%5CG_onthefly_statistics_8_2.png" />
 </section>
 <section id="time-verses-age-statistics">
-<h2>Time verses Age statistics<a class="headerlink" href="#time-verses-age-statistics" title="Permalink to this heading">¶</a></h2>
+<h2>Time verses Age statistics<a class="headerlink" href="#time-verses-age-statistics" title="Permalink to this headline">¶</a></h2>
 <p>Both gridded and polygon statistics come in two types, “time” and “age”.</p>
 <ul class="simple">
 <li><p>“time” statistics are time series, or snapshots, of particle numbers
@@ -581,7 +580,7 @@ grid cell from each potential source location.</p></li>
       &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

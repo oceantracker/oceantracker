@@ -1,12 +1,12 @@
-from oceantracker.particle_concentrations._base_user_triangle_properties import BaseTriangleProperties
+from oceantracker.particle_concentrations._base_user_triangle_properties import _BaseTriangleProperties
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.util.numba_util import njitOT
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 import numpy as np
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
-class  ParticleConcentrations2D(BaseTriangleProperties):
+class  ParticleConcentrations2D(_BaseTriangleProperties):
     def __init__(self):
         super().__init__()
         # set up info/attributes
@@ -20,7 +20,7 @@ class  ParticleConcentrations2D(BaseTriangleProperties):
         self.check_class_required_fields_prop_etc(required_props_list=['tide','water_depth'])
     def set_up_data_buffers(self):
 
-        grid = si.core_roles.field_group_manager.grid
+        grid = si.core_class_roles.field_group_manager.grid
         # set up data buffer
         s = (grid['triangles'].shape[0],)
 
@@ -50,8 +50,8 @@ class  ParticleConcentrations2D(BaseTriangleProperties):
     def update(self,n_time_step, time_sec):
         params= self.params
 
-        grid = si.core_roles.field_group_manager.grid
-        part_prop =si.roles.particle_properties
+        grid = si.core_class_roles.field_group_manager.grid
+        part_prop =si.class_roles.particle_properties
 
         if not params['update_values_every_time_step'] and abs(time_sec - self.info['time_last_stats_recorded']) < params['update_interval']: return
 

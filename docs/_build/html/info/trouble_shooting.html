@@ -1,18 +1,17 @@
 
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Trouble shooting &#8212; OceanTracker Beta 0.4 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <title>Trouble shooting &#8212; OceanTracker Beta 0.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
@@ -84,12 +83,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -99,26 +98,26 @@
           <div class="body" role="main">
             
   <section id="trouble-shooting">
-<h1>Trouble shooting<a class="headerlink" href="#trouble-shooting" title="Permalink to this heading">¶</a></h1>
+<h1>Trouble shooting<a class="headerlink" href="#trouble-shooting" title="Permalink to this headline">¶</a></h1>
 <p>There are a number of ways a run can produce error messages.
 Known errors caught by OT should have  graceful exit error.
 Others with trace back are likely
 aspects that OT is not yet aware of, or code bugs for the developer to fix.
 Warnings or Notes do not cause OT to exit.</p>
 <section id="first-step">
-<h2>First step<a class="headerlink" href="#first-step" title="Permalink to this heading">¶</a></h2>
-<p>Carefully, look back at the screen output or <a href="#id1"><span class="problematic" id="id2">*</span></a>_caseLog_log.txt
+<h2>First step<a class="headerlink" href="#first-step" title="Permalink to this headline">¶</a></h2>
+<p>Carefully, look back at the screen output or <a href="#system-message-1"><span class="problematic" id="problematic-1">*</span></a>_caseLog_log.txt
 file, and find the first error flagged.
 Some errors spawn other errors, so look back before the last reported error.</p>
 </section>
 <section id="anticipated-errors">
-<h2>Anticipated errors<a class="headerlink" href="#anticipated-errors" title="Permalink to this heading">¶</a></h2>
+<h2>Anticipated errors<a class="headerlink" href="#anticipated-errors" title="Permalink to this headline">¶</a></h2>
 <p>These are errors that results from internal checks done by OT.
 They are usually to to with errors in the settings or parameters supplied or issues with the hindcast.
 They normally don’t have traceback information and come with both a message and a hint about what to to about it.</p>
 </section>
 <section id="unexpected-errors">
-<h2>Unexpected errors<a class="headerlink" href="#unexpected-errors" title="Permalink to this heading">¶</a></h2>
+<h2>Unexpected errors<a class="headerlink" href="#unexpected-errors" title="Permalink to this headline">¶</a></h2>
 <p>These are raised errors, those that generate a full stack traceback.The are likely
 OT code issues or bugs. Which could be due to:</p>
 <ul class="simple">
@@ -129,23 +128,23 @@ OT code issues or bugs. Which could be due to:</p>
 <p>These errors need to be reported to the developer to fix.</p>
 </section>
 <section id="reporting-an-error">
-<h2>Reporting an error<a class="headerlink" href="#reporting-an-error" title="Permalink to this heading">¶</a></h2>
+<h2>Reporting an error<a class="headerlink" href="#reporting-an-error" title="Permalink to this headline">¶</a></h2>
 <p>In reporting an error to the developer, please</p>
 <ul>
 <li><p>Rerun the code with setting debug = True, which may give more informative error messages.</p></li>
 <li><p>Send the to developer the following files:</p>
 <blockquote>
-<div><p># <a href="#id3"><span class="problematic" id="id4">*</span></a>_caseLog_log.txt, screen log</p>
-<p>#  <a href="#id5"><span class="problematic" id="id6">*</span></a>_caseInfo.json, lots of useful info</p>
-<p># <a href="#id7"><span class="problematic" id="id8">*</span></a>_raw_user_params.json, user supplied settings/parameters</p>
-<p># <a href="#id9"><span class="problematic" id="id10">*</span></a>_runInfo.json,  global information about the hindcast and run</p>
+<div><p># <a href="#system-message-2"><span class="problematic" id="problematic-2">*</span></a>_caseLog_log.txt, screen log</p>
+<p>#  <a href="#system-message-3"><span class="problematic" id="problematic-3">*</span></a>_caseInfo.json, lots of useful info</p>
+<p># <a href="#system-message-4"><span class="problematic" id="problematic-4">*</span></a>_raw_user_params.json, user supplied settings/parameters</p>
+<p># <a href="#system-message-5"><span class="problematic" id="problematic-5">*</span></a>_runInfo.json,  global information about the hindcast and run</p>
 </div></blockquote>
 </li>
 <li><p>If requested also give access to</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>all the  output files, eg. tracks etc</p></li>
-<li><p>a sample of the hindcast in order to reproduce the bug, with the given <a href="#id11"><span class="problematic" id="id12">*</span></a>_raw_user_params.json file.</p></li>
+<li><p>a sample of the hindcast in order to reproduce the bug, with the given <a href="#system-message-6"><span class="problematic" id="problematic-6">*</span></a>_raw_user_params.json file.</p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -179,7 +178,7 @@ OT code issues or bugs. Which could be due to:</p>
       &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

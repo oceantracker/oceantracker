@@ -8,10 +8,10 @@ import shutil
 import numpy as np
 from oceantracker import definitions
 from oceantracker.util import cord_transforms
-
+from plot_oceantracker import plot_tracks
 
 def set_output_loc(fn):
-    d =  dict(output_file_base=path.split(fn)[-1].split('.')[0],
+    d =  dict(output_file_base=     path.split(fn)[-1].split('.')[0],
             root_output_dir=path.join(path.dirname(fn), 'output'),
             )
     return d
@@ -21,18 +21,19 @@ def base_settings(fn,args,label=None):
     if args.variant is not None: s+=f'_{args.variant:02d}'
     if label is not None: s += f'_{label}'
     d =  dict(output_file_base=s,
-            root_output_dir=path.join(path.dirname(fn), 'output'),
+            root_output_dir=path.join(definitions.default_output_dir, 'unit_tests'),
             time_step=600.,  # 10 min time step
             use_random_seed = True,
             NCDF_time_chunk=1,
-            debug=True
+            debug=True,
+
             )
     return d
 
 image_dir= 'output'
 reader_demo_schisim=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
-                 input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                 file_mask='demoHindcastSchism*.nc',
+                 input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','schsim3D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                file_mask='demo_hindcast_schisim3D*.nc',
 )  # file mask to search for
 
 reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.dev_GenericStructuredReader',
@@ -156,3 +157,35 @@ ax = [1591000, 1601500, 5478500, 5491000]
 def read_tracks(case_info_file):
     return load_output_files.load_track_data(case_info_file)
 
+def compare_reference_run(case_info_file, args):
+
+    reference_case_info_file = case_info_file.replace('unit_tests', 'unit_test_reference_cases')
+    if args.reference_case:
+        # rewrite reference case output
+        shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
+
+    tracks = read_tracks(case_info_file)
+    tracks_ref = read_tracks(reference_case_info_file)
+    dx = np.abs(tracks['x'] - tracks_ref['x'])
+
+    # print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
+
+    print(f'(x,y,z) differences from reference run: "{path.basename(case_info_file).split(".")[0]}"' )
+    print(' min  ', np.nanmin(np.nanmin(dx, axis=0), axis=0))
+    print(' mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
+    print(' max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
+
+
+def show_track_plot(case_info_file, args):
+
+    if not args.plot : return
+    tracks= read_tracks(case_info_file)
+
+    movie_file1= path.join(image_dir, 'decay_movie_frame.mp4') if args.save_plots else None
+
+    anim= plot_tracks.animate_particles(tracks,
+                           show_grid=True, show_dry_cells=True,
+                            #part_color_map='hot',
+                           #size_using_data=tracks['a_pollutant'],
+                           #colour_using_data=tracks['a_pollutant'],
+                           movie_file=movie_file1)

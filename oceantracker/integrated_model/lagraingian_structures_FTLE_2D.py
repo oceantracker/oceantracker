@@ -2,14 +2,14 @@ import numpy as np
 from os import path
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.ncdf_util import NetCDFhandler
-from oceantracker.integrated_model._base_model import  BaseModel
+from oceantracker.integrated_model._base_model import  _BaseIntegratedModel
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
 #from oceantracker.util.parameter_checking import ParameterListCheckerV2 as PLC2
 from oceantracker.util import time_util
 from copy import  deepcopy
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
-class dev_LagarangianStructuresFTLE2D(BaseModel):
+class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
     '''Time series of Lagrangian Coherent Structures heat maps,
      calculated as Finite-Time Lyapunov exponents (FTLEs) at given lag times,
      see Haller, G., 2015. Lagrangian coherent structures.
@@ -50,12 +50,12 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
         params = self.params
         params['lags'] = np.asarray(params['lags'] )
         # turn off dispersion
-        si.settings.include_dispersion = False
+        si.settings.use_dispersion = False
         #, backtracking= params['backwards'])and ste forrad/mackwads
 
         # make a grid release group at each time interval and grid
         # clear existing releases
-        si.roles.release_groups={} # not use with other releases
+        si.class_roles.release_groups={} # not use with other releases
 
         # checks on params
         if params['grid_center'].shape[0] != params['grid_span'].shape[0]:
@@ -127,7 +127,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
         time = []
         md = si.run_info.model_direction
 
-        for name, rg in si.roles.release_groups.items():
+        for name, rg in si.class_roles.release_groups.items():
             # time of lags after start of release group
             t = rg.schedulers['release'].info['start_time'] + md*params['lags']
 
@@ -156,10 +156,10 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
         self._open_output_file()
 
     def update(self, n_time_step, time_sec):
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         # do LSC calculation on schedule
-        for n, rg in enumerate(si.roles.release_groups.values()):
+        for n, rg in enumerate(si.class_roles.release_groups.values()):
              if rg.schedulers['LCScalculation_scheduler'].do_task(n_time_step):
                 # find particles in this release group to do calculations at this lag
                 sel = part_prop['IDrelease_group'].compare_all_to_a_value('eq', rg.info['IDrelease_group'], out=self.get_partID_buffer('ID1'))
@@ -172,7 +172,7 @@ class dev_LagarangianStructuresFTLE2D(BaseModel):
     def _calculate_LCS(self, n_pulse ,n_grid, n_lag, sel):
         params = self.params
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         # make grid of current locations
         self.x_at_lag.fill(np.nan)

@@ -35,7 +35,7 @@ def set_values(x1, values, active, scale=1.0):
     else: #case Dim
         for n in range(active.shape[0]):
             nn=active[n]
-            for m in range(values.shape[1]):
+            for m in range(x1.shape[1]):
                 x1[nn, m] = values[n, m]*scale
 
 @njitOT

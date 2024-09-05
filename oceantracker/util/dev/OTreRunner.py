@@ -3,7 +3,7 @@
 import argparse
 from datetime import datetime
 from oceantracker.util import time_util
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 def no_emit(msg_header, s): return
 
@@ -84,12 +84,12 @@ class OceanTrackerReRunner(object):
         self.emit = emit_method
         otsim = self.otsim
         si = otsim.shared_info
-        pgm = otsim.shared_info.core_roles.particle_group_manager
-        solver = otsim.shared_info.core_roles.solver
-        reader = si.core_roles.reader
+        pgm = otsim.shared_info.core_class_roles.particle_group_manager
+        solver = otsim.shared_info.core_class_roles.solver
+        reader = si.core_class_roles.reader
 
         # clear, then add new release groups   re formed with new param
-        si.roles.release_groups=[]
+        si.class_roles.release_groups=[]
         t_start, t_end, estimated_total_particles= None
 
 
@@ -98,7 +98,7 @@ class OceanTrackerReRunner(object):
         si.model_duration=  min(abs(t_end - t_start), si.run_params['duration'])
 
         # reset any stats, reallocate count arrays, based on new release groups
-        for s in si.roles.particle_statistics:
+        for s in si.class_roles.particle_statistics:
             s.initial_setup()
 
         pgm.info['num_released'] = 0
@@ -107,7 +107,7 @@ class OceanTrackerReRunner(object):
 
     def _get_engine_info(self):
         otsim = self.otsim
-        grid =  si.core_roles.readergrid
+        grid =  si.core_class_roles.readergrid
 
         reader = otsim.shared_info.reader
         t1 = reader.get_first_time_in_hindcast()

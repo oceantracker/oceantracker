@@ -1,18 +1,17 @@
 
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>OceanTracker &#8212; OceanTracker Beta 0.4 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <title>OceanTracker &#8212; OceanTracker Beta 0.5 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -50,7 +49,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="info/about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="info/features.html">Features</a></li>
@@ -70,12 +69,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -85,14 +84,14 @@
           <div class="body" role="main">
             
   <section id="oceantracker">
-<span id="home"></span><h1><em>OceanTracker</em><a class="headerlink" href="#oceantracker" title="Permalink to this heading">¶</a></h1>
+<span id="home"></span><h1><em>OceanTracker</em><a class="headerlink" href="#oceantracker" title="Permalink to this headline">¶</a></h1>
 <section id="fast-particle-tracking-in-unstructured-grids">
-<h2>Fast particle tracking in unstructured grids<a class="headerlink" href="#fast-particle-tracking-in-unstructured-grids" title="Permalink to this heading">¶</a></h2>
+<h2>Fast particle tracking in unstructured grids<a class="headerlink" href="#fast-particle-tracking-in-unstructured-grids" title="Permalink to this headline">¶</a></h2>
 <center>
   <video width="70%" controls autoplay loop>
  <source src="./_static/demos/demo02_animation.mp4">
  </video>
-</center><p>OceanTracker is a fast extendable code for offline particle tracking in unstructured grids <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, which also works with regular grid hydrodynamic models.</p>
+</center><p>OceanTracker is a fast extendable code for offline particle tracking in unstructured grids <a class="footnote-reference brackets" href="#footnote-1" id="footnote-reference-1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, which also works with regular grid hydrodynamic models.</p>
 <p>OceanTracker’s speed enables millions of particles to be simulated in unstructured grids. This
 significantly increases the range of particle behaviours that can be modeled and the quality of statistics
 derived from the particles. To eliminate the need to store and wade through the analysis of vast volumes of recorded particle tracks,
@@ -101,9 +100,9 @@ the code has the ability to calculate statistics on the fly, such as heat maps a
 or by an expert adding their specialised code for novel particle behaviours or statistics, to the computational pipe line.</p>
 <p>Code is on <a class="reference external" href="https://github.com/oceantracker/oceantracker/">github</a> , released under the MIT licence.</p>
 <section id="features">
-<h3>Features<a class="headerlink" href="#features" title="Permalink to this heading">¶</a></h3>
+<h3>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>Fast and extendable offline native grid particle tracking for unstructured grids <a class="footnote-reference brackets" href="#id3" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></li>
+<li><p>Fast and extendable offline native grid particle tracking for unstructured grids <a class="footnote-reference brackets" href="#footnote-1" id="footnote-reference-2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></li>
 <li><p>Calculate the tracks of millions of particles</p></li>
 <li><p>User configurable settings and computational pipeline driven entirely by json or yaml text files.</p></li>
 <li><p>Add user defined particle properties and behaviours from parameter text files.</p></li>
@@ -123,7 +122,7 @@ or by an expert adding their specialised code for novel particle behaviours or s
 </ul>
 </section>
 <section id="architecture">
-<h3>Architecture<a class="headerlink" href="#architecture" title="Permalink to this heading">¶</a></h3>
+<h3>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Implemented in Python</p></li>
 <li><p>Driven by parameters in JSON or YAML file, or in code from a Python dictionary</p></li>
@@ -138,14 +137,14 @@ or by an expert adding their specialised code for novel particle behaviours or s
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This is Oceantracker version: Beta 0.4.The code its still evolving, documentation needs to be expanded and proof read. If you find bugs, have suggestions or ideas make contact!</p>
-</div>
-<aside class="footnote brackets" id="id3" role="note">
+<p>This is Oceantracker version: Beta 0.5.The code its still evolving, documentation needs to be expanded and proof read. If you find bugs, have suggestions or ideas make contact!</p>
+</aside>
+<aside class="footnote brackets" id="footnote-1" role="note">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<span class="backrefs">(<a role="doc-backlink" href="#footnote-reference-1">1</a>,<a role="doc-backlink" href="#footnote-reference-2">2</a>)</span>
 <p>Vennell, R., Scheel, M., Weppe, S., Knight, B. and Smeaton, M., 2021. <a class="reference external" href="https://link.springer.com/article/10.1007/s10236-020-01436-7/">Fast lagrangian particle tracking in unstructured ocean model grids</a> ,  Ocean Dynamics, 71(4), pp.423-437.</p>
 </aside>
-<p><em>Last updated:</em> 2023-06-27</p>
+<p><em>Last updated:</em> 2024-09-03</p>
 </section>
 </section>
 </section>
@@ -172,7 +171,7 @@ or by an expert adding their specialised code for novel particle behaviours or s
       &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

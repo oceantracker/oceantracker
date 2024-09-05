@@ -72,7 +72,9 @@ class MessageLogger(object ):
 
     def msg(self, msg_text, warning=False, note=False,
             hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
-            fatal_error=False, exit_now=False, exception = None, traceback_str=None, dev=False):
+            spell_check=None,possible_values=None,
+            fatal_error=False, exit_now=False, exception = None,
+            traceback_str=None, dev=False):
 
 
         if exit_now : fatal_error = True
@@ -114,6 +116,9 @@ class MessageLogger(object ):
                     m.append(msg_str('hint: ' + l, tabs + 3))
             else:
                 m.append(msg_str('hint: ' + hint, tabs + 3))
+
+        if spell_check is not None:
+           m.append(f'\n Closest matches to "{spell_check}" = {difflib.get_close_matches(spell_check, possible_values, cutoff=0.4)}')
 
         # make crumb trail
         if crumbs is not None and crumbs != '':

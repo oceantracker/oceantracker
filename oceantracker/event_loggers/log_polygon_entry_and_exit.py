@@ -3,7 +3,7 @@ import numpy as np
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 
 from oceantracker.particle_properties.util import particle_operations_util
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 class LogPolygonEntryAndExit(BaseEventLogger):
     # assumes non over lapping polygons
@@ -40,7 +40,7 @@ class LogPolygonEntryAndExit(BaseEventLogger):
     def update(self,n_time_step, time_sec):
         self.start_update_timer()
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         event_polygon = part_prop['event_polygon']
         current_polygon_for_event_logging = part_prop['current_polygon_for_event_logging']
 

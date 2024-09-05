@@ -46,18 +46,7 @@ def main(args):
 
     case_info_file = ot.run()
 
-    tracks= test_definitions.read_tracks(case_info_file)
-
-    movie_file1= path.join(test_definitions.image_dir, 'decay_movie_frame.mp4') if args.save_plots else None
-
-    anim= plot_tracks.animate_particles(tracks, axis_lims= test_definitions.ax,
-                           show_grid=True, show_dry_cells=True,
-                            #part_color_map='hot',
-                           #size_using_data=tracks['a_pollutant'],
-                           #colour_using_data=tracks['a_pollutant'],
-                           movie_file=movie_file1)
-
-    #plot_tracks.plot_utilities.animation_output(anim, 'output\test.mp4', fps=15, dpi=600, show=True)
+    test_definitions.show_track_plot(case_info_file, args)
 
     return case_info_file
 

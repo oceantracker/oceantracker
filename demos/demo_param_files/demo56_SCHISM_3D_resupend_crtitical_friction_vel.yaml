@@ -58,8 +58,8 @@ particle_statistics:
   update_interval: 3600
   z_min: -2
 reader:
-  file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  file_mask: demo_hindcast_schisim3D_00.nc
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   load_fields:
   - water_temperature
 regrid_z_to_uniform_sigma_levels: true

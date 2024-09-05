@@ -2,7 +2,7 @@
 SplitParticles
 ###############
 
-**Doc:** 
+**Doc:**     Splits  particles in two at  given time interval,    for given status values and  given particle age range.    Simulates reproduction, but can produce large numbers fast!    
 
 **short class_name:** SplitParticles
 
@@ -18,49 +18,69 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-		- required_type: ``<class 'str'>``
-		- expert: ``False``
+		- data_type: ``<class 'str'>``
 
-	* ``probability_of_splitting`` :   ``<class 'float'>``   *<optional>*
+	* ``interval`` :   ``<class 'float'>``   *<optional>*
+		Description: time interval between splits
+
+		- default: ``86400``
+		- data_type: ``<class 'float'>``
+		- units: ``sec``
+		- min: ``60``
+
+	* ``max_age`` :   ``<class 'float'>``   *<optional>*
+		Description: maximum particle age to split
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``sec``
+
+	* ``min_age`` :   ``<class 'float'>``   *<optional>*
+		Description: minumim particle age to start splitting
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``sec``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``probability`` :   ``<class 'float'>``   *<optional>*
+		Description: probability of splitting at each given interval
+
 		- default: ``1.0``
-		- required_type: ``<class 'float'>``
+		- data_type: ``<class 'float'>``
 		- min: ``0.0``
 		- max: ``1.0``
-		- expert: ``False``
 
-	* ``split_status_equal_to`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-		- required_type: ``<class 'str'>``
+	* ``statuses``:  *<optional>*
+		Description: - list of status names to cull
+
+		- a list containing type:  ``[]``
+		- default list : ``['moving', 'on_bottom', 'stranded_by_tide', 'stationary']``
+		- data_type: ``<class 'str'>``
 		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
-		- expert: ``False``
-
-	* ``split_status_greater_than`` :   ``<class 'str'>``   *<optional>*
-		- default: ``dead``
-		- required_type: ``<class 'str'>``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
-		- expert: ``False``
-
-	* ``splitting_interval`` :   ``<class 'float'>``   *<optional>*
-		- default: ``3600``
-		- required_type: ``<class 'float'>``
-		- min: ``1``
-		- expert: ``False``
-
-	* ``user_instance_info`` :   ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``   *<optional>*
-		Description: a user setable ID which can be added information about the instance which remains in its params dict for later use, can be str, int,float, list or tuple
-
-		- default: ``None``
-		- required_type: ``[<class 'str'>, <class 'int'>, <class 'float'>, <class 'tuple'>, <class 'list'>]``
-		- expert: ``False``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``1``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
-		- required_type: ``<class 'str'>``
-		- expert: ``False``
+		- data_type: ``<class 'str'>``
 
 
 
 Expert Parameters:
 *******************
+
+	* ``development`` :   ``<class 'bool'>``   *<optional>*
+		Description: Class is under development and testing
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 

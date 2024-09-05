@@ -1,7 +1,8 @@
 # To do List
 
 # Required for version 0.5
-
+1. check all required variables are present at end of setup
+2. 1. check key read variables have required types 
 1. ScishimV5 reader
     1. Bug fix in sigma profile builder for WHOI hindcast
 1. DEFT3D FM

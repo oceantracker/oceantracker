@@ -28,8 +28,9 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
     ax.set_xlim(axis_lims[:2])
     ax.set_ylim(axis_lims[2:])
 
-    # fill domain as white
-    ax.fill(grid['grid_outline']['domain']['mask'][:,0], grid['grid_outline']['domain']['mask'][:,1],
+    # fill outs domain as land
+    mask_xy= grid['grid_outline']['domain_masking_polygon']
+    ax.fill(mask_xy[:,0], mask_xy[:,1],
             edgecolor= None, facecolor=color_palette['land'], linewidth=.5, zorder=3)
 
     # plot islands from outline
@@ -180,7 +181,7 @@ def add_heading(txt):
 
 def add_map_scale_bar(axis_lims, ax=plt.gca(),x_size_fraction=10 ):
     dx= axis_lims[1]- axis_lims[0]
-    ds = np.power(10, np.ceil(np.log10(dx / x_size_fraction)))
+    ds = np.power(10, max(np.floor(np.log10(dx / x_size_fraction)),1))
     lab = '%1.0f m' % ds if ds < 1000 else  '%1.0f km' % (ds/1000)
     fontprops = font_manager.FontProperties(size=8)
     scalebar = AnchoredSizeBar(ax.transData,
