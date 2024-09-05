@@ -1,6 +1,7 @@
-numpy < 1.23
+numpy < 2
 numba
 netcdf4
+xarray
 scipy
 pyproj
 setuptools

@@ -6,9 +6,9 @@ venv
 /docs/_build/doctrees/
 /oceantracker.egg-info/
 /tutorials_how_to/output/
-/tests/misc/output/
+/dev/misc/output/
 /demos/root_output_dir/
-/tests/dev_testing/root_output_dir/
+/dev/dev_testing/root_output_dir/
 /tests/unit_tests/output/
 /output/
 /tests/unit_tests/reference_case_output/

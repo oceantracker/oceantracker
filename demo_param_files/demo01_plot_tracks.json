@@ -5,9 +5,8 @@
     "time_step": 600,
     "debug": true,
     "reader": {
-        "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
-        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "demoHindcast2D*.nc",
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "Random_order_*.nc",
         "dimension_map": {
             "time": "time",
             "node": "nodes"
@@ -39,8 +38,9 @@
         "time_steps_per_per_file": 700,
         "update_interval": 4500
     },
-    "release_groups": {
-        "mypoints1": {
+    "release_groups": [
+        {
+            "name": "mypoints1",
             "points": [
                 [
                     1594500,
@@ -50,25 +50,29 @@
             "pulse_size": 200,
             "release_interval": 0
         }
-    },
-    "particle_properties": {
-        "Oxygen": {
+    ],
+    "particle_properties": [
+        {
+            "name": "Oxygen",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0,
             "initial_value": 20.0
         },
-        "distance_travelled": {
+        {
+            "name": "distance_travelled",
             "class_name": "DistanceTravelled"
         },
-        "age_decay": {
+        {
+            "name": "age_decay",
             "class_name": "AgeDecay",
             "decay_time_scale": 86400.0
         },
-        "my_constant_prop": {
+        {
+            "name": "my_constant_prop",
             "class_name": "ParticleLoad",
             "initial_value": 100
         }
-    },
+    ],
     "backtracking": true,
     "root_output_dir": "output"
 }

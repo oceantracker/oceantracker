@@ -12,6 +12,7 @@ if __name__ == "__main__":
     parser.add_argument('--variant',type=int)
     parser.add_argument('-backtracking', action='store_true')
     parser.add_argument('-reference_case', action='store_true')
+    parser.add_argument('-plot', action='store_true')
     parser.add_argument('-save_plots', action='store_true')
 
     args = parser.parse_args()

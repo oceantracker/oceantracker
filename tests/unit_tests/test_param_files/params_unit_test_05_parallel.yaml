@@ -59,8 +59,8 @@ particle_statistics:
   z_min: -10.0
 processors: 2
 reader:
-  file_mask: demoHindcastSchism*.nc
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  file_mask: demoHindcastSchism3D.nc
+  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast\deprecated
 resuspension:
   critical_friction_velocity: 0.005
 root_output_dir: E:\H_Local_drive\ParticleTracking\oceantracker\tests\unit_tests\output

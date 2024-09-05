@@ -12,7 +12,7 @@ def main(args):
     ot.settings(**test_definitions.base_settings(__file__, args))
     hm = test_definitions.hydro_model['demoSchism']
 
-    ot.settings(time_step=1800,include_dispersion=False,backtracking=True,
+    ot.settings(time_step=1800,use_dispersion=False,backtracking=True,
              use_A_Z_profile=False, )
 
 

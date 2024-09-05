@@ -2,7 +2,7 @@ from oceantracker.particle_properties._base_particle_properties import CustomPar
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 class ParticleLoad(CustomParticleProperty):
     '''
@@ -21,7 +21,7 @@ class ParticleLoad(CustomParticleProperty):
     def initial_setup(self):
         super().initial_setup()
         info= self.info
-        pgm = si.core_roles.particle_group_manager
+        pgm = si.core_class_roles.particle_group_manager
 
         si.add_class('particle_properties', class_name='CoreParticleProperty', name=self.params['name'] + '_initial_value',time_varying=False, write=False)
 

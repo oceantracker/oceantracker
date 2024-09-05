@@ -4,7 +4,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.field_group_manager.util import  field_group_manager_util
 import numpy as np
 from oceantracker.util import time_util
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 from time import  perf_counter
 from copy import copy, deepcopy
 from oceantracker.definitions import  cell_search_status_flags
@@ -25,8 +25,8 @@ class DevNestedFields(ParameterBaseClass):
         if si.settings.write_tracks:
             pass
 
-        fgm_outer_grid = si._class_importer.new_make_class_instance_from_params('field_group_manager',dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
-                                                                                crumbs='adding outer hydro-grid field manager for nested grid run')
+        fgm_outer_grid = si.class_importer.make_class_instance_from_params('field_group_manager', dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
+                                                                           crumbs='adding outer hydro-grid field manager for nested grid run')
         fgm_outer_grid.initial_setup()
         hi = fgm_outer_grid.get_hindcast_info()
         self.hydro_time_step = hi['time_step']
@@ -44,8 +44,8 @@ class DevNestedFields(ParameterBaseClass):
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}, name= "{name}"')
 
             t0= perf_counter()
-            fgm_nested =  si._class_importer.new_make_class_instance_from_params('field_group_manager',dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
-                                                     crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
+            fgm_nested =  si.class_importer.make_class_instance_from_params('field_group_manager', dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
+                                                                            crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
 
             fgm_nested._setup_hydro_reader(rb)
 
@@ -168,7 +168,7 @@ class DevNestedFields(ParameterBaseClass):
 
     def are_points_inside_domain(self,x,include_dry_cells):
         # used to check initial release points only
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         # todo below look in all grids, starting with outer, faster to find first grid starting with nesteds
         # look find grid containing points, starting with last nested grid
@@ -208,7 +208,7 @@ class DevNestedFields(ParameterBaseClass):
 
     def setup_time_step(self, time_sec, xq, active):
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
 
         # update outer grid
@@ -272,7 +272,7 @@ class DevNestedFields(ParameterBaseClass):
 
         # loop over grids find interpolated values
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
             # find particles in this hydro-grid
@@ -290,7 +290,7 @@ class DevNestedFields(ParameterBaseClass):
     def update_tidal_stranding_status(self, time_sec, alive):
         # loop over grids
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
             # find particles in this hydro-grid

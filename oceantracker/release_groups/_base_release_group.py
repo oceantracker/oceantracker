@@ -6,9 +6,9 @@ from numba import njit
 from oceantracker.util.numba_util import njitOT
 
 from oceantracker.util.basic_util import nopass
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
-class BaseReleaseGroup(ParameterBaseClass):
+class _BaseReleaseGroup(ParameterBaseClass):
     def __init__(self):
         super().__init__() # get parent defaults
         self.add_default_params(
@@ -71,12 +71,11 @@ class BaseReleaseGroup(ParameterBaseClass):
         release_part_prop['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)
         return release_part_prop
 
-
     def _check_potential_release_locations_in_bounds(self, x):
         # check cadiated in bound
         # there must be a particle property set up for every release_part_prop must have a
         # use KD tree to find points those inside model domain
-        fgm = si.core_roles.field_group_manager
+        fgm = si.core_class_roles.field_group_manager
         is_inside, release_part_prop  = fgm.are_points_inside_domain(x, self.params['allow_release_in_dry_cells'])
 
         return is_inside, release_part_prop
@@ -91,8 +90,6 @@ class BaseReleaseGroup(ParameterBaseClass):
         n_required = self.get_number_required()
 
         # there must be a particle property set up for every release_part_prop must have a
-
-
         if  'points' in params :
             self.points  = params['points'] # grid release does not have points param
 
@@ -181,16 +178,15 @@ class BaseReleaseGroup(ParameterBaseClass):
     def add_tide_and_depth_release_part_prop(self,release_part_prop, time_sec):# get water depth and tide at particle locations, which may be needed to filter particle releases
              
             # add tide and water depth at released particle locations
-            fgm = si.core_roles.field_group_manager
-            release_part_prop['water_depth'] = fgm.interp_named_field_at_given_locations_and_time(
-                                                'water_depth', release_part_prop['x'], time_sec=None,
-                                                n_cell=release_part_prop['n_cell'],
-                                                bc_cords=release_part_prop['bc_cords'],
+            #todo mbetter ways to do this?
+            fgm = si.core_class_roles.field_group_manager
+            release_part_prop['water_depth'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
+                                                'water_depth', release_part_prop['x'],
+                                                release_part_prop['n_cell'],release_part_prop['bc_cords'], time_sec=None,
                                                 hydro_model_gridID=release_part_prop['hydro_model_gridID'])
-            release_part_prop['tide'] = fgm.interp_named_field_at_given_locations_and_time(
-                                                'tide', release_part_prop['x'], time_sec=time_sec,
-                                                n_cell=release_part_prop['n_cell'],
-                                                bc_cords=release_part_prop['bc_cords'],
+            release_part_prop['tide'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
+                                                'tide', release_part_prop['x'],
+                                                release_part_prop['n_cell'],release_part_prop['bc_cords'], time_sec=time_sec,
                                                 hydro_model_gridID=release_part_prop['hydro_model_gridID'])
             return release_part_prop
 

@@ -7,7 +7,7 @@ from os import path
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5, revision  = 4, date = '2024-03-30', parameter_ver=0.5)
+version= dict(major= 0.5, revision  = 10, date = '2024-03-30', parameter_ver=0.5)
 version['str'] = f"{version['major']:.2f}.{version['revision']:04.0f}-{version['date']}"
 
 try:
@@ -24,17 +24,18 @@ max_timedelta_in_seconds = 1000*365*24*3600
 docs_base_url= 'https://oceantracker.github.io/oceantracker/_build/html/'
 package_dir = path.dirname(__file__)
 ot_root_dir = path.dirname(package_dir)
+default_output_dir = path.join(path.dirname(path.dirname(package_dir)),'oceantracker_output')
 
 known_readers = dict(
-                schisim= 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
-                schisim_v5 =  'oceantracker.reader.schism_reader_v5.SCHISMreaderNCDFv5',
-                fvcom =  'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
-                roms =  'oceantracker.reader.ROMS_reader.ROMsNativeReader',
-                delft3d_fm =  'oceantracker.reader.delft_fm.dev_DELFTFM',
-                generic =  'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
+                SCHISM= 'oceantracker.reader.SCHISM_reader.SCHISMreaderNCDF',
+                ROMS =  'oceantracker.reader.ROMS_reader.ROMsNativeReader',
+                SCHISM_v5 =  'oceantracker.reader.SCHISM_reader_v5.SCHISMreaderNCDFv5',
+                GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
+                #fvcom =  'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
+                DEFT3D_FM =  'oceantracker.reader.delft_fm.dev_DELFTFM',
+                #generic =  'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 #dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',
                  )
-
 
 default_classes_dict = dict(
                 solver= 'oceantracker.solver.solver.Solver',
@@ -43,14 +44,13 @@ default_classes_dict = dict(
                 field_group_manager='oceantracker.field_group_manager.field_group_manager.FieldGroupManager',
                 particle_group_manager= 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager',
                 tracks_writer = 'oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter',
-                interpolator = 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid',
+                interpolator = 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularGrid',
                 dispersion='oceantracker.dispersion.random_walk.RandomWalk',
                 resuspension = 'oceantracker.resuspension.resuspension.BasicResuspension',
                 tidal_stranding = 'oceantracker.tidal_stranding.tidal_stranding.TidalStranding',
                 release_groups = 'oceantracker.release_groups.point_release.PointRelease',
                 field_reader='oceantracker.fields._base_field.ReaderField',
                 field_custom='oceantracker.fields._base_field.CustomField',
-                field_friction_velocity_from_bottom_stress='oceantracker.fields.friction_velocity.FrictionVelocityFromBottomStress',
                 field_friction_velocity_from_near_sea_bed_velocity='oceantracker.fields.friction_velocity.FrictionVelocityFromNearSeaBedVelocity',
                 field_A_Z_profile_vertical_gradient='oceantracker.fields.field_vertical_gradient.VerticalGradient',
                 )

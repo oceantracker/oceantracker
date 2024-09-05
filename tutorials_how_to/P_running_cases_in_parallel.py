@@ -25,7 +25,7 @@
 
 # ## Run parallel with helper class
 
-# In[8]:
+# In[1]:
 
 
 # run in parallel using helper class method
@@ -99,14 +99,15 @@ from  importlib import reload # force a reload to get around notebooks single na
 reload(main)
 
 # first build base case, params used for all cases
-base_case={ "debug" :True,
-    'output_file_base' :'parallel_test1',      # name used as base for output files
-    'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
-    'time_step' : 120,  #  2 min time step as seconds  
-    'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+params= dict(debug =True,
+    output_file_base= 'parallel_test1',      # name used as base for output files
+    root_output_dir= 'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
+    time_step = 120,  #  2 min time step as seconds  
+    reader ={'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                 'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
         },
-        }
+    case_list=[] # append params for each case here in same structure as above in main case 
+          )
 
 # define the required release  points
 points = [  [1597682.1237, 5489972.7479],
@@ -115,26 +116,24 @@ points = [  [1597682.1237, 5489972.7479],
             [1597917.3387, 5489000],
         ]
 
-# build a list of params for each case, with one release group fot each point
-case_list=[]
+# build a list of params for each case, with one release group for each point
+
 for n,p in enumerate(points):
-    case_param = {}
     # add one point as a release group to this case
-    case_param['release_groups']['mypoint'+str(n)] = {  # better to give release group a unique name
-                                            'points':[p],  # needs to be 1, by 2 list for single 2D point
-                                            'release_interval': 3600,           # seconds between releasing particles
-                                            'pulse_size': 10,                   # number of particles released each release_interval
-                                }
-    case_list.append(case_param)  # add this case to the list
-
-
+    d = dict( name= 'mypoint'+str(n),# better to give release group a unique name
+            points= [p],  # needs to be 1, by 2 list for single 2D point
+            release_interval= 3600,           # seconds between releasing particles
+            pulse_size= 10,                   # number of particles released each release_interval
+            )
+    case_param =dict(release_groups=[d]) # release group list of one or more releases
+    params['case_list'].append(case_param)
 
 # to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
 if __name__ == '__main__':
 
     # run as parallel set of cases
-    #    by default uses one less than the number of physical processors at one time, use setting "processors"
-    case_info_files= main.run_parallel(base_case, case_list)
+    #    by default uses two less than the number of physical processors at one time, use setting "processors"
+    case_info_files= main.run(params)
     
     # NOTE for parallel runs case_info_files is a list, one for each case run
     # so to load track files use    

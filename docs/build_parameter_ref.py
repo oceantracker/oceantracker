@@ -8,7 +8,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from oceantracker.util.parameter_checking import _ParameterBaseDataClassChecker, ParameterTimeChecker as PTC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util import package_util
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 si._setup()
 from oceantracker import definitions
 
@@ -96,7 +96,8 @@ class RSTfileBuilder(object):
         else:
             p = {key: item for key, item in params.items() if isinstance(item,_ParameterBaseDataClassChecker ) and not item.expert}
             self.add_heading('Parameters:', level=0)
-
+        # loop over params
+        dont_include= ['default','type', 'default_value', 'is_required', 'doc_str' ,'expert','obsolete']
         for key in sorted(p.keys()):
             item= p[key]
 
@@ -105,9 +106,9 @@ class RSTfileBuilder(object):
                 self.add_params_from_dict( item, indent=1,expert=False) # dont split expert for nested params
                 continue
 
-            if type(item) == PVC:
+            if item.obsolete: continue  # dont write obsolete params
 
-                if item.obsolete : continue # dont write obsolete params
+            if type(item) == PVC:
                 self.add_lines('* ``' + key + '`` :   ``' + str(item.data_type) + '`` '
                                + ('  *<optional>*' if not item.is_required else '**<isrequired>**') , indent=indent+1)
 
@@ -118,13 +119,12 @@ class RSTfileBuilder(object):
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
 
                 for k, v in item.asdict().items():
-                    if k not in ['type', 'default_value', 'is_required', 'doc_str'] and v is not None:
+                    if k not in dont_include and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
                 self.add_lines()
 
             elif type(item) == PTC:
 
-                if item.obsolete: continue # dont write obsolete params
                 self.add_lines('* ``' + key + '`` :   ``' + str([x.__name__ for x in item.possible_types ]) + '`` '
                                + ('  *<optional>*' if not item.is_required else '**<isrequired>**') , indent=indent+1)
 
@@ -137,7 +137,7 @@ class RSTfileBuilder(object):
                     self.add_lines('- ' + 'possible_values' + ': ``' + str(v) + '``', indent=indent + 2)
 
                 for k, v in item.asdict().items():
-                    if k not in ['type','possible_types', 'default_value', 'is_required', 'doc_str','expert','obsolete','possible_values'] and v is not None:
+                    if (k not in dont_include and v is not None):
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 
                 self.add_lines()
@@ -155,7 +155,7 @@ class RSTfileBuilder(object):
                                + str(item.default) + '``', indent=indent+2)
 
                 for k, v in item.asdict().items():
-                    if k not in ['default_list','acceptable_types', 'default_value', 'is_required', 'doc_str'] and v is not None:
+                    if k not in dont_include and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 
                 self.add_lines()
@@ -168,7 +168,7 @@ class RSTfileBuilder(object):
 def make_class_sub_pages(class_role, link_tag=''):
     # make doc pages from defaults of all python in named dir
 
-    mods= si._class_importer.class_tree[class_role]
+    mods= si.class_importer.class_tree[class_role]
 
     toc = RSTfileBuilder(class_role+'_toc', class_role + link_tag)
 
@@ -200,7 +200,7 @@ def make_class_sub_pages(class_role, link_tag=''):
         p.add_lines()
 
 
-
+        # write params
         params = instance.default_params
         p.add_params_from_dict(params,expert=False)
         p.add_lines()
@@ -241,7 +241,7 @@ def build_param_ref():
     page.add_heading('Core "class" roles',level=2)
     page.add_lines('Only one core class per role. These have singular role names.')
     page.add_new_toc_to_page('core', maxdepth=1)
-    for key in sorted(si.core_roles.possible_values()):
+    for key in sorted(si.core_class_roles.possible_values()):
         toc = make_class_sub_pages(key)
         page.add_toc_link('core', toc)
 
@@ -252,7 +252,7 @@ def build_param_ref():
     page.add_new_toc_to_page('roles_dict', maxdepth=1, sort_body=True)
 
     page.add_new_toc_to_page('user', maxdepth=1)
-    for key in sorted(si.roles.possible_values()):
+    for key in sorted(si.class_roles.possible_values()):
         if key in ['nested_readers'] : continue
         toc = make_class_sub_pages(key)
         page.add_toc_link('user', toc)

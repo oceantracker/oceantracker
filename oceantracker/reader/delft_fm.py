@@ -1,137 +1,90 @@
-from oceantracker.reader._base_reader import BaseReader
+import datetime
+
+from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
 from oceantracker.reader.util.hydromodel_grid_transforms import convert_regular_grid_to_triangles
-import  oceantracker.util.time_util as time_util
+from  oceantracker.util import time_util, numpy_util
 import numpy as np
-from datetime import  datetime,timezone
-from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.reader.util import  reader_util
 from oceantracker.reader.util import  hydromodel_grid_transforms
+from oceantracker.util.numba_util import  njitOT
+from oceantracker.shared_info import shared_info as si
 
-from oceantracker.shared_info import SharedInfo as si
-
-class dev_DELFTFM(BaseReader):
+class dev_DELFTFM(_BaseUnstructuredReader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
-        self.add_default_params({
-            'load_fields' : PLC(['water_depth'], str, doc_str='always load tide and water depth, for dry cells id 2D'),
-            'grid_variable_map': {'time': PVC('time', str),
-                                  'x': PLC(['mesh2d_node_x', 'mesh2d_node_y'], str, fixed_len=2),
-                                  'x_cell': PLC(['mesh2d_face_x', 'mesh2d_face_y'], str, fixed_len=2),
-                                  'zlevel': PVC(None, str),
-                                  'triangles': PVC('mesh2d_face_nodes', str),
-                                  'bottom_cell_index': PVC(None, str),
-                                  'is_dry_cell': PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
-            'field_variable_map': {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ucz'], str, fixed_len=3),
-                                   'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
-                                   'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
-                                   'water_temperature': PVC('temp', str, doc_str='maps standard internal field name to file variable name'),
-                                   'salinity': PVC('salt', str, doc_str='maps standard internal field name to file variable name'),
-                                   'wind_stress': PVC('wind_stress', str, doc_str='maps standard internal field name to file variable name'),
-                                   'bottom_stress': PVC('bottom_stress', str, doc_str='maps standard internal field name to file variable name'),
-                                   'A_Z_profile': PVC('diffusivity', str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                   'water_velocity_depth_averaged': PLC(['mesh2d_ucx','mesh2d_ucy'], str, fixed_len=2,
-                                                                        doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
+        self.add_default_params(
+            variable_signature=PLC(['mesh2d_waterdepth','mesh2d_face_nodes'], str, doc_str='Variable names used to test if file is this format'),
+            one_based_indices = PVC(True, bool, doc_str='DELFT 3D has indices starting at 1 not zero'),
+            load_fields = PLC(['water_depth'], str, doc_str='always load tide and water depth, for dry cells id 2D'),
+            grid_variable_map= dict( time= PVC('time', str),
+                        x = PVC('mesh2d_node_x', str, doc_str='x location of nodes'),
+                        y = PVC('mesh2d_node_y', str, doc_str='y location of nodes'),
+                        x_cell=PVC('mesh2d_face_x', str, doc_str='x location of cell centers'),
+                        y_cell=PVC('mesh2d_face_y', str, doc_str='y location of cell center'),
+                        z= PVC('mesh2d_interface_z', str,doc_str='Layer edges depths'),
+                        z_layer=PVC('mesh2d_layer_z', str, doc_str='Mid layer z'),
+                        triangles= PVC('mesh2d_face_nodes', str),
+                        quad_face_nodes=PVC('mesh2d_face_nodes', str),
+                        bottom_cell_index= PVC(None, str),
+                        is_dry_cell=PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
+                            ),
+            dimension_map=dict(
+                        time=PVC('time', str, doc_str='name of time dimension in files'),
+                        node=PVC('mesh2d_nNodes', str, doc_str='name of nodes dimension in files'),
+                        z=PVC('mesh2d_nInterfaces', str, doc_str='name of dimensions for z layer boundaries '),
+                        all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers'], str, doc_str='All z dims used to identify  3D variables'),
+                        cell_dim=PVC('mesh2d_nFaces', str, doc_str='Triangle/quad cell dim'),
+                        z_layer_dim=PVC('mesh2d_nLayers', str, doc_str='Number of layers, one less than z values'),
+                         ),
+            field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
+                        'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
+                        'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
+                        'water_temperature': PVC('temp', str, doc_str='maps standard internal field name to file variable name'),
+                        'salinity': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+                        'wind_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+                        'bottom_stress': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+                        'A_Z_profile': PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
+                        'water_velocity_depth_averaged': PLC(['mesh2d_ucx','mesh2d_ucy'], str, fixed_len=2,
+                                                doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
+                            )
 
-        })
+    def get_hindcast_info(self, catalog):
 
-    def is_file_format(self,file_name):
-        # check if file matches this file format
-        ml = si.msg_logger
-        nc = NetCDFhandler(file_name,'r')
-        is_file_type= nc.is_var('mesh2d_node_x') and nc.is_var('mesh2d_face_nodes')
+        dm = self.params['dimension_map']
+        fvm= self.params['field_variable_map']
+        gm = self.params['grid_variable_map']
+        hi = dict(is3D=  'mesh2d_nLayers' in catalog['info']['dims'])
 
-        # further checks
-        if is_file_type:
-            mesh2d_face_nodes = nc.read_a_variable('mesh2d_face_nodes')
-            if mesh2d_face_nodes.shape[1] > 4:
-                ml.msg(f'DELFT3D FM-reader currently only works with triangle and quad cells, not cells with {mesh2d_face_nodes.shape[1]} sides',
-                         fatal_error=True, exit_now= True, caller=self)
-        nc.close()
-        return is_file_type
-
-    def read_time_sec_since_1970(self, nc, file_index=None):
-        var_name = self.params['grid_variable_map']['time']
-        time = nc.read_a_variable(var_name, sel=file_index)
-        units = nc.var_attr(var_name,'units')
-
-        s= units.split('since ')[-1]
-        date_str,time_zone_str= s.rsplit(' ', 1)
-        d0 = datetime.fromisoformat(s)
-        self.info['time_zone'] =  'TODO decode time zone'
-
-        d0 = np.datetime64(d0).astype('datetime64[s]')
-        sec = time_util.datetime64_to_seconds(d0)
-        time += sec
-        return time
-
-    def read_horizontal_grid_coords(self, nc, grid):
-
-        var_names = self.params['grid_variable_map']['x']
-        x = np.stack((nc.read_a_variable(var_names[0]), nc.read_a_variable(var_names[1])), axis=1).astype(np.float64)
-        var_names_cell = self.params['grid_variable_map']['x_cell']
-        x_cell = np.stack((nc.read_a_variable(var_names_cell[0]), nc.read_a_variable(var_names_cell[1])), axis=1).astype(np.float64)
-
-        if 'degree' in nc.var_attr(var_names[0],'units').lower() :
-            grid['hydro_model_cords_in_lat_long'] = True
-            grid['lon_lat'] = x.copy()
-            si._setup_lon_lat_to_meters_grid_tranforms(grid['lon_lat'])
-            grid['x'] = si._transform_lon_lat_to_meters(grid['lon_lat'])
-            grid['lon_lat_cell'] = x_cell.copy()
-            grid['x_cell'] = si._transform_lon_lat_to_meters(grid['lon_lat_cell'])
-
+        if hi['is3D']:
+            hi['z_dim'] = dm['z']
+            hi['num_z_levels'] = catalog['info']['dims'][hi['z_dim']]
+            hi['all_z_dims'] = dm['all_z_dims']
+            # Only LSC hasbottom_cell_index
+            hi['vert_grid_type'] = si.vertical_grid_types.Zfixed if 'mesh2d_interface_z' in catalog['variables'] \
+                                                                        else si.vertical_grid_types.Sigma
         else:
-            grid['hydro_model_cords_in_lat_long'] = False
-            grid['x'] = x
-            grid['x_cell'] = x_cell
+            hi['z_dim'] = None
+            hi['num_z_levels'] = 1
+            hi['all_z_dims'] =  []
+            hi['vert_grid_type'] = None
 
-        return grid
+        # get num nodes in each field
+        # is the number of nodes = uniques nodes in the quad mesh
 
-    def read_triangles_as_int32(self, nc, grid):
+        hi['node_dim'] = dm['node']
+        hi['num_nodes'] =  catalog['info']['dims'][hi['node_dim']]
 
-        grid['quad_face_nodes'] = nc.read_a_variable(self.params['grid_variable_map']['triangles']).astype(np.int32)
-        grid['quad_face_nodes'] -= 1 # make zero based
+        if len(catalog['variables'][gm['triangles']]['dims']) > 4:
+            si.msg_logger.msg(f'DELFT3D FM-reader currently only works with triangle and quad cells, not cells with {mesh2d_face_nodes.shape[1]} sides',
+                   fatal_error=True, exit_now=True, caller=self)
 
-        # split quad cells aby adding new triangles
-        # flag quad cells for splitting if index in 4th column
+        return hi
 
-        # split quad grids buy making new triangles
-        # -1000 values are triangles not quad cells < 0 so will be split
-        if grid['quad_face_nodes'].shape[1] == 4:
-            grid['quad_cells_to_split'] = np.flatnonzero(grid['quad_face_nodes'][:, 3] > 0).astype(np.int32)
-            grid['triangles'] = split_quad_cells(grid['quad_face_nodes'], grid['quad_cells_to_split'])
-        else:
-            grid['triangles'] = grid['quad_face_nodes']
-            grid['quad_cells_to_split'] = np.arange(0).astype(np.int32)
-        return grid
 
-    def is_hindcast3D(self, nc):
-
-        ml = si.msg_logger
-        uname=self.params['field_variable_map']['water_velocity'][0]
-        is3D = nc.is_var_dim(uname,'nmesh2d_layer')
-        is3D = is3D or nc.is_var_dim(uname,'mesh2d_nLayers')
-        if is3D:
-            ml.msg('reading DELFT3D 3D hincasts is under development, contact developer for update ',
-                     fatal_error=True, exit_now=True, caller=self)
-        return is3D
-    def setup_water_velocity(self, nc,grid):
-        # tweak to be depth averaged
-        fm = self.params['field_variable_map']
-        var_file_name=fm['water_velocity'][0]
-
-        if si.run_info.is3D_run:#
-            # todo 3D not working yet
-            #  3D velocity, check if vertical vel file exits
-            if self.get_3D_var_file_name(nc,fm['water_velocity'][2]) is not None:
-                # drop vertical velocity varaible
-                fm['water_velocity'] = fm['water_velocity'][:2]
-        else:
-            fm['water_velocity'] =fm['water_velocity_depth_averaged']
-        pass
 
     def get_field_params(self,nc, name):
         fmap = self.params['field_variable_map']
@@ -141,10 +94,11 @@ class dev_DELFTFM(BaseReader):
                         )
         return f_params
 
-    def read_dry_cell_data(self, nc, grid, fields, file_index, is_dry_cell_buffer, buffer_index):
+    def read_dry_cell_data(self,nt_index, buffer_index):
         # get dry cells from water depth and tide
-        # no tide data so set on min water depth?
-
+        fields = self.fields
+        grid= self.grid
+        is_dry_cell_buffer = grid['is_dry_cell_buffer']
         mean_water_depth = np.nanmean(fields['water_depth'].data[0,:,0,0][grid['triangles']],axis=1)
 
         is_dry_cell_buffer[buffer_index,:]=  mean_water_depth < si.settings.minimum_total_water_depth
@@ -153,16 +107,54 @@ class dev_DELFTFM(BaseReader):
                                                 si.settings.minimum_total_water_depth, is_dry_cell_buffer, buffer_index)
         pass
 
-    def set_up_uniform_sigma(self,nc, grid):
+    def build_vertical_grid(self, grid):
+        # add time invariant vertical grid variables needed for transformations
+        # first values in z axis is the top? so flip
+        gm = self.params['grid_variable_map']
+        fm = self.params['field_variable_map']
+        ds = self.dataset
+        grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values
+        grid['z_layer'] =ds.read_variable(gm['z_layer']).data.astype(np.float32)   # layer center fractions
 
-        pass
+        si.settings['regrid_z_to_uniform_sigma_levels'] = False  # no need to regrid
 
-    def build_hori_grid(self, nc, grid):
 
-        super().build_hori_grid(nc, grid)
+        grid = super().build_vertical_grid(grid)
+
+
+
+        # need to add a layer between first given z level and bottom
+        grid['bottom_cell_index'] = np.maximum(grid['bottom_cell_index']-1, 0)
+        return  grid
+
+    def read_bottom_cell_index(self, grid):
+        gm = self.params['grid_variable_map']
+        fm = self.params['field_variable_map']
+        ds = self.dataset
+        # find bottom cell based on nans in a dummy read of mid-layer velocity after it has been converted to nodal values
+        u = ds.read_variable(fm['water_velocity'][0], nt=0).data  # from non nans in first hori velocity time step
+        u = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(u,
+                            grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
+
+        bottom_cell_index = self.find_layer_with_first_non_nan(u[0, :, :])
+        return bottom_cell_index
+
+
+    def build_hori_grid(self, grid):
+
+        super().build_hori_grid( grid)
+        ds = self.dataset
+        gm = self.params['grid_variable_map']
+
+        # read cell centers, where u,v are defined
+        xc = ds.read_variable(gm['x_cell']).data
+        yc = ds.read_variable(gm['y_cell']).data
+        grid['x_cell'] = np.stack((xc,yc),axis=1)
 
         # setp up node to face map and weights needed
-        # to gret nodal values from face values
+        # to get nodal values from face values
+        grid['quad_face_nodes'] = ds.read_variable(gm['quad_face_nodes']).data - 1
+        grid['quad_face_nodes'] = numpy_util.ensure_int32_dtype(grid['quad_face_nodes'])
 
         grid['node_to_quad_cell_map'],grid['quad_cells_per_node'] = hydromodel_grid_transforms.get_node_to_cell_map(grid['quad_face_nodes'], grid['x'].shape[0])
 
@@ -173,46 +165,65 @@ class dev_DELFTFM(BaseReader):
                                             grid['x'], grid['x_cell'],
                                             grid['node_to_quad_cell_map'], grid['quad_cells_per_node'])
 
-        return  grid
+        return grid
 
-    def read_file_var_as_4D_nodal_values(self,nc,grid, var_name, file_index=None):
+    def read_file_var_as_4D_nodal_values(self,var_name,field, nt=None):
         # read variable into 4D ( time, node, depth, comp) format
         # assumes same variable order in the file
+        ds = self.dataset
+        grid = self.grid
+        params = self.params
+        gm = params['grid_variable_map']
+        dm = params['dimension_map']
+        hi = si.hindcast_info
 
-        data = nc.read_a_variable(var_name, sel=file_index)
-
+        data = ds.read_variable(var_name, nt=nt)
+        data_dims =data.dims
+        data = data.data
         # add time dim if needed
-        if not nc.is_var_dim(var_name, 'time'):
-            data  = data[np.newaxis, ...]
+        if hi['time_dim'] not in data_dims: data = data[np.newaxis, ...]
 
-        # see if z or z water level  in variable and swap z and node dim
-        if nc.is_var_dim(var_name,'siglay') :
-            #3D mid layer values
-            # convert mid-layer values to values at layer boundaries, ie zlevels
-            data = hydromodel_grid_transforms.convert_layer_field_to_levels_from_depth_fractions_at_each_node(
-                                data, grid['zlevel_fractions_layer'], grid['zlevel_fractions'])
-        elif not nc.is_var_dim(var_name, 'siglev') :
-            # 2D field
-            data =    data = data[..., np.newaxis]
-
-        # add dummy vector component to make 4D
-        data = data[:, :, :, np.newaxis]
+        # add z dim if needed
+        if all(x not in data_dims for x in dm['all_z_dims']): data = data[..., np.newaxis]
 
         # some variables at nodes, some at edge mid points ( eg u,v,w)
-        if nc.is_var_dim(var_name, 'mesh2d_nFaces'):
+        if dm['cell_dim'] in data_dims:
             # data is at cell center/element/triangle  move to nodes
-            data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
+            data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(
+                                        data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
+        # must be done after nodal values
+        if dm['z_layer_dim'] in data_dims:
+            data = hydromodel_grid_transforms.convert_mid_layer_fixedZ_top_bot_layer_values(
+                data, grid['z_layer'], grid['z'], grid['bottom_cell_index'], grid['water_depth'])
+
+        # add dummy component axis
+        data = data[..., np.newaxis]
 
         return data
 
-    def preprocess_field_variable(self, nc, name,grid, data):
-
+    def preprocess_field_variable(self, name,grid, data):
 
         if name =='water_depth':
-            # depth seems to be read as upwards z at node, so revese z
+            # depth seems to be read as upwards z at node, so rervese z
             data = -data
+        elif name == 'water_velocity' and data.shape[2] > 1:
+            # ensure vel zero at sea bed
+            data = reader_util.patch_bottom_velocity_to_make_it_zero(data, grid['bottom_cell_index'])
         return data
 
 
 
+    @staticmethod
+    @njitOT
+    def find_layer_with_first_non_nan(data):
+        # find cell with the bottom, from first mid-layer velocities not a nan
+        n_nodes=data.shape[0]
+        n_zlevels = data.shape[1]
+        depth_cell_with_bottom = np.full((n_nodes,),n_zlevels-1, dtype=np.int32)
+        for n in range(n_nodes):
+            for nz in range(n_zlevels-1): # loop over depth cells
+                if ~np.isnan(data[n, nz]) :# find first non-nan
+                    depth_cell_with_bottom[n] = nz # note some water depths are <0, land?
+                    break
 
+        return depth_cell_with_bottom

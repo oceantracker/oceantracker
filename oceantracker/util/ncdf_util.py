@@ -44,15 +44,14 @@ class NetCDFhandler(object):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
         if dtype is None: dtype = np.float64  # double by default
-
+        dtype = np.dtype(dtype) # convert string dtypes
         if fill_value is None:
             if dtype in [np.float64, np.float32]:
                 fill_value = np.nan
-            elif dtype==np.uint8:
-                fill_value = 0
+            elif np.issubclass_(np.int32,np.integer):
+                fill_value = -128
             else:
                 fill_value = -128
-
 
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compressionLevel > 0),
                                                 complevel=compressionLevel, fill_value=fill_value)
@@ -69,13 +68,15 @@ class NetCDFhandler(object):
         return v
 
     def read_a_variable(self,name, sel=None):
-        # read all of variables or sel of first dimension
+        # read a variable or sel of first dimension
         if sel is None:
             data= self.file_handle.variables[name][:]   # read whole variable
         else:
             data = self.file_handle.variables[name][sel, ...] # selection from first dimension
 
-        return np.array(data)
+        out = np.asarray((data))
+
+        return out
 
     def read_variables(self, var_list=None, required_var=[], output=None, sel=None):
         # read a list of variables into a dictionary, if output is a dictionary its add to that one
@@ -90,30 +91,33 @@ class NetCDFhandler(object):
         output['global_attributes'] = self.global_attrs()
         return output
 
-    def write_a_new_variable(self, name, X, dimList, description=None, attributes=None,dtype=None, chunksizes=None,
-                             compressionLevel=0, fill_value=None, units=None):
+    def write_a_new_variable(self, name, data, dimList, description=None,
+                             attributes={},dtype=None, chunksizes=None,units=None,
+                             compressionLevel=0,
+                             missing_value= None):
         # write a whole variable and add dimensions if required
         if type(dimList) != list and type(dimList) != tuple :dimList =[dimList]
 
-        if X.ndim != len(dimList):
+        if data.ndim != len(dimList):
             raise Exception('write_a_new_variable: NCDF variable = ' + name + ' must have same number of dimensions as length of dimList' )
 
         # cycle through dims list to add dimension, if needed
         for n in range(len(dimList)):
-            self.add_dimension(dimList[n], X.shape[n])  # an unlimted dimension
+            self.add_dimension(dimList[n], data.shape[n])  # an unlimted dimension
 
-        if dtype is None: dtype = X.dtype  # preserve type unless explicitly changed
+        if dtype is None: dtype = data.dtype  # preserve type unless explicitly changed
 
+        v = self.create_a_variable(name, dimList,description=description,
+                    attributes= attributes,dtype=dtype, chunksizes= chunksizes,
+                    units= units,  compressionLevel=compressionLevel, fill_value=missing_value)
 
-        v = self.create_a_variable(name, dimList,description=description,attributes= attributes,dtype=dtype, chunksizes= chunksizes,
-                                   units= units,  compressionLevel=compressionLevel, fill_value=-1)
-
-        # check dims match as below write does not repect shape
+        # check dims match as below write does not respect shape
         for n,dn in enumerate(dimList):
             if self.dim_size(dn) != v.shape[n]:
                 raise ValueError('Size of dimension ' + dn + '(=' +   str(v.shape[n]) + ')  for   variable ' +  name +
                                  ' does not  size of defined dimension ' + dn + '(=' +   str(self.dim_size(dn)) + ')' )
-        v[:] = X[:]  # write X
+        v[:] = data[:]  # write X
+        pass
 
     def write_part_of_first_dim_of_variable(self,name,data, sel):
         # write data as part of first dim of named variable with give indicies, only if numpy array list in sel indices is not empty
@@ -159,7 +163,8 @@ class NetCDFhandler(object):
 
     def var_data(self, name):   return self.file_handle.variables[name][:]
 
-    def all_var_names(self): return list(self.file_handle.variables.keys())
+    def all_var_names(self):
+        return list(self.file_handle.variables.keys())
     def all_var_dims(self,var):
         return list(self.file_handle.variables[var].dimensions)
 
@@ -175,7 +180,8 @@ class NetCDFhandler(object):
         dtype = self.file_handle.variables[name][0].dtype
         return dtype
 
-    def var_fill_value(self, name):  return self.file_handle.variables[name]._FillValue
+    def var_fill_value(self, name):
+        return self.file_handle.variables[name]._FillValue
 
     def is_var_dim(self, var_name, dim_name):
         return dim_name in self.all_var_dims(var_name)
@@ -191,10 +197,21 @@ class NetCDFhandler(object):
         for name in self.global_attr_names():
             nc_new.write_global_attribute(name, self.global_attr(name))
 
-    def copy_variable(self, nc_new, name):
+    def copy_variable(self,name, nc_new, compressionLevel=0,float32asInt16=False):
         v = self.file_handle[name]
+
         #write_a_new_variable(self, name, X, dimList, description=None, attributes=None, dtype=None, chunksizes=None, compressionLevel=0):
-        nc_new.write_a_new_variable(name,v[:], v.dimensions, description=v.description)
+        attributes = self.all_var_attr(name)
+        if '_FillValue' in attributes:
+            missing_value=attributes['_FillValue' ]
+            del attributes['_FillValue']
+        else:
+            missing_value = None
+        nc_new.write_a_new_variable(name,v[:], v.dimensions,
+                                    missing_value=missing_value,
+                                    attributes=attributes,
+                                    compressionLevel=compressionLevel,
+                                    float32asInt16=float32asInt16)
         pass
 
     def write_packed_1Darrays(self, name, array_list, description=None, attributes=None, dtype=None, chunksizes=None,
@@ -236,4 +253,27 @@ class NetCDFhandler(object):
         self.file_handle.close()
         self.file_handle = None  # parallel pool cant pickle nc so void
 
-pass
+def compute_scale_and_offset_int16(data, missing_value=None):
+    # scale data into int32's
+    # mask and get min
+    if missing_value is not None:
+        data[data == missing_value] = np.nan
+    dmin, dmax = np.nanmin(data), np.nanmax(data)
+
+    # int 16 negative 32768 through positive 32767
+    # stretch/compress data to the available packed range
+    i16 =np.iinfo(np.int16)
+
+    i16_range = float(i16.max - 2)  # range with last value reserved for missing value
+
+    # translate the range to be symmetric about zero
+    add_offset   = (dmin+.5*(dmax-dmin)).astype(data.dtype)
+    scale_factor = ((dmax - add_offset)/i16_range).astype(data.dtype)
+
+    # mask with new missing value
+    missing_value = -i16.max
+    #data[np.isnan(data)] = missing_value
+    #data = np.round(data,0).astype(np.int16)
+    print('\t scaled',dmin, dmax , scale_factor, add_offset, missing_value)
+
+    return data, scale_factor, add_offset, missing_value

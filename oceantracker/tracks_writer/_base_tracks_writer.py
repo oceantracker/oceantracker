@@ -6,11 +6,11 @@ from oceantracker.util import output_util
 from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
 from oceantracker.util.profiling_util import  function_profiler
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 # class to write with, outline methods needed
 # a non-writer, as all methods are None
 
-class BaseWriter(ParameterBaseClass):
+class _BaseWriter(ParameterBaseClass):
     # particle property  write modes,   used to set when to write  properties to output, as well as if to calculate at all
 
 
@@ -50,7 +50,7 @@ class BaseWriter(ParameterBaseClass):
             params['update_interval'] = si.settings.time_step
 
         if si.settings['write_dry_cell_flag']:
-            grid = si.core_roles.field_group_manager.grid
+            grid = si.core_class_roles.field_group_manager.grid
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])
             self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[si.settings.NCDF_time_chunk,grid['triangles'].shape[0]])
@@ -139,9 +139,9 @@ class BaseWriter(ParameterBaseClass):
     # to work in compact mode must write particle non-time varying  particle properties when released
     #  eg ID etc, releaseGroupID  etc
 
-        writer = si.core_roles.tracks_writer
+        writer = si.core_class_roles.tracks_writer
         if si.settings.write_tracks and new_particleIDs.shape[0] > 0:
-            for name, prop in si.roles.particle_properties.items():
+            for name, prop in si.class_roles.particle_properties.items():
                 # parameters are not time varying, so done at ends in retangular writes, or on culling particles
                 if not prop.params['time_varying'] and prop.params['write']:
                     writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs)
@@ -154,11 +154,11 @@ class BaseWriter(ParameterBaseClass):
         self.pre_time_step_write_book_keeping()
 
         # write group data
-        for name,i in si.roles.time_varying_info.items():
+        for name,i in si.class_roles.time_varying_info.items():
             if i.params['write']:
                 self.write_time_varying_info(name, i)
 
-        part_prop=si.roles.particle_properties
+        part_prop=si.class_roles.particle_properties
         for name,i in part_prop.items():
             if i.params['write'] and i.params['time_varying']:
                 if si.hydro_model_cords_in_lat_long and name in ['x','x_last_good']:
@@ -168,7 +168,7 @@ class BaseWriter(ParameterBaseClass):
 
         if si.settings['write_dry_cell_flag']:
             # wont run if nested grids
-            grid = si.core_roles.field_group_manager.grid
+            grid = si.core_class_roles.field_group_manager.grid
             self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid['dry_cell_index'].reshape(1,-1)
 
         self.time_steps_written_to_current_file += 1 # time steps in current file
@@ -179,7 +179,7 @@ class BaseWriter(ParameterBaseClass):
         if si.settings.write_tracks:
             nc = self.nc
             # write properties only written at end
-            self.add_global_attribute('total_num_particles_released', si.core_roles.particle_group_manager.info['particles_released'])
+            self.add_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
             self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
 
             # add all global attributes

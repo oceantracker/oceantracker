@@ -3,7 +3,7 @@ import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.polygon_util import set_up_list_of_polygon_instances, InsidePolygon
 
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 class InsidePolygonsNonOverlapping2D(CustomParticleProperty):
     '''
@@ -29,7 +29,7 @@ class InsidePolygonsNonOverlapping2D(CustomParticleProperty):
 
     def update(self,n_time_step, time_sec, active):
         # find polygon each particle is inside
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         # make all inside no polyg
         self.set_values(-1, active)

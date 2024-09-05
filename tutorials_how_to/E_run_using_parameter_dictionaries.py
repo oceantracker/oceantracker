@@ -14,7 +14,7 @@
 # 
 # 
 
-# In[7]:
+# In[25]:
 
 
 # build a more complex dictionary of parameters using code
@@ -25,16 +25,18 @@ params={
     'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                         'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
                         },
-    # add  release locations from two points, 
+    # add a list of release groups, the release locations from two points, 
     #       particle_release_groups are a list of one or more release groups 
     #               (ie locations where particles are released at the same times and locations) 
-    'release_groups': {
-            'my_release_point' :{'points':[[1595000, 5482600],
-                                                [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
-                                'release_interval': 3600,           # seconds between releasing particles
-                                'pulse_size': 10,                   # number of particles released each release_interval
-                                },
-            'my_polygon_release': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
+    'release_groups': [
+                {'name': 'my_release_point', # optional name to refer to in code
+                'points':[[1595000, 5482600],
+                          [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
+                'release_interval': 3600,           # seconds between releasing particles
+                'pulse_size': 10,                   # number of particles released each release_interval
+                },
+                {'name':'my_polygon_release',
+                 'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
                                     'points':[   [1597682.1237, 5489972.7479],
                                                     [1598604.1667, 5490275.5488],
                                                     [1598886.4247, 5489464.0424],
@@ -43,14 +45,16 @@ params={
                                     'release_interval': 7200,           # seconds between releasing particles
                                     'pulse_size': 20,                   # number of particles released each release_interval
                                     },    
-                                    },
+                ],
     'resuspension' : {'critical_friction_velocity': .005}, # only re-suspend particles if friction vel. exceeds this value
     
-    # velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model's 
-    'velocity_modifiers' : {   # here a fall velocity with given mean and variance is added to the computation 
-                                'fall_velocity': {'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
-                                                    'value': -0.001,'variance': 0.0002}
-                                },                      
+    # list of velocity_modifiers are a set of velocities added to  water velocity give in  hydrodynamic model's 
+    'velocity_modifiers' : [   # here a fall velocity with given mean and variance is added to the computation 
+                {'name':'fall_velocity', 
+                 'class_name' : 'TerminalVelocity', 
+                 'value': -0.001,
+                 'variance': 0.0002} # fall velocity has this variance around value
+                        ],                      
         }
 
 # write params to build on for later examples
@@ -59,67 +63,17 @@ json_util.write_JSON('./example_param_files/param_test1.json', params)
 yaml_util.write_YAML('./example_param_files/param_test1.yaml', params)
 
 
-# ## Build param. dict. from template
-# 
-# Use a provided template, which pre-defines most top level parameters that can be used, then set required parameters using assignments. Reproducing the above in code...
-# 
-# 
-
-# In[8]:
-
-
-from oceantracker import main
-
-# repeat above and set dict keys values by assignments
-params =dict(reader={},release_groups={}, resuspension={},velocity_modifiers={} )
-params['output_file_base'] ='param_test1'
-params['root_output_dir']= 'output'             #  output is put in dir   'root_output_dir'/'output_file_base'
-params['time_step']= 120  #  2 min time step as seconds  
-params['reader']['input_dir']= '../demos/demo_hindcast'  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-params['reader']['file_mask']= 'demoHindcastSchism*.nc'    # the file mask of the hindcast files
-
-params['release_groups']['my_release_point'] = {
-                                            'points':[[1595000, 5482600],
-                                                   [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
-                                            'release_interval': 3600,           # seconds between releasing particles
-                                            'pulse_size': 10,                   # number of particles released each release_interval
-                                            }
-params['release_groups']['my_polygon_release'] = {
-                                            'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
-                                            'points':[   [1597682.1237, 5489972.7479],
-                                                        [1598604.1667, 5490275.5488],
-                                                        [1598886.4247, 5489464.0424],
-                                                        [1597917.3387, 5489000],
-                                                        [1597300, 5489000], [1597682.1237, 5489972.7479]],
-                                            'release_interval': 7200,           # seconds between releasing particles
-                                            'pulse_size': 20,                   # number of particles released each release_interval
-                                            }   
-params['resuspension']['critical_friction_velocity']= .005
-
-params['velocity_modifiers']['my_fall_velocity']= {   # here a fall velocity with given value and variance is added to the computation 
-                                                    'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
-                                                     'value': -0.001,'variance': 0.0002
-                                                    }
-
-
-# In[9]:
-
-
-# show the full template as json
-import json
-print( json.dumps(params, indent=4))
-
-
 #   ### Show parameters in yaml format
 # 
 #   yaml format has no brackets/braces and relies on tab indenting to nest items
 
-# In[10]:
+# In[26]:
 
 
-# show the full template in yaml format
+# show the params in yaml format
 import yaml
-print( yaml.dump(params))
+p = yaml_util.read_YAML('./example_param_files/param_test1.yaml')
+print( yaml.dump(p))
 
 
 # ## Run OceanTracker from parameters
@@ -148,7 +102,7 @@ print( yaml.dump(params))
 # 
 # Is line below!
 
-# In[11]:
+# In[27]:
 
 
 # run oceantracker using param dict built in cells above
@@ -158,7 +112,7 @@ case_info_file_name = main.run(params)
 # case_info file is the name of a json file useful in plotting results 
 
 
-# In[12]:
+# In[28]:
 
 
 # plot animation of results
@@ -203,7 +157,7 @@ HTML(anim.to_html5_video())
 # 
 # the full arguments are below
 
-# In[13]:
+# In[29]:
 
 
 get_ipython().system('python ../oceantracker/run_oceantracker.py -h')

@@ -20,25 +20,8 @@ particle_properties:
   initial_value: 100
   name: my_constant_prop
 reader:
-  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
-  dimension_map:
-    node: nodes
-    time: time
-  field_variable_map:
-    tide: tide
-    water_depth: depth
-    water_velocity:
-    - east_vel
-    - north_vel
-  file_mask: demoHindcast2D*.nc
-  grid_variable_map:
-    time: time_sec
-    triangles: tri
-    x:
-    - east
-    - north
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
-  isodate_of_hindcast_time_zero: '2020-06-01'
+  file_mask: Random_order_*.nc
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   time_buffer_size: 15
 release_groups:
 - max_age: 21600
@@ -48,7 +31,7 @@ release_groups:
     - 5486100
   pulse_size: 1
   release_interval: 0
-  start: '2020-06-02T00:00:00'
+  start: '2017-01-02T00:00:00'
 - max_age: 21600
   name: r2
   points:
@@ -56,7 +39,7 @@ release_groups:
     - 5486100
   pulse_size: 1
   release_interval: 0
-  start: '2020-06-03T00:00:00'
+  start: '2017-01-03T00:00:00'
 - max_age: 21600
   name: r3
   points:
@@ -64,7 +47,7 @@ release_groups:
     - 5486100
   pulse_size: 1
   release_interval: 0
-  start: '2020-06-04T00:00:00'
+  start: '2017-01-04T00:00:00'
 - max_age: 21600
   name: r4
   points:
@@ -72,7 +55,7 @@ release_groups:
     - 5486100
   pulse_size: 1
   release_interval: 0
-  start: '2020-06-03T03:00:00'
+  start: '2017-01-03T03:00:00'
 root_output_dir: output
 time_step: 900
 tracks_writer:

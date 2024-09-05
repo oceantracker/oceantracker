@@ -2,9 +2,9 @@ import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.numpy_util import possible_dtypes
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
-class BaseTimeVaringInfo(ParameterBaseClass):
+class _BaseTimeVaringInfo(ParameterBaseClass):
     # single valued time varying information, ie not a particle property
     # eg  "time" data, numer released so far
     # properties which are maintained in memory and may be written out, eg group and particle
@@ -14,6 +14,7 @@ class BaseTimeVaringInfo(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
 
         self.add_default_params({   'description': PVC(None,str),
+                                    'units': PVC(None, str),
                                     'write': PVC(True, bool),
                                     'dtype':PVC('float64', str, possible_values=possible_dtypes),
                                     'vector_dim': PVC(1, int, min=1),
@@ -25,12 +26,15 @@ class BaseTimeVaringInfo(ParameterBaseClass):
         self.role_doc('Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
 
     def initial_setup(self, **kwargs):
+        params = self.params
         s=(1,)
-        self.data = self.data = np.full(s, self.params['initial_value'], dtype=  self.get_dtype(),order='c')
+        self.data = self.data = np.full(s, params['initial_value'], dtype=  self.get_dtype(),order='c')
 
-        if si.settings.write_tracks and self.params['write']:
-            w = si.core_roles.tracks_writer
-            w.create_variable_to_write(self.params['name'], 'time', None, self.params['vector_dim'], attributes=None, dtype=self.params['dtype'])
+        if si.settings.write_tracks and params['write']:
+            w = si.core_class_roles.tracks_writer
+            w.create_variable_to_write(params['name'], 'time', None, params['vector_dim'],
+                                    units=params['units'], description=params['description'],
+                      dtype=params['dtype'])
 
     def update(self,n_time_step, time_sec, active): pass # manual update by default
     def set_values(self, value): self.data[0]=value
@@ -41,7 +45,7 @@ class BaseTimeVaringInfo(ParameterBaseClass):
     def get_dtype(self):  return np.dtype(self.params['dtype'])
 
 
-class TimeVaryingInfo(BaseTimeVaringInfo):
+class TimeVaryingInfo(_BaseTimeVaringInfo):
     pass
 
 

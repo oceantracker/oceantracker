@@ -6,7 +6,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 from  oceantracker.particle_group_manager.util import  pgm_util
 from oceantracker.definitions import particle_property_types
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_properties._base_particle_properties import CoreParticleProperty,FieldParticleProperty,CustomParticleProperty
 
 # holds and provides access to different types a group of particle properties, eg position, field properties, custom properties
@@ -39,7 +39,8 @@ class ParticleGroupManager(ParameterBaseClass):
         si.add_class('particle_properties', class_name='CoreParticleProperty', name='velocity_modifier', vector_dim=nDim)
 
         si.add_class('particle_properties', class_name='CoreParticleProperty', name='status', dtype='int8', )
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='age', initial_value=0.)
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='age', initial_value=0.,
+                     units='seconds', description='Time in seconds since particle released')
 
         # parameters are set once and then don't change with time
         si.add_class('particle_properties', class_name='CoreParticleProperty', name='ID', dtype='int32', initial_value=-1, time_varying=False,
@@ -53,10 +54,14 @@ class ParticleGroupManager(ParameterBaseClass):
         # ID used when nested grids only
         si.add_class('particle_properties', class_name='CoreParticleProperty', name='hydro_model_gridID', write=True, time_varying=True, dtype='int8', initial_value=-1,
                      description='ID for which grid, outer (ID=0) or nested (ID >0),  each particle resides in ')
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='time_released', time_varying=False, description='time (sec) each particle was released')
+        si.add_class('particle_properties', class_name='CoreParticleProperty', name='time_released', time_varying=False,
+                     units='seconds since 1970-01-01 00:00:00',
+                     description='time (sec) each particle was released')
 
         #  time dependent core  properties
-        si.add_class('time_varying_info',name='time', description='time in seconds, since 1/1/1970') #time has only one value at each time step
+        si.add_class('time_varying_info',name='time',
+                     units='seconds since 1970-01-01 00:00:00',
+                     description='time in seconds, since 1/1/1970') #time has only one value at each time step
         si.add_class('time_varying_info',name='num_part_released_so_far', description='number of particles released up to the given time', dtype='int32')  # time has only one value at each time step
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
@@ -66,25 +71,25 @@ class ParticleGroupManager(ParameterBaseClass):
         # see if any group is ready to release
         new_buffer_indices = np.full((0,), 0, np.int32)
 
-        for name, rg in si.roles.release_groups.items():
+        for name, rg in si.class_roles.release_groups.items():
             if rg.schedulers['release'].do_task(n_time_step):
                 release_part_prop = rg.get_release_locations(time_sec)
                 new_index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
             pass
         # for all new particles update cell and bc cords for new particles all at same time
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         #todo does this setup_interp_time_step have to be here?
-        si.core_roles.field_group_manager.setup_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
+        si.core_class_roles.field_group_manager.setup_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
 
         # initial values  part prop derived from fields
-        for name, i  in si.roles.particle_properties.items():
+        for name, i  in si.class_roles.particle_properties.items():
             if isinstance(i, FieldParticleProperty) :
                 i.initial_value_at_birth(new_buffer_indices)
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
-        for name, i  in si.roles.particle_properties.items():
+        for name, i  in si.class_roles.particle_properties.items():
             if isinstance(i, CustomParticleProperty):
                 i.initial_value_at_birth(new_buffer_indices)
 
@@ -117,7 +122,7 @@ class ParticleGroupManager(ParameterBaseClass):
         new_buffer_indices= np.arange(info['particles_in_buffer'], smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
         num_released = new_buffer_indices.shape[0]
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         # copy over release data to new part props
         for name in release_data.keys():
@@ -140,7 +145,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def _expand_particle_buffers(self,num_particles):
         info = self.info
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         # get number of chunks required rounded up
         n_chunks = max(1,int(np.ceil(num_particles/si.settings.particle_buffer_chunk_size)))
         info['current_particle_buffer_size'] = n_chunks*si.settings.particle_buffer_chunk_size
@@ -165,9 +170,9 @@ class ParticleGroupManager(ParameterBaseClass):
     def update_PartProp(self,n_time_step, time_sec, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
         t0 = perf_counter()
-        si.roles.time_varying_info['time'].set_values(time_sec)
-        si.roles.time_varying_info['num_part_released_so_far'].set_values(self.info['particles_released'])
-        part_prop =si.roles.particle_properties
+        si.class_roles.time_varying_info['time'].set_values(time_sec)
+        si.class_roles.time_varying_info['num_part_released_so_far'].set_values(self.info['particles_released'])
+        part_prop =si.class_roles.particle_properties
 
         self.screen_msg= ''
         #  calculate age core particle property = t-time_released
@@ -175,14 +180,14 @@ class ParticleGroupManager(ParameterBaseClass):
                                                    part_prop['time_released'].used_buffer(), active, scale= -1.)
 
         # first interpolate to give particle properties from reader derived  fields
-        for name,i in si.roles.particle_properties.items():
+        for name,i in si.class_roles.particle_properties.items():
             if isinstance(i, FieldParticleProperty):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
-        for name, i in si.roles.particle_properties.items():
+        for name, i in si.class_roles.particle_properties.items():
             if isinstance(i, CustomParticleProperty):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec, active)
@@ -191,7 +196,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def status_counts_and_kill_old_particles(self, t):
         # deactivate old particles for each release group
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         info = self.info
 
         num_alive =pgm_util._status_counts_and_kill_old_particles(part_prop['age'].data,
@@ -206,7 +211,7 @@ class ParticleGroupManager(ParameterBaseClass):
     def remove_dead_particles_from_memory(self):
         # in comapct mode, if too many   dead particles remove then from buffer
         info = self.info
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
         num_alive = ID_alive.shape[0]
@@ -243,7 +248,7 @@ class ParticleGroupManager(ParameterBaseClass):
         s += f'S:{counts[sf.stranded_by_tide-128]:05d}  B:{counts[sf.on_bottom -128]:05d} '
         s += f'D:{counts[sf.dead - 128]:03d} O:{counts[sf.outside_open_boundary - 128]:02d} '
         s += f'N:{counts[sf.bad_cord - 128]:03d} Buffer:{info["particles_in_buffer"]:04d} '
-        s += '%3.0f%%' % (100. * info['particles_in_buffer'] / si.core_roles.particle_group_manager.info['current_particle_buffer_size'])
+        s += '%3.0f%%' % (100. * info['particles_in_buffer'] / si.core_class_roles.particle_group_manager.info['current_particle_buffer_size'])
         s += self.screen_msg
         return s
 

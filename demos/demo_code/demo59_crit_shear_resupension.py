@@ -10,7 +10,7 @@ runInfo_file_name, has_errors = main.run(params)
 
 # below only required for plotting
 from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
-from plot_oceantracker.plot_vertical_tracks import plot_path_in_vertical_section
+from plot_oceantracker.plot_tracks import plot_path_in_vertical_section
 
 output_file= "output\demo59_crit_shear_resupension"
 

@@ -1,14 +1,14 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC,ParameterTimeChecker as PTC
-from oceantracker.trajectory_modifiers._base_trajectory_modifers import BaseTrajectoryModifier
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 from oceantracker.particle_properties.util import particle_comparisons_util
 from oceantracker.util.basic_util import IDmapToArray
 from oceantracker.util.numba_util import njitOT
 
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 
-class CullParticles(BaseTrajectoryModifier):
+class CullParticles(_BaseTrajectoryModifier):
     '''
     Prototype for how to  cull particles,
     this version just culls random particles of given statuses,
@@ -51,7 +51,7 @@ class CullParticles(BaseTrajectoryModifier):
 
     def select_particles_to_cull(self, time_sec, active):
          
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         eligible_to_cull = self._cullIDs(part_prop['status'].used_buffer(), self.statuses_to_cull,
                                        self.get_partID_buffer('B1'))
         culled = particle_comparisons_util.random_selection(eligible_to_cull, self.params['probability'], self.get_partID_subset_buffer('B1'))
@@ -61,7 +61,7 @@ class CullParticles(BaseTrajectoryModifier):
     def update(self,n_time_step, time_sec, active):
 
         if self.schedulers['culler01'].do_task(n_time_step):
-            part_prop =  si.roles.particle_properties
+            part_prop =  si.class_roles.particle_properties
             culled = self.select_particles_to_cull(time_sec, active)
             part_prop['status'].set_values(si.particle_status_flags.dead, culled)
 

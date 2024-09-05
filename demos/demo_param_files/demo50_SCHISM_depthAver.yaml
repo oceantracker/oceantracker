@@ -47,8 +47,8 @@ particle_properties:
   decay_time_scale: 86400.0
   name: age_decay
 reader:
-  file_mask: demoHindcastSchism3D.nc
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  file_mask: demo_hindcast_schisim3D_00.nc
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   load_fields:
   - water_temperature
 regrid_z_to_uniform_sigma_levels: true
@@ -64,7 +64,6 @@ release_groups:
     - -1
   pulse_size: 10
   release_interval: 3600
-  start: '2017-01-01T01:30:00'
 - class_name: oceantracker.release_groups.polygon_release.PolygonRelease
   name: Poly1
   points:

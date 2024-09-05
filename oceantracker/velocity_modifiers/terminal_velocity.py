@@ -1,11 +1,11 @@
-from  oceantracker.velocity_modifiers._base_velocity_modifer import VelocityModiferBase
+from  oceantracker.velocity_modifiers._base_velocity_modifer import _VelocityModiferBase
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
-class TerminalVelocity(VelocityModiferBase):
+class TerminalVelocity(_VelocityModiferBase):
     # add terminal velocity to particle velocity  < 0 is downwards ie sinking
 
     def __init__(self,):
@@ -24,7 +24,7 @@ class TerminalVelocity(VelocityModiferBase):
     def initial_setup(self):
         super().initial_setup()
          
-        pgm= si.core_roles.particle_group_manager
+        pgm= si.core_class_roles.particle_group_manager
 
         si.msg_logger.msg('When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',note=True)
 
@@ -36,7 +36,7 @@ class TerminalVelocity(VelocityModiferBase):
     def update(self,n_time_step, time_sec, active):
         # modify vertical velocity, if backwards, make negative
          
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         velocity_modifier = part_prop['velocity_modifier']
 
         if self.params['variance'] is None:

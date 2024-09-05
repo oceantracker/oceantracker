@@ -9,7 +9,7 @@ from oceantracker.util import  output_util
 from oceantracker.util.basic_util import nopass
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 class BaseEventLogger(ParameterBaseClass):
 
@@ -30,7 +30,7 @@ class BaseEventLogger(ParameterBaseClass):
     def initial_setup(self):
 
         # boolean buffer particle prop to recorded history of event having started (must be prop to be managed in compact mode)
-        pgm = si.core_roles.particle_group_manager
+        pgm = si.core_class_roles.particle_group_manager
         si.add_class('particle_properties', class_name='CoreParticleProperty', name='event_has_started_boolean', initial_value=False, dtype='bool', write=False)
         self.time_steps_written = 0
 
@@ -40,7 +40,7 @@ class BaseEventLogger(ParameterBaseClass):
         # eg. based on number of particles in buffer
         # returns particle indices where event has started and ended
 
-        event_has_started_boolean = si.roles.particle_properties['event_has_started_boolean'].data
+        event_has_started_boolean = si.class_roles.particle_properties['event_has_started_boolean'].data
 
         IDs_event_began, IDs_event_ended = self._find_particles_where_event_has_started_or_ended_numba(
                                                         event_has_started_boolean,
@@ -51,7 +51,7 @@ class BaseEventLogger(ParameterBaseClass):
 
     def set_up_output_file(self,addition_prop_to_write = None):
         # set up netcdf-file variables with open dimension
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         params = self.params
         info= self.info
 
@@ -87,9 +87,9 @@ class BaseEventLogger(ParameterBaseClass):
     def write_events(self,IDs_event_began, IDs_event_ended):
         # prop to write is list of particle prop to write beyond the standard ones, e.g.  ID of polygon each particle is inside, to note which polygon event is associated with
 
-        part_prop= si.roles.particle_properties
+        part_prop= si.class_roles.particle_properties
 
-        time = si.roles.time_varying_info['time'].get_values()
+        time = si.class_roles.time_varying_info['time'].get_values()
 
         for event_flag, IDs in zip([1,-1], [IDs_event_began, IDs_event_ended]):
 

@@ -7,10 +7,11 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from numba.typed import List as NumbaList
 from numba import  njit
 from oceantracker.util.numba_util import njitOT
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 from oceantracker.util import time_util
-class BaseParticleLocationStats(ParameterBaseClass):
+
+class _BaseParticleLocationStats(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes
@@ -77,16 +78,16 @@ class BaseParticleLocationStats(ParameterBaseClass):
 
     def check_part_prop_list(self):
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
 
         names=[]
         for name in self.params['particle_property_list']:
 
             si.msg_logger.spell_check(f'Particle property name {name} not recognised',
-                                     name, si.roles.particle_properties.keys(),
+                                      name, si.class_roles.particle_properties.keys(),
                                       hint='check parameter "particle_property_list"',
                                       crumbs=f'Particle Statistic "{self.params["name"]}" >',
-                                     caller = self,fatal_error=True, exit_now=True)
+                                      caller = self, fatal_error=True, exit_now=True)
 
             if part_prop[name].is_vector():
                 si.msg_logger.msg('On the fly statistical Binning of vector particle property  "' + name + '" not yet implemented', warning=True)
@@ -115,7 +116,9 @@ class BaseParticleLocationStats(ParameterBaseClass):
     def set_up_time_bins(self,nc):
         # stats time variables commute to all 	for progressive writing
         nc.add_dimension('time_dim', None)  # unlimited time
-        nc.create_a_variable('time', ['time_dim'],  np.float64, description= 'time in seconds')
+        nc.create_a_variable('time', ['time_dim'],  np.float64,
+                             units='seconds since 1970-01-01 00:00:00',
+                             description= 'time in seconds since 1970/01/01 00:00')
 
         # other output common to all types of stats
         nc.create_a_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
@@ -123,7 +126,7 @@ class BaseParticleLocationStats(ParameterBaseClass):
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
 
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         self.prop_data_list, self.sum_prop_data_list = [],[]
         # todo put this in numba uti;, for other classes to use
         names=[]
@@ -165,12 +168,12 @@ class BaseParticleLocationStats(ParameterBaseClass):
 
     def update(self,n_time_step, time_sec):
         '''do particle counts'''
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         info = self.info
         self.start_update_timer()
 
 
-        num_in_buffer = si.core_roles.particle_group_manager.info['particles_in_buffer']
+        num_in_buffer = si.core_class_roles.particle_group_manager.info['particles_in_buffer']
 
         # first select those to count based on status and z location
         sel = self.sel_status_waterdepth_and_z(part_prop['status'].data, part_prop['x'].data, part_prop['water_depth'].data.ravel(),
@@ -182,7 +185,7 @@ class BaseParticleLocationStats(ParameterBaseClass):
 
         #update prop list data, as buffer may have expnaded
         #todo do this only when expansion occurs??
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
             self.prop_data_list[n]= part_prop[name].data
 
@@ -216,7 +219,7 @@ class BaseParticleLocationStats(ParameterBaseClass):
         # write nth step in file
         fh = self.nc.file_handle
         fh['time'][n] = time
-        release_groups = si.roles.release_groups
+        release_groups = si.class_roles.release_groups
 
         # add up number released
         num_released = 0
@@ -237,13 +240,13 @@ class BaseParticleLocationStats(ParameterBaseClass):
         nc = self.nc
         # write total released in each release group
         num_released=[]
-        for name, i in si.roles.release_groups.items():
+        for name, i in si.class_roles.release_groups.items():
             num_released.append(i.info['number_released'])
 
         if self.params['write']:
             self.info_to_write_at_end()
             nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
-            nc.write_global_attribute('total_num_particles_released', si.core_roles.particle_group_manager.info['particles_released'])
+            nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
 
             nc.close()
         self.nc = None  # parallel pool cant pickle nc

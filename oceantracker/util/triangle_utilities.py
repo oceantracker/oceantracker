@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit, prange
 from numba.typed import List as NumbaList
-from oceantracker.util.polygon_util import InsidePolygon
+from oceantracker.util.polygon_util import InsidePolygon, make_domain_mask
 from oceantracker.util import  basic_util
 from oceantracker.util.numba_util import njitOT
 
@@ -149,7 +149,7 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
     len_seg = [len(l) for l in segs] # f
 
     # split segments into  domain or island
-    # domain is line segment containing most easterly node in the trangulation
+    # domain is line segment containing most easterly node in the triangulation
     nodes=np.unique(triangles)
     x_tri =  x[ nodes, 0]
     domain_node= nodes[np.argmax( x_tri == x_tri.min())]
@@ -165,6 +165,9 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
             out['domain'].update(d)
         else:
             out['islands'].append(d)
+
+    # add domain mask, a polygon made up of bounding box and the domain, usedto plot domain
+    out['domain_masking_polygon']=make_domain_mask(out['domain']['points'])
     return out
 
 def calcuate_triangle_areas(xy, tri):

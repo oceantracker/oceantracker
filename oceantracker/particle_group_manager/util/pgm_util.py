@@ -1,7 +1,7 @@
 from numba import  njit
 
 from oceantracker.util.numba_util import njitOT
-from oceantracker.shared_info import SharedInfo as si
+from oceantracker.shared_info import shared_info as si
 
 status_stationary = int(si.particle_status_flags['stationary'])
 status_dead = int(si.particle_status_flags['dead'])

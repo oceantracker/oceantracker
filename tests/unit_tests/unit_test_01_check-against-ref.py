@@ -10,8 +10,11 @@ from tests.unit_tests import test_definitions
 def main(args):
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__,args))
-    ot.settings(time_step=1800,include_dispersion=False,
-             use_A_Z_profile=False, )
+    ot.settings(time_step=1800,use_dispersion=False,
+                screen_output_time_interval=1800,
+             use_A_Z_profile=True,
+            regrid_z_to_uniform_sigma_levels=True
+                )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
                  NCDF_particle_chunk= 500) # keep file small
@@ -25,7 +28,6 @@ def main(args):
     ot.add_class('release_groups', **test_definitions.rg_start_in_middle)
     ot.add_class('release_groups', **test_definitions.rg_outside_domain)
     ot.add_class('release_groups', **test_definitions.rg_datetime)
-
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
@@ -41,21 +43,9 @@ def main(args):
     ot.add_class('resuspension', critical_friction_velocity=0.01)
     case_info_file = ot.run()
 
-    reference_case_info_file = case_info_file.replace('output','reference_case_output')
-    if args.reference_case:
-        # rewrite reference case output
-        shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file),dirs_exist_ok=True)
+    test_definitions.compare_reference_run(case_info_file, args)
 
-    tracks= test_definitions.read_tracks(case_info_file)
-    tracks_ref = test_definitions.read_tracks(reference_case_info_file)
-    dx = np.abs(tracks['x']- tracks_ref['x'])
-
-    #print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
-    print('(x,y,z) differences from reference run',)
-    print(' min  ', np.nanmin(np.nanmin(dx, axis=0),axis=0))
-    print(' mean ', np.nanmean(np.nanmean(dx, axis=0),axis=0))
-    print(' max  ', np.nanmax(np.nanmax(dx, axis=0),axis=0))
-
+    test_definitions.show_track_plot(case_info_file, args)
 
 
 
