@@ -15,9 +15,9 @@ package_dir = definitions.package_dir
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-plot', action='store_true')
+    parser.add_argument('-noplot', action='store_true')
     parser.add_argument('-save_plots', action='store_true')
-
+    args = parser.parse_args()
     ot = OceanTracker()
 
     ot.settings(
@@ -83,6 +83,7 @@ if __name__ == "__main__":
 
     tracks=load_output_files.load_track_data(case_info_file)
 
-    ax = [1591000, 1601500, 5478500, 5491000]
-    anim = plot_tracks.animate_particles(tracks,axis_lims=ax,
-                                show_grid=True, show_dry_cells=True)
+    if not args.noplot:
+        ax = [1591000, 1601500, 5478500, 5491000]
+        anim = plot_tracks.animate_particles(tracks,axis_lims=ax,
+                                    show_grid=True, show_dry_cells=True)
