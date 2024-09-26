@@ -20,14 +20,14 @@ if __name__ == "__main__":
 
     ot = OceanTracker()
 
-    ot.settings(root_output_dir=path.join(definitions.default_output_dir, 'dev_output'),
+    ot.settings(
+        root_output_dir=path.join(definitions.default_output_dir, 'dev_output'),
         # below optional
         time_step=300,
         use_dispersion=True,
         screen_output_time_interval=1800,
         use_A_Z_profile=True,
-        regrid_z_to_uniform_sigma_levels=True
-                )
+        regrid_z_to_uniform_sigma_levels=True )
 
     # set up reader
     demo_hindcast_dir =path.join(path.dirname(definitions.package_dir), 'demos')
@@ -44,9 +44,7 @@ if __name__ == "__main__":
 
     ot.add_class('release_groups', name='my_polygon_release',  # name used internal to refer to this release
          class_name='PolygonRelease',  # class to use
-         # (x,y) points making up a 2D polygon
          points=poly1,
-         # the below are optional settings/parameters
          release_interval=3600, pulse_size=5,
          z_min=-2., z_max=0.5)
 
@@ -56,6 +54,7 @@ if __name__ == "__main__":
          # the below are optional settings/parameters
          initial_value=1000,  # value of property when released
          decay_time_scale=7200.) # add a new property to particle_properties role
+
     ot.add_class('particle_properties', class_name='Speed', name='speed')
 
     # add a gridded particle statistic to plot heat map
@@ -76,7 +75,8 @@ if __name__ == "__main__":
         status_min= 'moving',
         z_min= -2,
         grid_size= [120, 121],
-                 polygon_list=[dict(points=poly1)])
+        polygon_list=[dict(points=poly1)])
+
     ot.add_class('resuspension', critical_friction_velocity=0.002)
 
     case_info_file = ot.run()
