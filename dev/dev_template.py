@@ -84,6 +84,6 @@ if __name__ == "__main__":
     tracks=load_output_files.load_track_data(case_info_file)
 
     if not args.noplot:
-        ax = [1591000, 1601500, 5478500, 5491000]
+        ax = [1591000, 1601500, 5479500, 5491000]
         anim = plot_tracks.animate_particles(tracks,axis_lims=ax,
                                     show_grid=True, show_dry_cells=True)
