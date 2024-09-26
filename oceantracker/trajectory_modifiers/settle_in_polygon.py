@@ -35,10 +35,10 @@ class SettleInPolygon(_BaseTrajectoryModifier):
         self.polygon = InsidePolygon(verticies=a)# do set up to speed inside using pre-calculation
 
         # add particle prop to track which are inside polygon, which will be automatically written to output
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='is_stationary_in_polygon', dtype='int8')
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='is_stationary_in_polygon', dtype='int8')
 
         # add part prop to record when last released
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='time_of_settlement', initial_value=0.)
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='time_of_settlement', initial_value=0.)
 
     # all particles checked to see if they need status changing
     def update(self,n_time_step, time_sec, active):

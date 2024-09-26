@@ -118,8 +118,8 @@ def check_python_version(msg_logger):
             ml.msg('Oceantracker requires Python 3 , version >= 3.9  and < 3.11',
                          hint=install_hint, warning=True, tabs=1)
         if (p_major == 3 and p_minor >= 11):
-            ml.msg('Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4', warning=True)
-
+            ml.msg('Oceantracker is compatible with Python 3.11, but > 3.11, however not all external imported packages have been updated to be compatible with 3.11', warning=True,
+                   hint='Down grade to python 3.10 if unexplained issues in external packages')
 
 def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', caller = None):
     # set numba config via environment variables,

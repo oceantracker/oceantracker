@@ -1,10 +1,10 @@
-from oceantracker.particle_properties._base_particle_properties import CustomParticleProperty
+from oceantracker.particle_properties._base_particle_properties import ManuallyUpdatedParticleProperty
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 
 from oceantracker.shared_info import shared_info as si
 
-class ParticleLoad(CustomParticleProperty):
+class ParticleLoad(ManuallyUpdatedParticleProperty):
     '''
     Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass.
     '''
@@ -23,7 +23,7 @@ class ParticleLoad(CustomParticleProperty):
         info= self.info
         pgm = si.core_class_roles.particle_group_manager
 
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name=self.params['name'] + '_initial_value',time_varying=False, write=False)
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name=self.params['name'] + '_initial_value',time_varying=False, write=False)
 
     def initial_value_at_birth(self, new_part_IDs):
 

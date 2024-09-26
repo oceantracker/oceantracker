@@ -35,11 +35,11 @@
 1. used np.datetime64, milli sec internally
 2. Add positive=True to param checker to ensure vale is >0
 2. faster to do dry cellby updating adjacency matrix? aviods addtional decsion in cel serach
-   
+1, throw error if all release points in a release group or all of polygon vertices  are outside domain
 
 ## Niggles that need sorting some time
 
-3. tracks eadfer to reain dead particle locations in retangular form
+3. compact tracks writer to reatin dead particle locations in retangular form, but flag as dead
 1. List check makes default values of None into [], should be None? Look at merging list params, better to remove, or keep for building polygon lists ?
 1. all final_setup()' s done??
 1. inside polygon class over writes given points with closed polygon 
@@ -95,31 +95,17 @@
 
 
 ##   IMPROVEMENTS
-1.   allow numpy arrays in "array" type
-1.   smart way to tell class_dict item does not belong to that type, without class name
-1.   allow isostr, datetime, np.dateime64 for dates
 
 1.    rotate particle relese polygns to reduce searches for points in side
-1.    extend inside polygon to have list of cells fully inside plogon for faster serach done??
 1.    replace retain_culled_part_locations with use of "last known location",
-1.   and add "show_dead_particles" option to tracks plotting
 1.   plot routines using message logger ???
-1.   merge residence time into polygon stats?
 1.   add variance calc to on fly stats particle prop, by adding sum of squares heatmap/ploygon
 1.    read geojson polygons
-1.   free run through statr/gaps/ends when no active particles
 
-1.   add CPC for check dicts of class parameters??
-1.  more consisted crumb use for all message logger errors to aid debug
 1.   merge demo plots back into demos
-1.   particle property, fill value is fill value, not intial, value, put in netcdf, compact reader pyhton and matlab, than fills matrix
-1. status to have not released before creataion, dead afet death  in compact reader,
-1.  ensures statatus is not released when filling upper left of reytangular matrix
-1.   say why no particles found, eg outside domain etc
+1.  ensures status is not released when filling upper left of reytangular matrix
  
  ##   Simplify
-
-
 1.   tidy up particle concentrations, add grid data to netcdf
 
 ##   FUTURE
@@ -139,6 +125,7 @@
 
 ##    ERROR HANDLING
 1.   improve crumb trail use in paramters and elsewhere
+1.   more consisted crumb use for all message logger errors to aid debug
 1.    check in no if main for parralel case, to avoid  error on windows if running in //
 1.   case info not found on graceful exit error
 
