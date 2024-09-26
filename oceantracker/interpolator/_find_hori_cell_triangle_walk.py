@@ -42,13 +42,13 @@ class FindHoriCellTriangleWalk(object):
 
         # classes need by this class
         crumbs = 'interpolator intitial_setup>'
-        si.add_class('particle_properties', name='n_cell', class_name='CoreParticleProperty', write=False, dtype='int32',
+        si.add_class('particle_properties', name='n_cell', class_name='ManuallyUpdatedParticleProperty', write=False, dtype='int32',
                      initial_value=0, caller=self, crumbs=crumbs)  # start with cell number guess of zero
-        si.add_class('particle_properties', name='n_cell_last_good', class_name='CoreParticleProperty', write=False, dtype='int32',
+        si.add_class('particle_properties', name='n_cell_last_good', class_name='ManuallyUpdatedParticleProperty', write=False, dtype='int32',
                      initial_value=0, caller=self, crumbs=crumbs)
-        si.add_class('particle_properties', name='cell_search_status', class_name='CoreParticleProperty', write=False,
+        si.add_class('particle_properties', name='cell_search_status', class_name='ManuallyUpdatedParticleProperty', write=False,
                      initial_value=cell_search_status_flags.ok, dtype='int8', caller=self, crumbs=crumbs)
-        si.add_class('particle_properties', name='bc_cords', class_name='CoreParticleProperty', write=False,
+        si.add_class('particle_properties', name='bc_cords', class_name='ManuallyUpdatedParticleProperty', write=False,
                      initial_value=0., vector_dim=3, dtype='float32', caller=self, crumbs=crumbs)
 
         self.walk_counts = np.zeros((6,), dtype=np.int64)

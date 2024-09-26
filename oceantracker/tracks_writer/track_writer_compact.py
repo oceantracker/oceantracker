@@ -99,7 +99,7 @@ class CompactTracksWriter(_BaseWriter):
         # this writes prop like release ID as particles are release, so it works with both rectangular and compact writers
         IDs= si.class_roles.particle_properties['ID'].get_values(released)
         d= data[released, ...]
-        self.nc.file_handle.variables[prop_name][IDs, ...]  = d
+        self.nc.file_handle.variables[prop_name][IDs, ...] = d
 
     def write_time_varying_particle_prop(self, prop_name, data):
         # only write those particles which are alive

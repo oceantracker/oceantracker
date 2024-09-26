@@ -205,11 +205,11 @@ class _BaseReader(ParameterBaseClass):
             b = f'{np.array2string(bounds[0], precision=1, floatmode="fixed")} to {np.array2string(bounds[1], precision=1, floatmode="fixed")}'
         si.hindcast_info['bounding_box'] = b
         si.msg_logger.msg(f'Hydro-model is "{"3D" if grid["is3D"] else "2D"}"  type "{self.__class__.__name__}"',
-                          note=True, hint=f'Files found dir and sub-dirs of "{self.params["input_dir"]}"')
+                          note=True, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
         hi = si.hindcast_info
-        si.msg_logger.msg(f'Start: {hi["start_date"]}  end:  {hi["end_date"]}, time steps  {hi["total_time_steps"]} ', tabs=2)
+        si.msg_logger.msg(f'Hindcast start: {hi["start_date"]}  end:  {hi["end_date"]}, time steps  {hi["total_time_steps"]} ', tabs=3)
 
-        si.msg_logger.msg('grid bounding box = ' + b, tabs=2)
+        si.msg_logger.msg('grid bounding box = ' + b, tabs=4)
 
 
         # reader triangles
@@ -320,7 +320,7 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         hi = si.hindcast_info
         vgt = si.vertical_grid_types
-        grid['bottom_cell_index'] = self.read_bottom_cell_index(grid)
+        grid['bottom_cell_index'] = self.read_bottom_cell_index(grid).astype(np.int32)
 
         # allow vertical regridding to same sigma at all nodes
         if si.settings['regrid_z_to_uniform_sigma_levels'] and hi['vert_grid_type'] in [ vgt.LSC, vgt.Slayer]:

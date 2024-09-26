@@ -134,8 +134,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         except Exception as e:
             ml.show_all_warnings_and_errors()
             ml.msg(f' Unexpected error in case number [{ri.caseID:2}] ', fatal_error=True,hint='check above or .err file')
-            raise Exception()
             tb = traceback.format_exc()
+
             ml.write_error_log_file(e, tb)
             # printout out trace back
             ml.msg(str(e))
@@ -264,7 +264,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         if len(si.class_roles['release_groups']) == 0:
             si.msg_logger.msg('No particle "release_groups" parameters found', fatal_error=True, caller=self)
-        si.msg_logger.exit_if_prior_errors('Erroers adding release groups??')
+        si.msg_logger.exit_if_prior_errors('Errors adding release groups??')
 
         # set up to start end times based on release_groups
         # set up release groups and find first release time to start model
@@ -334,6 +334,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.core_class_roles.reader = reader
 
         # todo nested reader setup
+        for n, rb in enumerate( run_builder['nested_reader_builders']):
+            pass
 
     def _build_single_reader(self,reader_builder):
         # build a readers

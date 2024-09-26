@@ -31,7 +31,7 @@ class BaseEventLogger(ParameterBaseClass):
 
         # boolean buffer particle prop to recorded history of event having started (must be prop to be managed in compact mode)
         pgm = si.core_class_roles.particle_group_manager
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='event_has_started_boolean', initial_value=False, dtype='bool', write=False)
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='event_has_started_boolean', initial_value=False, dtype='bool', write=False)
         self.time_steps_written = 0
 
     def find_events(self, event_is_happening_boolean):
