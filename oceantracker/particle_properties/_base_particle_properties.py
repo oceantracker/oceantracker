@@ -4,7 +4,6 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 from oceantracker.util.basic_util import nopass
-from oceantracker.definitions import  particle_property_types
 from oceantracker.shared_info import shared_info as si
 from oceantracker.util.numpy_util import possible_dtypes
 
@@ -30,7 +29,7 @@ class _BaseParticleProperty(ParameterBaseClass):
                                     'write': PVC(True, bool, doc_str='Write particle property to tracks or event files file'),
                                     'type': PVC('user', str,obsolete=True,
                                                 doc_str='type of particle property, used to manage how to update particle property',
-                                                possible_values=particle_property_types),
+                                                ),
                                      'release_group_parameters':PLC(None, str, expert=True, doc_str='In development: release group specific particle prop params'),
               })
 
@@ -151,9 +150,6 @@ class _BaseParticleProperty(ParameterBaseClass):
         return found
 
 # three types of particle depending on update method
-class CoreParticleProperty(_BaseParticleProperty):
-    def update(self, n_time_step, time_sec, active): pass
-
 class FieldParticleProperty(_BaseParticleProperty):
     def update(self, n_time_step, time_sec, active):
         si.core_class_roles.field_group_manager.interp_field_at_particle_locations(self.params['name'], active)
