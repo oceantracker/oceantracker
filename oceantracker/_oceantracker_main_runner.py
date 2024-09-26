@@ -258,7 +258,7 @@ class _OceanTrackerRunner(object):
 
         # remove any fields that cant be used in 2D
         if not run_builder['is3D_run']:
-            fi = run_builder['reader_builder']['reader_field_info']
+            fi = reader_builder['reader_field_info']
             for name in fi.keys():
                 if fi[name]['params']['is3D']: fi.pop(name)
             # disable resuspension

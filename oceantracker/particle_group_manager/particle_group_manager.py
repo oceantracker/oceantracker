@@ -5,7 +5,6 @@ from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 from  oceantracker.particle_group_manager.util import  pgm_util
-from oceantracker.definitions import particle_property_types
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_properties._base_particle_properties import FieldParticleProperty,ManuallyUpdatedParticleProperty,CustomParticleProperty
 
