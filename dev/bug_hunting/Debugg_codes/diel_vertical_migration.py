@@ -68,7 +68,7 @@ class DielVerticalMigration(_VelocityModiferBase):
     
     def update(self, n_time_step, time_sec, active):
         
-        part_prop = si.roles.particle_properties
+        part_prop = si.class_roles.particle_properties
         
         # Compute solar radiation for active particles
         date = si.run_info.current_model_date.astype(datetime.datetime) # make the datetime object aware of timezone
@@ -76,7 +76,7 @@ class DielVerticalMigration(_VelocityModiferBase):
         
         # Modify vertical velocity to follow diel vertical migration
         vertical_velocity = np.abs(self.params['vertical_swimming_speed']) /1000  # magnitude in mm/s 
-        start = self.params['start'] # Start of diel vertical migration (age in seconds)
+        start = self.params['age_start'] # Start of diel vertical migration (age in seconds)
         self._update_diel_vertical_velocity(part_prop['velocity_modifier'].data, 
                                             part_prop['light'].data, 
                                             part_prop['age'].data,
