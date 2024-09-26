@@ -27,8 +27,7 @@ class DielVerticalMigration(_VelocityModiferBase):
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True, required_props_list=['velocity_modifier'])        
-  
-  
+
     def initial_setup(self):
         super().initial_setup()
         pgm= si.core_class_roles.particle_group_manager
