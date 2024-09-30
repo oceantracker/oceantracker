@@ -4,7 +4,7 @@ import multiprocessing
 from copy import deepcopy
 from datetime import datetime, timedelta
 
-from os import path, makedirs
+from os import path, makedirs, walk, unlink
 import shutil
 from time import perf_counter
 from copy import  copy, deepcopy
@@ -60,7 +60,7 @@ class _OceanTrackerRunner(object):
 
         # setup output dir and msg files
         t0 = perf_counter()
-        o = setup_util.setup_output_dir(working_params['settings'], ml, crumbs= crumbs + '> Setting up output dir')
+        o = self.setup_output_dir(working_params['settings'], ml, crumbs= crumbs + '> Setting up output dir')
 
         o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base' ] +'_run') # message logger output file setup
         run_builder['output_files'] = o
@@ -330,7 +330,58 @@ class _OceanTrackerRunner(object):
             is3D_run = False
 
         return is3D_run
-            
+
+    def setup_output_dir(self, params, msg_logger, crumbs='', caller=None):
+
+        # setus up params, opens log files/ error handling, required befor mesage loger can be used
+        crumbs += '> setup_output_dir'
+
+        # check outpu_file_base is not dir, just a test
+        if len(path.dirname(params['output_file_base'])) > 0:
+            msg_logger.msg(f'Setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{params["output_file_base"]}"', fatal_error=True,
+                           hint='Use setting "root_output_dir" to designate which dir. to place output files in',
+                           crumbs=crumbs, caller=caller,
+                           exit_now=True)
+
+        # get output files location
+        root_output_dir = path.abspath(path.normpath(params['root_output_dir']))
+        run_output_dir = path.join(root_output_dir, params['output_file_base'])
+
+        if params['add_date_to_run_output_dir']:
+            run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
+
+        # clear existing folder
+        if path.isdir(run_output_dir):
+            shutil.rmtree(run_output_dir)
+            for root, dirs, files in walk(run_output_dir):
+                for f in files:
+                    unlink(path.join(root, f))
+                for d in dirs:
+                    shutil.rmtree(path.join(root, d))
+            msg_logger.msg('Deleted contents of existing output dir', warning=True)
+
+        # make a new dir
+        try:
+            makedirs(run_output_dir)  # make  and clear out dir for output
+        except OSError as e:
+            # path may already exist, but if not through other error, exit
+            msg_logger.msg(f'Failed to make run output dir:{run_output_dir}', fatal_error=True,
+                           crumbs=crumbs, caller=caller,
+                           exception=e, traceback_str=traceback.print_exc(), exit_now=True)
+
+        # write a copy of user given parameters, to help with debugging and code support
+        fb = 'users_params_' + params['output_file_base']
+        output_files = {'root_output_dir': root_output_dir,
+                        'run_output_dir': run_output_dir,
+                        'output_file_base': params['output_file_base'],
+                        'raw_output_file_base': copy(params['output_file_base']),
+                        # this is need for grid file so it does not get a case number in // runs
+                        'runInfo_file': params['output_file_base'] + '_runInfo.json',
+                        'runLog_file': params['output_file_base'] + '_runScreen.log',
+                        'run_error_file': params['output_file_base'] + '_run.err',
+                        'users_params_json': fb + '.json',
+                        }
+        return output_files
     def _write_run_info_json(self, case_summary, run_builder):
         # read first case info for shared info
         ml = msg_logger
