@@ -27,7 +27,7 @@ class ParticleGroupManager(ParameterBaseClass):
         info['num_alive'] = 0
 
         nDim = si.run_info.vector_components
-        info['current_particle_buffer_size'] = si.settings.particle_buffer_chunk_size
+        info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size
         # core particle props. , write at each required time step
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x', vector_dim=nDim)  # particle location
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x0', write=True, time_varying=False, vector_dim=nDim)  # location when last moving
@@ -114,6 +114,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # check if buffer needs expanding
         smax = info['particles_in_buffer'] + release_data['x'].shape[0]
         if smax > si.settings['max_particles']: return # no more can be released
+
         if smax > self.info['current_particle_buffer_size']:
             self._expand_particle_buffers(smax)
 
@@ -126,6 +127,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # copy over release data to new part props
         for name in release_data.keys():
             part_prop[name].set_values(release_data[name], new_buffer_indices)
+
 
         # record needed copies
         if new_buffer_indices.size >0:

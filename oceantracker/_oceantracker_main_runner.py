@@ -338,7 +338,7 @@ class _OceanTrackerRunner(object):
 
         # check outpu_file_base is not dir, just a test
         if len(path.dirname(params['output_file_base'])) > 0:
-            msg_logger.msg(f'Setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{params["output_file_base"]}"', fatal_error=True,
+            msg_logger.msg(f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{params["output_file_base"]}"', fatal_error=True,
                            hint='Use setting "root_output_dir" to designate which dir. to place output files in',
                            crumbs=crumbs, caller=caller,
                            exit_now=True)
