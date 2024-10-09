@@ -221,7 +221,8 @@ class ParticleGroupManager(ParameterBaseClass):
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
         if nDead > 100_000 and nDead >= 0.20*info['particles_in_buffer']:
                 # if too many dead then delete from memory
-                si.msg_logger.msg(f'removing dead {nDead:,} particles from memory, as more than 20% are dead', tabs=3)
+                dead_frac=100*nDead/info['particles_in_buffer']
+                si.msg_logger.msg(f'removing dead {nDead:6,d} particles from buffer,  {dead_frac:2.0f}% are dead', tabs=3)
 
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():
@@ -244,11 +245,11 @@ class ParticleGroupManager(ParameterBaseClass):
         info = self.info
         counts =self.status_count_array
 
-        s =  f' Rel.:{info["particles_released"]:8,d}: '
-        s += f'Active:{info["num_alive"]:05d} M:{counts[sf.moving-128]:05d} '
-        s += f'S:{counts[sf.stranded_by_tide-128]:05d}  B:{counts[sf.on_bottom -128]:05d} '
-        s += f'D:{counts[sf.dead - 128]:03d} O:{counts[sf.outside_open_boundary - 128]:02d} '
-        s += f'N:{counts[sf.bad_cord - 128]:03d} Buffer:{info["particles_in_buffer"]:04d} '
+        s =  f' Rel.:{info["particles_released"]:<6,d}: '
+        s += f'Active:{info["num_alive"]:<6,d} M:{counts[sf.moving-128]:<6,d} '
+        s += f'S:{counts[sf.stranded_by_tide-128]:<6,d}  B:{counts[sf.on_bottom -128]:<6,d} '
+        s += f'D:{counts[sf.dead - 128]:<6,d} O:{counts[sf.outside_open_boundary - 128]:<6,d} '
+        s += f'N:{counts[sf.bad_cord - 128]:<6,d} Buffer:{info["particles_in_buffer"]:<6,d} '
         s += '%3.0f%%' % (100. * info['particles_in_buffer'] / si.core_class_roles.particle_group_manager.info['current_particle_buffer_size'])
         s += self.screen_msg
         return s

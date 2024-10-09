@@ -15,11 +15,18 @@ class CullRate(_BaseTrajectoryModifier):
                                                           units='particles per sec'))
 
     def initial_setup(self, **kwargs):
-        self.info['prob_culling'] = 1. - np.exp(-self.params['decay_rate'] * si.settings.time_step)
+
+        rate = self.params['decay_rate'] * si.settings.time_step
+        if rate > 1.0e-3:
+            # below is exact prob. but may mave numerical issues for small decay_rate*time_step,
+            self.info['prob_culling'] = 1. - np.exp(-rate)
+        else:
+            # small rate approximation to exponential probability with error rate^2/2
+            self.info['prob_culling'] = rate
+
     def update(self, n_time_step, time_sec, active):
         # update decay prop each time step
         part_prop = si.class_roles.particle_properties
-
         self._do_cull(part_prop['status'].data, self.info['prob_culling'],si.particle_status_flags.dead, active)
 
     @staticmethod
