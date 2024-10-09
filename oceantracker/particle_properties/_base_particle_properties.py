@@ -37,7 +37,7 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def initial_setup(self):
         params = self.params
-        s = (si.settings.particle_buffer_chunk_size,) # initial size one chunk
+        s = (si.settings.particle_buffer_initial_size,) # initial size one chunk
         if params['vector_dim'] > 1:
             s += (params['vector_dim'],)
 
