@@ -5,9 +5,8 @@ from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 from  oceantracker.particle_group_manager.util import  pgm_util
-from oceantracker.definitions import particle_property_types
 from oceantracker.shared_info import shared_info as si
-from oceantracker.particle_properties._base_particle_properties import CoreParticleProperty,FieldParticleProperty,CustomParticleProperty
+from oceantracker.particle_properties._base_particle_properties import FieldParticleProperty,ManuallyUpdatedParticleProperty,CustomParticleProperty
 
 # holds and provides access to different types a group of particle properties, eg position, field properties, custom properties
 class ParticleGroupManager(ParameterBaseClass):
@@ -28,33 +27,33 @@ class ParticleGroupManager(ParameterBaseClass):
         info['num_alive'] = 0
 
         nDim = si.run_info.vector_components
-        info['current_particle_buffer_size'] = si.settings.particle_buffer_chunk_size
+        info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size
         # core particle props. , write at each required time step
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='x', vector_dim=nDim)  # particle location
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='x0', write=True, time_varying=False, vector_dim=nDim)  # location when last moving
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x', vector_dim=nDim)  # particle location
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x0', write=True, time_varying=False, vector_dim=nDim)  # location when last moving
 
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='x_last_good', write=False, vector_dim=nDim)  # location when last moving
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x_last_good', write=False, vector_dim=nDim)  # location when last moving
 
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='particle_velocity', vector_dim=nDim)
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='velocity_modifier', vector_dim=nDim)
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='particle_velocity', vector_dim=nDim)
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='velocity_modifier', vector_dim=nDim)
 
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='status', dtype='int8', )
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='age', initial_value=0.,
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status', dtype='int8', )
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='age', initial_value=0.,
                      units='seconds', description='Time in seconds since particle released')
 
         # parameters are set once and then don't change with time
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='ID', dtype='int32', initial_value=-1, time_varying=False,
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='ID', dtype='int32', initial_value=-1, time_varying=False,
                      description='unique particle ID number, zero based')
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='IDrelease_group', dtype='int32', initial_value=-1, time_varying=False,
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='IDrelease_group', dtype='int32', initial_value=-1, time_varying=False,
                      description='ID of group release particle is part of  is in, zero based')
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='user_release_groupID', dtype='int32', initial_value=-1, time_varying=False,
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='user_release_groupID', dtype='int32', initial_value=-1, time_varying=False,
                      description='user given integer ID of release group')
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='IDpulse', dtype='int32', initial_value=-1, time_varying=False,
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='IDpulse', dtype='int32', initial_value=-1, time_varying=False,
                      description='ID of pulse particle was released within its release group, zero based')
         # ID used when nested grids only
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='hydro_model_gridID', write=True, time_varying=True, dtype='int8', initial_value=-1,
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='hydro_model_gridID', write=True, time_varying=True, dtype='int8', initial_value=-1,
                      description='ID for which grid, outer (ID=0) or nested (ID >0),  each particle resides in ')
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='time_released', time_varying=False,
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='time_released', time_varying=False,
                      units='seconds since 1970-01-01 00:00:00',
                      description='time (sec) each particle was released')
 
@@ -115,6 +114,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # check if buffer needs expanding
         smax = info['particles_in_buffer'] + release_data['x'].shape[0]
         if smax > si.settings['max_particles']: return # no more can be released
+
         if smax > self.info['current_particle_buffer_size']:
             self._expand_particle_buffers(smax)
 
@@ -127,6 +127,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # copy over release data to new part props
         for name in release_data.keys():
             part_prop[name].set_values(release_data[name], new_buffer_indices)
+
 
         # record needed copies
         if new_buffer_indices.size >0:
@@ -188,7 +189,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for name, i in si.class_roles.particle_properties.items():
-            if isinstance(i, CustomParticleProperty):
+            if isinstance(i, ManuallyUpdatedParticleProperty):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()
@@ -220,7 +221,8 @@ class ParticleGroupManager(ParameterBaseClass):
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
         if nDead > 100_000 and nDead >= 0.20*info['particles_in_buffer']:
                 # if too many dead then delete from memory
-                si.msg_logger.msg(f'removing dead {nDead:,} particles from memory, as more than 20% are dead', tabs=3)
+                dead_frac=100*nDead/info['particles_in_buffer']
+                si.msg_logger.msg(f'removing dead {nDead:6,d} particles from buffer,  {dead_frac:2.0f}% are dead', tabs=3)
 
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():
@@ -243,11 +245,11 @@ class ParticleGroupManager(ParameterBaseClass):
         info = self.info
         counts =self.status_count_array
 
-        s =  f' Rel.:{info["particles_released"]:8,d}: '
-        s += f'Active:{info["num_alive"]:05d} M:{counts[sf.moving-128]:05d} '
-        s += f'S:{counts[sf.stranded_by_tide-128]:05d}  B:{counts[sf.on_bottom -128]:05d} '
-        s += f'D:{counts[sf.dead - 128]:03d} O:{counts[sf.outside_open_boundary - 128]:02d} '
-        s += f'N:{counts[sf.bad_cord - 128]:03d} Buffer:{info["particles_in_buffer"]:04d} '
+        s =  f' Rel.:{info["particles_released"]:<6,d}: '
+        s += f'Active:{info["num_alive"]:<6,d} M:{counts[sf.moving-128]:<6,d} '
+        s += f'S:{counts[sf.stranded_by_tide-128]:<6,d}  B:{counts[sf.on_bottom -128]:<6,d} '
+        s += f'D:{counts[sf.dead - 128]:<6,d} O:{counts[sf.outside_open_boundary - 128]:<6,d} '
+        s += f'N:{counts[sf.bad_cord - 128]:<6,d} Buffer:{info["particles_in_buffer"]:<6,d} '
         s += '%3.0f%%' % (100. * info['particles_in_buffer'] / si.core_class_roles.particle_group_manager.info['current_particle_buffer_size'])
         s += self.screen_msg
         return s

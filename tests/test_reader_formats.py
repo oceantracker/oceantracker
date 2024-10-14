@@ -355,7 +355,6 @@ def get_case(n):
             ax=  [  1715000 ,    1755000 ,    6010000 ,    6050000] # northland
             title = 'nested test'
             nested_readers= [dict(name='nest1',
-                    class_name='oceantracker.reader.schism_reader.SCHISMreaderNCDF',
                     input_dir = r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\Existing_Sep2012_temp',
                     hgrid_file_name=r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\hgrid.gr3',
                     # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',

@@ -4,7 +4,6 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util import time_util
 from oceantracker.util.basic_util import nopass
-from oceantracker.definitions import  particle_property_types
 from oceantracker.shared_info import shared_info as si
 from oceantracker.util.numpy_util import possible_dtypes
 
@@ -28,9 +27,9 @@ class _BaseParticleProperty(ParameterBaseClass):
                                     'initial_value':PVC(0.,float, doc_str='Value given to particle property on release'),
                                     'update':PVC(True,bool),
                                     'write': PVC(True, bool, doc_str='Write particle property to tracks or event files file'),
-                                    'type': PVC('user', str,
+                                    'type': PVC('user', str,obsolete=True,
                                                 doc_str='type of particle property, used to manage how to update particle property',
-                                                possible_values=particle_property_types),
+                                                ),
                                      'release_group_parameters':PLC(None, str, expert=True, doc_str='In development: release group specific particle prop params'),
               })
 
@@ -38,7 +37,7 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def initial_setup(self):
         params = self.params
-        s = (si.settings.particle_buffer_chunk_size,) # initial size one chunk
+        s = (si.settings.particle_buffer_initial_size,) # initial size one chunk
         if params['vector_dim'] > 1:
             s += (params['vector_dim'],)
 
@@ -151,17 +150,11 @@ class _BaseParticleProperty(ParameterBaseClass):
         return found
 
 # three types of particle depending on update method
-class CoreParticleProperty(_BaseParticleProperty):
-    def update(self, n_time_step, time_sec, active): pass
-
 class FieldParticleProperty(_BaseParticleProperty):
     def update(self, n_time_step, time_sec, active):
         si.core_class_roles.field_group_manager.interp_field_at_particle_locations(self.params['name'], active)
 
-
 class CustomParticleProperty(_BaseParticleProperty):
-    def update(self, n_time_step, time_sec, active): nopass('Custom particle epropr must have an update method')
-
-#todo remove below
-class old_ParticleProperty(_BaseParticleProperty):
-    pass
+    def update(self, n_time_step, time_sec, active): nopass('CustomParticleProperty error must have an update method')
+class ManuallyUpdatedParticleProperty(_BaseParticleProperty):
+    def update(self, n_time_step, time_sec, active): pass

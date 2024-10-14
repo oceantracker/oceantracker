@@ -4,7 +4,7 @@ import multiprocessing
 from copy import deepcopy
 from datetime import datetime, timedelta
 
-from os import path, makedirs
+from os import path, makedirs, walk, unlink
 import shutil
 from time import perf_counter
 from copy import  copy, deepcopy
@@ -49,8 +49,6 @@ class _OceanTrackerRunner(object):
         # base case run builder
         run_builder = dict( working_params = working_params,
                             version = definitions.version,
-                            reader_builder=dict(catalog=None,
-                                                reader_params=None),
                             computer_info = get_versions_computer_info.get_computer_info())
 
         #  merge defaults of bee case settings which have to be the same for all cases
@@ -62,7 +60,7 @@ class _OceanTrackerRunner(object):
 
         # setup output dir and msg files
         t0 = perf_counter()
-        o = setup_util.setup_output_dir(working_params['settings'], ml, crumbs= crumbs + '> Setting up output dir')
+        o = self.setup_output_dir(working_params['settings'], ml, crumbs= crumbs + '> Setting up output dir')
 
         o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base' ] +'_run') # message logger output file setup
         run_builder['output_files'] = o
@@ -81,9 +79,9 @@ class _OceanTrackerRunner(object):
 
         ml.exit_if_prior_errors('parameters have errors')
 
-        run_builder['reader_builder'], run_builder['nested_reader_builders'] = self._get_hindcast_file_info(run_builder)
+        run_builder['reader_builder'], run_builder['nested_reader_builders'] = self._create_reader_builders(run_builder)
 
-        if len(working_case_list_params) == 0 or working_params['settings']['processors'] == 1:
+        if len(working_case_list_params) == 0 :
             # no case list
             case_info_file = self._run_single(run_builder)
         else:
@@ -244,75 +242,79 @@ class _OceanTrackerRunner(object):
         case_summary = ot.run_case(deepcopy(working_params))
         return case_summary
 
-    def _get_hindcast_file_info(self, run_builder):
+    def _create_reader_builders(self, run_builder):
         # created a dict which can be used to build a reader
         t0 = perf_counter()
         ml = msg_logger
-        crumbs = 'Getting hydro-model file info> '
+        crumbs = '_get_hindcast_file_info> '
         working_params = run_builder['working_params']
 
-
-        run_builder['reader_builder'] = dict(params=working_params['core_roles']['reader'])
-        reader_builder =  run_builder['reader_builder']
-
-        file_list= self._check_input_dir(reader_builder['params'], crumbs='Main reader')
-
-        # detect reader format and add clas_name to params
-        reader_builder['params'], reader = self._detect_hydro_file_format(reader_builder,file_list, crumbs=crumbs)
-
-        reader_builder['catalog'] = self._get_hydro_file_catalog(reader_builder['params'], crumbs=crumbs + ' primary reader> ')
-
-        # add info to reader bulider on if 3D hindcast and mapped fields
-        reader_builder = self._map_and_catagorise_field_variables(run_builder, reader)
+        # primary reader
+        reader_builder= self._make_a_reader_builder(run_builder,working_params['core_roles']['reader'], crumbs)
+        json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], 'hindcast_variable_catalog.json'), reader_builder['catalog'])
 
         # work out in 3D run from water velocity
-        run_builder['is3D_run'] = self._detect_3D_velocity(run_builder)
+        run_builder['is3D_run'] = self._detect_3D_velocity(reader_builder)
 
         # remove any fields that cant be used in 2D
         if not run_builder['is3D_run']:
-            fi =  reader_builder['reader_field_info']
+            fi = reader_builder['reader_field_info']
             for name in fi.keys():
                 if fi[name]['params']['is3D']: fi.pop(name)
             # disable resuspension
             run_builder['working_params']['settings']['use_resuspension'] = False
 
-        # add custom fields
-        reader_builder['custom_field_params'] = dict()
-        for n, params in enumerate(working_params['roles']['fields']):
-            if 'name' not in params:
-                msg_logger.msg(f'Custom field #{n} must have both a "name" and "class_name" parameters',
-                           hint=f'given parameters are {str(params)}', fatal_error=True, caller=self)
-                continue
-
-            params.update(time_buffer_size=reader_builder['params']['time_buffer_size'],
-                          nodes=reader_builder['hindcast_info']['num_nodes'],
-                          zlevels=reader_builder['hindcast_info']['num_z_levels'])
-            reader_builder['custom_field_params'][params['name']] =params
-
-        # add field params for those required by other classes
-        reader_builder = self._add_field_params_added_by_classes_code(working_params, reader_builder)
-
         # get file info for nested readers
         nested_reader_builders = []
         if 'nested_readers' not in working_params['roles']: working_params['roles']['nested_readers'] = []
 
-        for n, params in enumerate(working_params['roles']['nested_readers']):
+        for n, nested_reader_params in enumerate(working_params['roles']['nested_readers']):
             t0 = perf_counter()
-            nested_params, nested_file_list = get_hydro_model_info.find_file_format_and_file_list(params, class_importer, ml)
-            nested_reader = self.class_importer.make_class_instance_from_params('reader', nested_params, crumbs=f'nested reader#{n:d}>')
-
-            d = dict(params=nested_params, file_info=nested_reader.get_hindcast_files_info(nested_file_list, ml))
-            nested_reader_builders.append(d)
+            nested_reader_builder = self._make_a_reader_builder(run_builder, nested_reader_params, crumbs = crumbs+f'> nested reader#{n}')
+            json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], f'hindcast_variable_catalog_ested_reader{n:03d}.json'),
+                                                        nested_reader_builder['catalog'])
+            nested_reader_builders.append(nested_reader_builder)
             ml.progress_marker(f'sorted nested hyrdo-model #{n} files in time order ', start_time=t0)
 
         ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
 
         return reader_builder, nested_reader_builders
+    def _make_a_reader_builder(self,run_builder, reader_params, crumbs):
+        crumbs = crumbs +'>_make_a_reader_builder '
 
-    def _detect_3D_velocity(self, run_builder):
+        reader_builder = dict(params=reader_params)
+
+        file_list = self._check_input_dir(reader_builder['params'], crumbs=crumbs)
+
+        # detect reader format and add clas_name to params
+        reader_builder['params'], reader = self._detect_hydro_file_format(reader_builder['params'], file_list, crumbs=crumbs)
+
+        reader_builder['catalog'] = self._get_hydro_file_catalog(reader_builder['params'],crumbs=crumbs)
+
+        # add info to reader bulider on if 3D hindcast and mapped fields
+        reader_builder = self._map_and_catagorise_field_variables(run_builder, reader_builder, reader)
+
+        # add custom fields
+        reader_builder['custom_field_params'] = dict()
+        for n, params in enumerate( run_builder['working_params']['roles']['fields']):
+            if 'name' not in params:
+                msg_logger.msg(f'Custom field #{n} must have both a "name" and "class_name" parameters',
+                               hint=f'given parameters are {str(params)}', fatal_error=True, caller=self)
+                continue
+
+            params.update(time_buffer_size=reader_builder['params']['time_buffer_size'],
+                          nodes=reader_builder['hindcast_info']['num_nodes'],
+                          zlevels=reader_builder['hindcast_info']['num_z_levels'])
+            reader_builder['custom_field_params'][params['name']] = params
+
+        # add field params for those required by other classes
+        reader_builder = self._add_field_params_added_by_classes_code( run_builder['working_params'], reader_builder)
+
+        return reader_builder
+
+    def _detect_3D_velocity(self, reader_builder):
         # check if water velocity variables are there, if not swap to depth averaged versions if present
         is3D_run = True
-        reader_builder = run_builder['reader_builder']
         fi =  reader_builder['reader_field_info']
 
         if 'water_velocity' not in fi:
@@ -328,7 +330,58 @@ class _OceanTrackerRunner(object):
             is3D_run = False
 
         return is3D_run
-            
+
+    def setup_output_dir(self, params, msg_logger, crumbs='', caller=None):
+
+        # setus up params, opens log files/ error handling, required befor mesage loger can be used
+        crumbs += '> setup_output_dir'
+
+        # check outpu_file_base is not dir, just a test
+        if len(path.dirname(params['output_file_base'])) > 0:
+            msg_logger.msg(f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{params["output_file_base"]}"', fatal_error=True,
+                           hint='Use setting "root_output_dir" to designate which dir. to place output files in',
+                           crumbs=crumbs, caller=caller,
+                           exit_now=True)
+
+        # get output files location
+        root_output_dir = path.abspath(path.normpath(params['root_output_dir']))
+        run_output_dir = path.join(root_output_dir, params['output_file_base'])
+
+        if params['add_date_to_run_output_dir']:
+            run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
+
+        # clear existing folder
+        if path.isdir(run_output_dir):
+            shutil.rmtree(run_output_dir)
+            for root, dirs, files in walk(run_output_dir):
+                for f in files:
+                    unlink(path.join(root, f))
+                for d in dirs:
+                    shutil.rmtree(path.join(root, d))
+            msg_logger.msg('Deleted contents of existing output dir', warning=True)
+
+        # make a new dir
+        try:
+            makedirs(run_output_dir)  # make  and clear out dir for output
+        except OSError as e:
+            # path may already exist, but if not through other error, exit
+            msg_logger.msg(f'Failed to make run output dir:{run_output_dir}', fatal_error=True,
+                           crumbs=crumbs, caller=caller,
+                           exception=e, traceback_str=traceback.print_exc(), exit_now=True)
+
+        # write a copy of user given parameters, to help with debugging and code support
+        fb = 'users_params_' + params['output_file_base']
+        output_files = {'root_output_dir': root_output_dir,
+                        'run_output_dir': run_output_dir,
+                        'output_file_base': params['output_file_base'],
+                        'raw_output_file_base': copy(params['output_file_base']),
+                        # this is need for grid file so it does not get a case number in // runs
+                        'runInfo_file': params['output_file_base'] + '_runInfo.json',
+                        'runLog_file': params['output_file_base'] + '_runScreen.log',
+                        'run_error_file': params['output_file_base'] + '_run.err',
+                        'users_params_json': fb + '.json',
+                        }
+        return output_files
     def _write_run_info_json(self, case_summary, run_builder):
         # read first case info for shared info
         ml = msg_logger
@@ -426,11 +479,11 @@ class _OceanTrackerRunner(object):
 
         return cat
 
-    def _detect_hydro_file_format(self, reader_builder, file_list, crumbs=''):
+    def _detect_hydro_file_format(self, reader_params, file_list, crumbs=''):
         # detect hindcast format and add reader class_name to params if missing
         # return reader class_name if given
         ml = msg_logger
-        reader_params= reader_builder['params']
+
         if 'class_name' in reader_params:
             reader = self.class_importer.make_class_instance_from_params('reader',
                         reader_params, check_for_unknown_keys=True,caller=self,  # dont flag unknown keys
@@ -478,7 +531,7 @@ class _OceanTrackerRunner(object):
         reader = known_readers[found_reader]['instance']
         return params, reader
 
-    def _add_field_params_added_by_classes_code(self, working_params, reader_builder):
+    def _add_field_params_added_by_classes_code(self,working_params,reader_builder ):
         # get pasm for any fields added by classes in there add_any_required_fields() method using self.add_field
         # must be done first to allow the reader to build all required fields
         crumbs = 'Adding code required fields'
@@ -499,10 +552,12 @@ class _OceanTrackerRunner(object):
 
         # add fields required by other classes
         for role, param_list  in working_params['roles'].items():
+            if role == 'nested_readers': continue # a reader wont add custom fields
             for params in param_list:
                 self._add_fields_from_one_class(role, params, settings, reader_builder, crumbs=f' add classes for role {role}')
 
-            return reader_builder
+        return reader_builder
+
     def _add_fields_from_one_class(self, role, params, settings, reader_builder, crumbs=''):
         # and fields given by one class
         known_fields = list(reader_builder['reader_field_info'].keys()) \
@@ -527,11 +582,10 @@ class _OceanTrackerRunner(object):
             reader_builder['custom_field_params'][name] = params
         pass
 
-    def _map_and_catagorise_field_variables(self, run_builder, reader):
+    def _map_and_catagorise_field_variables(self, run_builder,reader_builder, reader):
         # add to catalog if 3D hindcast and mapped internal fields to file variables
         # also builds field_info,  pamareters and info  required to set up reader fields
         ml = msg_logger
-        reader_builder = run_builder['reader_builder']
         catalog = reader_builder['catalog']
 
         reader_builder['hindcast_info'] = catalog['info']
@@ -609,7 +663,7 @@ class _OceanTrackerRunner(object):
         reader_builder['grid_info'] = dict(variable_map=reader.params['grid_variable_map'])
 
         ml.exit_if_prior_errors('Errors matching field variables with those in the file, see above')
-        json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], 'hindcast_variable_catalog.json'), catalog)
+
         return reader_builder
 
     def close(self):

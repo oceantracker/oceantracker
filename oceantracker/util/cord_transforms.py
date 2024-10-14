@@ -11,20 +11,20 @@ from math import floor
 EPSG_WGS84 = 4326
 EPSG_NZTM  = 2193
 
-transformerNZTM_to_WGS84 = Transformer.from_crs(EPSG_NZTM , EPSG_WGS84, always_xy = True)
-transformerWGS84_to_NZTM = Transformer.from_crs(EPSG_WGS84, EPSG_NZTM , always_xy = True)
+_transformerNZTM_to_WGS84 = Transformer.from_crs(EPSG_NZTM , EPSG_WGS84, always_xy = True)
+_transformerWGS84_to_NZTM = Transformer.from_crs(EPSG_WGS84, EPSG_NZTM , always_xy = True)
 
 
 def WGS84_to_NZTM(lon_lat, out=None):
     # (lng,lat ) to NZTM for numpy arays
     if out is None: out = np.full_like(lon_lat,0.)
-    out[:,0],out[:,1] = transformerWGS84_to_NZTM.transform(lon_lat[:, 0], lon_lat[:, 1])
+    out[:,0],out[:,1] = _transformerWGS84_to_NZTM.transform(lon_lat[:, 0], lon_lat[:, 1])
     return out
 
 def NZTM_to_WGS84(xy, out=None):
     #  NZTM ( east, north)  to (lat, lng) for numpy arays
     if out is None: out = np.full_like(xy,np.nan)
-    out[:,0],out[:,1] = transformerNZTM_to_WGS84.transform(xy[:,0], xy[:,1])
+    out[:,0],out[:,1] = _transformerNZTM_to_WGS84.transform(xy[:,0], xy[:,1])
 
     # ensure longitude > 0
     sel= out[:,0] < 0

@@ -1,8 +1,8 @@
-from oceantracker.particle_properties._base_particle_properties import CustomParticleProperty
+from oceantracker.particle_properties._base_particle_properties import ManuallyUpdatedParticleProperty
 import numpy as np
 from oceantracker.shared_info import shared_info as si
 
-class eDNAdetection(CustomParticleProperty):
+class eDNAdetection(ManuallyUpdatedParticleProperty):
 
     def __init__(self):
         super().__init__()

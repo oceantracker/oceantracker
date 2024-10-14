@@ -23,7 +23,7 @@ class LogPolygonEntryAndExit(BaseEventLogger):
         super().initial_setup()  # set up using regular grid for  stats
         # add particle property to show which polygon particle is in, -1 = in no polygon
 
-        si.add_class('particle_properties', class_name='CoreParticleProperty', name='event_polygon', initial_value=-1, dtype='int16')
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='event_polygon', initial_value=-1, dtype='int16')
         si.add_class('particle_properties', name='current_polygon_for_event_logging',
                      class_name='oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
                                                                                         polygon_list=self.params['polygon_list'], write=False)

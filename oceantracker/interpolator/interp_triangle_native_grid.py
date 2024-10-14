@@ -47,11 +47,11 @@ class  InterpTriangularGrid(_BaseInterp):
         if grid['is3D']:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
-            si.add_class('particle_properties', name ='nz_cell', class_name='CoreParticleProperty',write=False, dtype='int32',
+            si.add_class('particle_properties', name ='nz_cell', class_name='ManuallyUpdatedParticleProperty',write=False, dtype='int32',
                          initial_value=0, caller=self,crumbs=crumbs) # todo  create  initial serach for vertical cell
-            si.add_class('particle_properties', name ='z_fraction',class_name='CoreParticleProperty',write=False, dtype='float32',
+            si.add_class('particle_properties', name ='z_fraction',class_name='ManuallyUpdatedParticleProperty',write=False, dtype='float32',
                          initial_value=0., caller=self,crumbs=crumbs)
-            si.add_class('particle_properties', name ='z_fraction_water_velocity',class_name='CoreParticleProperty',write=False, dtype='float32',
+            si.add_class('particle_properties', name ='z_fraction_water_velocity',class_name='ManuallyUpdatedParticleProperty',write=False, dtype='float32',
                          initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer', caller=self,crumbs=crumbs)
 
             # set up vertical grid

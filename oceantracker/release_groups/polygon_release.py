@@ -42,8 +42,10 @@ class PolygonRelease(PointRelease):
         ll, ur = info['bounding_box_ll_ul']
         info['bounding_box_area'] = abs((ur[0] - ll[0]) * (ur[1] - ll[1]))
 
-        if info['polygon_area']  < 1:
-            ml.msg('Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
+        if info['polygon_area']  < 10:
+            ml.msg('Polygon release, area of polygon is < 10 sq metres , area =' + str(info['polygon_area']),
+                   hint='Is hydro model grid in meters and polygon coords given in (lon, lat)  degrees, convert polygons to hydro models meters coords? ',
+                   warning=True)
 
         info['number_released'] = 0
         info['pulseID'] = 0

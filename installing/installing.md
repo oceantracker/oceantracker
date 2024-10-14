@@ -45,9 +45,9 @@ Note: In Windows may need to run conda prompt window as administrator to install
     
 5. Or : Manually build Conda environment
 
-        ``conda create -n oceantracker python=3.11`` 
+        ``conda create -n oceantracker python=3.10`` 
 
-    Note: Must use python version 3.10 or 3.11 NumPy versions 1.21–1.26
+    Note: Use python version 3.10 as not all external imported  3.11 NumPy versions 1.21–1.26
 
     Activate new environment
 

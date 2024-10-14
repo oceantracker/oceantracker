@@ -51,7 +51,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
     def add_any_required_fields(self,settings,mapped_reader_fields, message_logger):
         # this adds field required by this a class, this must be done before model is built to assemble reader
         # these are added with self.add_field() method
-        pass
+        return None
 
     def add_required_custom_field(self, name:str, class_name:str, msg_logger,
                            params:dict ={},  crumbs:str =''):

@@ -1,10 +1,10 @@
-from oceantracker.particle_properties._base_particle_properties import CustomParticleProperty
+from oceantracker.particle_properties._base_particle_properties import ManuallyUpdatedParticleProperty
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.shared_info import shared_info as si
 from oceantracker.util.numba_util import njitOT
 
-class Speed(CustomParticleProperty):
+class Speed(ManuallyUpdatedParticleProperty):
     '''
     Calculates the horizontal speed of water or particles.
     '''

@@ -1,11 +1,11 @@
-from oceantracker.particle_properties._base_particle_properties import CustomParticleProperty
+from oceantracker.particle_properties._base_particle_properties import ManuallyUpdatedParticleProperty
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.polygon_util import set_up_list_of_polygon_instances, InsidePolygon
 
 from oceantracker.shared_info import shared_info as si
 
-class InsidePolygonsNonOverlapping2D(CustomParticleProperty):
+class InsidePolygonsNonOverlapping2D(ManuallyUpdatedParticleProperty):
     '''
     particle property giving ID of 2D polygon which particle is inside. -1 if in no polygon
     assumes non-overlapping polygons, ie so only inside one at a time, ie the first it is found inside,

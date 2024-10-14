@@ -8,7 +8,8 @@ from oceantracker.util import json_util, yaml_util
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--test',type=int)
+    parser.add_argument('--test', type=int)
+    parser.add_argument('--norun',type=int)
     parser.add_argument('--variant',type=int)
     parser.add_argument('-backtracking', action='store_true')
     parser.add_argument('-reference_case', action='store_true')

@@ -12,3 +12,4 @@ venv
 /tests/unit_tests/output/
 /output/
 /tests/unit_tests/reference_case_output/
+/dev/bug_hunting/Debugg_codes/root_output_dir/

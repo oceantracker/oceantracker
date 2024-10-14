@@ -90,5 +90,3 @@ class _CellSearchStatusFlags(_base_values_class):
 
 cell_search_status_flags = _CellSearchStatusFlags()
 
-# particle prop types
-particle_property_types = ['manual_update', 'from_fields', 'user']

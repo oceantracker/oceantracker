@@ -149,9 +149,6 @@ class FieldGroupManager(ParameterBaseClass):
         # debug_util.plot_walk_step(xq, si.core_roles.reader.grid, part_prop)
 
 
-
-
-
     #@function_profiler(__name__)
     def interp_field_at_particle_locations(self, field_name, active, output=None):
         # in place evaluation of field interpolation

@@ -29,3 +29,4 @@ class AgeDecay(CustomParticleProperty):
 
         val = self.params['initial_value']*np.exp(-np.abs(age) / self.params['decay_time_scale'])
         self.set_values(val,active)
+
