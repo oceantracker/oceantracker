@@ -199,8 +199,8 @@ class ParticleGroupManager(ParameterBaseClass):
         # deactivate old particles for each release group
         part_prop = si.class_roles.particle_properties
         info = self.info
-
-        num_alive =pgm_util._status_counts_and_kill_old_particles(part_prop['age'].data,
+        info['num_alive_last_time_step'] =  info['num_alive']
+        num_alive = pgm_util._status_counts_and_kill_old_particles(part_prop['age'].data,
                                     part_prop['status'].data,
                                     part_prop['IDrelease_group'].data,
                                     info['max_age_for_each_release_group'],
