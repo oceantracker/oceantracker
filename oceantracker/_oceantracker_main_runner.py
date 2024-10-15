@@ -2,8 +2,7 @@
 import multiprocessing
 
 # ensure in spwan mode, to give separate multiprocessing completely, so no share memory from forking
-if multiprocessing.get_start_method() != 'spawn':
-    multiprocessing.set_start_method('spawn')
+multiprocessing.set_start_method('spawn', force =True)
 
 from copy import deepcopy
 from datetime import datetime, timedelta
