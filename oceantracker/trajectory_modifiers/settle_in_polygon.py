@@ -6,7 +6,8 @@ from oceantracker.util.polygon_util import  InsidePolygon
 from oceantracker.shared_info import shared_info as si
 
 class SettleInPolygon(_BaseTrajectoryModifier):
-    # fallows particles to freeze if inside a polygon
+    '''allows particles to freeze if inside a single polygon
+    '''
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
@@ -26,7 +27,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
 
         # set up polygons to test if particles inside
         if 'points' not in self.params['polygon']:
-            si.msg_logger.msg('initialize: Polygon settlement, each polygon must be a dictionary with at least a "points" key as a list of coordinates', fatal_error=True)
+            si.msg_logger.msg('initialize: Polygon settlement, currently only works for single  polygon and polygon must be a dictionary with at least a "points" key as a list of coordinates', fatal_error=True)
 
         a = np.asarray(self.params['polygon']['points'])
         if a.shape[1] != 2:

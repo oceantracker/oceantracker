@@ -1,6 +1,10 @@
 # do first to ensure its right
 import multiprocessing
 
+# ensure in spwan mode, to give separate multiprocessing completely, so no share memory from forking
+if multiprocessing.get_start_method() != 'spawn':
+    multiprocessing.set_start_method('spawn')
+
 from copy import deepcopy
 from datetime import datetime, timedelta
 
@@ -62,7 +66,7 @@ class _OceanTrackerRunner(object):
         t0 = perf_counter()
         o = self.setup_output_dir(working_params['settings'], ml, crumbs= crumbs + '> Setting up output dir')
 
-        o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base' ] +'_run') # message logger output file setup
+        o['run_log'], o['run_error_file'] = ml.set_up_files(o['run_output_dir'], o['output_file_base' ] +'_runLog') # message logger output file setup
         run_builder['output_files'] = o
 
         ml.msg(f'Output is in dir "{o["run_output_dir"]}"', hint='see for copies of screen output and user supplied parameters, plus all other output')
@@ -196,8 +200,10 @@ class _OceanTrackerRunner(object):
         case_run_builder_list = []
 
         for n_case, case_params in enumerate(working_case_list_params):
-            case_working_params = setup_util.merge_base_and_case_working_params(base_working_params, n_case, case_params, si.base_case_only_params, ml,
-                                                                                crumbs=f'_run_parallel case #[{n_case}]', caller=None)
+            # form case params from copies of its elements
+            case_working_params = setup_util.merge_base_and_case_working_params(deepcopy(base_working_params), n_case,
+                                                            deepcopy(case_params), deepcopy(si.base_case_only_params), ml,
+                                                            crumbs=f'_run_parallel case #[{n_case}]', caller=None)
             ml.exit_if_prior_errors(f'Errors in setting up case #{n_case}')
             case_run_builder = deepcopy(run_builder)
             case_run_builder['caseID'] = n_case
@@ -218,8 +224,7 @@ class _OceanTrackerRunner(object):
         n_proc = min(n_proc, len(working_case_list_params))  # limit to number of cases
 
         ml.progress_marker('oceantracker:multiProcessing: processors:' + str(n_proc))
-        if base_working_params['settings']['multi_processing_method'] is not None:
-            multiprocessing.set_start_method(base_working_params['settings']['multi_processing_method'])
+
 
         # run // cases
         with multiprocessing.Pool(processes=n_proc) as pool:

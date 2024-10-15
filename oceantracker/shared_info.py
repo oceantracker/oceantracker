@@ -98,8 +98,7 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Allow particles to resuspend')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                           doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
-    multi_processing_method = PVC(None, str, expert=True, possible_values=['fork','spawn'],
-                          doc_str='How  multiprocessing is implemented, ie. sets  multiprocessing.set_start_method(str),  spawn= separate work spaces, fork = has copy on parents memory space')
+
     particle_buffer_initial_size= PVC(1_000_000, int, min=1, doc_str='Starting size of particle property memory buffer. This expands by particle_buffer_chunk_size as needed', expert=True)
     particle_buffer_chunk_size = PVC(500_000, int, min=1, doc_str='How much particle property memory buffer sizes are increased by when they are full',
                                      expert=True)
