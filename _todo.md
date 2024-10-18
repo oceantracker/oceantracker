@@ -12,6 +12,9 @@
 1. in case runner create all user requested instances and merge params in one step
 1. build check that all classes are initialised and finalized
 1. write of case info file even if errors, trap json encoding erorrs 
+2. centalize polygon list creation and param checking 
+3. Note if pending  memory issues and log sizes used. write error log
+4. ensure error log is written on caught error
   
 
 ##  Internal Structure
@@ -47,7 +50,7 @@
 1. cope with time dependent water depth in write to grid
 1. unit test cope with dispersion on 
 2. nest field group manager, use default only if none given
-3. 
+3.  reader grid transforms faster with pre-allocated buffers?
     
 ## Nice to haves
 1. attach name of method to message loggers crumb trail
