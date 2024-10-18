@@ -175,14 +175,12 @@ class FieldGroupManager(ParameterBaseClass):
         active = np.arange(x.shape[0])
 
         if time_sec is None:
-                triangle_eval_interp.time_independent_2D_scalar_field(output, field_instance.data,
-                                                                      self.grid['triangles'],
-                                                                      n_cell, bc_cords, active)
+            triangle_eval_interp.time_independent_2D_scalar_field(output, field_instance.data,
+                                            self.grid['triangles'],n_cell, bc_cords, active)
         else:
             current_hydro_model_step, current_buffer_steps, fractional_time_steps = self.reader._time_step_and_buffer_offsets(time_sec)
             triangle_eval_interp.time_dependent_2D_scalar_field(current_buffer_steps, fractional_time_steps, output,
-                                                                field_instance.data, self.grid['triangles'],
-                                                                part_prop['n_cell'].data, part_prop['bc_cords'].data, active)
+                                      field_instance.data, self.grid['triangles'], n_cell, bc_cords, active)
         return output
 
     def set_up_interpolator(self):

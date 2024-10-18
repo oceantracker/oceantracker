@@ -1,7 +1,7 @@
 # do first to ensure its right
 import multiprocessing
 
-# ensure in spwan mode, to give separate multiprocessing completely, so no share memory from forking
+# ensure in spwan mode, to give separate multiprocessing completely (so no shared memory from fork when using in linux)
 multiprocessing.set_start_method('spawn', force =True)
 
 from copy import deepcopy

@@ -36,7 +36,7 @@ class RandomWalk(BaseTrajectoryModifer):
         info = self.info
         params= self.params
         dt = si.settings.time_step
-        info['random_walk_size'] = np.array((self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_H'], dt), self.calc_walk(self.params['A_V'], dt)))
+        info['random_walk_size'] = np.array((self._calc_walk(self.params['A_H'], dt), self._calc_walk(self.params['A_H'], dt), self._calc_walk(self.params['A_V'], dt)))
         if not si.run_info.is3D_run:
             info['random_walk_size'] = info['random_walk_size'][:2]
 
@@ -45,7 +45,7 @@ class RandomWalk(BaseTrajectoryModifer):
         # detect of using A_Z_profile
         info['use_A_Z_profile'] = 'A_Z_profile' in si.core_class_roles.field_group_manager.fields
 
-    def calc_walk(self, A_turb, dt):
+    def _calc_walk(self, A_turb, dt):
         # this is variance of particle motion in each vector direction,
         # ( factor of 2 would  be 6 , if wanting 3D isotropic variance, rather than its separate effect on 1D components used above)
         return np.sqrt(2. * np.abs(dt) * np.abs(A_turb))
