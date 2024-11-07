@@ -6,13 +6,13 @@ from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import shared_info as si
 
 class VerticalGradient(CustomFieldBase):
-    '''Add a vertical gradient field of the  "name_of_field" param,
-    as a custom field named "name_of_field_vertical_grad"'
+    '''Add a vertical gradient field of the  "get_grad_of_field_named" param,
+    as a custom field named "get_grad_of_field_named_vertical_grad"'
     '''
 
     def __init__(self):
         super().__init__()
-        self.add_default_params({'name_of_field': PVC(None, str, is_required=True, doc_str='Name of field to calculate the vertical gradient of'),
+        self.add_default_params({'get_grad_of_field_named': PVC(None, str, is_required=True, doc_str='Name of field to calculate the vertical gradient of'),
                                  # below are not required as acquired from named field
                                  'time_varying': PVC(True, bool),
                                  'requires3D':  PVC(True, bool),
@@ -23,7 +23,7 @@ class VerticalGradient(CustomFieldBase):
         ml = si.msg_logger
         # get fields prop from named field
         params= self.params
-        f = fields[params['name_of_field']]
+        f = fields[params['get_grad_of_field_named']]
         params['time_varying']= f.is_time_varying()
         params['is3D'] = f.is3D()
 
@@ -35,12 +35,12 @@ class VerticalGradient(CustomFieldBase):
     def update(self,fields,grid,nt):
 
         if 'sigma' in grid:
-            _calc_field_vert_grad_from_sigma_levels(fields[self.params['name_of_field']].data, grid['sigma'],
+            _calc_field_vert_grad_from_sigma_levels(fields[self.params['get_grad_of_field_named']].data, grid['sigma'],
                                                fields['tide'].data,fields['water_depth'].data,
                                                grid['bottom_cell_index'], si.settings.z0, self.data)
         else:
             # z levels
-            _calc_field_vert_grad_from_zlevels(fields[self.params['name_of_field']].data,grid['zlevel'],
+            _calc_field_vert_grad_from_zlevels(fields[self.params['get_grad_of_field_named']].data,grid['zlevel'],
                                     grid['bottom_cell_index'], si.settings.z0, self.data)
 
 @njitOT

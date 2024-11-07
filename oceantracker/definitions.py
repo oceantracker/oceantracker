@@ -42,11 +42,15 @@ default_classes_dict = dict(
                 particle_properties='oceantracker.particle_properties._base_particle_properties.ParticleProperty',
                 time_varying_info='oceantracker.time_varying_info._base_time_varying_info.TimeVaryingInfo',
                 field_group_manager='oceantracker.field_group_manager.field_group_manager.FieldGroupManager',
+                field_group_manager_nested='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields',
                 particle_group_manager= 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager',
                 tracks_writer = 'oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter',
                 interpolator = 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularGrid',
-                dispersion='oceantracker.dispersion.random_walk.RandomWalk',
-                resuspension = 'oceantracker.resuspension.resuspension.BasicResuspension',
+                dispersion2D_constantViscosity='oceantracker.dispersion.random_walk2D_constant_viscosity.RandomWalk2DconstantViscosity',
+                dispersion3D_constantViscosity='oceantracker.dispersion.random_walk3D_constant_viscosity.RandomWalk3DconstantViscosity',
+                dispersion2D_A_Z_profile='oceantracker.dispersion.random_walk3D_A_Z_profile.RandomWalk3D_A_Z_profile',
+                resuspension_using_near_sea_bed_vel='oceantracker.resuspension.resuspension_using_near_sea_bed_vel.ResuspensionUsingNearSeaBedVel',
+                resuspension_using_bottom_stress='oceantracker.resuspension.resuspension_using_bottom_stress.ResuspensionUsingBottomStress',
                 tidal_stranding = 'oceantracker.tidal_stranding.tidal_stranding.TidalStranding',
                 release_groups = 'oceantracker.release_groups.point_release.PointRelease',
                 field_reader='oceantracker.fields._base_field.ReaderField',
@@ -54,7 +58,6 @@ default_classes_dict = dict(
                 field_friction_velocity_from_near_sea_bed_velocity='oceantracker.fields.friction_velocity.FrictionVelocityFromNearSeaBedVelocity',
                 field_A_Z_profile_vertical_gradient='oceantracker.fields.field_vertical_gradient.VerticalGradient',
                 )
-
 # index values
 
 # below are mapping names to index name

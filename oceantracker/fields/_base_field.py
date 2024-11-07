@@ -12,6 +12,7 @@ class _BaseField(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults and merge with given params
 
         self.add_default_params(
+                    name=PVC(None, str, doc_str='Name to refer to this field internally within code, must be given', is_required=True),
                     time_varying= PVC(False, bool,doc_str='Does field vary with time', is_required=True),
                     is3D = PVC(False, bool,is_required=True,doc_str='is field 3D'),
                     is_vector= PVC(False, bool),

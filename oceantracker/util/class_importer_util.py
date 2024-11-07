@@ -41,7 +41,7 @@ class ClassImporter():
         return cls_obj
 
     def get_class_name(self,params,default_classID):
-        if 'class_name' in params and params['class_name'] is not None:
+        if  'class_name' in params:
             return params['class_name']
         elif default_classID in definitions.default_classes_dict :
             return definitions.default_classes_dict[default_classID]
@@ -78,6 +78,9 @@ class ClassImporter():
     def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None,
                                         caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):
         ml = self.msg_logger
+
+        if params is None: params = {}
+
         if class_role not in self.class_tree:
             self.msg_logger.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
                                 hint= f'possible values={self.class_tree.keys()}',

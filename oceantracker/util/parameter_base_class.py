@@ -46,22 +46,23 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.partID_buffers={} # dict of int32 ID number buffers
         self.shared_info = None
         self.schedulers ={}
-        self.required_fields_info = dict(reader=[], custom={})
+
 
     def add_any_required_fields(self,settings,mapped_reader_fields, message_logger):
         # this adds field required by this a class, this must be done before model is built to assemble reader
-        # these are added with self.add_field() method
-        return None
+        # returns 3 lists
 
-    def add_required_custom_field(self, name:str, class_name:str, msg_logger,
-                           params:dict ={},  crumbs:str =''):
-        # allows uses to add fields within the code , with given name and class_name
-        # kwargs arguments are the field's parameters, eg class_name
-        params.update(params,class_name=class_name)
-        self.required_fields_info['custom'][name] = params
+        # list of internal names as strings of required non-standard fields to be read from files
+        required_reader_fields = []
 
-    def add_required_reader_field(self, reader_field_name):
-        self.required_fields_info['reader'].append(reader_field_name)
+        # list of parameter dictionary of   custom fields required by this  class to operated,
+        # eg spatial field probabity  of where particles are likely to settle on the bottom
+        # minumim is  [dict(name='internal naem of feild used to reference it',class_name='class name used to import this custom field'},...]
+        # eg is using A_Z profe need custion field of its vertical gradient
+        #  [ dict(name= 'A_Z_profile_vertical_gradient',classname = 'VerticalGradient',  get_grad_of_field_named='A_Z_profile', write_interp_particle_prop_to_tracks_file=False))]
+        custom_field_params = []
+
+        return required_reader_fields,  custom_field_params
 
     def final_setup(self):
         # setup done after all other classes have intitial_setup, ie things that depend on settingas of othe classes

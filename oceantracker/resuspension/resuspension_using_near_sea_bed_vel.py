@@ -7,7 +7,7 @@ from oceantracker.util.numba_util import njitOT
 from numba import  njit
 from oceantracker.shared_info import shared_info as si
 
-class BasicResuspension(BaseResuspension):
+class ResuspensionUsingNearSeaBedVel(BaseResuspension):
     # based on
     # Lynch, Daniel R., David A. Greenberg, Ata Bilgili, Dennis J. McGillicuddy Jr, James P. Manning, and Alfredo L. Aretxabaleta.
     # Particles in the coastal ocean: Theory and applications. Cambridge University Press, 2014.
@@ -21,23 +21,16 @@ class BasicResuspension(BaseResuspension):
                                  })
 
     def add_any_required_fields(self,settings, known_reader_fields, msg_logger):
+        required_reader_fields = []
+        custom_field_params=[dict(name='friction_velocity',class_name='FrictionVelocityFromNearSeaBedVelocity',
+                               write_interp_particle_prop_to_tracks_file=False)]
+        msg_logger.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
+        return required_reader_fields,  custom_field_params
 
-        if 'bottom_stress' in known_reader_fields:
-            self.add_required_reader_field( 'bottom_stress') # set up reading from file
-            self.add_required_custom_field('friction_velocity','FrictionVelocityFromBottomStress',
-                                    msg_logger, params= dict(requires3D= True,write_interp_particle_prop_to_tracks_file=False),
-                                    crumbs='adding resuspension class params using bottom stress')
-            msg_logger.msg('Found bottom stress in hydro-files, using it to calculate friction velocity for particle resuspension', note=True)
-        else:
-            self.add_required_custom_field('friction_velocity','FrictionVelocityFromNearSeaBedVelocity',
-                                    msg_logger, params= dict(write_interp_particle_prop_to_tracks_file=False),
-                                    crumbs='initializing friction velocity field used by resuspension class with near bottom velocity')
-            msg_logger.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
-        pass
 
     def initial_setup(self, **kwargs):
         info = self.info
-        #  don't adjust resupension distance for terminal velocity,
+        #  don't adjust re-suspension distance for terminal velocity,
         #  Lynch (Particles in the Ocean Book, says don't adjust due fall velocity, as it  affects prior that particle resuspends)
         info['resuspension_factor']= 2.0*0.4*si.settings.z0*si.settings.time_step/(1. - 2./np.pi)
         pass

@@ -104,8 +104,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         has_errors = False
         try:
             # - -------- start set up---------------------------------------------------------------------
-            self._build_all_readers(run_builder)
-
             self._build_field_group(si.working_params, run_builder['reader_builder'])  # setup fields to get hindcast info, ie its starts and ends
 
             self._add_release_groups_to_get_run_start_end(si.working_params)
@@ -212,8 +210,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # make other core classes
         si.add_class('solver',working_params['core_roles']['solver'],crumbs=crumbs,caller=self)
-        si.add_class('dispersion', working_params['core_roles']['dispersion'], crumbs=crumbs, caller=self)
-        if si.run_info.is3D_run:
+        if si.settings['use_dispersion']:
+            si.add_class('dispersion', working_params['core_roles']['dispersion'], crumbs=crumbs, caller=self)
+
+        if si.run_info.is3D_run and si.settings['use_resuspension']:
             si.add_class('resuspension', working_params['core_roles']['resuspension'], crumbs=crumbs, caller=self)
 
         # add user/custom particle properties
@@ -321,33 +321,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.msg_logger.progress_marker('Added release groups and found run start and end times', start_time=t0)
 
-    def _build_all_readers(self, run_builder):
-        # build primary and nested readers
-
-        reader=  self._build_single_reader(run_builder['reader_builder'])
-
-        reader.write_hydro_model_grid(None if len(run_builder['nested_reader_builders']) else 0)
-
-        # add request to load compulsory fields
-        reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
-        si.hydro_model_cords_in_lat_long = reader.grid['hydro_model_cords_in_lat_long']
-        si.core_class_roles.reader = reader
-
-        # todo nested reader setup
-        for n, rb in enumerate( run_builder['nested_reader_builders']):
-            pass
-
-    def _build_single_reader(self,reader_builder):
-        # build a readers
-        info = self.info
-        # first build data set
-        self.dataset = OceanTrackerDataSet()
-        self.dataset.build_dataset_from_catalog(reader_builder['catalog'])
-
-        reader = si.add_class('reader', reader_builder['params'],
-                                   caller=self, crumbs=f'setup_hydro_fields> reader class ', initialize=False)
-        reader.build_reader(reader_builder, self.dataset)
-        return  reader
 
     def _build_field_group(self, working_params, reader_builder):
         # initialise all classes, order is important!
@@ -357,16 +330,17 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # start with setting up field groups, which set up readers
         # as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
-        # chose fiel manager for normal or nested readers
-        if len(si.working_params['roles']['nested_readers']) > 0:
-            # use development nested readers class
-            #todo add dev_nested_fields to  default claseses
-            working_params['core_roles']['field_group_manager'].update(dict(class_name='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields'))
+        # chose file manager for normal or nested readers
+        if len(reader_builder['nested_reader_builders']) > 0:
+            # use development nested readers class field group manager
+            if working_params['core_roles']['field_group_manager'] is None: working_params['core_roles']['field_group_manager'] ={}
+            if 'class_name' not in working_params['core_roles']['field_group_manager']:
+                working_params['core_roles']['field_group_manager']['class_name'] = definitions.default_classes_dict['field_group_manager_nested']
 
         # set up fields
         fgm = si.add_class('field_group_manager',working_params['core_roles']['field_group_manager'], initialize=False)
-        fgm.initial_setup()
-        si.run_info.is3D_run = fgm.grid['is3D']
+        fgm.initial_setup(reader_builder, caller=self)
+        si.run_info.is3D_run = fgm.info['is3D']
         si.run_info.vector_components = 3 if si.run_info.is3D_run else 2
         fgm.final_setup()
 

@@ -168,7 +168,7 @@ class RSTfileBuilder(object):
 def make_class_sub_pages(class_role, link_tag=''):
     # make doc pages from defaults of all python in named dir
 
-    mods= si.class_importer.class_tree[class_role]
+    mods= si._class_importer.class_tree[class_role]
 
     toc = RSTfileBuilder(class_role+'_toc', class_role + link_tag)
 

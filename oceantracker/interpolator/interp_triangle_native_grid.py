@@ -29,8 +29,8 @@ class  InterpTriangularGrid(_BaseInterp):
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
 
     #@function_profiler(__name__)
-    def initial_setup(self, grid):
-        super().initial_setup()  # children must call this parent class to default shared_params etc
+    def initial_setup(self, grid, reader_builder):
+        super().initial_setup(grid, reader_builder)  # children must call this parent class to default shared_params etc
         params = self.params
         self.grid = grid
         t0 = perf_counter()
@@ -55,7 +55,7 @@ class  InterpTriangularGrid(_BaseInterp):
                          initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer', caller=self,crumbs=crumbs)
 
             # set up vertical grid
-            hi = si.hindcast_info
+            hi = reader_builder['hindcast_info']
             vgt= si.vertical_grid_types
             match hi['vert_grid_type']:
                 case vgt.Sigma:

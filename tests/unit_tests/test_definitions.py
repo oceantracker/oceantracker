@@ -10,6 +10,10 @@ from oceantracker import definitions
 from oceantracker.util import cord_transforms
 from plot_oceantracker import plot_tracks
 
+
+def test3D_schism_template():
+    ot = OceanTracker()
+
 def set_output_loc(fn):
     d =  dict(output_file_base=     path.split(fn)[-1].split('.')[0],
             root_output_dir=path.join(path.dirname(fn), 'output'),

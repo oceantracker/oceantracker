@@ -76,7 +76,6 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
                               release_interval=0. )
         # if 3D sort out depth range and always resuspend
         if si.run_info.is3D_run:
-            si.add_class('resuspension', critical_friction_velocity=0.0)  # always resuspend
             if params['floating']:
                 si.add_class('trajectory_modifiers',name='floater',class_name='SurfaceFloat')
             else:

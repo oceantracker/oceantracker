@@ -8,10 +8,7 @@ from copy import deepcopy
 from oceantracker.shared_info import shared_info as si
 from  oceantracker.definitions import  node_types, cell_search_status_flags
 from oceantracker.interpolator.util import  triangle_eval_interp
-
-
-#TODO allow fields to be spread across mutiple files and file types
-# todo  have field manager with each field having its own reader, grid and interpolator
+from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
 class FieldGroupManager(ParameterBaseClass):
     # class holding data in file and ability to spatially interpolate fields that it holds
@@ -29,19 +26,27 @@ class FieldGroupManager(ParameterBaseClass):
         info['fractional_time_steps']= np.zeros((2,), dtype=np.float64)
         info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
 
-    def initial_setup(self):
+    def initial_setup(self, reader_builder,  caller=None):
         ml = si.msg_logger
-        # connect to primary reader
-        self.reader=si.core_class_roles.reader
-        self.grid = self.reader.grid
-        self.fields = self.reader.fields
+        # build  primary. ie  velocity field, reader
+        self.reader=self._build_single_reader(reader_builder)
+        reader = self.reader
 
-        self.set_up_interpolator()
+        self.write_hydro_model_grid()
+        # todo add ancillary reader fields readers here
+
+        # add request to load compulsory fields
+        reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
+        si.hydro_model_cords_in_lat_long = reader.grid['hydro_model_cords_in_lat_long']
+
+        self.fields = self.reader.fields
+        self.info['is3D'] = self.reader.grid['is3D']
+
 
     def final_setup(self):
         ml = si.msg_logger
         info = self.info
-        grid = self.grid
+        grid = self.reader.grid
 
         if  si.hydro_model_cords_in_lat_long:
             ml.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid',
@@ -50,17 +55,20 @@ class FieldGroupManager(ParameterBaseClass):
             ml.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid',
                    note=True)
 
-        self.info['has_open_boundary_nodes'] = np.any(self.grid['node_type'] == node_types.open_boundary)
+        self.info['has_open_boundary_nodes'] = np.any(self.reader.grid['node_type'] == node_types.open_boundary)
         self.info['open_boundary_type'] = si.settings.open_boundary_type
 
         # set up dry cell adjacency space for triangle walk
         grid['adjacency_with_dry_edges'] = grid['adjacency'].copy()  # working space to add dry cell boundaries to
 
-        self.interpolator.final_setup()
+        self.reader.interpolator.final_setup()
 
         # add tidal stranding class
         i = si.add_class('tidal_stranding', {}, crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', caller=self)
         self.tidal_stranding = i
+
+    def write_hydro_model_grid(self):
+        self.reader.write_hydro_model_grid()
 
     def add_part_prop_from_fields_plus_book_keeping(self):
         # add part prop for reader and custom fields
@@ -72,10 +80,13 @@ class FieldGroupManager(ParameterBaseClass):
                                             time_varying=True, dtype='float64', initial_value=0.)
         pass
 
+    def update_readers(self, time_sec):
+        self.reader.update(time_sec)
+
     def update_tidal_stranding_status(self, time_sec, alive):
         i = self.tidal_stranding
         i.start_update_timer()
-        i.update(self.grid, time_sec, alive)
+        i.update(self.reader.grid, time_sec, alive)
         i.stop_update_timer()
 
     def setup_time_step(self, time_sec, xq, active,apply_open_boundary_condition=True):
@@ -84,12 +95,12 @@ class FieldGroupManager(ParameterBaseClass):
         # get next two buffer time steps around the given time in reader ring buffer
         # plus global time step locations and time ftactions od timre step and put results in interpolators step info numpy structure
         info = self.info
-        grid =self.grid
+        grid =self.reader.grid
         info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self.reader._time_step_and_buffer_offsets(time_sec)
         part_prop = si.class_roles.particle_properties
 
         # find hori cell
-        self.interpolator.find_hori_cell(xq, active)
+        self.reader.interpolator.find_hori_cell(xq, active)
 
         # all those that need fixing, lateral boundaries and bad, ie cell_status < blocked_dry_cell
         sel_fix = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('B1'))
@@ -110,8 +121,21 @@ class FieldGroupManager(ParameterBaseClass):
         if grid['is3D']:
             # find vertical cell
             info = self.info
-            self.interpolator.find_vertical_cell(self.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
+            self.reader.interpolator.find_vertical_cell(self.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
+
+
+    def _build_single_reader(self,reader_builder):
+        # build a readers
+        info = self.info
+        # first build data set
+        dataset = OceanTrackerDataSet()
+        dataset.build_dataset_from_catalog(reader_builder['catalog'])
+
+        reader = si._make_class_instance('reader', reader_builder['params'],
+                                   caller=self, crumbs=f'setup_hydro_fields> reader class ', initialize=False)
+        reader.build_reader(reader_builder,dataset)
+        return  reader
 
     def _apply_domain_boundary_condition(self, sel_bad):
         part_prop = si.class_roles.particle_properties
@@ -160,7 +184,7 @@ class FieldGroupManager(ParameterBaseClass):
         if output is None:   output = part_prop[field_name].used_buffer() # over write current values
 
         field= self.reader.fields[field_name]
-        self.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
+        self.reader.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
 
     def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_cords, time_sec= None, hydro_model_gridID=None):
         # interp reader field_name at specfied locations,  not particle locations
@@ -176,24 +200,16 @@ class FieldGroupManager(ParameterBaseClass):
 
         if time_sec is None:
             triangle_eval_interp.time_independent_2D_scalar_field(output, field_instance.data,
-                                            self.grid['triangles'],n_cell, bc_cords, active)
+                                            self.reader.grid['triangles'],n_cell, bc_cords, active)
         else:
             current_hydro_model_step, current_buffer_steps, fractional_time_steps = self.reader._time_step_and_buffer_offsets(time_sec)
             triangle_eval_interp.time_dependent_2D_scalar_field(current_buffer_steps, fractional_time_steps, output,
-                                      field_instance.data, self.grid['triangles'], n_cell, bc_cords, active)
+                                      field_instance.data, self.reader.grid['triangles'], n_cell, bc_cords, active)
         return output
-
-    def set_up_interpolator(self):
-
-        i = si.add_class('interpolator', si.working_params['core_roles']['interpolator'],initialize=False,
-                                             default_classID='interpolator', caller= self,
-                                             crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
-        i.initial_setup(self.grid)
-        self.interpolator = i
 
     def update_dry_cell_values(self):
         # update 0-255 dry cell index for each interpolator
-        grid = self.grid
+        grid = self.reader.grid
         info= self.info
         field_group_manager_util.update_dry_cell_index( grid['is_dry_cell_buffer'], grid['dry_cell_index'],
                                                    info['current_buffer_steps'], info['fractional_time_steps'])
@@ -210,7 +226,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def are_points_inside_domain(self,x, include_dry_cells):
         # only primary/outer grid
-        is_inside, part_data = self.interpolator.are_points_inside_domain(x)
+        is_inside, part_data = self.reader.interpolator.are_points_inside_domain(x)
         n = x.shape[0]
         part_data['hydro_model_gridID'] = np.zeros((n,), dtype=np.int8)
 
@@ -223,7 +239,7 @@ class FieldGroupManager(ParameterBaseClass):
 
 
     def are_dry_cells(self, n_cell):
-        sel = self.grid['dry_cell_index'][n_cell] > 128  # those dry
+        sel = self.reader.grid['dry_cell_index'][n_cell] > 128  # those dry
         return sel
     
     def close(self):
