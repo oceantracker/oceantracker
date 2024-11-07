@@ -223,7 +223,7 @@ class _SharedInfoClass():
         # this allows shared info to make a class importer when needed
         self.msg_logger.set_screen_tag('Prelim')
         self.msg_logger.reset()
-        self.class_importer = class_importer_util.ClassImporter(self.msg_logger)
+        self._class_importer = class_importer_util.ClassImporter(self.msg_logger)
 
         # empty out roles and core roles in case of rerunning and shared info import only happens once
         for role in self.core_class_roles.as_dict().keys():
@@ -236,13 +236,14 @@ class _SharedInfoClass():
         for role in list(self.class_roles.as_dict().keys()) + list(self.core_class_roles.as_dict().keys()):
             self.classes[role] = None if role in  self.core_class_roles.as_dict() else {}
 
-    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=True, **kwargs):
+    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=True,check_for_unknown_keys=True, **kwargs):
 
         ml = self.msg_logger
         crumbs += f'Adding class {class_role}>'
         if params is None: params ={}
         if type(params) != dict :
-            ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}', fatal_error=True, crumbs=crumbs, caller=caller)
+            ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}', fatal_error=True, crumbs=crumbs,
+                                check_for_unknown_keys=check_for_unknown_keys, caller=caller)
             return None
 
         params= dict(params,**kwargs) # join params and kwargs
@@ -250,7 +251,8 @@ class _SharedInfoClass():
         if class_role in self.core_class_roles.possible_values():
             #core  roles
             params['name'] = None
-            i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller)
+            i = self._make_class_instance(class_role, params, default_classID=default_classID, crumbs=crumbs,
+                                          check_for_unknown_keys=check_for_unknown_keys, caller=caller, initialize=initialize)
             i.info['instanceID'] = 0
             self.core_class_roles[class_role] = i
 
@@ -258,7 +260,7 @@ class _SharedInfoClass():
             #other roles
             instanceID= len(self.class_roles[class_role])
             params['name'] = f'{class_role}_{instanceID:04d}' if 'name' not in params or params['name'] is None else params['name']
-            i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller)
+            i = self._make_class_instance(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller,initialize=initialize)
             i.info['instanceID'] = instanceID
             self.class_roles[class_role][params['name']] = i
 
@@ -268,6 +270,13 @@ class _SharedInfoClass():
             return None
         # make instance and merge params
 
+        return i
+
+    def _make_class_instance(self,class_role, params,default_classID=None, crumbs='', caller=None,initialize=True,check_for_unknown_keys=True):
+        # make and class instance from calss_name in params using  class importer
+        i = self._class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
+                                                                 check_for_unknown_keys=check_for_unknown_keys,
+                                                                 crumbs=crumbs, caller=caller)
         if initialize:
             i.initial_setup()
         return i

@@ -1,13 +1,13 @@
 from random import normalvariate
 from numba import njit, types as nbtypes
 from oceantracker.util.numba_util import njitOT
-from oceantracker.dispersion.random_walk import RandomWalk
+from oceantracker.dispersion.random_walk3D_constant_viscosity import RandomWalk3DconstantViscosity
 #from oceantracker.interpolator.util.scatch_tests.vertical_walk_at_particle_location_eval_interp import _evalBCinterp
 import numpy as np
 from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import shared_info as si
 
-class RandomWalkVaryingAZ(RandomWalk):
+class RandomWalkVaryingAZ(RandomWalk3DconstantViscosity):
     # dispersion for PDE of  the form d(A_z d(V)/dz)/dz if turbulent eddy viscosity A_z depends on z adds  vertical advection to random walk equal to d A_z/dz
     # see Lynch Particles in the Coastal Ocean: Theory and Applications
     def __init__(self):

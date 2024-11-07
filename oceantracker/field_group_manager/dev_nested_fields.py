@@ -15,54 +15,42 @@ class DevNestedFields(ParameterBaseClass):
     # build a list of field group managers for outer and nest grids
     # first in list grid is the outer grid
 
-    readers=[] # first is outer grid, nesting the others
+    readers=[] # first is outer grid readers[0], nesting readers are readers[1:]
 
-    def initial_setup(self):
+    def initial_setup(self,reader_builder,  caller=None):
 
         ml = si.msg_logger
-        # setup outer grid first
-
-        if si.settings.write_tracks:
-            pass
-
-        fgm_outer_grid = si.class_importer.make_class_instance_from_params('field_group_manager', dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
-                                                                           crumbs='adding outer hydro-grid field manager for nested grid run')
-        fgm_outer_grid.initial_setup()
-        hi = fgm_outer_grid.get_hindcast_info()
+        # setup outer grid firstF
+        fgm_outer_grid = si._make_class_instance('field_group_manager', {}, default_classID='field_group_manager',
+                                initialize=False,caller= caller, crumbs='adding outer hydro-grid field manager for nested grid run')
+        fgm_outer_grid.initial_setup( reader_builder,  caller=self)
+        hi = fgm_outer_grid.reader.reader_builder['hindcast_info']
         self.hydro_time_step = hi['time_step']
         self.start_time, self.end_time = hi['start_time'], hi['end_time']
-        self.grid['is3D'] = fgm_outer_grid.info['is3D']
-
-        # todo  check if all hindcasts have same required info
-
+        self.info['is3D'] = fgm_outer_grid.reader.grid['is3D']
 
         # first grid is outer grid
         self.fgm_hydro_grids = [fgm_outer_grid]
 
         # add nested grids
-        for name, rb in si.run_builder['nested_reader_builders'].items():
-            ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}, name= "{name}"')
+        for rb in reader_builder['nested_reader_builders']:
+            ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}')
 
             t0= perf_counter()
-            fgm_nested =  si.class_importer.make_class_instance_from_params('field_group_manager', dict(class_name='oceantracker.field_group_manager.field_group_manager.FieldGroupManager'),
-                                                                            crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
-
-            fgm_nested._setup_hydro_reader(rb)
-
-            # todo check that all nested grids have open bc and set open to true
-            fgm_nested.set_up_interpolator()
-
-
+            fgm_nested =  si._make_class_instance('field_group_manager', {}, default_classID='field_group_manager',
+                                                  initialize=False, caller=caller,
+                                                    crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
+            fgm_nested.initial_setup(rb, caller=caller)
             self.fgm_hydro_grids.append(fgm_nested)
 
             # note times
-            hi = fgm_nested.get_hindcast_info()
+            hi = fgm_nested.reader.reader_builder['hindcast_info']
             self.hydro_time_step = min(self.hydro_time_step,hi['time_step'])
 
             # start and end times
             self.start_time, self.end_time=  max(self.start_time,hi['start_time']), min(self.end_time,hi['end_time'])
 
-            ml.progress_marker(f'Finished nested hydro-model grid setup #{len(self.fgm_hydro_grids)}, name= "{name}", '
+            ml.progress_marker(f'Finished nested hydro-model grid setup #{len(self.fgm_hydro_grids)} '
                                f'from {time_util.seconds_to_isostr(hi["start_time"])} to  {time_util.seconds_to_isostr(hi["end_time"])}', start_time=t0)
 
         #todo add check times overlaping
@@ -88,7 +76,7 @@ class DevNestedFields(ParameterBaseClass):
         # check nested grids
         for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):
             if not fgm.info['has_open_boundary_nodes']:
-                ml.msg(f'Nested grids must tag open boundary nodes, nested grid {n+1} " does not',
+                ml.msg(f'Nested grids must  open boundary nodes, nested grid {n+1} " does not',
                                   fatal_error=True, exit_now=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
 
         # outer grid is not required to have open boundary nodes, but can if provided
@@ -96,50 +84,6 @@ class DevNestedFields(ParameterBaseClass):
         if not fgm.info['has_open_boundary_nodes']: fgm.info['open_boundary_type'] = si.settings.open_boundary_type
         pass
 
-    def setup_dispersion_and_resuspension_fields(self):
-        # see if al files have the required variables
-
-        ml = si.msg_logger
-        has_bottom_stress = []
-        has_A_Z_profile  = []
-
-        # check each file
-        for fgm in self.fgm_hydro_grids:
-            nc = fgm.reader.open_first_file()
-            fmap = fgm.reader.params['field_variable_map']
-
-            # see if A_z profile variablve present to use in vertical dispersion
-            has_A_Z_profile.append(si.run_info.is3D_run and si.settings['use_A_Z_profile'] and fmap['A_Z_profile'] is not None and nc.is_var(fmap['A_Z_profile']) )
-            # use bottom stres for resupension if in all files
-            if si.run_info.is3D_run:
-                # add friction velocity from bottom stress or near seabed vel
-                bs_map = fmap['bottom_stress'] if type(fmap['bottom_stress']) == list else [fmap['bottom_stress']]  # ensure map is a list
-                has_bottom_stress.append(nc.is_var(bs_map[0]))
-        pass
-
-        # acheck all hydro models have bootom stress
-        if all(has_bottom_stress):
-            # set up additional fields
-            has_bottom_stress = True
-        else:
-            has_bottom_stress = False
-            ml.msg('Not all hydro-models have bottom stress variable, using near seabed velocity to calculate friction velocity for resuspension ',note=True)
-
-        # check al have Az profile
-        if all(has_A_Z_profile):
-            # set up additional fields
-            has_A_Z_profile = True
-        else:
-            has_A_Z_profile = False
-            ml.msg('Not 3D run, or not all hydro-models have A_Z profile, using constant A_Z for vertical dispersion' , note=True)
-
-        self.info['has_A_Z_profile'] = has_A_Z_profile
-
-        for fgm in self.fgm_hydro_grids:
-            fgm._setup_required_resupension_fields(nc, has_bottom_stress)
-            fgm._setup_required_dispersion_fields(nc, has_A_Z_profile)
-
-        nc.close()
 
     def get_hindcast_info(self):
         d = dict(start_time=self.start_time,

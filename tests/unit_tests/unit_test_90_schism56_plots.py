@@ -8,7 +8,7 @@ from tests.unit_tests import test_definitions
 def main(args):
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__,args))
-    ot.settings(time_step=240)
+    ot.settings(time_step=240, use_A_Z_profile=True)
 
     ot.add_class('reader', **test_definitions.reader_demo_schisim)
 

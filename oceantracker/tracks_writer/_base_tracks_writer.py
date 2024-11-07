@@ -50,7 +50,7 @@ class _BaseWriter(ParameterBaseClass):
             params['update_interval'] = si.settings.time_step
 
         if si.settings['write_dry_cell_flag']:
-            grid = si.core_class_roles.field_group_manager.grid
+            grid = si.core_class_roles.field_group_manager.reader.grid
             self.add_dimension('triangle_dim', grid['triangles'].shape[0])
             self.add_new_variable('dry_cell_index', ['time_dim','triangle_dim'], attributes={'description': 'Time series of grid dry index 0-255'},
                                   dtype=np.uint8, chunking=[si.settings.NCDF_time_chunk,grid['triangles'].shape[0]])
@@ -168,7 +168,7 @@ class _BaseWriter(ParameterBaseClass):
 
         if si.settings['write_dry_cell_flag']:
             # wont run if nested grids
-            grid = si.core_class_roles.field_group_manager.grid
+            grid = si.core_class_roles.field_group_manager.reader.grid
             self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid['dry_cell_index'].reshape(1,-1)
 
         self.time_steps_written_to_current_file += 1 # time steps in current file

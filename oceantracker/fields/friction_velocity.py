@@ -11,15 +11,32 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
     ''''''
     def __init__(self):
         super().__init__()
-        self.add_default_params( time_varying=PVC(True,bool),
+        self.add_default_params(name=PVC('friction_velocity', str,
+                                doc_str='Name to refer to this field internally within code'),
+                                 time_varying=PVC(True,bool),
                                  is3D=PVC(False,bool),
                                  requires3D=PVC(True,bool),
                                  is_vector=PVC(False,bool),
                                  )
 
 
+    def add_any_required_fields(self,settings, known_reader_fields, msg_logger):
+
+        custom_field_params= [dict(name='friction_velocity',class_name='FrictionVelocityFromNearSeaBedVelocity',
+                            write_interp_particle_prop_to_tracks_file=False)]
+        msg_logger.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
+
+        required_reader_fields = []
+
+        return required_reader_fields,  custom_field_params
+
+
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True)
+
+    def initial_setup(self,time_buffer_size, num_nodes, num_zlevels,fields):
+        super().initial_setup(time_buffer_size, num_nodes, num_zlevels,fields)
+
 
     def update(self, fields,grid,buffer_index):
         vtg = si.vertical_grid_types

@@ -135,8 +135,10 @@ class _BaseReader(ParameterBaseClass):
         self.dataset = dataset
         self.grid_variable_map = reader_builder['grid_info']['variable_map']
         self.reader_field_vars_map = reader_builder['reader_field_info']
+
         self.grid = self._set_up_grid()
 
+        self._set_up_interpolator(reader_builder)
         self._setup_fields(reader_builder)
 
 
@@ -360,6 +362,7 @@ class _BaseReader(ParameterBaseClass):
         # setup field classes , ie make memory buffer
         cat =self.dataset.catalog
         self.fields={}
+        fgm = si.core_class_roles.field_group_manager
         fields = self.fields
 
 
@@ -381,6 +384,7 @@ class _BaseReader(ParameterBaseClass):
             f = reader_builder['reader_field_info'][name]
             params= f['params']
             i = self._add_a_field(name, params, reader_builder, class_name='ReaderField')
+
             # read reader field now if not time varying
             if not i.is_time_varying():
                     i.data = self.read_field_data(name, i)
@@ -394,7 +398,8 @@ class _BaseReader(ParameterBaseClass):
         params['name'] = name
         if class_name is not None: params.update(class_name=class_name)
 
-        i = si.class_importer.make_class_instance_from_params('fields', params, check_for_unknown_keys=False, crumbs=f'Adding field "{name}", class_name="{params["class_name"]}"')
+        i = si._make_class_instance('fields', params, initialize=False,
+                                        check_for_unknown_keys=False, crumbs=f'Adding field "{name}", class_name="{params["class_name"]}"')
         i.initial_setup(self.params['time_buffer_size'],hi['num_nodes'],hi['num_z_levels'], self.fields)
 
         # add variable info on file variables list for reader fields
@@ -403,6 +408,14 @@ class _BaseReader(ParameterBaseClass):
 
         self.fields[name] = i
         return  i
+
+    def _set_up_interpolator(self, reader_builder):
+        if si.working_params['core_roles']['interpolator'] is None: si.working_params['core_roles']['interpolator'] = {}
+        i = si._make_class_instance('interpolator', si.working_params['core_roles']['interpolator'],initialize=False,
+                                             default_classID='interpolator', caller= self,
+                                             crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
+        i.initial_setup(self.grid,reader_builder)
+        self.interpolator = i
 
     # setup and read core fields, depth, tide, water velocity
     # ----------------------------------------------------

@@ -60,7 +60,7 @@ class Solver(ParameterBaseClass):
         ri.free_wheeling = False
         model_times = si.run_info.times
 
-        self._update_all_readers(model_times[0]) # initial buffer fill
+        fgm.update_readers(model_times[0]) # initial buffer fill
 
         # run forwards through model time variable, which for backtracking are backwards in time
         t2 = model_times[0]
@@ -90,7 +90,7 @@ class Solver(ParameterBaseClass):
 
            # alive particles so do steps
             ri.total_alive_particles += num_alive
-            self._update_all_readers(time_sec)
+            fgm.update_readers(time_sec)
 
             # do stats etc updates and write tracks
             self._pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
@@ -200,10 +200,6 @@ class Solver(ParameterBaseClass):
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
 
-
-
-    def _update_all_readers(self, time_sec):
-        si.core_class_roles.reader.update(time_sec)
 
     def do_time_step(self, time_sec, is_moving):
 
