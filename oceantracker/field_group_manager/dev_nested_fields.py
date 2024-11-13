@@ -95,10 +95,10 @@ class DevNestedFields(ParameterBaseClass):
         d['date_span'] = time_util.seconds_to_pretty_duration_string(abs(d['end_time'] - d['start_time']))
         return d
 
-    def update_reader(self, time_sec):
+    def update_readers(self, time_sec):
 
         for fgm in self.fgm_hydro_grids:
-            fgm.update_reader(time_sec)
+            fgm.update_readers(time_sec)
 
 
     def get_hydo_model_time_step(self): return self.hydro_time_step # return the smallest time step

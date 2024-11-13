@@ -163,7 +163,7 @@ def load_residence_file(case_info_file_name=None,name=None, var_list=[]):
     nc_file_name =  _get_role_dict_file_name(case_info, 'particle_statistics', name)
     d = read_ncdf_output_files.read_residence_file(nc_file_name, var_list)
     #d['info']= case_info['class_roles_info']['particle_statistics'][name]
-    d['params'] = case_info['working_params']['roles']['particle_statistics'][name]
+    d['params'] = case_info['working_params']['class_roles']['particle_statistics'][name]
 
     d = _extract_useful_info(case_info, d)
     d['grid'] = load_grid(case_info_file_name)

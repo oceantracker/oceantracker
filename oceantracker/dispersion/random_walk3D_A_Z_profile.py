@@ -23,7 +23,7 @@ class RandomWalk3D_A_Z_profile(RandomWalk3DconstantViscosity):
     def add_any_required_fields(self,settings, known_reader_fields, msg_logger):
         required_reader_fields =[]
         custom_field_params = [dict(name= 'A_Z_profile_vertical_gradient',
-                                    classname = 'VerticalGradient',
+                                    class_name = 'VerticalGradient',
                                     get_grad_of_field_named='A_Z_profile',
                                     write_interp_particle_prop_to_tracks_file=False)]
         return required_reader_fields, custom_field_params

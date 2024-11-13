@@ -22,8 +22,8 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
     si = shared_info
     crumbs += '> decompose_params'
     w = dict(settings= {},
-             core_roles = {k: None for k in si.core_class_roles.possible_values()},  # insert full list and defaults
-             roles = {k: [] for k in si.class_roles.possible_values()},
+             core_class_roles = {k: None for k in si.core_class_roles.possible_values()},  # insert full list and defaults
+             class_roles = {k: [] for k in si.class_roles.possible_values()},
              )
 
 
@@ -48,7 +48,7 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
             w['settings'][k] = item
 
         elif k in core_role_keys:
-            w['core_roles'][k] = item
+            w['core_class_roles'][k] = item
 
         elif k in role_keys:
             if type(item) != list:
@@ -56,7 +56,7 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
                                +'\n Roles changed from dict type to list type in new version',
                                        hint =f'Got type {str(type(item))}, value={str(item)}' ,
                                        crumbs=crumbs, fatal_error=True)
-            w['roles'][k] = item
+            w['class_roles'][k] = item
         else:
             msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
                            crumbs=crumbs, link='parameter_ref_toc', fatal_error=True)
@@ -144,14 +144,14 @@ def merge_base_and_case_working_params(base_working_params,n_case, case_working_
             case_working_params['settings'][key] = item
 
     # merge core classes
-    for key, item in base_working_params['core_roles'].items():
+    for key, item in base_working_params['core_class_roles'].items():
         if key not in case_working_params:
-            case_working_params['core_roles'][key]= item
+            case_working_params['core_class_roles'][key]= item
     # class dicts
-    for role, role_dict in base_working_params['roles'].items():
+    for role, role_dict in base_working_params['class_roles'].items():
         # loop over named base case classes
-        for item in base_working_params['roles'][role]:
-            case_working_params['roles'][role].append(item)
+        for item in base_working_params['class_roles'][role]:
+            case_working_params['class_roles'][role].append(item)
 
     return case_working_params
 

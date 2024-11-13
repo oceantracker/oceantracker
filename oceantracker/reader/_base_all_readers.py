@@ -410,8 +410,8 @@ class _BaseReader(ParameterBaseClass):
         return  i
 
     def _set_up_interpolator(self, reader_builder):
-        if si.working_params['core_roles']['interpolator'] is None: si.working_params['core_roles']['interpolator'] = {}
-        i = si._make_class_instance('interpolator', si.working_params['core_roles']['interpolator'],initialize=False,
+        if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
+        i = si._make_class_instance('interpolator', si.working_params['core_class_roles']['interpolator'],initialize=False,
                                              default_classID='interpolator', caller= self,
                                              crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
         i.initial_setup(self.grid,reader_builder)

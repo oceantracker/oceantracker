@@ -59,7 +59,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
         # eg spatial field probabity  of where particles are likely to settle on the bottom
         # minumim is  [dict(name='internal naem of feild used to reference it',class_name='class name used to import this custom field'},...]
         # eg is using A_Z profe need custion field of its vertical gradient
-        #  [ dict(name= 'A_Z_profile_vertical_gradient',classname = 'VerticalGradient',  get_grad_of_field_named='A_Z_profile', write_interp_particle_prop_to_tracks_file=False))]
+        #  [ dict(name= 'A_Z_profile_vertical_gradient',class_name = 'VerticalGradient',  get_grad_of_field_named='A_Z_profile', write_interp_particle_prop_to_tracks_file=False))]
         custom_field_params = []
 
         return required_reader_fields,  custom_field_params
@@ -156,7 +156,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
         ''' Add a scheduler object to given param_class_instance, with boolean task_flag attribute for each time step,
             which is true if  task is to be carried out.
             Rounds times interval and times to nearest time step'''
-        s = Scheduler(si.settings, si.run_info, si.hindcast_info, start=start, end=end, duration=duration,
+        s = Scheduler(si.settings, si.run_info, start=start, end=end, duration=duration,
                                                     interval =interval, times=times, caller=caller,
                                                     msg_logger=si.msg_logger, crumbs=crumbs + f'> adding scheduler {name_scheduler}')
         self.schedulers[name_scheduler]  = s
