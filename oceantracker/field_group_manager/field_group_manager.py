@@ -28,11 +28,16 @@ class FieldGroupManager(ParameterBaseClass):
 
     def initial_setup(self, reader_builder,  caller=None):
         ml = si.msg_logger
+        info = self.info
+
         # build  primary. ie  velocity field, reader
-        self.reader=self._build_single_reader(reader_builder)
+        self.reader = self._build_single_reader(reader_builder)
         reader = self.reader
 
-        self.write_hydro_model_grid()
+        hi = reader_builder['hindcast_info']
+        info['start_time'], info['end_time'] = hi['start_time'], hi['end_time']
+        self.info['is3D'] = self.reader.grid['is3D']
+
         # todo add ancillary reader fields readers here
 
         # add request to load compulsory fields
@@ -40,8 +45,8 @@ class FieldGroupManager(ParameterBaseClass):
         si.hydro_model_cords_in_lat_long = reader.grid['hydro_model_cords_in_lat_long']
 
         self.fields = self.reader.fields
-        self.info['is3D'] = self.reader.grid['is3D']
 
+        self.write_hydro_model_grid()
 
     def final_setup(self):
         ml = si.msg_logger
@@ -170,7 +175,7 @@ class FieldGroupManager(ParameterBaseClass):
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
 
-        # debug_util.plot_walk_step(xq, si.core_roles.reader.grid, part_prop)
+        # debug_util.plot_walk_step(xq, si.core__class_roles.reader.grid, part_prop)
 
 
     #@function_profiler(__name__)

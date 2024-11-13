@@ -140,9 +140,10 @@ class  InterpTriangularGrid(_BaseInterp):
         if sel.size > 0:
             # si.msg_logger.msg(f'Search retried for {sel.size} cells')
             info['triangle_walks_retried'] += sel.size
-            new_cell = self.initial_horizontal_cell(grid, xq[sel, :])
-            part_prop['n_cell'].set_values(new_cell, sel)
-            self._get_hori_cell(xq, sel)
+
+            n_cell, bc, is_inside_domain = self.find_initial_cell(xq[sel,...])
+            part_prop['n_cell'].set_values(n_cell, sel)
+            part_prop['bc_cords'].set_values(bc, sel)
 
             # recheck for additional failures
             sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
@@ -170,7 +171,7 @@ class  InterpTriangularGrid(_BaseInterp):
 
     #@function_profiler(__name__)
     def are_points_inside_domain(self,xq):
-        n_cell, bc, is_inside_domain  = self._hori_cell_finder.find_initial_cell(xq)
+        n_cell, bc, is_inside_domain  = self.find_initial_cell(xq)
         part_data = dict(x = xq, n_cell=n_cell, bc_cords=bc)
         # todo add interpolated water depth, tide???
         return is_inside_domain, part_data # is inside if  magnitude of all BC < 1

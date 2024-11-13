@@ -246,15 +246,22 @@ class _OceanTrackerRunner(object):
         return case_summary
 
     def _create_reader_builders(self, run_builder):
-        # created a dict which can be used to build a reader
+        # created a dict which can be used to build a reader and nested reader builders
         t0 = perf_counter()
         ml = msg_logger
         crumbs = '_get_hindcast_file_info> '
         working_params = run_builder['working_params']
-
+        settings = working_params['settings']
         # primary reader
-        reader_builder= self._make_a_reader_builder(run_builder,working_params['core_roles']['reader'], crumbs)
+        reader_builder, reader= self._make_a_reader_builder(run_builder,working_params['core_class_roles']['reader'], crumbs)
         json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], 'hindcast_variable_catalog.json'), reader_builder['catalog'])
+
+        # optional primary reader fields for resuspension and dispersion
+        optional_reader_fields= dict(
+            use_A_Z_profile = settings['use_A_Z_profile'] and 'A_Z_profile' in reader_builder['reader_field_info'],
+                # option to use bottom stress for friction velocity
+            use_bottom_stress = 'bottom_stress' in reader_builder['reader_field_info']
+            )
 
         # work out in 3D run from water velocity
         run_builder['is3D_run'] = self._detect_3D_velocity(reader_builder)
@@ -269,17 +276,27 @@ class _OceanTrackerRunner(object):
 
         # get file info for nested readers
         nested_reader_builders = []
-        if 'nested_readers' not in working_params['roles']: working_params['roles']['nested_readers'] = []
-
-        for n, nested_reader_params in enumerate(working_params['roles']['nested_readers']):
+        for n, nested_reader_params in enumerate(working_params['class_roles']['nested_readers']):
             t0 = perf_counter()
-            nested_reader_builder = self._make_a_reader_builder(run_builder, nested_reader_params, crumbs = crumbs+f'> nested reader#{n}')
-            json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], f'hindcast_variable_catalog_ested_reader{n:03d}.json'),
-                                                        nested_reader_builder['catalog'])
-            nested_reader_builders.append(nested_reader_builder)
+            nrb, r = self._make_a_reader_builder(run_builder, nested_reader_params, crumbs = crumbs+f'> nested reader#{n}')
+            json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], f'hindcast_variable_catalog_nested_reader{n:03d}.json'),
+                                                        nrb['catalog'])
+            nested_reader_builders.append(nrb)
+            optional_reader_fields['use_A_Z_profile'] = optional_reader_fields['use_A_Z_profile'] and 'A_Z_profile' in nrb['reader_field_info']
+            optional_reader_fields['use_bottom_stress'] = optional_reader_fields['use_bottom_stress'] and 'bottom_stress' in nrb['reader_field_info']
+
             ml.progress_marker(f'sorted nested hyrdo-model #{n} files in time order ', start_time=t0)
 
         ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
+
+
+
+        # setup reader fields and those required by classes, check field consistency between primary and nested readers
+        #  uisng optional_reader_fields to check if primary and all nested readers have the A_Z profils and bottom stress above
+        self._add_field_builders(working_params, reader_builder, optional_reader_fields) # primary reader
+
+        for r in nested_reader_builders:
+            self._add_field_builders(working_params, r, optional_reader_fields)
 
         reader_builder['nested_reader_builders'] = nested_reader_builders
         return reader_builder
@@ -299,23 +316,9 @@ class _OceanTrackerRunner(object):
         # add info to reader bulider on if 3D hindcast and mapped fields
         reader_builder = self._map_and_catagorise_field_variables(run_builder, reader_builder, reader)
 
-        # add custom fields
-        reader_builder['custom_field_params'] = dict()
-        for n, params in enumerate( run_builder['working_params']['roles']['fields']):
-            if 'name' not in params:
-                msg_logger.msg(f'Custom field #{n} must have both a "name" and "class_name" parameters',
-                               hint=f'given parameters are {str(params)}', fatal_error=True, caller=self)
-                continue
 
-            params.update(time_buffer_size=reader_builder['params']['time_buffer_size'],
-                          nodes=reader_builder['hindcast_info']['num_nodes'],
-                          zlevels=reader_builder['hindcast_info']['num_z_levels'])
-            reader_builder['custom_field_params'][params['name']] = params
+        return reader_builder, reader
 
-        # add field params for those required by other classes
-        reader_builder = self._add_field_params_added_by_classes_code( run_builder['working_params'], reader_builder)
-
-        return reader_builder
 
     def _detect_3D_velocity(self, reader_builder):
         # check if water velocity variables are there, if not swap to depth averaged versions if present
@@ -536,20 +539,34 @@ class _OceanTrackerRunner(object):
         reader = known_readers[found_reader]['instance']
         return params, reader
 
-    def _add_field_params_added_by_classes_code(self,working_params,reader_builder ):
+    def _add_field_builders(self, working_params, reader_builder, optional_reader_fields):
         # get pasm for any fields added by classes in there add_any_required_fields() method using self.add_field
         # must be done first to allow the reader to build all required fields
         crumbs = 'Adding code required fields'
 
+        # add custom fields
+        reader_builder['custom_field_params'] = dict()
+        for n, params in enumerate( working_params['class_roles']['fields']):
+            if 'name' not in params:
+                msg_logger.msg(f'Custom field #{n} must have both a "name" and "class_name" parameters',
+                               hint=f'given parameters are {str(params)}', fatal_error=True, caller=self)
+                continue
+
+            params.update(time_buffer_size=reader_builder['params']['time_buffer_size'],
+                          nodes=reader_builder['hindcast_info']['num_nodes'],
+                          zlevels=reader_builder['hindcast_info']['num_z_levels'])
+            reader_builder['custom_field_params'][params['name']] = params
+
         settings = working_params['settings']
         hi = reader_builder['hindcast_info']
-        core_params = working_params['core_roles']
+        core_params = working_params['core_class_roles']
         # set up dispersion/random walk fields
-        if settings['use_dispersion']:
+        if settings['use_dispersion'] :
             if hi['is3D']:
                 core_params['dispersion'] = self._add_fields_from_one_class('dispersion', core_params['dispersion'],
                     settings, reader_builder,crumbs='main> adding 3D dispersion fields',
-                    default_classID='dispersion3D_constantViscosity'if 'A_Z_profile' in reader_builder['reader_field_info'] else 'dispersion2D_A_Z_profile')
+                    default_classID='dispersion2D_A_Z_profile'if \
+                                optional_reader_fields['use_A_Z_profile'] else 'dispersion3D_constantViscosity')
             else:
                 core_params['dispersion'] = self._add_fields_from_one_class('dispersion', core_params['dispersion'],
                                                 settings, reader_builder, default_classID='dispersion2D_constantViscosity',
@@ -558,19 +575,19 @@ class _OceanTrackerRunner(object):
         if hi['is3D'] and settings['use_resuspension']:
             core_params['resuspension'] = self._add_fields_from_one_class('resuspension', core_params['resuspension'],
                     settings, reader_builder, crumbs='main> adding 2D resuspension fields',
-                    default_classID='resuspension_using_bottom_stress' if 'bottom_stress' in reader_builder['reader_field_info'] else 'resuspension_using_near_sea_bed_vel')
+                    default_classID='resuspension_using_bottom_stress' if  optional_reader_fields['use_bottom_stress'] else 'resuspension_using_near_sea_bed_vel')
 
         # look at core classes which might require addition fields if they are used
         core_params['tidal_stranding'] = self._add_fields_from_one_class('tidal_stranding', core_params['tidal_stranding'],
                                         settings, reader_builder, crumbs='main> adding 2D resuspension fields',
                                         default_classID='tidal_stranding')
 
-        if working_params['core_roles']['integrated_model'] is not None:
+        if working_params['core_class_roles']['integrated_model'] is not None:
             core_params['integrated_model']= self._add_fields_from_one_class('integrated_model', core_params['integrated_model'],
                                             settings, reader_builder, crumbs='')
 
         # add fields required by other classes
-        for role, param_list  in working_params['roles'].items():
+        for role, param_list  in working_params['class_roles'].items():
             if role == 'nested_readers': continue # a reader wont add custom fields
             for n in range(len(param_list)):
                 param_list[n] = self._add_fields_from_one_class(role, param_list[n], settings, reader_builder, crumbs=f' add classes for role {role}')

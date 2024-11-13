@@ -91,7 +91,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             sleep(delay)
             ml.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
 
-
         t0=perf_counter()
         ml.progress_marker('Scanned OceanTracker to build short name map to the full class_names', start_time=t0)
 
@@ -192,10 +191,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.core_class_roles.field_group_manager.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
 
         if si.settings.write_tracks:
-            si.add_class('tracks_writer', working_params['core_roles']['tracks_writer'], crumbs=crumbs, caller=self)
+            si.add_class('tracks_writer', working_params['core_class_roles']['tracks_writer'], crumbs=crumbs, caller=self)
 
         # particle group manager for particle handing infra-structure
-        pgm = si.add_class('particle_group_manager',working_params['core_roles']['particle_group_manager'],crumbs=crumbs,caller=self)
+        pgm = si.add_class('particle_group_manager',working_params['core_class_roles']['particle_group_manager'],crumbs=crumbs,caller=self)
 
         # schedule all release groups
         pgm.info['max_age_for_each_release_group'] = np.zeros((0,),dtype=np.int32)
@@ -209,20 +208,20 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             pgm.info['max_age_for_each_release_group'] = np.append(pgm.info['max_age_for_each_release_group'], max_age)
 
         # make other core classes
-        si.add_class('solver',working_params['core_roles']['solver'],crumbs=crumbs,caller=self)
+        si.add_class('solver',working_params['core_class_roles']['solver'],crumbs=crumbs,caller=self)
         if si.settings['use_dispersion']:
-            si.add_class('dispersion', working_params['core_roles']['dispersion'], crumbs=crumbs, caller=self)
+            si.add_class('dispersion', working_params['core_class_roles']['dispersion'], crumbs=crumbs, caller=self)
 
         if si.run_info.is3D_run and si.settings['use_resuspension']:
-            si.add_class('resuspension', working_params['core_roles']['resuspension'], crumbs=crumbs, caller=self)
+            si.add_class('resuspension', working_params['core_class_roles']['resuspension'], crumbs=crumbs, caller=self)
 
         # add user/custom particle properties
-        for n, params in enumerate(working_params['roles']['particle_properties']):
+        for n, params in enumerate(working_params['class_roles']['particle_properties']):
             si.add_class('particle_properties', params, caller=self, crumbs=crumbs + f' Adding user given particle properties  -instance #{n} >')
 
         # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for role in ['velocity_modifiers', 'trajectory_modifiers', 'particle_statistics', 'particle_concentrations', 'event_loggers']:
-            for n, params in  enumerate(working_params['roles'][role]):
+            for n, params in  enumerate(working_params['class_roles'][role]):
                 si.add_class(role, params, caller=self,crumbs=crumbs + f' Adding class {role} -instance #{n} >')
 
         # do integrated models last
@@ -255,11 +254,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # add release groups from params or intergated model
         crumbs = 'adding release groups'
-        for params in working_params['roles']['release_groups']:
+        for params in working_params['class_roles']['release_groups']:
             si.add_class('release_groups',params,caller=self,crumbs=crumbs, initialize=False)
 
-        if working_params['core_roles']['integrated_model']is not None:
-            i = si.add_class('integrated_model', working_params['core_roles']['integrated_model'], crumbs=crumbs + ' Adding integrated_model release groups', caller=self, initialize=False)
+        if working_params['core_class_roles']['integrated_model']is not None:
+            i = si.add_class('integrated_model', working_params['core_class_roles']['integrated_model'], crumbs=crumbs + ' Adding integrated_model release groups', caller=self, initialize=False)
             i.add_release_groups_and_settings(crumbs=crumbs)
 
         if len(si.class_roles['release_groups']) == 0:
@@ -325,6 +324,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
     def _build_field_group(self, working_params, reader_builder):
         # initialise all classes, order is important!
         # shortcuts
+        info = self.info
         t0 = perf_counter()
 
         # start with setting up field groups, which set up readers
@@ -333,12 +333,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # chose file manager for normal or nested readers
         if len(reader_builder['nested_reader_builders']) > 0:
             # use development nested readers class field group manager
-            if working_params['core_roles']['field_group_manager'] is None: working_params['core_roles']['field_group_manager'] ={}
-            if 'class_name' not in working_params['core_roles']['field_group_manager']:
-                working_params['core_roles']['field_group_manager']['class_name'] = definitions.default_classes_dict['field_group_manager_nested']
+            if working_params['core_class_roles']['field_group_manager'] is None: working_params['core_class_roles']['field_group_manager'] ={}
+            if 'class_name' not in working_params['core_class_roles']['field_group_manager']:
+                working_params['core_class_roles']['field_group_manager']['class_name'] = definitions.default_classes_dict['field_group_manager_nested']
 
         # set up fields
-        fgm = si.add_class('field_group_manager',working_params['core_roles']['field_group_manager'], initialize=False)
+        fgm = si.add_class('field_group_manager',working_params['core_class_roles']['field_group_manager'], initialize=False)
         fgm.initial_setup(reader_builder, caller=self)
         si.run_info.is3D_run = fgm.info['is3D']
         si.run_info.vector_components = 3 if si.run_info.is3D_run else 2
@@ -347,6 +347,9 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         if si.settings.time_step > si.hindcast_info['time_step']:
             si.msg_logger.msg(f'Results may not be accurate as, time step param={si.settings.time_step:2.0f} sec,  > hydo model time step = {si.hindcast_info["time_step"]:2.0f}',
                    warning=True)
+
+        si.run_info.hindcast_start_time = fgm.info['start_time']
+        si.run_info.hindcast_end_time = fgm.info['end_time']
 
         si.msg_logger.progress_marker('Setup field group manager', start_time=t0)
 
@@ -363,7 +366,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                          elapsed_time_sec=elapsed_time_sec,
                          number_particles_released= pgm.info['particles_released'] if pgm  is not None else None ))
         info.update(si.run_info.as_dict())
-        # base class variable warnings is common with all descendents of parameter_base_class
+        # base class variable warnings is common with all descendants of parameter_base_class
         d = {'caseID' : si.run_info.caseID,
              'user_note': si.settings['user_note'],
              'file_written': datetime.now().isoformat(),
@@ -371,7 +374,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'version_info':   si.run_builder['version'],
              'computer_info':  si.run_builder['computer_info'],
              'hindcast_info': si.hindcast_info,
-             'working_params': dict(settings = si.settings.as_dict() ,core_roles={}, roles={}),
+             'working_params': dict(settings = si.settings.as_dict() ,core_class_roles={}, class_roles={}),
              'timing':dict(block_timings=[], function_timers= {}),
              'update_timers': {},
              'settings' : si.settings.as_dict(),
@@ -393,7 +396,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             d['scheduler_info'][key] = {}
             d['update_timers'][key] = {}
             d['output_files'][key] = {}
-            d['working_params']['roles'][key] = {}
+            d['working_params']['class_roles'][key] = {}
             # interate over dict
             for key2, i2 in i.items():
                 class_info[key][key2]= i2.info
@@ -409,7 +412,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 p = deepcopy(i2.params)
                 if key == 'release_groups':  # don't put release point locations which may make json too big
                     p['points'] = 'points may be too large for json, read release_groups netCDF file, '
-                d['working_params']['roles'][key][key2] = p
+                d['working_params']['class_roles'][key][key2] = p
 
         # rewrite release groups in net cdf
         d['output_files']['release_groups'] = si.output_files['release_groups']
@@ -429,7 +432,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if hasattr(i, 'scheduler_info'):
                 d['scheduler_info'][key]= i.scheduler_info
 
-            d['working_params']['core_roles'][key] = i.params
+            d['working_params']['core_class_roles'][key] = i.params
 
         keys= []
         times=[]

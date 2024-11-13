@@ -7,7 +7,7 @@ class Scheduler(object):
     # rounds starts, times and intervals to model time steps,
     # uses times given, otherwise start and interval
     # all times in seconds
-    def __init__(self,settings, run_info,hindcast_info,
+    def __init__(self,settings, run_info,
                  start=None, end=None, duration=None,
                  interval = None, times=None,cancel_when_done=True,
                  msg_logger=None,caller=None,crumbs=''):
@@ -19,7 +19,7 @@ class Scheduler(object):
 
         if times is None:
             # make from start time and interval
-            times, interval = self._start_end_from_interval(settings,hindcast_info,  run_info,start, end, duration, interval)
+            times, interval = self._start_end_from_interval(settings,  run_info,start, end, duration, interval)
         else:
             # use times given, but round
             n = (times - run_info.start_time)/dt
@@ -63,8 +63,8 @@ class Scheduler(object):
                         )
         i = self.info
         b = f'{12*" "} Scheduler{15*" "}Hindcast{14*" "}Run\n'
-        b += f'Start- {i["start_date"]} | {hindcast_info["start_date"]} | {time_util.seconds_to_isostr(run_info.times[0])}  \n'
-        b += f'Ends - {i["end_date"]} | {hindcast_info["end_date"]} | {time_util.seconds_to_isostr(run_info.times[-1])}]\n'
+        b += f'Start- {i["start_date"]} | {time_util.seconds_to_isostr(run_info.hindcast_start_time)} | {time_util.seconds_to_isostr(run_info.times[0])}  \n'
+        b += f'Ends - {i["end_date"]} | {time_util.seconds_to_isostr(run_info.hindcast_end_time)} | {time_util.seconds_to_isostr(run_info.times[-1])}]\n'
         b += f'{10*" "}interval = {i["interval"]}, backtracking={settings.backtracking}'
         i['bounds_table']= b
 
@@ -76,15 +76,13 @@ class Scheduler(object):
             msg_logger.msg('No scheduled times within model run times',
                                 hint=i['bounds_table'], caller=caller, fatal_error=True, crumbs=crumbs)
 
-        pass
-
-    def _start_end_from_interval(self,settings,hindcast_info,run_info, start,end, duration, interval):
+    def _start_end_from_interval(self,settings,run_info, start,end, duration, interval):
 
         md = run_info.model_direction
         dt = settings.time_step
 
         if start is None:
-            start = hindcast_info['start_time'] if run_info.start_time is None else run_info.start_time
+            start = run_info.hindcast_start_time if run_info.start_time is None else run_info.start_time
         else:
             # use given start rounded to time step
             n = (start - run_info.start_time) / dt  # number of model steps since the start

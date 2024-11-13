@@ -162,7 +162,7 @@ class OceanTrackerDataSet(object):
                 fi['end_time'] = time[-1]
                 fi['time_steps'] = time.size
 
-            for key, d in ds.dims.items(): info['dims'][key] = d
+            for key, d in ds.sizes.items(): info['dims'][key] = d
             for key, d in ds.attrs.items(): info['attrs'][key] = d
             cat['file_info'].append(fi)
 

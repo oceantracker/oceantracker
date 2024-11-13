@@ -173,6 +173,8 @@ class _RunInfo(_SharedStruct):
     time_of_nominal_first_occurrence = None
     total_alive_particles = 0
     time_steps_completed = 0
+    hindcast_start_time = None
+    hindcast_end_time = None
 
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
@@ -265,7 +267,7 @@ class _SharedInfoClass():
             self.class_roles[class_role][params['name']] = i
 
         else:
-            ml.msg(f'Unknown class role {class_role}', hint=f'Must be one of core_roles {str(self.core_class_roles.possible_values())} or other roles {str(self.class_roles.possible_values())}',
+            ml.msg(f'Unknown class role {class_role}', hint=f'Must be one of core_class_roles {str(self.core_class_roles.possible_values())} or other roles {str(self.class_roles.possible_values())}',
                    fatal_error=True, crumbs=crumbs, caller=caller)
             return None
         # make instance and merge params
