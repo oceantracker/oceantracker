@@ -20,12 +20,12 @@ import geopandas as gpd # Need to be installed with pip command
 ot = OceanTracker()
 ## Set basic settings ##
 ot.settings(output_file_base =r'Connectivity_farms_GLM_OT_outputs',   # name used as base for output files
-            #root_output_dir = '/hpcfreenas/romain/GM_connectivity_MBS',
-            root_output_dir = r'D:\OceanTrackerOutput\bug_hunting',
+            root_output_dir = '/hpcfreenas/romain/GM_connectivity_MBS',
+            #root_output_dir = r'D:\OceanTrackerOutput\bug_hunting',
             add_date_to_run_output_dir = True,
             # Run parameters
             backtracking = False,
-            time_step = 200.0, # in seconds, time-step of interpolation
+            time_step = 600.0, # in seconds, time-step of interpolation
             # Parallel run
             processors=6, # Set up parallel run on x processors
             # Register outputs
@@ -36,8 +36,8 @@ ot.settings(output_file_base =r'Connectivity_farms_GLM_OT_outputs',   # name use
 ## Add reader for oceanographic data ##
 if __name__ == '__main__':
     ot.add_class('reader',
-                 #input_dir ='/hpcfreenas/hindcast/UpperSouthIsland/HABs2018benk/nogrowth',  # folder to search for hindcast files
-                 input_dir = r'D:\Hindcasts\UpperSouthIsland\2018_benHABS\nogrowth',
+                 input_dir ='/hpcfreenas/hindcast/UpperSouthIsland/HABs2018benk/nogrowth',  # folder to search for hindcast files
+                 #input_dir = r'D:\Hindcasts\UpperSouthIsland\2018_benHABS\nogrowth',
                  # folder to search for hindcast files
                  file_mask = 'Nydia*.nc', # hindcast netcdf file
                  time_buffer_size = 20,
@@ -60,7 +60,7 @@ if __name__ == '__main__':
         new_poly = dict(points=polygon_coords, user_polygonID=feature['properties']['id'])
         polygon_list.append(new_poly)
 
-    for s_idx, s in enumerate(polygon_list[0:3], start=0):
+    for s_idx, s in enumerate(polygon_list[0:-1], start=0):
         ot.add_class('release_groups', name = str(s_idx),                         # user must provide a name for group first
                     class_name = 'oceantracker.release_groups.polygon_release.PolygonRelease',
                     points = polygon_list[s_idx].get("points"),                               # must be an N by 2 or 3 or list, convertible to a numpy array
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                     )
 
     ot.add_class('particle_statistics', name='Connectivity_matrix',
-            class_name='oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
+            class_name='PolygonStats2D_ageBased',
             start=datetime.strptime('01/02/2018', "%d/%m/%Y").isoformat(),
             end=datetime.strptime('01/08/2018', "%d/%m/%Y").isoformat(),
             polygon_list=polygon_list,

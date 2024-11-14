@@ -80,12 +80,12 @@ class InsidePolygon(object):
         self.polygon_bounds = np.array([np.min(vert[:,0]), np.max(vert[:,0]),
                          np.min(vert[:,1]),  np.max(vert[:,1]) ])
 
-        # make an initial function to find id points inside with one subcell
+        # make an initial function to find if points inside with one subcell
         x = np.linspace(self.polygon_bounds[0], self.polygon_bounds[1], 2)
         y = np.linspace(self.polygon_bounds[2], self.polygon_bounds[3],  2)
         overlap = np.ones((1, 1), dtype=np.int8)
-        self.inside_ray_tracing_indices_fun = make_inside_ray_tracing_indices(self.line_bounds, self.slope_inv, self.polygon_bounds,
-                                                            x,y,overlap)
+        self.inside_ray_tracing_indices_fun = make_inside_ray_tracing_indices_subgrids(self.line_bounds, self.slope_inv, self.polygon_bounds,
+                                                                                       x, y, overlap)
 
         # set up sub-grid of bounds to speed eliminating points from full check for ray tracing
         x = np.linspace(self.polygon_bounds[0], self.polygon_bounds[1], bounds_sub_grid_size + 1)
@@ -111,8 +111,8 @@ class InsidePolygon(object):
         self.sub_grid_x = x
         self.sub_grid_y = y
         self.sub_grid_overlaps_polygon = overlap
-        self.inside_ray_tracing_indices_fun = make_inside_ray_tracing_indices(self.line_bounds, self.slope_inv, self.polygon_bounds,
-                                                                     self.sub_grid_x, self.sub_grid_y, self.sub_grid_overlaps_polygon)
+        self.inside_ray_tracing_indices_fun = make_inside_ray_tracing_indices_subgrids(self.line_bounds, self.slope_inv, self.polygon_bounds,
+                                                                                       self.sub_grid_x, self.sub_grid_y, self.sub_grid_overlaps_polygon)
         pass
 
     def _make_closed(self, p):
@@ -136,7 +136,7 @@ class InsidePolygon(object):
         area = abs(area) / 2.0
         return area
 
-def make_inside_ray_tracing_indices(lb, slope_inv, bounds,sub_grid_x,sub_grid_y, sub_grid_overlaps_polygon):
+def make_inside_ray_tracing_indices_subgrids(lb, slope_inv, bounds, sub_grid_x, sub_grid_y, sub_grid_overlaps_polygon):
     # wrapper to make faster reduce number of arguments anf faster by compling fixed array references into code
 
     # useful constants

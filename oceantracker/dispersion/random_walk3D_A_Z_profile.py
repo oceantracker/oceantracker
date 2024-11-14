@@ -21,7 +21,7 @@ class RandomWalk3D_A_Z_profile(RandomWalk3DconstantViscosity):
                                                             required_props_list=['nz_cell', 'x', 'n_cell'],
                                                           crumbs='random walk with use_A_Z_profile')
     def add_any_required_fields(self,settings, known_reader_fields, msg_logger):
-        required_reader_fields =[]
+        required_reader_fields =['A_Z_profile']
         custom_field_params = [dict(name= 'A_Z_profile_vertical_gradient',
                                     class_name = 'VerticalGradient',
                                     get_grad_of_field_named='A_Z_profile',
