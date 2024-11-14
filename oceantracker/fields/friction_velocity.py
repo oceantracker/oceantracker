@@ -62,22 +62,6 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
 
     @staticmethod
     @njitOT
-    def calc_friction_velocity_Sigma_grid(buffer_index, sigma, tide, water_depth,
-                                          water_velocity, z0, out):
-        # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
-        # based on log layer  u= u_* log(z/z0)/kappa
-        for nt in buffer_index:
-            for n in np.arange(out.shape[1]):  # loop over nodes
-                # size of bottom cell from its fraction of the water depth
-                twd = abs(tide[nt,n, 0, 0] + water_depth[0, n, 0, 0])
-                if twd < 0.1: twd = 0.1
-                dz = (sigma[1] - sigma[0]) * twd
-                speed = np.sqrt(water_velocity[nt, n, 1, 0] ** 2 + water_velocity[nt, n, 1, 1] ** 2)
-                out[nt, n, 0, 0] = 0.4 * speed / np.log((dz + z0) / z0)
-                # will give np.inf for very thin lower layers, ie small total water depth
-
-    @staticmethod
-    @njitOT
     def calc_friction_velocity_from_Slayer_or_LSC_grid(buffer_index, zlevel, bottom_cell_index, z0, water_velocity, out):
         # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
         # based on log layer  u= u_* log(z/z0)/kappa
@@ -91,6 +75,23 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
                     out[nt, n, 0, 0] = 0.4*speed/np.log((dz+z0)/z0)
                 else:
                     out[nt, n, 0, 0] = 0.
+
+    @staticmethod
+    @njitOT
+    def calc_friction_velocity_Sigma_grid(buffer_index, sigma, tide, water_depth,
+                                          water_velocity, z0, out):
+        # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
+        # based on log layer  u= u_* log(z/z0)/kappa
+        for nt in buffer_index:
+            for n in np.arange(out.shape[1]):  # loop over nodes
+                # size of bottom cell from its fraction of the water depth
+                twd = abs(tide[nt,n, 0, 0] + water_depth[0, n, 0, 0])
+                if twd < 0.1: twd = 0.1
+                dz = (sigma[1] - sigma[0]) * twd
+                speed = np.sqrt(water_velocity[nt, n, 1, 0] ** 2 + water_velocity[nt, n, 1, 1] ** 2)
+                out[nt, n, 0, 0] = 0.4 * speed / np.log((dz + z0) / z0)
+
+
 
     @staticmethod
     @njitOT
