@@ -72,6 +72,22 @@ class FieldGroupManager(ParameterBaseClass):
         i = si.add_class('tidal_stranding', {}, crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', caller=self)
         self.tidal_stranding = i
 
+
+    def add_reader_field(self,name, params):
+        r = self.reader
+        r._add_a_reader_field(name, params)
+
+
+    def add_custom_field(self,name, params, default_classID=None):
+        r = self.reader
+        i = si._class_importer.make_class_instance_from_params('fields',params, name=name,
+                                            default_classID=default_classID)
+        i.initial_setup(r.params['time_buffer_size'],r.info,r.fields)
+        r.fields[name] = i
+
+        # add classes required by this class
+        i.add_required_classes_and_settings(si.settings, si.run_builder['reader_builder'], self.msg_logger)
+
     def write_hydro_model_grid(self):
         self.reader.write_hydro_model_grid()
 
@@ -84,6 +100,7 @@ class FieldGroupManager(ParameterBaseClass):
                                             vector_dim = i.get_number_components(),
                                             time_varying=True, dtype='float64', initial_value=0.)
         pass
+
 
     def update_readers(self, time_sec):
         self.reader.update(time_sec)
@@ -137,7 +154,7 @@ class FieldGroupManager(ParameterBaseClass):
         dataset = OceanTrackerDataSet()
         dataset.build_dataset_from_catalog(reader_builder['catalog'])
 
-        reader = si._make_class_instance('reader', reader_builder['params'],
+        reader = si._class_importer.make_class_instance_from_params('reader', reader_builder['params'],
                                    caller=self, crumbs=f'setup_hydro_fields> reader class ', initialize=False)
         reader.build_reader(reader_builder,dataset)
         return  reader

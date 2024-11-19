@@ -18,6 +18,57 @@ class ParticleGroupManager(ParameterBaseClass):
         # set up pointer dict and lists
         self.status_flags= si.particle_status_flags
 
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
+        nDim = si.run_info.vector_components
+        info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size
+        # core particle props. , write at each required time step
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x',
+                     vector_dim=nDim)  # particle location
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x0', write=True,
+                     time_varying=False, vector_dim=nDim)  # location when last moving
+
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x_last_good',
+                     write=False, vector_dim=nDim)  # location when last moving
+
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='particle_velocity',
+                     vector_dim=nDim)
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='velocity_modifier',
+                     vector_dim=nDim)
+
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status', dtype='int8', )
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='age', initial_value=0.,
+                     units='seconds', description='Time in seconds since particle released')
+
+        # parameters are set once and then don't change with time
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='ID', dtype='int32',
+                     initial_value=-1, time_varying=False,
+                     description='unique particle ID number, zero based')
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='IDrelease_group',
+                     dtype='int32', initial_value=-1, time_varying=False,
+                     description='ID of group release particle is part of  is in, zero based')
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='user_release_groupID',
+                     dtype='int32', initial_value=-1, time_varying=False,
+                     description='user given integer ID of release group')
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='IDpulse', dtype='int32',
+                     initial_value=-1, time_varying=False,
+                     description='ID of pulse particle was released within its release group, zero based')
+        # ID used when nested grids only
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='hydro_model_gridID',
+                     write=True, time_varying=True, dtype='int8', initial_value=-1,
+                     description='ID for which grid, outer (ID=0) or nested (ID >0),  each particle resides in ')
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='time_released',
+                     time_varying=False,
+                     units='seconds since 1970-01-01 00:00:00',
+                     description='time (sec) each particle was released')
+
+        #  time dependent core  properties
+        si.add_class('time_varying_info', name='time',
+                     units='seconds since 1970-01-01 00:00:00',
+                     description='time in seconds, since 1/1/1970')  # time has only one value at each time step
+        si.add_class('time_varying_info', name='num_part_released_so_far',
+                     description='number of particles released up to the given time',
+                     dtype='int32')  # time has only one value at each time step
 
     def initial_setup(self):
         info=self.info
@@ -26,42 +77,6 @@ class ParticleGroupManager(ParameterBaseClass):
         info['particles_released'] = 0
         info['num_alive'] = 0
 
-        nDim = si.run_info.vector_components
-        info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size
-        # core particle props. , write at each required time step
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x', vector_dim=nDim)  # particle location
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x0', write=True, time_varying=False, vector_dim=nDim)  # location when last moving
-
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x_last_good', write=False, vector_dim=nDim)  # location when last moving
-
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='particle_velocity', vector_dim=nDim)
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='velocity_modifier', vector_dim=nDim)
-
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status', dtype='int8', )
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='age', initial_value=0.,
-                     units='seconds', description='Time in seconds since particle released')
-
-        # parameters are set once and then don't change with time
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='ID', dtype='int32', initial_value=-1, time_varying=False,
-                     description='unique particle ID number, zero based')
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='IDrelease_group', dtype='int32', initial_value=-1, time_varying=False,
-                     description='ID of group release particle is part of  is in, zero based')
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='user_release_groupID', dtype='int32', initial_value=-1, time_varying=False,
-                     description='user given integer ID of release group')
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='IDpulse', dtype='int32', initial_value=-1, time_varying=False,
-                     description='ID of pulse particle was released within its release group, zero based')
-        # ID used when nested grids only
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='hydro_model_gridID', write=True, time_varying=True, dtype='int8', initial_value=-1,
-                     description='ID for which grid, outer (ID=0) or nested (ID >0),  each particle resides in ')
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='time_released', time_varying=False,
-                     units='seconds since 1970-01-01 00:00:00',
-                     description='time (sec) each particle was released')
-
-        #  time dependent core  properties
-        si.add_class('time_varying_info',name='time',
-                     units='seconds since 1970-01-01 00:00:00',
-                     description='time in seconds, since 1/1/1970') #time has only one value at each time step
-        si.add_class('time_varying_info',name='num_part_released_so_far', description='number of particles released up to the given time', dtype='int32')  # time has only one value at each time step
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
 

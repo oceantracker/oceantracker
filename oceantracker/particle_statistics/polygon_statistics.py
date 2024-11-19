@@ -19,6 +19,14 @@ class _CorePolygonMethods(ParameterBaseClass):
         self.remove_default_params(['grid_center','release_group_centered_grids', 'grid_span' ])
         self.file_tag = 'polygon_stats'
 
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
+        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
+        info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_ {self.info["instanceID"]:03d}'
+        si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D',
+                     name=info['inside_polygon_particle_prop'],
+                     polygon_list=self.params['polygon_list'], write=False)
+
     def initial_setup(self, **kwargs):
 
         ml = si.msg_logger
@@ -57,10 +65,7 @@ class _CorePolygonMethods(ParameterBaseClass):
 
         pgm = si.core_class_roles.particle_group_manager
 
-        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-        self.info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_ {self.info["instanceID"]:03d}'
-        si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D', name=self.info['inside_polygon_particle_prop'],
-                                               polygon_list=self.params['polygon_list'], write=False)
+
         nc.add_dimension('polygon_dim', len(self.params['polygon_list']))
 
         add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])

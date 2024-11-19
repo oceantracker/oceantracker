@@ -136,6 +136,9 @@ class _BaseReader(ParameterBaseClass):
         self.grid_variable_map = reader_builder['grid_info']['variable_map']
         self.reader_field_vars_map = reader_builder['reader_field_info']
 
+        self.info.update(self.reader_builder['hindcast_info'])
+        self.info['is3D'] = self.dataset.catalog['info']['is3D']
+
         self.grid = self._set_up_grid()
 
         self._set_up_interpolator(reader_builder)
@@ -148,7 +151,8 @@ class _BaseReader(ParameterBaseClass):
         bi['buffer_size'] = self.params['time_buffer_size']
         bi['buffer_available'] = bi['buffer_size']
         bi['nt_buffer0'] = 0
-        self.info['is3D']= self.dataset.catalog['info']['is3D']
+
+
 
 
     def final_setup(self):      pass
@@ -381,26 +385,23 @@ class _BaseReader(ParameterBaseClass):
         for name  in list(set(load_fields)):
             if name in ['water_depth', 'tide','water_velocity']: continue
 
-            f = reader_builder['reader_field_info'][name]
-            params= f['params']
-            i = self._add_a_field(name, params, reader_builder, class_name='ReaderField')
+            i = self._add_a_reader_field(name)
 
             # read reader field now if not time varying
             if not i.is_time_varying():
                     i.data = self.read_field_data(name, i)
 
-        # set up custom fields
-        for name, params in reader_builder['custom_field_params'].items():
-            i = self._add_a_field(name, params, reader_builder)
+    def _add_a_reader_field(self, name, params={}):
+        reader_builder = self.reader_builder
 
-    def _add_a_field(self, name, params,reader_builder, class_name=None):
         hi = reader_builder['hindcast_info']
         params['name'] = name
-        if class_name is not None: params.update(class_name=class_name)
+        params.update(reader_builder['reader_field_info'][name][ 'params'])
 
-        i = si._make_class_instance('fields', params, initialize=False,
-                                        check_for_unknown_keys=False, crumbs=f'Adding field "{name}", class_name="{params["class_name"]}"')
-        i.initial_setup(self.params['time_buffer_size'],hi['num_nodes'],hi['num_z_levels'], self.fields)
+        i = si._class_importer.make_class_instance_from_params('fields', params, initialize=False,
+                                        default_classID='field_reader',
+                                        check_for_unknown_keys=False, crumbs=f'Adding reader field "{name}"')
+        i.initial_setup(self.params['time_buffer_size'], hi, self.fields)
 
         # add variable info on file variables list for reader fields
         if name in reader_builder['reader_field_info']:
@@ -411,7 +412,7 @@ class _BaseReader(ParameterBaseClass):
 
     def _set_up_interpolator(self, reader_builder):
         if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
-        i = si._make_class_instance('interpolator', si.working_params['core_class_roles']['interpolator'],initialize=False,
+        i = si._class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],initialize=False,
                                              default_classID='interpolator', caller= self,
                                              crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
         i.initial_setup(self.grid,reader_builder)
@@ -420,13 +421,11 @@ class _BaseReader(ParameterBaseClass):
     # setup and read core fields, depth, tide, water velocity
     # ----------------------------------------------------
     def setup_water_depth_field(self):
-        i = self._add_a_field('water_depth', dict(is3D=False,is_vector=False,time_varying=False),
-                                self.reader_builder, class_name='ReaderField')
+        i = self._add_a_reader_field('water_depth')
         i.data = self.read_field_data('water_depth', i) # read time in varient field
 
     def setup_tide_field(self):
-        i = self._add_a_field('tide', dict(is3D=False,is_vector=False,time_varying=True),
-                                self.reader_builder, class_name='ReaderField')
+        i = self._add_a_reader_field('tide')
         return i
     def update_tide_field(self, buffer_index, nt):
         field = self.fields['tide']
@@ -435,9 +434,7 @@ class _BaseReader(ParameterBaseClass):
         return data
 
     def setup_water_velocity_field(self):
-        rb = self.reader_builder
-        params = rb['reader_field_info']['water_velocity'][ 'params']
-        i = self._add_a_field('water_velocity', params, rb, class_name='ReaderField')
+        i = self._add_a_reader_field('water_velocity')
         return i
 
     def update_water_velocity_field(self, buffer_index, nt):

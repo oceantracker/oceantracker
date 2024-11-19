@@ -75,11 +75,12 @@ class ClassImporter():
                                             hint='A miss-spelt short class_name? or missing custimn class',
                                             fatal_error=True, exit_now=True)
 
-    def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None,
+    def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None, initialize=False,
                                         caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):
         ml = self.msg_logger
 
         if params is None: params = {}
+        if name is not None: params['name'] = name
 
         if class_role not in self.class_tree:
             self.msg_logger.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
@@ -98,7 +99,6 @@ class ClassImporter():
         if class_obj is None:
             return None
         i = class_obj() # make instance
-        i.params['name'] = name
         i.info['class_role'] = class_role
 
         if merge_params:
@@ -106,6 +106,8 @@ class ClassImporter():
 
         # attach the current message loger to instance
         i.msg_logger = self.msg_logger
+        if initialize:
+            i.initial_setup()
         return i
 
     def scan_package_for_classes(self, crumbs='', caller=None):

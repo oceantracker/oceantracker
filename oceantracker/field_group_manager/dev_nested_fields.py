@@ -21,7 +21,7 @@ class DevNestedFields(ParameterBaseClass):
 
         ml = si.msg_logger
         # setup outer grid firstF
-        fgm_outer_grid = si._make_class_instance('field_group_manager', {}, default_classID='field_group_manager',
+        fgm_outer_grid = si._class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
                                 initialize=False,caller= caller, crumbs='adding outer hydro-grid field manager for nested grid run')
         fgm_outer_grid.initial_setup( reader_builder,  caller=self)
         hi = fgm_outer_grid.reader.reader_builder['hindcast_info']
@@ -37,7 +37,7 @@ class DevNestedFields(ParameterBaseClass):
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}')
 
             t0= perf_counter()
-            fgm_nested =  si._make_class_instance('field_group_manager', {}, default_classID='field_group_manager',
+            fgm_nested =  si._class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
                                                   initialize=False, caller=caller,
                                                     crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
             fgm_nested.initial_setup(rb, caller=caller)

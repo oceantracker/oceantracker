@@ -7,7 +7,7 @@ from oceantracker.shared_info import shared_info as si
 
 
 
-class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
+class FrictionVelocity(CustomFieldBase):
     ''''''
     def __init__(self):
         super().__init__()
@@ -20,45 +20,54 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
                                  )
 
 
-    def add_any_required_fields(self,settings, known_reader_fields, msg_logger):
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
+        fgm = si.core_class_roles['field_group_manager']
+        hi = reader_builder['hindcast_info']
 
-        custom_field_params= [dict(name='friction_velocity',class_name='FrictionVelocityFromNearSeaBedVelocity',
-                            write_interp_particle_prop_to_tracks_file=False)]
-        msg_logger.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
+        if 'bottom_stress' in reader_builder['reader_field_info']:
+            fgm.ad
+            info['mode'] == 4
+        else:
 
-        required_reader_fields = []
+            vtg = si.vertical_grid_types
 
-        return required_reader_fields,  custom_field_params
-
+            match  hi['vert_grid_type']:
+                case  vtg.Sigma : info['mode'] = 1
+                case  vtg.Slayer: info['mode'] = 2
+                case  vtg.LSC: info['mode'] = 2
+                case vtg.Zfixed: info['mode'] = 3
+        pass
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True)
 
-    def initial_setup(self,time_buffer_size, num_nodes, num_zlevels,fields):
-        super().initial_setup(time_buffer_size, num_nodes, num_zlevels,fields)
 
 
     def update(self, fields,grid,buffer_index):
-        vtg = si.vertical_grid_types
-        if si.hindcast_info['vert_grid_type'] == vtg.Sigma:
+        info = self.info
+        if info['mode'] == 1:
             # sigma model
             self.calc_friction_velocity_Sigma_grid(buffer_index,
                                                    grid['sigma'],
                                                    fields['tide'].data, fields['water_depth'].data,
                                                    fields['water_velocity'].data,
                                                    si.settings.z0, self.data)
-        elif si.hindcast_info['vert_grid_type'] in [vtg.Slayer,vtg.LSC]:
+        elif info['mode'] == 2:
             # native vertical grid
             self.calc_friction_velocity_from_Slayer_or_LSC_grid(buffer_index, grid['zlevel'],
                                                                 grid['bottom_cell_index'],
                                                                 si.settings.z0, fields['water_velocity'].data,
                                                                 self.data)
-        elif si.hindcast_info['vert_grid_type'] == vtg.Zfixed:
+        elif info['mode'] == 3:
             self.calc_friction_velocity_fixed_zlevels_grid(buffer_index, grid['z'],
                                             grid['water_depth'],
                                             grid['bottom_cell_index'],
                                             si.settings.z0, fields['water_velocity'].data,
                                             self.data)
+        elif info['mode'] == 4:
+            self.calc_friction_velocity_from_bottom_stress(buffer_index, fields['bottom_stress'].data,
+                                                           si.settings['water_density'], self.data)
 
     @staticmethod
     @njitOT
@@ -112,11 +121,6 @@ class FrictionVelocityFromNearSeaBedVelocity(CustomFieldBase):
                     out[nt, n, 0, 0] = 0.4*speed/np.log((dz+z0)/z0)
                 else:
                     out[nt, n, 0, 0] = 0.
-
-class FrictionVelocityFromBottomStress(FrictionVelocityFromNearSeaBedVelocity):
-
-    def update(self, fields,grid, buffer_index):
-        self.calc_friction_velocity_from_bottom_stress(buffer_index,fields['bottom_stress'].data,  si.settings['water_density'],self.data)
 
     @staticmethod
     @njitOT

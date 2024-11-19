@@ -2,7 +2,7 @@ NUMBA_cache_code: false
 debug: true
 dispersion:
   A_H: 10
-  A_V: 10
+  A_V: 1
 event_loggers:
 - class_name: oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
   name: inoutpoly

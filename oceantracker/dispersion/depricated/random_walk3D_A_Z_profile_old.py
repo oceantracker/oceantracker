@@ -1,7 +1,5 @@
 import numpy as np
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.dispersion._base_dispersion import BaseTrajectoryModifer
-from oceantracker.dispersion.random_walk3D_constant_viscosity import RandomWalk3DconstantViscosity
+from oceantracker.dispersion.depricated.random_walk3D_constant_viscosity_old import RandomWalk3DconstantViscosity
 
 from random import normalvariate
 from oceantracker.util.numba_util import njitOT
@@ -20,13 +18,14 @@ class RandomWalk3D_A_Z_profile(RandomWalk3DconstantViscosity):
                 self.check_class_required_fields_prop_etc(requires3D=True,
                                                             required_props_list=['nz_cell', 'x', 'n_cell'],
                                                           crumbs='random walk with use_A_Z_profile')
-    def add_any_required_fields(self,settings, known_reader_fields, msg_logger):
+    def add_required_classes_and_settings(self, settings, known_reader_fields, msg_logger):
         required_reader_fields =['A_Z_profile']
         custom_field_params = [dict(name= 'A_Z_profile_vertical_gradient',
                                     class_name = 'VerticalGradient',
                                     get_grad_of_field_named='A_Z_profile',
                                     write_interp_particle_prop_to_tracks_file=False)]
-        return required_reader_fields, custom_field_params
+        field_settings = {}  # settings for the field instance which affects its itial set up or update, eg use_bottom?_stress for resupension class
+        return required_reader_fields, custom_field_params, field_settings
 
 
 

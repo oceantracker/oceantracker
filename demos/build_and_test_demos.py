@@ -199,7 +199,7 @@ params.append(p10)
 
 # case 50 schism basic
 schsim_base_params=\
-{'output_file_base' :'demo50_SCHISM_depthAver', 'debug': True,'time_step': 120,
+{'output_file_base' :'demo50_SCHISM_basic', 'debug': True,'time_step': 120,
             'NUMBA_cache_code': False,'use_A_Z_profile' : False,
             'regrid_z_to_uniform_sigma_levels': True,
                 #'numba_caching': False,
@@ -264,7 +264,7 @@ params.append (s56)
 s57 = deepcopy(s50)
 s57.update(dict(use_A_Z_profile=True,use_random_seed= False))
 s57.update({'output_file_base' : 'demo57_SCHISM_3D_lateralBoundaryTest'})
-s57['dispersion'].update({'A_H':10,'A_V': 10})
+s57['dispersion'].update({'A_H':10,'A_V':1})
 s57['velocity_modifiers']= [{'name':'terminal_velocity','class_name' : 'TerminalVelocity', 'value': .000}
                             ]
 s57['release_groups']=[{'name':'P1','points': [[1599750, 5485600, -1]], 'pulse_size': 20,

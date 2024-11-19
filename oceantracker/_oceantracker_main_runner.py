@@ -289,15 +289,6 @@ class _OceanTrackerRunner(object):
 
         ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
 
-
-
-        # setup reader fields and those required by classes, check field consistency between primary and nested readers
-        #  uisng optional_reader_fields to check if primary and all nested readers have the A_Z profils and bottom stress above
-        self._add_field_builders(working_params, reader_builder, optional_reader_fields) # primary reader
-
-        for r in nested_reader_builders:
-            self._add_field_builders(working_params, r, optional_reader_fields)
-
         reader_builder['nested_reader_builders'] = nested_reader_builders
         return reader_builder
 
@@ -538,87 +529,6 @@ class _OceanTrackerRunner(object):
         params = known_readers[found_reader]['instance'].params
         reader = known_readers[found_reader]['instance']
         return params, reader
-
-    def _add_field_builders(self, working_params, reader_builder, optional_reader_fields):
-        # get pasm for any fields added by classes in there add_any_required_fields() method using self.add_field
-        # must be done first to allow the reader to build all required fields
-        crumbs = 'Adding code required fields'
-
-        # add custom fields
-        reader_builder['custom_field_params'] = dict()
-        for n, params in enumerate( working_params['class_roles']['fields']):
-            if 'name' not in params:
-                msg_logger.msg(f'Custom field #{n} must have both a "name" and "class_name" parameters',
-                               hint=f'given parameters are {str(params)}', fatal_error=True, caller=self)
-                continue
-
-            params.update(time_buffer_size=reader_builder['params']['time_buffer_size'],
-                          nodes=reader_builder['hindcast_info']['num_nodes'],
-                          zlevels=reader_builder['hindcast_info']['num_z_levels'])
-            reader_builder['custom_field_params'][params['name']] = params
-
-        settings = working_params['settings']
-        hi = reader_builder['hindcast_info']
-        core_params = working_params['core_class_roles']
-        # set up dispersion/random walk fields
-        if settings['use_dispersion'] :
-            if hi['is3D']:
-                core_params['dispersion'] = self._add_fields_from_one_class('dispersion', core_params['dispersion'],
-                    settings, reader_builder,crumbs='main> adding 3D dispersion fields',
-                    default_classID='dispersion2D_A_Z_profile'if \
-                                optional_reader_fields['use_A_Z_profile'] else 'dispersion3D_constantViscosity')
-            else:
-                core_params['dispersion'] = self._add_fields_from_one_class('dispersion', core_params['dispersion'],
-                                                settings, reader_builder, default_classID='dispersion2D_constantViscosity',
-                                                crumbs='main> adding 2D dispersion fields')
-        # add required resuspension fields
-        if hi['is3D'] and settings['use_resuspension']:
-            core_params['resuspension'] = self._add_fields_from_one_class('resuspension', core_params['resuspension'],
-                    settings, reader_builder, crumbs='main> adding 2D resuspension fields',
-                    default_classID='resuspension_using_bottom_stress' if  optional_reader_fields['use_bottom_stress'] else 'resuspension_using_near_sea_bed_vel')
-
-        # look at core classes which might require addition fields if they are used
-        core_params['tidal_stranding'] = self._add_fields_from_one_class('tidal_stranding', core_params['tidal_stranding'],
-                                        settings, reader_builder, crumbs='main> adding 2D resuspension fields',
-                                        default_classID='tidal_stranding')
-
-        if working_params['core_class_roles']['integrated_model'] is not None:
-            core_params['integrated_model']= self._add_fields_from_one_class('integrated_model', core_params['integrated_model'],
-                                            settings, reader_builder, crumbs='')
-
-        # add fields required by other classes
-        for role, param_list  in working_params['class_roles'].items():
-            if role == 'nested_readers': continue # a reader wont add custom fields
-            for n in range(len(param_list)):
-                param_list[n] = self._add_fields_from_one_class(role, param_list[n], settings, reader_builder, crumbs=f' add classes for role {role}')
-
-        return reader_builder
-
-    def _add_fields_from_one_class(self, role, params, settings, reader_builder, default_classID=None, crumbs=''):
-        # and fields given by one class
-        known_fields = list(reader_builder['reader_field_info'].keys()) \
-                   + list(reader_builder['custom_field_params'].keys())
-
-        if params is None: params= {}
-
-        i = self.class_importer.make_class_instance_from_params(role, params, check_for_unknown_keys=False,
-                                    default_classID=default_classID, crumbs=crumbs + f'> loading  {role}', caller=self)
-        params['class_name'] = i.params['class_name'] # use found class name, if found from  default_classID
-
-        # get any fields class requires
-        required_reader_fields, custom_field_params = i.add_any_required_fields(settings,known_fields, msg_logger)
-
-        for name in required_reader_fields:
-            if name not in reader_builder['reader_field_info']:
-                msg_logger.msg(f'No reader field variable map for variable "{name}"',
-                               hint=f'field added by class')
-            reader_builder['params']['load_fields'] = list(set([name]+reader_builder['params']['load_fields']))
-
-        # add required custom field params to reader builder
-        for cp in custom_field_params:
-            reader_builder['custom_field_params'][cp['name']] = cp
-
-        return params
 
     def _map_and_catagorise_field_variables(self, run_builder,reader_builder, reader):
         # add to catalog if 3D hindcast and mapped internal fields to file variables

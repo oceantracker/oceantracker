@@ -103,7 +103,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         has_errors = False
         try:
             # - -------- start set up---------------------------------------------------------------------
-            self._build_field_group(si.working_params, run_builder['reader_builder'])  # setup fields to get hindcast info, ie its starts and ends
+
+            # must make fields first, so other claseses can add own required fields
+            self._build_field_group(si.working_params, run_builder['reader_builder'])
+
+            self._make_all_class_instances_from_params(si.working_params, run_builder['reader_builder'])
 
             self._add_release_groups_to_get_run_start_end(si.working_params)
 
@@ -175,6 +179,34 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         return si.case_summary
 
+    def _make_all_class_instances_from_params(self, working_params, reader_builder):
+
+        settings= working_params['settings']
+        hi= reader_builder['hindcast_info']
+        ccr = working_params['core_class_roles']
+        for role, params in ccr.items():
+            if role in ['particle_group_manager', 'solver', 'tidal_stranding']:
+                i= si.add_class(role,params=params, initialize=False)
+            pass
+
+        if settings['use_dispersion']:
+            i = si.add_class('dispersion', params= ccr['dispersion'],initialize=False)
+
+        if hi['is3D']:
+            i = si.add_class('resuspension', params=ccr['resuspension'], initialize=False)
+
+        if si.settings.write_tracks:
+            si.add_class('tracks_writer', params= ccr['tracks_writer'], crumbs='making tracks writer class instance',
+                         caller=self)
+
+        # do class role lists
+        for role, param_list in working_params['class_roles'].items():
+            for params in param_list:
+                i = si.add_class(role, params=params, initialize=False)
+
+        if ccr['integrated_model'] is not None:
+            si.add_class('integrated_model', ccr['integrated_model'])
+        pass
 
     def _do_run_integrity_checks(self):
          # check all have required, fields, part props and grid data
@@ -185,16 +217,16 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
     def _initial_setup_all_classes(self,working_params):
         # initialise all classes, order is important!
-        crumbs='_initial_setup_all_classes>'
+        crumbs='initial_setup_all_classes>'
         t0 = perf_counter()
 
-        si.core_class_roles.field_group_manager.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
-
-        if si.settings.write_tracks:
-            si.add_class('tracks_writer', working_params['core_class_roles']['tracks_writer'], crumbs=crumbs, caller=self)
+        fgm = si.core_class_roles.field_group_manager
+        fgm.final_setup()
+        fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
 
         # particle group manager for particle handing infra-structure
-        pgm = si.add_class('particle_group_manager',working_params['core_class_roles']['particle_group_manager'],crumbs=crumbs,caller=self)
+        pgm = si.core_class_roles.particle_group_manager
+        pgm.initial_setup()
 
         # schedule all release groups
         pgm.info['max_age_for_each_release_group'] = np.zeros((0,),dtype=np.int32)
@@ -208,29 +240,33 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             pgm.info['max_age_for_each_release_group'] = np.append(pgm.info['max_age_for_each_release_group'], max_age)
 
         # make other core classes
-        si.add_class('solver',working_params['core_class_roles']['solver'],crumbs=crumbs,caller=self)
+        ccr = si.core_class_roles
+        ccr.solver.initial_setup()
+
         if si.settings['use_dispersion']:
-            si.add_class('dispersion', working_params['core_class_roles']['dispersion'], crumbs=crumbs, caller=self)
+            ccr.dispersion.initial_setup()
 
         if si.run_info.is3D_run and si.settings['use_resuspension']:
-            si.add_class('resuspension', working_params['core_class_roles']['resuspension'], crumbs=crumbs, caller=self)
+            ccr.resuspension.initial_setup()
 
-        # add user/custom particle properties
-        for n, params in enumerate(working_params['class_roles']['particle_properties']):
-            si.add_class('particle_properties', params, caller=self, crumbs=crumbs + f' Adding user given particle properties  -instance #{n} >')
 
-        # build and initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
-        for role in ['velocity_modifiers', 'trajectory_modifiers', 'particle_statistics', 'particle_concentrations', 'event_loggers']:
-            for n, params in  enumerate(working_params['class_roles'][role]):
-                si.add_class(role, params, caller=self,crumbs=crumbs + f' Adding class {role} -instance #{n} >')
+        # initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
+        for role in ['particle_properties','time_varying_info','velocity_modifiers', 'trajectory_modifiers', 'particle_statistics', 'particle_concentrations', 'event_loggers']:
+            for name, i in si.class_roles[role].items():
+                i.initial_setup()
 
-        # do integrated models last
+        if si.settings.write_tracks:
+            si.core_class_roles.tracks_writer.initial_setup()
+
+        # do integrated models last, which may add release groups
         if si.core_class_roles.integrated_model is not None:
             si.core_class_roles.integrated_model.initial_setup()
 
+        # set up al release groups from al classese, eg intergated model
+        for name, i in si.class_roles.release_groups.items():
+            i.initial_setup()
 
         si.msg_logger.progress_marker('Done initial setup of all classes', start_time=t0)
-
 
     def _final_setup_all_classes(self):
         # finlaise alll partimes after all inatilaised
@@ -252,15 +288,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         md = ri.model_direction
         hi_start,hi_end = si.hindcast_info['start_time'],si.hindcast_info['end_time']
 
-        # add release groups from params or intergated model
         crumbs = 'adding release groups'
-        for params in working_params['class_roles']['release_groups']:
-            si.add_class('release_groups',params,caller=self,crumbs=crumbs, initialize=False)
-
-        if working_params['core_class_roles']['integrated_model']is not None:
-            i = si.add_class('integrated_model', working_params['core_class_roles']['integrated_model'], crumbs=crumbs + ' Adding integrated_model release groups', caller=self, initialize=False)
-            i.add_release_groups_and_settings(crumbs=crumbs)
-
+   
         if len(si.class_roles['release_groups']) == 0:
             si.msg_logger.msg('No particle "release_groups" parameters found', fatal_error=True, caller=self)
         si.msg_logger.exit_if_prior_errors('Errors adding release groups??')

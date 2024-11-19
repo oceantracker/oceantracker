@@ -48,21 +48,12 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.schedulers ={}
 
 
-    def add_any_required_fields(self,settings,mapped_reader_fields, message_logger):
-        # this adds field required by this a class, this must be done before model is built to assemble reader
-        # returns 3 lists
+    def add_required_classes_and_settings(self, settings, reader_builder, message_logger):
+        # this adds classes required by this a class using si.add_class.
+        # reader/custom fields are  added with field group manager methods
+        pass
 
-        # list of internal names as strings of required non-standard fields to be read from files
-        required_reader_fields = []
 
-        # list of parameter dictionary of   custom fields required by this  class to operated,
-        # eg spatial field probabity  of where particles are likely to settle on the bottom
-        # minumim is  [dict(name='internal naem of feild used to reference it',class_name='class name used to import this custom field'},...]
-        # eg is using A_Z profe need custion field of its vertical gradient
-        #  [ dict(name= 'A_Z_profile_vertical_gradient',class_name = 'VerticalGradient',  get_grad_of_field_named='A_Z_profile', write_interp_particle_prop_to_tracks_file=False))]
-        custom_field_params = []
-
-        return required_reader_fields,  custom_field_params
 
     def final_setup(self):
         # setup done after all other classes have intitial_setup, ie things that depend on settingas of othe classes

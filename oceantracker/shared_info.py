@@ -122,16 +122,17 @@ class _ClassRoles(_SharedStruct):
     time_varying_info = [] # particle info,eg. time,or  tide at at tide gauge, core example is particle time
 
 class _CoreClassRoles(_SharedStruct):
-    reader = {}
+    reader = None
+    interpolator = None
+    #todo below beter as None
     solver = {}
     field_group_manager = {}
-    interpolator = {}
     particle_group_manager = {}
     tracks_writer = {}
     dispersion = {}
     tidal_stranding = {}
     resuspension = {}
-    integrated_model = {} # this is here as there can be only one at a time
+    integrated_model = None # this is here as there can be only one at a time
 from dataclasses import dataclass
 
 class _ParticleStatusFlags(_SharedStruct):
@@ -233,13 +234,9 @@ class _SharedInfoClass():
         for role in self. class_roles.as_dict().keys():
             setattr(self.class_roles, role, {})
 
-        # todo deprecated .classes
-        self.classes = {}
-        for role in list(self.class_roles.as_dict().keys()) + list(self.core_class_roles.as_dict().keys()):
-            self.classes[role] = None if role in  self.core_class_roles.as_dict() else {}
 
-    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=True,check_for_unknown_keys=True, **kwargs):
-
+    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=False,check_for_unknown_keys=True, **kwargs):
+        #todo get rid in initialize
         ml = self.msg_logger
         crumbs += f'Adding class {class_role}>'
         if params is None: params ={}
@@ -253,7 +250,7 @@ class _SharedInfoClass():
         if class_role in self.core_class_roles.possible_values():
             #core  roles
             params['name'] = None
-            i = self._make_class_instance(class_role, params, default_classID=default_classID, crumbs=crumbs,
+            i =  self._class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs,
                                           check_for_unknown_keys=check_for_unknown_keys, caller=caller, initialize=initialize)
             i.info['instanceID'] = 0
             self.core_class_roles[class_role] = i
@@ -262,7 +259,8 @@ class _SharedInfoClass():
             #other roles
             instanceID= len(self.class_roles[class_role])
             params['name'] = f'{class_role}_{instanceID:04d}' if 'name' not in params or params['name'] is None else params['name']
-            i = self._make_class_instance(class_role, params, default_classID=default_classID, crumbs=crumbs, caller=caller,initialize=initialize)
+            i = self._class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
+                                                                     crumbs=crumbs, caller=caller,initialize=initialize)
             i.info['instanceID'] = instanceID
             self.class_roles[class_role][params['name']] = i
 
@@ -270,18 +268,12 @@ class _SharedInfoClass():
             ml.msg(f'Unknown class role {class_role}', hint=f'Must be one of core_class_roles {str(self.core_class_roles.possible_values())} or other roles {str(self.class_roles.possible_values())}',
                    fatal_error=True, crumbs=crumbs, caller=caller)
             return None
-        # make instance and merge params
+
+        # add classes required by this class
+        i.add_required_classes_and_settings(self.settings, self.run_builder['reader_builder'], self.msg_logger)
 
         return i
 
-    def _make_class_instance(self,class_role, params,default_classID=None, crumbs='', caller=None,initialize=True,check_for_unknown_keys=True):
-        # make and class instance from calss_name in params using  class importer
-        i = self._class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
-                                                                 check_for_unknown_keys=check_for_unknown_keys,
-                                                                 crumbs=crumbs, caller=caller)
-        if initialize:
-            i.initial_setup()
-        return i
 
     def _all_class_instance_pointers_iterator(self):
         # build list of all points for iteration, eg in calling all close methods
