@@ -25,10 +25,13 @@ class Solver(ParameterBaseClass):
                         'screen_output_step_count': PVC(None, int, obsolete=True,  doc_str='use setting "screen_output_time_interval" in seconds')
                             })
 
-
-    def initial_setup(self):
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
         crumbs='Solver_initial_setup >'
         si.add_class('particle_properties', name= 'v_temp',class_name='ManuallyUpdatedParticleProperty', vector_dim= si.run_info.vector_components, write=False, crumbs=crumbs)
+
+    def initial_setup(self):pass
+
 
 
     def check_requirements(self):

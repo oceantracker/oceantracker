@@ -17,7 +17,7 @@ class RandomWalk2DconstantViscosity(BaseTrajectoryModifer):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params(A_H= PVC(0.1,float,min=0., doc_str='Horizontal turbulent eddy viscosity', units = 'm/s^2'),
                                        )
-    def add_any_required_fields(self,settings, known_reader_fields, msg_logger):
+    def add_required_classes_and_settings(self, settings, known_reader_fields, msg_logger):
 
         # list of internal names as strings of required non-standard fields to be read from files
         required_reader_fields = []

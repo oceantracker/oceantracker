@@ -7,7 +7,7 @@ from oceantracker.util.numba_util import njitOT
 from numba import  njit
 from oceantracker.shared_info import shared_info as si
 
-class ResuspensionUsingNearSeaBedVel(BaseResuspension):
+class Resuspension(BaseResuspension):
     # based on
     # Lynch, Daniel R., David A. Greenberg, Ata Bilgili, Dennis J. McGillicuddy Jr, James P. Manning, and Alfredo L. Aretxabaleta.
     # Particles in the coastal ocean: Theory and applications. Cambridge University Press, 2014.
@@ -20,12 +20,11 @@ class ResuspensionUsingNearSeaBedVel(BaseResuspension):
                 'critical_friction_velocity': PVC(0., float, min=0., doc_str='Critical friction velocity, u_* in m/s defined in terms of bottom stress (this param is not the same as near seabed velocity)'),
                                  })
 
-    def add_any_required_fields(self,settings, known_reader_fields, msg_logger):
-        required_reader_fields = []
-        custom_field_params=[dict(name='friction_velocity',class_name='FrictionVelocityFromNearSeaBedVelocity',
-                               write_interp_particle_prop_to_tracks_file=False)]
-        msg_logger.msg('No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension', note=True)
-        return required_reader_fields,  custom_field_params
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+
+        fgm = si.core_class_roles['field_group_manager']
+        i = fgm.add_custom_field('friction_velocity', {}, default_classID='field_friction_velocity')
+
 
 
     def initial_setup(self, **kwargs):

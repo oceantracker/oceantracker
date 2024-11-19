@@ -22,13 +22,13 @@ class _BaseField(ParameterBaseClass):
         reader = None
         interp = None
 
-    def initial_setup(self,time_buffer_size, num_nodes, num_zlevels,fields):
+    def initial_setup(self,time_buffer_size, reader_info, reader_fields):
 
         params= self.params
 
         s= [time_buffer_size if params['time_varying'] else 1,
-            num_nodes,
-            num_zlevels if params['is3D'] else 1,
+            reader_info['num_nodes'],
+            reader_info['num_z_levels'] if params['is3D'] else 1,
             (3 if params['is3D'] else 2) if params['is_vector'] else 1
         ]
 

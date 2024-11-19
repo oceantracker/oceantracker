@@ -20,6 +20,9 @@ from oceantracker.interpolator import _find_vertical_cell_classes
 class  InterpTriangularGrid(_BaseInterp):
 
     # uses tweaked sci py which allows using start triangle location
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
+
 
     def __init__(self):
         # set up info/attributes
@@ -27,6 +30,9 @@ class  InterpTriangularGrid(_BaseInterp):
         self.add_default_params({'bc_walk_tol': PVC(1.0e-4, float,min = 0.),
                                  'max_search_steps': PVC(500,int, min =1)})
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
+
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
 
     #@function_profiler(__name__)
     def initial_setup(self, grid, reader_builder):
@@ -71,7 +77,7 @@ class  InterpTriangularGrid(_BaseInterp):
     def final_setup(self):
 
         # set up a grid class,part_prop and vertical cell find functions to minimise numba function arguments
-        grid = self.grid
+
         info = self.info
 
         # create particle properties to  store history of current triangle  for reuse

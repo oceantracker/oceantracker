@@ -26,13 +26,15 @@ class BaseEventLogger(ParameterBaseClass):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['event_has_started_boolean'])
 
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='event_has_started_boolean', initial_value=False, dtype='bool', write=False)
+        self.time_steps_written = 0
 
     def initial_setup(self):
 
         # boolean buffer particle prop to recorded history of event having started (must be prop to be managed in compact mode)
         pgm = si.core_class_roles.particle_group_manager
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='event_has_started_boolean', initial_value=False, dtype='bool', write=False)
-        self.time_steps_written = 0
 
     def find_events(self, event_is_happening_boolean):
         # find particles where event has just started or just ended, by comparing event_is_happening_boolean and recorded history in self.event_has_started_boolean

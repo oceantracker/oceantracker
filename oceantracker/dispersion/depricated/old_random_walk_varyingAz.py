@@ -1,7 +1,5 @@
 from random import normalvariate
-from numba import njit, types as nbtypes
-from oceantracker.util.numba_util import njitOT
-from oceantracker.dispersion.random_walk3D_constant_viscosity import RandomWalk3DconstantViscosity
+from oceantracker.dispersion.depricated.random_walk3D_constant_viscosity_old import RandomWalk3DconstantViscosity
 #from oceantracker.interpolator.util.scatch_tests.vertical_walk_at_particle_location_eval_interp import _evalBCinterp
 import numpy as np
 from oceantracker.util.numba_util import njitOT

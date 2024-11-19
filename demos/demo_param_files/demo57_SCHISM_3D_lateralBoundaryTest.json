@@ -14,7 +14,7 @@
     },
     "dispersion": {
         "A_H": 10,
-        "A_V": 10
+        "A_V": 1
     },
     "release_groups": [
         {

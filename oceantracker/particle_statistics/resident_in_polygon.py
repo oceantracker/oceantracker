@@ -20,6 +20,43 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                  'role_output_file_tag': PVC('residence', str),
                                  })
 
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
+        params = self.params
+        ml = si.msg_logger
+
+        # find associated release group
+        if params['name_of_polygon_release_group'] not in si.class_roles.release_groups:
+            ml.msg(params['class_name'].split('.')[-1] + ' no polygon release group of name ' + params[
+                'name_of_polygon_release_group'] +
+                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(
+                list(si.class_roles.release_groups.keys())),
+                   caller=self, fatal_error=True)
+
+        rg = si.class_roles.release_groups[params['name_of_polygon_release_group']]
+        if not isinstance(rg, PolygonRelease):
+            ml.msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params[
+                'name_of_polygon_release_group'] +
+                   '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ',
+                   caller=self, fatal_error=True)
+
+        self.release_group_to_count = rg
+        self.info['release_group_name'] = rg.params['name']
+        self.info['release_group_ID_to_count'] = rg.info['instanceID']
+
+
+        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
+        polygon = merge_params_with_defaults(
+            {'name': 'residence_for_release_group' + params['name_of_polygon_release_group'],
+             'points': self.release_group_to_count.params['points']}, si.default_polygon_dict_params,
+            si.msg_logger)
+        # create resident in polygon for single release group
+        pgm = si.core_class_roles.particle_group_manager
+        self.info['inside_polygon_particle_prop'] = f'resident_in_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
+        si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D',
+                     name=self.info['inside_polygon_particle_prop'],
+                     polygon_list=[polygon], write=False)
+
     def initial_setup(self, **kwargs):
 
         ml = si.msg_logger
@@ -27,31 +64,8 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         # do standard stats initialize
         super().initial_setup()  # set up using regular grid for  stats
 
-        # find associated release group
-        if params['name_of_polygon_release_group']  not in si.class_roles.release_groups:
-            ml.msg(params['class_name'].split('.')[-1] + ' no polygon release group of name ' + params['name_of_polygon_release_group'] +
-                                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(list(si.class_roles.release_groups.keys())),
-                   caller=self, fatal_error=True)
 
-        rg = si.class_roles.release_groups[params['name_of_polygon_release_group']]
-        if not isinstance(rg, PolygonRelease) :
-            ml.msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params['name_of_polygon_release_group'] +
-                                  '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ',
-                   caller=self, fatal_error=True)
 
-        self.release_group_to_count = rg
-        self.info['release_group_name'] = rg.params['name']
-        self.info['release_group_ID_to_count'] = rg.info['instanceID']
-
-        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-        polygon =merge_params_with_defaults({'name': 'residence_for_release_group' + params['name_of_polygon_release_group'],
-                                             'points': self.release_group_to_count.params['points']},si.default_polygon_dict_params ,
-                                             si.msg_logger)
-        # create resident in polygon for single release group
-        pgm = si.core_class_roles.particle_group_manager
-        self.info['inside_polygon_particle_prop'] = f'resident_in_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
-        si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D', name=self.info['inside_polygon_particle_prop'],
-                                               polygon_list=[polygon],write=False)
 
 
         # tag file with release group number
