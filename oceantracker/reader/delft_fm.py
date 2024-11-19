@@ -175,13 +175,13 @@ class dev_DELFTFM(_BaseUnstructuredReader):
         params = self.params
         gm = params['grid_variable_map']
         dm = params['dimension_map']
-        hi = si.hindcast_info
+        info = self.info
 
         data = ds.read_variable(var_name, nt=nt)
         data_dims =data.dims
         data = data.data
         # add time dim if needed
-        if hi['time_dim'] not in data_dims: data = data[np.newaxis, ...]
+        if info['time_dim'] not in data_dims: data = data[np.newaxis, ...]
 
         # add z dim if needed
         if all(x not in data_dims for x in dm['all_z_dims']): data = data[..., np.newaxis]

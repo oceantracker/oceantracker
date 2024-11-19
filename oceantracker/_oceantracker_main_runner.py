@@ -300,6 +300,11 @@ class _OceanTrackerRunner(object):
         # add info to reader bulider on if 3D hindcast and mapped fields
         reader_builder = self._map_and_catagorise_field_variables(run_builder, reader_builder, reader)
 
+        # set working vertical grid,if remapping to sigma grids
+        vgt = si.vertical_grid_types
+        hi = reader_builder['hindcast_info']
+        hi['working_vert_grid_type'] = vgt.Sigma if hi['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and si.settings.regrid_z_to_uniform_sigma_levels \
+                                                    else hi['vert_grid_type'] # use native grid
 
         return reader_builder, reader
 

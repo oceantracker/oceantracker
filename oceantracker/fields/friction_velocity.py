@@ -31,11 +31,7 @@ class FrictionVelocity(CustomFieldBase):
             # use near bottom velocity
             vgt = si.vertical_grid_types
 
-            if hi['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and si.settings.regrid_z_to_uniform_sigma_levels:
-                # set mode as sigma grid if converting
-                info['mode'] = 1
-            else:
-                match  hi['vert_grid_type']:
+            match  hi['working_vert_grid_type']:
                     case  vgt.Sigma : info['mode'] = 1
                     case  vgt.Slayer: info['mode'] = 2
                     case  vgt.LSC: info['mode'] = 2

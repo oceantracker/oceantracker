@@ -10,9 +10,29 @@ from oceantracker.interpolator.util import  triangle_eval_interp
 from oceantracker.particle_properties.util import  particle_operations_util
 
 class EvalInterpTriangles(object):
-    def __init__(self, grid, params):
+    def __init__(self, grid, params, reader_builder):
         self.grid, self.params = grid, params
-        self.info = {}
+        self.info = dict()
+
+        # set mode for uniform or ragged bottom cell
+        vgt = si.vertical_grid_types
+        hi = reader_builder['hindcast_info']
+
+        if hi['working_vert_grid_type'] in [vgt.Sigma, vgt.Slayer]:
+            # all depth layers used
+            self.info['mode3D'] = 1
+
+        elif  hi['working_vert_grid_type'] in [vgt.LSC, vgt.Zfixed]:
+            # ragged bottom
+            self.info['mode3D'] = 2
+
+        elif not hi['is3D']:
+            # 2D mode
+            self.info['mode3D'] = 0
+
+        else:
+            raise Exception(f'Coding error, Unknown  working vertical  grid type {hi["working_vert_grid_type"]}')
+
 
     def _time_independent_2D_scalar_field(self, field_instance, current_buffer_steps,
                                           fractional_time_steps, output, active, n_cell=None, bc=None):
@@ -31,12 +51,8 @@ class EvalInterpTriangles(object):
                                                               part_prop['n_cell'].data, part_prop['bc_cords'].data, active)
     def _time_dependent_2D_scalar_field(self,field_instance,current_buffer_steps,
                                        fractional_time_steps,output, active, n_cell=None, bc=None):
-        part_prop= si.class_roles.particle_properties
         #scalar, eg water depth
-        # todo find a better way to get tde and water depth for release points
-        nc_cell = part_prop['n_cell'].data if n_cell is None else n_cell
-        bc = part_prop['bc_cords'].data if bc is None else bc
-
+        part_prop= si.class_roles.particle_properties
         triangle_eval_interp.time_dependent_2D_scalar_field(
                             current_buffer_steps, fractional_time_steps,output,
                             field_instance.data,self.grid['triangles'],
@@ -54,23 +70,22 @@ class EvalInterpTriangles(object):
                                         fractional_time_steps, output, active):
         grid = self.grid
         part_prop = si.class_roles.particle_properties
-        vgt = si.vertical_grid_types
+
         F_data = field_instance.data
 
-        if si.hindcast_info['vert_grid_type'] in [vgt.Sigma, vgt.Slayer]:
+        if self.info['mode3D'] == 1:
             triangle_eval_interp.time_dependent_3D_scalar_field_data_in_all_layers(
                                         current_buffer_steps, fractional_time_steps,
                                                      F_data ,                                                                                 grid['triangles'],
                                                      part_prop['n_cell'].data, part_prop['bc_cords'].data, part_prop['nz_cell'].data,
                                                      part_prop['z_fraction'].data,
                                                      output, active)
-        elif si.hindcast_info['vert_grid_type'] in [vgt.LSC, vgt.Zfixed]:
+        else:
             triangle_eval_interp.time_dependent_3D_scalar_field_ragged_bottom(current_buffer_steps, fractional_time_steps, F_data,
                                                                          grid['triangles'], grid['bottom_cell_index'],
                                                                          part_prop['n_cell'].data, part_prop['bc_cords'].data, part_prop['nz_cell'].data, part_prop['z_fraction'].data,
                                                                          output, active)
-        else:
-            raise Exception(f'Unknown vertical  grid type {si.hindcast_info["vert_grid_type"]}')
+
 
     def _time_dependent_3D_vector_field(self, field_instance, current_buffer_steps,
                                         fractional_time_steps, output, active):
@@ -78,24 +93,21 @@ class EvalInterpTriangles(object):
         grid= self.grid
         F_data = field_instance.data
         part_prop = si.class_roles.particle_properties
-        vgt = si.vertical_grid_types
 
         # use z_fractions with log layer near bottom for water velocity
         z_fraction = part_prop['z_fraction_water_velocity'] if field_instance.params['name'] == 'water_velocity' else part_prop['z_fraction']
 
-        if si.hindcast_info['vert_grid_type'] in [vgt.Sigma,vgt.Slayer]:
+        if self.info['mode3D'] == 1:
             # these have spatially uniform and static map of z levels
-            triangle_eval_interp.time_dependent_3D_vector_field_data_in_all_layers(current_buffer_steps, fractional_time_steps, F_data, grid['triangles'], part_prop['n_cell'].data, part_prop['bc_cords'].data, part_prop['nz_cell'].data, z_fraction.data,
-                                                                                   output, active)
-
-        elif si.hindcast_info['vert_grid_type'] in  [vgt.LSC, vgt.Zfixed]:
+            triangle_eval_interp.time_dependent_3D_vector_field_data_in_all_layers(current_buffer_steps, fractional_time_steps,
+                                                                F_data, grid['triangles'], part_prop['n_cell'].data,
+                                                                part_prop['bc_cords'].data, part_prop['nz_cell'].data,
+                                                                z_fraction.data, output, active)
+        else :
             triangle_eval_interp.time_dependent_3D_vector_field_ragged_bottom(current_buffer_steps, fractional_time_steps, F_data,
                                                                               grid['triangles'], grid['bottom_cell_index'],
                                                                               part_prop['n_cell'].data, part_prop['bc_cords'].data, part_prop['nz_cell'].data, part_prop['z_fraction'].data,
                                                                               output, active)
-            pass
-        else:
-            raise Exception(f'Unknown vertical  grid type {si.hindcast_info["vert_grid_type"]}')
 
 # special case give bc and cell, used to evaluate water depth and tide  for checking release points
 # interp_named_field_at_given_locations_and_time(self, field_name, x, n_cell=None,bc_cords=None, time_sec= None ):
