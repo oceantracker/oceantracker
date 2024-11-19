@@ -48,7 +48,7 @@ class  InterpTriangularGrid(_BaseInterp):
         self.info['horizontal_cell_finder_info'] = self._hori_cell_finder.info
         self._get_hori_cell = self._hori_cell_finder.find_cell
 
-        self._interp_evaluator= EvalInterpTriangles(grid,params)
+        self._interp_evaluator= EvalInterpTriangles(grid,params, reader_builder)
 
         if grid['is3D']:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle

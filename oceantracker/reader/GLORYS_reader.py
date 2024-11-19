@@ -144,7 +144,8 @@ class GLORYSreader(_BaseStructuredReader):
         ml = si.msg_logger
         ds = self.dataset
         catalog = ds.catalog
-        hi = si.hindcast_info
+        info = self.info
+
         dm = self.params['dimension_map']
         grid = self.grid
 
@@ -154,9 +155,9 @@ class GLORYSreader(_BaseStructuredReader):
         data = data.data  # now a numpy array for numba to work on
 
         # add dummy time dim if none
-        if hi['time_dim'] not in data_dims: data = data[np.newaxis, ...]
+        if info['time_dim'] not in data_dims: data = data[np.newaxis, ...]
 
-        if any(x in hi['all_z_dims'] for x in data_dims):
+        if any(x in info['all_z_dims'] for x in data_dims):
             data = np.transpose(data,(0,2,3,1))# move z to end
             # cell zero is at top, put at bottom
             data = np.flip(data, axis=3) # flip z

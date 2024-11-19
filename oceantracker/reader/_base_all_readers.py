@@ -135,15 +135,15 @@ class _BaseReader(ParameterBaseClass):
         self.dataset = dataset
         self.grid_variable_map = reader_builder['grid_info']['variable_map']
         self.reader_field_vars_map = reader_builder['reader_field_info']
-
-        self.info.update(self.reader_builder['hindcast_info'])
-        self.info['is3D'] = self.dataset.catalog['info']['is3D']
+        info = self.info
+        hi = self.reader_builder['hindcast_info']
+        info.update(hi)
+        info['is3D'] = self.dataset.catalog['info']['is3D']
 
         self.grid = self._set_up_grid()
 
         self._set_up_interpolator(reader_builder)
         self._setup_fields(reader_builder)
-
 
         # set up ring buffer  info
         bi = self.info['buffer_info']
@@ -194,7 +194,7 @@ class _BaseReader(ParameterBaseClass):
     def build_hori_grid(self, grid):
         # read nodal values and triangles
         params = self.params
-
+        info = self.info
         grid['x'] = self.read_horizontal_grid_coords(grid) # read nodal x's
 
         bounds = [grid['x'].min(axis=0), grid['x'].max(axis=0)]
@@ -209,11 +209,11 @@ class _BaseReader(ParameterBaseClass):
         else:
             grid['hydro_model_cords_in_lat_long'] = params['hydro_model_cords_in_lat_long']  # user override
             b = f'{np.array2string(bounds[0], precision=1, floatmode="fixed")} to {np.array2string(bounds[1], precision=1, floatmode="fixed")}'
-        si.hindcast_info['bounding_box'] = b
+        info['bounding_box'] = b
         si.msg_logger.msg(f'Hydro-model is "{"3D" if grid["is3D"] else "2D"}"  type "{self.__class__.__name__}"',
                           note=True, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
-        hi = si.hindcast_info
-        si.msg_logger.msg(f'Hindcast start: {hi["start_date"]}  end:  {hi["end_date"]}, time steps  {hi["total_time_steps"]} ', tabs=3)
+
+        si.msg_logger.msg(f'Hindcast start: {info["start_date"]}  end:  {info["end_date"]}, time steps  {info["total_time_steps"]} ', tabs=3)
 
         si.msg_logger.msg('grid bounding box = ' + b, tabs=4)
 
@@ -331,14 +331,14 @@ class _BaseReader(ParameterBaseClass):
         # allow vertical regridding to same sigma at all nodes
         if si.settings['regrid_z_to_uniform_sigma_levels'] and info['vert_grid_type'] in [ vgt.LSC, vgt.Slayer]:
             grid = self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
-            info['vert_grid_type'] = si.vertical_grid_types.Sigma # now a sigma grid
+
 
         # set up zlevel or sigma
         si.run_info['read_zlevels'] = False
         if info['vert_grid_type'] in [vgt.LSC, vgt.Slayer]:
             # native  vertical grid option, could be  Schisim LCS vertical grid
             # used to size field data arrays
-            s = [self.params['time_buffer_size'], grid['x'].shape[0], hi['num_z_levels']]
+            s = [self.params['time_buffer_size'], grid['x'].shape[0], info['num_z_levels']]
             grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
             si.run_info['read_zlevels'] = True
 
@@ -451,14 +451,14 @@ class _BaseReader(ParameterBaseClass):
     def _time_step_and_buffer_offsets(self, time_sec):
 
         grid = self.grid
-        hi = si.hindcast_info
+        info = self.info
         bi = self.info['buffer_info']
 
         fractional_time_steps = np.zeros((2,), dtype=np.float64)
         current_buffer_steps = np.zeros((2,), dtype=np.int32)
 
-        hindcast_fraction = (time_sec - hi['start_time']) / hi['duration']
-        current_hydro_model_step = int((hi['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
+        hindcast_fraction = (time_sec - info['start_time']) / info['duration']
+        current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
 
         # ring buffer locations of surrounding steps
         current_buffer_steps[0] = current_hydro_model_step % bi['buffer_size']
@@ -469,7 +469,7 @@ class _BaseReader(ParameterBaseClass):
         # sets the fraction of time step that current time is between
         # surrounding hindcast time steps
         # abs makes it work when backtracking
-        s = abs(time_sec - time_hindcast) / hi['time_step']
+        s = abs(time_sec - time_hindcast) / info['time_step']
         fractional_time_steps[0] = 1.0 - s
         fractional_time_steps[1] = s
         return current_hydro_model_step, current_buffer_steps, fractional_time_steps
@@ -600,7 +600,7 @@ class _BaseReader(ParameterBaseClass):
 
     def read_time(self, nt):
         # assume time is seconds or datetime64
-        time_var = si.hindcast_info['time_variable']
+        time_var = self.info['time_variable']
         time = self.dataset.read_variable(time_var, nt=nt)
         time = time.coords[time_var].data
 

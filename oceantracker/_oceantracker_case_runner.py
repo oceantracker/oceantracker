@@ -42,7 +42,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.run_builder = run_builder
         si.working_params = run_builder['working_params']
         si.case_summary=dict(case_info_file=None)
-        si.hindcast_info = run_builder['reader_builder']['catalog']['info']
 
         # setup shared info and message logger
         si._setup() # clear out classes from class instance of SharedInfo if running series of mains
@@ -288,7 +287,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         t0 = perf_counter()
         ri = si.run_info
         md = ri.model_direction
-        hi_start,hi_end = si.hindcast_info['start_time'],si.hindcast_info['end_time']
+        fgm= si.core_class_roles.field_group_manager
+        hi_start,hi_end = fgm.info['start_time'],fgm.info['end_time']
 
         crumbs = 'adding release groups'
    
@@ -375,9 +375,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.run_info.vector_components = 3 if si.run_info.is3D_run else 2
         fgm.final_setup()
 
-        if si.settings.time_step > si.hindcast_info['time_step']:
-            si.msg_logger.msg(f'Results may not be accurate as, time step param={si.settings.time_step:2.0f} sec,  > hydo model time step = {si.hindcast_info["time_step"]:2.0f}',
-                   warning=True)
 
         si.run_info.hindcast_start_time = fgm.info['start_time']
         si.run_info.hindcast_end_time = fgm.info['end_time']
@@ -404,7 +401,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'output_files': deepcopy(si.output_files),
              'version_info':   si.run_builder['version'],
              'computer_info':  si.run_builder['computer_info'],
-             'hindcast_info': si.hindcast_info,
              'working_params': dict(settings = si.settings.as_dict() ,core_class_roles={}, class_roles={}),
              'timing':dict(block_timings=[], function_timers= {}),
              'update_timers': {},

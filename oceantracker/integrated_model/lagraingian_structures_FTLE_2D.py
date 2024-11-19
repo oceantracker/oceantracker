@@ -83,8 +83,9 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
                 si.msg_logger.msg('LCS not yet working for non-floating particles', fatal_error=True, exit_now=True,caller=self)
 
         # get time for pulse releases within hindcast
-        if params['start'] is None: params['start'] = si.hindcast_info['end_time'] if si.settings.backtracking else si.hindcast_info['start_time']
-        if params['end']   is None: params['end']   = si.hindcast_info['start_time'] if si.settings.backtracking else si.hindcast_info['end_time']
+        fgm = si.core_class_roles.field_group_manager
+        if params['start'] is None: params['start'] = fgm.info['end_time'] if si.settings.backtracking else fgm.info['start_time']
+        if params['end']   is None: params['end']   = fgm.info['start_time'] if si.settings.backtracking else fgm.info['end_time']
         params['release_interval'] = round(params['release_interval']/si.settings.time_step,0 )*si.settings.time_step
 
         duration = abs(params['end']-params['start'])
@@ -93,7 +94,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
             si.msg_logger.msg('LSC/FTLE model duration is less than largest requested lag', hint=f'Check hindcast duration, or start end parameters lags={str(params["lags"])}',
                               crumbs='Setting up release times', caller=self,fatal_error=True, exit_now=True)
 
-        sel = np.logical_and(info['times'] >= si.hindcast_info['start_time'],info['times'] <= si.hindcast_info['end_time'], )
+        sel = np.logical_and(info['times'] >= fgm.info['start_time'],info['times'] <= fgm.info['end_time'], )
         info['times'] =  info['times'][sel]
 
         # set up release group for each pulse

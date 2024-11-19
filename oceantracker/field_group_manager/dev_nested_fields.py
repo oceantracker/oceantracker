@@ -21,7 +21,7 @@ class DevNestedFields(ParameterBaseClass):
 
         ml = si.msg_logger
         info= self.info
-        # setup outer grid first and for cpresence of key reader fileds in all hindcasts
+        # setup outer grid first and for presence of key reader fields in all hindcasts
         si.settings.use_bottom_stress = si.settings.use_bottom_stress and 'bottom_stress' in reader_builder['reader_field_info']
         si.settings.use_A_Z_profile = si.settings.use_A_Z_profile and 'A_Z_profile' in reader_builder['reader_field_info']
 

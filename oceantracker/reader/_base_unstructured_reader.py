@@ -43,7 +43,7 @@ class _BaseUnstructuredReader(_BaseReader):
         # get 4D size
 
         s = var_info['shape4D'].copy()
-        time_dim = si.hindcast_info[ 'time_dim']
+        time_dim = self.info[ 'time_dim']
         s[0] = d.coords[time_dim].size if time_dim in d.dims else 1
         return d.data.reshape(s)
 
