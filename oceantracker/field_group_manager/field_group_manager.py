@@ -208,7 +208,7 @@ class FieldGroupManager(ParameterBaseClass):
         field= self.reader.fields[field_name]
         self.reader.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
 
-    def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_cords, time_sec= None, hydro_model_gridID=None):
+    def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_cords, time_sec= None,hydro_model_gridID=None):
         # interp reader field_name at specfied locations,  not particle locations
         # used for getting tide and water depth at release locations give cell and bc_cords
         #todo smarter ways to do this special case using interploator class, not numba kernals?

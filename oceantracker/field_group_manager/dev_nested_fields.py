@@ -20,14 +20,17 @@ class DevNestedFields(ParameterBaseClass):
     def initial_setup(self,reader_builder,  caller=None):
 
         ml = si.msg_logger
-        # setup outer grid firstF
+        info= self.info
+        # setup outer grid first and for cpresence of key reader fileds in all hindcasts
+        si.settings.use_bottom_stress = si.settings.use_bottom_stress and 'bottom_stress' in reader_builder['reader_field_info']
+        si.settings.use_A_Z_profile = si.settings.use_A_Z_profile and 'A_Z_profile' in reader_builder['reader_field_info']
+
         fgm_outer_grid = si._class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
                                 initialize=False,caller= caller, crumbs='adding outer hydro-grid field manager for nested grid run')
         fgm_outer_grid.initial_setup( reader_builder,  caller=self)
         hi = fgm_outer_grid.reader.reader_builder['hindcast_info']
-        self.hydro_time_step = hi['time_step']
-        self.start_time, self.end_time = hi['start_time'], hi['end_time']
-        self.info['is3D'] = fgm_outer_grid.reader.grid['is3D']
+        info['start_time'], info['end_time'] = hi['start_time'], hi['end_time']
+        info['is3D'] = fgm_outer_grid.reader.grid['is3D']
 
         # first grid is outer grid
         self.fgm_hydro_grids = [fgm_outer_grid]
@@ -37,18 +40,17 @@ class DevNestedFields(ParameterBaseClass):
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}')
 
             t0= perf_counter()
+            si.settings.use_bottom_stress = si.settings.use_bottom_stress and 'bottom_stress' in rb['reader_field_info']
+            si.settings.use_A_Z_profile = si.settings.use_A_Z_profile and 'A_Z_profile' in rb['reader_field_info']
             fgm_nested =  si._class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
                                                   initialize=False, caller=caller,
                                                     crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
             fgm_nested.initial_setup(rb, caller=caller)
             self.fgm_hydro_grids.append(fgm_nested)
 
-            # note times
+            # note start and end times
             hi = fgm_nested.reader.reader_builder['hindcast_info']
-            self.hydro_time_step = min(self.hydro_time_step,hi['time_step'])
-
-            # start and end times
-            self.start_time, self.end_time=  max(self.start_time,hi['start_time']), min(self.end_time,hi['end_time'])
+            info['start_time'], info['end_time'] =  max(info['start_time'],hi['start_time']), min(info['end_time'],hi['end_time'])
 
             ml.progress_marker(f'Finished nested hydro-model grid setup #{len(self.fgm_hydro_grids)} '
                                f'from {time_util.seconds_to_isostr(hi["start_time"])} to  {time_util.seconds_to_isostr(hi["end_time"])}', start_time=t0)
@@ -96,15 +98,16 @@ class DevNestedFields(ParameterBaseClass):
         return d
 
     def update_readers(self, time_sec):
-
         for fgm in self.fgm_hydro_grids:
             fgm.update_readers(time_sec)
 
+    def add_reader_field(self, name, params):
+        for fgm in self.fgm_hydro_grids:
+            fgm.add_reader_field(name, params)
 
-    def get_hydo_model_time_step(self): return self.hydro_time_step # return the smallest time step
-
-    def get_hindcast_start_end_times(self):
-        return self.start_time, self.end_time
+    def add_custom_field(self, name, params, default_classID=None):
+        for fgm in self.fgm_hydro_grids:
+            fgm.add_custom_field(name, params, default_classID=default_classID)
 
     def add_part_prop_from_fields_plus_book_keeping(self):
         # only use outer grid to add properties for all readers
@@ -137,7 +140,7 @@ class DevNestedFields(ParameterBaseClass):
         return is_inside, part_data
 
 
-    def interp_named_field_at_given_locations_and_time(self, field_name, x, time_sec= None, n_cell=None,bc_cords=None, output=None,hydro_model_gridID=None):
+    def interp_named_2D_scalar_fields_at_given_locations_and_time(self,field_name,  x, n_cell, bc_cords, time_sec = None, hydro_model_gridID = None):
 
         vals= np.full((x.shape[0],), 0., dtype=np.float32)
 
@@ -145,9 +148,9 @@ class DevNestedFields(ParameterBaseClass):
         for n in range(len(self.fgm_hydro_grids)):
             fgm = self.fgm_hydro_grids[n]
             sel = hydro_model_gridID == n
-            vals[sel, ...] = fgm.interp_named_field_at_given_locations_and_time(field_name, x[sel, :],
-                                          time_sec=time_sec, n_cell=n_cell[sel], bc_cords=bc_cords[sel, :])
-
+            vals[sel, ...] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(field_name, x[sel, :],
+                                          n_cell[sel],bc_cords[sel,:], time_sec= time_sec,hydro_model_gridID=n)
+        #field_name, x, n_cell, bc_cords, time_sec = None, hydro_model_gridID = None
         return vals
 
     def setup_time_step(self, time_sec, xq, active):
@@ -239,9 +242,7 @@ class DevNestedFields(ParameterBaseClass):
         for n, fgm in enumerate(self.fgm_hydro_grids):
             # find particles in this hydro-grid
             sel = part_prop['hydro_model_gridID'].find_subset_where(alive, 'eq', n, out=self.get_partID_subset_buffer('gridID'))  # those on this grid
-            fgm.tidal_stranding.update(fgm.grid, time_sec, sel)
-
-
+            fgm.tidal_stranding.update(fgm.reader.grid, time_sec, sel)
 
     def screen_info(self):
         # only for outer grid

@@ -21,9 +21,8 @@ class Resuspension(BaseResuspension):
                                  })
 
     def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
-
-        fgm = si.core_class_roles['field_group_manager']
-        i = fgm.add_custom_field('friction_velocity', {}, default_classID='field_friction_velocity')
+        i = si.add_custom_field('friction_velocity', dict(write_interp_particle_prop_to_tracks_file=False),
+                                default_classID='field_friction_velocity')
 
 
 

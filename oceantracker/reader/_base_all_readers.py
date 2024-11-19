@@ -324,26 +324,26 @@ class _BaseReader(ParameterBaseClass):
         # setup transforms on the data, eg regrid vertical if 3D to same sigma levels
         params = self.params
         info = self.info
-        hi = si.hindcast_info
+
         vgt = si.vertical_grid_types
         grid['bottom_cell_index'] = self.read_bottom_cell_index(grid).astype(np.int32)
 
         # allow vertical regridding to same sigma at all nodes
-        if si.settings['regrid_z_to_uniform_sigma_levels'] and hi['vert_grid_type'] in [ vgt.LSC, vgt.Slayer]:
+        if si.settings['regrid_z_to_uniform_sigma_levels'] and info['vert_grid_type'] in [ vgt.LSC, vgt.Slayer]:
             grid = self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
-            hi['vert_grid_type'] = si.vertical_grid_types.Sigma # now a sigma grid
+            info['vert_grid_type'] = si.vertical_grid_types.Sigma # now a sigma grid
 
         # set up zlevel or sigma
         si.run_info['read_zlevels'] = False
-        if hi['vert_grid_type'] in [vgt.LSC, vgt.Slayer]:
+        if info['vert_grid_type'] in [vgt.LSC, vgt.Slayer]:
             # native  vertical grid option, could be  Schisim LCS vertical grid
             # used to size field data arrays
             s = [self.params['time_buffer_size'], grid['x'].shape[0], hi['num_z_levels']]
             grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
             si.run_info['read_zlevels'] = True
 
-        elif hi['vert_grid_type'] == vgt.Zfixed:
-            hi['vert_grid_type'] = si.vertical_grid_types.Zfixed
+        elif info['vert_grid_type'] == vgt.Zfixed:
+            info['vert_grid_type'] = si.vertical_grid_types.Zfixed
 
         return grid
 
@@ -441,7 +441,7 @@ class _BaseReader(ParameterBaseClass):
         field = self.fields['water_velocity']
         data = self.read_field_data('water_velocity', field, nt)
 
-        if field.is3D() and si.settings['regrid_z_to_uniform_sigma_levels']:
+        if field.is3D() and si.settings.regrid_z_to_uniform_sigma_levels:
             data = self._vertical_regrid_Slayer_field_to_uniform_sigma('water_velocity', data)
 
         field.data[buffer_index, ...] = data
