@@ -63,7 +63,13 @@ class  InterpTriangularGrid(_BaseInterp):
             # set up vertical grid
             hi = reader_builder['hindcast_info']
             vgt= si.vertical_grid_types
-            match hi['vert_grid_type']:
+            if si.settings.regrid_z_to_uniform_sigma_levels and  hi['vert_grid_type'] in [vgt.Slayer, vgt.LSC] :
+
+                vert_grid_type =  vgt.Sigma
+            else:
+                vert_grid_type =  hi['vert_grid_type']
+
+            match vert_grid_type:
                 case vgt.Sigma:
                     self._vert_cell_finder= _find_vertical_cell_classes.FindVerticalCellSigmaGrid(grid, params) # make sigma map
 

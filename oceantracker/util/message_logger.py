@@ -204,6 +204,7 @@ class MessageLogger(object ):
 
     def write_error_log_file(self, e,traceback_str):
         sleep(.5)
+        self.msg(traceback_str)
         with open(path.normpath(self.error_file_name),'w') as f:
             f.write('_____ Known warnings and Errors ________________________________\n')
             for t in [self.notes_list, self.warnings_list, self.errors_list]:

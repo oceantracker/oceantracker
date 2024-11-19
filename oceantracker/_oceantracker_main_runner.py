@@ -256,12 +256,6 @@ class _OceanTrackerRunner(object):
         reader_builder, reader= self._make_a_reader_builder(run_builder,working_params['core_class_roles']['reader'], crumbs)
         json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], 'hindcast_variable_catalog.json'), reader_builder['catalog'])
 
-        # optional primary reader fields for resuspension and dispersion
-        optional_reader_fields= dict(
-            use_A_Z_profile = settings['use_A_Z_profile'] and 'A_Z_profile' in reader_builder['reader_field_info'],
-                # option to use bottom stress for friction velocity
-            use_bottom_stress = 'bottom_stress' in reader_builder['reader_field_info']
-            )
 
         # work out in 3D run from water velocity
         run_builder['is3D_run'] = self._detect_3D_velocity(reader_builder)
@@ -282,8 +276,7 @@ class _OceanTrackerRunner(object):
             json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], f'hindcast_variable_catalog_nested_reader{n:03d}.json'),
                                                         nrb['catalog'])
             nested_reader_builders.append(nrb)
-            optional_reader_fields['use_A_Z_profile'] = optional_reader_fields['use_A_Z_profile'] and 'A_Z_profile' in nrb['reader_field_info']
-            optional_reader_fields['use_bottom_stress'] = optional_reader_fields['use_bottom_stress'] and 'bottom_stress' in nrb['reader_field_info']
+
 
             ml.progress_marker(f'sorted nested hyrdo-model #{n} files in time order ', start_time=t0)
 

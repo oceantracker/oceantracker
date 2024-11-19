@@ -201,6 +201,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # do class role lists
         for role, param_list in working_params['class_roles'].items():
+            if role in ['nested_readers']: continue
+
             for params in param_list:
                 i = si.add_class(role, params=params, initialize=False)
 

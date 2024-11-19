@@ -22,21 +22,24 @@ class FrictionVelocity(CustomFieldBase):
 
     def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
         info = self.info
-        fgm = si.core_class_roles['field_group_manager']
         hi = reader_builder['hindcast_info']
 
-        if 'bottom_stress' in reader_builder['reader_field_info']:
-            fgm.ad
+        if settings['use_bottom_stress'] and 'bottom_stress' in reader_builder['reader_field_info']:
+            si.add_reader_field('bottom_stress',dict(write_interp_particle_prop_to_tracks_file=False))
             info['mode'] == 4
         else:
+            # use near bottom velocity
+            vgt = si.vertical_grid_types
 
-            vtg = si.vertical_grid_types
-
-            match  hi['vert_grid_type']:
-                case  vtg.Sigma : info['mode'] = 1
-                case  vtg.Slayer: info['mode'] = 2
-                case  vtg.LSC: info['mode'] = 2
-                case vtg.Zfixed: info['mode'] = 3
+            if hi['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and si.settings.regrid_z_to_uniform_sigma_levels:
+                # set mode as sigma grid if converting
+                info['mode'] = 1
+            else:
+                match  hi['vert_grid_type']:
+                    case  vgt.Sigma : info['mode'] = 1
+                    case  vgt.Slayer: info['mode'] = 2
+                    case  vgt.LSC: info['mode'] = 2
+                    case vgt.Zfixed: info['mode'] = 3
         pass
 
     def check_requirements(self):

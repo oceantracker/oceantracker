@@ -91,7 +91,9 @@ class _DefaultSettings(_SharedStruct):
     open_boundary_type = PVC(0, int, min=0, max=1, doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS ' )
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )
     use_A_Z_profile = PVC(True, bool,
-                doc_str='Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file' )
+                doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')
+    use_bottom_stress = PVC(True, bool,
+                          doc_str='Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension')
     use_dispersion = PVC(True, bool,
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     use_resuspension = PVC(True, bool,
@@ -239,6 +241,13 @@ class _SharedInfoClass():
         #todo get rid in initialize
         ml = self.msg_logger
         crumbs += f'Adding class {class_role}>'
+
+        if class_role=='fields':
+            ml.msg('Cannot use si.add_class() method to add fields',
+                   hint='Use add_reader_field(name,  params) or si.add_custom_field(name, params, default_classID=None)',
+                   fatal_error=True, exit_now=True)
+
+
         if params is None: params ={}
         if type(params) != dict :
             ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}', fatal_error=True, crumbs=crumbs,
@@ -273,6 +282,12 @@ class _SharedInfoClass():
         i.add_required_classes_and_settings(self.settings, self.run_builder['reader_builder'], self.msg_logger)
 
         return i
+
+    # wrapers for adding fields
+    def add_reader_field(self, name, params):
+        return self.core_class_roles.field_group_manager.add_reader_field(name, params)
+    def add_custom_field(self, name, params, default_classID=None):
+        return self.core_class_roles.field_group_manager.add_custom_field(name, params, default_classID=default_classID)
 
 
     def _all_class_instance_pointers_iterator(self):

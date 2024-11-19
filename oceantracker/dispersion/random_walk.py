@@ -22,14 +22,13 @@ class RandomWalk(BaseTrajectoryModifer):
     def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
         info = self.info
         hi = reader_builder['hindcast_info']
-        fgm = si.core_class_roles.field_group_manager
 
         # set up mode/type of random walk
         if hi['is3D']:
             if settings['use_A_Z_profile'] and 'A_Z_profile' in reader_builder['reader_field_info']:
                 info['mode'] = 4
-                fgm.add_reader_field( 'A_Z_profile', dict(write_interp_particle_prop_to_tracks_file=False))
-                fgm.add_custom_field('A_Z_profile_vertical_gradient', dict(class_name = 'VerticalGradient',
+                si.add_reader_field( 'A_Z_profile', dict(write_interp_particle_prop_to_tracks_file=False))
+                si.add_custom_field('A_Z_profile_vertical_gradient', dict(class_name = 'VerticalGradient',
                                       get_grad_of_field_named='A_Z_profile',  write_interp_particle_prop_to_tracks_file=False))
             else:
                 # constant A_V 3D
