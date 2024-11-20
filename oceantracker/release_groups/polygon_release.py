@@ -32,7 +32,7 @@ class PolygonRelease(PointRelease):
             params['points_lon_lat'] = params['points'].copy()
             params['points'] = si._transform_lon_lat_to_meters(params['points_lon_lat'],
                                         in_lat_lon_order=self.params['coords_in_lat_lon_order'],
-                                       crumbs=f'Polygon release {self.IDstr()}')
+                                       crumbs=f'Polygon release #{info["instanceID"]}')
         info['release_type'] = 'polygon'
         info['bounding_box_ll_ul'] = np.stack((np.nanmin(params['points'][:,:2], axis=0),
                                                np.nanmax(params['points'][:,:2], axis=0)))

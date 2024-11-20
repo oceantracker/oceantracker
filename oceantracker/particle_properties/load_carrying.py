@@ -1,10 +1,10 @@
-from oceantracker.particle_properties._base_particle_properties import ManuallyUpdatedParticleProperty
+from oceantracker.particle_properties._base_particle_properties import CustomParticleProperty
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 
 from oceantracker.shared_info import shared_info as si
 
-class ParticleLoad(ManuallyUpdatedParticleProperty):
+class ParticleLoad(CustomParticleProperty):
     '''
     Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass.
     '''
