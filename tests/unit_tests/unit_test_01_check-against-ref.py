@@ -32,6 +32,7 @@ def main(args):
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
     ot.add_class('particle_properties', class_name='Speed', name='speed')
+    ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
 
     # add a gridded particle statistic to plot heat map
     ot.add_class('particle_statistics',**test_definitions.ps1)

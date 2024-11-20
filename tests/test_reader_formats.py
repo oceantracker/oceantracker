@@ -363,7 +363,8 @@ def get_case(n):
 
             )]
 
-        case 2000:
+
+        case 3000:
             root_input_dir = 'dummy_data_dir'
             file_mask = 'single_ocean_gyre2D.nc'
             output_file_base = 'dummy_data_single_ocean_grye'

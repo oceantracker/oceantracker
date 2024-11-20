@@ -146,7 +146,6 @@ class FieldGroupManager(ParameterBaseClass):
             self.reader.interpolator.find_vertical_cell(self.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
 
-
     def _build_single_reader(self,reader_builder):
         # build a readers
         info = self.info
@@ -258,7 +257,6 @@ class FieldGroupManager(ParameterBaseClass):
             # only  keep those in wet cells at this time
             is_inside = np.logical_and(is_inside , ~self.are_dry_cells(part_data['n_cell'] ))
         return is_inside, part_data
-
 
     def are_dry_cells(self, n_cell):
         sel = self.reader.grid['dry_cell_index'][n_cell] > 128  # those dry

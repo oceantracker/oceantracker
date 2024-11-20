@@ -186,9 +186,10 @@ class ParticleGroupManager(ParameterBaseClass):
     def update_PartProp(self,n_time_step, time_sec, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
         t0 = perf_counter()
-        si.class_roles.time_varying_info['time'].set_values(time_sec)
-        si.class_roles.time_varying_info['num_part_released_so_far'].set_values(self.info['particles_released'])
-        part_prop =si.class_roles.particle_properties
+        cr = si.class_roles
+        cr.time_varying_info['time'].set_values(time_sec)
+        cr.time_varying_info['num_part_released_so_far'].set_values(self.info['particles_released'])
+        part_prop =cr.particle_properties
 
         self.screen_msg= ''
         #  calculate age core particle property = t-time_released
@@ -196,15 +197,15 @@ class ParticleGroupManager(ParameterBaseClass):
                                                    part_prop['time_released'].used_buffer(), active, scale= -1.)
 
         # first interpolate to give particle properties from reader derived  fields
-        for name,i in si.class_roles.particle_properties.items():
+        for name,i in cr.particle_properties.items():
             if isinstance(i, FieldParticleProperty):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()
 
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
-        for name, i in si.class_roles.particle_properties.items():
-            if isinstance(i, ManuallyUpdatedParticleProperty):
+        for name, i in cr.particle_properties.items():
+            if isinstance(i, CustomParticleProperty):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()
