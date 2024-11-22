@@ -44,8 +44,6 @@ class FieldGroupManager(ParameterBaseClass):
         reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
         si.hydro_model_cords_in_lat_long = reader.grid['hydro_model_cords_in_lat_long']
 
-        self.fields = self.reader.fields
-
         self.write_hydro_model_grid()
 
     def final_setup(self):
@@ -93,7 +91,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def add_part_prop_from_fields_plus_book_keeping(self):
         # add part prop for reader and custom fields
-        for name, i in self.fields.items():
+        for name, i in self.reader.fields.items():
             if i.params['create_particle_property_with_same_name']:
                 si.add_class('particle_properties', class_name='FieldParticleProperty', name=name,
                                             write=i.params['write_interp_particle_prop_to_tracks_file'],
@@ -143,7 +141,7 @@ class FieldGroupManager(ParameterBaseClass):
         if grid['is3D']:
             # find vertical cell
             info = self.info
-            self.reader.interpolator.find_vertical_cell(self.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
+            self.reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
 
     def _build_single_reader(self,reader_builder):
@@ -214,7 +212,7 @@ class FieldGroupManager(ParameterBaseClass):
         part_prop = si.class_roles.particle_properties
         info = self.info
 
-        field_instance = self.fields[field_name]
+        field_instance = self.reader.fields[field_name]
         # is no output name given particle property for output is same as hindcast field_name
         output = np.full((x.shape[0], field_instance.data.shape[3]), np.nan) if field_instance.data.shape[3] > 1 else np.full((x.shape[0],), np.nan)
         active = np.arange(x.shape[0])

@@ -273,8 +273,7 @@ def get_case(n):
             # batic sea GLORYS
 
 
-            x0 = [
-                [58.36351222050503, 21.7318678553635],
+            x0 = [ [58.36351222050503, 21.7318678553635],
                 [55.54839701166633, 16.870008930959628],
 
                    ]
@@ -294,42 +293,7 @@ def get_case(n):
             fall_vel = -0.01
             is3D =True
 
-        case 1101:
-            #OCEANUM GLORYS
-            x0 =  [
-                #[-73.48272505246274, -173.7097571108972],
-                   [-70., -130],
-                [-69.52499266063822,-130],
-                [-70.5, -130],
-                [-71, -130],
-                [-71, -125],
-                [-71.3, -128.2],
-                [-71.46114498134901, 171.2627422568032],
-                  # [-76.,- 160.]
-                   ]
 
-            x0 = [       # [-73.48272505246274, -173.7097571108972],
-                [-72.,176],
-                [-70.72144746302578, 170.34],
-                [-73.55945050776178, 171.22711508577942],
-                [-74.55945050776178, 175.],
-                [-67., 169],
-                 ]
-
-            x0 = np.flip(np.asarray(x0), axis=1)
-            #x0[:,0] += -90. + 360 # todo hack to get ross sea right acros date line in utm transform
-
-            file_mask  =  'RossSea*.nc'
-            output_file_base= 'GLORYS'
-            title = 'GLORYS test'
-            #root_input_dir = r'F:\Hindcast_reader_tests\Glorys\Antartica'
-            root_input_dir =r'F:\Hindcast_reader_tests\Glorys\BalticSea'
-            #reader = 'oceantracker.reader.dev.dev_ross_sea_GLORYS_reader.GLORYSreader'
-            open_boundary_type = 1
-            max_days = 90
-            time_step = 3600.
-            pulse_size = 1
-            is3D = True
 
         case 2000:
             # nested schisim
