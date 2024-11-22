@@ -41,7 +41,7 @@ class GLORYSreader(_BaseStructuredReader):
                                    #'water_velocity_depth_averaged': PLC(['dahv'], str, fixed_len=2,
                                    #                                     doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
-            variable_signature= PLC(['latitude', 'e2t'], str, doc_str='Variable names used to test if file is this format'),
+            variable_signature= PLC(['latitude', 'uo','vo','depth'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
 
                         )
@@ -63,8 +63,7 @@ class GLORYSreader(_BaseStructuredReader):
 
         else:
             hi['z_dim'] = None
-            hi['num_z_levels'] = 0
-            hi['num_z_levels'] = 0
+            hi['num_z_levels'] = 1
             hi['all_z_dims'] = []
             hi['vert_grid_type'] = None
 
@@ -72,11 +71,8 @@ class GLORYSreader(_BaseStructuredReader):
         params= self.params
         dims = catalog['info']['dims']
         # nodes = rows* cols
-        hi['num_nodes'] = dims[params['dimension_map']['row']] * dims[params['dimension_map']['col']]
-
-
+        hi['num_nodes'] = dims['lat' if 'lat' in dims else 'latitude'] * dims['lon' if 'lon' in dims else 'longitude']
         return hi
-
 
     def read_horizontal_grid_coords(self, grid):
         ds = self.dataset
@@ -98,11 +94,14 @@ class GLORYSreader(_BaseStructuredReader):
     def build_hori_grid(self, grid):
 
         ds = self.dataset
-        grid['water_3D_mask'] = ds.read_variable('mask').data == 1 # water grid
-        grid['water_3D_mask'] = np.transpose(grid['water_3D_mask'],(1,2,0)) # put z last
-        grid['water_3D_mask'] = np.flip(grid['water_3D_mask'], axis=2) # mask 0 layer is
+        if 'mask' in ds.variables:
+            grid['water_3D_mask'] = ds.read_variable('mask').data == 1 # water grid
+            grid['water_3D_mask'] = np.transpose(grid['water_3D_mask'],(1,2,0)) # put z last
+            grid['water_3D_mask'] = np.flip(grid['water_3D_mask'], axis=2) # mask 0 layer is
+            grid['land_mask'] = ~grid['water_3D_mask'][:, :, -1]  # uppermost mask is the land
+        else:
+            pass
 
-        grid['land_mask'] = ~grid['water_3D_mask'][:, :,-1] # uppermost mask is the land
 
         grid = super().build_hori_grid(grid)
         return grid
@@ -117,10 +116,8 @@ class GLORYSreader(_BaseStructuredReader):
         # GLORY are fized z
         si.settings['regrid_z_to_uniform_sigma_levels'] = False  # no need to regrid
 
-
         grid = super().build_vertical_grid(grid)
         return grid
-
 
     def read_bottom_cell_index(self, grid):
         # bottom cell is in data files
@@ -131,7 +128,7 @@ class GLORYSreader(_BaseStructuredReader):
         # file cell count is top down, convert to bottom up index
         grid['bottom_cell_index_grid'] = cat['info']['num_z_levels'] - grid['bottom_cell_index_grid'] # do this before making an it to capture nans
         # land nodes use 0
-        sel = np.isnan(  grid['bottom_cell_index_grid'])
+        sel = np.isnan(grid['bottom_cell_index_grid'])
         grid['bottom_cell_index_grid'][sel] = 0
 
         grid['bottom_cell_index_grid'] =  ensure_int32_dtype(grid['bottom_cell_index_grid'])
@@ -176,12 +173,16 @@ class GLORYSreader(_BaseStructuredReader):
 
         return data
 
+    def setup_tide_field(self):
+        # assume no tide, so create a dummy zero tide reader field
+        i = self._add_a_reader_field('tide',dict(is3D=False,time_varying=True, initial_value=0.), dummy=True)
+        return i
+
     def update_tide_field(self, buffer_index, nt):
         # there is no tide, so set to zero
-        field = self.fields['tide']
-        s = copy(list(field.data.shape))
-        s[0]=buffer_index.size
-        field.data[buffer_index, ...] = np.zeros(s, dtype=np.float32)
+       field = self.fields['tide']
+       pass
+
 
     def read_dry_cell_data(self, nt_index, buffer_index):
         # get dry cells from water depth and tide
@@ -191,19 +192,6 @@ class GLORYSreader(_BaseStructuredReader):
                                                 si.settings.minimum_total_water_depth, grid['is_dry_cell_buffer'], buffer_index)
         pass
 
-    def read_field_var(self, nc, var_file_name, sel=None):
-        # read sel time steps of field variable
-        pass
-        if nc.is_var(var_file_name):
-            # 2D variable in out2d.nc
-            return super().read_field_var(nc, var_file_name, sel=sel)
-        else:
-            # read water depth  variable in another file
-            nc_var= NetCDFhandler(self.params['water_depth_file'])
-            data = nc_var.read_a_variable(var_file_name, sel=sel)
-            data_dims = nc_var.all_var_dims(var_file_name)
-            nc_var.close()
-            return data, data_dims
 
     @staticmethod
     @njitOT

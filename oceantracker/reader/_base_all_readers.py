@@ -391,12 +391,14 @@ class _BaseReader(ParameterBaseClass):
             if not i.is_time_varying():
                     i.data = self.read_field_data(name, i)
 
-    def _add_a_reader_field(self, name, params={}):
+    def _add_a_reader_field(self, name, params={},dummy=False):
         reader_builder = self.reader_builder
 
         hi = reader_builder['hindcast_info']
+        params = deepcopy(params)
         params['name'] = name
-        params.update(reader_builder['reader_field_info'][name][ 'params'])
+        if not dummy:
+            params.update(reader_builder['reader_field_info'][name][ 'params'])
 
         i = si._class_importer.make_class_instance_from_params('fields', params, initialize=False,
                                         default_classID='field_reader',
@@ -408,7 +410,7 @@ class _BaseReader(ParameterBaseClass):
             i.info.update(file_vars_info=reader_builder['reader_field_info'][name]['file_vars_info'])
 
         self.fields[name] = i
-        return  i
+        return i
 
     def _set_up_interpolator(self, reader_builder):
         if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
@@ -565,6 +567,7 @@ class _BaseReader(ParameterBaseClass):
         num_read = nt_available.size
         bi['buffer_available'] -= num_read
         si.msg_logger.progress_marker(f' read {num_read:3d} time steps in  {perf_counter() - t0:3.1f} sec', tabs=2)
+
 
     def read_field_data(self, name, field, nt_index=None):
         data = self._assemble_field_components(field, nt_index)

@@ -263,9 +263,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         if si.core_class_roles.integrated_model is not None:
             si.core_class_roles.integrated_model.initial_setup()
 
-        # set up al release groups from al classese, eg intergated model
-        for name, i in si.class_roles.release_groups.items():
-            i.initial_setup()
 
         si.msg_logger.progress_marker('Done initial setup of all classes', start_time=t0)
 

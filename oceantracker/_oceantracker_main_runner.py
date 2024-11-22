@@ -505,17 +505,18 @@ class _OceanTrackerRunner(object):
         # must check all files as varables may be split between files
 
         found_reader = None
-        all_variables= set()
+        all_variables= []
         for fn in file_list:
             ds= xr.open_dataset(fn)
-            all_variables.union(set(ds.variables.keys()))
-            for name, r in known_readers.items():
-                # check if each variable in the signature
-                found_var = [v in ds.variables for v in r['variable_sig']]
-                # break if all variables are found for this reader
-                if all(found_var):
-                    found_reader = name
-            if found_reader is not None: break
+            all_variables +=list(ds.variables.keys())
+        all_variables = list(set(all_variables)) # unique list of variables
+        for name, r in known_readers.items():
+            # check if each variable in the signature
+            found_var = [v in all_variables for v in r['variable_sig']]
+            # break if all variables are found for this reader
+            if all(found_var):
+                found_reader = name
+                break
 
         if found_reader is None:
             ml.msg(f'Could not set up reader, no files in dir = "{reader_params["input_dir"]} found matching mask = "{reader_params["file_mask"]}"  (or "out2d*.nc" if schism v5), or files do no match known format',
