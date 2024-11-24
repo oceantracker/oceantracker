@@ -78,12 +78,13 @@ def get_case(n):
             title = 'NZ national test'
 
         case 120:
-            root_input_dir = r'G:\Hindcasts_large\2024_hauraki_gulf_auck_uni\2020\01'
+            root_input_dir = r'Z:\Hindcasts\NorthIsland\2024_hauraki_gulf_auck_uni\2020\01'
             output_file_base = 'Test Hauraki'
             file_mask = 'schout*.nc'
             params['EPSG_code_metres_grid'] = 2193
             x0=[[-36.832885812299395, 174.76309434822716],
                 [-36.70276297564815, 174.81729496997661]]
+            x0 = np.flip(np.asarray(x0), axis=1)
             ax = None # Auck
             title = 'Auckland test'
 
