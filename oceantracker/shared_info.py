@@ -336,8 +336,8 @@ class _SharedInfoClass():
             out[:, 0], out[:, 1], = self.Transformer_to_meters.transform(lon_lat[:, 0], lon_lat[:, 1])
 
         if np.any(~np.isfinite(out.ravel())):
-            self.msg_logger.msg('Could not convert some lon_lat to meters, values out of bounds, or values in lat lon order?',
-                            crumbs=crumbs,fatal_error=True,exit_now=True, hint='values='+str(out))
+            self.msg_logger.msg('Could not convert some lon_lat to meters, values out of bounds, are values in (lat, lon) order?',
+                            crumbs=crumbs,fatal_error=True,exit_now=True, hint=', require (lon, lat) order, values='+str(out))
         return out
 
     def _transform_lon_lat_deltas(self,ll_deltas, ref_lon_lat,  deltas_in_lat_lon_order=False):
