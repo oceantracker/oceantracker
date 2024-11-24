@@ -18,8 +18,6 @@ class FrictionVelocity(CustomFieldBase):
                                  requires3D=PVC(True,bool),
                                  is_vector=PVC(False,bool),
                                  )
-        self.info['mode' ]= None
-
 
     def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
         info = self.info
