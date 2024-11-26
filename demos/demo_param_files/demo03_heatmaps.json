@@ -74,6 +74,10 @@
             "particle_property_list": [
                 "water_depth"
             ],
+            "grid_span": [
+                10000,
+                10000
+            ],
             "grid_size": [
                 220,
                 221

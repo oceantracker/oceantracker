@@ -25,6 +25,9 @@ particle_statistics:
   grid_size:
   - 220
   - 221
+  grid_span:
+  - 10000
+  - 10000
   max_age_to_bin: 259200.0
   min_age_to_bin: 0.0
   name: age_grid

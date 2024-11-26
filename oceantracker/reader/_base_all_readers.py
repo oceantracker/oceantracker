@@ -13,8 +13,9 @@ from time import perf_counter
 from oceantracker.util.basic_util import nopass
 import oceantracker.reader.util.hydromodel_grid_transforms as hydromodel_grid_transforms
 from oceantracker.util.triangle_utilities import split_quad_cells
-from oceantracker.util.cord_transforms import get_Metcator_info
+from oceantracker.util.cord_transforms import get_Metcator_info, fix_any_spanning180east
 from oceantracker.util import triangle_utilities, basic_util
+
 
 from oceantracker.reader.util import reader_util
 
@@ -29,7 +30,7 @@ class _BaseReader(ParameterBaseClass):
         self.add_default_params({
             'input_dir': PVC(None, str, is_required=True),
             'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-            'hydro_model_cords_in_lat_long': PVC(False, bool, doc_str='Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected'),
+            'geographic_coords': PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, setting this froces reading as geograraphic coord', expert=True),
             'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
             'time_buffer_size': PVC(24, int, min=2),
             'load_fields': PLC(None, str,
@@ -37,7 +38,7 @@ class _BaseReader(ParameterBaseClass):
                                make_list_unique=True),
             'one_based_indices': PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
             'variable_signature':PLC(None, str,doc_str='Variable names used to test if file is this format'),
-            'EPSG': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
+            'EPSG': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
 
             'variable_signature': PLC(None, str, doc_str='Variable names used to test if file is this format', is_required=True),
@@ -61,7 +62,8 @@ class _BaseReader(ParameterBaseClass):
         })  # list of normal required dimensions
 
         self.info['buffer_info'] = dict( time_steps_in_buffer = [])
-
+        self.grid={}
+        self.fields ={}
 
 
     # Below are required  methods for any new reader
@@ -72,7 +74,7 @@ class _BaseReader(ParameterBaseClass):
     def get_hindcast_info(self, catalog): nopass()
     # get is 3D, vertical grid type and
 
-    def read_horizontal_grid_coords(self, nc, grid):   nopass()
+    def read_horizontal_grid_coords(self, grid):   nopass()
 
     def read_triangles(self, grid):     nopass()
 
@@ -126,19 +128,21 @@ class _BaseReader(ParameterBaseClass):
     # -------------------------------------------------
     # core reader processes
 
-
-    def build_reader(self, reader_builder, dataset):
-        # map variable internal names to names in NETCDF file
-        # set update default value and vector variables map  based on given list
-        # first build data set
+    def initial_setup(self,reader_builder, dataset):
         self.reader_builder = reader_builder
         self.dataset = dataset
         self.grid_variable_map = reader_builder['grid_info']['variable_map']
         self.reader_field_vars_map = reader_builder['reader_field_info']
+
+        # map variable internal names to names in NETCDF file
+        # set update default value and vector variables map  based on given list
+        # first build data set
+
         info = self.info
+
         hi = self.reader_builder['hindcast_info']
         info.update(hi)
-        info['is3D'] = self.dataset.catalog['info']['is3D']
+        info['is3D'] = dataset.catalog['info']['is3D']
 
         self.grid = self._set_up_grid()
 
@@ -197,26 +201,23 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         grid['x'] = self.read_horizontal_grid_coords(grid) # read nodal x's
 
-        bounds = [grid['x'].min(axis=0), grid['x'].max(axis=0)]
+        bounds =np.asarray( [grid['x'].min(axis=0), grid['x'].max(axis=0)])
         # test if lat long coords
-        if self.detect_lonlat_grid(grid['x']) or  params['hydro_model_cords_in_lat_long']:
-            # use auto-detection or forced by user
-            grid['hydro_model_cords_in_lat_long'] = True
-            si._setup_lon_lat_to_meters_grid_tranforms(grid['x'])
-            grid['lon_lat'] = grid['x'].copy()
-            grid['x'] = si._transform_lon_lat_to_meters(grid['lon_lat'])
-            b = f'{np.array2string(bounds[0], precision=4, floatmode="fixed")} to {np.array2string(bounds[1], precision=2, floatmode="fixed")}'
-        else:
-            grid['hydro_model_cords_in_lat_long'] = params['hydro_model_cords_in_lat_long']  # user override
-            b = f'{np.array2string(bounds[0], precision=1, floatmode="fixed")} to {np.array2string(bounds[1], precision=1, floatmode="fixed")}'
+        info['geographic_coords'] = self.detect_lonlat_grid(grid['x']) or params['geographic_coords']
+
+        if info['geographic_coords']:
+            grid['x']=fix_any_spanning180east(grid['x'],msg_logger= si.msg_logger, caller=self,
+                                              crumbs=f'setting up reader in dir=  {params["input_dir"]}')
+
+        b = f'{np.array2string(bounds[0], precision=3, floatmode="fixed")} to {np.array2string(bounds[1], precision=3, floatmode="fixed")}'
+
         info['bounding_box'] = b
-        si.msg_logger.msg(f'Hydro-model is "{"3D" if grid["is3D"] else "2D"}"  type "{self.__class__.__name__}"',
+        si.msg_logger.msg(f'Hydro-model is "{"3D" if grid["is3D"] else "2D"}", in geographic coords = "{info["geographic_coords"] }"  type "{self.__class__.__name__}"',
                           note=True, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
 
         si.msg_logger.msg(f'Hindcast start: {info["start_date"]}  end:  {info["end_date"]}, time steps  {info["total_time_steps"]} ', tabs=3)
 
         si.msg_logger.msg('grid bounding box = ' + b, tabs=4)
-
 
         # reader triangles
         grid['triangles'] = self.read_triangles(grid)
@@ -228,22 +229,6 @@ class _BaseReader(ParameterBaseClass):
         # ensure variables have right type
         grid['x'] = grid['x'].astype(np.float64)
 
-
-        # get dergees per m at mercator coords for triangle area calcs
-        #dev code testing global lon_lat particle converting delta in m to degrees
-        if  False and grid['hydro_model_cords_in_lat_long']:
-            grid['deg_per_m'], grid['x_mercator'] = get_Metcator_info((grid['lon_lat']))
-
-            # checks on area calac
-            from oceantracker.util.triangle_utilities  import calcuate_triangle_areas
-            a1= calcuate_triangle_areas(grid['x'], grid['triangles'])
-            a2 = calcuate_triangle_areas(grid['x_mercator'], grid['triangles'])
-            rm = a2 / a1
-
-            xutm = si._transform_lon_lat_to_meters(grid['lon_lat'])
-            a3= calcuate_triangle_areas(xutm, grid['triangles'])
-            ru = a3 / a1
-            pass
 
         return grid
 
@@ -287,7 +272,7 @@ class _BaseReader(ParameterBaseClass):
         grid['node_type'][grid['grid_outline']['domain']['nodes']] = node_types.domain_boundary
 
         t0 = perf_counter()
-        grid['triangle_area'] = triangle_utilities.calcuate_triangle_areas(grid['x'], grid['triangles'])
+        grid['triangle_area'] = triangle_utilities.calcuate_triangle_areas(grid['x'], grid['triangles'],info['geographic_coords'])
         msg_logger.progress_marker('calculated triangle areas', start_time=t0)
         msg_logger.progress_marker('Finished grid setup')
 
@@ -652,7 +637,7 @@ class _BaseReader(ParameterBaseClass):
         islatlong=  (np.nanmax(xgrid[:,0])- np.nanmin(xgrid[:,0]) < 360) or (np.nanmax(xgrid[:,0])- np.nanmin(xgrid[:,0]) < 360)
 
         if islatlong:
-            si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so not a meters grid ', warning=True)
+            si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so not a meters grid ', note=True)
         return islatlong
 
     def write_hydro_model_grid(self, gridID=None):
@@ -676,6 +661,9 @@ class _BaseReader(ParameterBaseClass):
         nc = ncdf_util.NetCDFhandler(path.join(output_files['run_output_dir'], f_name), 'w')
         nc.write_global_attribute('index_note', ' all indices are zero based')
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
+        nc.write_global_attribute('geographic_coords_used', 1 if self.info['geographic_coords'] else 0)
+
+
 
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
         nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))

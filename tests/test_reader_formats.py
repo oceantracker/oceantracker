@@ -17,7 +17,7 @@ def default_params():
         'write_tracks': True,
         'output_file_base': None,
         'root_output_dir': None,
-         'EPSG_code_metres_grid': None,
+         'EPSG_code_meters_grid': None,
         'regrid_z_to_uniform_sigma_levels': True,
         'particle_properties': [{'name':'part_decay',  'class_name': 'AgeDecay',
                                 'decay_time_scale': 1. * 3600 * 24}],
@@ -81,7 +81,7 @@ def get_case(n):
             root_input_dir = r'Z:\Hindcasts\NorthIsland\2024_hauraki_gulf_auck_uni\2020\01'
             output_file_base = 'Test Hauraki'
             file_mask = 'schout*.nc'
-            params['EPSG_code_metres_grid'] = 2193
+            params['EPSG_code_meters_grid'] = 2193
             x0=[[-36.832885812299395, 174.76309434822716],
                 [-36.70276297564815, 174.81729496997661]]
             x0 = np.flip(np.asarray(x0), axis=1)
@@ -94,7 +94,7 @@ def get_case(n):
             root_input_dir = r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2009'
             output_file_base = 'SoundsBen_Phd'
             file_mask = 'schism_marl2009*.nc'
-            params['EPSG_code_metres_grid'] = 2193
+            params['EPSG_code_meters_grid'] = 2193
             x0=[[-40.788387332710876, 172.8418709119585],
                 [-40.905652106497435, 173.88863555540422]]
             x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
@@ -259,6 +259,7 @@ def get_case(n):
             #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = True
             show_grid = False
+
         case 500:
             # NEMO
             root_input_dir = r'F:\Hindcast_reader_tests\NEMO\NemoNorthSeaORCA025-N006_data'

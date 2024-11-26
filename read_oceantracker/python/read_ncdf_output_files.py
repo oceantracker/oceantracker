@@ -278,6 +278,9 @@ def read_grid_file(file_name):
     # load OT output file grid
     d={}
     nc = NetCDFhandler(file_name,'r')
+
+    for a,val in nc.global_attrs().items():
+        d[a] = val
     for var in nc.file_handle.variables.keys():
         d[var]= nc.read_a_variable(var)
 

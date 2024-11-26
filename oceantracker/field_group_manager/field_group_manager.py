@@ -1,7 +1,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 
 import numpy as np
-from oceantracker.util import time_util, ncdf_util, json_util
+from oceantracker.util import time_util, ncdf_util, json_util, cord_transforms
 from oceantracker.field_group_manager.util import field_group_manager_util
 from time import  perf_counter
 from copy import deepcopy
@@ -42,7 +42,14 @@ class FieldGroupManager(ParameterBaseClass):
 
         # add request to load compulsory fields
         reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
-        si.hydro_model_cords_in_lat_long = reader.grid['hydro_model_cords_in_lat_long']
+
+        info['geographic_coords'] = reader.info['geographic_coords']
+        if si.settings.use_geographic_coords or info['geographic_coords']:
+            i = reader._add_a_reader_field('degrees_per_meter', dict(is3D=False, time_varying=False, initial_value=0., is_vector=True), dummy=True)
+            i.data[0, :, 0, :] = cord_transforms.get_deg_per_meter(reader.grid['x'])
+
+
+        info['geographic_coords'] = reader.info['geographic_coords']
 
         self.write_hydro_model_grid()
 
@@ -50,13 +57,6 @@ class FieldGroupManager(ParameterBaseClass):
         ml = si.msg_logger
         info = self.info
         grid = self.reader.grid
-
-        if  si.hydro_model_cords_in_lat_long:
-            ml.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid',
-                   warning=True)
-        else:
-            ml.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid',
-                   note=True)
 
         self.info['has_open_boundary_nodes'] = np.any(self.reader.grid['node_type'] == node_types.open_boundary)
         self.info['open_boundary_type'] = si.settings.open_boundary_type
@@ -80,7 +80,7 @@ class FieldGroupManager(ParameterBaseClass):
         r = self.reader
         i = si._class_importer.make_class_instance_from_params('fields',params, name=name,
                                             default_classID=default_classID)
-        i.initial_setup(r.params['time_buffer_size'],r.info,r.fields)
+        i.initial_setup(r.params['time_buffer_size'],r.info,r.fields, r.grid)
         r.fields[name] = i
 
         # add classes required by this class
@@ -147,13 +147,16 @@ class FieldGroupManager(ParameterBaseClass):
     def _build_single_reader(self,reader_builder):
         # build a readers
         info = self.info
+
+
+        reader = si._class_importer.make_class_instance_from_params('reader', reader_builder['params'],
+                                   caller=self, crumbs=f'setup_hydro_fields> reader class ', initialize=False)
         # first build data set
         dataset = OceanTrackerDataSet()
         dataset.build_dataset_from_catalog(reader_builder['catalog'])
 
-        reader = si._class_importer.make_class_instance_from_params('reader', reader_builder['params'],
-                                   caller=self, crumbs=f'setup_hydro_fields> reader class ', initialize=False)
-        reader.build_reader(reader_builder,dataset)
+        reader.initial_setup(reader_builder,dataset)
+
         return  reader
 
     def _apply_domain_boundary_condition(self, sel_bad):

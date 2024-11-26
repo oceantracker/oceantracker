@@ -125,12 +125,12 @@ class BaseGenericReader(_BaseReader):
             time += time_util.isostr_to_seconds(self.params['isodate_of_hindcast_time_zero'])
         return time
 
-    def read_horizontal_grid_coords(self, nc, grid):
+    def read_horizontal_grid_coords(self,  grid):
         params= self.params
         var_name = params['grid_variable_map']['x']
         grid['x'] = np.column_stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1]))).astype(np.float64)
 
-        if self.params['hydro_model_cords_in_lat_long']:
+        if self.params['hydro_model_cords_geographic']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
 
         return grid

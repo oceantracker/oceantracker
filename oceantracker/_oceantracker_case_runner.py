@@ -17,7 +17,6 @@ from oceantracker.util.setup_util import config_numba_environment_and_random_see
 from oceantracker import definitions
 
 from oceantracker.shared_info import shared_info as si
-from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
 # note do not import numba here as its environment  setting must ve done first, import done below
 class OceanTrackerCaseRunner(ParameterBaseClass):
@@ -223,6 +222,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         fgm = si.core_class_roles.field_group_manager
         fgm.final_setup()
+        if fgm.info['geographic_coords']:  si.settings.use_geographic_coords = True
+
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
 
         # particle group manager for particle handing infra-structure
@@ -368,6 +369,10 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # set up fields
         fgm = si.add_class('field_group_manager',working_params['core_class_roles']['field_group_manager'], initialize=False)
         fgm.initial_setup(reader_builder, caller=self)
+
+        if not si.settings.use_geographic_coords and fgm.info['geographic_coords']:
+            si.settings.use_geographic_coords = True
+
         si.run_info.is3D_run = fgm.info['is3D']
         si.run_info.vector_components = 3 if si.run_info.is3D_run else 2
         fgm.final_setup()

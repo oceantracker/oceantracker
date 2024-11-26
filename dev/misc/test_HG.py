@@ -51,7 +51,7 @@ if __name__ == '__main__':
          'reader': {'file_mask': 'sch*.nc',
                    'input_dir': root_input_dir,
                     'regrid_z_to_equal_sigma': True,
-                    'hydro_model_cords_in_lat_long' : True,
+                    'hydro_model_cords_geographic' : True,
                       #'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                       },
            }

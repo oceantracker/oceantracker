@@ -51,6 +51,9 @@ particle_statistics:
   grid_size:
   - 120
   - 121
+  grid_span:
+  - 10000
+  - 10000
   name: grid1
   particle_property_list:
   - water_depth

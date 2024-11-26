@@ -295,7 +295,8 @@ class _OceanTrackerRunner(object):
         # detect reader format and add clas_name to params
         reader_builder['params'], reader = self._detect_hydro_file_format(reader_builder['params'], file_list, crumbs=crumbs)
 
-        reader_builder['catalog'] = self._get_hydro_file_catalog(reader_builder['params'],crumbs=crumbs)
+        reader_builder['catalog']= self._get_hydro_file_catalog(reader_builder['params'],crumbs=crumbs)
+
 
         # add info to reader bulider on if 3D hindcast and mapped fields
         reader_builder = self._map_and_catagorise_field_variables(run_builder, reader_builder, reader)
@@ -305,6 +306,8 @@ class _OceanTrackerRunner(object):
         hi = reader_builder['hindcast_info']
         hi['working_vert_grid_type'] = vgt.Sigma if hi['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and si.settings.regrid_z_to_uniform_sigma_levels \
                                                     else hi['vert_grid_type'] # use native grid
+
+
 
         return reader_builder, reader
 
@@ -516,6 +519,7 @@ class _OceanTrackerRunner(object):
             # break if all variables are found for this reader
             if all(found_var):
                 found_reader = name
+                found_data_set = ds
                 break
 
         if found_reader is None:
@@ -527,6 +531,7 @@ class _OceanTrackerRunner(object):
         # return merged params
         params = known_readers[found_reader]['instance'].params
         reader = known_readers[found_reader]['instance']
+
         return params, reader
 
     def _map_and_catagorise_field_variables(self, run_builder,reader_builder, reader):
