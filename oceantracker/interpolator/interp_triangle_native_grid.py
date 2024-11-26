@@ -58,7 +58,7 @@ class  InterpTriangularGrid(_BaseInterp):
             si.add_class('particle_properties', name ='z_fraction',class_name='ManuallyUpdatedParticleProperty',write=False, dtype='float32',
                          initial_value=0., caller=self,crumbs=crumbs)
             si.add_class('particle_properties', name ='z_fraction_water_velocity',class_name='ManuallyUpdatedParticleProperty',write=False, dtype='float32',
-                         initial_value=0., description=' thickness of bottom layer in metres, used for log layer velocity interp in bottom layer', caller=self,crumbs=crumbs)
+                         initial_value=0., description=' thickness of bottom layer in meters, used for log layer velocity interp in bottom layer', caller=self,crumbs=crumbs)
 
             # set up vertical grid
             hi = reader_builder['hindcast_info']

@@ -1,5 +1,6 @@
 import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
+from oceantracker.util import   cord_transforms
 from oceantracker.release_groups.point_release import PointRelease
 from oceantracker.shared_info import shared_info as si
 
@@ -28,22 +29,20 @@ class PolygonRelease(PointRelease):
             ml.msg('"points" parameter have at least 3 points, given ' + str(params['points']), fatal_error=True, caller=self)
 
         # ensure points are  meters
-        if si.hydro_model_cords_in_lat_long:
-            params['points_lon_lat'] = params['points'].copy()
-            params['points'] = si._transform_lon_lat_to_meters(params['points_lon_lat'],
-                                        in_lat_lon_order=self.params['coords_in_lat_lon_order'],
-                                       crumbs=f'Polygon release #{info["instanceID"]}')
+        if si.settings.use_geographic_coords:
+            params['points'] = cord_transforms.fix_any_spanning180east(params['points'], msg_logger=si.msg_logger, caller=self,
+                                                       crumbs=f'Point release#{params["name"]}')
         info['release_type'] = 'polygon'
         info['bounding_box_ll_ul'] = np.stack((np.nanmin(params['points'][:,:2], axis=0),
                                                np.nanmax(params['points'][:,:2], axis=0)))
 
-        self.polygon = InsidePolygon(verticies = params['points'])
+        self.polygon = InsidePolygon(verticies = params['points'], geographic_coords=si.settings.use_geographic_coords)
         info['polygon_area'] = self.polygon.get_area()
         ll, ur = info['bounding_box_ll_ul']
         info['bounding_box_area'] = abs((ur[0] - ll[0]) * (ur[1] - ll[1]))
 
         if info['polygon_area']  < 10:
-            ml.msg('Polygon release, area of polygon is < 10 sq metres , area =' + str(info['polygon_area']),
+            ml.msg('Polygon release, area of polygon is < 10 sq meters , area =' + str(info['polygon_area']),
                    hint='Is hydro model grid in meters and polygon coords given in (lon, lat)  degrees, convert polygons to hydro models meters coords? ',
                    warning=True)
 

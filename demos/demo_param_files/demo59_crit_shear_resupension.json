@@ -120,6 +120,10 @@
             ],
             "status_min": "moving",
             "z_min": -2,
+            "grid_span": [
+                10000,
+                10000
+            ],
             "grid_size": [
                 120,
                 121

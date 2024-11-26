@@ -46,7 +46,7 @@ reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_read
              dimension_map=dict(time='t', rows='y', cols='x'),
              grid_variable_map=dict(time='Time', x=['x_grid', 'y_grid']),
              field_variable_map=dict(water_depth='Depth', water_velocity=['U', 'V'], tide='Tide'),
-             hydro_model_cords_in_lat_long=False)
+             hydro_model_cords_geographic=False)
 
 reader_NZnational=dict(  input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01',
             file_mask = 'NZfinite*.nc')
@@ -188,7 +188,7 @@ def show_track_plot(case_info_file, args):
     movie_file1= path.join(image_dir, 'decay_movie_frame.mp4') if args.save_plots else None
 
     anim= plot_tracks.animate_particles(tracks,
-                           show_grid=True, show_dry_cells=True,
+                           show_grid=True, show_dry_cells=True,axis_labels=True,
                             #part_color_map='hot',
                            #size_using_data=tracks['a_pollutant'],
                            #colour_using_data=tracks['a_pollutant'],

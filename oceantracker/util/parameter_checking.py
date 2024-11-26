@@ -87,7 +87,8 @@ class _ParameterBaseDataClassChecker():
         if user_param is None:
             if self.is_required:
                 msg_logger.msg(f'Required parameter: must set parameter "{key}"',
-                    hint=f'Variable description:{self.doc_str}', crumbs=crumbs, fatal_error=True, caller=caller)
+                    hint=f'Variable description:{self.doc_str} , units= {self.units} ',
+                               crumbs=crumbs, fatal_error=True, caller=caller)
                 return None
             else:
                 value = self.get_default()
@@ -238,7 +239,7 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
     obsolete: bool = False
     is_required: bool = False
     doc_str : str = None
-    units: str = 'metres, or (lon, lat) as  decimal degrees if hindcast in (lon, lat) '
+    units: str = 'meters, or (lon, lat) as  decimal degrees if hindcast in (lon, lat) '
     one_or_more_points: bool = False
     single_cord: bool = False
     is3D: bool = False

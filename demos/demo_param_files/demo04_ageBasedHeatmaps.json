@@ -78,6 +78,10 @@
                 220,
                 221
             ],
+            "grid_span": [
+                10000,
+                10000
+            ],
             "min_age_to_bin": 0.0,
             "max_age_to_bin": 259200.0,
             "age_bin_size": 3600.0

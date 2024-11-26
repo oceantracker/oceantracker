@@ -82,7 +82,7 @@ class _DefaultSettings(_SharedStruct):
                            doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
     multiprocessing_case_start_delay = PVC(0., float, min=0.,expert=True,
                                            doc_str='Delay start of each sucessive case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
-    EPSG_code_metres_grid = PVC(None, int,
+    EPSG_code_meters_grid = PVC(None, int,
                 doc_str='If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM' )
     write_tracks = PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes' )
     user_note = PVC('No user note', str, doc_str='Any run note to store in case info file' )
@@ -90,6 +90,9 @@ class _DefaultSettings(_SharedStruct):
     water_density = PVC(1025., float, units='kg/m^3', doc_str='Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900. )
     open_boundary_type = PVC(0, int, min=0, max=1, doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS ' )
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )
+    use_geographic_coords = PVC(False, bool,
+                          doc_str='Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
+                                expert=True)
     use_A_Z_profile = PVC(True, bool,
                 doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')
     use_bottom_stress = PVC(True, bool,
@@ -312,10 +315,10 @@ class _SharedInfoClass():
 
     def _setup_lon_lat_to_meters_grid_tranforms(self,grid_lon_lat):
         #todo add user given meters grid option
-        if self.settings['EPSG_code_metres_grid'] is None:
+        if self.settings['EPSG_code_meters_grid'] is None:
             epsg = cord_transforms.get_utm_epsg(grid_lon_lat)
         else:
-            epsg =  self.settings['EPSG_code_metres_grid']
+            epsg =  self.settings['EPSG_code_meters_grid']
 
         self.Transformer_to_meters = cord_transforms.get_tansformer(cord_transforms.EPSG_WGS84,epsg)
         self.Transformer_to_lon_lat = cord_transforms.get_tansformer(epsg, cord_transforms.EPSG_WGS84)

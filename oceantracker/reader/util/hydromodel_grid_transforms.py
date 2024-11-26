@@ -94,7 +94,7 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
                     # get total water depth
                     twd = max( abs(tide[nt, node, 0, 0] + water_depth[0, node, 0, 0]), minimum_total_water_depth)
 
-                    # dz is  bottom layer thickness in metres, in original hydro model data
+                    # dz is  bottom layer thickness in meters, in original hydro model data
                     dz =  twd*dzf
                     if dz < z0:
                         f = 0.0

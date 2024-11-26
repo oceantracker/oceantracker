@@ -161,9 +161,6 @@ class _BaseWriter(ParameterBaseClass):
         part_prop=si.class_roles.particle_properties
         for name,i in part_prop.items():
             if i.params['write'] and i.params['time_varying']:
-                if si.hydro_model_cords_in_lat_long and name in ['x','x_last_good']:
-                    #todo convert to latlong
-                    pass
                 self.write_time_varying_particle_prop(name, i.data)
 
         if si.settings['write_dry_cell_flag']:
