@@ -77,33 +77,11 @@ def convert_cords(xy, EPSG_in, EPSG_out):
     return out
 
 
-# dev code to test use of mercator for use in global lon_lat particle tracking
-EPSG_Mercator = 'ESRI:53004'
-
-
-# dev transforms to operate in native (lon, lat) coords
-# set up class instances once to speed computation,
-# xy=True will assume (lon,lat) input output
-transformerWGS84_to_Mercator = Transformer.from_crs(EPSG_WGS84, EPSG_Mercator, always_xy = True)
-
-def WGS84_to_to_Mercator(lon_lat, out=None):
-    # (lng,lat ) to NZTM for numpy arays
-    if out is None: out = np.full_like(lon_lat,0.)
-    # put lon between -180 and 180
-    sel = lon_lat[:,0] > 180
-    lon_lat[sel, 0] -= 360
-    out[:,0],out[:,1] = transformerWGS84_to_Mercator.transform(lon_lat[:, 0], lon_lat[:, 1])
-    return out
-def get_Metcator_info(lon_lat):
-    x_mercator = WGS84_to_to_Mercator(lon_lat)
-
-    return None,x_mercator
-
 def fix_any_spanning180east(lon_lat,single_cord=False, msg_logger=None, caller=None, crumbs=None):
     # check longitudes spanning 180, ie jumps from 179 E to -179 East
     if single_cord: lon_lat = lon_lat[np.newaxis,:]
-    bounds= [lon_lat.min(), lon_lat.max()]
-    if abs(bounds[0] - bounds[1]) > 180:
+    bounds= [lon_lat[:,0].min(), lon_lat[:,0].max()]
+    if abs(bounds[1] - bounds[0]) > 180:
         # spanning 180 deg east
         sel = lon_lat[:, 0] < 0
         lon_lat[sel,:] += 360.

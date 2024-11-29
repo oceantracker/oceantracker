@@ -115,8 +115,6 @@ class ROMsNativeReader(_BaseStructuredReader):
         grid['sigma']       = 1. + ds.read_variable('s_w').data.astype(np.float32)  # layer boundary fractions reversed from negative values
         grid['sigma_layer'] = 1. + ds.read_variable('s_rho').data.astype(np.float32)  # layer center fractions
 
-        #ROMS are uniform sigma
-        si.settings['regrid_z_to_uniform_sigma_levels'] = False # no need to regrid
 
         grid = super().build_vertical_grid(grid)
         return grid

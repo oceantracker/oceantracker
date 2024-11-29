@@ -116,9 +116,6 @@ class dev_DELFTFM(_BaseUnstructuredReader):
         grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values
         grid['z_layer'] =ds.read_variable(gm['z_layer']).data.astype(np.float32)   # layer center fractions
 
-        si.settings['regrid_z_to_uniform_sigma_levels'] = False  # no need to regrid
-
-
         grid = super().build_vertical_grid(grid)
 
 

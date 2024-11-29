@@ -136,6 +136,7 @@ ps1 = dict(name='my_heatmap',
          class_name='GriddedStats2D_timeBased',
          # the below are optional settings/parameters
          grid_size=[120, 121],  # number of east and north cells in the heat map
+        grid_span = [10000,10000],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant'],  # request a heat map for the decaying part. prop. added above
@@ -151,6 +152,7 @@ poly_stats =dict(
         status_min= 'moving',
         z_min= -2,
         grid_size= [120, 121])
+
 LCS = dict(name='LSC test',
            class_name='dev_LagarangianStructuresFTLE2D',
          )

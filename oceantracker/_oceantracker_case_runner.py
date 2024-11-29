@@ -184,14 +184,14 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         ccr = working_params['core_class_roles']
         for role, params in ccr.items():
             if role in ['particle_group_manager', 'solver', 'tidal_stranding']:
-                i= si.add_class(role,params=params, initialize=False)
+                i= si.add_class(role,params=params)
             pass
 
         if settings['use_dispersion']:
-            i = si.add_class('dispersion', params= ccr['dispersion'],initialize=False)
+            i = si.add_class('dispersion', params= ccr['dispersion'])
 
         if hi['is3D']:
-            i = si.add_class('resuspension', params=ccr['resuspension'], initialize=False)
+            i = si.add_class('resuspension', params=ccr['resuspension'])
 
         if si.settings.write_tracks:
             si.add_class('tracks_writer', params= ccr['tracks_writer'], crumbs='making tracks writer class instance',
@@ -202,7 +202,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             if role in ['nested_readers']: continue
 
             for params in param_list:
-                i = si.add_class(role, params=params, initialize=False)
+                i = si.add_class(role, params=params)
 
         if ccr['integrated_model'] is not None:
             si.add_class('integrated_model', ccr['integrated_model'])
@@ -367,11 +367,21 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                 working_params['core_class_roles']['field_group_manager']['class_name'] = definitions.default_classes_dict['field_group_manager_nested']
 
         # set up fields
-        fgm = si.add_class('field_group_manager',working_params['core_class_roles']['field_group_manager'], initialize=False)
+        fgm = si.add_class('field_group_manager',working_params['core_class_roles']['field_group_manager'])
         fgm.initial_setup(reader_builder, caller=self)
 
-        if not si.settings.use_geographic_coords and fgm.info['geographic_coords']:
-            si.settings.use_geographic_coords = True
+        # tweak options based on available fields
+        settings = si.settings
+        settings.use_geographic_coords = fgm.info['geographic_coords'] or si.settings.use_geographic_coords
+        settings.use_A_Z_profile = fgm.info['has_A_Z_profile'] and settings.use_A_Z_profile
+        settings.use_bottom_stress = fgm.info['has_bottom_stress'] and settings.use_bottom_stress
+
+        si.run_info.is3D_run = fgm.info['is3D']
+        if not si.run_info.is3D_run:
+            settings.use_resuspension = False
+
+        # now setup reader knowing if geographic, if A_Z_profile or bottom stress available,  and in use
+        fgm.build_readers()
 
         si.run_info.is3D_run = fgm.info['is3D']
         si.run_info.vector_components = 3 if si.run_info.is3D_run else 2

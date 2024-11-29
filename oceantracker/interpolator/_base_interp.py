@@ -10,7 +10,7 @@ class _BaseInterp(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params(dict( debug_check_cell= PVC(False, bool, doc_str='checks particles are inside the cell found by interp')))
 
-    def initial_setup(self, grid, reader_builder): pass
+    def initial_setup(self, reader): pass
 
     # find hori and vertical cell containing each particle
     def find_cell(self, xq, current_buffer_steps,fractional_time_steps, active): basic_util.nopass(' must supply find_cells method')

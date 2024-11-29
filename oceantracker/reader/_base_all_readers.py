@@ -13,8 +13,8 @@ from time import perf_counter
 from oceantracker.util.basic_util import nopass
 import oceantracker.reader.util.hydromodel_grid_transforms as hydromodel_grid_transforms
 from oceantracker.util.triangle_utilities import split_quad_cells
-from oceantracker.util.cord_transforms import get_Metcator_info, fix_any_spanning180east
-from oceantracker.util import triangle_utilities, basic_util
+from oceantracker.util.cord_transforms import fix_any_spanning180east
+from oceantracker.util import triangle_utilities, basic_util, cord_transforms
 
 
 from oceantracker.reader.util import reader_util
@@ -30,7 +30,8 @@ class _BaseReader(ParameterBaseClass):
         self.add_default_params({
             'input_dir': PVC(None, str, is_required=True),
             'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-            'geographic_coords': PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, setting this froces reading as geograraphic coord', expert=True),
+            'geographic_coords': PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, usinh this setting  forces reading as geograraphic coord if auto-dectect fails',
+                                     expert=True),
             'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
             'time_buffer_size': PVC(24, int, min=2),
             'load_fields': PLC(None, str,
@@ -38,7 +39,7 @@ class _BaseReader(ParameterBaseClass):
                                make_list_unique=True),
             'one_based_indices': PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
             'variable_signature':PLC(None, str,doc_str='Variable names used to test if file is this format'),
-            'EPSG': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
+            'EPSG_code': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
 
             'variable_signature': PLC(None, str, doc_str='Variable names used to test if file is this format', is_required=True),
@@ -142,9 +143,38 @@ class _BaseReader(ParameterBaseClass):
 
         hi = self.reader_builder['hindcast_info']
         info.update(hi)
-        info['is3D'] = dataset.catalog['info']['is3D']
+        pass
 
+
+    def build_reader(self, gridID=0):
+
+        # make grid
         self.grid = self._set_up_grid()
+        grid = self.grid
+        params = self.params
+        info = self.info
+        info['gridID'] = gridID
+
+        if si.settings.use_geographic_coords:
+            if not info['geographic_coords']:
+                # if not already in geographic
+                if params['EPSG_code'] is None:
+                    si.msg_logger.msg('When using geographic coords and hydromodel not already in geographic coords, Reader must have "EPSG_code" parameter set to do conversion',
+                                      hint = 'EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes for hydro model at at https://spatialreference.org/',
+                                      caller = self, fatal_error=True, exit_now=True)
+                # do conversion
+                grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
+
+
+            # fix any spanning 179 to -179
+            grid['x'] = fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
+                                                crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
+            # set up conversion of meters to degreees
+            i = self._add_a_reader_field('degrees_per_meter',dict(time_varying=False,is3D=False, is_vector=True, write_interp_particle_prop_to_tracks_file=False ),dummy=True)
+            i.data[0, :, 0, :] = cord_transforms.get_deg_per_meter(grid['x'])
+            pass
+
+        reader_builder= self.reader_builder
 
         self._set_up_interpolator(reader_builder)
         self._setup_fields(reader_builder)
@@ -167,10 +197,6 @@ class _BaseReader(ParameterBaseClass):
         grid = self.build_hori_grid(grid)
         grid = self.construct_grid_variables(grid)
 
-        pass
-        if si.settings['display_grid_at_start']:
-            from plot_oceantracker.plot_utilities import  display_grid
-            display_grid(grid,1)
 
         if grid['is3D']:
             grid = self.build_vertical_grid(grid)
@@ -185,14 +211,6 @@ class _BaseReader(ParameterBaseClass):
                 v = grid[name]
                 if v is not None and v.dtype != np.float32:
                     si.msg_logger.msg(f'Reader type error {name} must be dtype {np.float64} ', warning=True)
-        if False:
-            from  matplotlib import pyplot as plt
-            #use('QtAgg')
-            #plt.ion()
-            o = grid['grid_outline']['domain_masking_polygon']
-            plt.plot(o[:,0],o[:,1])
-            plt.show(block=False)
-
         return grid
 
     def build_hori_grid(self, grid):
@@ -202,12 +220,8 @@ class _BaseReader(ParameterBaseClass):
         grid['x'] = self.read_horizontal_grid_coords(grid) # read nodal x's
 
         bounds =np.asarray( [grid['x'].min(axis=0), grid['x'].max(axis=0)])
-        # test if lat long coords
-        info['geographic_coords'] = self.detect_lonlat_grid(grid['x']) or params['geographic_coords']
 
-        if info['geographic_coords']:
-            grid['x']=fix_any_spanning180east(grid['x'],msg_logger= si.msg_logger, caller=self,
-                                              crumbs=f'setting up reader in dir=  {params["input_dir"]}')
+
 
         b = f'{np.array2string(bounds[0], precision=3, floatmode="fixed")} to {np.array2string(bounds[1], precision=3, floatmode="fixed")}'
 
@@ -314,21 +328,19 @@ class _BaseReader(ParameterBaseClass):
         grid['bottom_cell_index'] = self.read_bottom_cell_index(grid).astype(np.int32)
 
         # allow vertical regridding to same sigma at all nodes
-        if si.settings['regrid_z_to_uniform_sigma_levels'] and info['vert_grid_type'] in [ vgt.LSC, vgt.Slayer]:
+
+        if info['regrid_z_to_uniform_sigma_levels']:
             grid = self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
 
 
-        # set up zlevel or sigma
-        si.run_info['read_zlevels'] = False
+        # set up zlevels if needed
+        info['read_zlevels'] = False
         if info['vert_grid_type'] in [vgt.LSC, vgt.Slayer]:
             # native  vertical grid option, could be  Schisim LCS vertical grid
             # used to size field data arrays
             s = [self.params['time_buffer_size'], grid['x'].shape[0], info['num_z_levels']]
             grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
-            si.run_info['read_zlevels'] = True
-
-        elif info['vert_grid_type'] == vgt.Zfixed:
-            info['vert_grid_type'] = si.vertical_grid_types.Zfixed
+            info['read_zlevels'] = True
 
         return grid
 
@@ -350,10 +362,7 @@ class _BaseReader(ParameterBaseClass):
     def _setup_fields(self, reader_builder):
         # setup field classes , ie make memory buffer
         cat =self.dataset.catalog
-        self.fields={}
-        fgm = si.core_class_roles.field_group_manager
         fields = self.fields
-
 
         # add essential fields- water depth, tide, water velocity
         self.setup_water_depth_field()
@@ -385,7 +394,7 @@ class _BaseReader(ParameterBaseClass):
         if not dummy:
             params.update(reader_builder['reader_field_info'][name][ 'params'])
 
-        i = si._class_importer.make_class_instance_from_params('fields', params, initialize=False,
+        i = si._class_importer.make_class_instance_from_params('fields', params,
                                         default_classID='field_reader',
                                         check_for_unknown_keys=False, crumbs=f'Adding reader field "{name}"')
         i.initial_setup(self.params['time_buffer_size'], hi, self.fields)
@@ -397,12 +406,13 @@ class _BaseReader(ParameterBaseClass):
         self.fields[name] = i
         return i
 
+
     def _set_up_interpolator(self, reader_builder):
         if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
-        i = si._class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],initialize=False,
+        i = si._class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
                                              default_classID='interpolator', caller= self,
                                              crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
-        i.initial_setup(self.grid,reader_builder)
+        i.initial_setup(self)
         self.interpolator = i
 
     # setup and read core fields, depth, tide, water velocity
@@ -428,7 +438,7 @@ class _BaseReader(ParameterBaseClass):
         field = self.fields['water_velocity']
         data = self.read_field_data('water_velocity', field, nt)
 
-        if field.is3D() and si.settings.regrid_z_to_uniform_sigma_levels:
+        if field.is3D() and self.info['regrid_z_to_uniform_sigma_levels']:
             data = self._vertical_regrid_Slayer_field_to_uniform_sigma('water_velocity', data)
 
         field.data[buffer_index, ...] = data
@@ -471,7 +481,6 @@ class _BaseReader(ParameterBaseClass):
             si.block_timer('Filled reader buffers',t0)
             self.stop_update_timer()
 
-
     #@function_profiler(__name__)
     def fill_time_buffer(self,time_sec):
         # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
@@ -499,7 +508,7 @@ class _BaseReader(ParameterBaseClass):
 
         buffer_index = self.hydro_model_index_to_buffer_index(nt_available)
         s = f' Reading {buffer_index.size:2d} time steps, '
-        s += f' for hindcast time steps {nt_available[0]:02d}:{nt_available[-1]:02d}, '
+        s += f' for hindcast time steps {nt_available[0]:02d}:{nt_available[-1]:02d}, from {info["input_dir"]} '
         s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03d} '
         si.msg_logger.progress_marker(s)
 
@@ -524,19 +533,6 @@ class _BaseReader(ParameterBaseClass):
 
             # insert data
             field.data[buffer_index, ...] = data
-
-            if si.settings['dev_debug_plots']:
-                # check overplots of regridding
-                from matplotlib import pyplot as plt
-                nn = 300  # for test hindcats
-                nn = 1000
-                grid = self.grid
-                plt.plot(grid['zlevel_fractions'][nn, :], junk[0, nn, :, 0], c='g')
-                plt.plot(grid['zlevel_fractions'][nn, :], Fjunk[0, nn, :, 0], 'g.')
-                plt.plot(grid['sigma'], data[0, nn, :, 0], 'r--')
-                plt.plot(grid['sigma'], data[0, nn, :, 0], 'rx')
-                # plt.show(block= True)
-                plt.savefig('\myfig.png')
 
         # read dry cels which may need tide and water depth fields
         self.read_dry_cell_data(nt_available, buffer_index)
@@ -581,7 +577,7 @@ class _BaseReader(ParameterBaseClass):
         grid = self.grid
         grid['time'][buffer_index] = self.read_time(nt)
 
-        if si.run_info.is3D_run and si.run_info.read_zlevels :
+        if si.run_info.is3D_run and self.info['read_zlevels']:
             # read zlevel if native vertical grid of types Slayer or LSC
             grid['zlevel'][buffer_index,...] =  self.read_zlevel(nt)
         pass
@@ -632,27 +628,31 @@ class _BaseReader(ParameterBaseClass):
         nt_hindcast = self.time_to_hydro_model_index(time_sec)
         return nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
-    def detect_lonlat_grid(self, xgrid):
+    def detect_lonlat_grid(self, dataset,msg_logger):
+        x= dataset.read_variable(self.params['grid_variable_map']['x']).data
         # look at range to see if too small to be meters grid
-        islatlong=  (np.nanmax(xgrid[:,0])- np.nanmin(xgrid[:,0]) < 360) or (np.nanmax(xgrid[:,0])- np.nanmin(xgrid[:,0]) < 360)
+        islatlong=  (np.nanmax(x)- np.nanmin(x) < 360) or (np.nanmax(x)- np.nanmin(x) < 360)
 
         if islatlong:
-            si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so not a meters grid ', note=True)
+            msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so not a meters grid ', note=True,
+                              caller = self)
+
         return islatlong
 
-    def write_hydro_model_grid(self, gridID=None):
+    def write_hydro_model_grid(self):
         # write a netcdf of the grid from first hindcast file
         grid = self.grid
+        info = self.info
         output_files = si.output_files
 
         # add to list of outptut files
-        if gridID is None or gridID ==0:
+        if info['gridID'] ==0:
             # primary/outer grid
             f_name= output_files['raw_output_file_base'] + '_grid.nc'
             output_files['grid'] = f_name
         else:
-            if 'nested_grid' not in output_files: output_files['nested_grid'] = []
-            f_name = output_files['raw_output_file_base'] + f'_grid{gridID:03d}.nc'
+            if 'nested_grids' not in output_files: output_files['nested_grids'] = []
+            f_name = output_files['raw_output_file_base'] + f'_grid{info["gridID"]:03d}.nc'
             output_files['nested_grids'].append(f_name)
 
         # only  write grid for first parallel cases

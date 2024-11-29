@@ -107,7 +107,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
             for n_pulse in range(info['times'].size):
                 rp['start'] = info['times'][n_pulse]
                 # add param dict as keyword arguments, must not initialize yet, ie delay initial_setup till al release groups added
-                si.add_class('release_groups', name= f'LCS_grid_{n_grid:03d}_pulse_{n_pulse:04d}', **rp, initialize=False)
+                si.add_class('release_groups', name= f'LCS_grid_{n_grid:03d}_pulse_{n_pulse:04d}', **rp)
             pass
 
     def initial_setup(self):
