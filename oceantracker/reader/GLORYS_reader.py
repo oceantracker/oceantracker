@@ -33,15 +33,15 @@ class GLORYSreader(_BaseStructuredReader):
             field_variable_map= {'water_velocity': PLC(['uo', 'vo','wo'], str),
                                    'tide': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('deptho', str, doc_str='maps standard internal field name to file variable name'),
-                                   #'water_temperature': PVC('temp', str, doc_str='maps standard internal field name to file variable name'),
-                                   #'salinity': PVC('salt', str, doc_str='maps standard internal field name to file variable name'),
+                                   'water_temperature': PVC('thetao', str, doc_str='maps standard internal field name to file variable name'),
+                                   'salinity': PVC('so', str, doc_str='maps standard internal field name to file variable name'),
                                    #'wind_stress': PVC('wind_stress', str, doc_str='maps standard internal field name to file variable name'),
                                    #'bottom_stress': PVC('bottom_stress', str, doc_str='maps standard internal field name to file variable name'),
                                    #'A_Z_profile': PVC('diffusivity', str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
                                    #'water_velocity_depth_averaged': PLC(['dahv'], str, fixed_len=2,
                                    #                                     doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
-            variable_signature= PLC(['latitude', 'uo','vo','depth'], str, doc_str='Variable names used to test if file is this format'),
+            variable_signature= PLC(['time','latitude', 'uo','vo'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
 
                         )
@@ -113,9 +113,6 @@ class GLORYSreader(_BaseStructuredReader):
         gm = self.grid_variable_map
         grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)
         grid['z'] = -grid['z'][::-1]  # z is positive down so take -ve
-        # GLORY are fized z
-        si.settings['regrid_z_to_uniform_sigma_levels'] = False  # no need to regrid
-
         grid = super().build_vertical_grid(grid)
         return grid
 

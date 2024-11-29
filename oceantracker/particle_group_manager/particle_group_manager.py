@@ -104,7 +104,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
         for name, i  in si.class_roles.particle_properties.items():
-            if isinstance(i, CustomParticleProperty):
+            if isinstance(i,CustomParticleProperty):
                 i.initial_value_at_birth(new_buffer_indices)
 
         # update new particles props

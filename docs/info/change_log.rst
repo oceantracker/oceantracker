@@ -7,7 +7,7 @@ Known issues
 __________________
 
 
-Version '0.5.0.000 2024-03-07'
+Version '0.5.0.000 2024-11-26'
 _________________________
 
 Faster and simplified internal structure
@@ -17,7 +17,8 @@ New features
 
 #. Now works in natively geographic coords if hindcast is in geographic coords. If using geographic coords all inputs
 must also be groegraphic in (lon, lat) order, eg. release points, polygons, stats etc.
-Also grid spans must also be in degrees as (dlon, dlat)
+
+#. Also grid spans  are now always required and must  be in  (dx,dy) meters or degrees as (dlon, dlat) if geographic
 
 #. Most expensive step in 3D finding vertical cell is now 5 times faster, so code net 2-3 times faster, as by default regrids  3D data to uniform Sigma grid, to speed vertical cell search by factor of 5. Original slower native vertical grid short vertical walk search still available.
 
