@@ -55,8 +55,11 @@ class FieldGroupManager(ParameterBaseClass):
         grid = self.reader.grid
 
         info['has_open_boundary_nodes'] = np.any(self.reader.grid['node_type'] == node_types.open_boundary)
-        info['open_boundary_type'] = si.settings.open_boundary_type
-        info['apply_open_boundary'] = info['has_open_boundary_nodes'] and si.settings.open_boundary_type > 0
+
+        if 'use_open_boundary' not in info :
+            # set info here if not preset by nested grids
+            info['use_open_boundary'] = si.settings.use_open_boundary
+        info['use_open_boundary'] = info['has_open_boundary_nodes'] and info['use_open_boundary']
 
         # set up dry cell adjacency space for triangle walk
         grid['adjacency_with_dry_edges'] = grid['adjacency'].copy()  # working space to add dry cell boundaries to
@@ -112,7 +115,7 @@ class FieldGroupManager(ParameterBaseClass):
         i.update(self.reader.grid, time_sec, alive)
         i.stop_update_timer()
 
-    def setup_time_step(self, time_sec, xq, active,apply_open_boundary_fix=True):
+    def setup_time_step(self, time_sec, xq, active):
 
         # set buffer index from this time and next inside stepinfo
         # get next two buffer time steps around the given time in reader ring buffer
@@ -128,17 +131,22 @@ class FieldGroupManager(ParameterBaseClass):
         # all those that need fixing, lateral boundaries and bad, ie cell_status < blocked_dry_cell
         sel_fix = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('B1'))
 
-        self._apply_domain_boundary_condition(sel_fix)
+        sel_outside_open = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', cell_search_status_flags.open_boundary_edge,
+                                                                        out=self.get_partID_subset_buffer('B2'))
+        if sel_outside_open.size > 0:
+            self._fix_those_outside_open_boundary(sel_outside_open)
+
+        # outside domain but not an open boundary,
+        sel_outside_domain = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
+                                                                        cell_search_status_flags.domain_edge,
+                                                                        out=self.get_partID_subset_buffer('B2'))
+        self._move_back(sel_outside_domain)
 
         if si.settings.block_dry_cells:
-            self._apply_dry_cell_boundary_condition(sel_fix)
-
-        # only fix if single grid, nested grids get fixed by nested grid manager
-        sel_open = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
-                                                                cell_search_status_flags.open_boundary_edge,
-                                                                out=self.get_partID_subset_buffer('B1'))
-        if apply_open_boundary_fix:
-            self._fix_those_outside_open_boundary(sel_fix)# fix outside boundary
+            sel_hit_dry = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
+                                                                    cell_search_status_flags.dry_cell_edge,
+                                                                    out=self.get_partID_subset_buffer('B2'))
+            self._apply_dry_cell_boundary_condition(sel_hit_dry)
 
         # finally move back bad cell searches, nan etc
         sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
@@ -167,30 +175,21 @@ class FieldGroupManager(ParameterBaseClass):
 
         #todo add ancillary file readers below here
 
-    def _apply_domain_boundary_condition(self, sel_bad):
-        part_prop = si.class_roles.particle_properties
 
-        # lateral boundary
-        sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.domain_edge, out=self.get_partID_subset_buffer('B2'))
-        self._move_back(sel)
-
-    def _apply_dry_cell_boundary_condition(self, sel_bad):
+    def _apply_dry_cell_boundary_condition(self, sel_hit_dry):
         # dry cell boundary
-        part_prop = si.class_roles.particle_properties
-        sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
-        self._move_back(sel)
+        self._move_back(sel_hit_dry)
 
-    def _fix_those_outside_open_boundary(self, active):
+    def _fix_those_outside_open_boundary(self, sel_outside):
         part_prop = si.class_roles.particle_properties
         # deal with open boundary
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.open_boundary_edge, out=self.get_partID_subset_buffer('B1'))
-        if sel.size > 0:
-            if self.info['has_open_boundary_nodes'] and si.settings.open_boundary_type > 0:
-                part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel)
-                part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell, but not the location
-            else:
-                # outside and no open boundary somove back
-                self._move_back(sel)
+
+        if self.info['use_open_boundary']:
+            # dont move back
+            part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel_outside)
+        else:
+            # outside and no open boundary so move back
+            self._move_back(sel_outside)
 
     def _move_back(self, sel):
         # do move backs for blocked and bad
