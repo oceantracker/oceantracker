@@ -51,7 +51,7 @@ def get_case(n):
     time_step=3600.
     fall_vel= -0.01
     pulse_size = 10
-    open_boundary_type = 0
+    use_open_boundary = False,
     reader= None
     is3D=True
     water_depth_file = None
@@ -288,7 +288,7 @@ def get_case(n):
             title = 'GLORYS test'
             root_input_dir = r'F:\Hindcast_reader_tests\Glorys\BalticSea'
             # reader = 'oceantracker.reader.dev.dev_ross_sea_GLORYS_reader.GLORYSreader'
-            open_boundary_type = 1
+            use_open_boundary = True
             max_days =10
             time_step = 1800.
             pulse_size = 10
@@ -304,7 +304,7 @@ def get_case(n):
             output_file_base = 'shared_reader'
             file_mask = 'NZfinite*.nc'
             max_days =5# 30
-            open_boundary_type = 1
+            use_open_boundary = True
 
             x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri
                 [-35.87936265079254, 174.52205865417034], # harbour jet
@@ -349,7 +349,7 @@ def get_case(n):
 
     params.update(user_note=title,output_file_base=output_file_base,
 
-                  max_run_duration= max_days*24*3600, time_step= time_step, open_boundary_type=open_boundary_type)
+                  max_run_duration= max_days*24*3600, time_step= time_step, use_open_boundary=use_open_boundary )
     params['reader'].update(input_dir=root_input_dir,
                             file_mask=file_mask,
                             class_name=reader)

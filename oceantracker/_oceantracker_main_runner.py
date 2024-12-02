@@ -353,11 +353,6 @@ class _OceanTrackerRunner(object):
         # clear existing folder
         if path.isdir(run_output_dir):
             shutil.rmtree(run_output_dir)
-            for root, dirs, files in walk(run_output_dir):
-                for f in files:
-                    unlink(path.join(root, f))
-                for d in dirs:
-                    shutil.rmtree(path.join(root, d))
             msg_logger.msg('Deleted contents of existing output dir', warning=True)
 
         # make a new dir

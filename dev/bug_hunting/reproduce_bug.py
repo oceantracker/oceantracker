@@ -236,7 +236,7 @@ params = {
         ],
         "run_params": {
             "block_dry_cells": True,
-            "open_boundary_type": 1,
+            "use_open_boundary": True,
             "write_tracks": True,
             "duration": model_duration,
         },

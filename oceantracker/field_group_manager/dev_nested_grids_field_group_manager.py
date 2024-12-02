@@ -104,21 +104,20 @@ class DevNestedFields(ParameterBaseClass):
 
         ml = si.msg_logger
         # do final setup for each grid
-        for fgm in self.fgm_hydro_grids:
-            fgm.final_setup()
+        self.fgm_hydro_grids[0].final_setup()
 
 
         # check nested grids
-        for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):
+        for n, fgm in enumerate(self.fgm_hydro_grids[1:]):
+            fgm.final_setup()
+            fgm.info['use_open_boundary'] = True  # force open boundary condition for inner grid
             if not fgm.info['has_open_boundary_nodes']:
-                ml.msg(f'Nested grids must have open boundary nodes defined, nested grid {n-1} " does not',
+                ml.msg(f'Nested grids must have open boundary nodes defined, nested grid {n} " does not',
                                   fatal_error=True, exit_now=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
-            fgm.info['open_boundary_type'] = 1  # do nothing open boundary condition for inner grids
-            fgm.info['apply_open_boundary'] = True
 
         # outer grid is not required to have open boundary nodes, but can if provided
         fgm = self.fgm_hydro_grids[0]
-        if not fgm.info['has_open_boundary_nodes']: fgm.info['open_boundary_type'] = si.settings.open_boundary_type
+        if not fgm.info['has_open_boundary_nodes'] and si.settings.use_open_boundary: fgm.info['use_open_boundary'] = True
         pass
 
 
@@ -197,7 +196,7 @@ class DevNestedFields(ParameterBaseClass):
         # update outer grid
         fgm_outer_grid = self.fgm_hydro_grids[0]
         on_outer_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', 0, out=self.get_partID_buffer('fgmID0'))
-        fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid, apply_open_boundary_fix=True)
+        fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid)
 
         # work through inner grids
         for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):  # loop over nested rids
@@ -208,7 +207,7 @@ class DevNestedFields(ParameterBaseClass):
             is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0), include_dry_cells=True)
 
             if np.any(is_inside):
-                # move those now inside inner grid and copy in values
+                # move those now inside outer grid and copy in values
                 s = on_outer_grid[is_inside]
                 #print('xx moved to inner grid', n, np.count_nonzero(is_inside), int(time_sec),part_prop['ID'].get_values(s[:5]))
 
@@ -222,10 +221,10 @@ class DevNestedFields(ParameterBaseClass):
             on_inner_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', n, out=self.get_partID_buffer('fgmID1'))
 
             # update inner grid,without fixing open boundary
-            fgm.setup_time_step(time_sec, xq, on_inner_grid, apply_open_boundary_fix=False)
+            fgm.setup_time_step(time_sec, xq, on_inner_grid)
 
             # find those outside  this inner grid open boundary and move to outer
-            outside_inner = part_prop['cell_search_status'].find_subset_where(on_inner_grid, 'eq', cell_search_status_flags.open_boundary_edge, out=self.get_partID_subset_buffer('fgmID2'))
+            outside_inner = part_prop['status'].find_subset_where(on_inner_grid, 'eq', si.particle_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('fgmID2'))
             if outside_inner.size > 0:
                 inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0), include_dry_cells=True)
                 if np.any(inside_outer):
@@ -240,7 +239,7 @@ class DevNestedFields(ParameterBaseClass):
                     part_prop['bc_cords'].set_values(pp['bc_cords'][inside_outer, ...], s)
 
                     # update those now on outer grid and apply its open boundary condition
-                    fgm_outer_grid.setup_time_step(time_sec, xq, s, apply_open_boundary_fix=True)
+                    fgm_outer_grid.setup_time_step(time_sec, xq, s)
                     pass
                 if np.any(~inside_outer):
                     fgm._move_back(outside_inner[~inside_outer] ) # move back to last good position on inner grid

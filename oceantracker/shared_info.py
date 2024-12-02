@@ -88,7 +88,7 @@ class _DefaultSettings(_SharedStruct):
     user_note = PVC('No user note', str, doc_str='Any run note to store in case info file' )
     z0 = PVC(0.005, float, units='m', doc_str='Bottom roughness, used for tolerance and log layer calcs. ', min=0.0001 )  # default bottom roughness
     water_density = PVC(1025., float, units='kg/m^3', doc_str='Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900. )
-    open_boundary_type = PVC(0, int, min=0, max=1, doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS ' )
+    use_open_boundary = PVC(False, bool, doc_str='Allow particles to leave open boundary, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred for structed grids like ROMS ' )
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )
     use_geographic_coords = PVC(False, bool,
                           doc_str='Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
