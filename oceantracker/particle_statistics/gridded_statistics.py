@@ -341,12 +341,12 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         super().info_to_write_at_end()
         
         # Write z grid info
-        nc.write_a_new_variable('z', stats_grid['z'], ['z_dim'], description='Mid point of vertical grid cell')
+        nc.write_a_new_variable('z', stats_grid['z'], ['release_group_dim', 'z_dim'], description='Mid point of vertical grid cell')
 
         # Calculate grid cell volume
-        dx = np.diff(stats_grid['x_bin_edges'][0,:]).reshape((1,-1))
-        dy = np.diff(stats_grid['y_bin_edges'][0,:]).reshape((-1,1)) 
-        dz = np.diff(stats_grid['z_bin_edges']).reshape((-1,1,1))
+        dx = np.diff(stats_grid['x_bin_edges'][0,:]).reshape(( 1, 1,-1))
+        dy = np.diff(stats_grid['y_bin_edges'][0,:]).reshape(( 1,-1, 1)) 
+        dz = np.diff(stats_grid['z_bin_edges'][0,:]).reshape((-1, 1, 1))
         volume = dx * dy * dz
 
         # Write grid cell volume
@@ -369,15 +369,17 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         # Make vertical bin edges
         base_z_bin_edges = np.linspace(vmin, vmax, vsize +1)
 
-        # Make vertical bin centers
+
         dz = float((vmax - vmin) / vsize)
+        # Make vertical bin centers
         # via convolution
         base_z = 0.5 * (base_z_bin_edges[1:] + base_z_bin_edges[:-1])
         
-        # Store in grid dict
-        stats_grid['z'] = base_z
-        stats_grid['z_bin_edges'] = base_z_bin_edges
-        # stats_grid['cell_volume'] = stats_grid['cell_area'] * dz
+        # make copies for each release group
+        s= (len(si.class_roles.release_groups), 1)
+        stats_grid['z'] = np.tile(base_z[np.newaxis,:], s)
+        stats_grid['z_bin_edges'] = np.tile(base_z_bin_edges[np.newaxis,:], s)
+        stats_grid['cell_volume'] = stats_grid['cell_area'] * dz
 
         if self.params['write']:
             nc.add_dimension('z_dim', vsize)
@@ -391,7 +393,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         # Add z dimension to dimension lists
         dim_names = ['time_dim', 'release_group_dim', 'z_dim', 'y_dim', 'x_dim']
         dim_sizes = [None, len(si.class_roles.release_groups), 
-                    len(stats_grid['z']), stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
+                    stats_grid['z'].shape[1], stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
 
         nc.create_a_variable('count', dim_names, np.int64, 
                           description='counts of particles in 3D grid at given times, for each release group')
@@ -428,12 +430,12 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             # Get grid spacings
             dx = x_edges[ng, 1] - x_edges[ng, 0]
             dy = y_edges[ng, 1] - y_edges[ng, 0]
-            dz = z_edges[1] - z_edges[0]
+            dz = z_edges[ng, 1] - z_edges[ng, 0]
 
             # Calculate grid indices
             r = int(np.floor((x[n, 1] - y_edges[ng,0]) / dy))  # row is y
             c = int(np.floor((x[n, 0] - x_edges[ng,0]) / dx))  # column is x
-            k = int(np.floor((-x[n, 2] - z_edges[0]) / dz))    # k is z
+            k = int(np.floor((-x[n, 2] - z_edges[ng,0]) / dz))    # k is z
 
             # Check if particle is inside grid bounds
             if (0 <= r < y_edges.shape[1] - 1 and 
