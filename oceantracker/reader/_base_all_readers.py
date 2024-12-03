@@ -440,7 +440,7 @@ class _BaseReader(ParameterBaseClass):
 
         if field.is3D() and self.info['regrid_z_to_uniform_sigma_levels']:
             data = self._vertical_regrid_Slayer_field_to_uniform_sigma('water_velocity', data)
-
+        #data[:,:,:,:] = np.asarray([.1,0,0.]) #debug with uniform eastward flow
         field.data[buffer_index, ...] = data
         return data
 

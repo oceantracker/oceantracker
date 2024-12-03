@@ -163,6 +163,7 @@ class DevNestedFields(ParameterBaseClass):
                 # start with outer grids values
                 is_inside = sel_n.copy()
                 part_data= deepcopy(part_data_n)
+                part_data['hydro_model_gridID'][sel_n] = 0
             else:
                 # use next grids values
                 is_inside[sel_n]= True
@@ -196,6 +197,7 @@ class DevNestedFields(ParameterBaseClass):
         # update outer grid
         fgm_outer_grid = self.fgm_hydro_grids[0]
         on_outer_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', 0, out=self.get_partID_buffer('fgmID0'))
+        #print('xx1',on_outer_grid, part_prop['status'].data[:1], part_prop['x'].data[:1], part_prop['hydro_model_gridID'].data[:1])
         fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid)
 
         # work through inner grids
@@ -209,8 +211,8 @@ class DevNestedFields(ParameterBaseClass):
             if np.any(is_inside):
                 # move those now inside outer grid and copy in values
                 s = on_outer_grid[is_inside]
-                #print('xx moved to inner grid', n, np.count_nonzero(is_inside), int(time_sec),part_prop['ID'].get_values(s[:5]))
 
+                #print('xx moved to inner grid',s[:2], part_prop['status'].data[s[:2]], part_prop['x'].data[s[:2]],  part_prop['hydro_model_gridID'].data[s[:2]])
                 part_prop['hydro_model_gridID'].set_values(n, s)  # put on inner grid
                 part_prop['n_cell'].set_values(pp['n_cell'][is_inside], s)
                 part_prop['n_cell_last_good'].set_values(pp['n_cell'][is_inside], s)
@@ -230,14 +232,14 @@ class DevNestedFields(ParameterBaseClass):
                 if np.any(inside_outer):
                     # move those now inside inner grid and copy in values
                     s = outside_inner[inside_outer]  # IDs of those outside inner and inside outer
-                    #print('xx moved to outer grid=', n,'count=', np.count_nonzero(inside_outer), int(time_sec),part_prop['ID'].get_values(s[:5]))
+
 
                     part_prop['status'].set_values(si.particle_status_flags.moving, s)
                     part_prop['hydro_model_gridID'].set_values(0, s)  # put on outer grid
                     part_prop['n_cell'].set_values(pp['n_cell'][inside_outer], s)
                     part_prop['n_cell_last_good'].set_values(pp['n_cell'][inside_outer], s)
                     part_prop['bc_cords'].set_values(pp['bc_cords'][inside_outer, ...], s)
-
+                    #print('xx moved to outer grid', s[:2], part_prop['status'].data[s[:2]], part_prop['x'].data[s[:2]],  part_prop['hydro_model_gridID'].data[:1])
                     # update those now on outer grid and apply its open boundary condition
                     fgm_outer_grid.setup_time_step(time_sec, xq, s)
                     pass
@@ -245,7 +247,8 @@ class DevNestedFields(ParameterBaseClass):
                     fgm._move_back(outside_inner[~inside_outer] ) # move back to last good position on inner grid
                     #part_prop['hydro_model_gridID'].set_values(-1,outside_inner[~inside_outer] )
                     #print('xx could not be moved to outer grid=',n,'count=', np.count_nonzero(~inside_outer))
-
+            pass
+            #print('xx10', part_prop['status'].data[:1], part_prop['x'].data[:1],    part_prop['hydro_model_gridID'].data[:1])
             #todo any still outside the inner or outer grid? move back?
             #todo utside outer grid and all inner grids
         pass
