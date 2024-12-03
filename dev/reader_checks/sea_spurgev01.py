@@ -36,19 +36,21 @@ if __name__ == "__main__":
     max_days = 5  # 30
     use_open_boundary = True
 
-    x0 = [ [174.665532083399,-35.922300421719214], # hen and chickes, in outer grid
+    x0 = [[174.665532083399,-35.922300421719214], # hen and chickes, in outer grid
            [167.70585302583135, -41.09760403942677],
            [168.18486957886807, -41.126477553835635],
            [178.78311081480544, -34.83205141270341],
-          [ 178.9627420221942, -41.47295972674199]]
-    ot.add_class('release_groups',points = x0, pulse_size=10, release_interval=0)
+        [179.74114392087887, -35.81375090260477],
+          [ 178.9627420221942, -41.47295972674199]
+           ]
+    ot.add_class('release_groups',points = x0, pulse_size=10, release_interval=1800)
     if True:
         case_info_file= ot.run()
     else:
         case_info_file = r'D:\OceanTrackerOutput\sea_spurge01\f'
     tracks =load_output_files.load_track_data(case_info_file,gridID=1) # plot inner grid
     anim = plot_tracks.animate_particles(tracks,colour_using_data=tracks['hydro_model_gridID'],
-                                         back_ground_depth=False,
+                                         back_ground_depth=False, vmin=0,vmax=1,
                                          show_grid=True, show_dry_cells=True, axis_labels=True,
                                          )
 
