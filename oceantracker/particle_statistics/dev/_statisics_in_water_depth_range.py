@@ -1,7 +1,7 @@
 # does gridded and polygon statistics for particles in a depth range
 import numpy as np
 
-import oceantracker.particle_statistics.gridded_statistics as gridded_statistics
+import oceantracker.particle_statistics.gridded_statistics_2D as gridded_statistics_2D
 import oceantracker.particle_statistics.polygon_statistics as polygon_statistics
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
@@ -41,14 +41,14 @@ class WaterDepthRangeStats(ParameterBaseClass):
         return out[:nfound]
 
 
-class GriddedStats2D_timeBasedDepthRange(WaterDepthRangeStats, gridded_statistics.GriddedStats2D_timeBased):
+class GriddedStats2D_timeBasedDepthRange(WaterDepthRangeStats, gridded_statistics_2D.GriddedStats2D_timeBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
         self.add_default_params({'role_output_file_tag' : PVC('stats_gridded_time_depth_range', str)})
 
-class GriddedStats2D_ageBasedDepthRange(WaterDepthRangeStats, gridded_statistics.GriddedStats2D_ageBased):
+class GriddedStats2D_ageBasedDepthRange(WaterDepthRangeStats, gridded_statistics_2D.GriddedStats2D_ageBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
