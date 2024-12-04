@@ -1,5 +1,5 @@
 import numpy as np
-import oceantracker.particle_statistics.gridded_statistics as gridded_statistics
+import oceantracker.particle_statistics.gridded_statistics_2D as gridded_statistics_2D
 from numba import njit
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC,merge_params_with_defaults
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
@@ -70,7 +70,7 @@ class _CorePolygonMethods(ParameterBaseClass):
 
         add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
 
-class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_timeBased):
+class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics_2D.GriddedStats2D_timeBased):
     # class to hold counts of particles inside 2D polygons squares
 
     def __init__(self):
@@ -152,7 +152,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
             for m in range(len(prop_list)):
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
 
-class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_ageBased):
+class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics_2D.GriddedStats2D_ageBased):
 
     def __init__(self):
         super().__init__()
