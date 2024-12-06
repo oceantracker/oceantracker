@@ -11,7 +11,7 @@ from oceantracker.shared_info import shared_info as si
 
 class PointRelease(_BaseReleaseGroup):
     '''
-    Release pulse of particles at given points, or in cicile around points.
+    Release pulse of particles at given points, or in circle around points.
     '''
     def __init__(self):
         # set up info/attributes

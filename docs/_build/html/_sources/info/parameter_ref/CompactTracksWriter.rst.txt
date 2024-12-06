@@ -14,20 +14,6 @@ CompactTracksWriter
 Parameters:
 ************
 
-	* ``NCDF_particle_chunk`` :   ``<class 'int'>``   *<optional>*
-		Description: number of particles per time chunk in the netcdf file
-
-		- default: ``100000``
-		- data_type: ``<class 'int'>``
-		- min: ``100``
-
-	* ``NCDF_time_chunk`` :   ``<class 'int'>``   *<optional>*
-		Description: number of time steps per time chunk in the netcdf file
-
-		- default: ``24``
-		- data_type: ``<class 'int'>``
-		- min: ``1``
-
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
 
@@ -38,17 +24,6 @@ Parameters:
 		Description: Name used to refer to class in code and output, = None for core claseses
 
 		- default: ``None``
-		- data_type: ``<class 'str'>``
-
-	* ``retain_compact_files`` :   ``<class 'bool'>``   *<optional>*
-		Description: keep  compact tracks files after conversion to rectangular format
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
-
-	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
-		- default: ``tracks_compact``
 		- data_type: ``<class 'str'>``
 
 	* ``time_steps_per_per_file`` :   ``<class 'int'>``   *<optional>*
@@ -102,11 +77,22 @@ Parameters:
 Expert Parameters:
 *******************
 
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
+	* ``NCDF_particle_chunk`` :   ``<class 'int'>``   *<optional>*
+		Description: number of particles per time chunk in the netcdf file
 
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
+		- default: ``100000``
+		- data_type: ``<class 'int'>``
+		- min: ``100``
+
+	* ``NCDF_time_chunk`` :   ``<class 'int'>``   *<optional>*
+		Description: number of time steps per time chunk in the netcdf file
+
+		- default: ``24``
+		- data_type: ``<class 'int'>``
+		- min: ``1``
+
+	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
+		- default: ``tracks_compact``
+		- data_type: ``<class 'str'>``
 
 

@@ -15,7 +15,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="old_ParticleProperty" href="old_ParticleProperty.html" />
+    <link rel="next" title="_BaseParticleProperty" href="_BaseParticleProperty.html" />
     <link rel="prev" title="ParticleParameterFromNormalDistribution" href="ParticleParameterFromNormalDistribution.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -76,7 +76,7 @@
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="particle_properties_toc.html">particle_properties</a><ul>
       <li>Previous: <a href="ParticleParameterFromNormalDistribution.html" title="previous chapter">ParticleParameterFromNormalDistribution</a></li>
-      <li>Next: <a href="old_ParticleProperty.html" title="next chapter">old_ParticleProperty</a></li>
+      <li>Next: <a href="_BaseParticleProperty.html" title="next chapter">_BaseParticleProperty</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -175,16 +175,6 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">type</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: type of particle property, used to manage how to update particle property</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">user</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['manual_update',</span> <span class="pre">'from_fields',</span> <span class="pre">'user']</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">units</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
@@ -244,20 +234,10 @@
 <section id="expert-parameters">
 <h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">development</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class is under development and testing</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
+<div><ul class="simple">
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">release_group_parameters</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - In development: release group specific particle prop params</p>
-<ul class="simple">
+<ul>
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
@@ -284,7 +264,7 @@
           <a href="ParticleParameterFromNormalDistribution.html" title="Previous document">ParticleParameterFromNormalDistribution</a>
         </li>
         <li>
-          <a href="old_ParticleProperty.html" title="Next document">old_ParticleProperty</a>
+          <a href="_BaseParticleProperty.html" title="Next document">_BaseParticleProperty</a>
           &rarr;
         </li>
     </ul>

@@ -40,8 +40,6 @@ class FieldGroupManager(ParameterBaseClass):
 
 
 
-
-
     def build_readers(self):
 
         self.reader.build_reader()
@@ -124,7 +122,7 @@ class FieldGroupManager(ParameterBaseClass):
         grid =self.reader.grid
         info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self.reader._time_step_and_buffer_offsets(time_sec)
         part_prop = si.class_roles.particle_properties
-
+        reader = self.reader
         # find hori cell
         self.reader.interpolator.find_hori_cell(xq, active)
 
@@ -152,10 +150,10 @@ class FieldGroupManager(ParameterBaseClass):
         sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel) # those still bad, eg nan etc
 
-        if grid['is3D']:
+        if reader.info['is3D']:
             # find vertical cell
             info = self.info
-            self.reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
+            reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
 
     def _create_readers(self, reader_builder):
@@ -165,6 +163,8 @@ class FieldGroupManager(ParameterBaseClass):
         self.reader = si._class_importer.make_class_instance_from_params('reader', reader_builder['params'],
                                    caller=self, crumbs=f'setup_hydro_fields> reader class ')
         reader = self.reader
+
+
         # first build data set
         dataset = OceanTrackerDataSet()
         dataset.build_dataset_from_catalog(reader_builder['catalog'])

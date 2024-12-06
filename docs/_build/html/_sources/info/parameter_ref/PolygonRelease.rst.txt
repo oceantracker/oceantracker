@@ -152,11 +152,4 @@ points: still working on display  of default params of  type <class 'oceantracke
 Expert Parameters:
 *******************
 
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
-
 

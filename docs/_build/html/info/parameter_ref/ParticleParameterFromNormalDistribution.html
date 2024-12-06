@@ -106,7 +106,7 @@
 <p><strong>Doc:</strong></p>
 <p><strong>short class_name:</strong> ParticleParameterFromNormalDistribution</p>
 <p><strong>full class_name :</strong> oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution</p>
-<p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseParticleProperty&gt; CustomParticleProperty&gt; ParticleParameterFromNormalDistribution</p>
+<p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseParticleProperty&gt; ManuallyUpdatedParticleProperty&gt; ParticleParameterFromNormalDistribution</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
 <blockquote>
@@ -170,16 +170,6 @@
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
 <li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">type</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: type of particle property, used to manage how to update particle property</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">user</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['manual_update',</span> <span class="pre">'from_fields',</span> <span class="pre">'user']</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -251,20 +241,10 @@
 <section id="expert-parameters">
 <h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">development</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class is under development and testing</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
+<div><ul class="simple">
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">release_group_parameters</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - In development: release group specific particle prop params</p>
-<ul class="simple">
+<ul>
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>default list : <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>

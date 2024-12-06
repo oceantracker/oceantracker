@@ -11,8 +11,8 @@ from oceantracker.reader.util import  hydromodel_grid_transforms
 from oceantracker.util.numba_util import  njitOT
 from oceantracker.shared_info import shared_info as si
 
-class dev_DELFTFM(_BaseUnstructuredReader):
-
+class DELFTFM(_BaseUnstructuredReader):
+    development = True
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(

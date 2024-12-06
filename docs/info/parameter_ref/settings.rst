@@ -10,7 +10,7 @@ ______________________________
 Parameters:
 ************
 
-	* ``EPSG_code_metres_grid`` :   ``<class 'int'>``   *<optional>*
+	* ``EPSG_code_meters_grid`` :   ``<class 'int'>``   *<optional>*
 		Description: If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM
 
 		- default: ``None``
@@ -81,14 +81,6 @@ Parameters:
 		- units: ``m``
 		- min: ``0.0``
 
-	* ``open_boundary_type`` :   ``<class 'int'>``   *<optional>*
-		Description: new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS
-
-		- default: ``0``
-		- data_type: ``<class 'int'>``
-		- min: ``0``
-		- max: ``1``
-
 	* ``output_file_base`` :   ``<class 'str'>``   *<optional>*
 		Description: The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written
 
@@ -130,7 +122,14 @@ Parameters:
 		- min: ``0.001``
 
 	* ``use_A_Z_profile`` :   ``<class 'bool'>``   *<optional>*
-		Description: Use the hydro-model vertical turbulent diffusivity profiles for vertical random walk (more realistic) instead of constant value (faster), if profiles are in the file
+		Description: Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files
+
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
+
+	* ``use_bottom_stress`` :   ``<class 'bool'>``   *<optional>*
+		Description: Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension
 
 		- default: ``True``
 		- data_type: ``<class 'bool'>``
@@ -140,6 +139,13 @@ Parameters:
 		Description: Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures
 
 		- default: ``True``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
+
+	* ``use_open_boundary`` :   ``<class 'bool'>``   *<optional>*
+		Description: Allow particles to leave open boundary, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred for structed grids like ROMS
+
+		- default: ``False``
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
@@ -224,13 +230,6 @@ Expert Parameters:
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``multi_processing_method`` :   ``<class 'str'>``   *<optional>*
-		Description: How  multiprocessing is implemented, ie. sets  multiprocessing.set_start_method(str),  spawn= separate work spaces, fork = has copy on parents memory space
-
-		- default: ``None``
-		- data_type: ``<class 'str'>``
-		- possible_values: ``['fork', 'spawn']``
-
 	* ``multiprocessing_case_start_delay`` :   ``<class 'float'>``   *<optional>*
 		Description: Delay start of each sucessive case run parallel, to reduce congestion reading first hydo-model file
 
@@ -244,6 +243,20 @@ Expert Parameters:
 		- default: ``500000``
 		- data_type: ``<class 'int'>``
 		- min: ``1``
+
+	* ``particle_buffer_initial_size`` :   ``<class 'int'>``   *<optional>*
+		Description: Starting size of particle property memory buffer. This expands by particle_buffer_chunk_size as needed
+
+		- default: ``1000000``
+		- data_type: ``<class 'int'>``
+		- min: ``1``
+
+	* ``use_geographic_coords`` :   ``<class 'bool'>``   *<optional>*
+		Description: Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 	* ``use_random_seed`` :   ``<class 'bool'>``   *<optional>*
 		Description: Makes results reproducible, only use for testing developments give the same results!

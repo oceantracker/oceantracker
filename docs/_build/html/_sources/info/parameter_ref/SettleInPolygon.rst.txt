@@ -2,7 +2,7 @@
 SettleInPolygon
 ################
 
-**Doc:** 
+**Doc:** allows particles to freeze if inside a single polygon    
 
 **short class_name:** SettleInPolygon
 
@@ -43,12 +43,5 @@ Parameters:
 
 Expert Parameters:
 *******************
-
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 

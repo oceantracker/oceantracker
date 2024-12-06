@@ -295,39 +295,83 @@ def get_case(n):
             fall_vel = -0.01
             is3D =True
 
+        case   1101:
+            # copernicus GLORYS
 
+            root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D'
+            file_mask = 'cmems*.nc'
+
+            x0 = [[174.665532083399, -35.922300421719214],  # hen and chickes, in outer grid
+                  [167.70585302583135, -41.09760403942677],
+                  [168.18486957886807, -41.126477553835635],
+                  [178.78311081480544, -34.83205141270341],
+                  [179.74114392087887, -35.81375090260477],
+                  [178.9627420221942, -41.47295972674199]
+                  ]
+
+            output_file_base = 'GLORYS3D'
+            title = 'GLORYS 3D test'
+            use_open_boundary = True
+            max_days =10
+            time_step = 1800.
+            pulse_size = 10
+            fall_vel = -0.01
+            is3D =True
+
+        case  1102:
+            # copernicus GLORYS 2D, surface values
+
+            root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge2D'
+            file_mask = 'cmems*.nc'
+
+            x0 = [[174.665532083399, -35.922300421719214],  # hen and chickes, in outer grid
+                  [167.70585302583135, -41.09760403942677],
+                  [168.18486957886807, -41.126477553835635],
+                  [178.78311081480544, -34.83205141270341],
+                  [179.74114392087887, -35.81375090260477],
+                  [178.9627420221942, -41.47295972674199]
+                  ]
+
+            output_file_base = 'GLORYS3D'
+            title = 'GLORYS 3D test'
+            use_open_boundary = True
+            max_days = 10
+            time_step = 1800.
+            pulse_size = 10
+            fall_vel = -0.01
+            is3D = False
 
         case 2000:
-            # nested schisim
-            pulse_size = 5
-            root_input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
-            output_file_base = 'shared_reader'
-            file_mask = 'NZfinite*.nc'
-            max_days =5# 30
-            use_open_boundary = True
+                # nested schisim
+                pulse_size = 5
+                root_input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
+                output_file_base = 'shared_reader'
+                file_mask = 'NZfinite*.nc'
+                max_days =5# 30
+                use_open_boundary = True
 
-            x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri
-                [-35.87936265079254, 174.52205865417034], # harbour jet
-                [-35.94290227656262, 174.4761188861907],  # nearshore brembay
-                [-35.91960370397214, 174.59610759097396],
-                [-35.922300421719214, 174.665532083399],  # hen and chickes, in outer grid
-                [-35.922300421719214, 174.665532083399], # hen and chickes, in outer grid
-                ]
-            x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
-            x0=[   [ 1727195 ,    6035149],
-                    [1737357,     6029638],
-                    [1742484 ,    6021345],
-                    [1743472 ,    6019861]]
-            ax=  [  1715000 ,    1755000 ,    6010000 ,    6050000] # northland
-            title = 'nested test'
-            nested_readers= [dict(name='nest1',
-                    input_dir = r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\Existing_Sep2012_temp',
-                    hgrid_file_name=r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\hgrid.gr3',
-                    # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',
-                    #  hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
-                    file_mask = 'schout*.nc',
+                x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri
+                    [-35.87936265079254, 174.52205865417034], # harbour jet
+                    [-35.94290227656262, 174.4761188861907],  # nearshore brembay
+                    [-35.91960370397214, 174.59610759097396],
+                    [-35.922300421719214, 174.665532083399],  # hen and chickes, in outer grid
+                    [-35.922300421719214, 174.665532083399], # hen and chickes, in outer grid
+                    ]
+                x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
+                x0=[   [ 1727195 ,    6035149],
+                        [1737357,     6029638],
+                        [1742484 ,    6021345],
+                        [1743472 ,    6019861]]
+                ax=  [  1715000 ,    1755000 ,    6010000 ,    6050000] # northland
+                title = 'nested test'
+                nested_readers= [dict(name='nest1',
+                        input_dir = r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\Existing_Sep2012_temp',
+                        hgrid_file_name=r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\hgrid.gr3',
+                        # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',
+                        #  hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
+                        file_mask = 'schout*.nc',
 
-            )]
+                )]
 
 
         case 3000:

@@ -95,19 +95,20 @@ ot.settings(output_file_base='heat_map_example', # name used as base for output 
             write_tracks = False # particle tracks not needed for on fly 
             )
 # ot.set_class, sets parameters for a named class
-ot.add_class('reader',input_dir= '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                      file_mask=  'demoHindcastSchism*.nc')  # hindcast file mask
+ot.add_class('reader',input_dir=  '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                      file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
 
 # add one release locations 
-ot.add_class('release_groups', name='my_release_point', # user must provide a name for group first
-                        points= [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
-                        release_interval= 900,           # seconds between releasing particles
-                        pulse_size= 1000,                   # number of particles released each release_interval
+ot.add_class('release_groups', 
+               name='my_release_point', # optional name used to refere to group in plotting
+                points= [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
+                release_interval= 900,           # seconds between releasing particles
+                pulse_size= 1000,                   # number of particles released each release_interval
             )
 # add a decaying particle property
 # add and Age decay particle property, with exponential decay based on age, with time scale 1 hour                             
 ot.add_class('particle_properties', # add a new property to particle_properties role
-            name ='a_pollutant', # must have a user given name
+            name ='a_pollutant', # must have a user given name to 
             class_name='oceantracker.particle_properties.age_decay.AgeDecay', #  class_role is resuspension
             initial_value= 1000,
             decay_time_scale = 3600.) # time scale of age decay ie decays initial_value* exp(-age/decay_time_scale)
@@ -148,7 +149,7 @@ from plot_oceantracker import plot_statistics
 from IPython.display import HTML
 
 # basic read of net cdf
-raw_stats = read_ncdf_output_files.read_stats_file('output/heat_map_example/heat_map_example_stats_gridded_time_my_heatmap.nc')
+raw_stats = read_ncdf_output_files.read_stats_file('./output/heat_map_example/heat_map_example_stats_gridded_time_0_my_heatmap.nc')
 print('raw_stats', raw_stats.keys())
 
 # better,  load netcdf plus grid and other data useful in plotting 
@@ -177,53 +178,61 @@ plot_statistics.plot_heat_map(stats_data, var='a_pollutant',release_group= 'my_r
 # 
 # # add polygon stats example with plotting
 
-# In[5]:
+# In[9]:
 
 
 # Polygon Statistics example.py run using dictionary of parameters
 #------------------------------------------------
-from oceantracker import main
-params={}
-params.update(output_file_base='polygon_connectivity_map_example',  # name used as base for output files
-            root_output_dir= 'output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
+# make instance of oceantracker to use to set parameters using code, then run
+ot = OceanTracker()
+
+# ot.settings method use to set basic settings
+ot.settings(output_file_base='heat_map_example', # name used as base for output files
+            root_output_dir='output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
             time_step= 600., #  10 min time step as seconds
             write_tracks = False # particle tracks not needed for on fly 
+            )
+# ot.set_class, sets parameters for a named class
+ot.add_class('reader',input_dir=  '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                      file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
+
+# add one release locations 
+ot.add_class('release_groups', 
+               name='my_release_point', # optional name used to refere to group in plotting
+                points= [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
+                release_interval= 900,           # seconds between releasing particles
+                pulse_size= 1000,                   # number of particles released each release_interval
+            )
+# add a decaying particle property
+# add and Age decay particle property, with exponential decay based on age, with time scale 1 hour                             
+ot.add_class('particle_properties', # add a new property to particle_properties role
+            name ='a_pollutant', # must have a user given name to 
+            class_name='oceantracker.particle_properties.age_decay.AgeDecay', #  class_role is resuspension
+            initial_value= 1000,
+            decay_time_scale = 3600.) # time scale of age decay ie decays initial_value* exp(-age/decay_time_scale)
+
+# add a gridded particle statistic 
+ot.add_class('particle_statistics',
+               name='my_polygon',
+               class_name= 'PolygonStats2D_timeBased',
+               polygon_list = [
+                        dict(points= [   [1597682.1237, 5489972.7479],# list of one or more polygons
+                                 [1598604.1667, 5490275.5488],
+                                 [1598886.4247, 5489464.0424],
+                                 [1597917.3387, 5489000],
+                                 [1597300, 5489000], [1597682.1237, 5489972.7479]]
+                        )] 
                )
 
-# ot.set_class, sets parameters for a named class
-params.update(reader= { 'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                    'file_mask':  'demoHindcastSchism*.nc'})  # hindcast file mask
-params.update(release_groups= {},particle_statistics={} )
-# add one release locations 
-params['release_groups']['my_release_point']={ # user must provide a name for group first
-                        'points': [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
-                        'release_interval': 900,           # seconds between releasing particles
-                        'pulse_size': 1000,                   # number of particles released each release_interval
-            }
-# add a gridded particle statistic 
-params['particle_statistics']['my_polygon']= {
-                'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
-                'polygon_list': [{'points': [   [1597682.1237, 5489972.7479],# list of one or more polygons
-                                                [1598604.1667, 5490275.5488],
-                                                [1598886.4247, 5489464.0424],
-                                                [1597917.3387, 5489000],
-                                                [1597300, 5489000], [1597682.1237, 5489972.7479]
-                                                ]                                         
-                                  }],
-                # the below settings are optional
-                'update_interval': 900, # time interval in sec, between doing particle statists counts 
-                'status_min':'moving', # only count the particles which are moving 
-                }
-
 # run oceantracker
-poly_case_info_file_name = main.run(params)
+poly_case_info_file_name = ot.run()
 
 
 # ## Read polygon/connectivity statistics
 # 
 # 
 
-# In[ ]:
+# In[10]:
 
 
 #Read polygon stats and calculate connectivity matrix 

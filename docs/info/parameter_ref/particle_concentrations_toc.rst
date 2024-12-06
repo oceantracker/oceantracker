@@ -7,6 +7,7 @@ particle_concentrations
 	:maxdepth: 1
 
 	ParticleConcentrations2D.rst
+	_BaseTriangleProperties.rst
 
 **Role:** 
 
