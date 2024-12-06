@@ -12,6 +12,7 @@ from copy import copy
 
 class GLORYSreader(_BaseStructuredReader):
 
+    development= True
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
@@ -47,9 +48,21 @@ class GLORYSreader(_BaseStructuredReader):
                         )
 
     def get_hindcast_info(self, catalog):
+
+
         dm = self.params['dimension_map']
         fm = self.params['field_variable_map']
-        hi = dict(is3D=any(d in catalog['variables'][fm['water_velocity'][0]]['dims'] for d in dm['all_z_dims']))
+        hi = dict( )
+
+        if 'mask' not in catalog['variables']:
+            si.msg_logger.msg('For GLORYS hindcasts, must include the static variables netcdf file in same folder as the currents hindcast files, as need variables such as the land mask in that file',
+                              caller = self, fatal_error=True, exit_now=True)
+
+        xvel_dims =  catalog['variables'][fm['water_velocity'][0]]['dims']
+        hi['is3D']=any(d in xvel_dims  for d in dm['all_z_dims'])
+        # GLORYS may give unit z dim to 2D data
+        hi['is3D'] =  hi['is3D'] if dm['z'] in xvel_dims and xvel_dims[dm['z'] ] > 1 else False
+
         if hi['is3D']:
             hi['z_dim'] = dm['z']
             hi['num_z_levels'] = catalog['info']['dims'][hi['z_dim']]
@@ -66,6 +79,7 @@ class GLORYSreader(_BaseStructuredReader):
             hi['num_z_levels'] = 1
             hi['all_z_dims'] = []
             hi['vert_grid_type'] = None
+            fm['water_velocity'] = fm['water_velocity'][:2]
 
         # get num nodes in each field
         params= self.params

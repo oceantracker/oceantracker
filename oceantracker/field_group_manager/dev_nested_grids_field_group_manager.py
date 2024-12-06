@@ -12,8 +12,11 @@ from oceantracker.definitions import  cell_search_status_flags
 # run fields nested with outer main readers grid
 
 class DevNestedFields(ParameterBaseClass):
-    # build a list of field group managers for outer and nest grids
-    # first in list grid is the outer grid
+    ''' Core class. Builds a list of field group managers for outer and nested grids and manage
+    interactions with list of field group managers. Eg update, interpolate etc
+     First in list grid is the outer grid.
+     Consistency between available hindcast variables means this code is fragile and error messages opaque.
+     '''
 
     readers=[] # first is outer grid readers[0], nesting readers are readers[1:]
 
@@ -96,8 +99,6 @@ class DevNestedFields(ParameterBaseClass):
             fgm.reader.build_reader(gridID=n)
             fgm.reader.write_hydro_model_grid()
         pass
-
-
 
 
     def final_setup(self):

@@ -30,7 +30,7 @@ class _BaseReader(ParameterBaseClass):
         self.add_default_params({
             'input_dir': PVC(None, str, is_required=True),
             'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-            'geographic_coords': PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, usinh this setting  forces reading as geograraphic coord if auto-dectect fails',
+            'geographic_coords': PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
                                      expert=True),
             'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
             'time_buffer_size': PVC(24, int, min=2),
@@ -193,12 +193,11 @@ class _BaseReader(ParameterBaseClass):
 
     def _set_up_grid(self):
         grid={}
-        grid['is3D']  = self.reader_builder['hindcast_info']['is3D']
         grid = self.build_hori_grid(grid)
         grid = self.construct_grid_variables(grid)
 
 
-        if grid['is3D']:
+        if self.info['is3D']:
             grid = self.build_vertical_grid(grid)
 
         else:
@@ -226,7 +225,7 @@ class _BaseReader(ParameterBaseClass):
         b = f'{np.array2string(bounds[0], precision=3, floatmode="fixed")} to {np.array2string(bounds[1], precision=3, floatmode="fixed")}'
 
         info['bounding_box'] = b
-        si.msg_logger.msg(f'Hydro-model is "{"3D" if grid["is3D"] else "2D"}", in geographic coords = "{info["geographic_coords"] }"  type "{self.__class__.__name__}"',
+        si.msg_logger.msg(f'Hydro-model is "{"3D" if info["is3D"] else "2D"}", in geographic coords = "{info["geographic_coords"] }"  type "{self.__class__.__name__}"',
                           note=True, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
 
         si.msg_logger.msg(f'Hindcast start: {info["start_date"]}  end:  {info["end_date"]}, time steps  {info["total_time_steps"]} ', tabs=3)
@@ -431,6 +430,22 @@ class _BaseReader(ParameterBaseClass):
         return data
 
     def setup_water_velocity_field(self):
+        reader_builder = self.reader_builder
+        fi = reader_builder['reader_field_info']
+
+        # look for depth averaged if 3D velocity not there
+        if 'water_velocity' not in fi:
+            if 'water_velocity_depth_averaged' not in fi:
+                # use depth average if vailable
+                si.msg_logger.msg('Cannot find water_velocity or depth averaged water velocity in hindcast',
+                               hint=f'Found variables mapped to {str(fi.keys())} \n File variables are {str(reader_builder["catalog"]["variables"].keys())}',
+                               fatal_error=True, exit_now=True)
+
+            fi['water_velocity'] = fi['water_velocity_depth_averaged']
+            fi.pop('water_velocity_depth_averaged')
+            si.msg_logger.msg('No 3D velocity variables in hindcast, using depth averaged water velocity instead in 2D mode',
+                note=True)
+
         i = self._add_a_reader_field('water_velocity')
         return i
 

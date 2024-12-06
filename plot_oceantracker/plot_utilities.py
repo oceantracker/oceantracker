@@ -115,10 +115,12 @@ def plot_dry_cells(track_data,show_dry_cells=True, nt=0):
         dry_cell_data[dry_cell_data < 128] = np.nan
         pc = plt.gca().tripcolor(grid['x'][:, 0], grid['x'][:, 1], facecolors=dry_cell_data[nt, :], triangles=grid['triangles'],
                                  zorder=3, vmin=128, vmax=255, edgecolors='none', alpha=.3, cmap=cmap, antialiaseds=True)
+        return pc, dry_cell_data
     else:
-        # small fast dummy plot
-        dry_cell_data = np.full((track_data['time'].shape[0],1),np.nan)
-        pc = plt.gca().tripcolor(grid['x'][:3, 0],  grid['x'][:3, 1], grid['triangles'][0,:],
+        # small fast dummy plot of first two triangles
+        dry_cell_data = np.full((track_data['time'].shape[0],2),np.nan)
+        pc = plt.gca().tripcolor(grid['x'][:, 0],  grid['x'][:, 1], grid['triangles'][:2,:3],
+                                 facecolors=dry_cell_data[nt, :2],
                                  zorder=3, vmin=128, vmax=255, edgecolors='face', alpha=0.)
 
     return pc, dry_cell_data

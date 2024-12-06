@@ -176,7 +176,7 @@ class OceanTrackerDataSet(object):
                 if v_name not in cat['variables']:  # make new variable
                     cat['variables'][v_name] = dict(fileID=[])
                 cat['variables'][v_name]['fileID'].append(fileID)
-                cat['variables'][v_name]['dims'] = data.dims
+                cat['variables'][v_name]['dims'] = {key:ds.sizes[key]  for key in data.dims}
                 cat['variables'][v_name]['attrs'] = data.attrs
                 cat['variables'][v_name]['encoding'] = data.encoding
                 cat['variables'][v_name]['dtype'] = data.dtype

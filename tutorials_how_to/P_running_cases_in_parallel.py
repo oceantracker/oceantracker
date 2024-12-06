@@ -43,10 +43,8 @@ ot.settings(output_file_base= 'parallel_test2',      # name used as base for out
     time_step = 120,  #  2 min time step as seconds  
     )
 
-ot.add_class('reader',
-            input_dir='../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-            file_mask= 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-            )
+ot.add_class('reader',input_dir= '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                      file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
 
 # now put a release group with one point into case list
 # define the required release  points
@@ -55,14 +53,13 @@ points = [  [1597682.1237, 5489972.7479],
             [1598886.4247, 5489464.0424],
             [1597917.3387, 5489000],
         ]
-
-# build a list of params for each case, with one release group fot each point
+# run each point release in parrallel
 for n, p in enumerate(points):
     # add a release group with one point to case "n"
     ot.add_class('release_groups',
                 case=n, # this adds release group to the n'th case to run in //
-                name ='mypoint'+str(n), # must have unique name for each group
-                points= [p],  # needs to be 1, by 2 list for single 2D point
+                name ='mypoint'+str(n), # optional name for each group
+                points= p,  # needs to be 1, by 2 list for single 2D point
                 release_interval= 3600,           # seconds between releasing particles
                 pulse_size= 10,                   # number of particles released each release_interval
                 )
@@ -90,24 +87,23 @@ if __name__ == '__main__':
 
 # ## Run parallel using param. dicts.
 
-# In[1]:
+# In[8]:
 
 
 # oceantracker parallel demo, run different release groups as parallel processes
-from oceantracker import main
-from  importlib import reload # force a reload to get around notebooks single name space
-reload(main)
+from oceantracker.main import OceanTracker
+
+# make instance of oceantracker to use to set parameters using code, then run
+ot = OceanTracker()
 
 # first build base case, params used for all cases
-params= dict(debug =True,
+params=dict(debug =True,
     output_file_base= 'parallel_test1',      # name used as base for output files
     root_output_dir= 'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
-    time_step = 120,  #  2 min time step as seconds  
-    reader ={'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-        },
-    case_list=[] # append params for each case here in same structure as above in main case 
-          )
+    time_step = 120,  #  2 min time step as seconds 
+    ) 
+params['reader']= dict(input_dir= '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                      file_mask=  'demo_hindcast_schisim3D*.nc')
 
 # define the required release  points
 points = [  [1597682.1237, 5489972.7479],
@@ -117,7 +113,7 @@ points = [  [1597682.1237, 5489972.7479],
         ]
 
 # build a list of params for each case, with one release group for each point
-
+params['case_list'] =[]
 for n,p in enumerate(points):
     # add one point as a release group to this case
     d = dict( name= 'mypoint'+str(n),# better to give release group a unique name

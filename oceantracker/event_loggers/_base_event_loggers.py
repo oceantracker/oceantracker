@@ -11,7 +11,7 @@ from oceantracker.util.numba_util import njitOT
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.shared_info import shared_info as si
 
-class BaseEventLogger(ParameterBaseClass):
+class _BaseEventLogger(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()

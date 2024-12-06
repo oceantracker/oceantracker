@@ -308,28 +308,9 @@ class _OceanTrackerRunner(object):
         hi['has_A_Z_profile'] = 'A_Z_profile' in reader_builder['reader_field_info']
         hi['has_bottom_stress'] = 'bottom_stress' in reader_builder['reader_field_info']
         # work out in 3D run from water velocity
-        hi['is3D'] = self._detect_3D_velocity(reader_builder)
         hi['geographic_coords'] = reader.detect_lonlat_grid(dataset,msg_logger)
         return reader_builder, reader
 
-    def _detect_3D_velocity(self, reader_builder):
-        # check if water velocity variables are there, if not swap to depth averaged versions if present
-        is3D_run = True
-        fi =  reader_builder['reader_field_info']
-
-        if 'water_velocity' not in fi:
-            if  'water_velocity_depth_averaged' not in fi:
-                # use depth average if vailable
-                msg_logger.msg('Cannot find water_velocity or depth averaged water velocity in hindcast',
-                        hint=f'Found variables mapped to {str(fi.keys())} \n File variables are {str(reader_builder["catalog"]["variables"].keys())}',
-                        fatal_error=True, exit_now=True)
-
-            fi['water_velocity'] = fi['water_velocity_depth_averaged']
-            fi.pop('water_velocity_depth_averaged')
-            msg_logger.msg('No 3D velocity variables in hindcast, using depth averaged water velocity instead in 2D mode', note=True)
-            is3D_run = False
-
-        return is3D_run
 
     def setup_output_dir(self, params, msg_logger, crumbs='', caller=None):
 

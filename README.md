@@ -2,14 +2,18 @@
 
 ## Fast particle tracking in structure and unstructured grids
 
-OceanTracker is a fast extendable code for offline particle tracking in unstructured grids [1], which also works with structured grids.
+OceanTracker is a fast extendable code for offline particle tracking in structured and  unstructured grids [1].
 
-OceanTracker currently fully supports ROMs and SCHISM, 
-plus support for fixed z level vertical grids of DELFT3D-FM and GLORYS
+OceanTracker currently  supports strctured grid ROMs and GLORYS(NEMO/COPERNICUS) 
+for fixed z level vertical grids and unstructured grids of SCHISM and DELFT3D-FM  
 
-OceanTracker’s speed enables millions of particles to be simulated in unstructured grids. This significantly increases the range of particle behaviours that can be modeled and the quality of statistics derived from the particles. To eliminate the need to store and wade through the analysis of vast volumes of recorded particle tracks, the code has the ability to calculate statistics on the fly, such as heat maps and connectivity between regions.
+OceanTracker’s speed enables millions of particles to be simulated in unstructured grids. This significantly increases 
+the range of particle behaviours that can be modeled and the quality of statistics derived from the particles. 
+To eliminate the need to store and wade through the analysis of vast volumes of recorded particle tracks, the code has 
+the ability to calculate statistics on the fly, such as heat maps and connectivity between regions.
 
-OceanTracker code is highly flexible and extendable by the user, whether run by a new user with a text file of parameters, or by an expert adding their specialised code for novel particle behaviours or statistics, to the computational pipe line
+OceanTracker code is highly flexible and extendable by the user, whether run by a new user with a text file of 
+parameters, or by an expert adding their specialised code for novel particle behaviours or statistics, to the computational pipe line
 
 
 [More about Ocean tracker and gallery](https://oceantracker.github.io/oceantracker/)
