@@ -1,5 +1,5 @@
 import numpy as np
-from oceantracker.util import basic_util, output_util
+from oceantracker.util import basic_util, status_util
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from os import  path
@@ -11,6 +11,7 @@ from oceantracker.shared_info import shared_info as si
 
 from oceantracker.util import time_util
 
+status_unknown= int(si.particle_status_flags.unknown)
 class _BaseParticleLocationStats(ParameterBaseClass):
 
     def __init__(self):
@@ -27,10 +28,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
                         role_output_file_tag =            PVC('stats_base',str,doc_str='tag on output file for this class'),
                         write =                       PVC(True,bool,doc_str='Write statistcs to disk'),
-                        status_min =  PVC('stationary', str, possible_values= si.particle_status_flags.possible_values(),
-                                                     doc_str=' Count only those particles with status >= to this value'),
-                        status_max =  PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),
-                                        doc_str=' Count only those particles with status  <= to this value'),
+                        status_list= PLC(['stationary','stranded_by_tide','on_bottom','moving'], str,
+                                         doc_str='List of particle status types to count,eg  ["on_bottom","moving"], other status types will be ignored in statistcs',
+                                         possible_values=si.particle_status_flags.possible_values()),
                         z_min =  PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value', units='meters above mean water level, so is < 0 at depth'),
                         z_max =  PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value', units='meters above mean water level, so is < 0 at depth'),
                         water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
@@ -38,6 +38,14 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                         particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
                         coords_in_lat_lon_order =  PVC(False, bool,
                             doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
+                        status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),
+                                       doc_str=' Count only those particles with status >= to this value',
+                                       obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
+                                       ),
+                        status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),
+                                       doc_str=' Count only those particles with status  <= to this value',
+                                       obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
+                                       ),
                         )
         self.add_default_params(count_start_date= PTC(None,  obsolete=True,  doc_str='Use "start" parameter'),
                                 count_end_date= PTC(None,   obsolete=True,  doc_str='Use "end" parameter'))
@@ -53,8 +61,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         params = self.params
 
         self.check_part_prop_list()
-
-        info['status_range'] = np.asarray([si.particle_status_flags[params['status_min']], si.particle_status_flags[params['status_max']]])
+        # to spped status check make map with trues at index of status to include in counts
+        self.statuses_to_count_map = status_util.build_select_status_map(params['status_list'])
 
         #set particle depth and water depth limits for counting particles
 
@@ -177,7 +185,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         # first select those to count based on status and z location
         sel = self.sel_status_waterdepth_and_z(part_prop['status'].data, part_prop['x'].data, part_prop['water_depth'].data.ravel(),
-                                               info['status_range'], info['z_range'], info['water_depth_range'],
+                                               self.statuses_to_count_map, info['z_range'], info['water_depth_range'],
                                                num_in_buffer, self.get_partID_buffer('B1'))
 
         # any overloaded sub-selection of particles given in child classes
@@ -196,20 +204,21 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         self.stop_update_timer()
 
+
     @staticmethod
     @njitOT
-    def sel_status_waterdepth_and_z(status, x, water_depth, status_range, z_range, water_depth_range, num_in_buffer, out):
+    def sel_status_waterdepth_and_z(status, x, water_depth, statuses_to_count_map, z_range, water_depth_range, num_in_buffer, out):
         n_found = 0
         if x.shape[1] == 3:
             # 3D selection
             for n in range(num_in_buffer):
-                if status_range[0] <= status[n] <= status_range[1] and z_range[0] <= x[n, 2] <= z_range[1] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
+                if statuses_to_count_map[status[n]-status_unknown] and z_range[0] <= x[n, 2] <= z_range[1] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
                     out[n_found] = n
                     n_found += 1
         else:
             # 2D selection
             for n in range(num_in_buffer):
-                if status_range[0] <= status[n] <= status_range[1] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
+                if statuses_to_count_map[status[n]-status_unknown] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
                     out[n_found] = n
                     n_found += 1
 
@@ -247,6 +256,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.info_to_write_at_end()
             nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
             nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
+            nc.write_global_attribute('particle_status_values_counted', str(self.params['status_list']))
 
             nc.close()
         self.nc = None  # parallel pool cant pickle nc

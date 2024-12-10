@@ -387,7 +387,8 @@ def get_case(n):
     params['particle_statistics'] = [{ 'name' :'grid1','class_name': 'GriddedStats2D_timeBased',
                                        'grid_center': x0[0][:2],
                                        'grid_span' : [.1,.15] if geo_cords else [10000,10000],
-                                       'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min': 'moving', 'z_min': -2,
+                                       'update_interval': 3600, 'particle_property_list': ['water_depth'],
+                                       'status_list':['moving'], 'z_min': -2,
                                        'grid_size': [120, 121]},
                                      ]
 

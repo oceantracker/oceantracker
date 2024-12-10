@@ -178,7 +178,6 @@ class ParameterTimeChecker(_ParameterBaseDataClassChecker):
                 return time_util.isostr_to_seconds(value) # convert iso string
             if type(value) in [int, float,  np.float64, np.float32]:
                 return float(value)
-
             if type(value) == np.datetime64:
                 return time_util.datetime64_to_seconds(value)
 

@@ -47,7 +47,7 @@ particle_properties:
   decay_time_scale: 86400.0
   name: age_decay
 particle_statistics:
-- class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased
+- class_name: oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased
   grid_size:
   - 120
   - 121
@@ -57,12 +57,13 @@ particle_statistics:
   name: grid1
   particle_property_list:
   - water_depth
-  status_min: moving
+  status_list:
+  - moving
   update_interval: 3600
   z_min: -2
 reader:
   file_mask: demo_hindcast_schisim3D_00.nc
-  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  input_dir: C:\Work\ot_install_test\oceantracker\demos\demo_hindcast
   load_fields:
   - water_temperature
 regrid_z_to_uniform_sigma_levels: true

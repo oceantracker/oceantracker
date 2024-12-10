@@ -142,9 +142,9 @@ from dataclasses import dataclass
 
 class _ParticleStatusFlags(_SharedStruct):
     '''Particle status flags mapped to integer values'''
-    unknown  = -100
-    bad_cord = -20
-    cell_search_failed=  -19
+    unknown  = -20
+    bad_cord = -16
+    cell_search_failed=  -15
     notReleased = -10
     dead = -5
     outside_open_boundary =-2
@@ -152,6 +152,7 @@ class _ParticleStatusFlags(_SharedStruct):
     stranded_by_tide = 3
     on_bottom = 6
     moving =  10
+
 
 class _VerticalGridTypes(_SharedStruct):
     '''Particle status flags mapped to integer values'''

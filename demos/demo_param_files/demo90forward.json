@@ -5,7 +5,7 @@
     "time_step": 60,
     "debug": true,
     "reader": {
-        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "input_dir": "C:\\Work\\ot_install_test\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "Random_order_*.nc",
         "time_buffer_size": 2
     },

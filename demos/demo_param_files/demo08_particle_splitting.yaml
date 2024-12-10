@@ -50,7 +50,7 @@ particle_properties:
   name: age_decay
 reader:
   file_mask: Random_order_*.nc
-  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  input_dir: C:\Work\ot_install_test\oceantracker\demos\demo_hindcast
   time_buffer_size: 15
 release_groups:
 - name: P1
