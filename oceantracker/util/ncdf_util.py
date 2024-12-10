@@ -48,7 +48,7 @@ class NetCDFhandler(object):
         if fill_value is None:
             if dtype in [np.float64, np.float32]:
                 fill_value = np.nan
-            elif np.issubclass_(np.int32,np.integer):
+            elif issubclass(np.int32,np.integer):
                 fill_value = -128
             else:
                 fill_value = -128
