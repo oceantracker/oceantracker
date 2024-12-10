@@ -142,7 +142,7 @@ from dataclasses import dataclass
 
 class _ParticleStatusFlags(_SharedStruct):
     '''Particle status flags mapped to integer values'''
-    unknown  = basic_util.fillvalue('int8')
+    unknown  = -100
     bad_cord = -20
     cell_search_failed=  -19
     notReleased = -10
@@ -185,7 +185,6 @@ class _RunInfo(_SharedStruct):
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
     large_float = 1.0E50
-
 
 # Shared class, build using the above
 #------------------------------------------------------------
