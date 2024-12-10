@@ -52,7 +52,7 @@ def main(args):
                                              release_group_centered_grids=True,  # center a grid around each release group
                                              update_interval=1800,  # time interval in sec, between doing particle statists counts
                                              particle_property_list=['speed'],  # request a heat map for the decaying part. prop. added above
-                                             status_min='moving',  # only count the particles which are moving
+                                             status_list=['moving'],  # only count the particles which are moving
                                              z_min=-10.,  # only count particles at locations above z=-2m
                                         )
     ot.add_class('particle_statistics',name='my_polygon_stats',
@@ -61,7 +61,7 @@ def main(args):
                                              polygon_list=[dict(points=poly_points+.05)],  # number of east and north cells in the heat map
                                              update_interval=1800,  # time interval in sec, between doing particle statists counts
                                              particle_property_list=['speed'],  # request a heat map for the decaying part. prop. added above
-                                             status_min='moving',  # only count the particles which are moving
+                                             status_list=['moving'],  # only count the particles which are moving
                                              z_min=-10.,  # only count particles at locations above z=-2m
                                         )
     case_info_file = ot.run()

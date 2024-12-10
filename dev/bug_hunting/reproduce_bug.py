@@ -251,7 +251,7 @@ params = {
         },
         "particle_statistics": [
             {
-                "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
+                "class_name": "oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased",
                 "calculation_interval": output_time_step,
                 "count_status_in_range": ["on_bottom", "on_bottom"],
                 "particle_property_list": [

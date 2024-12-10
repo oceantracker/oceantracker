@@ -39,7 +39,7 @@ if __name__ == '__main__':
         'release_groups': {'mypoints':{'points': x0, 'pulse_size': 1000, 'release_interval': 0}},
         'dispersion': {'A_H': 1.0, 'A_V': 0.001},
         'particle_statistics': {'my_stats':{
-                'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+                'class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased',
                 'update_interval': 3600, 'particle_property_list': ['water_depth'],
                 'grid_center': x0[0], 'grid_span': [25000., 25000.],
                 'grid_size': [120, 121]}},

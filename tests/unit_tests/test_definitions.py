@@ -140,16 +140,18 @@ ps1 = dict(name='my_heatmap',
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant'],  # request a heat map for the decaying part. prop. added above
-         status_min='moving',  # only count the particles which are moving
+         #status_list=[],  # only count the particles which are moving
+
          z_min=-10.,  # only count particles at locations above z=-2m
          start='2017-01-01T02:30:00',
          )
 
-poly_stats =dict(
+poly_stats =dict(name='my_poly_stats',
         class_name='PolygonStats2D_timeBased',
         update_interval= 3600,
         particle_property_list=['water_depth'],
-        status_min= 'moving',
+        #status_list=[],
+
         z_min= -2,
         grid_size= [120, 121])
 
@@ -181,6 +183,12 @@ def compare_reference_run(case_info_file, args):
     print(' mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
     print(' max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
 
+    # check stats
+    for name in ['my_heatmap','my_poly_stats']:
+        stats_ref= load_output_files.load_stats_data(reference_case_info_file,name=name)
+        stats= load_output_files.load_stats_data(case_info_file, name=name)
+        dc = stats['count'] - stats_ref['count']
+        print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max counts-ref run counts =',np.nanmax(np.abs(dc)))
 
 def show_track_plot(case_info_file, args):
 

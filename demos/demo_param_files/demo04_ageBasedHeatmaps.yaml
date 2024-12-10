@@ -21,7 +21,7 @@ particle_properties:
   name: my_constant_prop
 particle_statistics:
 - age_bin_size: 3600.0
-  class_name: oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased
+  class_name: oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_ageBased
   grid_size:
   - 220
   - 221
@@ -59,7 +59,7 @@ particle_statistics:
   update_interval: 1800
 reader:
   file_mask: Random_order_*.nc
-  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  input_dir: C:\Work\ot_install_test\oceantracker\demos\demo_hindcast
   time_buffer_size: 15
 release_groups:
 - name: myP1

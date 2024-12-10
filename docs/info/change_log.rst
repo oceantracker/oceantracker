@@ -19,7 +19,8 @@ New features
 must also be groegraphic in (lon, lat) order, eg. release points, polygons, stats etc.
 
 #. Also grid spans  are now always required and must  be in  (dx,dy) meters or degrees as (dlon, dlat) if geographic
-
+#. gridded_statistics module renamed gridded_statistics2D in prep for 3D versions
+#. particle stats params status_min, _max are obsolete replaced by status_list
 #. Most expensive step in 3D finding vertical cell is now 5 times faster, so code net 2-3 times faster, as by default regrids  3D data to uniform Sigma grid, to speed vertical cell search by factor of 5. Original slower native vertical grid short vertical walk search still available.
 
 #. By default uses diffusivity vertical profile for A_Z in random walk if variable mapped to A_Z_profile is found in the hydro file

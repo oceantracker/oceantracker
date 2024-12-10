@@ -154,7 +154,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # flag if some release groups did not release
             for name, i in si.class_roles.release_groups.items():
                 if i.info['number_released'] == 0:
-                    ml.msg(f'No particles were release by group name= "{name}"', fatal_error=True,
+                    ml.msg(f'No particles were released by release_group named= "{name}"', fatal_error=True,
                            caller= i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
 
             ml.show_all_warnings_and_errors() # reshow warnings

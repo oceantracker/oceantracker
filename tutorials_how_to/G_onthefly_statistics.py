@@ -116,11 +116,11 @@ ot.add_class('particle_properties', # add a new property to particle_properties 
 # add a gridded particle statistic 
 ot.add_class('particle_statistics', 
                 name = 'my_heatmap',
-                class_name= 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+                class_name= 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased',
                 # the below settings are optional
                 update_interval = 900, # time interval in sec, between doing particle statists counts 
                 particle_property_list = ['a_pollutant'], # request a heat map for the decaying part. prop. added above
-                status_min ='moving', # only count the particles which are moving 
+                status_list =['moving'], # only count the particles which are moving
                 z_min =-2.,  # only count particles at locations above z=-2m
                 grid_size= [120, 121]  # number of east and north cells in the heat map
                 )
