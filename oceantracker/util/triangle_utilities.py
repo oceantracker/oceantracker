@@ -1,8 +1,8 @@
 import numpy as np
 from numba import njit, prange
 from numba.typed import List as NumbaList
-from oceantracker.util.polygon_util import InsidePolygon, make_domain_mask
-from oceantracker.util import  basic_util
+from oceantracker.util.polygon_util import make_domain_mask
+from oceantracker.util import  basic_util, cord_transforms
 from oceantracker.util.numba_util import njitOT
 
 
@@ -170,9 +170,18 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
     out['domain_masking_polygon']=make_domain_mask(out['domain']['points'])
     return out
 
-def calcuate_triangle_areas(xy, tri):
-    x= xy[tri,0]
-    y = xy[tri,1]
+def calcuate_triangle_areas(xy, tri, geographic_coords=False):
+    if geographic_coords:
+        # get triangle coords relative to first vertex in meters
+        dxy = cord_transforms.get_deg_per_meter(xy)
+        xy = xy/dxy
+        x = xy[tri, 0]
+        y = xy[tri, 1]
+        x = x - x[:, 0][:, np.newaxis]
+        y = y - y[:, 0][:, np.newaxis]
+    else:
+        x= xy[tri,0]
+        y = xy[tri,1]
     area = 0.5 * np.abs((x[:, 0] * (y[:, 1] - y[:, 2])) + (x[:, 1] * (y[:, 2] - y[:, 0])) + (x[:, 2] * (y[:, 0] - y[:, 1])))
     return area
 

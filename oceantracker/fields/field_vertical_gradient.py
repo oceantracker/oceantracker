@@ -19,7 +19,7 @@ class VerticalGradient(CustomFieldBase):
                                  'is3D': PVC(True, bool),
                                  })
 
-    def initial_setup(self,time_buffer_size, reader_info, reader_fields):
+    def initial_setup(self,time_buffer_size, reader_info, reader_fields, grid):
         ml = si.msg_logger
         # get fields prop from named field
         params= self.params
@@ -27,7 +27,7 @@ class VerticalGradient(CustomFieldBase):
         params['time_varying']= f.is_time_varying()
         params['is3D'] = f.is3D()
 
-        super().initial_setup(time_buffer_size, reader_info, reader_fields)  # set up self.data with above params
+        super().initial_setup(time_buffer_size, reader_info, reader_fields, grid)  # set up self.data with above params
         pass
 
     def check_requirements(self):

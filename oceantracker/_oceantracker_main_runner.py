@@ -254,19 +254,8 @@ class _OceanTrackerRunner(object):
         settings = working_params['settings']
         # primary reader
         reader_builder, reader= self._make_a_reader_builder(run_builder,working_params['core_class_roles']['reader'], crumbs)
-        json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], 'hindcast_variable_catalog.json'), reader_builder['catalog'])
+        json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], 'hindcast_variable_catalog.json'), reader_builder)
 
-
-        # work out in 3D run from water velocity
-        run_builder['is3D_run'] = self._detect_3D_velocity(reader_builder)
-
-        # remove any fields that cant be used in 2D
-        if not run_builder['is3D_run']:
-            fi = reader_builder['reader_field_info']
-            for name in fi.keys():
-                if fi[name]['params']['is3D']: fi.pop(name)
-            # disable resuspension
-            run_builder['working_params']['settings']['use_resuspension'] = False
 
         # get file info for nested readers
         nested_reader_builders = []
@@ -295,7 +284,8 @@ class _OceanTrackerRunner(object):
         # detect reader format and add clas_name to params
         reader_builder['params'], reader = self._detect_hydro_file_format(reader_builder['params'], file_list, crumbs=crumbs)
 
-        reader_builder['catalog'] = self._get_hydro_file_catalog(reader_builder['params'],crumbs=crumbs)
+        reader_builder['catalog'], dataset = self._get_hydro_file_catalog(reader_builder['params'],crumbs=crumbs)
+
 
         # add info to reader bulider on if 3D hindcast and mapped fields
         reader_builder = self._map_and_catagorise_field_variables(run_builder, reader_builder, reader)
@@ -303,30 +293,24 @@ class _OceanTrackerRunner(object):
         # set working vertical grid,if remapping to sigma grids
         vgt = si.vertical_grid_types
         hi = reader_builder['hindcast_info']
-        hi['working_vert_grid_type'] = vgt.Sigma if hi['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and si.settings.regrid_z_to_uniform_sigma_levels \
-                                                    else hi['vert_grid_type'] # use native grid
+        hi['vert_grid_type_in_files'] = hi['vert_grid_type']
+        if hi['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and si.settings.regrid_z_to_uniform_sigma_levels:
+            hi['vert_grid_type'] = vgt.Sigma
+            hi['regrid_z_to_uniform_sigma_levels'] = True
+        elif hi['vert_grid_type'] in [vgt.Sigma, vgt.Zfixed]:
+            hi['regrid_z_to_uniform_sigma_levels'] = False
+        elif hi['is3D']:
+            si.msg_logger.msg(f'Unknown grid vertical type "{hi["vert_grid_type"]}"',
+                          hint=f'must be one of {str(vgt.possible_values())}',
+                          caller=self, fatal_error=True, exit_now=True)
 
+
+        hi['has_A_Z_profile'] = 'A_Z_profile' in reader_builder['reader_field_info']
+        hi['has_bottom_stress'] = 'bottom_stress' in reader_builder['reader_field_info']
+        # work out in 3D run from water velocity
+        hi['geographic_coords'] = reader.detect_lonlat_grid(dataset,msg_logger)
         return reader_builder, reader
 
-
-    def _detect_3D_velocity(self, reader_builder):
-        # check if water velocity variables are there, if not swap to depth averaged versions if present
-        is3D_run = True
-        fi =  reader_builder['reader_field_info']
-
-        if 'water_velocity' not in fi:
-            if  'water_velocity_depth_averaged' not in fi:
-                # use depth average if vailable
-                msg_logger.msg('Cannot find water_velocity or depth averaged water velocity in hindcast',
-                        hint=f'Found variables mapped to {str(fi.keys())} \n File variables are {str(reader_builder["catalog"]["variables"].keys())}',
-                        fatal_error=True, exit_now=True)
-
-            fi['water_velocity'] = fi['water_velocity_depth_averaged']
-            fi.pop('water_velocity_depth_averaged')
-            msg_logger.msg('No 3D velocity variables in hindcast, using depth averaged water velocity instead in 2D mode', note=True)
-            is3D_run = False
-
-        return is3D_run
 
     def setup_output_dir(self, params, msg_logger, crumbs='', caller=None):
 
@@ -350,11 +334,6 @@ class _OceanTrackerRunner(object):
         # clear existing folder
         if path.isdir(run_output_dir):
             shutil.rmtree(run_output_dir)
-            for root, dirs, files in walk(run_output_dir):
-                for f in files:
-                    unlink(path.join(root, f))
-                for d in dirs:
-                    shutil.rmtree(path.join(root, d))
             msg_logger.msg('Deleted contents of existing output dir', warning=True)
 
         # make a new dir
@@ -474,7 +453,7 @@ class _OceanTrackerRunner(object):
                                file_mask=reader_params['file_mask'])
         ml.progress_marker('Cataloged hydro-model files/variables in time order', start_time=t0)
 
-        return cat
+        return cat, ds
 
     def _detect_hydro_file_format(self, reader_params, file_list, crumbs=''):
         # detect hindcast format and add reader class_name to params if missing
@@ -516,6 +495,7 @@ class _OceanTrackerRunner(object):
             # break if all variables are found for this reader
             if all(found_var):
                 found_reader = name
+                found_data_set = ds
                 break
 
         if found_reader is None:
@@ -527,6 +507,7 @@ class _OceanTrackerRunner(object):
         # return merged params
         params = known_readers[found_reader]['instance'].params
         reader = known_readers[found_reader]['instance']
+
         return params, reader
 
     def _map_and_catagorise_field_variables(self, run_builder,reader_builder, reader):

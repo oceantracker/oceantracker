@@ -33,11 +33,11 @@ class dev_GenericStructuredReader(BaseGenericReader):
         # nodal x's
         grid['x'] = np.column_stack(( grid['xi'].ravel(), grid['yi'].ravel() )).astype(np.float64)
 
-        if self.params['hydro_model_cords_in_lat_long']:
+        if self.params['hydro_model_cords_geographic']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
-            grid['hydro_model_cords_in_lat_long'] = True
+            grid['hydro_model_cords_geographic'] = True
         else:
-            grid['hydro_model_cords_in_lat_long'] = False
+            grid['hydro_model_cords_geographic'] = False
 
         grid = self.get_land_mask(grid)
 

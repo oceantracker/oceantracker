@@ -1,11 +1,11 @@
-from oceantracker.event_loggers._base_event_loggers import BaseEventLogger
+from oceantracker.event_loggers._base_event_loggers import _BaseEventLogger
 import numpy as np
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.shared_info import shared_info as si
 
-class LogPolygonEntryAndExit(BaseEventLogger):
+class LogPolygonEntryAndExit(_BaseEventLogger):
     # assumes non over lapping polygons
 
     def __init__(self):

@@ -11,8 +11,8 @@ from oceantracker.reader.util import  hydromodel_grid_transforms
 from oceantracker.util.numba_util import  njitOT
 from oceantracker.shared_info import shared_info as si
 
-class dev_DELFTFM(_BaseUnstructuredReader):
-
+class DELFTFM(_BaseUnstructuredReader):
+    development = True
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
@@ -115,9 +115,6 @@ class dev_DELFTFM(_BaseUnstructuredReader):
         ds = self.dataset
         grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values
         grid['z_layer'] =ds.read_variable(gm['z_layer']).data.astype(np.float32)   # layer center fractions
-
-        si.settings['regrid_z_to_uniform_sigma_levels'] = False  # no need to regrid
-
 
         grid = super().build_vertical_grid(grid)
 

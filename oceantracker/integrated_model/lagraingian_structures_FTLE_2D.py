@@ -16,6 +16,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
      Annual review of fluid mechanics, 47, pp.137-162.')
      Currently only 2D  implemented
      '''
+    development = True
 
     def __init__(self):
         # set up info/attributes
@@ -34,7 +35,8 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
                                doc_str='center of one or more LCS grid centers  or (lon, lat) if hydromodel in geographic coords., should be [x,y] or [[x1,y1],[x1,y1],...] for multiple grids, which may have different spans, but all must have same number of rows and columns ',
                               units='meters or decimal degrees'),
             grid_span=  PCC(None, one_or_more_points=True, min=.0001, is3D=False, is_required=True,
-                             doc_str='(width, height)  of the grid release, should be single [dx,dy] or [[dx1,dy1],[dx1,dy1],...] with one pair for each grid center', units='meters only'),
+                             doc_str='(width, height)  of the grid release (dx,dy) , should be single [dx,dy] or [[dx1,dy1],[dx1,dy1],...] with one pair for each grid center',
+                                        units='meters or degrees( dlon,dlat)'),
             floating=PVC(True, bool, doc_str='Do LCS for floating partyicles, in development currently only option '),
             z_min=  PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
             z_max=  PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
@@ -106,15 +108,11 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
             for n_pulse in range(info['times'].size):
                 rp['start'] = info['times'][n_pulse]
                 # add param dict as keyword arguments, must not initialize yet, ie delay initial_setup till al release groups added
-                si.add_class('release_groups', name= f'LCS_grid_{n_grid:03d}_pulse_{n_pulse:04d}', **rp, initialize=False)
+                si.add_class('release_groups', name= f'LCS_grid_{n_grid:03d}_pulse_{n_pulse:04d}', **rp)
             pass
 
     def initial_setup(self):
         params = self.params
-
-        
-        if si. hydro_model_cords_in_lat_long:
-            si.msg_logger.msg(' to do LCS not yet working for lon-lat hydro models ',fatal_error=True, exit_now=True)
 
         if params['lags'] is None: params['lags']  = [24*3600.]
         params['lags'] = np.asarray(params['lags']) # easier as an array

@@ -84,7 +84,7 @@ def read_case_info_file(case_info_file_name):
     case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
     return case_info
 
-def load_track_data(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1, run_output_dir=None):
+def load_track_data(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1, run_output_dir=None, gridID=0):
     # load one track file from squeuence of what may be split files
     # todo load split track files into  dictionary
 
@@ -92,7 +92,7 @@ def load_track_data(case_info_file_name, var_list=None, release_group= None, fra
 
     track_file = path.join( case_info['output_files']['run_output_dir'], case_info['output_files']['tracks_writer'][track_file_number-1])
     tracks = read_ncdf_output_files.read_particle_tracks_file(track_file, var_list, release_group=release_group, fraction_to_read=fraction_to_read)
-    tracks['grid'] = load_grid(case_info_file_name)
+    tracks['grid'] = load_grid(case_info_file_name,gridID=gridID)
 
     tracks= _extract_useful_info(case_info, tracks)
     x= tracks['x'][:,:,0]
@@ -122,10 +122,15 @@ def load_concentration_data(case_info_file_name, name= None):
     d =  _extract_useful_info(case_info, d)
     return d
 
-def load_grid(case_info_file_name):
+def load_grid(case_info_file_name,gridID=0):
     # load OT output file grid from  output of load_runInfo() or load_runcase_info()
     case_info = read_case_info_file(case_info_file_name)
-    grid_file = path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['grid'])
+    if gridID==0:
+        grid_file = path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['grid'])
+    else:
+        grid_file = case_info['output_files']['nested_grids'][gridID-1]
+
+    grid_file = path.join(case_info['output_files']['run_output_dir'],grid_file)
     d = read_ncdf_output_files.read_grid_file(grid_file)
 
     if 'grid_outline' not in d:

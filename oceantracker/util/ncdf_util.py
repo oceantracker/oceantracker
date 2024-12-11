@@ -46,12 +46,14 @@ class NetCDFhandler(object):
         if dtype is None: dtype = np.float64  # double by default
         dtype = np.dtype(dtype) # convert string dtypes
         if fill_value is None:
-            if dtype in [np.float64, np.float32]:
+            if np.issubdtype(dtype,np.floating):
                 fill_value = np.nan
-            elif np.issubclass_(np.int32,np.integer):
-                fill_value = -128
+            elif np.issubdtype(dtype, np.unsignedinteger):
+                fill_value = None
+            elif np.issubdtype(dtype, np.signedinteger):
+                fill_value = np.iinfo(dtype).min
             else:
-                fill_value = -128
+                fill_value = None
 
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compressionLevel > 0),
                                                 complevel=compressionLevel, fill_value=fill_value)

@@ -1,5 +1,6 @@
 import numpy as np
 from oceantracker.util.numba_util import njitOT
+from oceantracker.util import cord_transforms
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
@@ -18,7 +19,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
                  'release_group_centered_grids': PVC(False, bool),
                  'grid_center':         PCC(None, single_cord=True,is3D=False, doc_str='center of the statistics grid as (x,y), must be given if not using  release_group_centered_grids',
                                             units='meters'),
-                 'grid_span':           PCC([10000,10000], single_cord=True, is3D=False,doc_str='(width-x, height-y)  of the statistics grid', units='meters only'),
+                 'grid_span':           PLC(None, float, doc_str='(width-x, height-y)  of the statistics grid', units='meters (dx,dy) or degrees (dlon, dlat) if geographic',
+                                            is_required=True),
                  'role_output_file_tag' :    PVC('stats_gridded_time',str),
                     })
         self.grid = {}
@@ -65,19 +67,32 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         # default if no center given use release groups
         if params['grid_center'] is None:
             params['release_group_centered_grids'] = True
+
+        if params['release_group_centered_grids']:
+            # get centers from mid release group
+            # loop over release groups to get bin edges
+            info['grid_centers']= []
+            for ngroup, name in enumerate(si.class_roles.release_groups.keys()):
+                rg = si.class_roles.release_groups[name]
+                x0 = rg.info['bounding_box_ll_ul']  # works for point and polygon releases,
+                x_release_group_center = np.nanmean(x0[:, :2], axis=0)
+                info['grid_centers'].append(x_release_group_center)
+            info['grid_centers'] = np.asarray(info['grid_centers'])
+
         else:
-            if si.hydro_model_cords_in_lat_long:
-                info['grid_center_lon_lat'] = params['grid_center'].copy()
-                info['grid_center']= si._transform_lon_lat_to_meters( info['grid_center_lon_lat'], in_lat_lon_order=self.params['coords_in_lat_lon_order'])
-            else:
-                info['grid_center'] =  params['grid_center']
+            # use given grid center for all
+            info['grid_centers'] =  np.tile(params['grid_center'],(len(si.class_roles.release_groups),1))
+
+
+        if si.settings.use_geographic_coords:
+            # check points for wrap around 180
+            info['grid_centers'] = cord_transforms.fix_any_spanning180east(info['grid_centers'], msg_logger=si.msg_logger, caller=self,
+                                                       crumbs=f'gridded statistics release# {params["name"]}')
+
 
         gsize = np.asarray(params['grid_size'])
         gsize = gsize + (gsize+1) % 2  # grid size must be odd to ensure middle of center cell at mid point , a required by re
         gspan = params['grid_span']
-
-        # make bin edges grid one larger than given grid_size  as (row, col), (y,x) size
-        dx, dy = float(gspan[0]/gsize[1]), float(gspan[1]/gsize[0])
 
         # make bin centers
         base_x = np.linspace(-gspan[0] / 2, gspan[0] / 2, gsize[1] )
@@ -85,6 +100,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         # make bin edges for counting inside, which is one grid cell larger
         # deal with special case of unit grid
+
         dx = gspan[0] if gsize[1] == 1 else float(np.diff(base_x[:2]))
         dy = gspan[1] if gsize[0] == 1 else float(np.diff(base_y[:2]))
         gspan_edges = gspan + np.asarray([dx,dy]) #  edges are one cell larger
@@ -92,31 +108,26 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         base_y_bin_edges = np.linspace(-gspan_edges[1]/2, gspan_edges[1]/2, gsize[0] + 1)
 
         # make copies for each release group
-        s= (len(si.class_roles.release_groups), 1)
-        stats_grid['x'] = np.tile(base_x[np.newaxis,:], s)
-        stats_grid['y'] = np.tile(base_y[np.newaxis, :], s)
-        stats_grid['x_bin_edges'] = np.tile(base_x_bin_edges[np.newaxis, :], s)
-        stats_grid['y_bin_edges'] = np.tile(base_y_bin_edges[np.newaxis, :], s)
-        stats_grid['cell_area'] = dx * dy
+        #   make empty arrays
+        n_grids= info['grid_centers'].shape[0]
+        stats_grid['x'] = np.zeros((n_grids, base_x.size), dtype=np.float64)
+        stats_grid['y'] = np.zeros( (n_grids, base_y.size), dtype=np.float64)
+        stats_grid['x_bin_edges'] = np.zeros( (n_grids, base_x_bin_edges.size), dtype=np.float64)
+        stats_grid['y_bin_edges'] = np.zeros( (n_grids, base_y_bin_edges.size), dtype=np.float64)
 
-        if params['release_group_centered_grids']:
-            # form grids around mean of each release group locations
-            # loop over release groups to get bin edges
-            for ngroup, name  in enumerate(si.class_roles.release_groups.keys()):
-                rg = si.class_roles.release_groups[name]
-                x0 = rg.info['bounding_box_ll_ul'] # works for point and polygon releases,
-                x_release_group_center= np.nanmean(x0[:,:2], axis=0)
-                stats_grid['x'][ngroup, :] += x_release_group_center[0]
-                stats_grid['y'][ngroup, :] += x_release_group_center[1]
-                stats_grid['x_bin_edges'][ngroup, :] += x_release_group_center[0]
-                stats_grid['y_bin_edges'][ngroup, :] += x_release_group_center[1]
-        else:
-            # used same grid with single  given center for all particle release groups
-            stats_grid['x'] += info['grid_center'][0]
-            stats_grid['y'] += info['grid_center'][1]
-            stats_grid['x_bin_edges'] += info['grid_center'][0]
-            stats_grid['y_bin_edges'] += info['grid_center'][1]
-        pass
+
+
+        for n_grid, p in enumerate(info['grid_centers']):
+            stats_grid['x'][n_grid, :] = p[0] + base_x
+            stats_grid['y'][n_grid, :] = p[1] + base_y
+            stats_grid['x_bin_edges'][n_grid, :] = p[0] + base_x_bin_edges
+            stats_grid['y_bin_edges'][n_grid, :] = p[1] + base_y_bin_edges
+
+        # get area im meters even if in geographic coords. from first release group
+        stats_grid['cell_area'] = cord_transforms.rectangle_area_meters_sq(
+            stats_grid['x_bin_edges'][0, 0], stats_grid['y_bin_edges'][0, 0],
+            stats_grid['x_bin_edges'][0, 1], stats_grid['y_bin_edges'][0, 1],
+            is_geographic=si.settings.use_geographic_coords)
 
         if self.params['write']:
             nc.add_dimension('x_dim', stats_grid['x'].shape[1])
@@ -154,10 +165,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         p_x= part_prop['x'].used_buffer()
 
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
-                                         self.count_time_slice, self.count_all_particles_time_slice, self.prop_data_list, self.sum_prop_data_list, sel)
-
-
-
+                                        self.count_time_slice, self.count_all_particles_time_slice,
+                                        self.prop_data_list, self.sum_prop_data_list, sel)
 
     @staticmethod
     @njitOT
@@ -310,3 +319,4 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
         for key, item in self.sum_binned_part_prop.items():
             # need to write final sums of propetries  after all age counts done across all times
             nc.write_a_new_variable('sum_' + key, item[:], dims, description= 'sum of particle property inside bin  ' + key)
+

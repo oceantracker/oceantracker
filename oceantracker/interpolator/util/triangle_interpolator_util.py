@@ -55,7 +55,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 def BCwalk(xq, tri_walk_AOS, dry_cell_index,
                 n_cell, cell_search_status,bc_cords,
                 walk_counts,
-                max_triangle_walk_steps, bc_walk_tol, open_boundary_type, block_dry_cells,
+                max_triangle_walk_steps, bc_walk_tol, block_dry_cells,
                 active):
     # Barycentric walk across triangles to find cells
 
@@ -96,7 +96,7 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
             if next_tri < 0:
                 # if no new adjacent triangle, then are trying to exit domain at a boundary triangle,
                 # keep n_cell, bc  unchanged
-                if open_boundary_type > 0 and next_tri == cell_search_open_boundary_edge:  # outside domain
+                if next_tri == cell_search_open_boundary_edge:  # outside domain
                     # leave x, bc, cell, location  unchanged as outside
                     cell_search_status[n] = cell_search_open_boundary_edge
                     break
@@ -128,9 +128,6 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
         walk_counts[1] += n_steps  # steps taken
         walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
 
-@njitOT
-def _move_back(x, x_old):
-    for i in range(x.shape[0]): x[i] = x_old[i]
 
 @njitOT
 def calc_BC_cords_numba(x, n_cells, BCtransform, bc):

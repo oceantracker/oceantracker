@@ -12,8 +12,11 @@ from oceantracker.definitions import  cell_search_status_flags
 # run fields nested with outer main readers grid
 
 class DevNestedFields(ParameterBaseClass):
-    # build a list of field group managers for outer and nest grids
-    # first in list grid is the outer grid
+    ''' Core class. Builds a list of field group managers for outer and nested grids and manage
+    interactions with list of field group managers. Eg update, interpolate etc
+     First in list grid is the outer grid.
+     Consistency between available hindcast variables means this code is fragile and error messages opaque.
+     '''
 
     readers=[] # first is outer grid readers[0], nesting readers are readers[1:]
 
@@ -26,34 +29,58 @@ class DevNestedFields(ParameterBaseClass):
         si.settings.use_A_Z_profile = si.settings.use_A_Z_profile and 'A_Z_profile' in reader_builder['reader_field_info']
 
         fgm_outer_grid = si._class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
-                                initialize=False,caller= caller, crumbs='adding outer hydro-grid field manager for nested grid run')
+                               caller= caller, crumbs='adding outer hydro-grid field manager for nested grid run')
         fgm_outer_grid.initial_setup( reader_builder,  caller=self)
-        hi = fgm_outer_grid.reader.reader_builder['hindcast_info']
-        info['start_time'], info['end_time'] = hi['start_time'], hi['end_time']
-        info['is3D'] = fgm_outer_grid.reader.grid['is3D']
+
+        hi = fgm_outer_grid.reader.info
+        info.update(hi)
 
         # first grid is outer grid
         self.fgm_hydro_grids = [fgm_outer_grid]
 
         # add nested grids
+        checks=dict(has_A_Z_profile=[],has_bottom_stress=[],is3D=[],geographic_coords=[], start_time=[],end_time=[],
+                    input_dir=[])
         for rb in reader_builder['nested_reader_builders']:
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}')
 
             t0= perf_counter()
-            si.settings.use_bottom_stress = si.settings.use_bottom_stress and 'bottom_stress' in rb['reader_field_info']
-            si.settings.use_A_Z_profile = si.settings.use_A_Z_profile and 'A_Z_profile' in rb['reader_field_info']
+
             fgm_nested =  si._class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
-                                                  initialize=False, caller=caller,
-                                                    crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
+                                                 caller=caller, crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
             fgm_nested.initial_setup(rb, caller=caller)
+
+            for key, item in checks.items():
+                item.append(fgm_nested.info[key])
+
             self.fgm_hydro_grids.append(fgm_nested)
 
             # note start and end times
-            hi = fgm_nested.reader.reader_builder['hindcast_info']
-            info['start_time'], info['end_time'] =  max(info['start_time'],hi['start_time']), min(info['end_time'],hi['end_time'])
+            hi = fgm_nested.info
+            info['start_time'] = max(info['start_time'],hi['start_time'])
+            info['end_time']   = min(info['end_time'],  hi['end_time'])
 
             ml.progress_marker(f'Finished nested hydro-model grid setup #{len(self.fgm_hydro_grids)} '
                                f'from {time_util.seconds_to_isostr(hi["start_time"])} to  {time_util.seconds_to_isostr(hi["end_time"])}', start_time=t0)
+
+        # overlapping times checks
+        for  n, d in enumerate(zip(checks['start_time'],checks['end_time'], checks['input_dir'])):
+            if not(d[0] <= info['start_time'] and  d[1] >= info['end_time']) :
+                ml.msg(f'Nested reader files do not overlap in time with outer grid for files nested grid in # {d[2]}',
+                       hint=f'Outer grid from {str(info["start_date"])}  to, {str(info["end_date"])},' +
+                            f' inner grid from {time_util.seconds_to_isostr(d[0])}  to, {time_util.seconds_to_isostr(d[1])}',
+                       fatal_error=True)
+        ml.exit_if_prior_errors('Some non-overlapping times in nested grid hydro files')
+
+        # settings consistency with hindcast
+        info['has_A_Z_profile'] = info['has_A_Z_profile'] and all(checks['has_A_Z_profile'])
+        info['has_bottom_stress'] = info['has_bottom_stress'] and all(checks['has_bottom_stress'])
+        info['geographic_coords'] = info['geographic_coords'] or any(checks['geographic_coords'])
+
+        if not all ([ x== info['is3D']for x in checks['is3D']]):
+            ml.msg(f'Cannot mix 2D and 3D nestd grids ',
+                   hint= f'For primary reader 3D ={info["is3D"]}, nested readers are 3D={str(checks["is3D"])}',
+                   crumbs='Nested reader set up', fatal_error=True, exit_now=True, caller=self)
 
         #todo add check times overlaping
 
@@ -67,23 +94,31 @@ class DevNestedFields(ParameterBaseClass):
 
         pass
 
+    def build_readers(self):
+        for n, fgm in  enumerate(self.fgm_hydro_grids):
+            fgm.reader.build_reader(gridID=n)
+            fgm.reader.write_hydro_model_grid()
+        pass
+
+
     def final_setup(self):
 
         ml = si.msg_logger
         # do final setup for each grid
-        for fgm in self.fgm_hydro_grids:
-            fgm.final_setup()
-            fgm.info['open_boundary_type'] = 1 # do nothing open boundary condition for inner grids
+        self.fgm_hydro_grids[0].final_setup()
+
 
         # check nested grids
-        for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):
+        for n, fgm in enumerate(self.fgm_hydro_grids[1:]):
+            fgm.final_setup()
+            fgm.info['use_open_boundary'] = True  # force open boundary condition for inner grid
             if not fgm.info['has_open_boundary_nodes']:
-                ml.msg(f'Nested grids must  open boundary nodes, nested grid {n+1} " does not',
+                ml.msg(f'Nested grids must have open boundary nodes defined, nested grid {n} " does not',
                                   fatal_error=True, exit_now=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
 
         # outer grid is not required to have open boundary nodes, but can if provided
         fgm = self.fgm_hydro_grids[0]
-        if not fgm.info['has_open_boundary_nodes']: fgm.info['open_boundary_type'] = si.settings.open_boundary_type
+        if not fgm.info['has_open_boundary_nodes'] and si.settings.use_open_boundary: fgm.info['use_open_boundary'] = True
         pass
 
 
@@ -111,7 +146,8 @@ class DevNestedFields(ParameterBaseClass):
 
     def add_part_prop_from_fields_plus_book_keeping(self):
         # only use outer grid to add properties for all readers
-        self.fgm_hydro_grids[0].add_part_prop_from_fields_plus_book_keeping()
+        for fgm in self.fgm_hydro_grids:
+                fgm.add_part_prop_from_fields_plus_book_keeping()
 
     def are_points_inside_domain(self,x,include_dry_cells):
         # used to check initial release points only
@@ -128,6 +164,7 @@ class DevNestedFields(ParameterBaseClass):
                 # start with outer grids values
                 is_inside = sel_n.copy()
                 part_data= deepcopy(part_data_n)
+                part_data['hydro_model_gridID'][sel_n] = 0
             else:
                 # use next grids values
                 is_inside[sel_n]= True
@@ -161,7 +198,8 @@ class DevNestedFields(ParameterBaseClass):
         # update outer grid
         fgm_outer_grid = self.fgm_hydro_grids[0]
         on_outer_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', 0, out=self.get_partID_buffer('fgmID0'))
-        fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid, apply_open_boundary_condition=True)
+        #print('xx1',on_outer_grid, part_prop['status'].data[:1], part_prop['x'].data[:1], part_prop['hydro_model_gridID'].data[:1])
+        fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid)
 
         # work through inner grids
         for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):  # loop over nested rids
@@ -172,10 +210,10 @@ class DevNestedFields(ParameterBaseClass):
             is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0), include_dry_cells=True)
 
             if np.any(is_inside):
-                # move those now inside inner grid and copy in values
+                # move those now inside outer grid and copy in values
                 s = on_outer_grid[is_inside]
-                #print('xx moved to inner grid', n, np.count_nonzero(is_inside), int(time_sec),part_prop['ID'].get_values(s[:5]))
 
+                #print('xx moved to inner grid',s[:2], part_prop['status'].data[s[:2]], part_prop['x'].data[s[:2]],  part_prop['hydro_model_gridID'].data[s[:2]])
                 part_prop['hydro_model_gridID'].set_values(n, s)  # put on inner grid
                 part_prop['n_cell'].set_values(pp['n_cell'][is_inside], s)
                 part_prop['n_cell_last_good'].set_values(pp['n_cell'][is_inside], s)
@@ -186,31 +224,32 @@ class DevNestedFields(ParameterBaseClass):
             on_inner_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', n, out=self.get_partID_buffer('fgmID1'))
 
             # update inner grid,without fixing open boundary
-            fgm.setup_time_step(time_sec, xq, on_inner_grid, apply_open_boundary_condition=False)
+            fgm.setup_time_step(time_sec, xq, on_inner_grid)
 
             # find those outside  this inner grid open boundary and move to outer
-            outside_inner = part_prop['cell_search_status'].find_subset_where(on_inner_grid, 'eq', cell_search_status_flags.open_boundary_edge, out=self.get_partID_subset_buffer('fgmID2'))
+            outside_inner = part_prop['status'].find_subset_where(on_inner_grid, 'eq', si.particle_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('fgmID2'))
             if outside_inner.size > 0:
                 inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0), include_dry_cells=True)
                 if np.any(inside_outer):
                     # move those now inside inner grid and copy in values
                     s = outside_inner[inside_outer]  # IDs of those outside inner and inside outer
-                    #print('xx moved to outer grid=', n,'count=', np.count_nonzero(inside_outer), int(time_sec),part_prop['ID'].get_values(s[:5]))
+
 
                     part_prop['status'].set_values(si.particle_status_flags.moving, s)
                     part_prop['hydro_model_gridID'].set_values(0, s)  # put on outer grid
                     part_prop['n_cell'].set_values(pp['n_cell'][inside_outer], s)
                     part_prop['n_cell_last_good'].set_values(pp['n_cell'][inside_outer], s)
                     part_prop['bc_cords'].set_values(pp['bc_cords'][inside_outer, ...], s)
-
+                    #print('xx moved to outer grid', s[:2], part_prop['status'].data[s[:2]], part_prop['x'].data[s[:2]],  part_prop['hydro_model_gridID'].data[:1])
                     # update those now on outer grid and apply its open boundary condition
-                    fgm_outer_grid.setup_time_step(time_sec, xq, s, apply_open_boundary_condition=True)
+                    fgm_outer_grid.setup_time_step(time_sec, xq, s)
                     pass
                 if np.any(~inside_outer):
                     fgm._move_back(outside_inner[~inside_outer] ) # move back to last good position on inner grid
                     #part_prop['hydro_model_gridID'].set_values(-1,outside_inner[~inside_outer] )
                     #print('xx could not be moved to outer grid=',n,'count=', np.count_nonzero(~inside_outer))
-
+            pass
+            #print('xx10', part_prop['status'].data[:1], part_prop['x'].data[:1],    part_prop['hydro_model_gridID'].data[:1])
             #todo any still outside the inner or outer grid? move back?
             #todo utside outer grid and all inner grids
         pass
@@ -248,7 +287,4 @@ class DevNestedFields(ParameterBaseClass):
         # only for outer grid
         return self.fgm_hydro_grids[0].screen_info()
 
-    def write_hydro_model_grid(self):
-        # loop over all hydro-models to write grids
-        for n, fgm in enumerate(self.fgm_hydro_grids):
-            fgm.write_hydro_model_grid(gridID=n)
+

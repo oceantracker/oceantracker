@@ -82,7 +82,7 @@ def get_params(datasource=1):
                                 'particle_prop_to_write_list': ['ID', 'x', 'IDrelease_group', 'status', 'age'],
                                 'polygon_list': [{'user_polygon_name': 'A', 'points': (np.asarray(poly_points) + np.asarray([-5000, 0])).tolist()},                                                                                                                ]
                                                  }],
-            'particle_statistics' :[ {'name': 'statas1','class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased',
+            'particle_statistics' :[ {'name': 'statas1','class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_ageBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'grid_size': [220, 221],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},

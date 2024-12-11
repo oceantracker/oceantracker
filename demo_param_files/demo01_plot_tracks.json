@@ -5,30 +5,9 @@
     "time_step": 600,
     "debug": true,
     "reader": {
-        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "input_dir": "C:\\Work\\ot_install_test\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "Random_order_*.nc",
-        "dimension_map": {
-            "time": "time",
-            "node": "nodes"
-        },
-        "grid_variable_map": {
-            "time": "time_sec",
-            "x": [
-                "east",
-                "north"
-            ],
-            "triangles": "tri"
-        },
-        "field_variable_map": {
-            "water_velocity": [
-                "east_vel",
-                "north_vel"
-            ],
-            "water_depth": "depth",
-            "tide": "tide"
-        },
-        "time_buffer_size": 15,
-        "isodate_of_hindcast_time_zero": "2020-06-01"
+        "time_buffer_size": 15
     },
     "user_note": "test of notes",
     "dispersion": {

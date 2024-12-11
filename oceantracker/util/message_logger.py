@@ -221,7 +221,6 @@ class MessageLogger(object ):
 
         if 'fatal_error' not in kwargs: kwargs['warning']= True
         if 'exit_now' not in kwargs: kwargs['warning'] = True
-        msg = msg + f', parameter "{key}" is not recognised, '
         if hint is None : hint= ''
         known = list(possible_values)
         if key not in known:

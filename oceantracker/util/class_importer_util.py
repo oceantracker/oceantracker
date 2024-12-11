@@ -68,13 +68,19 @@ class ClassImporter():
             mod,_ ,c = class_name.rpartition('.')
             try:
                 m = self._import_module_from_string(mod)
-                return getattr(m,c) # get class as module attribute
             except Exception as e:
-                self.msg_logger.spell_check(f' Cannot find module "{mod}" or class within it="{c}"',
-                                            f'{mod}.{c}', [x.split('.')[1] for x in self.short_name_class_map.keys()],
+                self.msg_logger.spell_check(f'Cannot find module "{mod}" ',
+                                            mod.split('.')[-1],
+                                            list(set([x.split('.')[-2] for x in self.full_name_class_map.keys()])),
+                                            hint='A miss-spelt module name? or missing custom module python file',
+                                            fatal_error=True, exit_now=True)
+            try:
+                return getattr(m, c)  # get class as module attribute
+            except Exception as e:
+                self.msg_logger.spell_check(f'Cannot find class "{c}" within module "{mod}"' ,
+                                            c, [x.split('.')[1] for x in self.short_name_class_map.keys()],
                                             hint='A miss-spelt short class_name? or missing custimn class',
                                             fatal_error=True, exit_now=True)
-
     def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None, initialize=False,
                                         caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):
         ml = self.msg_logger

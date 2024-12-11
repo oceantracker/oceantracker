@@ -95,7 +95,8 @@ class ParticleGroupManager(ParameterBaseClass):
         part_prop = si.class_roles.particle_properties
 
         #todo does this setup_interp_time_step have to be here?
-        si.core_class_roles.field_group_manager.setup_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
+        fgm =si.core_class_roles.field_group_manager
+        fgm.setup_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
 
         # initial values  part prop derived from fields
         for name, i  in si.class_roles.particle_properties.items():
@@ -104,22 +105,13 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
         for name, i  in si.class_roles.particle_properties.items():
-            if isinstance(i, CustomParticleProperty):
+            if isinstance(i,CustomParticleProperty):
                 i.initial_value_at_birth(new_buffer_indices)
 
         # update new particles props
         # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
         self.update_PartProp(n_time_step, time_sec, new_buffer_indices)
 
-        # flag if any bad initial locations
-        if si.settings['open_boundary_type'] > 0:
-            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags.outside_open_boundary, out=self.get_partID_buffer('B1'))
-        else:
-            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
-
-        if bad.shape[0] > 0:
-            si.msg_logger.msg(str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain',warning=True)
-            si.msg_logger.msgg(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)),warning=True)
         return new_buffer_indices #indices of all new particles
 
     def release_a_particle_group_pulse(self, release_data, time_sec):

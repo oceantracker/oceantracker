@@ -92,7 +92,7 @@ class FindHoriCellTriangleWalk(object):
             n_cell, cell_search_status, bc_cords,
             self.walk_counts,
             params['max_search_steps'], params['bc_walk_tol'],
-            si.settings.open_boundary_type, si.settings['block_dry_cells'], active)
+            si.settings['block_dry_cells'], active)
 
     def close(self):
         info= self.info

@@ -32,7 +32,7 @@ known_readers = dict(
                 SCHISM_v5 =  'oceantracker.reader.SCHISM_reader_v5.SCHISMreaderNCDFv5',
                 GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
                 #fvcom =  'oceantracker.reader.FVCOM_reader.unstructured_FVCOM',
-                DEFT3D_FM =  'oceantracker.reader.delft_fm.dev_DELFTFM',
+                DEFT3D_FM =  'oceantracker.reader.delft_fm.DELFTFM',
                 #generic =  'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 #dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',
                  )
@@ -42,7 +42,7 @@ default_classes_dict = dict(
                 particle_properties='oceantracker.particle_properties._base_particle_properties.ParticleProperty',
                 time_varying_info='oceantracker.time_varying_info._base_time_varying_info.TimeVaryingInfo',
                 field_group_manager='oceantracker.field_group_manager.field_group_manager.FieldGroupManager',
-                field_group_manager_nested='oceantracker.field_group_manager.dev_nested_fields.DevNestedFields',
+                field_group_manager_nested='oceantracker.field_group_manager.dev_nested_grids_field_group_manager.DevNestedFields',
                 particle_group_manager= 'oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager',
                 tracks_writer = 'oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter',
                 interpolator = 'oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularGrid',

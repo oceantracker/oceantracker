@@ -25,7 +25,7 @@ class InsidePolygonsNonOverlapping2D(ManuallyUpdatedParticleProperty):
         super().initial_setup()
         # set up polygons instances
 
-        self.polygons, msg = set_up_list_of_polygon_instances(self.params['polygon_list'])
+        self.polygons, msg = set_up_list_of_polygon_instances(self.params['polygon_list'], geographic_coords=si.settings.use_geographic_coords)
 
     def update(self,n_time_step, time_sec, active):
         # find polygon each particle is inside
