@@ -77,27 +77,34 @@ def convert_cords(xy, EPSG_in, EPSG_out):
     return out
 
 
-# dev code to test use of mercator for use in global lon_lat particle tracking
-EPSG_Mercator = 'ESRI:53004'
+def fix_any_spanning180east(lon_lat,single_cord=False, msg_logger=None, caller=None, crumbs=None):
+    # check longitudes spanning 180, ie jumps from 179 E to -179 East
+    if single_cord: lon_lat = lon_lat[np.newaxis,:]
+    bounds= [lon_lat[:,0].min(), lon_lat[:,0].max()]
+    if abs(bounds[1] - bounds[0]) > 180:
+        # spanning 180 deg east
+        sel = lon_lat[:, 0] < 0
+        lon_lat[sel,:] += 360.
+        msg_logger.msg( f'Hydro-model coordinates are geographic and span 180 degrees east, converting to 0-360 degrees',
+                        note=True, caller =caller,crumbs=crumbs )
+    if single_cord: lon_lat = lon_lat[0]
+    return lon_lat
 
+def get_deg_per_meter(lon_lat, single_cord=False):
+    dx = 1. / 111000.  # deg per m of latitude, rows of lon_lat are multiple locations
+    if single_cord: lon_lat = lon_lat[np.newaxis, :]
+    out = np.full_like(lon_lat,0., dtype =lon_lat.dtype)
 
-# dev transforms to operate in native (lon, lat) coords
+    out[:, 0] = dx * np.cos(np.deg2rad(lon_lat[:, 1]))
+    out[:, 1]= dx
+    if single_cord: out = out[0]
+    return  out
 
-def WGS84_to_to_Mercator(lon_lat, out=None):
-    # (lng,lat ) to NZTM for numpy arays
-    if out is None: out = np.full_like(lon_lat,0.)
-    # put lon between -180 and 180
-    sel = lon_lat[:,0] > 180
-    lon_lat[sel, 0] -= 360
-    out[:,0],out[:,1] = transformerWGS84_to_Mercator.transform(lon_lat[:, 0], lon_lat[:, 1])
-    return out
-def get_Metcator_info(lon_lat):
-    x_mercator = WGS84_to_to_Mercator(lon_lat)
-
-    return None,x_mercator
-
-
-# set up class instances once to speed computation,
-# xy=True will assume (lon,lat) input output
-transformerWGS84_to_Mercator = Transformer.from_crs(EPSG_WGS84, EPSG_Mercator, always_xy = True)
-
+def rectangle_area_meters_sq(xll,yll, xur, yur, is_geographic=False):
+    # calculate area of "small" retangle in meters squred, for bth m's and geographic coorindates
+    # given coords of lower left and upper right
+    if is_geographic:
+        dxy = get_deg_per_meter(np.asarray([xll,.5*(yll+yur)]), single_cord=True)
+        return ((xur-xll)/dxy[0])*((yur-yll)/dxy[1])
+    else:
+        return (xur - xll)*(yur-yll)

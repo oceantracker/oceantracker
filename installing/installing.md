@@ -23,31 +23,11 @@ Due to version dependencies of modules outside oceantracker, it curently only wo
 
     ``cd ./oceantracker``
 
-
-4. Either: Make conda  environment from given file
-
-This method is strongly recommended as it ensures  version compatibility amongst python modules. This conda link is useful. 
-
-https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
-
-First open a conda prompt window,  or in liunx a ordinary command window. 
-
-Note: In Windows may need to run conda prompt window as administrator to install packages.
-
-   From root dir of oceantracker package run 
-     
-     ``conda env create -f installing/ot_conda_env.yml``
-    
-   Activate new environment
-
-      ``conda activate oceantracker``
-
-    
-5. Or : Manually build Conda environment
+3. Manually build a Conda environment
 
         ``conda create -n oceantracker python=3.10`` 
 
-    Note: Use python version 3.10 as not all external imported  3.11 NumPy versions 1.21–1.26
+    Note: Use python version 3.10 as not all required external imported  packages work in 3.11
 
     Activate new environment
 

@@ -65,14 +65,14 @@ if __name__ == "__main__":
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant'],  # request a heat map for the decaying part. prop. added above
-         status_min='moving',  # only count the particles which are moving
+         status_list=['moving'],  # only count the particles which are moving
          z_min=-10.,  # only count particles at locations above z=-2m
          start='2017-01-01T02:30:00',)
 
     ot.add_class('particle_statistics', class_name='PolygonStats2D_timeBased',
         update_interval= 3600,
         particle_property_list=['water_depth'],
-        status_min= 'moving',
+        status_list= ['moving'],
         z_min= -2,
         grid_size= [120, 121],
         polygon_list=[dict(points=poly1)])

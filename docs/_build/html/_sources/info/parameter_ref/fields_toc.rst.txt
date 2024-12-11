@@ -7,11 +7,11 @@ fields
 	:maxdepth: 1
 
 	CustomFieldBase.rst
-	FrictionVelocityFromBottomStress.rst
-	FrictionVelocityFromNearSeaBedVelocity.rst
+	FrictionVelocity.rst
 	ReaderField.rst
 	TotalWaterDepth.rst
 	VerticalGradient.rst
+	_BaseField.rst
 
 **Role:** 
 

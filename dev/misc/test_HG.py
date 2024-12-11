@@ -44,14 +44,14 @@ if __name__ == '__main__':
         'release_groups': {'P1': {'points': x0 ,'pulse_size':5, 'release_interval': 3600}},
         'dispersion': {'A_H': 1.0 ,'A_V': 0.001},
         'particle_statistics' : {'S1':{
-                                 'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+                                 'class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased',
                                  'update_interval': 3600, 'particle_property_list': ['water_depth'],
                                 'grid_center': x0[0].tolist(),'grid_span': [25000.,25000.],
                                  'grid_size': [120, 121]}},
          'reader': {'file_mask': 'sch*.nc',
                    'input_dir': root_input_dir,
                     'regrid_z_to_equal_sigma': True,
-                    'hydro_model_cords_in_lat_long' : True,
+                    'hydro_model_cords_geographic' : True,
                       #'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                       },
            }

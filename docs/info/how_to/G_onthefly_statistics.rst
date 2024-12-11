@@ -84,10 +84,10 @@ Gridded/Heat map example
 The below uses the helper class method to extends the minimal_example to
 add
 
--  Decaying particle property, eg. breakdown of a pollutant
--  Gridded time series of particle statistics as heat maps, which also
-   builds a heat map of the pollutant
--  Plot the particle counts and pollutant as animated heatmap.
+- Decaying particle property, eg. breakdown of a pollutant
+- Gridded time series of particle statistics as heat maps, which also
+  builds a heat map of the pollutant
+- Plot the particle counts and pollutant as animated heatmap.
 
 .. code:: ipython3
 
@@ -105,19 +105,20 @@ add
                 write_tracks = False # particle tracks not needed for on fly 
                 )
     # ot.set_class, sets parameters for a named class
-    ot.add_class('reader',input_dir= '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                          file_mask=  'demoHindcastSchism*.nc')  # hindcast file mask
+    ot.add_class('reader',input_dir=  '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                          file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
     
     # add one release locations 
-    ot.add_class('release_groups', name='my_release_point', # user must provide a name for group first
-                            points= [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
-                            release_interval= 900,           # seconds between releasing particles
-                            pulse_size= 1000,                   # number of particles released each release_interval
+    ot.add_class('release_groups', 
+                   name='my_release_point', # optional name used to refere to group in plotting
+                    points= [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
+                    release_interval= 900,           # seconds between releasing particles
+                    pulse_size= 1000,                   # number of particles released each release_interval
                 )
     # add a decaying particle property
     # add and Age decay particle property, with exponential decay based on age, with time scale 1 hour                             
     ot.add_class('particle_properties', # add a new property to particle_properties role
-                name ='a_pollutant', # must have a user given name
+                name ='a_pollutant', # must have a user given name to 
                 class_name='oceantracker.particle_properties.age_decay.AgeDecay', #  class_role is resuspension
                 initial_value= 1000,
                 decay_time_scale = 3600.) # time scale of age decay ie decays initial_value* exp(-age/decay_time_scale)
@@ -141,97 +142,114 @@ add
 
 .. parsed-literal::
 
-    helper --------------------------------------------------------------------------
+    helper ----------------------------------------------------------------------
     helper Starting OceanTracker helper class
     helper   - Starting run using helper class
-    Main --------------------------------------------------------------------------
+    Main      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+    Main ----------------------------------------------------------------------
     Main OceanTracker starting main:
-    Main   - Output dir set up.
+    Main     Starting package set up
+    Main         -  Built OceanTracker package tree,	  0.566 sec
+    Main         -  Built OceanTracker sort name map,	  0.000 sec
+    Main     -  Done package set up to setup ClassImporter,	  0.566 sec
     Main >>> Warning: Deleted contents of existing output dir
-    Main     >>> Note: to help with debugging, parameters as given by user  are in "heat_map_example_raw_user_params.json"
-    Main   Output is in dir "e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\heat_map_example"
-    Main         hint: see for copies of screen output and user supplied parameters, plus all other output
-    Main --------------------------------------------------------------------------
-    Main  OceanTracker version 0.5.0.000 2024-03-07 - preliminary setup
-    Main      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
-    Main   - Found input dir "../demos/demo_hindcast"
-    Main   - found hydro-model files of type  "SCHISIM"
-    Main       -  sorted hyrdo-model files in time order,	  0.916 sec
-    C000 --------------------------------------------------------------------------
-    C000 Starting case number   0,  heat_map_example at 2024-03-20T14:25:46.534260
-    C000 --------------------------------------------------------------------------
-    C000       -  Scanned OceanTracker to build short name map to the full class_names,	  0.018 sec
+    Main Output is in dir "f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\heat_map_example"
+    Main       hint: see for copies of screen output and user supplied parameters, plus all other output
+    Main     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
+    Main ----------------------------------------------------------------------
+    Main  OceanTracker version 0.50.0010-2024-03-30 - preliminary setup
+    Main   - Found input dir "../demos/demo_hindcast/schsim3D"
+    Main   - found hydro-model files of type  "SCHISM"
+    Main Cataloging hindcast with 1 files in dir ../demos/demo_hindcast/schsim3D
+    Main     -  Cataloged hydro-model files/variables in time order,	  0.007 sec
+    Main >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+    Main     -  sorted hyrdo-model files in time order,	  0.033 sec
+    prelim:     Starting package set up
+    prelim:         -  Built OceanTracker package tree,	  0.010 sec
+    prelim:         -  Built OceanTracker sort name map,	  0.000 sec
+    prelim:     -  Done package set up to setup ClassImporter,	  0.010 sec
+    C000 ----------------------------------------------------------------------
+    C000 Starting case number   0,  heat_map_example at 2024-09-06T07:36:22.428531
+    C000 ----------------------------------------------------------------------
+    C000     -  Scanned OceanTracker to build short name map to the full class_names,	  0.000 sec
+    C000 >>> Note: Hydro-model is "3D"  type "SCHISMreaderNCDF"
+    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast/schsim3D"
+    C000     Start: 2017-01-01T00:30:00.000000000  end:  2017-01-01T23:30:00.000000000, time steps  24 
+    C000     grid bounding box = [1589789.0 5479437.0] to [1603398.0 5501640.0]
     C000   - Starting grid setup
-    C000       -  built node to triangles map,	  0.632 sec
-    C000       -  built triangle adjacency matrix,	  0.303 sec
-    C000       -  found boundary triangles,	  0.000 sec
-    C000       -  built domain and island outlines,	  1.414 sec
-    C000       -  calculated triangle areas,	  0.000 sec
+    C000     -  built node to triangles map,	  0.421 sec
+    C000     -  built triangle adjacency matrix,	  0.149 sec
+    C000     -  found boundary triangles,	  0.000 sec
+    C000     -  built domain and island outlines,	  0.912 sec
+    C000     -  calculated triangle areas,	  0.000 sec
     C000   - Finished grid setup
+    C000     -  built barycentric-transform matrix,	  0.252 sec
+    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
+    C000     -  Setup field group manager,	  0.255 sec
+    C000     -  Added release groups and found run start and end times,	  0.001 sec
+    C000     -  Done initial setup of all classes,	  0.294 sec
+    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
+    C000 ----------------------------------------------------------------------
+    C000   - Starting heat_map_example,  duration: 0 days 23 hrs 0 min 0 sec
+    C000   -  Reading 24 time steps,  for hindcast time steps 00:23,  into ring buffer offsets 000:023 
+    C000       -  read  24 time steps in  0.8 sec
+    C000 ----------------------------------------------------------------------
+    C000   - Starting time stepping: 2017-01-01T00:30:00 to 2017-01-01T23:30:00 , duration  0 days 23 hrs 0 min 0 sec 
+    C000 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000   0% step time = 4424.9 ms
+    C000 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   4,000: Active:04000 M:04000 S:00000  B:00000 D:000 O:00 N:000 Buffer:4000   1% step time =  1.7 ms
+    C000 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   7,000: Active:07000 M:07000 S:00000  B:00000 D:000 O:00 N:000 Buffer:7000   1% step time =  1.9 ms
+    C000 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  10,000: Active:10000 M:09999 S:00000  B:00001 D:000 O:00 N:000 Buffer:10000   2% step time =  2.2 ms
+    C000 17% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  13,000: Active:13000 M:13000 S:00000  B:00000 D:000 O:00 N:000 Buffer:13000   3% step time =  2.6 ms
+    C000 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  16,000: Active:16000 M:15999 S:00000  B:00001 D:000 O:00 N:000 Buffer:16000   3% step time =  2.7 ms
+    C000 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  19,000: Active:19000 M:18999 S:00000  B:00001 D:000 O:00 N:000 Buffer:19000   4% step time =  2.9 ms
+    C000 30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  22,000: Active:22000 M:21991 S:00000  B:00009 D:000 O:00 N:000 Buffer:22000   4% step time =  3.1 ms
+    C000 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  25,000: Active:25000 M:24981 S:00000  B:00019 D:000 O:00 N:000 Buffer:25000   5% step time =  4.8 ms
+    C000 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  28,000: Active:28000 M:27985 S:00000  B:00015 D:000 O:00 N:000 Buffer:28000   6% step time =  4.1 ms
+    C000 43% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  31,000: Active:31000 M:30983 S:00000  B:00017 D:000 O:00 N:000 Buffer:31000   6% step time =  4.7 ms
+    C000 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  34,000: Active:34000 M:33991 S:00000  B:00009 D:000 O:00 N:000 Buffer:34000   7% step time =  5.1 ms
+    C000 52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  37,000: Active:37000 M:36991 S:00000  B:00009 D:000 O:00 N:000 Buffer:37000   7% step time =  4.5 ms
+    C000 57% step 0078:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:  40,000: Active:40000 M:39989 S:00000  B:00011 D:000 O:00 N:000 Buffer:40000   8% step time =  4.8 ms
+    C000 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  43,000: Active:43000 M:42992 S:00001  B:00007 D:000 O:00 N:000 Buffer:43000   9% step time =  4.9 ms
+    C000 65% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  46,000: Active:46000 M:45989 S:00008  B:00003 D:000 O:00 N:000 Buffer:46000   9% step time =  5.8 ms
+    C000 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  49,000: Active:49000 M:48991 S:00008  B:00001 D:000 O:00 N:000 Buffer:49000  10% step time =  5.8 ms
+    C000 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  52,000: Active:52000 M:51991 S:00008  B:00001 D:000 O:00 N:000 Buffer:52000  10% step time =  6.3 ms
+    C000 78% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  55,000: Active:55000 M:54991 S:00008  B:00001 D:000 O:00 N:000 Buffer:55000  11% step time =  6.2 ms
+    C000 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  58,000: Active:58000 M:57992 S:00008  B:00000 D:000 O:00 N:000 Buffer:58000  12% step time =  6.3 ms
+    C000 87% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  61,000: Active:61000 M:60989 S:00008  B:00003 D:000 O:00 N:000 Buffer:61000  12% step time =  6.8 ms
+    C000 91% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  64,000: Active:64000 M:63992 S:00000  B:00008 D:000 O:00 N:000 Buffer:64000  13% step time =  7.3 ms
+    C000 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  67,000: Active:67000 M:66992 S:00000  B:00008 D:000 O:00 N:000 Buffer:67000  13% step time =  7.7 ms
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000 100% step 0138:H0023b23-00 Day +00 23:00 2017-01-01 23:30:00: Rel.:  69,000: Active:69000 M:68997 S:00000  B:00003 D:000 O:00 N:000 Buffer:69000  14% step time = 72.4 ms
     C000 >>> Note: Hydro-model is "3D"  type "SCHISMreaderNCDF"
-    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast"
-    C000     grid bounding box = [1590046.0 5478274.0] to [1603253.0 5492492.0]
-    C000       -  built barycentric-transform matrix,	  0.484 sec
-    C000 >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
-    C000 >>> Note: Found vertical diffusivity profile in hydro-model files
-    C000 >>> Note: Using vertical diffusivity profile in hydro-model for vertical random walk
-    C000 >>> Warning: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
-    C000 >>> Warning: Making scheduler: update interval rounded to be integer number of time steps
-    C000       hint: 900 sec. rounded to model time step = 1200 sec.
-    C000       in:  adding scheduler
-    C000       -  Set up run start and end times, plus release groups and their schedulers,	  0.000 sec
-    C000       -  final set up of core classes,	  0.002 sec
-    C000 --------------------------------------------------------------------------
-    C000   - Starting heat_map_example,  duration: 0 days 22 hrs 50 min 0 sec
-    C000       -  Initialized Solver Class,	  0.000 sec
-    C000   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 24 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
-    C000       -  read  24 time steps in  1.2 sec
-    C000 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000 -  0% step time = 8044.9 ms
-    C000 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   4,000: Active:04000 M:03998 S:00000  B:00002 D:000 O:00 N:000 Buffer:4000 -  1% step time =  4.7 ms
-    C000 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   7,000: Active:07000 M:06980 S:00000  B:00020 D:000 O:00 N:000 Buffer:7000 -  1% step time =  6.5 ms
-    C000 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  10,000: Active:10000 M:09953 S:00000  B:00047 D:000 O:00 N:000 Buffer:10000 -  2% step time =  8.6 ms
-    C000 18% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  13,000: Active:13000 M:12931 S:00000  B:00069 D:000 O:00 N:000 Buffer:13000 -  3% step time = 10.4 ms
-    C000 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  16,000: Active:16000 M:15861 S:00000  B:00139 D:000 O:00 N:000 Buffer:16000 -  3% step time = 12.1 ms
-    C000 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  19,000: Active:19000 M:18768 S:00000  B:00232 D:000 O:00 N:000 Buffer:19000 -  4% step time = 13.0 ms
-    C000 31% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  22,000: Active:22000 M:21510 S:00000  B:00490 D:000 O:00 N:000 Buffer:22000 -  4% step time = 15.0 ms
-    C000 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  25,000: Active:25000 M:24001 S:00000  B:00999 D:000 O:00 N:000 Buffer:25000 -  5% step time = 16.7 ms
-    C000 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  28,000: Active:28000 M:26458 S:00000  B:01542 D:000 O:00 N:000 Buffer:28000 -  6% step time = 18.2 ms
-    C000 44% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  31,000: Active:31000 M:29281 S:00000  B:01719 D:000 O:00 N:000 Buffer:31000 -  6% step time = 19.7 ms
-    C000 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  34,000: Active:34000 M:32090 S:00000  B:01910 D:000 O:00 N:000 Buffer:34000 -  7% step time = 21.2 ms
-    C000 53% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  37,000: Active:37000 M:34975 S:00000  B:02025 D:000 O:00 N:000 Buffer:37000 -  7% step time = 22.9 ms
-    C000 57% step 0078:H0013b13-14 Day +00 13:00 2017-01-01 13:30:00: Rel.:  40,000: Active:40000 M:38011 S:00000  B:01989 D:000 O:00 N:000 Buffer:40000 -  8% step time = 24.5 ms
-    C000 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  43,000: Active:43000 M:40848 S:00115  B:02037 D:000 O:00 N:000 Buffer:43000 -  9% step time = 26.2 ms
-    C000 66% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  46,000: Active:46000 M:43211 S:00696  B:02093 D:000 O:00 N:000 Buffer:46000 -  9% step time = 26.9 ms
-    C000 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  49,000: Active:49000 M:46131 S:00696  B:02173 D:000 O:00 N:000 Buffer:49000 - 10% step time = 29.6 ms
-    C000 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  52,000: Active:52000 M:49021 S:00696  B:02283 D:000 O:00 N:000 Buffer:52000 - 10% step time = 30.9 ms
-    C000 79% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  55,000: Active:55000 M:51769 S:00696  B:02535 D:000 O:00 N:000 Buffer:55000 - 11% step time = 30.5 ms
-    C000 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  58,000: Active:58000 M:54369 S:00696  B:02935 D:000 O:00 N:000 Buffer:58000 - 12% step time = 32.7 ms
-    C000 88% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  61,000: Active:61000 M:56785 S:00696  B:03519 D:000 O:00 N:000 Buffer:61000 - 12% step time = 35.1 ms
-    C000 92% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  64,000: Active:64000 M:59771 S:00076  B:04153 D:000 O:00 N:000 Buffer:64000 - 13% step time = 36.6 ms
-    C000 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  67,000: Active:67000 M:62131 S:00000  B:04869 D:000 O:00 N:000 Buffer:67000 - 13% step time = 38.2 ms
-    C000 100% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:  69,000: Active:69000 M:63605 S:00000  B:05395 D:000 O:00 N:000 Buffer:69000 - 14% step time = 48.1 ms
-    C000 >>> Note: Hydro-model is "3D"  type "SCHISMreaderNCDF"
-    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast"
-    C000 >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
-    C000 >>> Note: Found vertical diffusivity profile in hydro-model files
-    C000 >>> Note: Using vertical diffusivity profile in hydro-model for vertical random walk
-    C000 >>> Warning: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
-    C000 >>> Warning: Making scheduler: update interval rounded to be integer number of time steps
-    C000       hint: 900 sec. rounded to model time step = 1200 sec.
-    C000       in:  adding scheduler
-    C000 --------------------------------------------------------------------------
-    C000   - Finished case number   0,  heat_map_example started: 2024-03-20 14:25:46.534260, ended: 2024-03-20 14:26:03.925328
-    C000       Elapsed time =0:00:17.391068
-    C000 --------------------------------------------------------------------------
-    Main     >>> Note: run summary with case file names   "heat_map_example_runInfo.json"
-    Main     >>> Note: to help with debugging, parameters as given by user  are in "heat_map_example_raw_user_params.json"
-    Main     >>> Note: run summary with case file names   "heat_map_example_runInfo.json"
-    Main >>> Warning: Deleted contents of existing output dir
-    Main --------------------------------------------------------------------------
-    Main OceanTracker summary:  elapsed time =0:00:18.451895
-    Main       Cases -   0 errors,   4 warnings,   5 notes, check above
-    Main       Main  -   0 errors,   1 warnings,   2 notes, check above
-    Main --------------------------------------------------------------------------
+    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast/schsim3D"
+    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
+    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
+    C000 ----------------------------------------------------------------------
+    C000   - Finished case number   0,  heat_map_example started: 2024-09-06 07:36:22.428531, ended: 2024-09-06 07:36:33.784928
+    C000       Computational time =0:00:11.356397
+    C000 --- End case 0 -------------------------------------------------------
+    End --- Summary ----------------------------------------------------------
+    End     >>> Note: Run summary with case file names in "*_runInfo.json"
+    End     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
+    End >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+    End     >>> Note: Run summary with case file names in "*_runInfo.json"
+    End >>> Warning: Deleted contents of existing output dir
+    End ----------------------------------------------------------------------
+    End ----------------------------------------------------------------------
+    End OceanTracker summary:  elapsed time =0:00:11.968494
+    End       Cases -   0 errors,   0 warnings,   3 notes, check above
+    End       Main  -   0 errors,   1 warnings,   3 notes, check above
+    End   Output in f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\heat_map_example
+    End ----------------------------------------------------------------------
     
 
 Read and plot heat maps
@@ -254,7 +272,7 @@ etc for plotting
     from IPython.display import HTML
     
     # basic read of net cdf
-    raw_stats = read_ncdf_output_files.read_stats_file('output/heat_map_example/heat_map_example_stats_gridded_time_my_heatmap.nc')
+    raw_stats = read_ncdf_output_files.read_stats_file('./output/heat_map_example/heat_map_example_stats_gridded_time_0_my_heatmap.nc')
     print('raw_stats', raw_stats.keys())
     
     # better,  load netcdf plus grid and other data useful in plotting 
@@ -280,9 +298,9 @@ etc for plotting
 
 .. parsed-literal::
 
-    raw_stats dict_keys(['total_num_particles_released', 'release_groupID_my_release_point', 'dimensions', 'limits', 'release_groupID', 'release_locations', 'release_points', 'sum_a_pollutant', 'number_of_release_points', 'time', 'x', 'num_released_total', 'count', 'count_all_particles', 'grid_cell_area', 'is_polygon_release', 'number_released_each_release_group', 'y', 'time_var', 'date', 'stats_type', 'connectivity_matrix', 'a_pollutant'])
-    stats dict_keys(['total_num_particles_released', 'release_groupID_my_release_point', 'dimensions', 'limits', 'release_groupID', 'release_locations', 'release_points', 'sum_a_pollutant', 'number_of_release_points', 'time', 'x', 'num_released_total', 'count', 'count_all_particles', 'grid_cell_area', 'is_polygon_release', 'number_released_each_release_group', 'y', 'time_var', 'date', 'stats_type', 'connectivity_matrix', 'a_pollutant', 'info', 'params', 'release_group_centered_grids', 'particle_status_flags', 'particle_release_groups', 'full_case_params', 'grid'])
-    animate_heat_map> colour axis limits [0, 1376] [0, 1376]
+    raw_stats dict_keys(['total_num_particles_released', 'dimensions', 'limits', 'variable_attributes', 'grid_cell_area', 'num_released_total', 'time', 'x', 'y', 'count', 'number_released_each_release_group', 'count_all_particles', 'sum_a_pollutant', 'global_attributes', 'time_var', 'date', 'stats_type', 'connectivity_matrix', 'a_pollutant'])
+    stats dict_keys(['total_num_particles_released', 'dimensions', 'limits', 'variable_attributes', 'grid_cell_area', 'num_released_total', 'time', 'x', 'y', 'count', 'number_released_each_release_group', 'count_all_particles', 'sum_a_pollutant', 'global_attributes', 'time_var', 'date', 'stats_type', 'connectivity_matrix', 'a_pollutant', 'particle_status_flags', 'particle_release_groups', 'grid'])
+    animate_heat_map> colour axis limits [0, 1146] [0, 1146]
     
 
 
@@ -291,7 +309,7 @@ etc for plotting
 
 .. parsed-literal::
 
-    animate_heat_map> colour axis limits [1.4321606718741004e-07, 1000.0] [1.4321606718741004e-07, 1000.0]
+    animate_heat_map> colour axis limits [1.026187963170189e-07, 1000.0] [1.026187963170189e-07, 1000.0]
     
 
 
@@ -318,145 +336,162 @@ add polygon stats example with plotting
 
     # Polygon Statistics example.py run using dictionary of parameters
     #------------------------------------------------
-    from oceantracker import main
-    params={}
-    params.update(output_file_base='polygon_connectivity_map_example',  # name used as base for output files
-                root_output_dir= 'output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
+    # make instance of oceantracker to use to set parameters using code, then run
+    ot = OceanTracker()
+    
+    # ot.settings method use to set basic settings
+    ot.settings(output_file_base='heat_map_example', # name used as base for output files
+                root_output_dir='output',             #  output is put in dir   'root_output_dir'\\'output_file_base'
                 time_step= 600., #  10 min time step as seconds
                 write_tracks = False # particle tracks not needed for on fly 
+                )
+    # ot.set_class, sets parameters for a named class
+    ot.add_class('reader',input_dir=  '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                          file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
+    
+    # add one release locations 
+    ot.add_class('release_groups', 
+                   name='my_release_point', # optional name used to refere to group in plotting
+                    points= [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
+                    release_interval= 900,           # seconds between releasing particles
+                    pulse_size= 1000,                   # number of particles released each release_interval
+                )
+    # add a decaying particle property
+    # add and Age decay particle property, with exponential decay based on age, with time scale 1 hour                             
+    ot.add_class('particle_properties', # add a new property to particle_properties role
+                name ='a_pollutant', # must have a user given name to 
+                class_name='oceantracker.particle_properties.age_decay.AgeDecay', #  class_role is resuspension
+                initial_value= 1000,
+                decay_time_scale = 3600.) # time scale of age decay ie decays initial_value* exp(-age/decay_time_scale)
+    
+    # add a gridded particle statistic 
+    ot.add_class('particle_statistics',
+                   name='my_polygon',
+                   class_name= 'PolygonStats2D_timeBased',
+                   polygon_list = [
+                            dict(points= [   [1597682.1237, 5489972.7479],# list of one or more polygons
+                                     [1598604.1667, 5490275.5488],
+                                     [1598886.4247, 5489464.0424],
+                                     [1597917.3387, 5489000],
+                                     [1597300, 5489000], [1597682.1237, 5489972.7479]]
+                            )] 
                    )
     
-    # ot.set_class, sets parameters for a named class
-    params.update(reader= { 'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                        'file_mask':  'demoHindcastSchism*.nc'})  # hindcast file mask
-    params.update(release_groups= {},particle_statistics={} )
-    # add one release locations 
-    params['release_groups']['my_release_point']={ # user must provide a name for group first
-                            'points': [ [1599000, 5486200]],       # ust be 1 by N list pairs of release locations
-                            'release_interval': 900,           # seconds between releasing particles
-                            'pulse_size': 1000,                   # number of particles released each release_interval
-                }
-    # add a gridded particle statistic 
-    params['particle_statistics']['my_polygon']= {
-                    'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
-                    'polygon_list': [{'points': [   [1597682.1237, 5489972.7479],# list of one or more polygons
-                                                    [1598604.1667, 5490275.5488],
-                                                    [1598886.4247, 5489464.0424],
-                                                    [1597917.3387, 5489000],
-                                                    [1597300, 5489000], [1597682.1237, 5489972.7479]
-                                                    ]                                         
-                                      }],
-                    # the below settings are optional
-                    'update_interval': 900, # time interval in sec, between doing particle statists counts 
-                    'status_min':'moving', # only count the particles which are moving 
-                    }
-    
     # run oceantracker
-    poly_case_info_file_name = main.run(params)
+    poly_case_info_file_name = ot.run()
+    
 
 
 .. parsed-literal::
 
-    Main --------------------------------------------------------------------------
+    helper ----------------------------------------------------------------------
+    helper Starting OceanTracker helper class
+    helper   - Starting run using helper class
+    Main      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+    Main ----------------------------------------------------------------------
     Main OceanTracker starting main:
-    Main   - Output dir set up.
+    Main     Starting package set up
+    Main         -  Built OceanTracker package tree,	  0.011 sec
+    Main         -  Built OceanTracker sort name map,	  0.000 sec
+    Main     -  Done package set up to setup ClassImporter,	  0.012 sec
     Main >>> Warning: Deleted contents of existing output dir
-    Main     >>> Note: to help with debugging, parameters as given by user  are in "polygon_connectivity_map_example_raw_user_params.json"
-    Main   Output is in dir "e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\polygon_connectivity_map_example"
-    Main         hint: see for copies of screen output and user supplied parameters, plus all other output
-    Main --------------------------------------------------------------------------
-    Main  OceanTracker version 0.5.0.000 2024-03-07 - preliminary setup
-    Main      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
-    Main   - Found input dir "../demos/demo_hindcast"
-    Main   - found hydro-model files of type  "SCHISIM"
-    Main       -  sorted hyrdo-model files in time order,	  0.025 sec
-    C000 --------------------------------------------------------------------------
-    C000 Starting case number   0,  polygon_connectivity_map_example at 2024-03-20T14:32:20.527679
-    C000 --------------------------------------------------------------------------
-    C000       -  Scanned OceanTracker to build short name map to the full class_names,	  0.019 sec
+    Main Output is in dir "f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\heat_map_example"
+    Main       hint: see for copies of screen output and user supplied parameters, plus all other output
+    Main     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
+    Main ----------------------------------------------------------------------
+    Main  OceanTracker version 0.50.0010-2024-03-30 - preliminary setup
+    Main   - Found input dir "../demos/demo_hindcast/schsim3D"
+    Main   - found hydro-model files of type  "SCHISM"
+    Main Cataloging hindcast with 1 files in dir ../demos/demo_hindcast/schsim3D
+    Main     -  Cataloged hydro-model files/variables in time order,	  0.008 sec
+    Main >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+    Main     -  sorted hyrdo-model files in time order,	  0.022 sec
+    prelim:     Starting package set up
+    prelim:         -  Built OceanTracker package tree,	  0.011 sec
+    prelim:         -  Built OceanTracker sort name map,	  0.000 sec
+    prelim:     -  Done package set up to setup ClassImporter,	  0.011 sec
+    C000 ----------------------------------------------------------------------
+    C000 Starting case number   0,  heat_map_example at 2024-09-06T07:54:20.095814
+    C000 ----------------------------------------------------------------------
+    C000     -  Scanned OceanTracker to build short name map to the full class_names,	  0.000 sec
+    C000 >>> Note: Hydro-model is "3D"  type "SCHISMreaderNCDF"
+    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast/schsim3D"
+    C000     Start: 2017-01-01T00:30:00.000000000  end:  2017-01-01T23:30:00.000000000, time steps  24 
+    C000     grid bounding box = [1589789.0 5479437.0] to [1603398.0 5501640.0]
     C000   - Starting grid setup
-    C000       -  built node to triangles map,	  0.000 sec
-    C000       -  built triangle adjacency matrix,	  0.000 sec
-    C000       -  found boundary triangles,	  0.000 sec
-    C000       -  built domain and island outlines,	  0.527 sec
-    C000       -  calculated triangle areas,	  0.000 sec
+    C000     -  built node to triangles map,	  0.000 sec
+    C000     -  built triangle adjacency matrix,	  0.000 sec
+    C000     -  found boundary triangles,	  0.000 sec
+    C000     -  built domain and island outlines,	  0.376 sec
+    C000     -  calculated triangle areas,	  0.000 sec
     C000   - Finished grid setup
+    C000     -  built barycentric-transform matrix,	  0.000 sec
+    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
+    C000     -  Setup field group manager,	  0.003 sec
+    C000     -  Added release groups and found run start and end times,	  0.001 sec
+    C000     -  Done initial setup of all classes,	  0.557 sec
+    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
+    C000 ----------------------------------------------------------------------
+    C000   - Starting heat_map_example,  duration: 0 days 23 hrs 0 min 0 sec
+    C000   -  Reading 24 time steps,  for hindcast time steps 00:23,  into ring buffer offsets 000:023 
+    C000       -  read  24 time steps in  0.2 sec
+    C000 ----------------------------------------------------------------------
+    C000   - Starting time stepping: 2017-01-01T00:30:00 to 2017-01-01T23:30:00 , duration  0 days 23 hrs 0 min 0 sec 
+    C000 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000   0% step time = 261.4 ms
+    C000 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   4,000: Active:04000 M:04000 S:00000  B:00000 D:000 O:00 N:000 Buffer:4000   1% step time =  1.5 ms
+    C000 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   7,000: Active:07000 M:07000 S:00000  B:00000 D:000 O:00 N:000 Buffer:7000   1% step time =  1.7 ms
+    C000 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  10,000: Active:10000 M:10000 S:00000  B:00000 D:000 O:00 N:000 Buffer:10000   2% step time =  2.0 ms
+    C000 17% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  13,000: Active:13000 M:13000 S:00000  B:00000 D:000 O:00 N:000 Buffer:13000   3% step time =  2.3 ms
+    C000 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  16,000: Active:16000 M:15999 S:00000  B:00001 D:000 O:00 N:000 Buffer:16000   3% step time =  2.6 ms
+    C000 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  19,000: Active:19000 M:19000 S:00000  B:00000 D:000 O:00 N:000 Buffer:19000   4% step time =  2.9 ms
+    C000 30% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  22,000: Active:22000 M:21994 S:00000  B:00006 D:000 O:00 N:000 Buffer:22000   4% step time =  3.2 ms
+    C000 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  25,000: Active:25000 M:24981 S:00000  B:00019 D:000 O:00 N:000 Buffer:25000   5% step time =  3.6 ms
+    C000 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  28,000: Active:28000 M:27990 S:00000  B:00010 D:000 O:00 N:000 Buffer:28000   6% step time =  3.8 ms
+    C000 43% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  31,000: Active:31000 M:30991 S:00000  B:00009 D:000 O:00 N:000 Buffer:31000   6% step time =  4.1 ms
+    C000 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  34,000: Active:34000 M:33986 S:00000  B:00014 D:000 O:00 N:000 Buffer:34000   7% step time =  4.4 ms
+    C000 52% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  37,000: Active:37000 M:36986 S:00000  B:00014 D:000 O:00 N:000 Buffer:37000   7% step time =  4.7 ms
+    C000 57% step 0078:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:  40,000: Active:40000 M:39992 S:00000  B:00008 D:000 O:00 N:000 Buffer:40000   8% step time =  5.2 ms
+    C000 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  43,000: Active:43000 M:42990 S:00000  B:00010 D:000 O:00 N:000 Buffer:43000   9% step time =  5.2 ms
+    C000 65% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  46,000: Active:46000 M:45973 S:00021  B:00006 D:000 O:00 N:000 Buffer:46000   9% step time =  5.6 ms
+    C000 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  49,000: Active:49000 M:48974 S:00021  B:00005 D:000 O:00 N:000 Buffer:49000  10% step time =  5.9 ms
+    C000 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  52,000: Active:52000 M:51979 S:00021  B:00000 D:000 O:00 N:000 Buffer:52000  10% step time =  6.7 ms
+    C000 78% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  55,000: Active:55000 M:54976 S:00021  B:00003 D:000 O:00 N:000 Buffer:55000  11% step time =  6.3 ms
+    C000 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  58,000: Active:58000 M:57979 S:00021  B:00000 D:000 O:00 N:000 Buffer:58000  12% step time =  6.5 ms
+    C000 87% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  61,000: Active:61000 M:60976 S:00021  B:00003 D:000 O:00 N:000 Buffer:61000  12% step time =  6.7 ms
+    C000 91% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  64,000: Active:64000 M:63989 S:00000  B:00011 D:000 O:00 N:000 Buffer:64000  13% step time =  7.1 ms
+    C000 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  67,000: Active:67000 M:66991 S:00000  B:00009 D:000 O:00 N:000 Buffer:67000  13% step time =  7.2 ms
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
+    C000       -  read   1 time steps in  0.0 sec
+    C000 100% step 0138:H0023b23-00 Day +00 23:00 2017-01-01 23:30:00: Rel.:  69,000: Active:69000 M:68990 S:00000  B:00010 D:000 O:00 N:000 Buffer:69000  14% step time = 75.6 ms
     C000 >>> Note: Hydro-model is "3D"  type "SCHISMreaderNCDF"
-    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast"
-    C000     grid bounding box = [1590046.0 5478274.0] to [1603253.0 5492492.0]
-    C000       -  built barycentric-transform matrix,	  0.000 sec
-    C000 >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
-    C000 >>> Note: Found vertical diffusivity profile in hydro-model files
-    C000 >>> Note: Using vertical diffusivity profile in hydro-model for vertical random walk
-    C000 >>> Warning: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
-    C000 >>> Warning: Making scheduler: update interval rounded to be integer number of time steps
-    C000       hint: 900 sec. rounded to model time step = 1200 sec.
-    C000       in:  adding scheduler
-    C000       -  Set up run start and end times, plus release groups and their schedulers,	  0.000 sec
-    C000       -  final set up of core classes,	  0.002 sec
-    C000 --------------------------------------------------------------------------
-    C000   - Starting polygon_connectivity_map_example,  duration: 0 days 22 hrs 50 min 0 sec
-    C000       -  Initialized Solver Class,	  0.000 sec
-    C000   - Reading-file-00  demoHindcastSchism3D.nc, steps in file  24, steps  available 000:023, reading  24 of 24 steps,  for hydo-model time steps 00:23,  from file offsets 00:23,  into ring buffer offsets 000:023 
-    C000       -  read  24 time steps in  0.0 sec
-    C000 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:   1,000: Active:01000 M:01000 S:00000  B:00000 D:000 O:00 N:000 Buffer:1000 -  0% step time = 1031.2 ms
-    C000 04% step 0006:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:   4,000: Active:04000 M:03998 S:00000  B:00002 D:000 O:00 N:000 Buffer:4000 -  1% step time =  4.2 ms
-    C000 09% step 0012:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:   7,000: Active:07000 M:06982 S:00000  B:00018 D:000 O:00 N:000 Buffer:7000 -  1% step time =  6.2 ms
-    C000 13% step 0018:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:  10,000: Active:10000 M:09967 S:00000  B:00033 D:000 O:00 N:000 Buffer:10000 -  2% step time =  8.2 ms
-    C000 18% step 0024:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:  13,000: Active:13000 M:12913 S:00000  B:00087 D:000 O:00 N:000 Buffer:13000 -  3% step time = 10.0 ms
-    C000 22% step 0030:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:  16,000: Active:16000 M:15877 S:00000  B:00123 D:000 O:00 N:000 Buffer:16000 -  3% step time = 11.5 ms
-    C000 26% step 0036:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:  19,000: Active:19000 M:18792 S:00000  B:00208 D:000 O:00 N:000 Buffer:19000 -  4% step time = 12.9 ms
-    C000 31% step 0042:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:  22,000: Active:22000 M:21452 S:00000  B:00548 D:000 O:00 N:000 Buffer:22000 -  4% step time = 14.7 ms
-    C000 35% step 0048:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:  25,000: Active:25000 M:23993 S:00000  B:01007 D:000 O:00 N:000 Buffer:25000 -  5% step time = 16.3 ms
-    C000 39% step 0054:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:  28,000: Active:28000 M:26468 S:00000  B:01532 D:000 O:00 N:000 Buffer:28000 -  6% step time = 17.5 ms
-    C000 44% step 0060:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:  31,000: Active:31000 M:29323 S:00000  B:01677 D:000 O:00 N:000 Buffer:31000 -  6% step time = 19.1 ms
-    C000 48% step 0066:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:  34,000: Active:34000 M:32078 S:00000  B:01922 D:000 O:00 N:000 Buffer:34000 -  7% step time = 20.6 ms
-    C000 53% step 0072:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:  37,000: Active:37000 M:34953 S:00000  B:02047 D:000 O:00 N:000 Buffer:37000 -  7% step time = 22.1 ms
-    C000 57% step 0078:H0013b13-14 Day +00 13:00 2017-01-01 13:30:00: Rel.:  40,000: Active:40000 M:37987 S:00000  B:02013 D:000 O:00 N:000 Buffer:40000 -  8% step time = 24.0 ms
-    C000 61% step 0084:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:  43,000: Active:43000 M:40880 S:00112  B:02008 D:000 O:00 N:000 Buffer:43000 -  9% step time = 25.8 ms
-    C000 66% step 0090:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:  46,000: Active:46000 M:43222 S:00685  B:02093 D:000 O:00 N:000 Buffer:46000 -  9% step time = 26.7 ms
-    C000 70% step 0096:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:  49,000: Active:49000 M:46198 S:00685  B:02117 D:000 O:00 N:000 Buffer:49000 - 10% step time = 29.1 ms
-    C000 74% step 0102:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:  52,000: Active:52000 M:48915 S:00685  B:02400 D:000 O:00 N:000 Buffer:52000 - 10% step time = 30.1 ms
-    C000 79% step 0108:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:  55,000: Active:55000 M:51584 S:00685  B:02731 D:000 O:00 N:000 Buffer:55000 - 11% step time = 30.3 ms
-    C000 83% step 0114:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:  58,000: Active:58000 M:54283 S:00685  B:03032 D:000 O:00 N:000 Buffer:58000 - 12% step time = 32.2 ms
-    C000 88% step 0120:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:  61,000: Active:61000 M:56846 S:00685  B:03469 D:000 O:00 N:000 Buffer:61000 - 12% step time = 34.1 ms
-    C000 92% step 0126:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:  64,000: Active:64000 M:59746 S:00072  B:04182 D:000 O:00 N:000 Buffer:64000 - 13% step time = 35.8 ms
-    C000 96% step 0132:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:  67,000: Active:67000 M:62035 S:00000  B:04965 D:000 O:00 N:000 Buffer:67000 - 13% step time = 37.0 ms
-    C000 100% step 0137:H0022b22-23 Day +00 22:50 2017-01-01 23:20:00: Rel.:  69,000: Active:69000 M:63656 S:00000  B:05344 D:000 O:00 N:000 Buffer:69000 - 14% step time = 45.6 ms
-    C000 >>> Note: Hydro-model is "3D"  type "SCHISMreaderNCDF"
-    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast"
-    C000 >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
-    C000 >>> Note: Found vertical diffusivity profile in hydro-model files
-    C000 >>> Note: Using vertical diffusivity profile in hydro-model for vertical random walk
-    C000 >>> Note: Hydro-model is "3D"  type "SCHISMreaderNCDF"
-    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast"
-    C000 >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
-    C000 >>> Note: Found vertical diffusivity profile in hydro-model files
-    C000 >>> Note: Using vertical diffusivity profile in hydro-model for vertical random walk
-    C000 >>> Warning: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
-    C000 >>> Warning: Making scheduler: update interval rounded to be integer number of time steps
-    C000       hint: 900 sec. rounded to model time step = 1200 sec.
-    C000       in:  adding scheduler
-    C000 >>> Warning: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
-    C000 >>> Warning: Making scheduler: update interval rounded to be integer number of time steps
-    C000       hint: 900 sec. rounded to model time step = 1200 sec.
-    C000       in:  adding scheduler
-    C000 --------------------------------------------------------------------------
-    C000   - Finished case number   0,  polygon_connectivity_map_example started: 2024-03-20 14:32:20.526679, ended: 2024-03-20 14:32:27.931390
-    C000       Elapsed time =0:00:07.404711
-    C000 --------------------------------------------------------------------------
-    Main     >>> Note: run summary with case file names   "polygon_connectivity_map_example_runInfo.json"
-    Main     >>> Note: to help with debugging, parameters as given by user  are in "heat_map_example_raw_user_params.json"
-    Main     >>> Note: run summary with case file names   "heat_map_example_runInfo.json"
-    Main     >>> Note: to help with debugging, parameters as given by user  are in "polygon_connectivity_map_example_raw_user_params.json"
-    Main     >>> Note: run summary with case file names   "polygon_connectivity_map_example_runInfo.json"
-    Main >>> Warning: Deleted contents of existing output dir
-    Main >>> Warning: Deleted contents of existing output dir
-    Main --------------------------------------------------------------------------
-    Main OceanTracker summary:  elapsed time =0:00:07.579921
-    Main       Cases -   0 errors,   8 warnings,  10 notes, check above
-    Main       Main  -   0 errors,   2 warnings,   4 notes, check above
-    Main --------------------------------------------------------------------------
+    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast/schsim3D"
+    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
+    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
+    C000 ----------------------------------------------------------------------
+    C000   - Finished case number   0,  heat_map_example started: 2024-09-06 07:54:20.080795, ended: 2024-09-06 07:54:24.432799
+    C000       Computational time =0:00:04.352004
+    C000 --- End case 0 -------------------------------------------------------
+    End --- Summary ----------------------------------------------------------
+    End     >>> Note: Run summary with case file names in "*_runInfo.json"
+    End     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
+    End >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+    End     >>> Note: Run summary with case file names in "*_runInfo.json"
+    End >>> Warning: Deleted contents of existing output dir
+    End ----------------------------------------------------------------------
+    End ----------------------------------------------------------------------
+    End OceanTracker summary:  elapsed time =0:00:04.390589
+    End       Cases -   0 errors,   0 warnings,   3 notes, check above
+    End       Main  -   0 errors,   1 warnings,   3 notes, check above
+    End   Output in f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\heat_map_example
+    End ----------------------------------------------------------------------
     
 
 Read polygon/connectivity statistics
@@ -479,7 +514,7 @@ Read polygon/connectivity statistics
 
 .. parsed-literal::
 
-    stats dict_keys(['total_num_particles_released', 'release_groupID_my_release_point', 'dimensions', 'limits', 'release_groupID', 'release_locations', 'time', 'number_released_each_release_group', 'number_of_release_points', 'release_points', 'is_polygon_release', 'count_all_particles', 'num_released_total', 'count', 'time_var', 'date', 'stats_type', 'connectivity_matrix', 'info', 'params', 'release_group_centered_grids', 'polygon_list', 'particle_status_flags', 'particle_release_groups', 'full_case_params', 'grid'])
+    stats dict_keys(['total_num_particles_released', 'dimensions', 'limits', 'variable_attributes', 'num_released_total', 'time', 'count', 'number_released_each_release_group', 'count_all_particles', 'global_attributes', 'time_var', 'date', 'stats_type', 'polygon_list', 'connectivity_matrix', 'particle_status_flags', 'particle_release_groups', 'grid'])
     
 
 
@@ -499,14 +534,14 @@ Time verses Age statistics
 
 Both gridded and polygon statistics come in two types, “time” and “age”.
 
--  “time” statistics are time series, or snapshots, of particle numbers
-   and particle properties at a time interval given by
-   “calculation_interval” parameter. Eg. gridded stats showing how the
-   heat map of a source’s plume evolves over time.
+- “time” statistics are time series, or snapshots, of particle numbers
+  and particle properties at a time interval given by
+  “calculation_interval” parameter. Eg. gridded stats showing how the
+  heat map of a source’s plume evolves over time.
 
--  “age” statistics are particle counts and properties binned by
-   particle age. The result are age based histograms of counts or
-   particle proprieties. This is useful to give numbers in each age band
-   arriving at a given grid cell or polygon, from each release group.
-   Eg. counting how many larvae are old enough to settle in a polygon or
-   grid cell from each potential source location.
+- “age” statistics are particle counts and properties binned by particle
+  age. The result are age based histograms of counts or particle
+  proprieties. This is useful to give numbers in each age band arriving
+  at a given grid cell or polygon, from each release group. Eg. counting
+  how many larvae are old enough to settle in a polygon or grid cell
+  from each potential source location.

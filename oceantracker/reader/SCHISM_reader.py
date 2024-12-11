@@ -50,6 +50,7 @@ class SCHISMreaderNCDF(_BaseUnstructuredReader):
 
         dm = self.params['dimension_map']
         fvm= self.params['field_variable_map']
+        gm = self.params['grid_variable_map']
 
         hi = dict(is3D=  fvm['water_velocity'][0]  in catalog['variables'])
 
@@ -58,7 +59,7 @@ class SCHISMreaderNCDF(_BaseUnstructuredReader):
             hi['num_z_levels'] = catalog['info']['dims'][hi['z_dim']]
             hi['all_z_dims'] = dm['all_z_dims']
             # Only LSC hasbottom_cell_index
-            hi['vert_grid_type'] = si.vertical_grid_types.LSC if 'bottom_cell_index' in catalog['variables'] \
+            hi['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_cell_index'] in catalog['variables'] \
                                                                         else si.vertical_grid_types.Slayer
         else:
             hi['z_dim'] = None

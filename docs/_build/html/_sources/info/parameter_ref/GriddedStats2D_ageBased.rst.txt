@@ -65,8 +65,16 @@ grid_center: still working on display  of default params of  type <class 'oceant
 		- fixed_len: ``2``
 		- min_len: ``0``
 
+	* ``grid_span``:**<isrequired>**
+		Description: - (width-x, height-y)  of the statistics grid
 
-grid_span: still working on display  of default params of  type <class 'oceantracker.util.parameter_checking.ParameterCoordsChecker'>
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``meters (dx,dy) or degrees (dlon, dlat) if geographic``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
 
 	* ``max_age_to_bin`` :   ``<class 'float'>``   *<optional>*
 		Description: Max. particle age to count
@@ -180,12 +188,5 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 
 Expert Parameters:
 *******************
-
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 

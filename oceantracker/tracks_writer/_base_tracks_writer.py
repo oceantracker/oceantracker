@@ -28,7 +28,7 @@ class _BaseWriter(ParameterBaseClass):
                         time_steps_per_per_file =  PVC(None, int,min=1, doc_str='Split track output into files with given number of time integer steps'),
                         write_dry_cell_flag =  PVC(False, bool, doc_str='Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down '),
                         write_dry_cell_index=PVC(True, bool, obsolete=True,  doc_str='Replaced by write_dry_cell_flag, set to false by default'),
-                        NCDF_time_chunk = PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file'),
+                        NCDF_time_chunk = PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file', expert=True),
                                 )
         self.info.update(output_file= [])
         self.total_time_steps_written = 0
@@ -161,9 +161,6 @@ class _BaseWriter(ParameterBaseClass):
         part_prop=si.class_roles.particle_properties
         for name,i in part_prop.items():
             if i.params['write'] and i.params['time_varying']:
-                if si.hydro_model_cords_in_lat_long and name in ['x','x_last_good']:
-                    #todo convert to latlong
-                    pass
                 self.write_time_varying_particle_prop(name, i.data)
 
         if si.settings['write_dry_cell_flag']:

@@ -15,7 +15,7 @@ from oceantracker.util import time_util
 color_palette={'land': (np.asarray([146, 179, 140])/256).tolist(), 'land_edge': [.5, .5, .5]}
 
 def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
-                  show_grid=False, back_ground_color_map='Blues',
+                  show_grid=False, back_ground_color_map='Blues',axis_labels=False,
                   title=None, text1=None, credit=None):
 
     # get grid bounds to fill a rectangle, copes with node and grid values
@@ -31,7 +31,9 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
     # fill outs domain as land
     mask_xy= grid['grid_outline']['domain_masking_polygon']
     ax.fill(mask_xy[:,0], mask_xy[:,1],
-            edgecolor= None, facecolor=color_palette['land'], linewidth=.5, zorder=3)
+          edgecolor= None, facecolor=color_palette['land'], linewidth=.5, zorder=0)
+    #
+    ax.plot(mask_xy[:, 0], mask_xy[:, 1])
 
     # plot islands from outline
     for g in grid['grid_outline']['islands']:
@@ -45,10 +47,11 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
         ax.triplot(grid['x'][:, 0], grid['x'][:, 1], grid['triangles'], color=(0.8, 0.8, 0.8), linewidth=.5, zorder=1)
 
     sel = grid['node_type'] == node_types.open_boundary# open_boundary_nodes
-    plt.scatter(grid['x'][sel, 0], grid['x'][sel, 1],s= 4,marker= '.',c='darkgreen')
+    plt.scatter(grid['x'][sel, 0], grid['x'][sel, 1],s= 4,marker= '.',c='darkgreen', zorder=1)
 
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
+    if not axis_labels:
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
     ax.tick_params(axis="both", direction="in", right=True, top=True)
 
     if title is not None:  ax.set_title(title)
@@ -112,10 +115,12 @@ def plot_dry_cells(track_data,show_dry_cells=True, nt=0):
         dry_cell_data[dry_cell_data < 128] = np.nan
         pc = plt.gca().tripcolor(grid['x'][:, 0], grid['x'][:, 1], facecolors=dry_cell_data[nt, :], triangles=grid['triangles'],
                                  zorder=3, vmin=128, vmax=255, edgecolors='none', alpha=.3, cmap=cmap, antialiaseds=True)
+        return pc, dry_cell_data
     else:
-        # small fast dummy plot
-        dry_cell_data = np.full((track_data['time'].shape[0],1),np.nan)
-        pc = plt.gca().tripcolor(grid['x'][:3, 0],  grid['x'][:3, 1], grid['triangles'][0,:],
+        # small fast dummy plot of first two triangles
+        dry_cell_data = np.full((track_data['time'].shape[0],2),np.nan)
+        pc = plt.gca().tripcolor(grid['x'][:, 0],  grid['x'][:, 1], grid['triangles'][:2,:3],
+                                 facecolors=dry_cell_data[nt, :2],
                                  zorder=3, vmin=128, vmax=255, edgecolors='face', alpha=0.)
 
     return pc, dry_cell_data

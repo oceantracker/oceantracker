@@ -77,15 +77,15 @@ p2.update({'block_dry_cells': True,
 p2.update({'output_file_base' :'demo02_animation' ,'time_step': 10*60})
 params.append(p2)
 
-
 # demo 3
 p3= deepcopy(demo_base_params)
 
 p3['release_groups']= [{'name': 'myP1','points': [[1596000, 5486000]], 'pulse_size': 2000, 'release_interval': 7200, 'release_radius': 100.},
                        {'name':  'myP2','points': [[1596000, 5490000]], 'pulse_size': 2000, 'release_interval': 7200}]
 
-p3['particle_statistics'] = [{'name':'gridstats1','class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
+p3['particle_statistics'] = [{'name':'gridstats1','class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
+                              'grid_span':[10000,10000],
                       'grid_size': [220, 221]},
                 {'name':'polystats1','class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
@@ -99,9 +99,10 @@ params.append(p3)
 # demo 4 age based heat maps
 p4 = deepcopy(p3)
 p4['particle_statistics'] = [
-    { 'name':'age_grid','class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased',
+    { 'name':'age_grid','class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_ageBased',
              'update_interval': 1800, 'particle_property_list': ['water_depth'],
              'grid_size': [220, 221],
+            'grid_span':[10000,10000],
              'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},
     { 'name':'age_poly','class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
              'update_interval': 1800, 'particle_property_list': ['water_depth', 'water_velocity'],
@@ -247,8 +248,10 @@ s56['release_groups']=[{'name': 'poly1','class_name': 'oceantracker.release_grou
                                 ],
                 'release_interval':  3600,
                 'pulse_size': 10},]
-s56['particle_statistics']= [ {'name':'grid1',   'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased',
-                      'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min':'moving','z_min' :-2,
+s56['particle_statistics']= [ {'name':'grid1',   'class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased',
+                      'update_interval': 3600, 'particle_property_list': ['water_depth'],
+                               'status_list':['moving'],'z_min' :-2,
+                        'grid_span':[10000,10000],
                       'grid_size': [120, 121]}]
 
 

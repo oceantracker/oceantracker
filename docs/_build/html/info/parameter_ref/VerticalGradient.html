@@ -15,7 +15,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="particle_concentrations" href="particle_concentrations_toc.html" />
+    <link rel="next" title="_BaseField" href="_BaseField.html" />
     <link rel="prev" title="TotalWaterDepth" href="TotalWaterDepth.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -76,7 +76,7 @@
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="fields_toc.html">fields</a><ul>
       <li>Previous: <a href="TotalWaterDepth.html" title="previous chapter">TotalWaterDepth</a></li>
-      <li>Next: <a href="particle_concentrations_toc.html" title="next chapter">particle_concentrations</a></li>
+      <li>Next: <a href="_BaseField.html" title="next chapter">_BaseField</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -103,7 +103,7 @@
             
   <section id="verticalgradient">
 <h1>VerticalGradient<a class="headerlink" href="#verticalgradient" title="Permalink to this headline">¶</a></h1>
-<p><strong>Doc:</strong> Add a vertical gradient field of the  “name_of_field” param,    as a custom field named “name_of_field_vertical_grad”’</p>
+<p><strong>Doc:</strong> Add a vertical gradient field of the  “get_grad_of_field_named” param,    as a custom field named “get_grad_of_field_named_vertical_grad”’</p>
 <p><strong>short class_name:</strong> VerticalGradient</p>
 <p><strong>full class_name :</strong> oceantracker.fields.field_vertical_gradient.VerticalGradient</p>
 <p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseField&gt; CustomFieldBase&gt; VerticalGradient</p>
@@ -130,6 +130,15 @@
 </dl>
 </li>
 <li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">get_grad_of_field_named</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: Name of field to calculate the vertical gradient of</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">is3D</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
@@ -148,16 +157,7 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Name used to refer to class in code and output, = None for core claseses</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">name_of_field</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: Name of field to calculate the vertical gradient of</p>
+<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: Name to refer to this field internally within code, must be given</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
@@ -205,20 +205,6 @@
 </section>
 <section id="expert-parameters">
 <h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">development</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class is under development and testing</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</div></blockquote>
 </section>
 </section>
 
@@ -233,7 +219,7 @@
           <a href="TotalWaterDepth.html" title="Previous document">TotalWaterDepth</a>
         </li>
         <li>
-          <a href="particle_concentrations_toc.html" title="Next document">particle_concentrations</a>
+          <a href="_BaseField.html" title="Next document">_BaseField</a>
           &rarr;
         </li>
     </ul>

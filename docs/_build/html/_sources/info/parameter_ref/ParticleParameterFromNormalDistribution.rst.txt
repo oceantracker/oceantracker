@@ -8,7 +8,7 @@ ParticleParameterFromNormalDistribution
 
 **full class_name :** oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution
 
-**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> CustomParticleProperty> ParticleParameterFromNormalDistribution
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ManuallyUpdatedParticleProperty> ParticleParameterFromNormalDistribution
 
 
 Parameters:
@@ -53,13 +53,6 @@ Parameters:
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``type`` :   ``<class 'str'>``   *<optional>*
-		Description: type of particle property, used to manage how to update particle property
-
-		- default: ``user``
-		- data_type: ``<class 'str'>``
-		- possible_values: ``['manual_update', 'from_fields', 'user']``
-
 	* ``units`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
@@ -98,13 +91,6 @@ Parameters:
 
 Expert Parameters:
 *******************
-
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 	* ``release_group_parameters``:  *<optional>*
 		Description: - In development: release group specific particle prop params

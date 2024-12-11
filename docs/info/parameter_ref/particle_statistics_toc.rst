@@ -11,8 +11,8 @@ particle_statistics
 	PolygonStats2D_ageBased.rst
 	PolygonStats2D_timeBased.rst
 	ResidentInPolygon.rst
+	_BaseParticleLocationStats.rst
+	_CorePolygonMethods.rst
 
-**Role:** Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are 
- * separated by release group 
- * can be a time series of statistics or put be in particle age bins.
+**Role:** 
 

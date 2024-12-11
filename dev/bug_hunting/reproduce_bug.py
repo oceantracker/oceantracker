@@ -236,7 +236,7 @@ params = {
         ],
         "run_params": {
             "block_dry_cells": True,
-            "open_boundary_type": 1,
+            "use_open_boundary": True,
             "write_tracks": True,
             "duration": model_duration,
         },
@@ -251,7 +251,7 @@ params = {
         },
         "particle_statistics": [
             {
-                "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
+                "class_name": "oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased",
                 "calculation_interval": output_time_step,
                 "count_status_in_range": ["on_bottom", "on_bottom"],
                 "particle_property_list": [

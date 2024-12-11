@@ -21,8 +21,8 @@ dev_DELFTFM
 Parameters:
 ************
 
-	* ``EPSG`` :   ``<class 'int'>``   *<optional>*
-		Description: integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/
+	* ``EPSG_code`` :   ``<class 'int'>``   *<optional>*
+		Description: integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/
 
 		- default: ``None``
 		- data_type: ``<class 'int'>``
@@ -38,13 +38,6 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-
-	* ``hydro_model_cords_in_lat_long`` :   ``<class 'bool'>``   *<optional>*
-		Description: Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
@@ -111,8 +104,8 @@ Parameters:
 Expert Parameters:
 *******************
 
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
+	* ``geographic_coords`` :   ``<class 'bool'>``   *<optional>*
+		Description: Read file coords as geographic values,normaly auto-detects if in geographic coords, usinh this setting  forces reading as geograraphic coord if auto-dectect fails
 
 		- default: ``False``
 		- data_type: ``<class 'bool'>``

@@ -19,8 +19,8 @@ Anticipated errors
 ===================
 
 These are errors that results from internal checks done by OT.
-They are usually to to with errors in the settings or parameters supplied or issues with the hindcast.
-They normally don't have traceback information and come with both a message and a hint about what to to about it.
+They are usually to do with errors in the settings or parameters supplied or issues with the hindcast.
+They normally also have traceback information and come with both a message and a hint about what to to about it.
 
 Unexpected errors
 ===================

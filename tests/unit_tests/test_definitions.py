@@ -46,7 +46,7 @@ reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_read
              dimension_map=dict(time='t', rows='y', cols='x'),
              grid_variable_map=dict(time='Time', x=['x_grid', 'y_grid']),
              field_variable_map=dict(water_depth='Depth', water_velocity=['U', 'V'], tide='Tide'),
-             hydro_model_cords_in_lat_long=False)
+             hydro_model_cords_geographic=False)
 
 reader_NZnational=dict(  input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01',
             file_mask = 'NZfinite*.nc')
@@ -136,21 +136,25 @@ ps1 = dict(name='my_heatmap',
          class_name='GriddedStats2D_timeBased',
          # the below are optional settings/parameters
          grid_size=[120, 121],  # number of east and north cells in the heat map
+        grid_span = [10000,10000],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant'],  # request a heat map for the decaying part. prop. added above
-         status_min='moving',  # only count the particles which are moving
+         #status_list=[],  # only count the particles which are moving
+
          z_min=-10.,  # only count particles at locations above z=-2m
          start='2017-01-01T02:30:00',
          )
 
-poly_stats =dict(
+poly_stats =dict(name='my_poly_stats',
         class_name='PolygonStats2D_timeBased',
         update_interval= 3600,
         particle_property_list=['water_depth'],
-        status_min= 'moving',
+        #status_list=[],
+
         z_min= -2,
         grid_size= [120, 121])
+
 LCS = dict(name='LSC test',
            class_name='dev_LagarangianStructuresFTLE2D',
          )
@@ -179,6 +183,12 @@ def compare_reference_run(case_info_file, args):
     print(' mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
     print(' max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
 
+    # check stats
+    for name in ['my_heatmap','my_poly_stats']:
+        stats_ref= load_output_files.load_stats_data(reference_case_info_file,name=name)
+        stats= load_output_files.load_stats_data(case_info_file, name=name)
+        dc = stats['count'] - stats_ref['count']
+        print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max counts-ref run counts =',np.nanmax(np.abs(dc)))
 
 def show_track_plot(case_info_file, args):
 
@@ -188,7 +198,7 @@ def show_track_plot(case_info_file, args):
     movie_file1= path.join(image_dir, 'decay_movie_frame.mp4') if args.save_plots else None
 
     anim= plot_tracks.animate_particles(tracks,
-                           show_grid=True, show_dry_cells=True,
+                           show_grid=True, show_dry_cells=True,axis_labels=True,
                             #part_color_map='hot',
                            #size_using_data=tracks['a_pollutant'],
                            #colour_using_data=tracks['a_pollutant'],

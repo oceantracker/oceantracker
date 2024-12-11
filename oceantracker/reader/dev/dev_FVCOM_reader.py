@@ -86,25 +86,25 @@ class unstructured_FVCOM(_BaseUnstructuredReader):
         grid['sigma'] = grid['zlevel_fractions'][node_min, :]
         return grid
 
-    def read_horizontal_grid_coords(self, nc, grid):
+    def read_horizontal_grid_coords(self, grid):
         # get node location in meters
         # also record cell center x as well to be used for get nodal field vals from values at center, eg velocity
         grid['x'] = np.stack((nc.read_a_variable('x'), nc.read_a_variable('y'))).astype(np.float64)
         grid['x_center'] = np.stack((nc.read_a_variable('xc'), nc.read_a_variable('yc')), axis=1).astype(np.float64)
 
         if  np.all(nc.read_a_variable('x')==0): #  use lat long? as x may sometimes be all be zeros
-            grid['hydro_model_cords_in_lat_long'] = True
+            grid['hydro_model_cords_geographic'] = True
             grid['x'] =   np.stack((nc.read_a_variable('lon'), nc.read_a_variable('lat')), axis=1).astype(np.float64)
             grid['x_center'] = np.stack((nc.read_a_variable('lonc'), nc.read_a_variable('latc')), axis=1).astype(np.float64)
 
         elif self.detect_lonlat_grid(grid['x']):
             # try auto detection
-            grid['hydro_model_cords_in_lat_long'] = True
+            grid['hydro_model_cords_geographic'] = True
 
         else:
-            grid['hydro_model_cords_in_lat_long'] = self.params['hydro_model_cords_in_lat_long']
+            grid['hydro_model_cords_geographic'] = self.params['hydro_model_cords_geographic']
 
-        if grid['hydro_model_cords_in_lat_long']:
+        if grid['hydro_model_cords_geographic']:
             grid['lon_lat'] = grid['x']
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
             grid['lon_lat_center'] = grid['x_center']

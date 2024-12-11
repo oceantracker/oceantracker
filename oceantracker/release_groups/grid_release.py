@@ -15,8 +15,8 @@ class GridRelease(_BaseReleaseGroup):
         self.remove_default_params(['points'])
         self.add_default_params(
             grid_center= PCC(None, single_cord=True, is_required=True, is3D=False, doc_str='center of the grid release  (x,y) or (lon, lat) if hydromodel in geographic coords.', units='meters or decimal degrees'),
-            grid_span= PCC(None, single_cord=True,is_required=True, is3D=False, doc_str='(width, height)  of the grid release', units='meters or decimal degrees'),
-            grid_size= PLC([100, 99], int, fixed_len=2,
+            grid_span= PCC(None, single_cord=True,is_required=True, is3D=False, doc_str='(dx, dy)  of the grid release', units='meters or decimal degrees (dlon, dlat)  if geographic coords'),
+            grid_size= PLC([10, 9], int, fixed_len=2,
                             min =1,max=10**6,
                            doc_str='number of rows and columns in grid'),
                             )

@@ -7,7 +7,7 @@ resuspension
 	:maxdepth: 1
 
 	BaseResuspension.rst
-	BasicResuspension.rst
+	Resuspension.rst
 
 **Role:** 
 

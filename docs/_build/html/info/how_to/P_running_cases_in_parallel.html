@@ -150,10 +150,8 @@ another process” errors.</p>
     <span class="n">time_step</span> <span class="o">=</span> <span class="mi">120</span><span class="p">,</span>  <span class="c1">#  2 min time step as seconds</span>
     <span class="p">)</span>
 
-<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;reader&#39;</span><span class="p">,</span>
-            <span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;../demos/demo_hindcast&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
-            <span class="n">file_mask</span><span class="o">=</span> <span class="s1">&#39;demoHindcastSchism*.nc&#39;</span><span class="p">,</span>    <span class="c1"># the file mask of the hindcast files</span>
-            <span class="p">)</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;reader&#39;</span><span class="p">,</span><span class="n">input_dir</span><span class="o">=</span> <span class="s1">&#39;../demos/demo_hindcast/schsim3D&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
+                      <span class="n">file_mask</span><span class="o">=</span>  <span class="s1">&#39;demo_hindcast_schisim3D*.nc&#39;</span><span class="p">)</span>  <span class="c1"># hindcast file mask</span>
 
 <span class="c1"># now put a release group with one point into case list</span>
 <span class="c1"># define the required release  points</span>
@@ -162,14 +160,13 @@ another process” errors.</p>
             <span class="p">[</span><span class="mf">1598886.4247</span><span class="p">,</span> <span class="mf">5489464.0424</span><span class="p">],</span>
             <span class="p">[</span><span class="mf">1597917.3387</span><span class="p">,</span> <span class="mi">5489000</span><span class="p">],</span>
         <span class="p">]</span>
-
-<span class="c1"># build a list of params for each case, with one release group fot each point</span>
+<span class="c1"># run each point release in parrallel</span>
 <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
     <span class="c1"># add a release group with one point to case &quot;n&quot;</span>
     <span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;release_groups&#39;</span><span class="p">,</span>
                 <span class="n">case</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="c1"># this adds release group to the n&#39;th case to run in //</span>
-                <span class="n">name</span> <span class="o">=</span><span class="s1">&#39;mypoint&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="c1"># must have unique name for each group</span>
-                <span class="n">points</span><span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">],</span>  <span class="c1"># needs to be 1, by 2 list for single 2D point</span>
+                <span class="n">name</span> <span class="o">=</span><span class="s1">&#39;mypoint&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="c1"># optional name for each group</span>
+                <span class="n">points</span><span class="o">=</span> <span class="n">p</span><span class="p">,</span>  <span class="c1"># needs to be 1, by 2 list for single 2D point</span>
                 <span class="n">release_interval</span><span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>           <span class="c1"># seconds between releasing particles</span>
                 <span class="n">pulse_size</span><span class="o">=</span> <span class="mi">10</span><span class="p">,</span>                   <span class="c1"># number of particles released each release_interval</span>
                 <span class="p">)</span>
@@ -190,54 +187,59 @@ another process” errors.</p>
 <pre class="literal-block">helper ----------------------------------------------------------------------
 helper Starting OceanTracker helper class
 helper   - Starting run using helper class
-Main      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+Main      Python version: 3.11.9 | packaged by conda-forge | (main, Apr 19 2024, 18:27:10) [MSC v.1938 64 bit (AMD64)]
+Main &gt;&gt;&gt; Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
 Main ----------------------------------------------------------------------
 Main OceanTracker starting main:
-Main &gt;&gt;&gt; Warning: Deleted contents of existing output dir
-Main Output is in dir &quot;e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test2&quot;
-Main       hint: see for copies of screen output and user supplied parameters, plus all other output
-Main     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test2_raw_user_params.json&quot;
-Main ----------------------------------------------------------------------
-Main  OceanTracker version 0.50.0004-2024-03-30 - preliminary setup
 Main     Starting package set up
-Main         -  Built OceanTracker package tree,      0.979 sec
+Main         -  Built OceanTracker package tree,      0.603 sec
 Main         -  Built OceanTracker sort name map,     0.000 sec
-Main     -  Done package set up to setup ClassImporter,       0.979 sec
-Main   - Found input dir &quot;../demos/demo_hindcast&quot;
-Main   - found hydro-model files of type  &quot;SCHISIM&quot;
-Main     -  sorted hyrdo-model files in time order,   0.009 sec
+Main     -  Done package set up to setup ClassImporter,       0.603 sec
+Main &gt;&gt;&gt; Warning: Deleted contents of existing output dir
+Main Output is in dir &quot;f:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test2&quot;
+Main       hint: see for copies of screen output and user supplied parameters, plus all other output
+Main     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;user_given_params.json&quot;
+Main ----------------------------------------------------------------------
+Main  OceanTracker version 0.50.0010-2024-03-30 - preliminary setup
+Main   - Found input dir &quot;../demos/demo_hindcast/schsim3D&quot;
+Main   - found hydro-model files of type  &quot;SCHISM&quot;
+Main Cataloging hindcast with 1 files in dir ../demos/demo_hindcast/schsim3D
+Main     -  Cataloged hydro-model files/variables in time order,      0.008 sec
+Main &gt;&gt;&gt; Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+Main     -  sorted hyrdo-model files in time order,   0.034 sec
 Main   - oceantracker:multiProcessing: processors:4
 Main   - parallel pool complete
 End --- Summary ----------------------------------------------------------
 End     &gt;&gt;&gt; Note: Run summary with case file names in &quot;<a href="#system-message-1"><span class="problematic" id="problematic-1">*</span></a>_runInfo.json&quot;
-End     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test2_raw_user_params.json&quot;
+End     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;user_given_params.json&quot;
+End &gt;&gt;&gt; Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
 End     &gt;&gt;&gt; Note: Run summary with case file names in &quot;<a href="#system-message-2"><span class="problematic" id="problematic-2">*</span></a>_runInfo.json&quot;
+End &gt;&gt;&gt; Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
 End &gt;&gt;&gt; Warning: Deleted contents of existing output dir
 End ----------------------------------------------------------------------
 End ----------------------------------------------------------------------
-End OceanTracker summary:  elapsed time =0:00:19.907178
-End       Cases -   0 errors,   0 warnings,  32 notes, check above
-End       Main  -   0 errors,   1 warnings,   2 notes, check above
+End OceanTracker summary:  elapsed time =0:00:17.406447
+End       Cases -   0 errors,   0 warnings,  12 notes, check above
+End       Main  -   0 errors,   2 warnings,   3 notes, check above
 End   Output in None
 End ----------------------------------------------------------------------</pre>
 </section>
 <section id="run-parallel-using-param-dicts">
 <h2>Run parallel using param. dicts.<a class="headerlink" href="#run-parallel-using-param-dicts" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># oceantracker parallel demo, run different release groups as parallel processes</span>
-<span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
-<span class="kn">from</span>  <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">reload</span> <span class="c1"># force a reload to get around notebooks single name space</span>
-<span class="n">reload</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">oceantracker.main</span> <span class="kn">import</span> <span class="n">OceanTracker</span>
+
+<span class="c1"># make instance of oceantracker to use to set parameters using code, then run</span>
+<span class="n">ot</span> <span class="o">=</span> <span class="n">OceanTracker</span><span class="p">()</span>
 
 <span class="c1"># first build base case, params used for all cases</span>
-<span class="n">params</span><span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">debug</span> <span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="n">params</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">debug</span> <span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">output_file_base</span><span class="o">=</span> <span class="s1">&#39;parallel_test1&#39;</span><span class="p">,</span>      <span class="c1"># name used as base for output files</span>
     <span class="n">root_output_dir</span><span class="o">=</span> <span class="s1">&#39;output&#39;</span><span class="p">,</span>             <span class="c1">#  output is put in dir   &#39;root_output_dir&#39;/&#39;output_file_base&#39;</span>
     <span class="n">time_step</span> <span class="o">=</span> <span class="mi">120</span><span class="p">,</span>  <span class="c1">#  2 min time step as seconds</span>
-    <span class="n">reader</span> <span class="o">=</span><span class="p">{</span><span class="s1">&#39;input_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;../demos/demo_hindcast&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
-                <span class="s1">&#39;file_mask&#39;</span><span class="p">:</span> <span class="s1">&#39;demoHindcastSchism*.nc&#39;</span><span class="p">,</span>    <span class="c1"># the file mask of the hindcast files</span>
-        <span class="p">},</span>
-    <span class="n">case_list</span><span class="o">=</span><span class="p">[]</span> <span class="c1"># append params for each case here in same structure as above in main case</span>
-          <span class="p">)</span>
+    <span class="p">)</span>
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;reader&#39;</span><span class="p">]</span><span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span> <span class="s1">&#39;../demos/demo_hindcast/schsim3D&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
+                      <span class="n">file_mask</span><span class="o">=</span>  <span class="s1">&#39;demo_hindcast_schisim3D*.nc&#39;</span><span class="p">)</span>
 
 <span class="c1"># define the required release  points</span>
 <span class="n">points</span> <span class="o">=</span> <span class="p">[</span>  <span class="p">[</span><span class="mf">1597682.1237</span><span class="p">,</span> <span class="mf">5489972.7479</span><span class="p">],</span>
@@ -247,7 +249,7 @@ End ----------------------------------------------------------------------</pre>
         <span class="p">]</span>
 
 <span class="c1"># build a list of params for each case, with one release group for each point</span>
-
+<span class="n">params</span><span class="p">[</span><span class="s1">&#39;case_list&#39;</span><span class="p">]</span> <span class="o">=</span><span class="p">[]</span>
 <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
     <span class="c1"># add one point as a release group to this case</span>
     <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span> <span class="s1">&#39;mypoint&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="c1"># better to give release group a unique name</span>
@@ -271,34 +273,42 @@ End ----------------------------------------------------------------------</pre>
     <span class="c1">#   where n is the case number 0,1,2...</span>
 </pre></div>
 </div>
-<pre class="literal-block">Main      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+<pre class="literal-block">helper ----------------------------------------------------------------------
+helper Starting OceanTracker helper class
+Main      Python version: 3.11.9 | packaged by conda-forge | (main, Apr 19 2024, 18:27:10) [MSC v.1938 64 bit (AMD64)]
+Main &gt;&gt;&gt; Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
 Main ----------------------------------------------------------------------
 Main OceanTracker starting main:
-Main &gt;&gt;&gt; Warning: Deleted contents of existing output dir
-Main Output is in dir &quot;e:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test1&quot;
-Main       hint: see for copies of screen output and user supplied parameters, plus all other output
-Main     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test1_raw_user_params.json&quot;
-Main ----------------------------------------------------------------------
-Main  OceanTracker version 0.50.0004-2024-03-30 - preliminary setup
 Main     Starting package set up
-Main         -  Built OceanTracker package tree,      1.006 sec
+Main         -  Built OceanTracker package tree,      0.010 sec
 Main         -  Built OceanTracker sort name map,     0.000 sec
-Main     -  Done package set up to setup ClassImporter,       1.006 sec
-Main   - Found input dir &quot;../demos/demo_hindcast&quot;
-Main   - found hydro-model files of type  &quot;SCHISIM&quot;
-Main     -  sorted hyrdo-model files in time order,   0.010 sec
+Main     -  Done package set up to setup ClassImporter,       0.010 sec
+Main &gt;&gt;&gt; Warning: Deleted contents of existing output dir
+Main Output is in dir &quot;f:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparallel_test1&quot;
+Main       hint: see for copies of screen output and user supplied parameters, plus all other output
+Main     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;user_given_params.json&quot;
+Main ----------------------------------------------------------------------
+Main  OceanTracker version 0.50.0010-2024-03-30 - preliminary setup
+Main   - Found input dir &quot;../demos/demo_hindcast/schsim3D&quot;
+Main   - found hydro-model files of type  &quot;SCHISM&quot;
+Main Cataloging hindcast with 1 files in dir ../demos/demo_hindcast/schsim3D
+Main     -  Cataloged hydro-model files/variables in time order,      0.009 sec
+Main &gt;&gt;&gt; Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+Main     -  sorted hyrdo-model files in time order,   0.024 sec
 Main   - oceantracker:multiProcessing: processors:4
 Main   - parallel pool complete
 End --- Summary ----------------------------------------------------------
 End     &gt;&gt;&gt; Note: Run summary with case file names in &quot;<a href="#system-message-3"><span class="problematic" id="problematic-3">*</span></a>_runInfo.json&quot;
-End     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;parallel_test1_raw_user_params.json&quot;
+End     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;user_given_params.json&quot;
+End &gt;&gt;&gt; Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
 End     &gt;&gt;&gt; Note: Run summary with case file names in &quot;<a href="#system-message-4"><span class="problematic" id="problematic-4">*</span></a>_runInfo.json&quot;
+End &gt;&gt;&gt; Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
 End &gt;&gt;&gt; Warning: Deleted contents of existing output dir
 End ----------------------------------------------------------------------
 End ----------------------------------------------------------------------
-End OceanTracker summary:  elapsed time =0:00:22.134924
-End       Cases -   0 errors,   0 warnings,  32 notes, check above
-End       Main  -   0 errors,   1 warnings,   2 notes, check above
+End OceanTracker summary:  elapsed time =0:00:16.965963
+End       Cases -   0 errors,   0 warnings,  12 notes, check above
+End       Main  -   0 errors,   2 warnings,   3 notes, check above
 End   Output in None
 End ----------------------------------------------------------------------</pre>
 </section>

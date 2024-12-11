@@ -7,6 +7,7 @@ tracks_writer
 	:maxdepth: 1
 
 	CompactTracksWriter.rst
+	_BaseWriter.rst
 
 **Role:** 
 

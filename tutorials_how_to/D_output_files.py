@@ -5,7 +5,9 @@
 # 
 # [This note-book is in oceantracker/tutorials_how_to/]
 # 
-# After running OceanTacker, output files are in the files are the folder given by parameters ./"root_output_dir"/"output_file_base"
+# After running OceanTacker, output files are in the files are the folder given by parameters ./"root_output_dir"/"output_file_base".
+# 
+# hint: FireFox will display json files in expandable strcture, other code also can do this
 # 
 # The main files are:
 # 
@@ -38,6 +40,9 @@
 #    * **_grid_outline.json** are the boundaries of hydrodynamic model's domain and islands, useful in plotting
 # 
 #    * **_grid.nc** a netcdf of the hydo-model's grid and other information, useful in plotting and analysis
+# 
+#    * **hindcast_variable_catalog.json**  holds info mapping file variables to internal variables 
+# 
 #    * **_events.nc** a netcdf output from events classes, which only writes output when events occur, eg. a particle entering or exiting given polygons.
 #    
 #    

@@ -73,7 +73,7 @@ if __name__ == '__main__':
                  )
 
     ot.add_class('particle_statistics',
-                class_name='oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased',
+                class_name='oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_ageBased',
                  name=f'heat_maps',  # user must provide a name for group first
                  release_group_centered_grids=True,
                  update_interval=3600.,  # seconds between counts
