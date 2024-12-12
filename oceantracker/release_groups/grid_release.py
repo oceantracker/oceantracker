@@ -33,7 +33,7 @@ class GridRelease(_BaseReleaseGroup):
                          description='(row , column) of grid point which released the particle')
             pass
     def initial_setup(self):
-         
+        super().initial_setup()  # required to get base class set up
         params = self.params
         info = self.info
 

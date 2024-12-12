@@ -96,15 +96,15 @@ class _DefaultSettings(_SharedStruct):
     use_A_Z_profile = PVC(True, bool,
                 doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')
     use_bottom_stress = PVC(True, bool,
-                          doc_str='Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension')
+                doc_str='Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension')
     use_dispersion = PVC(True, bool,
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
-                          doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
+                 doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
 
-    particle_buffer_initial_size= PVC(1_000_000, int, min=1, doc_str='Starting size of particle property memory buffer. This expands by particle_buffer_chunk_size as needed', expert=True)
+    particle_buffer_initial_size= PVC(500_000, int, min=1, doc_str='Starting size of particle property memory buffer. This expands by particle_buffer_chunk_size as needed', expert=True)
     particle_buffer_chunk_size = PVC(500_000, int, min=1, doc_str='How much particle property memory buffer sizes are increased by when they are full',
                                      expert=True)
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
@@ -253,8 +253,9 @@ class _SharedInfoClass():
 
         if params is None: params ={}
         if type(params) != dict :
-            ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}', fatal_error=True, crumbs=crumbs,
-                                check_for_unknown_keys=check_for_unknown_keys, caller=caller)
+            ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}',
+                        fatal_error=True, crumbs=crumbs,
+                        check_for_unknown_keys=check_for_unknown_keys, caller=caller)
             return None
 
         params= dict(params,**kwargs) # join params and kwargs

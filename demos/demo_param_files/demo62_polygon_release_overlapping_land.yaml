@@ -70,7 +70,7 @@ release_groups:
     - 5486972.7479
   pulse_size: 10
   release_interval: 10800
-- class_name: oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange
+- class_name: PolygonRelease
   name: Poly2
   points:
   - - 1594682.1237

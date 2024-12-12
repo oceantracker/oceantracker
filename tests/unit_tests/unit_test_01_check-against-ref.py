@@ -13,14 +13,15 @@ def main(args):
     ot.settings(time_step=1800,use_dispersion=False,
                 screen_output_time_interval=1800,
              use_A_Z_profile=True,
-            regrid_z_to_uniform_sigma_levels=True
+            regrid_z_to_uniform_sigma_levels=True,
+             #   NUMBA_cache_code=True,
                 )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
                  NCDF_particle_chunk= 500) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)
-    hm = test_definitions.hydro_model['demoSchism']
+    hm = test_definitions.hydro_model['demoSchism3D']
     ot.add_class('reader', **hm['reader'])
 
     # add a point release
@@ -42,11 +43,15 @@ def main(args):
 
 
     ot.add_class('resuspension', critical_friction_velocity=0.01)
+
+
     case_info_file = ot.run()
 
     test_definitions.compare_reference_run(case_info_file, args)
 
     test_definitions.show_track_plot(case_info_file, args)
+
+    return  ot.params
 
 
 

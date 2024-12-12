@@ -4,6 +4,7 @@ import json
 from os import path
 from datetime import datetime,date, timedelta
 import numba.core.types
+import traceback
 
 def write_JSON(file_name,d, indent=4):
     # aviod changing given file name
@@ -24,6 +25,7 @@ def read_JSON(file_name):
     # avoid changing given file name
     file_name= path.normpath(file_name)
     if file_name is None or not path.isfile(file_name):
+        print('Cannot find json file "' + file_name + '"  ')
         raise Exception('Cannot find json file "' + file_name + '"  ')
 
     try:
@@ -46,59 +48,60 @@ class MyEncoder(json.JSONEncoder):
         try :
             # first numpy types
             if isinstance(obj, np.ndarray):
-                if np.all(np.isfinite(obj)):
-                    if obj.dtype == np.datetime64:
-                        val =  str(obj)
-                    elif obj.dtype in [np.bool_,bool]:
-                        val =   obj.astype(np.int8).tolist()
-                    else:
-                        val =   obj.tolist()
+                if obj.dtype == np.datetime64:
+                    return str(obj)
+                elif obj.dtype in [np.bool_,bool]:
+                        return obj.astype(np.int8).tolist()
+                elif np.issubdtype(obj.dtype,np.floating):
+                    sel = np.logical_or(~np.isfinite(obj),np.isnan(obj))
+                    val[sel] = -9.99999e32
+                    return val.tolist()
                 else:
-                    # fire fox cant read nan in json so make an object array, with nan as none
-                    sel = ~np.isfinite(obj)
-                    val[sel]= -9.99999e32
-                    val =  val.tolist()
+                    return obj.tolist()
+                    # date/time strings
+            elif isinstance(obj, (datetime, date)):
+                return obj.isoformat()
+            elif isinstance(obj, (timedelta, )):
+                return str(obj)
 
-            elif isinstance(obj,(np.int8, np.int16, np.int32,np.int64)):
+            elif type(obj)== float and obj==np.nan:
+                return None
+
+            elif isinstance(obj,np.dtype):
+                return str(obj)
+
+            elif np.issubdtype(obj,np.datetime64):
+                return str(obj)
+
+            elif np.issubdtype(obj, np.integer):
                 # make single numpy int values
-                val =  int(obj)
-            elif type(obj) in (np.float16, np.float32, np.float64):
+                return str(obj)
+
+            elif np.issubdtype(obj, np.floating):
                 # make single numpy float values
-                if not np.isfinite(obj):
-                    val =  None
+                if np.isnan(obj):
+                    return None
+                elif not np.isfinite(obj):
+                    return None
                 else:
-                    val =  float(obj)
-            elif type(obj) == float:
-                if not np.isfinite(obj):
-                    val =  None
-                else:
-                    val =  float(obj)
+                    return  float(obj)
 
             elif  type(obj) in [np.bool_,bool]:
                 # make single numpy int values
-                val =  int(obj)
-            # date/time strings
-            elif isinstance(obj, (datetime, date)):
-                val =  obj.isoformat()
-
-            elif isinstance(obj,type):
-                val =  obj.__name__
-
-            elif type(obj) == np.datetime64:
-                val =  str(obj)
+                return int(obj)
 
             elif type(obj) == np.timedelta64:
-                val =  str(obj.astype(timedelta)) # timedelta has better formating
+                return str(obj.astype(timedelta)) # timedelta has better formating
 
-            elif isinstance(obj,np.dtype):
-                val =  str(obj)
             elif type(obj) == timedelta:
-                val =  str(obj)
+                return str(obj)
 
             elif np.isnan(obj) or not np.isfinite(obj):
-                val = None
+                return None
+            elif isinstance(obj,type):
+                return obj.__name__
 
-            return val
+            return super().default(val)
 
         except Exception as e:
             print(str(e))

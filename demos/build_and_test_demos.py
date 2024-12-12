@@ -324,7 +324,7 @@ p62.update({'output_file_base' :'demo62_polygon_release_overlapping_land',  })
 p62['release_groups']=[{'name':'Poly1','class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
          'points': (np.asarray(poly_points_large) + np.asarray([[0,-3000]])).tolist(),
          'pulse_size': 10, 'release_interval': 3*3600},
-    {'name':'Poly2','class_name': 'oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange',
+    {'name':'Poly2','class_name': 'PolygonRelease',
             'water_depth_min': 30,
             'points': (np.asarray(poly_points_large) + np.asarray([[-3000, 0]])).tolist(),
             'pulse_size': 10, 'release_interval': 3 * 3600}]

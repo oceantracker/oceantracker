@@ -89,9 +89,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             sleep(delay)
             ml.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
 
-        t0=perf_counter()
-        ml.progress_marker('Scanned OceanTracker to build short name map to the full class_names', start_time=t0)
-
         # set up profiling
         #profiling_util.set_profile_mode(si.settings['profiler'])
         # run info
@@ -303,6 +300,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         for name, rg in si.class_roles['release_groups'].items():
             rg_params = rg.params
+            rg.initial_setup()
             start =  default_start if rg_params['start'] is None else  rg_params['start']
             end = default_end if rg_params['end'] is None else rg_params['end']
             duration = si.info.large_float if rg_params['duration'] is None else rg_params['duration']

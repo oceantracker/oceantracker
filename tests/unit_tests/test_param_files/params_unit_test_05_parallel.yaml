@@ -49,21 +49,23 @@ particle_statistics:
   grid_size:
   - 120
   - 121
+  grid_span:
+  - 10000
+  - 10000
   name: my_heatmap
   particle_property_list:
   - a_pollutant
   release_group_centered_grids: true
   start: '2017-01-01T02:30:00'
-  status_min: moving
   update_interval: 7200
   z_min: -10.0
 processors: 2
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
-  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast\schsim3D
+  input_dir: C:\Work\ot_install_test\oceantracker\demos\demo_hindcast\schsim3D
 resuspension:
   critical_friction_velocity: 0.005
-root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
+root_output_dir: C:\Work\ot_install_test\oceantracker_output\unit_tests
 time_step: 120
 use_random_seed: true
 velocity_modifiers:

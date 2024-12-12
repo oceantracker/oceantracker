@@ -9,7 +9,7 @@ def main(args):
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__, args))
     ot.settings(time_step=120,processors=2)
-    hm = test_definitions.hydro_model['demoSchism']
+    hm = test_definitions.hydro_model['demoSchism3D']
     ot.add_class('reader', **hm['reader'])
 
     # add releasess
