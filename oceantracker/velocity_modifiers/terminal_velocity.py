@@ -18,17 +18,20 @@ class TerminalVelocity(_VelocityModiferBase):
 
     def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
         info = self.info
+
         if self.params['variance'] is not None:
             # set up individual particle terminal velocties
             si.add_class('particle_properties', class_name='ParticleParameterFromNormalDistribution',
                          name='terminal_velocity',
                          value=self.params['value'], variance=self.params['variance'])
 
-    def check_requirements(self):
-        self.check_class_required_fields_prop_etc(requires3D=True, required_props_list=['velocity_modifier'])
 
+    def check_requirements(self):
+        self.check_class_required_fields_prop_etc(requires3D=True,
+                                required_props_list=['velocity_modifier'])
 
     def initial_setup(self):
+
         super().initial_setup()
          
         pgm= si.core_class_roles.particle_group_manager

@@ -58,6 +58,7 @@ must also be groegraphic in (lon, lat) order, eg. release points, polygons, stat
 Behaviour changes
 ______________________________________________________________
 
+#. message logger fatal_error flag is now "error" flag, exit_now flag is "fatal_error"
 #. All user give intervals are now rounded to the an integer number of particle tracking  time steps after the models starting time, eg. release_interval, update_interval( particle statistics and others)
 As these updates can only happen at a model time step.
 

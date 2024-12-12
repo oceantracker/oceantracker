@@ -80,7 +80,7 @@ class DELFTFM(_BaseUnstructuredReader):
 
         if len(catalog['variables'][gm['triangles']]['dims']) > 4:
             si.msg_logger.msg(f'DELFT3D FM-reader currently only works with triangle and quad cells, not cells with {mesh2d_face_nodes.shape[1]} sides',
-                   fatal_error=True, exit_now=True, caller=self)
+                   fatal_error=True, caller=self)
 
         return hi
 

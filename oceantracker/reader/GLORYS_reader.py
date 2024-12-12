@@ -56,7 +56,7 @@ class GLORYSreader(_BaseStructuredReader):
 
         if 'mask' not in catalog['variables']:
             si.msg_logger.msg('For GLORYS hindcasts, must include the static variables netcdf file in same folder as the currents hindcast files, as need variables such as the land mask in that file',
-                              caller = self, fatal_error=True, exit_now=True)
+                              caller = self, error=True, fatal_error=True)
 
         xvel_dims =  catalog['variables'][fm['water_velocity'][0]]['dims']
         hi['is3D']=any(d in xvel_dims  for d in dm['all_z_dims'])
@@ -72,7 +72,7 @@ class GLORYSreader(_BaseStructuredReader):
                 hi['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:
                 si.msg_logger.msg('Glorys reader under development, only works for fixed zlevel grids, eg NEMO (output with "deptho_lev" variable) , contact developer to extend to sigma and other vertical grids',
-                                  hint='Please provide hindcast example files to test fixes against', fatal_error=True, exit_now=True)
+                                  hint='Please provide hindcast example files to test fixes against', fatal_error=True)
 
         else:
             hi['z_dim'] = None

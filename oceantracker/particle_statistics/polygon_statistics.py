@@ -43,7 +43,7 @@ class _CorePolygonMethods(ParameterBaseClass):
             if len(params['polygon_list']) == 0:
                 ml.msg('There are no polygon releases to use as statistic polygons',
                                   hint='must have at least one polygon release defined to use the use_release_group_polygons parameter, or use statistics polygon_list parameter',
-                                   fatal_error=True, exit_now=True, caller=self)
+                                   fatal_error=True, caller=self)
         else:
             # use given polygon list
             for n, p in enumerate(params['polygon_list']):
@@ -56,7 +56,7 @@ class _CorePolygonMethods(ParameterBaseClass):
 
         if len(params['polygon_list'])==0:
             ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
-                        fatal_error=True, exit_now=True,hint= 'eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
+                        fatal_error=True,hint= 'eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
 
         # do standard stats initialize
         super().initial_setup()  # set up using regular grid for  stats

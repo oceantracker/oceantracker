@@ -28,7 +28,7 @@ class PolygonRelease(PointRelease):
         params= self.params
         ml = si.msg_logger
         if params['points'].shape[0] < 3:
-            ml.msg('"points" parameter have at least 3 points, given ' + str(params['points']), fatal_error=True, caller=self)
+            ml.msg('"points" parameter have at least 3 points, given ' + str(params['points']), error=True, caller=self)
 
         # ensure points are  meters
         if si.settings.use_geographic_coords:

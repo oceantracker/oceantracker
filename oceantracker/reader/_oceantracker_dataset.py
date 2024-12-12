@@ -28,7 +28,7 @@ class OceanTrackerDataSet(object):
         file_names= glob(mask, recursive=True)
         if len(file_names)==0:
             msg_logger.msg(f'No files found in input_dir, or its sub-dirs matching mask "{file_mask}"',
-                           hint=f'searching with "gob" mask "{mask}"', fatal_error = True,exit_now=True)
+                           hint=f'searching with "gob" mask "{mask}"',fatal_error=True)
         msg_logger.msg(f'Cataloging hindcast with {len(file_names)} files in dir {input_dir}')
 
         self.catalog = dict(info=dict(input_dir=path.normpath(input_dir),file_mask=file_mask),
@@ -191,7 +191,7 @@ class OceanTrackerDataSet(object):
                 tlast = perf_counter()
         if info['time_dim'] is None or 'units'  not in info['time_encoding']:
             ml.msg(f'X=xarray could not identify time variable index in file ={fn}',
-                   fatal_error=True,exit_now=True, crumbs= self.crumbs,
+                   fatal_error=True, crumbs= self.crumbs,
                    hint='Hindcast filed do not have time variable with "units" attribute meeting CF convention, eg. "seconds since 2017-01-01 00:00:00 +0000"  ')
     def _time_sort_variable_fileIDs(self):
         # sort variable fileIDs by time, now all files are read
@@ -253,13 +253,13 @@ class OceanTrackerDataSet(object):
         # check if difernt number of files for any variable
         sel = np.flatnonzero( np.abs(np.diff(np.asarray(n_files)) ) > 0)
         if sel.size>0:
-            ml.msg('File numbers differ for some variables for hindcast where variables are in separate n files',fatal_error=True,
+            ml.msg('File numbers differ for some variables for hindcast where variables are in separate n files',error=True,
                              hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
         # check if all variables start at the same times
         starts = np.asarray(starts).astype(np.float64)
         sel = np.flatnonzero( np.abs(np.diff(starts)))
         if sel.size > 0:
-            ml.msg('Start times differ for some variables for hindcast where files are split between files',fatal_error=True,
+            ml.msg('Start times differ for some variables for hindcast where files are split between files',error=True,
                             hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
 
         # for all check missing time steps

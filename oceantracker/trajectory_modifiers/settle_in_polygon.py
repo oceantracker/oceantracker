@@ -34,7 +34,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
 
         # set up polygons to test if particles inside
         if 'points' not in self.params['polygon']:
-            si.msg_logger.msg('initialize: Polygon settlement, currently only works for single  polygon and polygon must be a dictionary with at least a "points" key as a list of coordinates', fatal_error=True)
+            si.msg_logger.msg('initialize: Polygon settlement, currently only works for single  polygon and polygon must be a dictionary with at least a "points" key as a list of coordinates', error=True)
 
         a = np.asarray(self.params['polygon']['points'])
         if a.shape[1] != 2:

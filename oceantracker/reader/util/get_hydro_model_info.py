@@ -11,7 +11,7 @@ def find_file_format_and_file_list(reader_params, class_importer, msg_logger, cr
     if 'class_name' in reader_params:
         reader = class_importer.make_class_instance_from_params('reader', reader_params, default_classID='reader', check_for_unknown_keys=False)
         if reader is None:
-            msg_logger.msg(f'Error loading given reader  hydro-model class name is  "{reader_params["class_name"]}"',fatal_error=True, exit_now= True)
+            msg_logger.msg(f'Error loading given reader  hydro-model class name is  "{reader_params["class_name"]}"', fatal_error= True)
         file_list = reader.get_file_list()
         return reader_params, file_list
 
@@ -36,7 +36,7 @@ def find_file_format_and_file_list(reader_params, class_importer, msg_logger, cr
     else:
         msg_logger.msg(f'Could not set up reader, no files in dir = "{reader_params["input_dir"]} found matching mask = "{reader_params["file_mask"]}"  (or "out2d*.nc" if schism v5), or files do no match known format',
                         hint='Check given input_dir and  file_mask params, check if any non-hydro netcdf files in the dir, otherwise may not be known format',
-                        fatal_error=True,  exit_now=True, crumbs= crumbs, caller=caller )
+                        fatal_error=True, crumbs= crumbs, caller=caller )
     return reader_params, file_list
 
 
