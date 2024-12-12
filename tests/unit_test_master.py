@@ -17,10 +17,7 @@ if __name__ == "__main__":
     parser.add_argument('-save_plots', action='store_true')
 
     args = parser.parse_args()
-    if args.test:
-        test_list = [args.test]
-    else:
-        test_list=[1,90]
+
 
     test_dir =path.join(definitions.ot_root_dir,'tests')
     info=[]
@@ -29,16 +26,23 @@ if __name__ == "__main__":
         name = path.split(n)[-1].split('.')[0]
         info.append([ int(name.split('_')[2]),name])
 
+    if args.test:
+        test_list =[x for x in info if x[0]==args.test]
+
+    else:
+        # do all tests
+        test_list =info
+
     sys.path.append(files_dir)
 
     param_dir = path.join(files_dir,'test_param_files')
     if not path.isdir(param_dir) : mkdir(param_dir)
 
 
-    for n, name in info:
-        if n in test_list:
-            p = importlib.import_module(name)
-            params = p.main(args)
+    for n, name in test_list:
+        p = importlib.import_module(name)
+        params = p.main(args)
+        if params is not None:
             json_util.write_JSON(path.join(param_dir,f'params_{name}.json'),params)
             yaml_util.write_YAML(path.join(param_dir, f'params_{name}.yaml'), params)
 

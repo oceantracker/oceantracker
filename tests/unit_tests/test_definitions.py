@@ -9,7 +9,7 @@ import numpy as np
 from oceantracker import definitions
 from oceantracker.util import cord_transforms
 from plot_oceantracker import plot_tracks
-
+from copy import deepcopy
 
 def test3D_schism_template():
     ot = OceanTracker()
@@ -35,11 +35,14 @@ def base_settings(fn,args,label=None):
     return d
 
 image_dir= 'output'
-reader_demo_schisim=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
+reader_demo_schisim3D=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
                  input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','schsim3D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                 file_mask='demo_hindcast_schisim3D*.nc',
 )  # file mask to search for
 
+reader_demo_schisim2D=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
+                 input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','schsim2D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                file_mask='Random_order*.nc',)
 reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.dev_GenericStructuredReader',
              input_dir=f'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\generic2D_structured_DoubleGyre',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
              file_mask='Double_gyre.nc',
@@ -52,12 +55,13 @@ reader_NZnational=dict(  input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\
             file_mask = 'NZfinite*.nc')
 reader_Sounds =dict(  input_dir = r'G:\Hindcasts_large\MalbroughSounds_10year_benPhD\2017',
             file_mask = 'schism_marl201701*.nc')
-hydro_model = dict(demoSchism=dict(reader= reader_demo_schisim,
+hydro_model = dict(demoSchism3D=dict(reader= reader_demo_schisim3D,
                             axis_lims=[1591000, 1601500, 5478500, 5491000],
                             x0=[[1594000, 5484200] ],
                             polygon=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
                                     [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
                             ),
+
                 doubleGyre=dict(reader= reader_double_gyre,axis_lims=[0, 2, 0, 1]),
                 NZnational=dict(reader= reader_NZnational,axis_lims= [1727860, 1823449, 5878821, 5957660],
                              x0=[[1750624.1218, 5921952.0475],
@@ -70,6 +74,8 @@ hydro_model = dict(demoSchism=dict(reader= reader_demo_schisim,
                             x0=[[1667563.4554392125, 5431675.08653105],
                                 [1683507.1281506484, 5452629.160486231]])
                    )
+hydro_model['demoSchism2D'] =deepcopy(hydro_model['demoSchism3D'])
+hydro_model['demoSchism2D']['reader'] = reader_demo_schisim2D
 
 rg_release_interval0 = dict( name='release_interval0',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
@@ -81,6 +87,7 @@ rg_datetime = dict( name='start_in_middle1',  # name used internal to refer to t
          class_name='PointRelease',  # class to use
         start=np.datetime64('2017-01-01T03:30:00'),
         points=[[1594000, 5484200, -2]],
+        water_depth_min= 500,
         #    tim=['2017-01-01T08:30:00','2017-01-01T01:30:00'],
          # the below are optional settings/parameters
          release_interval=3600,  # seconds between releasing particles
@@ -88,6 +95,7 @@ rg_datetime = dict( name='start_in_middle1',  # name used internal to refer to t
 rg_outside_domain = dict( name='outside_open_boundary',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
         points=[[1594000, 0, -2]],
+        max_cycles_to_find_release_points=10,
         #    dates=['2017-01-01T08:30:00','2017-01-01T01:30:00'],
          # the below are optional settings/parameters
          release_interval=3600,  # seconds between releasing particles
@@ -190,6 +198,10 @@ def compare_reference_run(case_info_file, args):
         dc = stats['count'] - stats_ref['count']
         print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max counts-ref run counts =',np.nanmax(np.abs(dc)))
 
+    # check times
+    dt = np.abs(tracks['time'] - tracks_ref['time'])
+    print('max time difference, sec', np.max(dt))
+    pass
 def show_track_plot(case_info_file, args):
 
     if not args.plot : return

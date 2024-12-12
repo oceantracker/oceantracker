@@ -19,7 +19,7 @@ def main(args):
                  NCDF_particle_chunk= 500) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)
-    hm = test_definitions.hydro_model['demoSchism']
+    hm = test_definitions.hydro_model['demoSchism3D']
     hm['reader'].update(input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','ROMS'),
                         file_mask='ROMS3D_00*.nc')
     ot.add_class('reader', **hm['reader'])

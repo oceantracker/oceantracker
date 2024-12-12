@@ -16,7 +16,7 @@ def main(args):
                  NCDF_particle_chunk= 500) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)
-    hm = test_definitions.hydro_model['demoSchism']
+    hm = test_definitions.hydro_model['demoSchism3D']
     ot.add_class('reader', **hm['reader'])
 
     # add a point releases

@@ -142,9 +142,9 @@ HTML(anim.to_html5_video())# this is slow to build!
 # 
 # On Windows, do this within an anaconda/miniconda prompt window with an activated environment.
 # 
-# eg. run "run_oceantracker.py" script in the oceantracker/oceantracker directory with command
+# eg. run "run_ot_cmd_line.py" script in the oceantracker/oceantracker directory with command
 # 
-# ``python  ../oceantracker/run_oceantracker.py ./example_param_files/param_test1.json``
+# ``python  run_ot_cmd_line.py ./example_param_files/param_test1.json``
 
 # ### Options when running at command line
 # 
@@ -158,5 +158,5 @@ HTML(anim.to_html5_video())# this is slow to build!
 # In[11]:
 
 
-get_ipython().system('python ../oceantracker/run_oceantracker.py -h')
+get_ipython().system('python ../oceantracker/run_ot_cmd_line.py -h')
 

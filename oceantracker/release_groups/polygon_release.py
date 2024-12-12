@@ -21,7 +21,9 @@ class PolygonRelease(PointRelease):
 
 
     def initial_setup(self):
+        super().initial_setup()  # required to get base class set up
         # sort out list  polygon from points
+
         info = self.info
         params= self.params
         ml = si.msg_logger

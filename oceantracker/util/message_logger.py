@@ -225,9 +225,9 @@ class MessageLogger(object ):
         known = list(possible_values)
         if key not in known:
             # flag if unknown
-            self.msg(msg,  hint=hint + f'\n Closest matches to "{key}" = {difflib.get_close_matches(key, known, cutoff=0.4)} ?? ',
+            self.msg(msg,  hint=hint + f'\n Closest matches to "{key}" = {str(difflib.get_close_matches(key, known, cutoff=0.4))} ?? ',
                   **kwargs)
-
+        pass
     def build_stack(self):
 
         #todo useful to print crumbs automatically?

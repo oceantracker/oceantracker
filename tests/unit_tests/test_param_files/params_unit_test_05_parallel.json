@@ -1,13 +1,13 @@
 {
     "output_file_base": "unit_test_05_parallel",
-    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
+    "root_output_dir": "C:\\Work\\ot_install_test\\oceantracker_output\\unit_tests",
     "time_step": 120,
     "use_random_seed": true,
     "NCDF_time_chunk": 1,
     "debug": true,
     "processors": 2,
     "reader": {
-        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast\\schsim3D",
+        "input_dir": "C:\\Work\\ot_install_test\\oceantracker\\demos\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
     },
     "case_list": [
@@ -90,12 +90,15 @@
                 120,
                 121
             ],
+            "grid_span": [
+                10000,
+                10000
+            ],
             "release_group_centered_grids": true,
             "update_interval": 7200,
             "particle_property_list": [
                 "a_pollutant"
             ],
-            "status_min": "moving",
             "z_min": -10.0,
             "start": "2017-01-01T02:30:00",
             "class_name": "GriddedStats2D_timeBased",

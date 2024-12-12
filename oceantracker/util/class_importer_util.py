@@ -64,6 +64,7 @@ class ClassImporter():
                         fatal_error=True, exit_now=True)
             pass
         else:
+            # class not in the pre-assembled tree of inbuilt classes
             # split out package and module if class name as
             mod,_ ,c = class_name.rpartition('.')
             try:
@@ -73,14 +74,17 @@ class ClassImporter():
                                             mod.split('.')[-1],
                                             list(set([x.split('.')[-2] for x in self.full_name_class_map.keys()])),
                                             hint='A miss-spelt module name? or missing custom module python file',
-                                            fatal_error=True, exit_now=True)
+                                            fatal_error=True, exit_now=True,exception=e)
+
             try:
                 return getattr(m, c)  # get class as module attribute
             except Exception as e:
                 self.msg_logger.spell_check(f'Cannot find class "{c}" within module "{mod}"' ,
-                                            c, [x.split('.')[1] for x in self.short_name_class_map.keys()],
-                                            hint='A miss-spelt short class_name? or missing custimn class',
+                                            f'{mod}.{c}', list(self.full_name_class_map.keys()),
+                                            hint='A miss-spelt short class_name? or missing custom class',
+                                            exception=e,
                                             fatal_error=True, exit_now=True)
+
     def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None, initialize=False,
                                         caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):
         ml = self.msg_logger
@@ -97,7 +101,8 @@ class ClassImporter():
         # get class name
         params['class_name'] = self.get_class_name(params, default_classID)
         if  params['class_name'] is  None:
-            ml.msg(f'No class_name param for "{name}" given, and no known default class for type  "{class_role}"', fatal_error=True, exit_now= True, crumbs=crumbs)
+            ml.msg(f'No class_name param for "{name}" given, and no known default class for type  "{class_role}"',
+                   fatal_error=True, exit_now= True, crumbs=crumbs)
             return
 
         class_obj = self.get_class_obj_from_class_name(class_role, params['class_name'])
@@ -105,6 +110,8 @@ class ClassImporter():
         if class_obj is None:
             return None
         i = class_obj() # make instance
+
+
         i.info['class_role'] = class_role
 
         if merge_params:

@@ -32,9 +32,10 @@ class PointRelease(_BaseReleaseGroup):
     def initial_setup(self):
         # must be called after unpack_x0
         # tidy up parameters to make them numpy arrays with first dimension equal to number of locations
-
+        super().initial_setup()  # required to get base class set up
         params = self.params
         info = self.info
+
 
         # ensure points are  meters
         if si.settings.use_geographic_coords:

@@ -23,8 +23,8 @@ def _run(args):
 
     match args.variant:
         case 0:
-            label='demoSchism'
-            hm = test_definitions.hydro_model['demoSchism']
+            label='demoSchism3D'
+            hm = test_definitions.hydro_model['demoSchism3D']
             model_settings.update(
                 grid_size=[90, 120],
                 grid_span=[6000, 8000],

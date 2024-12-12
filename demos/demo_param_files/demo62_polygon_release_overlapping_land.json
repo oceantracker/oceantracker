@@ -51,7 +51,7 @@
         },
         {
             "name": "Poly2",
-            "class_name": "oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange",
+            "class_name": "PolygonRelease",
             "water_depth_min": 30,
             "points": [
                 [

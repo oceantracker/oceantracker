@@ -19,34 +19,32 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         super().__init__()
         #todo add depth range for count
         self.add_default_params(
-                        update_interval =   PVC(60*60.,float,units='sec',
-                                       doc_str='Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step'),
-                        start =  PTC(None,doc_str= 'Start particle counting from this date-time, default is start of model run'),
-                        end =  PTC(None,  doc_str='Stop particle counting from this iso date-time, default is end of model run'),
-                        duration =  PVC(None, float, min=0.,units='sec',
-                                doc_str='How long to do counting after start time, can be used instead of "end" parameter'),
+                update_interval =   PVC(60*60.,float,units='sec',
+                               doc_str='Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step'),
+                start =  PTC(None,doc_str= 'Start particle counting from this date-time, default is start of model run'),
+                end =  PTC(None,  doc_str='Stop particle counting from this iso date-time, default is end of model run'),
+                duration =  PVC(None, float, min=0.,units='sec',
+                        doc_str='How long to do counting after start time, can be used instead of "end" parameter'),
 
-                        role_output_file_tag =            PVC('stats_base',str,doc_str='tag on output file for this class'),
-                        write =                       PVC(True,bool,doc_str='Write statistcs to disk'),
-                        status_list= PLC(['stationary','stranded_by_tide','on_bottom','moving'], str,
-                                         doc_str='List of particle status types to count,eg  ["on_bottom","moving"], other status types will be ignored in statistcs',
-                                         possible_values=si.particle_status_flags.possible_values()),
-                        z_min =  PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value', units='meters above mean water level, so is < 0 at depth'),
-                        z_max =  PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value', units='meters above mean water level, so is < 0 at depth'),
-                        water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
-                        water_depth_max =  PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
-                        particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
-                        coords_in_lat_lon_order =  PVC(False, bool,
-                            doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
-                        status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),
-                                       doc_str=' Count only those particles with status >= to this value',
-                                       obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
-                                       ),
-                        status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),
-                                       doc_str=' Count only those particles with status  <= to this value',
-                                       obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
-                                       ),
-                        )
+                role_output_file_tag =            PVC('stats_base',str,doc_str='tag on output file for this class'),
+                write =                       PVC(True,bool,doc_str='Write statistcs to disk'),
+                status_list= PLC(['stationary','stranded_by_tide','on_bottom','moving'], str,
+                                 doc_str='List of particle status types to count,eg  ["on_bottom","moving"], other status types will be ignored in statistcs',
+                                 possible_values=si.particle_status_flags.possible_values()),
+                z_min =  PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value', units='meters above mean water level, so is < 0 at depth'),
+                z_max =  PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value', units='meters above mean water level, so is < 0 at depth'),
+                water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
+                water_depth_max =  PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
+                particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
+                coords_in_lat_lon_order =  PVC(False, bool,
+                    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
+                status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),
+                                 obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
+                               ),
+                status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),
+                                obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
+                               ),
+                )
         self.add_default_params(count_start_date= PTC(None,  obsolete=True,  doc_str='Use "start" parameter'),
                                 count_end_date= PTC(None,   obsolete=True,  doc_str='Use "end" parameter'))
 

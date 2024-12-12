@@ -1,5 +1,6 @@
 import numpy as np
 from os import  path
+from time import perf_counter
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import  ParameterBaseClass
 from oceantracker.util import output_util
@@ -102,10 +103,10 @@ class _BaseWriter(ParameterBaseClass):
 
     def _open_file(self,file_name):
         self.time_steps_written_to_current_file = 0
-
+        t0 = perf_counter()
         self.info['output_file'].append(file_name + '.nc')
 
-        si.msg_logger.progress_marker('opening tracks output to : ' + self.info['output_file'][-1])
+
         self.add_global_attribute('file_created', datetime.now().isoformat())
 
         self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file'][-1]), 'w')
@@ -125,7 +126,7 @@ class _BaseWriter(ParameterBaseClass):
                                             hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time', )
             #print('xx', name)
             nc.create_a_variable(name, item['dim_list'] , item['dtype'],  description=item['description'],  attributes=item['attributes'], chunksizes=item['chunks'],)
-
+        si.msg_logger.progress_marker('Opened tracks output to : ' + self.info['output_file'][-1],start_time=t0)
         pass
 
     def pre_time_step_write_book_keeping(self): pass
