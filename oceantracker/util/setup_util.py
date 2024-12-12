@@ -41,7 +41,7 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
 
         if type(item) == tuple:
             # check item not a tuple
-            msg_logger.msg(f'Top level parameters must be key : value pairs of a dictionary, got a tuple for key= "{key}", value= "{str(item)}"', fatal_error=True, crumbs=crumbs,
+            msg_logger.msg(f'Top level parameters must be key : value pairs of a dictionary, got a tuple for key= "{key}", value= "{str(item)}"', error=True, crumbs=crumbs,
                    hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead', caller=caller)
 
         elif k in setting_keys:
@@ -55,11 +55,11 @@ def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
                 msg_logger.msg(f'Params under role key "{k}" must be a list of parameter dictionaries with "class_name" and optional internal "name"'
                                +'\n Roles changed from dict type to list type in new version',
                                        hint =f'Got type {str(type(item))}, value={str(item)}' ,
-                                       crumbs=crumbs, fatal_error=True)
+                                       crumbs=crumbs, error=True)
             w['class_roles'][k] = item
         else:
             msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
-                           crumbs=crumbs, link='parameter_ref_toc', fatal_error=True)
+                           crumbs=crumbs, link='parameter_ref_toc', error=True)
 
     msg_logger.exit_if_prior_errors('Errors in decomposing parameters into settings, and classes')
 
@@ -125,7 +125,7 @@ def merge_settings(settings, default_settings, msg_logger, settings_to_merge=Non
                                              crumbs= crumbs + f'> setting = "{key}"', caller=caller)
         else:
             msg_logger.spell_check(f'Unrecognized setting "{key}"',key, all_settings,
-                            crumbs = crumbs + f'> {key}', caller=caller, fatal_error=True)
+                            crumbs = crumbs + f'> {key}', caller=caller, error=True)
         pass
     return settings
 
@@ -136,7 +136,7 @@ def merge_base_and_case_working_params(base_working_params,n_case, case_working_
         pass
         if key in base_case_only_params:
             msg_logger.msg(f'Setting {key} cannot be set with a case', crumbs= crumbs,
-                          hint=f'Move parameter from cases to the base case #{n_case}', caller=caller, fatal_error=True)
+                          hint=f'Move parameter from cases to the base case #{n_case}', caller=caller, error=True)
 
     # merge the settings first
     for key, item in base_working_params['settings'].items():

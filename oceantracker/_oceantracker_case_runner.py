@@ -110,6 +110,8 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             self._final_setup_all_classes()
 
+            self._do_run_integrity_checks()
+
             ml.exit_if_prior_errors('Errors in setup??', caller=self)
 
             # -----------run-------------------------------
@@ -124,12 +126,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         except GracefulError as e:
             ml.show_all_warnings_and_errors()
-            ml.msg(f' Case Runner graceful exit from case number [{ri.caseID:2}]', hint ='Parameters/setup has errors, see above', fatal_error= True)
+            ml.msg(f' Case Runner graceful exit from case number [{ri.caseID:2}]', hint ='Parameters/setup has errors, see above', error= True)
             ml.write_error_log_file(e, traceback.format_exc())
             has_errors= True
         except Exception as e:
             ml.show_all_warnings_and_errors()
-            ml.msg(f' Unexpected error in case number [{ri.caseID:2}] ', fatal_error=True,hint='check above or .err file')
+            ml.msg(f' Unexpected error in case number [{ri.caseID:2}] ', error=True,hint='check above or .err file')
             tb = traceback.format_exc()
 
             ml.write_error_log_file(e, tb)
@@ -151,7 +153,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             # flag if some release groups did not release
             for name, i in si.class_roles.release_groups.items():
                 if i.info['number_released'] == 0:
-                    ml.msg(f'No particles were released by release_group named= "{name}"', fatal_error=True,
+                    ml.msg(f'No particles were released by release_group named= "{name}"', error=True,
                            caller= i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
 
             ml.show_all_warnings_and_errors() # reshow warnings
@@ -288,7 +290,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         crumbs = 'adding release groups'
    
         if len(si.class_roles['release_groups']) == 0:
-            si.msg_logger.msg('No particle "release_groups" parameters found', fatal_error=True, caller=self)
+            si.msg_logger.msg('No particle "release_groups" parameters found', error=True, caller=self)
         si.msg_logger.exit_if_prior_errors('Errors adding release groups??')
 
         # set up to start end times based on release_groups

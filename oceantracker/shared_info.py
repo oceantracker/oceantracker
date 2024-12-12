@@ -248,13 +248,13 @@ class _SharedInfoClass():
         if class_role=='fields':
             ml.msg('Cannot use si.add_class() method to add fields',
                    hint='Use add_reader_field(name,  params) or si.add_custom_field(name, params, default_classID=None)',
-                   fatal_error=True, exit_now=True)
+                   fatal_error=True)
 
 
         if params is None: params ={}
         if type(params) != dict :
             ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}',
-                        fatal_error=True, crumbs=crumbs,
+                        error=True, crumbs=crumbs,
                         check_for_unknown_keys=check_for_unknown_keys, caller=caller)
             return None
 
@@ -279,7 +279,7 @@ class _SharedInfoClass():
 
         else:
             ml.msg(f'Unknown class role {class_role}', hint=f'Must be one of core_class_roles {str(self.core_class_roles.possible_values())} or other roles {str(self.class_roles.possible_values())}',
-                   fatal_error=True, crumbs=crumbs, caller=caller)
+                   error=True, crumbs=crumbs, caller=caller)
             return None
 
         # add classes required by this class
@@ -341,7 +341,7 @@ class _SharedInfoClass():
 
         if np.any(~np.isfinite(out.ravel())):
             self.msg_logger.msg('Could not convert some lon_lat to meters, values out of bounds, are values in (lat, lon) order?',
-                            crumbs=crumbs,fatal_error=True,exit_now=True, hint=', require (lon, lat) order, values='+str(out))
+                            crumbs=crumbs, fatal_error=True, hint=', require (lon, lat) order, values='+str(out))
         return out
 
     def _transform_lon_lat_deltas(self,ll_deltas, ref_lon_lat,  deltas_in_lat_lon_order=False):

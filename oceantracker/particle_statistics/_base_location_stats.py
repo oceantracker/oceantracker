@@ -69,7 +69,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
         if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
         if info['z_range'][0] > info['z_range'][1]:
-            ml.msg(f'Require zmin > zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', fatal_error=True, caller=self,
+            ml.msg(f'Require zmin > zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', error=True, caller=self,
                               hint ='z=0 is mean water level, so z is mostly < 0')
 
         info['water_depth_range'] = np.asarray([-f, f])
@@ -77,7 +77,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
         if info['water_depth_range'][0]> info['water_depth_range'][1]:
             ml.msg(f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
-                     caller=self,fatal_error=True)
+                     caller=self,error=True)
 
         self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
         pass
@@ -93,7 +93,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                       name, si.class_roles.particle_properties.keys(),
                                       hint='check parameter "particle_property_list"',
                                       crumbs=f'Particle Statistic "{self.params["name"]}" >',
-                                      caller = self, fatal_error=True, exit_now=True)
+                                      caller = self, fatal_error=True)
 
             if part_prop[name].is_vector():
                 si.msg_logger.msg('On the fly statistical Binning of vector particle property  "' + name + '" not yet implemented', warning=True)
@@ -142,7 +142,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
             elif part_prop[key].get_dtype() != np.float64:
                 si.msg_logger.msg(f'On the fly statistics  can currently only track float64 particle properties, ignoring property  "{key}", of type "{str(part_prop[key].get_dtype())}"',
-                                  fatal_error=True)
+                                  error=True)
 
             else:
                 names.append(names)

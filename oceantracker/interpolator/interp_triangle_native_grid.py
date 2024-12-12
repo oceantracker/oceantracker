@@ -127,7 +127,7 @@ class  InterpTriangularGrid(_BaseInterp):
                 ie._time_dependent_3D_vector_field(fi, current_buffer_steps,
                                                    fractional_time_steps, output, active)
             case _:
-                si.msg_logger.msg (f' 3D time invariant fields interpolator not yet implemented for ', fatal_error=True,caller=self,
+                si.msg_logger.msg (f' 3D time invariant fields interpolator not yet implemented for ', error=True,caller=self,
                                    hint=f'remove field "{str(fi.params["name"])}" from reader load_fields param')
         pass
 

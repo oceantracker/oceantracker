@@ -67,17 +67,17 @@ class OceanTracker():
         known_class_roles = shared_info.core_class_roles.possible_values() + shared_info.class_roles.possible_values()
 
         if class_role is None:
-            ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', fatal_error=True, caller =self)
+            ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', error=True, caller =self)
             return
 
         if type(class_role) != str:
-            ml.msg('oceantracker.add_class, class_role must be a string got ', fatal_error=True, caller=self,
+            ml.msg('oceantracker.add_class, class_role must be a string got ', error=True, caller=self,
                    hint='Given type =' + str(type(class_role)))
             return
 
         if class_role not in known_class_roles:
             ml.spell_check(f'oceantracker.add_class, class_role parameter is not recognised, value ="{class_role}"',
-                           class_role,known_class_roles, fatal_error=True, hint=f'Possible_values {str(known_class_roles)}')
+                           class_role,known_class_roles, error=True, hint=f'Possible_values {str(known_class_roles)}')
             return
 
         existing_params = self._get_case_params_to_work_on(case)
@@ -95,7 +95,7 @@ class OceanTracker():
             if class_role not in existing_params: existing_params[class_role] = []
             if type(existing_params[class_role]) != list:
                 ml.msg(f'oceantracker.add_class {class_role} must be a list of dictionaries, with optional name key',
-                       fatal_error=True, caller=self,  hint='Given type =' + str(type(existing_params[class_role])))
+                       error=True, caller=self,  hint='Given type =' + str(type(existing_params[class_role])))
 
             existing_params[class_role].append(kwargs) # add users params
 
@@ -110,7 +110,7 @@ class OceanTracker():
             if 'case_list' not in self.params: self.params['case_list'] = []
             case_list = self.params['case_list']
             if type(case) != int or case < 0:
-                msg_logger.msg(f'Case keyword must be an integer >=0', fatal_error=True, hint=f'Got value :{str(case)}')
+                msg_logger.msg(f'Case keyword must be an integer >=0', error=True, hint=f'Got value :{str(case)}')
 
             if case < len(case_list):
                 return case_list[case] # work on existing case
@@ -119,7 +119,7 @@ class OceanTracker():
                 case_list.append({}) # expand by  one extra cases as empty
                 return case_list[case] # work on new last one
             else:
-                msg_logger.msg(f'New cases must be added in order, have case = {case}',fatal_error=True,
+                msg_logger.msg(f'New cases must be added in order, have case = {case}',error=True,
                      hint=f"This would be the {case + 1}'th case added, but only :{len(case_list)} cases have been added so far" )
                 return {}
 

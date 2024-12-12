@@ -70,11 +70,11 @@ class Scheduler(object):
 
         if i['start_time_outside_run_times']:
             msg_logger.msg('Making scheduler: start time is outside model run times',
-                                hint=i['bounds_table'], caller=caller, fatal_error=True, crumbs=crumbs)
+                                hint=i['bounds_table'], caller=caller, error=True, crumbs=crumbs)
 
         if self.scheduled_times.size == 0:
             msg_logger.msg('No scheduled times within model run times',
-                                hint=i['bounds_table'], caller=caller, fatal_error=True, crumbs=crumbs)
+                                hint=i['bounds_table'], caller=caller, error=True, crumbs=crumbs)
 
     def _start_end_from_interval(self,settings,run_info, start,end, duration, interval):
 

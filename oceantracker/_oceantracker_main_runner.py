@@ -96,20 +96,22 @@ class _OceanTrackerRunner(object):
     def _build_working_params(self, params, crumbs=''):
         ml = msg_logger
         if type(params) != dict:
-            ml.msg('Parameters must be of type dict, ', hint=f'Got type {str(type(params))} ', fatal_error=True, exit_now=True)
+            ml.msg('Parameters must be of type dict, ', hint=f'Got type {str(type(params))} ',
+                   fatal_error=True)
 
         # check for reder classes
         if 'reader' not in params or len(params['reader']) < 2:
             ml.msg('Parameter "reader" is required, or missing required parameters',
                    hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
-                   fatal_error=True, crumbs='case_run_set_up', caller=self)
+                   error=True, crumbs='case_run_set_up', caller=self)
 
         # split apart params and case list
 
         if 'case_list' in params:
             case_list = params['case_list']
             if type(case_list) != list:
-                ml.msg('Parameter "case_list"  must be of type list, ', hint=f'Got type {str(type(case_list))} ', fatal_error=True, exit_now=True)
+                ml.msg('Parameter "case_list"  must be of type list, ', hint=f'Got type {str(type(case_list))} ',
+                       fatal_error=True)
 
             params.pop( 'case_list')
         else:
@@ -150,7 +152,7 @@ class _OceanTrackerRunner(object):
 
         # check is case ran
         if case_summary['case_info_file'] is None:
-            ml.msg('case_info_file is None, run may not have completed', fatal_error=True)
+            ml.msg('case_info_file is None, run may not have completed', error=True)
 
         return case_info_files
 
@@ -302,7 +304,7 @@ class _OceanTrackerRunner(object):
         elif hi['is3D']:
             si.msg_logger.msg(f'Unknown grid vertical type "{hi["vert_grid_type"]}"',
                           hint=f'must be one of {str(vgt.possible_values())}',
-                          caller=self, fatal_error=True, exit_now=True)
+                          caller=self, fatal_error=True)
 
 
         hi['has_A_Z_profile'] = 'A_Z_profile' in reader_builder['reader_field_info']
@@ -319,10 +321,10 @@ class _OceanTrackerRunner(object):
 
         # check outpu_file_base is not dir, just a test
         if len(path.dirname(params['output_file_base'])) > 0:
-            msg_logger.msg(f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{params["output_file_base"]}"', fatal_error=True,
+            msg_logger.msg(f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{params["output_file_base"]}"', error=True,
                            hint='Use setting "root_output_dir" to designate which dir. to place output files in',
                            crumbs=crumbs, caller=caller,
-                           exit_now=True)
+                           fatal_error=True)
 
         # get output files location
         root_output_dir = path.abspath(path.normpath(params['root_output_dir']))
@@ -341,9 +343,9 @@ class _OceanTrackerRunner(object):
             makedirs(run_output_dir)  # make  and clear out dir for output
         except OSError as e:
             # path may already exist, but if not through other error, exit
-            msg_logger.msg(f'Failed to make run output dir:{run_output_dir}', fatal_error=True,
+            msg_logger.msg(f'Failed to make run output dir:{run_output_dir}',
                            crumbs=crumbs, caller=caller,
-                           exception=e, traceback_str=traceback.print_exc(), exit_now=True)
+                           exception=e, traceback_str=traceback.print_exc(), fatal_error=True)
 
         # write a copy of user given parameters, to help with debugging and code support
         fb = 'users_params_' + params['output_file_base']
@@ -424,13 +426,13 @@ class _OceanTrackerRunner(object):
         # check params and folders exists
         if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
             ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',
-                   fatal_error=True, exit_now=True, crumbs=crumbs)
+                   fatal_error=True, crumbs=crumbs)
         # check input dir exists
         if path.isdir(reader_params['input_dir']):
             ml.progress_marker(f'Found input dir "{reader_params["input_dir"]}"')
         else:
             ml.msg(f'Could not find input dir "{reader_params["input_dir"]}"',
-                   hint='Check reader parameter "input_dir"', fatal_error=True, exit_now=True)
+                   hint='Check reader parameter "input_dir"', fatal_error=True)
 
         # file mask is optional
         if 'file_mask' not in reader_params: reader_params['file_mask'] = None
@@ -441,7 +443,7 @@ class _OceanTrackerRunner(object):
         file_list = glob(mask, recursive=True)
         if len(file_list) == 0:
             msg_logger.msg(f'No files found in input_dir, or its sub-dirs matching mask "{mask}"',
-                           hint=f'searching with "gob" mask "{mask}"', fatal_error=True, exit_now=True)
+                           hint=f'searching with "gob" mask "{mask}"', fatal_error=True)
         return file_list
     def _get_hydro_file_catalog(self, reader_params,  crumbs=''):
         t0 = perf_counter()
@@ -501,7 +503,7 @@ class _OceanTrackerRunner(object):
         if found_reader is None:
             ml.msg(f'Could not set up reader, no files in dir = "{reader_params["input_dir"]} found matching mask = "{reader_params["file_mask"]}"  (or "out2d*.nc" if schism v5), or files do no match known format',
                    hint='Check given input_dir and  file_mask params, check if any non-hydro netcdf files in the dir, otherwise may not be known format',
-                   fatal_error=True, exit_now=True, crumbs=crumbs, caller=self)
+                   fatal_error=True, crumbs=crumbs, caller=self)
         # match found
         ml.progress_marker(f'found hydro-model files of type  "{found_reader.upper()}"')
         # return merged params
@@ -523,7 +525,7 @@ class _OceanTrackerRunner(object):
 
         if hi['vert_grid_type'] is not None and hi['vert_grid_type'] not in si.vertical_grid_types.possible_values():
             ml.msg(f'Coding error, dont recognise vert_grid_type grid type, got {hi["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
-                           hint=f'check reesder codes  get_hindcast_info() ', fatal_error=True)
+                           hint=f'check reesder codes  get_hindcast_info() ', error=True)
 
         reader_builder['hindcast_info'].update(hi)
 
@@ -541,7 +543,7 @@ class _OceanTrackerRunner(object):
                     if name not in catalog['variables']:
                         ml.msg(f' No  field_variable_map to load variable named "{name}" and no variable in file matching this name, so can not load this field',
                                hint=f'Add a map for this variable readers "field_variable_map"  param or check spelling loaded variable name matches a file variable, current map is {str(mapped_fields)}',
-                               fatal_error=True, exit_now=True)
+                               fatal_error=True)
 
             # decompose variabele lis
             var_list = mapped_fields[name]

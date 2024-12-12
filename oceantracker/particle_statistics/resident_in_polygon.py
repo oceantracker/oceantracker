@@ -31,14 +31,14 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                 'name_of_polygon_release_group'] +
                    ' user must name release group for residence time counts ' + ', available release group names are ' + str(
                 list(si.class_roles.release_groups.keys())),
-                   caller=self, fatal_error=True)
+                   caller=self, error=True)
 
         rg = si.class_roles.release_groups[params['name_of_polygon_release_group']]
         if not isinstance(rg, PolygonRelease):
             ml.msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params[
                 'name_of_polygon_release_group'] +
                    '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ',
-                   caller=self, fatal_error=True)
+                   caller=self, error=True)
 
         self.release_group_to_count = rg
         self.info['release_group_name'] = rg.params['name']
