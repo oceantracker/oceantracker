@@ -15,7 +15,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="event_loggers" href="event_loggers_toc.html" />
+    <link rel="next" title="_BaseWriter" href="_BaseWriter.html" />
     <link rel="prev" title="tracks_writer" href="tracks_writer_toc.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -76,7 +76,7 @@
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="tracks_writer_toc.html">tracks_writer</a><ul>
       <li>Previous: <a href="tracks_writer_toc.html" title="previous chapter">tracks_writer</a></li>
-      <li>Next: <a href="event_loggers_toc.html" title="next chapter">event_loggers</a></li>
+      <li>Next: <a href="_BaseWriter.html" title="next chapter">_BaseWriter</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -112,26 +112,6 @@
 <blockquote>
 <div><ul>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">NCDF_particle_chunk</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: number of particles per time chunk in the netcdf file</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">100000</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">100</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">NCDF_time_chunk</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: number of time steps per time chunk in the netcdf file</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">24</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class name as string A.B.C, used to import this class from python path</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
@@ -144,24 +124,6 @@
 <dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Name used to refer to class in code and output, = None for core claseses</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">retain_compact_files</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: keep  compact tracks files after conversion to rectangular format</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">role_output_file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">tracks_compact</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>
@@ -240,11 +202,29 @@
 <blockquote>
 <div><ul>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">development</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class is under development and testing</p>
+<dt><code class="docutils literal notranslate"><span class="pre">NCDF_particle_chunk</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: number of particles per time chunk in the netcdf file</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">100000</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">100</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">NCDF_time_chunk</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: number of time steps per time chunk in the netcdf file</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">24</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
+<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">role_output_file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">tracks_compact</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -265,7 +245,7 @@
           <a href="tracks_writer_toc.html" title="Previous document">tracks_writer</a>
         </li>
         <li>
-          <a href="event_loggers_toc.html" title="Next document">event_loggers</a>
+          <a href="_BaseWriter.html" title="Next document">_BaseWriter</a>
           &rarr;
         </li>
     </ul>

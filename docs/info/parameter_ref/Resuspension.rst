@@ -1,14 +1,14 @@
-##################
-BasicResuspension
-##################
+#############
+Resuspension
+#############
 
 **Doc:** 
 
-**short class_name:** BasicResuspension
+**short class_name:** Resuspension
 
-**full class_name :** oceantracker.resuspension.resuspension.BasicResuspension
+**full class_name :** oceantracker.resuspension.resuspension.Resuspension
 
-**Inheritance:** > ParameterBaseClass> BaseResuspension> BasicResuspension
+**Inheritance:** > ParameterBaseClass> BaseResuspension> Resuspension
 
 
 Parameters:
@@ -41,12 +41,5 @@ Parameters:
 
 Expert Parameters:
 *******************
-
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 

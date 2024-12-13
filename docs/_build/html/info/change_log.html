@@ -102,12 +102,15 @@
 <section id="known-issues">
 <h2>Known issues<a class="headerlink" href="#known-issues" title="Permalink to this headline">¶</a></h2>
 </section>
-<section id="version-0-5-0-000-2024-03-07">
-<h2>Version ‘0.5.0.000 2024-03-07’<a class="headerlink" href="#version-0-5-0-000-2024-03-07" title="Permalink to this headline">¶</a></h2>
+<section id="version-0-5-0-000-2024-11-26">
+<h2>Version ‘0.5.0.000 2024-11-26’<a class="headerlink" href="#version-0-5-0-000-2024-11-26" title="Permalink to this headline">¶</a></h2>
 <p>Faster and simplified internal structure</p>
 <section id="new-features">
 <h3>New features<a class="headerlink" href="#new-features" title="Permalink to this headline">¶</a></h3>
+<p>#. Now works in natively geographic coords if hindcast is in geographic coords. If using geographic coords all inputs
+must also be groegraphic in (lon, lat) order, eg. release points, polygons, stats etc.</p>
 <ol class="arabic simple">
+<li><p>Also grid spans  are now always required and must  be in  (dx,dy) meters or degrees as (dlon, dlat) if geographic</p></li>
 <li><p>Most expensive step in 3D finding vertical cell is now 5 times faster, so code net 2-3 times faster, as by default regrids  3D data to uniform Sigma grid, to speed vertical cell search by factor of 5. Original slower native vertical grid short vertical walk search still available.</p></li>
 <li><p>By default uses diffusivity vertical profile for A_Z in random walk if variable mapped to A_Z_profile is found in the hydro file</p></li>
 <li><p>Re-suspension by critical friction velocity, uses bottom stress to calculate friction velocity field if variable mapped to bottom_stress is found in the hydro file, if not uses near seabed velocity</p></li>
@@ -124,6 +127,7 @@
 <li><p>Setting display_grid_at_start plots grid as a check, clicking on image will print coords in console to use as release points</p></li>
 <li><p>Release group data now writen to separate file for each case, to use</p></li>
 <li><p>For coders using IDEs (Pycharm, VS code) the shared info structure variables and methods now auto completes/hints variable/method names, with doc_strs where available.</p></li>
+<li><p>use of xarray to read individual files</p></li>
 </ol>
 </section>
 </section>

@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="ROMsNativeReader" href="ROMsNativeReader.html" />
-    <link rel="prev" title="reader" href="reader_toc.html" />
+    <link rel="prev" title="DELFTFM" href="DELFTFM.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -75,7 +75,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="reader_toc.html">reader</a><ul>
-      <li>Previous: <a href="reader_toc.html" title="previous chapter">reader</a></li>
+      <li>Previous: <a href="DELFTFM.html" title="previous chapter">DELFTFM</a></li>
       <li>Next: <a href="ROMsNativeReader.html" title="next chapter">ROMsNativeReader</a></li>
   </ul></li>
   </ul></li>
@@ -112,7 +112,7 @@
 <blockquote>
 <div><ul>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">EPSG</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at <a class="reference external" href="https://spatialreference.org/">https://spatialreference.org/</a></p>
+<dt><code class="docutils literal notranslate"><span class="pre">EPSG_code</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: integer code for coordinate transform of hydro-model, only used if setting “use_geographic_coords”= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at <a class="reference external" href="https://spatialreference.org/">https://spatialreference.org/</a></p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
@@ -134,16 +134,6 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">hydro_model_cords_in_lat_long</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -219,7 +209,7 @@
 <dt><code class="docutils literal notranslate"><span class="pre">variable_signature</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Variable names used to test if file is this format</p>
 <ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['latitude',</span> <span class="pre">'e2t']</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['time',</span> <span class="pre">'latitude',</span> <span class="pre">'uo',</span> <span class="pre">'vo']</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 <li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
@@ -246,7 +236,7 @@
 <blockquote>
 <div><ul>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">development</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class is under development and testing</p>
+<dt><code class="docutils literal notranslate"><span class="pre">geographic_coords</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
@@ -268,7 +258,7 @@
     <ul>
         <li>
           &larr;
-          <a href="reader_toc.html" title="Previous document">reader</a>
+          <a href="DELFTFM.html" title="Previous document">DELFTFM</a>
         </li>
         <li>
           <a href="ROMsNativeReader.html" title="Next document">ROMsNativeReader</a>

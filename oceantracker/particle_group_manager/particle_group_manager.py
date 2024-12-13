@@ -83,6 +83,8 @@ class ParticleGroupManager(ParameterBaseClass):
     #@function_profiler(__name__)
     def release_particles(self,n_time_step, time_sec):
         # see if any group is ready to release
+
+        part_prop = si.class_roles.particle_properties
         new_buffer_indices = np.full((0,), 0, np.int32)
 
         for name, rg in si.class_roles.release_groups.items():
@@ -90,12 +92,6 @@ class ParticleGroupManager(ParameterBaseClass):
                 release_part_prop = rg.get_release_locations(time_sec)
                 new_index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
-            pass
-        # for all new particles update cell and bc cords for new particles all at same time
-        part_prop = si.class_roles.particle_properties
-
-        #todo does this setup_interp_time_step have to be here?
-        si.core_class_roles.field_group_manager.setup_time_step(time_sec, part_prop['x'].data, new_buffer_indices)  # new time is at end of sub step fraction =1
 
         # initial values  part prop derived from fields
         for name, i  in si.class_roles.particle_properties.items():
@@ -104,28 +100,17 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
         for name, i  in si.class_roles.particle_properties.items():
-            if isinstance(i, CustomParticleProperty):
+            if isinstance(i,CustomParticleProperty):
                 i.initial_value_at_birth(new_buffer_indices)
 
         # update new particles props
         # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
         self.update_PartProp(n_time_step, time_sec, new_buffer_indices)
-
-        # flag if any bad initial locations
-        if si.settings['open_boundary_type'] > 0:
-            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags.outside_open_boundary, out=self.get_partID_buffer('B1'))
-        else:
-            bad = part_prop['status'].find_subset_where(new_buffer_indices, 'lt', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
-
-        if bad.shape[0] > 0:
-            si.msg_logger.msg(str(bad.shape[0]) + ' initial locations are outside grid domain, or NaN, or outside due to random selection of locations outside domain',warning=True)
-            si.msg_logger.msgg(' Status of bad initial locations' + str(part_prop['status'].get_values(bad)),warning=True)
         return new_buffer_indices #indices of all new particles
 
     def release_a_particle_group_pulse(self, release_data, time_sec):
         # release one pulse of particles from given group
         info= self.info
-
         # check if buffer needs expanding
         smax = info['particles_in_buffer'] + release_data['x'].shape[0]
         if smax > si.settings['max_particles']: return # no more can be released
@@ -143,7 +128,6 @@ class ParticleGroupManager(ParameterBaseClass):
         for name in release_data.keys():
             part_prop[name].set_values(release_data[name], new_buffer_indices)
 
-
         # record needed copies
         if new_buffer_indices.size >0:
             part_prop['x0'].set_values(release_data['x'], new_buffer_indices)
@@ -157,6 +141,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # set interp memory properties if present
         info['particles_released'] += num_released # total released
         info['particles_in_buffer'] += num_released # number in particle buffer
+
         return new_buffer_indices
 
     def _expand_particle_buffers(self,num_particles):

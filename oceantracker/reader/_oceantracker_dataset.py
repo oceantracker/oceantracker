@@ -155,9 +155,11 @@ class OceanTrackerDataSet(object):
             if time_variable in ds.variables:
                 info['time_dim'] = ds[time_variable].dims[0]
                 info['time_dtype'] = ds[time_variable].dtype
+                info['time_encoding'] = ds.variables[info['time_variable']].encoding
                 fi['has_time'] = True
                 time = ds.variables[info['time_variable']].data
                 fi['time'] = time
+
                 fi['start_time'] = time[0]
                 fi['end_time'] = time[-1]
                 fi['time_steps'] = time.size
@@ -174,7 +176,7 @@ class OceanTrackerDataSet(object):
                 if v_name not in cat['variables']:  # make new variable
                     cat['variables'][v_name] = dict(fileID=[])
                 cat['variables'][v_name]['fileID'].append(fileID)
-                cat['variables'][v_name]['dims'] = data.dims
+                cat['variables'][v_name]['dims'] = {key:ds.sizes[key]  for key in data.dims}
                 cat['variables'][v_name]['attrs'] = data.attrs
                 cat['variables'][v_name]['encoding'] = data.encoding
                 cat['variables'][v_name]['dtype'] = data.dtype
@@ -187,11 +189,10 @@ class OceanTrackerDataSet(object):
                 ml.progress_marker(f'Cataloging hindcast file # {fileID} of {len(file_names)}, '
                                         f'name="{s}"',start_time=t0)
                 tlast = perf_counter()
-
-        if info['time_dim'] is None or 'units'  not in ds.variables[info['time_variable']].encoding:
+        if info['time_dim'] is None or 'units'  not in info['time_encoding']:
             ml.msg(f'X=xarray could not identify time variable index in file ={fn}',
                    fatal_error=True,exit_now=True, crumbs= self.crumbs,
-                   hint='Hindcast file does not have time variable with "units" attribute meeting CF convention, eg. "seconds since 2017-01-01 00:00:00 +0000"  ')
+                   hint='Hindcast filed do not have time variable with "units" attribute meeting CF convention, eg. "seconds since 2017-01-01 00:00:00 +0000"  ')
     def _time_sort_variable_fileIDs(self):
         # sort variable fileIDs by time, now all files are read
         cat = self.catalog

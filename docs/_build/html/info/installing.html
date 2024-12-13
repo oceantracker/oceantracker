@@ -126,29 +126,14 @@
 <div><p><code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">./oceantracker</span></code></p>
 </div></blockquote>
 </li>
-<li><p>Either: Make conda  environment from given file</p></li>
 </ol>
-<p>This method is strongly recommended as it ensures  version compatibility amongst python modules. This conda link is useful.</p>
-<p><a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html</a></p>
-<p>First open a conda prompt window,  or in liunx a ordinary command window.</p>
-<p>Note: In Windows may need to run conda prompt window as administrator to install packages.</p>
-<blockquote>
-<div><p>From root dir of oceantracker package run</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">create</span> <span class="pre">-f</span> <span class="pre">installing/environment.yml</span></code></p>
-</div></blockquote>
-<p>Activate new environment</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
-</div></blockquote>
-</div></blockquote>
-<ol class="arabic" start="5">
-<li><p>Or : Manually build Conda environment</p>
+<ol class="arabic" start="3">
+<li><p>Manually build a Conda environment</p>
 <blockquote>
 <div><blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">oceantracker</span> <span class="pre">python=3.10</span></code></p>
 </div></blockquote>
-<p>Note: Must use python version 3.10 (not 3.11 yet) and NumPy versions 1.21–1.23</p>
+<p>Note: Use python version 3.10 as not all required external imported  packages work in 3.11</p>
 <p>Activate new environment</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
@@ -156,38 +141,29 @@
 </div></blockquote>
 <p>Then install these packages</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">numba</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">netcdf4</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">scipy</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">pyproj</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">pyyaml</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">psutil</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">matplotlib</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">fiona</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::numpy=1.26</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::numba</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::netcdf4</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::xarray</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::scipy</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyproj</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::pyyaml</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::psutil</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::python-dateutil</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::matplotlib</span></code></p>
 </div></blockquote>
 </li>
 </ol>
-<dl class="simple">
-<dt>Notes:</dt><dd><ul class="simple">
-<li><p>numba should also install compatible version of numpy, if not use conda install -c anaconda numpy</p></li>
-<li><p>the fiona module, which reads geojson and shape files, can be very slow finding a conda repository, alternative ways at</p></li>
-</ul>
-</dd>
-<dt><a class="reference external" href="https://anaconda.org/conda-forge/fiona">https://anaconda.org/conda-forge/fiona</a>, or use faster to use pip install fiona</dt><dd><ul class="simple">
-<li><p>oceantracker does work with python 3.11, however netcdf4 does not install properly and fails to find a dll when importing in windows, but using pip install netcdf4 does allow netcdf4 to be imported. Hopefully netcdf at conda will soon be compatible with faster python 3.11</p></li>
-</ul>
-</dd>
-</dl>
 <ol class="arabic" start="7">
 <li><p>Make oceantracker package findable</p>
 <p>From root dir of oceantracker</p>
 <p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--no-deps</span> <span class="pre">-e</span> <span class="pre">.</span></code></p>
 </li>
 <li><p>To add ability to make animation movies if needed</p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">ffmpeg</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::ffmpeg</span></code></p>
 </li>
 <li><p>To work with iPython/Jupyter notebooks</p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">anaconda</span> <span class="pre">ipykernel</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::ipykernel</span></code></p>
 </li>
 </ol>
 </section>

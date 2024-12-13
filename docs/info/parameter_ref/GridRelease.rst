@@ -56,7 +56,7 @@ grid_center: still working on display  of default params of  type <class 'oceant
 		Description: - number of rows and columns in grid
 
 		- a list containing type:  ``[]``
-		- default list : ``[100, 99]``
+		- default list : ``[10, 9]``
 		- data_type: ``<class 'int'>``
 		- min: ``1``
 		- max: ``1000000``
@@ -164,12 +164,5 @@ grid_span: still working on display  of default params of  type <class 'oceantra
 
 Expert Parameters:
 *******************
-
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 

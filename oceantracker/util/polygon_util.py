@@ -6,12 +6,13 @@ import numpy as np
 import time
 import copy
 from oceantracker.util.numba_util import njitOT
-
+from oceantracker.util import cord_transforms
 
 class InsidePolygon(object):
     # finds points inside given polygon (M,2) vertices as numpy array
     # may be a closed or not closed polygon
-    def __init__(self,verticies, bounds_sub_grid_size=20):
+    def __init__(self,verticies,geographic_coords=None, bounds_sub_grid_size=20):
+        self.geographic_coords = geographic_coords
         self.points = self._make_closed(verticies).astype(np.float64) # close  polygon if needed
         self._build_inside_indicies_func(self.points, bounds_sub_grid_size)
 
@@ -122,9 +123,17 @@ class InsidePolygon(object):
         return p
 
     def get_area(self):
-        # area of closed polygon, by planimeter method?
-        #todo move to own utility, use triangle util?
-        x, y=self.points[:,0], self.points[:,1]
+        # area of  closed polygon, by planimeter method?
+        #   if geographic_coords must be small ie a couple of degrees in longtitude geographically small
+        # ie inside one UTM zone
+
+        xy=self.points
+        if self.geographic_coords:
+            xy =  cord_transforms.WGS84_to_UTM(xy, in_lat_lon_order=False)
+
+
+
+        x,y = xy[:,0], xy[:,1]
         n = len(x)
         area = 0.0
 
@@ -188,14 +197,14 @@ def make_inside_ray_tracing_indices_subgrids(lb, slope_inv, bounds, sub_grid_x, 
 
     return inside_ray_tracing_indices
 
-def set_up_list_of_polygon_instances(polygon_list):
+def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
     msg=[]
     polygons=[]
     for n, poly in enumerate(polygon_list):
 
         a = np.asarray(poly['points'])
 
-        p = InsidePolygon(verticies=a)  # do set up to speed inside using pre-calculation
+        p = InsidePolygon(verticies=a,geographic_coords=geographic_coords)  # do set up to speed inside using pre-calculation
         polygons.append(p)
 
         # ensure points closure updates parameters
@@ -219,7 +228,7 @@ def make_domain_mask(xy):
     bx= [np.min(xy[:, 0]),np.max(xy[:, 0])]
     by= [np.min(xy[:, 1]),np.max(xy[:, 1])]
 
-    # put box around domain spit at southern most point
+    # put box around domain spit at southernmost point
     n =np.argmin(xy[:,1])
     xy= np.concatenate(( xy[:n,:],
                     np.asarray([[bx[0],by[0]],[bx[0],by[1]], [bx[1],by[1]], [bx[1],by[0]]]),

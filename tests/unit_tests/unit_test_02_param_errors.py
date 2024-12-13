@@ -8,12 +8,13 @@ import numpy as np
 from tests.unit_tests import test_definitions
 
 def main(args):
+
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__,args))
     ot.settings(time_step=1800,use_dispersion=False,
              use_A_Z_profile=False, )
 
-    hm= test_definitions.hydro_model['demoSchism']
+    hm= test_definitions.hydro_model['demoSchism3D']
     p = deepcopy(hm['reader'])
     p.update(unkown_param = 1,field_variables=['a1'],field_variable_map=[])
     ot.add_class('reader', **p)
@@ -32,7 +33,12 @@ def main(args):
     p.update(grid_size=[-1,9.],grid_center=hm['x0'][0], grid_span=[1000,2000])
     ot.add_class('integrated_model',   **p)
     ot.add_class('resuspension', critical_friction_velocity=-0.01)
-    case_info_file = ot.run()
+
+    try:
+        case_info_file = ot.run()
+    except Exception as e:
+        print('has errors',str(e))
+        # acrry on
 
 
 

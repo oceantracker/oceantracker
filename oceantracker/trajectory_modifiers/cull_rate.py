@@ -11,7 +11,7 @@ class CullRate(_BaseTrajectoryModifier):
     '''
     def __init__(self):
         super().__init__()
-        self.add_default_params( decay_rate= PVC( 1.*3600*24, float, doc_str=' Particle decays at this average rate',
+        self.add_default_params( decay_rate= PVC( 1.*3600*24, float, doc_str=' Particles decay at this average rate',
                                                           units='particles per sec'))
 
     def initial_setup(self, **kwargs):

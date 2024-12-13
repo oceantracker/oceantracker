@@ -1,7 +1,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 
 import numpy as np
-from oceantracker.util import time_util, ncdf_util, json_util
+from oceantracker.util import time_util, ncdf_util, json_util, cord_transforms
 from oceantracker.field_group_manager.util import field_group_manager_util
 from time import  perf_counter
 from copy import deepcopy
@@ -31,35 +31,33 @@ class FieldGroupManager(ParameterBaseClass):
         info = self.info
 
         # build  primary. ie  velocity field, reader
-        self.reader = self._build_single_reader(reader_builder)
+        self._create_readers(reader_builder)
         reader = self.reader
 
-        hi = reader_builder['hindcast_info']
-        info['start_time'], info['end_time'] = hi['start_time'], hi['end_time']
-        self.info['is3D'] = self.reader.grid['is3D']
+        # add velocity reader to field group info
+        info.update(reader.info)
+        pass
 
-        # todo add ancillary reader fields readers here
 
-        # add request to load compulsory fields
-        reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
-        si.hydro_model_cords_in_lat_long = reader.grid['hydro_model_cords_in_lat_long']
 
-        self.write_hydro_model_grid()
+    def build_readers(self):
+
+        self.reader.build_reader()
+        self.reader.write_hydro_model_grid()
+
+        # todo add ancillary field readers here, eg waves
 
     def final_setup(self):
         ml = si.msg_logger
         info = self.info
         grid = self.reader.grid
 
-        if  si.hydro_model_cords_in_lat_long:
-            ml.msg(f'Hydro-model grid in (lon,lat) cords, all cords should be in (lon,lat), e.g. release group locations, gridded_stats grid',
-                   warning=True)
-        else:
-            ml.msg(f'Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid',
-                   note=True)
+        info['has_open_boundary_nodes'] = np.any(self.reader.grid['node_type'] == node_types.open_boundary)
 
-        self.info['has_open_boundary_nodes'] = np.any(self.reader.grid['node_type'] == node_types.open_boundary)
-        self.info['open_boundary_type'] = si.settings.open_boundary_type
+        if 'use_open_boundary' not in info :
+            # set info here if not preset by nested grids
+            info['use_open_boundary'] = si.settings.use_open_boundary
+        info['use_open_boundary'] = info['has_open_boundary_nodes'] and info['use_open_boundary']
 
         # set up dry cell adjacency space for triangle walk
         grid['adjacency_with_dry_edges'] = grid['adjacency'].copy()  # working space to add dry cell boundaries to
@@ -69,6 +67,13 @@ class FieldGroupManager(ParameterBaseClass):
         # add tidal stranding class
         i = si.add_class('tidal_stranding', {}, crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', caller=self)
         self.tidal_stranding = i
+
+        pass
+        if si.settings['display_grid_at_start'] and self.reader.info['gridID']==1:
+            from matplotlib import pyplot as plt
+            from plot_oceantracker.plot_utilities import display_grid
+            display_grid(grid, 1)
+            plt.show()
 
 
     def add_reader_field(self,name, params):
@@ -80,14 +85,13 @@ class FieldGroupManager(ParameterBaseClass):
         r = self.reader
         i = si._class_importer.make_class_instance_from_params('fields',params, name=name,
                                             default_classID=default_classID)
-        i.initial_setup(r.params['time_buffer_size'],r.info,r.fields)
+        i.initial_setup(r.params['time_buffer_size'],r.info,r.fields, r.grid)
         r.fields[name] = i
 
         # add classes required by this class
-        i.add_required_classes_and_settings(si.settings, si.run_builder['reader_builder'], self.msg_logger)
+        i.add_required_classes_and_settings(si.settings, r.reader_builder, self.msg_logger)
 
-    def write_hydro_model_grid(self):
-        self.reader.write_hydro_model_grid()
+
 
     def add_part_prop_from_fields_plus_book_keeping(self):
         # add part prop for reader and custom fields
@@ -109,7 +113,7 @@ class FieldGroupManager(ParameterBaseClass):
         i.update(self.reader.grid, time_sec, alive)
         i.stop_update_timer()
 
-    def setup_time_step(self, time_sec, xq, active,apply_open_boundary_condition=True):
+    def setup_time_step(self, time_sec, xq, active):
 
         # set buffer index from this time and next inside stepinfo
         # get next two buffer time steps around the given time in reader ring buffer
@@ -118,69 +122,74 @@ class FieldGroupManager(ParameterBaseClass):
         grid =self.reader.grid
         info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self.reader._time_step_and_buffer_offsets(time_sec)
         part_prop = si.class_roles.particle_properties
-
+        reader = self.reader
         # find hori cell
         self.reader.interpolator.find_hori_cell(xq, active)
 
         # all those that need fixing, lateral boundaries and bad, ie cell_status < blocked_dry_cell
         sel_fix = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('B1'))
 
-        self._apply_domain_boundary_condition(sel_fix)
+        sel_outside_open = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', cell_search_status_flags.open_boundary_edge,
+                                                                        out=self.get_partID_subset_buffer('B2'))
+        if sel_outside_open.size > 0:
+            self._fix_those_outside_open_boundary(sel_outside_open)
+
+        # outside domain but not an open boundary,
+        sel_outside_domain = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
+                                                                        cell_search_status_flags.domain_edge,
+                                                                        out=self.get_partID_subset_buffer('B2'))
+        self._move_back(sel_outside_domain)
 
         if si.settings.block_dry_cells:
-            self._apply_dry_cell_boundary_condition(sel_fix)
-
-        # only fix if single grid, nested grids get fixed by nested grid manager
-        if apply_open_boundary_condition:
-            self._apply_open_boundary_condition(sel_fix)# fix outside boundary
+            sel_hit_dry = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
+                                                                    cell_search_status_flags.dry_cell_edge,
+                                                                    out=self.get_partID_subset_buffer('B2'))
+            self._apply_dry_cell_boundary_condition(sel_hit_dry)
 
         # finally move back bad cell searches, nan etc
         sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel) # those still bad, eg nan etc
 
-        if grid['is3D']:
+        if reader.info['is3D']:
             # find vertical cell
             info = self.info
-            self.reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
+            reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
 
-    def _build_single_reader(self,reader_builder):
+    def _create_readers(self, reader_builder):
         # build a readers
         info = self.info
+
+        self.reader = si._class_importer.make_class_instance_from_params('reader', reader_builder['params'],
+                                   caller=self, crumbs=f'setup_hydro_fields> reader class ')
+        reader = self.reader
+
+
         # first build data set
         dataset = OceanTrackerDataSet()
         dataset.build_dataset_from_catalog(reader_builder['catalog'])
 
-        reader = si._class_importer.make_class_instance_from_params('reader', reader_builder['params'],
-                                   caller=self, crumbs=f'setup_hydro_fields> reader class ', initialize=False)
-        reader.build_reader(reader_builder,dataset)
-        return  reader
+        reader.initial_setup(reader_builder,dataset)
+        # add request to load compulsory fields
+        reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
 
-    def _apply_domain_boundary_condition(self, sel_bad):
-        part_prop = si.class_roles.particle_properties
+        #todo add ancillary file readers below here
 
-        # lateral boundary
-        sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.domain_edge, out=self.get_partID_subset_buffer('B2'))
-        self._move_back(sel)
 
-    def _apply_dry_cell_boundary_condition(self, sel_bad):
+    def _apply_dry_cell_boundary_condition(self, sel_hit_dry):
         # dry cell boundary
-        part_prop = si.class_roles.particle_properties
-        sel = part_prop['cell_search_status'].find_subset_where(sel_bad, 'eq', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
-        self._move_back(sel)
+        self._move_back(sel_hit_dry)
 
-    def _apply_open_boundary_condition(self, active):
+    def _fix_those_outside_open_boundary(self, sel_outside):
         part_prop = si.class_roles.particle_properties
-
         # deal with open boundary
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.open_boundary_edge, out=self.get_partID_subset_buffer('B1'))
-        if sel.size > 0:
-            if self.info['has_open_boundary_nodes'] and si.settings.open_boundary_type > 0:
-                part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel)
-                part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell, but not the location
-            else:
-                # outside and no open boundary somove back
-                self._move_back(sel)
+
+        if self.info['use_open_boundary']:
+            # dont move back
+            part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel_outside)
+        else:
+            # outside and no open boundary so move back
+            self._move_back(sel_outside)
 
     def _move_back(self, sel):
         # do move backs for blocked and bad

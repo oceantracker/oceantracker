@@ -175,7 +175,7 @@ def make_class_sub_pages(class_role, link_tag=''):
     toc.add_new_toc_to_page(class_role, maxdepth=1,sort_body=True)
     instance = None
     for name, info in mods.items():
-        if name[0] == '_':   continue  # ignore internal/base classes flagged with underscore
+        #if name[0] == '_':   continue  # ignore internal/base classes flagged with underscore
         instance= info['class_obj']()
         p = RSTfileBuilder(name, name)
         doc_str = info["class_obj"].__doc__

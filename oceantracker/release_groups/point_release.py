@@ -3,6 +3,7 @@ import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.release_groups._base_release_group import _BaseReleaseGroup
 from oceantracker.util.numba_util import njitOT
+from oceantracker.util.cord_transforms import fix_any_spanning180east
 
 
 from oceantracker.shared_info import shared_info as si
@@ -10,7 +11,7 @@ from oceantracker.shared_info import shared_info as si
 
 class PointRelease(_BaseReleaseGroup):
     '''
-    Release pulse of particles at given points, or in cicile around points.
+    Release pulse of particles at given points, or in circle around points.
     '''
     def __init__(self):
         # set up info/attributes
@@ -31,16 +32,16 @@ class PointRelease(_BaseReleaseGroup):
     def initial_setup(self):
         # must be called after unpack_x0
         # tidy up parameters to make them numpy arrays with first dimension equal to number of locations
-
+        super().initial_setup()  # required to get base class set up
         params = self.params
         info = self.info
 
-        # ensure points are  meters
-        if si.hydro_model_cords_in_lat_long:
-            params['points_lon_lat'] = params['points'].copy()
-            params['points'] =  si._transform_lon_lat_to_meters(params['points_lon_lat'], in_lat_lon_order=params['coords_in_lat_lon_order'],
-                                                    crumbs=f'Point release #[{info["instanceID"]}] : {params["name"]}')
 
+        # ensure points are  meters
+        if si.settings.use_geographic_coords:
+            # check points for wrap around 180
+            params['points'] = fix_any_spanning180east( params['points'], msg_logger=si.msg_logger, caller=self,
+                                                crumbs=f'Point release#{params["name"]}')
         info['bounding_box_ll_ul'] = np.stack(( np.nanmin(params['points'][:2],axis=0),
                                                 np.nanmax(params['points'][:2],axis=0)))
 

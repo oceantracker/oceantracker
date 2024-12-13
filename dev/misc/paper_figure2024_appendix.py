@@ -27,7 +27,7 @@ ot.add_class('particle_properties', name ='a_pollutant', class_name='oceantracke
 # add a gridded particle statistic to use as heat map
 ot.add_class('particle_statistics', name = 'my_heatmap', class_name= 'GriddedStats2D_timeBased',
         grid_size=[120, 121],  release_group_centered_grids = True, update_interval = 600, # time interval in sec, between doing particle statists counts
-        particle_property_list = ['a_pollutant'],  status_min ='moving', z_min =-10.)
+        particle_property_list = ['a_pollutant'],  status_list =['moving'], z_min =-10.)
 ot.add_class('resuspension', critical_friction_velocity=0.01) #set value for particle resupension
 run= True
 if run:
@@ -68,7 +68,7 @@ ot.add_class('particle_statistics',
                 release_group_centered_grids = True, # center a grid around each release group
                 update_interval = 600, # time interval in sec, between doing particle statists counts
                 particle_property_list = ['a_pollutant'], # request a heat map for the decaying part. prop. added above
-                status_min ='moving', # only count the particles which are moving
+                status_list =['moving'], # only count the particles which are moving
                 z_min =-10.,  # only count particles at locations above z=-2m
                 )
 

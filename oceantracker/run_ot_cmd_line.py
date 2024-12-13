@@ -34,29 +34,20 @@ if __name__ == '__main__':
     if args.param_file is None:
         sys.exit('Must give param file name eg  find parameter file, got ' + args.param_file)
 
-    if not path.isfile(path.normpath(args.param_file)):
-        sys.exit('Cannot find parameter file ' + args.param_file)
+    fn =path.abspath(args.param_file)
+    if not path.isfile(fn):
+        sys.exit('Cannot find parameter file ' + fn)
 
-    #print(args)
-    file_ext = path.splitext(args.param_file)[1].lower()
-
+    file_ext = path.splitext(fn)[-1].lower()
+    #print(file_ext)
     if file_ext== '.json':
-        params= json_util.read_JSON(args.param_file)
+        params= json_util.read_JSON(fn)
 
     elif file_ext  == '.yaml':
-        params = yaml_util.read_YAML(args.param_file)
+        params = yaml_util.read_YAML(fn)
     else:
         sys.exit('Parameter file must be *.yaml or *.json, is ' + args.param_file)
 
-    if type(params) is list:
-        # do fewer cases in debugging
-        n_case = len(params)
-        if args.cases is not None: n_case = min([args.cases, len(params)])
+    params = tweak_params(params, args)
 
-        if args.cases:  params = params[:min(1,n_case)]
-        for p in params:
-            p = tweak_params(p, args)
-    else:
-        params = tweak_params(params, args)
-
-    caseInfo_file_name, has_errors = main.run(params)
+    caseInfo_file_name = main.run(params)

@@ -34,7 +34,7 @@ def plot_tracks(track_data, show_grid=False,credit=None, heading =None,
 def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_grid=False,
                       title=None, max_duration=None,
                       movie_file= None, fps=10, dpi=300, interval=50, size=8,
-                      single_time_step=None,
+                      single_time_step=None,axis_labels=False,
                       polygon_list_to_plot = None, min_status=0,
                       back_ground_depth=True, back_ground_color_map = None, credit=None, heading= None,
                       size_using_data= None,  part_color_map=None,
@@ -73,6 +73,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
         plt.axis('scaled')
 
     plot_utilities.draw_base_map(track_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
+                                 axis_labels=axis_labels,
                                  back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
     dry_cell_plot,dry_cell_data = plot_utilities.plot_dry_cells(track_data, show_dry_cells)

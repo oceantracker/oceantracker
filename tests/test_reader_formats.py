@@ -17,7 +17,7 @@ def default_params():
         'write_tracks': True,
         'output_file_base': None,
         'root_output_dir': None,
-         'EPSG_code_metres_grid': None,
+         'EPSG_code_meters_grid': None,
         'regrid_z_to_uniform_sigma_levels': True,
         'particle_properties': [{'name':'part_decay',  'class_name': 'AgeDecay',
                                 'decay_time_scale': 1. * 3600 * 24}],
@@ -51,7 +51,7 @@ def get_case(n):
     time_step=3600.
     fall_vel= -0.01
     pulse_size = 10
-    open_boundary_type = 0
+    use_open_boundary = False,
     reader= None
     is3D=True
     water_depth_file = None
@@ -81,7 +81,7 @@ def get_case(n):
             root_input_dir = r'Z:\Hindcasts\NorthIsland\2024_hauraki_gulf_auck_uni\2020\01'
             output_file_base = 'Test Hauraki'
             file_mask = 'schout*.nc'
-            params['EPSG_code_metres_grid'] = 2193
+            params['EPSG_code_meters_grid'] = 2193
             x0=[[-36.832885812299395, 174.76309434822716],
                 [-36.70276297564815, 174.81729496997661]]
             x0 = np.flip(np.asarray(x0), axis=1)
@@ -94,7 +94,7 @@ def get_case(n):
             root_input_dir = r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2009'
             output_file_base = 'SoundsBen_Phd'
             file_mask = 'schism_marl2009*.nc'
-            params['EPSG_code_metres_grid'] = 2193
+            params['EPSG_code_meters_grid'] = 2193
             x0=[[-40.788387332710876, 172.8418709119585],
                 [-40.905652106497435, 173.88863555540422]]
             x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
@@ -259,6 +259,7 @@ def get_case(n):
             #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = True
             show_grid = False
+
         case 500:
             # NEMO
             root_input_dir = r'F:\Hindcast_reader_tests\NEMO\NemoNorthSeaORCA025-N006_data'
@@ -287,46 +288,90 @@ def get_case(n):
             title = 'GLORYS test'
             root_input_dir = r'F:\Hindcast_reader_tests\Glorys\BalticSea'
             # reader = 'oceantracker.reader.dev.dev_ross_sea_GLORYS_reader.GLORYSreader'
-            open_boundary_type = 1
+            use_open_boundary = True
             max_days =10
             time_step = 1800.
             pulse_size = 10
             fall_vel = -0.01
             is3D =True
 
+        case   1101:
+            # copernicus GLORYS
 
+            root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D'
+            file_mask = 'cmems*.nc'
+
+            x0 = [[174.665532083399, -35.922300421719214],  # hen and chickes, in outer grid
+                  [167.70585302583135, -41.09760403942677],
+                  [168.18486957886807, -41.126477553835635],
+                  [178.78311081480544, -34.83205141270341],
+                  [179.74114392087887, -35.81375090260477],
+                  [178.9627420221942, -41.47295972674199]
+                  ]
+
+            output_file_base = 'GLORYS3D'
+            title = 'GLORYS 3D test'
+            use_open_boundary = True
+            max_days =10
+            time_step = 1800.
+            pulse_size = 10
+            fall_vel = -0.01
+            is3D =True
+
+        case  1102:
+            # copernicus GLORYS 2D, surface values
+
+            root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge2D'
+            file_mask = 'cmems*.nc'
+
+            x0 = [[174.665532083399, -35.922300421719214],  # hen and chickes, in outer grid
+                  [167.70585302583135, -41.09760403942677],
+                  [168.18486957886807, -41.126477553835635],
+                  [178.78311081480544, -34.83205141270341],
+                  [179.74114392087887, -35.81375090260477],
+                  [178.9627420221942, -41.47295972674199]
+                  ]
+
+            output_file_base = 'GLORYS3D'
+            title = 'GLORYS 3D test'
+            use_open_boundary = True
+            max_days = 10
+            time_step = 1800.
+            pulse_size = 10
+            fall_vel = -0.01
+            is3D = False
 
         case 2000:
-            # nested schisim
-            pulse_size = 5
-            root_input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
-            output_file_base = 'shared_reader'
-            file_mask = 'NZfinite*.nc'
-            max_days =5# 30
-            open_boundary_type = 1
+                # nested schisim
+                pulse_size = 5
+                root_input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
+                output_file_base = 'shared_reader'
+                file_mask = 'NZfinite*.nc'
+                max_days =5# 30
+                use_open_boundary = True
 
-            x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri
-                [-35.87936265079254, 174.52205865417034], # harbour jet
-                [-35.94290227656262, 174.4761188861907],  # nearshore brembay
-                [-35.91960370397214, 174.59610759097396],
-                [-35.922300421719214, 174.665532083399],  # hen and chickes, in outer grid
-                [-35.922300421719214, 174.665532083399], # hen and chickes, in outer grid
-                ]
-            x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
-            x0=[   [ 1727195 ,    6035149],
-                    [1737357,     6029638],
-                    [1742484 ,    6021345],
-                    [1743472 ,    6019861]]
-            ax=  [  1715000 ,    1755000 ,    6010000 ,    6050000] # northland
-            title = 'nested test'
-            nested_readers= [dict(name='nest1',
-                    input_dir = r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\Existing_Sep2012_temp',
-                    hgrid_file_name=r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\hgrid.gr3',
-                    # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',
-                    #  hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
-                    file_mask = 'schout*.nc',
+                x0=[[-35.80822176918771, 174.43613622407605],# inside whargeri
+                    [-35.87936265079254, 174.52205865417034], # harbour jet
+                    [-35.94290227656262, 174.4761188861907],  # nearshore brembay
+                    [-35.91960370397214, 174.59610759097396],
+                    [-35.922300421719214, 174.665532083399],  # hen and chickes, in outer grid
+                    [-35.922300421719214, 174.665532083399], # hen and chickes, in outer grid
+                    ]
+                x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
+                x0=[   [ 1727195 ,    6035149],
+                        [1737357,     6029638],
+                        [1742484 ,    6021345],
+                        [1743472 ,    6019861]]
+                ax=  [  1715000 ,    1755000 ,    6010000 ,    6050000] # northland
+                title = 'nested test'
+                nested_readers= [dict(name='nest1',
+                        input_dir = r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\Existing_Sep2012_temp',
+                        hgrid_file_name=r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\hgrid.gr3',
+                        # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',
+                        #  hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
+                        file_mask = 'schout*.nc',
 
-            )]
+                )]
 
 
         case 3000:
@@ -342,13 +387,14 @@ def get_case(n):
     params['particle_statistics'] = [{ 'name' :'grid1','class_name': 'GriddedStats2D_timeBased',
                                        'grid_center': x0[0][:2],
                                        'grid_span' : [.1,.15] if geo_cords else [10000,10000],
-                                       'update_interval': 3600, 'particle_property_list': ['water_depth'], 'status_min': 'moving', 'z_min': -2,
+                                       'update_interval': 3600, 'particle_property_list': ['water_depth'],
+                                       'status_list':['moving'], 'z_min': -2,
                                        'grid_size': [120, 121]},
                                      ]
 
     params.update(user_note=title,output_file_base=output_file_base,
 
-                  max_run_duration= max_days*24*3600, time_step= time_step, open_boundary_type=open_boundary_type)
+                  max_run_duration= max_days*24*3600, time_step= time_step, use_open_boundary=use_open_boundary )
     params['reader'].update(input_dir=root_input_dir,
                             file_mask=file_mask,
                             class_name=reader)

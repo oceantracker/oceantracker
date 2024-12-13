@@ -10,6 +10,7 @@ release_groups
 	PointRelease.rst
 	PolygonRelease.rst
 	PolygonReleaseWaterDepthRange.rst
+	_BaseReleaseGroup.rst
 
 **Role:** Release particles at 1 or more given locations. A pulse_size of particles are released every release_interval. All these particles have ID properties for their release_group and the pulese they were released in.
 

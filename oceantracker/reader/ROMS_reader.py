@@ -40,7 +40,7 @@ class ROMsNativeReader(_BaseStructuredReader):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
         self.add_default_params(
-                hydro_model_cords_in_lat_long= PVC(False, bool, doc_str='Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected'),
+                hydro_model_cords_geographic= PVC(False, bool, doc_str='Force conversion given nodal lat longs to a UTM meters grid, only used if lat long coordinates not auto detected'),
 
                 field_variable_map= {'water_velocity': PLC(['u','v','w'], str, fixed_len=3),
                                     'water_depth': PVC('h', str),
@@ -115,8 +115,6 @@ class ROMsNativeReader(_BaseStructuredReader):
         grid['sigma']       = 1. + ds.read_variable('s_w').data.astype(np.float32)  # layer boundary fractions reversed from negative values
         grid['sigma_layer'] = 1. + ds.read_variable('s_rho').data.astype(np.float32)  # layer center fractions
 
-        #ROMS are uniform sigma
-        si.settings['regrid_z_to_uniform_sigma_levels'] = False # no need to regrid
 
         grid = super().build_vertical_grid(grid)
         return grid

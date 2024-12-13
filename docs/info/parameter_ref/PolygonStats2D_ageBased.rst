@@ -177,11 +177,4 @@ Parameters:
 Expert Parameters:
 *******************
 
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
-
 

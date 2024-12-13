@@ -82,26 +82,29 @@ class _DefaultSettings(_SharedStruct):
                            doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
     multiprocessing_case_start_delay = PVC(0., float, min=0.,expert=True,
                                            doc_str='Delay start of each sucessive case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
-    EPSG_code_metres_grid = PVC(None, int,
+    EPSG_code_meters_grid = PVC(None, int,
                 doc_str='If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM' )
     write_tracks = PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes' )
     user_note = PVC('No user note', str, doc_str='Any run note to store in case info file' )
     z0 = PVC(0.005, float, units='m', doc_str='Bottom roughness, used for tolerance and log layer calcs. ', min=0.0001 )  # default bottom roughness
     water_density = PVC(1025., float, units='kg/m^3', doc_str='Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900. )
-    open_boundary_type = PVC(0, int, min=0, max=1, doc_str='new- open boundary behaviour, only current option=1 is disable particle, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred ROMS ' )
+    use_open_boundary = PVC(False, bool, doc_str='Allow particles to leave open boundary, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred for structed grids like ROMS ' )
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )
+    use_geographic_coords = PVC(False, bool,
+                          doc_str='Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
+                                expert=True)
     use_A_Z_profile = PVC(True, bool,
                 doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')
     use_bottom_stress = PVC(True, bool,
-                          doc_str='Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension')
+                doc_str='Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension')
     use_dispersion = PVC(True, bool,
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
-                          doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
+                 doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
 
-    particle_buffer_initial_size= PVC(1_000_000, int, min=1, doc_str='Starting size of particle property memory buffer. This expands by particle_buffer_chunk_size as needed', expert=True)
+    particle_buffer_initial_size= PVC(500_000, int, min=1, doc_str='Starting size of particle property memory buffer. This expands by particle_buffer_chunk_size as needed', expert=True)
     particle_buffer_chunk_size = PVC(500_000, int, min=1, doc_str='How much particle property memory buffer sizes are increased by when they are full',
                                      expert=True)
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
@@ -139,9 +142,9 @@ from dataclasses import dataclass
 
 class _ParticleStatusFlags(_SharedStruct):
     '''Particle status flags mapped to integer values'''
-    unknown  = basic_util.fillvalue('int8')
-    bad_cord = -20
-    cell_search_failed=  -19
+    unknown  = -20
+    bad_cord = -16
+    cell_search_failed=  -15
     notReleased = -10
     dead = -5
     outside_open_boundary =-2
@@ -149,6 +152,7 @@ class _ParticleStatusFlags(_SharedStruct):
     stranded_by_tide = 3
     on_bottom = 6
     moving =  10
+
 
 class _VerticalGridTypes(_SharedStruct):
     '''Particle status flags mapped to integer values'''
@@ -182,7 +186,6 @@ class _RunInfo(_SharedStruct):
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
     large_float = 1.0E50
-
 
 # Shared class, build using the above
 #------------------------------------------------------------
@@ -250,8 +253,9 @@ class _SharedInfoClass():
 
         if params is None: params ={}
         if type(params) != dict :
-            ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}', fatal_error=True, crumbs=crumbs,
-                                check_for_unknown_keys=check_for_unknown_keys, caller=caller)
+            ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}',
+                        fatal_error=True, crumbs=crumbs,
+                        check_for_unknown_keys=check_for_unknown_keys, caller=caller)
             return None
 
         params= dict(params,**kwargs) # join params and kwargs
@@ -312,10 +316,10 @@ class _SharedInfoClass():
 
     def _setup_lon_lat_to_meters_grid_tranforms(self,grid_lon_lat):
         #todo add user given meters grid option
-        if self.settings['EPSG_code_metres_grid'] is None:
+        if self.settings['EPSG_code_meters_grid'] is None:
             epsg = cord_transforms.get_utm_epsg(grid_lon_lat)
         else:
-            epsg =  self.settings['EPSG_code_metres_grid']
+            epsg =  self.settings['EPSG_code_meters_grid']
 
         self.Transformer_to_meters = cord_transforms.get_tansformer(cord_transforms.EPSG_WGS84,epsg)
         self.Transformer_to_lon_lat = cord_transforms.get_tansformer(epsg, cord_transforms.EPSG_WGS84)

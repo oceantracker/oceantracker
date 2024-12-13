@@ -2,11 +2,11 @@
 DevNestedFields
 ################
 
-**Doc:** 
+**Doc:**  Core class. Builds a list of field group managers for outer and nested grids and manage    interactions with list of field group managers. Eg update, interpolate etc     First in list grid is the outer grid.     Consistency between available hindcast variables means this code is fragile and error messages opaque.     
 
 **short class_name:** DevNestedFields
 
-**full class_name :** oceantracker.field_group_manager.dev_nested_fields.DevNestedFields
+**full class_name :** oceantracker.field_group_manager.dev_nested_grids_field_group_manager.DevNestedFields
 
 
 .. warning::
@@ -41,12 +41,5 @@ Parameters:
 
 Expert Parameters:
 *******************
-
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 

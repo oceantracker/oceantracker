@@ -49,7 +49,7 @@ class GenericUnstructuredReader(BaseGenericReader):
 
         # read nodal x's
 
-        grid = self.read_horizontal_grid_coords(nc, grid)
+        grid = self.read_horizontal_grid_coords(grid)
         grid['x'] = grid['x'].astype(np.float64)
 
         grid = self.read_triangles(nc, grid)
@@ -99,12 +99,12 @@ class GenericUnstructuredReader(BaseGenericReader):
             time += self.params['isodate_of_hindcast_time_zero']
         return time
 
-    def read_horizontal_grid_coords(self, nc, grid):
+    def read_horizontal_grid_coords(self,grid):
         params= self.params
         var_name = params['grid_variable_map']['x']
         grid['x'] = np.column_stack((nc.read_a_variable(var_name[0]), nc.read_a_variable(var_name[1]))).astype(np.float64)
 
-        if self.params['hydro_model_cords_in_lat_long']:
+        if self.params['hydro_model_cords_geographic']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
 
         return grid
@@ -123,9 +123,9 @@ class GenericUnstructuredReader(BaseGenericReader):
 
         if self.detect_lonlat_grid(grid['x']):
             # try auto detection
-            grid['hydro_model_cords_in_lat_long'] = True
+            grid['hydro_model_cords_geographic'] = True
         else:
-            grid['hydro_model_cords_in_lat_long'] = self.params['hydro_model_cords_in_lat_long']
+            grid['hydro_model_cords_geographic'] = self.params['hydro_model_cords_geographic']
 
         return grid
 

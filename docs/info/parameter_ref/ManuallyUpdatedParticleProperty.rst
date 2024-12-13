@@ -1,14 +1,14 @@
-#####################
-old_ParticleProperty
-#####################
+################################
+ManuallyUpdatedParticleProperty
+################################
 
 **Doc:** 
 
-**short class_name:** old_ParticleProperty
+**short class_name:** ManuallyUpdatedParticleProperty
 
-**full class_name :** oceantracker.particle_properties._base_particle_properties.old_ParticleProperty
+**full class_name :** oceantracker.particle_properties._base_particle_properties.ManuallyUpdatedParticleProperty
 
-**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> old_ParticleProperty
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ManuallyUpdatedParticleProperty
 
 
 Parameters:
@@ -53,13 +53,6 @@ Parameters:
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``type`` :   ``<class 'str'>``   *<optional>*
-		Description: type of particle property, used to manage how to update particle property
-
-		- default: ``user``
-		- data_type: ``<class 'str'>``
-		- possible_values: ``['manual_update', 'from_fields', 'user']``
-
 	* ``units`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
@@ -89,13 +82,6 @@ Parameters:
 
 Expert Parameters:
 *******************
-
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 	* ``release_group_parameters``:  *<optional>*
 		Description: - In development: release group specific particle prop params

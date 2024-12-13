@@ -1,14 +1,14 @@
-#################################
-FrictionVelocityFromBottomStress
-#################################
+#################
+FrictionVelocity
+#################
 
 **Doc:** 
 
-**short class_name:** FrictionVelocityFromBottomStress
+**short class_name:** FrictionVelocity
 
-**full class_name :** oceantracker.fields.friction_velocity.FrictionVelocityFromBottomStress
+**full class_name :** oceantracker.fields.friction_velocity.FrictionVelocity
 
-**Inheritance:** > ParameterBaseClass> _BaseField> CustomFieldBase> FrictionVelocityFromNearSeaBedVelocity> FrictionVelocityFromBottomStress
+**Inheritance:** > ParameterBaseClass> _BaseField> CustomFieldBase> FrictionVelocity
 
 
 Parameters:
@@ -36,9 +36,9 @@ Parameters:
 		- possible_values: ``[True, False]``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: Name used to refer to class in code and output, = None for core claseses
+		Description: Name to refer to this field internally within code
 
-		- default: ``None``
+		- default: ``friction_velocity``
 		- data_type: ``<class 'str'>``
 
 	* ``requires3D`` :   ``<class 'bool'>``   *<optional>*
@@ -64,12 +64,5 @@ Parameters:
 
 Expert Parameters:
 *******************
-
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 

@@ -1,5 +1,6 @@
 import numpy as np
 from os import  path
+from time import perf_counter
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_base_class import  ParameterBaseClass
 from oceantracker.util import output_util
@@ -28,7 +29,7 @@ class _BaseWriter(ParameterBaseClass):
                         time_steps_per_per_file =  PVC(None, int,min=1, doc_str='Split track output into files with given number of time integer steps'),
                         write_dry_cell_flag =  PVC(False, bool, doc_str='Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down '),
                         write_dry_cell_index=PVC(True, bool, obsolete=True,  doc_str='Replaced by write_dry_cell_flag, set to false by default'),
-                        NCDF_time_chunk = PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file'),
+                        NCDF_time_chunk = PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file', expert=True),
                                 )
         self.info.update(output_file= [])
         self.total_time_steps_written = 0
@@ -102,10 +103,10 @@ class _BaseWriter(ParameterBaseClass):
 
     def _open_file(self,file_name):
         self.time_steps_written_to_current_file = 0
-
+        t0 = perf_counter()
         self.info['output_file'].append(file_name + '.nc')
 
-        si.msg_logger.progress_marker('opening tracks output to : ' + self.info['output_file'][-1])
+
         self.add_global_attribute('file_created', datetime.now().isoformat())
 
         self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file'][-1]), 'w')
@@ -125,7 +126,7 @@ class _BaseWriter(ParameterBaseClass):
                                             hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time', )
             #print('xx', name)
             nc.create_a_variable(name, item['dim_list'] , item['dtype'],  description=item['description'],  attributes=item['attributes'], chunksizes=item['chunks'],)
-
+        si.msg_logger.progress_marker('Opened tracks output to : ' + self.info['output_file'][-1],start_time=t0)
         pass
 
     def pre_time_step_write_book_keeping(self): pass
@@ -161,9 +162,6 @@ class _BaseWriter(ParameterBaseClass):
         part_prop=si.class_roles.particle_properties
         for name,i in part_prop.items():
             if i.params['write'] and i.params['time_varying']:
-                if si.hydro_model_cords_in_lat_long and name in ['x','x_last_good']:
-                    #todo convert to latlong
-                    pass
                 self.write_time_varying_particle_prop(name, i.data)
 
         if si.settings['write_dry_cell_flag']:

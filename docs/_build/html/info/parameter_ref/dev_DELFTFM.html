@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="resuspension" href="resuspension_toc.html" />
-    <link rel="prev" title="SCHISMreaderNCDFv5" href="SCHISMreaderNCDFv5.html" />
+    <link rel="prev" title="_BaseUnstructuredReader" href="_BaseUnstructuredReader.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -75,7 +75,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="reader_toc.html">reader</a><ul>
-      <li>Previous: <a href="SCHISMreaderNCDFv5.html" title="previous chapter">SCHISMreaderNCDFv5</a></li>
+      <li>Previous: <a href="_BaseUnstructuredReader.html" title="previous chapter">_BaseUnstructuredReader</a></li>
       <li>Next: <a href="resuspension_toc.html" title="next chapter">resuspension</a></li>
   </ul></li>
   </ul></li>
@@ -116,7 +116,7 @@
 <blockquote>
 <div><ul>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">EPSG</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: integer code for coordinate transform of hydro-model, only used if running in  lon-lat mode and code not in hindcast, eg. EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at <a class="reference external" href="https://spatialreference.org/">https://spatialreference.org/</a></p>
+<dt><code class="docutils literal notranslate"><span class="pre">EPSG_code</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: integer code for coordinate transform of hydro-model, only used if setting “use_geographic_coords”= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at <a class="reference external" href="https://spatialreference.org/">https://spatialreference.org/</a></p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
@@ -138,16 +138,6 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">hydro_model_cords_in_lat_long</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Force conversion given nodal lat longs to a UTM metres grid, only used if lat long coordinates not auto detected</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -250,7 +240,7 @@
 <blockquote>
 <div><ul>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">development</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class is under development and testing</p>
+<dt><code class="docutils literal notranslate"><span class="pre">geographic_coords</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Read file coords as geographic values,normaly auto-detects if in geographic coords, usinh this setting  forces reading as geograraphic coord if auto-dectect fails</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
@@ -272,7 +262,7 @@
     <ul>
         <li>
           &larr;
-          <a href="SCHISMreaderNCDFv5.html" title="Previous document">SCHISMreaderNCDFv5</a>
+          <a href="_BaseUnstructuredReader.html" title="Previous document">_BaseUnstructuredReader</a>
         </li>
         <li>
           <a href="resuspension_toc.html" title="Next document">resuspension</a>

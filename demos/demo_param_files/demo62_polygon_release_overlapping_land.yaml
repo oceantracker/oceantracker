@@ -48,7 +48,7 @@ particle_properties:
   name: age_decay
 reader:
   file_mask: demo_hindcast_schisim3D_00.nc
-  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  input_dir: C:\Work\ot_install_test\oceantracker\demos\demo_hindcast
   load_fields:
   - water_temperature
 regrid_z_to_uniform_sigma_levels: true
@@ -70,7 +70,7 @@ release_groups:
     - 5486972.7479
   pulse_size: 10
   release_interval: 10800
-- class_name: oceantracker.release_groups.polygon_release_water_depth_range.PolygonReleaseWaterDepthRange
+- class_name: PolygonRelease
   name: Poly2
   points:
   - - 1594682.1237

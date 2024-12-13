@@ -19,9 +19,8 @@ def main(args):
                  NCDF_particle_chunk= 500) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)
-    hm = test_definitions.hydro_model['demoSchism']
-    hm['reader'].update(input_dir=r'E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast\schsim2D',
-                        file_mask='Random_order*.nc')
+    hm = test_definitions.hydro_model['demoSchism2D']
+    hm['reader'].update( file_mask='Random_order*.nc')
     ot.add_class('reader', **hm['reader'])
 
     # add a point release

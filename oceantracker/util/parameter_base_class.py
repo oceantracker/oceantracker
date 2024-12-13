@@ -20,7 +20,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
     # 6) Defaults must be set in .__init__()  using method ._update_default_param_dictionary({})
     # 7) children must call   super().__init__()   to get defaults of parent
 
-
+    development = False
 
     def initial_setup(self): pass
 
@@ -40,7 +40,6 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.add_default_params(class_name = PVC(None,str, doc_str='Class name as string A.B.C, used to import this class from python path'),
                                   user_note = PVC(None, str),
                                  name = PVC(None, str,doc_str='Name used to refer to class in code and output, = None for core claseses'),
-                                 development = PVC(False, bool, expert=True,doc_str='Class is under development and testing'),
                                   )
 
         self.partID_buffers={} # dict of int32 ID number buffers

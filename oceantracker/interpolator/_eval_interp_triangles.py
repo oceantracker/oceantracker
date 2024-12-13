@@ -10,19 +10,19 @@ from oceantracker.interpolator.util import  triangle_eval_interp
 from oceantracker.particle_properties.util import  particle_operations_util
 
 class EvalInterpTriangles(object):
-    def __init__(self, grid, params, reader_builder):
-        self.grid, self.params = grid, params
+    def __init__(self, interp_params, reader):
+        self.grid, self.params = reader.grid, interp_params
         self.info = dict()
 
         # set mode for uniform or ragged bottom cell
         vgt = si.vertical_grid_types
-        hi = reader_builder['hindcast_info']
+        hi = reader.info
 
-        if hi['working_vert_grid_type'] in [vgt.Sigma, vgt.Slayer]:
+        if hi['vert_grid_type'] in [vgt.Sigma, vgt.Slayer]:
             # all depth layers used
             self.info['mode3D'] = 1
 
-        elif  hi['working_vert_grid_type'] in [vgt.LSC, vgt.Zfixed]:
+        elif  hi['vert_grid_type'] in [vgt.LSC, vgt.Zfixed]:
             # ragged bottom
             self.info['mode3D'] = 2
 
@@ -31,8 +31,7 @@ class EvalInterpTriangles(object):
             self.info['mode3D'] = 0
 
         else:
-            raise Exception(f'Coding error, Unknown  working vertical  grid type {hi["working_vert_grid_type"]}')
-
+            raise Exception(f'Coding error, Unknown  working vertical  grid type {hi["vert_grid_type"]}')
 
     def _time_independent_2D_scalar_field(self, field_instance, current_buffer_steps,
                                           fractional_time_steps, output, active, n_cell=None, bc=None):

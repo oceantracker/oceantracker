@@ -1,2 +1,103 @@
-null
-...
+NCDF_time_chunk: 1
+debug: true
+output_file_base: unit_test_01_check-against-ref
+particle_properties:
+- class_name: oceantracker.particle_properties.age_decay.AgeDecay
+  decay_time_scale: 7200.0
+  initial_value: 1000
+  name: a_pollutant
+- class_name: Speed
+  name: speed
+- class_name: AgeDecay
+  name: test_decay
+particle_statistics:
+- class_name: GriddedStats2D_timeBased
+  grid_size:
+  - 120
+  - 121
+  grid_span:
+  - 10000
+  - 10000
+  name: my_heatmap
+  particle_property_list:
+  - a_pollutant
+  release_group_centered_grids: true
+  start: '2017-01-01T02:30:00'
+  update_interval: 7200
+  z_min: -10.0
+- class_name: PolygonStats2D_timeBased
+  grid_size:
+  - 120
+  - 121
+  name: my_poly_stats
+  particle_property_list:
+  - water_depth
+  polygon_list:
+  - points:
+    - - 1597682.0
+      - 5486972
+    - - 1598604
+      - 5487275
+    - - 1598886
+      - 5486464
+    - - 1597917.0
+      - 5484000
+    - - 1597300
+      - 5484000
+    - - 1597682
+      - 5486972
+  update_interval: 3600
+  z_min: -2
+reader:
+  file_mask: demo_hindcast_schisim3D*.nc
+  input_dir: C:\Work\ot_install_test\oceantracker\demos\demo_hindcast\schsim3D
+regrid_z_to_uniform_sigma_levels: true
+release_groups:
+- class_name: PointRelease
+  name: release_interval0
+  points:
+  - - 1594000
+    - 5484200
+    - -2
+  pulse_size: 5
+  release_interval: 0
+- class_name: PointRelease
+  name: start_in_middl21
+  points:
+  - - 1594000
+    - 5484200
+    - -2
+  pulse_size: 5
+  release_interval: 3600
+  start: '2017-01-01T03:30:00'
+- class_name: PointRelease
+  max_cycles_to_find_release_points: 10
+  name: outside_open_boundary
+  points:
+  - - 1594000
+    - 0
+    - -2
+  pulse_size: 5
+  release_interval: 3600
+- class_name: PointRelease
+  name: start_in_middle1
+  points:
+  - - 1594000
+    - 5484200
+    - -2
+  pulse_size: 5
+  release_interval: 3600
+  start: '2017-01-01T03:30:00'
+  water_depth_min: 500
+resuspension:
+  critical_friction_velocity: 0.01
+root_output_dir: C:\Work\ot_install_test\oceantracker_output\unit_tests
+screen_output_time_interval: 1800
+time_step: 1800
+tracks_writer:
+  NCDF_particle_chunk: 500
+  update_interval: 3600
+  write_dry_cell_flag: false
+use_A_Z_profile: true
+use_dispersion: false
+use_random_seed: true

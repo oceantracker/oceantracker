@@ -5,7 +5,7 @@
     "time_step": 900,
     "debug": true,
     "reader": {
-        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "input_dir": "C:\\Work\\ot_install_test\\oceantracker\\demos\\demo_hindcast",
         "file_mask": "Random_order_*.nc",
         "time_buffer_size": 15
     },
@@ -69,7 +69,7 @@
     "particle_statistics": [
         {
             "name": "age_grid",
-            "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_ageBased",
+            "class_name": "oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_ageBased",
             "update_interval": 1800,
             "particle_property_list": [
                 "water_depth"
@@ -77,6 +77,10 @@
             "grid_size": [
                 220,
                 221
+            ],
+            "grid_span": [
+                10000,
+                10000
             ],
             "min_age_to_bin": 0.0,
             "max_age_to_bin": 259200.0,

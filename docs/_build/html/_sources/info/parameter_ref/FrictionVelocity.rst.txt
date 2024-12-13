@@ -2,13 +2,13 @@
 FrictionVelocity
 #################
 
-**Description:** 
+**Doc:** 
 
-**class_name:** oceantracker.fields.friction_velocity.FrictionVelocity
+**short class_name:** FrictionVelocity
 
-**File:** oceantracker/fields/friction_velocity.py
+**full class_name :** oceantracker.fields.friction_velocity.FrictionVelocity
 
-**Inheritance:** _BaseField> UserFieldBase> FrictionVelocity
+**Inheritance:** > ParameterBaseClass> _BaseField> CustomFieldBase> FrictionVelocity
 
 
 Parameters:
@@ -18,22 +18,51 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``create_particle_property_with_same_name`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
+		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``is_time_varying`` :   ``<class 'bool'>``   *<optional>*
+	* ``is_vector`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name to refer to this field internally within code
+
+		- default: ``friction_velocity``
+		- data_type: ``<class 'str'>``
+
+	* ``requires3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``num_components`` :   ``<class 'int'>``   *<optional>*
-		- default: ``1``
+	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``write_interp_particle_prop_to_tracks_file`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
+
+
+
+Expert Parameters:
+*******************
+
 
