@@ -354,6 +354,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # initialise all classes, order is important!
         # shortcuts
         info = self.info
+        si.msg_logger.progress_marker('Start  field group manager and readers setup')
         t0 = perf_counter()
 
         # start with setting up field groups, which set up readers
@@ -391,7 +392,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         si.run_info.hindcast_start_time = fgm.info['start_time']
         si.run_info.hindcast_end_time = fgm.info['end_time']
 
-        si.msg_logger.progress_marker('Setup field group manager', start_time=t0)
+        si.msg_logger.progress_marker('Finished field group manager and readers setup', start_time=t0)
 
 
     # ____________________________

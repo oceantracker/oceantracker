@@ -32,7 +32,7 @@ def main(args):
 
     ot.add_class('release_groups',name='my_polygon_release',  # name used internal to refer to this release
                             class_name='PolygonRelease',  # class to use
-                            release_interval = 1800,
+                            release_interval = 900,
                             points=poly_points)
     ot.add_class('release_groups', name='my_grid_release',  # name used internal to refer to this release
                  class_name='GridRelease',  # class to use
@@ -43,7 +43,9 @@ def main(args):
                  )
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
-    ot.add_class('particle_properties', class_name='Speed', name='speed')
+    ot.add_class('particle_properties', class_name='Speed')
+    ot.add_class('particle_properties', class_name='DistanceTravelled')
+
     ot.add_class('particle_statistics',name='my_heatmap',
                                              class_name='GriddedStats2D_timeBased',
                                             grid_span=[1,1.5],

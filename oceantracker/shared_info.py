@@ -271,10 +271,13 @@ class _SharedInfoClass():
         elif class_role in self.class_roles.possible_values():
             #other roles
             instanceID= len(self.class_roles[class_role])
-            params['name'] = f'{class_role}_{instanceID:04d}' if 'name' not in params or params['name'] is None else params['name']
             i = self._class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
                                                                      crumbs=crumbs, caller=caller,initialize=initialize)
             i.info['instanceID'] = instanceID
+            if params['name'] is None:
+                # if no name in params or default param
+                params['name'] = f'{class_role}_{instanceID:04d}'
+
             self.class_roles[class_role][params['name']] = i
 
         else:
@@ -284,7 +287,7 @@ class _SharedInfoClass():
 
         # add classes required by this class
         i.add_required_classes_and_settings(self.settings, self.run_builder['reader_builder'], self.msg_logger)
-
+        i.si = self # for alternative acess to shared info
         return i
 
     # wrapers for adding fields
