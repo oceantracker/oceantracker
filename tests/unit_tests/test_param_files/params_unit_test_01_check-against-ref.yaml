@@ -10,6 +10,7 @@ particle_properties:
   name: speed
 - class_name: AgeDecay
   name: test_decay
+- class_name: DistanceTravelled
 particle_statistics:
 - class_name: GriddedStats2D_timeBased
   grid_size:

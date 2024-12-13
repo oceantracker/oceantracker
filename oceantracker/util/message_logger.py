@@ -186,8 +186,7 @@ class MessageLogger(object ):
         tabs= tabs+1
         # add completion time if start given
         if start_time is not None:
-            msg = f' {msg},\t  {perf_counter()-start_time:1.3f} sec'
-            tabs += 1
+            msg = f'{msg},\t  {perf_counter()-start_time:1.3f} sec'
 
         self.msg('- ' + msg, tabs=tabs)
 

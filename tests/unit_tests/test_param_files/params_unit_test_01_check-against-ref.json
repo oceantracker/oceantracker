@@ -90,6 +90,9 @@
         {
             "class_name": "AgeDecay",
             "name": "test_decay"
+        },
+        {
+            "class_name": "DistanceTravelled"
         }
     ],
     "particle_statistics": [
