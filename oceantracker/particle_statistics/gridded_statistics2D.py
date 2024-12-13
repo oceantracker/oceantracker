@@ -319,3 +319,4 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
         for key, item in self.sum_binned_part_prop.items():
             # need to write final sums of propetries  after all age counts done across all times
             nc.write_a_new_variable('sum_' + key, item[:], dims, description= 'sum of particle property inside bin  ' + key)
+

@@ -6,7 +6,7 @@ from oceantracker.util.parameter_checking import ParameterListChecker as PLC, Pa
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 #from oceantracker.util.parameter_checking import ParameterListCheckerV2 as PLC2
 from oceantracker.shared_info import shared_info as si
-from oceantracker.particle_statistics.gridded_statistics_2D import GriddedStats2D_timeBased
+from oceantracker.particle_statistics.gridded_statistics2D import GriddedStats2D_timeBased
 
 
 class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
