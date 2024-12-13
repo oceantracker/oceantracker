@@ -200,7 +200,6 @@ def add_map_scale_bar(axis_lims, ax=plt.gca(),x_size_fraction=10 ):
                                fontproperties=fontprops)
 
     ax.add_artist(scalebar)
-#def add_time_text(t): time_text.set_text(time_util.seconds_to_pretty_str(t,seconds=False))
 
 def show_particleNumbers(n):  text_norm(.71, .04, '%3.0f Particles' % n, fontsize=5)
 

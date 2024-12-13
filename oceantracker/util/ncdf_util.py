@@ -188,7 +188,7 @@ class NetCDFhandler(object):
     def is_var_dim(self, var_name, dim_name):
         return dim_name in self.all_var_dims(var_name)
 
-    def get_fh(self): return self.file_handle
+    def get_file_handle(self): return self.file_handle
 
     def _sanitize_attribute(self,value):
         if type(value) is  bool: value =int(value) #  convert booleans

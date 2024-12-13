@@ -117,11 +117,6 @@ class unstructured_FVCOM(_BaseUnstructuredReader):
         grid['quad_cells_to_split'] =  np.full((0,),0, np.int32)
         return  grid
 
-
-
-    def number_hindcast_zlayers(self, nc):
-        return nc.dim_size('siglev')
-
     def read_zlevel_as_float32(self, nc,grid,fields, file_index, zlevel_buffer, buffer_index):
         # calcuate zlevel from depth fractions, tide and water depth
         # FVCOM has fraction of depth < from free surface, with top value first in z dim of arrAy

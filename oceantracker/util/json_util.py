@@ -40,11 +40,10 @@ def read_JSON(file_name):
 
 #Store as JSON a numpy.ndarray or any nested-list composition.
 class MyEncoder(json.JSONEncoder):
-    def __int__(self):
-        super().__int__(allow_nan=False) # file fox wont parse nan
 
     def default(self, obj):
         val =  deepcopy(obj)
+        #print('zz',type(obj),str(obj))
         try :
             # first numpy types
             if isinstance(obj, np.ndarray):
@@ -64,10 +63,11 @@ class MyEncoder(json.JSONEncoder):
             elif isinstance(obj, (timedelta, )):
                 return str(obj)
 
-            elif type(obj)== float and obj==np.nan:
+            elif type(obj)== float and np.isnan(obj):
+                print('xx float',str(obj))
                 return None
 
-            elif isinstance(obj,np.dtype):
+            elif isinstance(obj, np.dtype):
                 return str(obj)
 
             elif np.issubdtype(obj,np.datetime64):
@@ -80,11 +80,12 @@ class MyEncoder(json.JSONEncoder):
             elif np.issubdtype(obj, np.floating):
                 # make single numpy float values
                 if np.isnan(obj):
+                    #print('xx numpy', str(obj))
                     return None
                 elif not np.isfinite(obj):
                     return None
                 else:
-                    return  float(obj)
+                    return float(obj)
 
             elif  type(obj) in [np.bool_,bool]:
                 # make single numpy int values
@@ -96,17 +97,15 @@ class MyEncoder(json.JSONEncoder):
             elif type(obj) == timedelta:
                 return str(obj)
 
-            elif np.isnan(obj) or not np.isfinite(obj):
-                return None
             elif isinstance(obj,type):
                 return obj.__name__
-
-            return super().default(val)
 
         except Exception as e:
             print(str(e))
             print(' JSON encode error- oceantracker ignoring object type ' + str(type(obj)) + ' value=' + str(obj))
             return f'Bad json value, unencodable type {str(type(obj))}  values= {str(obj)}'
+
+        return super().default(val)
 
 # geojson polygons
 #todo make reader to/from internal polygon format
