@@ -20,11 +20,11 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
     if params is None : params ={}
     if type(params) not in[dict, int] :
         msg_logger.msg('Params must be a dictionary or list of parameter dict,  got type=' + str(type(params)),
-                       crumbs=crumbs,caller=caller,fatal_error= True)
+                       crumbs=crumbs,caller=caller,error= True)
         return params
     if type(default_params) != dict:
         msg_logger.msg(f'Default_params must be a dictionary,  got type={str(type(default_params))}',
-                       crumbs=crumbs,caller=caller,fatal_error= True)
+                       crumbs=crumbs,caller=caller,error= True)
         return params
 
     # find which keys/params are obsolete and the remainder
@@ -39,11 +39,11 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
             if  key not in default_params and not key.startswith('#'):
                 # get possible values without obsolete params
                 msg_logger.spell_check(msg, key,possible_params,caller=caller,
-                           crumbs= crumbs + crumb_seperator + f'"{key}"', fatal_error=True)
+                           crumbs= crumbs + crumb_seperator + f'"{key}"', error=True)
             elif key in obsolute_params:
                msg_logger.msg(msg + ' is obsolete ',
                               hint=default_params[key].doc_str,
-                              fatal_error=True, crumbs=crumbs, caller=caller)
+                              error=True, crumbs=crumbs, caller=caller)
 
     # loop over non-obsolete default keys
     for key in possible_params:
@@ -66,7 +66,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
                 item[n] = merge_params_with_defaults(params[key], item[n], msg_logger, crumbs=parent_crumb + crumb_seperator + key)
         else:
             msg_logger.msg(f'{msg},merge_params_with_defaults items in default dictionary can be ParamDictValueChecker, ParameterListChecker, or a nested param dict',
-                           crumbs= parent_crumb,fatal_error = True, caller=caller)
+                           crumbs= parent_crumb,error = True, caller=caller)
     return params
 
 @dataclass
@@ -88,7 +88,7 @@ class _ParameterBaseDataClassChecker():
             if self.is_required:
                 msg_logger.msg(f'Required parameter: must set parameter "{key}"',
                     hint=f'Variable description:{self.doc_str} , units= {self.units} ',
-                               crumbs=crumbs, fatal_error=True, caller=caller)
+                               crumbs=crumbs, error=True, caller=caller)
                 return None
             else:
                 value = self.get_default()
@@ -145,19 +145,19 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
         if not isinstance(value,_fundamental_types[self.data_type]):
             msg_logger.msg(f'{msg}, is not required data type, got type {type(value)}, value given =  {str(value)}',
                            hint =f'Must be one of types {_fundamental_types[self.data_type]}',
-                           caller=caller, fatal_error=True, crumbs=crumbs)
+                           caller=caller, error=True, crumbs=crumbs)
         if self.possible_values is not None and value not in self.possible_values:
             msg_logger.msg(f'{msg}, unexpected value="{str(value)}"',
                            hint=f'Must be one of {str(self.possible_values)}',
-                           caller=caller, fatal_error=True, crumbs=crumbs)
+                           caller=caller, error=True, crumbs=crumbs)
             return None
 
         # check max/mins
         if self.data_type in [ float, int]:
             if self.min is not None and value < self.min:
-                msg_logger.msg(f'{msg}, value {str(value)} must  be greater than {str(self.min)}', caller=caller, fatal_error=True, crumbs=crumbs)
+                msg_logger.msg(f'{msg}, value {str(value)} must  be greater than {str(self.min)}', caller=caller, error=True, crumbs=crumbs)
             if self.max is not None and value > self.max:
-                msg_logger.msg(f'{msg}, value {str(value)} must  be less than {str(self.max)}', caller=caller, fatal_error=True, crumbs=crumbs)
+                msg_logger.msg(f'{msg}, value {str(value)} must  be less than {str(self.max)}', caller=caller, error=True, crumbs=crumbs)
 
         return self.data_type(value) # return value as required type
 
@@ -184,11 +184,11 @@ class ParameterTimeChecker(_ParameterBaseDataClassChecker):
             #should never get here
             msg_logger.msg(f'{msg }, unexpected value = "{str(value)}", type = "{str(type(value))}"', caller=caller,
                            hint= f'Must be {self.units}',
-                           fatal_error=True, crumbs=crumbs)
+                           error=True, crumbs=crumbs)
 
         except Exception as e:
                 msg_logger.msg( f'{msg }, failed to convert to date got value = "{str(value)}", type = "{str(type(value))}"',caller= caller,
-                                hint=f'Must be {self.units}', fatal_error=True, crumbs = crumbs)
+                                hint=f'Must be {self.units}', error=True, crumbs = crumbs)
         pass
 
 @dataclass
@@ -211,15 +211,15 @@ class ParameterListChecker(ParamValueChecker):
 
         if type(values) != list:
             msg_logger.msg(f'{msg}, must be  of type list',
-                           hint=f'got type={str(type(values))}', crumbs=crumbs, caller=caller, fatal_error=True)
+                           hint=f'got type={str(type(values))}', crumbs=crumbs, caller=caller, error=True)
             return values
         # check length
         if self.fixed_len is not None and len(values) != self.fixed_len:
             msg_logger.msg(f'{msg}, list must be  exactly {self.fixed_len:d} long',
-                           hint= f'got list length={len(values) }, with {str(values)}', crumbs=crumbs,caller=caller, fatal_error=True)
+                           hint= f'got list length={len(values) }, with {str(values)}', crumbs=crumbs,caller=caller, error=True)
         if values is not None and len(values) < self.min_len:
             msg_logger.msg(f'{msg}, list must be  at least {self.fixed_len:d} long',
-                           hint= f'got list length={len(values) }', crumbs=crumbs,caller=caller, fatal_error=True)
+                           hint= f'got list length={len(values) }', crumbs=crumbs,caller=caller, error=True)
 
         # check each value in list and convert to fundamental types in parent checker
         for n, v in enumerate(values):
@@ -252,7 +252,7 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
 
         if type(value) not in [list, np.ndarray]:
             msg_logger.msg(f'{msg}, expected param of type list or numpy array got type {type(value)}',
-                           fatal_error=True, caller=caller, crumbs=crumbs)
+                           error=True, caller=caller, crumbs=crumbs)
             return None
 
         # attempt array conversion
@@ -261,14 +261,14 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
         except Exception as e:
             msg_logger.msg(f'{msg}, coordinates must be numpy array or a list convertible to a numpy array ',
                            hint = f'got values {str(value)}',caller = caller,
-                           crumbs = crumbs, fatal_error=True)
+                           crumbs = crumbs, error=True)
 
 
         # now have an array
         if not np.issubdtype(value.dtype, np.integer) and not np.issubdtype(value.dtype, np.floating):
             msg_logger.msg(f'{msg}, coordinates must only contain floats or ints, got type "{str(value.dtype)}" ',
                            hint=f'got values {str(value)}',caller = caller,
-                           crumbs=crumbs, fatal_error=True)
+                           crumbs=crumbs, error=True)
             return None
 
         # make int float
@@ -284,30 +284,30 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
             # only expecting 2 or 3 cord values
             if value.shape[0] < 2 or value.shape[0] > 3 :
                 msg_logger.msg(f'{msg},, expecting coordinates with only 2 or 3 values',
-                               hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
+                               hint=f'got values {str(value)}', crumbs=crumbs, error=True)
 
             if not self.is3D and value.shape[0] == 3:
                 msg_logger.msg(f'{msg}, expecting coordinates as 2D pair of values',
-                               hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
+                               hint=f'got values {str(value)}', crumbs=crumbs, error=True)
             return value
 
         # must be a vector of coords and expect an N by 2 or 3 array
         if value.ndim == 1:
                 msg_logger.msg(f'expecting N by 2 or 3 array, eg. [[2.4,4.5],[6.2,7.8],[6.6,9.]]',
-                        hint=f'got values {str(value)}', crumbs=crumbs, fatal_error=True)
+                        hint=f'got values {str(value)}', crumbs=crumbs, error=True)
                 return None
 
         if value.shape[1] < 2 or value.shape[1] > 3:
             msg_logger.msg(f'Expected and  vector N by 2 or 3 list or numpy array of coordinate pairs or triples, eg [[ 34., 56.]], ',
                    crumbs=crumbs,
-                   hint =f'got size "{str(value.shape)}"', fatal_error=True)
+                   hint =f'got size "{str(value.shape)}"', error=True)
             return None
 
         #check min max
         if self.min is not None and np.any(value< self.min):
-            msg_logger.msg(f'{msg}, value {str(value)} must  be greater than {str(self.min)}', caller=caller, fatal_error=True, crumbs=crumbs)
+            msg_logger.msg(f'{msg}, value {str(value)} must  be greater than {str(self.min)}', caller=caller, error=True, crumbs=crumbs)
         if self.max is not None and np.any(value > self.max):
-            msg_logger.msg(f'{msg}, value {str(value)} must  be less than {str(self.max)}', caller=caller, fatal_error=True, crumbs=crumbs)
+            msg_logger.msg(f'{msg}, value {str(value)} must  be less than {str(self.max)}', caller=caller, error=True, crumbs=crumbs)
 
         return value
 

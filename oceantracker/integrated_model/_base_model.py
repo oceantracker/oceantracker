@@ -15,12 +15,6 @@ class _BaseIntegratedModel(ParameterBaseClass):
 
     def update(self, n_time_step, time_sec):   nopass('update method is required for integrated models ')
 
-    def add_release_groups_and_settings(self,crumbs=''):
-        # must add relase grouspad seeting before initial setup
-        # adds settings and classes  needed by the model using helper class approach with keyword arguments
-        #  these are in addition to any other params the user sets
-        pass
-
 
 
 

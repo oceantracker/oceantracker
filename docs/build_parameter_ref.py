@@ -7,7 +7,6 @@ import importlib
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import _ParameterBaseDataClassChecker, ParameterTimeChecker as PTC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util import package_util
 from oceantracker.shared_info import shared_info as si
 si._setup()
 from oceantracker import definitions

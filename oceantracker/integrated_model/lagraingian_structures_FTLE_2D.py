@@ -64,7 +64,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
         if params['grid_center'].shape[0] != params['grid_span'].shape[0]:
             si.msg_logger.msg('Grid span must be list of size [2] or be N pairs of sizes, one gor each grid center',
                               hint=f'Grid center has {params["grid_center"].shape[0]} values  and grid span is size  {str(params["grid_span"].shape)}',
-                          fatal_error=True, exit_now=True, caller=self)
+                             fatal_error=True, caller=self)
 
         si.msg_logger.exit_if_prior_errors('LSC error??', caller=self)
         # set up lCS grid
@@ -82,7 +82,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
             if params['floating']:
                 si.add_class('trajectory_modifiers',name='floater',class_name='SurfaceFloat')
             else:
-                si.msg_logger.msg('LCS not yet working for non-floating particles', fatal_error=True, exit_now=True,caller=self)
+                si.msg_logger.msg('LCS not yet working for non-floating particles', fatal_error=True,caller=self)
 
         # get time for pulse releases within hindcast
         fgm = si.core_class_roles.field_group_manager
@@ -94,7 +94,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
         info['times']= params['start'] + si.run_info.model_direction * np.arange(0, duration - params['lags'].max() + params['release_interval'] , params['release_interval'] )
         if info['times'].size ==0:
             si.msg_logger.msg('LSC/FTLE model duration is less than largest requested lag', hint=f'Check hindcast duration, or start end parameters lags={str(params["lags"])}',
-                              crumbs='Setting up release times', caller=self,fatal_error=True, exit_now=True)
+                              crumbs='Setting up release times', caller=self,fatal_error=True)
 
         sel = np.logical_and(info['times'] >= fgm.info['start_time'],info['times'] <= fgm.info['end_time'], )
         info['times'] =  info['times'][sel]

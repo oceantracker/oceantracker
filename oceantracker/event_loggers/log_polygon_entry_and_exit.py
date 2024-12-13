@@ -34,7 +34,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         ml = si.msg_logger
         if self.info['instanceID'] > 0 :
             #todo why only 1
-            ml.msg('LogPolygonEntryAndExit: can only have one instance',fatal_error=True,exit_now=True )
+            ml.msg('LogPolygonEntryAndExit: can only have one instance',fatal_error=True )
 
 
 

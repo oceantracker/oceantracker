@@ -6,13 +6,14 @@ from read_oceantracker.python import read_ncdf_output_files
 from os import path
 from glob import glob
 
-def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0, run_output_dir= None):
+def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0,
+                                     run_output_dir= None):
     # get case_info.json file name from runInfo dict or json file name, can also set root_output_dir, if output moved to new location
     # ncase is one based
     if type(runInfo_fileName_or_runInfoDict) is str:
-       case_info_file_name = json_util.read_JSON(runInfo_fileName_or_runInfoDict)
+       run_case_info = json_util.read_JSON(runInfo_fileName_or_runInfoDict)
     else:
-        case_info_file_name = runInfo_fileName_or_runInfoDict
+        run_case_info = runInfo_fileName_or_runInfoDict
 
     if run_case_info is None:
         # file not found
@@ -22,7 +23,7 @@ def get_case_info_file_from_run_file(runInfo_fileName_or_runInfoDict, ncase = 0,
         run_output_dir = run_case_info['output_files']['run_output_dir']
 
     try:
-        case_info_file_name = path.join(run_output_dir, case_info_file_name)
+        case_info_file_name = path.join(run_output_dir, run_case_info)
 
     except Exception as e:
         raise Exception('load_ouput_files.get_case_info: Can not find case file json "' + str(case_info_file_name) + "', file missing or case may have had an error see *.err file")

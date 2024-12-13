@@ -73,20 +73,17 @@ class MessageLogger(object ):
     def msg(self, msg_text, warning=False, note=False,
             hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
             spell_check=None,possible_values=None,
-            fatal_error=False, exit_now=False, exception = None,
+            error=False, fatal_error=False, exception = None,
             traceback_str=None, dev=False):
-
-
-        if exit_now : fatal_error = True
+        
         if exception is not None:
             fatal_error = True
-            exit_now = True
-
+        if fatal_error: error = True
 
         m = ['']
         if dev: m[0] +='Core developer '
         # first line of message
-        if fatal_error:
+        if error:
             m[0] += msg_str( '>>> Error: ', tabs)
             self.error_count += 1
 
@@ -124,7 +121,7 @@ class MessageLogger(object ):
         if crumbs is not None and crumbs != '':
             m.append(msg_str(f'in: {crumbs}', tabs + 3))
 
-        if caller is not None and (fatal_error or warning) :
+        if caller is not None and (error or warning) :
             if hasattr(caller,'__class__'):
                 origin=  f'Class = {caller.__class__.__name__} '
                 if hasattr(caller,'info'):
@@ -151,7 +148,7 @@ class MessageLogger(object ):
                 self.log_file.write(ll + '\n')
 
             # keeplist ond warnings errors etc to print at end
-            if fatal_error:
+            if error:
                     self.errors_list.append(l)
                     #self.build_stack()
             if warning :
@@ -162,14 +159,14 @@ class MessageLogger(object ):
                     self.notes_list.append(l)
 
         # todo add traceback to message?
-        if exit_now:
+        if fatal_error:
             raise GracefulError('Fatal error cannot continue')
 
 
-    def has_fatal_errors(self): return  self.error_count > 0
+    def has_errors(self): return  self.error_count > 0
 
     def exit_if_prior_errors(self,msg, caller=None, crumbs=''):
-        if self.has_fatal_errors():
+        if self.has_errors():
             self.print_line()
             self.msg(msg + '>>> Fatal errors, can not continue', crumbs= crumbs, caller=caller)
             for m in self.errors_list:
@@ -219,14 +216,20 @@ class MessageLogger(object ):
     def spell_check(self, msg, key: str, possible_values: list,hint=None, **kwargs):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
 
-        if 'fatal_error' not in kwargs: kwargs['warning']= True
-        if 'exit_now' not in kwargs: kwargs['warning'] = True
+        if 'error' not in kwargs: kwargs['warning']= True
+        if 'fatal_error' not in kwargs: kwargs['warning'] = True
+        if 'tabs' not in kwargs: kwargs['tabs'] = 0
+
+
         if hint is None : hint= ''
         known = list(possible_values)
         if key not in known:
             # flag if unknown
-            self.msg(msg,  hint=hint + f'\n Closest matches to "{key}" = {str(difflib.get_close_matches(key, known, cutoff=0.4))} ?? ',
-                  **kwargs)
+            self.msg(msg, **kwargs)
+            self.msg(f'Closest matches to "{key}" are :',tabs=kwargs['tabs']+5)
+            for n ,t in enumerate(difflib.get_close_matches(key, known, cutoff=0.4)):
+                self.msg(f'{n+1}: "{t}"',tabs=kwargs['tabs']+7)
+
         pass
     def build_stack(self):
 

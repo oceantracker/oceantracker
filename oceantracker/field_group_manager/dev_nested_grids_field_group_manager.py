@@ -69,7 +69,7 @@ class DevNestedFields(ParameterBaseClass):
                 ml.msg(f'Nested reader files do not overlap in time with outer grid for files nested grid in # {d[2]}',
                        hint=f'Outer grid from {str(info["start_date"])}  to, {str(info["end_date"])},' +
                             f' inner grid from {time_util.seconds_to_isostr(d[0])}  to, {time_util.seconds_to_isostr(d[1])}',
-                       fatal_error=True)
+                       error=True)
         ml.exit_if_prior_errors('Some non-overlapping times in nested grid hydro files')
 
         # settings consistency with hindcast
@@ -80,7 +80,7 @@ class DevNestedFields(ParameterBaseClass):
         if not all ([ x== info['is3D']for x in checks['is3D']]):
             ml.msg(f'Cannot mix 2D and 3D nestd grids ',
                    hint= f'For primary reader 3D ={info["is3D"]}, nested readers are 3D={str(checks["is3D"])}',
-                   crumbs='Nested reader set up', fatal_error=True, exit_now=True, caller=self)
+                   crumbs='Nested reader set up', fatal_error=True, caller=self)
 
         #todo add check times overlaping
 
@@ -114,7 +114,7 @@ class DevNestedFields(ParameterBaseClass):
             fgm.info['use_open_boundary'] = True  # force open boundary condition for inner grid
             if not fgm.info['has_open_boundary_nodes']:
                 ml.msg(f'Nested grids must have open boundary nodes defined, nested grid {n} " does not',
-                                  fatal_error=True, exit_now=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
+                                  fatal_error=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
 
         # outer grid is not required to have open boundary nodes, but can if provided
         fgm = self.fgm_hydro_grids[0]

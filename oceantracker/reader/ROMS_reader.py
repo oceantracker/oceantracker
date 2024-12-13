@@ -184,7 +184,7 @@ class ROMsNativeReader(_BaseStructuredReader):
         # check if rows/cols now  consistent with Psi grid
         if not (grid['psi_land_mask'].shape == s[1:3]):
             ml.msg('not all ROMS variables consisted and cannot map all to psi grid, may be in-correctly formed subset of full model domain , try with full model domain, files variable "' + var_name +'"',
-                              fatal_error=True,exit_now=True, caller=self)
+                              fatal_error=True, caller=self)
 
         data = data.reshape( (s[0],s[1]*s[2], s[3])) # this should match flatten in "C" order
 

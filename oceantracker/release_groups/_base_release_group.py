@@ -181,7 +181,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
                 if z_min > z_max:
                     ml.msg(f'Must have zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
-                                      hint='z=0 is mean tide level and z < 0 below the mean tide level',   fatal_error=True, exit_now=True, caller=self)
+                                      hint='z=0 is mean tide level and z < 0 below the mean tide level',   fatal_error=True, caller=self)
                 release_part_prop['x']  = self.get_z_release_in_depth_range(release_part_prop['x'] ,z_min,z_max,
                                                                    release_part_prop['water_depth'],release_part_prop['tide'])
         return release_part_prop

@@ -82,26 +82,20 @@ class ParameterBaseClass(_RootParameterBaseClass):
 
     def check_class_required_fields_prop_etc(self, required_props_list=[],
                                              requires3D=None, crumbs=''):
-        si = self.shared_info
         for name in required_props_list:
             if name not in si.class_roles.particle_properties:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.params['name']
                                 + '" requires particle property  "' + name + '"'
-                                + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', fatal_error=True,crumbs=crumbs)
+                                + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', error=True,crumbs=crumbs)
 
         if requires3D and not si.run_info.is3D_run:
-                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', fatal_error=True,crumbs=crumbs)
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', error=True,crumbs=crumbs)
 
     def remove_default_params(self, name_list):
         # used to get rid if paramters of parent class which are not used by a child class
         for key in name_list:
             if key in self.default_params:
                 del self.default_params[key]
-
-    def clear_default_params(self, name_list):
-        # used to clear all defaults when not needed
-        for key in name_list:
-            self.default_params[key] ={}
 
     # below dynamical adds shared particle index buffers when first used within in a class instance
     # buffers are used to hold selections of particles, saving memory and time by reuse

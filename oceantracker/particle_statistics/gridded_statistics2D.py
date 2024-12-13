@@ -230,7 +230,7 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
         if age_max <= age_min:
             ml.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
                                     + str([age_min,age_max ]) + ', duration=' + str(si.run_info['duration']),
-                   caller=self,   fatal_error=True)
+                   caller=self,   error=True)
 
         # set up age bin edges
         dage= abs((self.params['age_bin_size']))
@@ -238,7 +238,7 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
             ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
-                     caller=self, fatal_error=True)
+                     caller=self, error=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 

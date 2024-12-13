@@ -43,7 +43,7 @@ class GenericUnstructuredReader(BaseGenericReader):
 
         for v in grid_map['x'] + [grid_map['triangles'], grid_map['time']]:
             if not nc.is_var(v):
-                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in grid set', fatal_error=True, caller=self)
+                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in grid set', error=True, caller=self)
                 return
         grid =  {}
 
@@ -72,7 +72,7 @@ class GenericUnstructuredReader(BaseGenericReader):
         is_vector = len(var_list) > 1
         for v in var_list:
             if not nc.is_var(v):
-                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in reader set up fields', fatal_error=True, caller=self)
+                ml.msg(f'Cannot find variable "{v}" in file "{nc.file_name}" ', crumbs='in reader set up fields', error=True, caller=self)
                 continue
             if dim_map['vector2D'] in nc.all_var_dims(v) or dim_map['vector3D'] in nc.all_var_dims(v):
                 is_vector = True

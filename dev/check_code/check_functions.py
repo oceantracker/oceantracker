@@ -18,7 +18,7 @@ for filename in iglob('../**/*.py',   recursive = True):
                 all_lines.append(l.strip())
 no_refs=[]
 for n, dl in enumerate(def_lines):
-    s=dl.split(' ')[1].split('(')[0] +'('
+    s=dl.split(' ')[1].split('(')[0] # +'('
     e=[]
     for l in all_lines:
         if s in l:

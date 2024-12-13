@@ -5,7 +5,7 @@ from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, 
 
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 
-from oceantracker.util import shared_info_util, class_importer_util, basic_util
+from oceantracker.util import class_importer_util, basic_util
 from oceantracker.util.message_logger import  MessageLogger
 
 from time import  perf_counter
@@ -248,13 +248,13 @@ class _SharedInfoClass():
         if class_role=='fields':
             ml.msg('Cannot use si.add_class() method to add fields',
                    hint='Use add_reader_field(name,  params) or si.add_custom_field(name, params, default_classID=None)',
-                   fatal_error=True, exit_now=True)
+                   fatal_error=True)
 
 
         if params is None: params ={}
         if type(params) != dict :
             ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}',
-                        fatal_error=True, crumbs=crumbs,
+                        error=True, crumbs=crumbs,
                         check_for_unknown_keys=check_for_unknown_keys, caller=caller)
             return None
 
@@ -279,7 +279,7 @@ class _SharedInfoClass():
 
         else:
             ml.msg(f'Unknown class role {class_role}', hint=f'Must be one of core_class_roles {str(self.core_class_roles.possible_values())} or other roles {str(self.class_roles.possible_values())}',
-                   fatal_error=True, crumbs=crumbs, caller=caller)
+                   error=True, crumbs=crumbs, caller=caller)
             return None
 
         # add classes required by this class
@@ -313,49 +313,6 @@ class _SharedInfoClass():
             b[name] = dict(time=0.,calls=0)
         b[name]['time'] += perf_counter()-t0
         b[name]['calls'] += 1
-
-    def _setup_lon_lat_to_meters_grid_tranforms(self,grid_lon_lat):
-        #todo add user given meters grid option
-        if self.settings['EPSG_code_meters_grid'] is None:
-            epsg = cord_transforms.get_utm_epsg(grid_lon_lat)
-        else:
-            epsg =  self.settings['EPSG_code_meters_grid']
-
-        self.Transformer_to_meters = cord_transforms.get_tansformer(cord_transforms.EPSG_WGS84,epsg)
-        self.Transformer_to_lon_lat = cord_transforms.get_tansformer(epsg, cord_transforms.EPSG_WGS84)
-
-    def _transform_lon_lat_to_meters(self, lon_lat, in_lat_lon_order=False, crumbs=''):
-        # transform 2D/3D vector of points or single point to meters
-        # also swaps input data to lon_lat if in_lat_lon_order
-        out= lon_lat.copy() # keep anz z cord
-
-        if lon_lat.ndim==1:
-            # single point
-            if in_lat_lon_order: lon_lat[0], lon_lat[1] = out[1], out[0]
-            out[0], out[1] = self.Transformer_to_meters.transform(lon_lat[ 0], lon_lat[1])
-        else:
-            # vector of coords
-            # swap input columns if inputs are as (lat, lon)  and not (lon,lat)
-            if in_lat_lon_order: lon_lat[:, 0], lon_lat[:, 1]  = out[:, 1].copy(), out[:, 0].copy()
-            out[:, 0], out[:, 1], = self.Transformer_to_meters.transform(lon_lat[:, 0], lon_lat[:, 1])
-
-        if np.any(~np.isfinite(out.ravel())):
-            self.msg_logger.msg('Could not convert some lon_lat to meters, values out of bounds, are values in (lat, lon) order?',
-                            crumbs=crumbs,fatal_error=True,exit_now=True, hint=', require (lon, lat) order, values='+str(out))
-        return out
-
-    def _transform_lon_lat_deltas(self,ll_deltas, ref_lon_lat,  deltas_in_lat_lon_order=False):
-        # transform step in lon lat difereces in meter grid diff   (a 2 element array) at given lat long/3D vector of points or single point to meters
-
-
-        if deltas_in_lat_lon_order: ll_deltas[0], ll_deltas[1] = ll_deltas[1], ll_deltas[0]
-
-        ll= np.vstack((ref_lon_lat, ref_lon_lat+ll_deltas))
-
-        x, y = self.Transformer_to_meters.transform(ll[:,0], ll[:,1])
-
-        out = np.asarray([float(x[1]-x[0]),float(y[1]-y[0])] )
-        return out
 
 
 # make the instance used throughout code

@@ -70,7 +70,6 @@ class _BaseReader(ParameterBaseClass):
     # Below are required  methods for any new reader
     # ---------------------------------------------------------
 
-    def number_hindcast_zlayers(self, nc):  nopass()
 
     def get_hindcast_info(self, catalog): nopass()
     # get is 3D, vertical grid type and
@@ -161,7 +160,7 @@ class _BaseReader(ParameterBaseClass):
                 if params['EPSG_code'] is None:
                     si.msg_logger.msg('When using geographic coords and hydromodel not already in geographic coords, Reader must have "EPSG_code" parameter set to do conversion',
                                       hint = 'EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes for hydro model at at https://spatialreference.org/',
-                                      caller = self, fatal_error=True, exit_now=True)
+                                      caller = self, fatal_error=True)
                 # do conversion
                 grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
 
@@ -439,7 +438,7 @@ class _BaseReader(ParameterBaseClass):
                 # use depth average if vailable
                 si.msg_logger.msg('Cannot find water_velocity or depth averaged water velocity in hindcast',
                                hint=f'Found variables mapped to {str(fi.keys())} \n File variables are {str(reader_builder["catalog"]["variables"].keys())}',
-                               fatal_error=True, exit_now=True)
+                               fatal_error=True)
 
             fi['water_velocity'] = fi['water_velocity_depth_averaged']
             fi.pop('water_velocity_depth_averaged')
