@@ -70,7 +70,6 @@ class _BaseReader(ParameterBaseClass):
     # Below are required  methods for any new reader
     # ---------------------------------------------------------
 
-    def number_hindcast_zlayers(self, nc):  nopass()
 
     def get_hindcast_info(self, catalog): nopass()
     # get is 3D, vertical grid type and

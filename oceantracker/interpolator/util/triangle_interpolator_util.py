@@ -208,30 +208,6 @@ def get_BC_transform_matrix(points, simplices):
 
     return Tinvs
 
-@njit()
-def interp2D_kernal_time_independent(data,bc):
-    # eval interp from values at triangle nodes
-    v = 0.
-    for m in range(3):
-        v += bc[m] * data[m]
-    return v
-
-@njit()
-def interp2D_kernal_time_dependent(data,bc,):
-    # eval interp from values at triangle nodes
-    v = 0.
-    for m in range(3):
-        v += bc[m] * data[m]
-    return v
-
-
-
-
-
-
-
-
-
 # Below is numpy version of numba BC cord code, now only used as check
 #________________________________________________
 def get_cell_cords_check(bc_transform,x,n_cell):

@@ -38,10 +38,6 @@ class CompactTracksWriter(_BaseWriter):
 
         self.info['time_particle_steps_written'] = 0
 
-    def create_part_prop_to_write(self,name, instance):
-        #todo write wrapper for below for particle properties to be easier to use
-        pass
-
     def create_variable_to_write(self,name,is_time_varying, is_part_prop, vector_dim=None,
                                  description=None,units=None,
                                  attributes={}, dtype=None, fill_value=None):

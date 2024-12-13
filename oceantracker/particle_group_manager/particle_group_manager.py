@@ -165,8 +165,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 
-    def get_particle_time(self): return self.time_varying_group_info['time'].get_values()
-
     #@function_profiler(__name__)
     def update_PartProp(self,n_time_step, time_sec, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method

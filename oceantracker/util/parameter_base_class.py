@@ -97,11 +97,6 @@ class ParameterBaseClass(_RootParameterBaseClass):
             if key in self.default_params:
                 del self.default_params[key]
 
-    def clear_default_params(self, name_list):
-        # used to clear all defaults when not needed
-        for key in name_list:
-            self.default_params[key] ={}
-
     # below dynamical adds shared particle index buffers when first used within in a class instance
     # buffers are used to hold selections of particles, saving memory and time by reuse
     # use with care as returned view may refer to same buffer!!

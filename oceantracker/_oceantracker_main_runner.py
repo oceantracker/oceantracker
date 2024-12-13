@@ -258,7 +258,6 @@ class _OceanTrackerRunner(object):
         reader_builder, reader= self._make_a_reader_builder(run_builder,working_params['core_class_roles']['reader'], crumbs)
         json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], 'hindcast_variable_catalog.json'), reader_builder)
 
-
         # get file info for nested readers
         nested_reader_builders = []
         for n, nested_reader_params in enumerate(working_params['class_roles']['nested_readers']):

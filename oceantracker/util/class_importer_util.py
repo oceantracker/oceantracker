@@ -69,20 +69,18 @@ class ClassImporter():
 
         for _, sub_pkg_name, ispkg in pkgutil.iter_modules([definitions.package_dir]):
 
-
             if ispkg and sub_pkg_name != 'util':
                 # look at sub packages
                 if sub_pkg_name not in tree: tree[sub_pkg_name] = {}
 
-
                 for _, mod_name, is_mod_a_pkg in pkgutil.iter_modules(path=[path.join(definitions.package_dir, sub_pkg_name)]):
-                #for _, mod_name, is_mod_a_pkg in pkgutil.iter_modules(sub_pkg):
 
                     if not is_mod_a_pkg:
                         mod = f'{path.basename(definitions.package_dir)}.{sub_pkg_name}.{mod_name}'
                         self.module_list.append(mod)
                         # import class and get info
                         i_mod = self._import_module_from_string(mod)
+
                         for class_name, class_obj in inspect.getmembers(i_mod):
                             if inspect.isclass(class_obj) and issubclass(class_obj, _RootParameterBaseClass) and class_obj.__module__ == mod:
                                 # local classes only
