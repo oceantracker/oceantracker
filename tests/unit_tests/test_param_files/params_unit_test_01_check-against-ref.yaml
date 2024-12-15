@@ -7,7 +7,6 @@ particle_properties:
   initial_value: 1000
   name: a_pollutant
 - class_name: Speed
-  name: speed
 - class_name: AgeDecay
   name: test_decay
 - class_name: DistanceTravelled

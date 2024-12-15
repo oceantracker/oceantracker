@@ -14,7 +14,7 @@ def write_JSON(file_name,d, indent=4):
         fn=file_name+'.json'
     try:
         with open(fn, mode='w') as fp:
-            json.dump(d, fp, cls=MyEncoder, indent=indent)
+            json.dump(d, fp, cls=MyEncoder, indent=indent,allow_nan=True)
 
     except Exception as e:
         print('Error>>  Failed to write json file ="' + file_name +'"')
@@ -27,7 +27,6 @@ def read_JSON(file_name):
     if file_name is None or not path.isfile(file_name):
         print('Cannot find json file "' + file_name + '"  ')
         raise Exception('Cannot find json file "' + file_name + '"  ')
-
     try:
         with open(file_name, 'r') as fp:
             d=json.load(fp)
@@ -40,10 +39,9 @@ def read_JSON(file_name):
 
 #Store as JSON a numpy.ndarray or any nested-list composition.
 class MyEncoder(json.JSONEncoder):
-
     def default(self, obj):
-        val =  deepcopy(obj)
-        #print('zz',type(obj),str(obj))
+
+        #print('xx0',type(obj),str(obj))
         try :
             # first numpy types
             if isinstance(obj, np.ndarray):
@@ -53,6 +51,7 @@ class MyEncoder(json.JSONEncoder):
                         return obj.astype(np.int8).tolist()
                 elif np.issubdtype(obj.dtype,np.floating):
                     sel = np.logical_or(~np.isfinite(obj),np.isnan(obj))
+                    val = deepcopy(obj)
                     val[sel] = -9.99999e32
                     return val.tolist()
                 else:
@@ -60,14 +59,20 @@ class MyEncoder(json.JSONEncoder):
                     # date/time strings
             elif isinstance(obj, (datetime, date)):
                 return obj.isoformat()
+
             elif isinstance(obj, (timedelta, )):
                 return str(obj)
 
-            elif type(obj)== float and np.isnan(obj):
-                print('xx float',str(obj))
-                return None
+            elif isinstance(obj,float):
+                  if np.isnan(obj):
+                      return None
+                  else:
+                      return float(obj)
+                #print('xx float',str(obj))
 
-            elif isinstance(obj, np.dtype):
+            elif isinstance(obj,np.dtype):
+                return str(obj)
+            elif np.issubdtype(obj,np.datetime64):
                 return str(obj)
 
             elif np.issubdtype(obj,np.datetime64):
@@ -79,8 +84,9 @@ class MyEncoder(json.JSONEncoder):
 
             elif np.issubdtype(obj, np.floating):
                 # make single numpy float values
+                print('xx1 numpy', str(obj))
                 if np.isnan(obj):
-                    #print('xx numpy', str(obj))
+                    print('xx2 numpy', str(obj))
                     return None
                 elif not np.isfinite(obj):
                     return None
@@ -100,12 +106,14 @@ class MyEncoder(json.JSONEncoder):
             elif isinstance(obj,type):
                 return obj.__name__
 
+            return super().default(obj)
+
         except Exception as e:
             print(str(e))
             print(' JSON encode error- oceantracker ignoring object type ' + str(type(obj)) + ' value=' + str(obj))
             return f'Bad json value, unencodable type {str(type(obj))}  values= {str(obj)}'
 
-        return super().default(val)
+
 
 # geojson polygons
 #todo make reader to/from internal polygon format
