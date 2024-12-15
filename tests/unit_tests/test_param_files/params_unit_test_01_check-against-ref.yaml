@@ -50,7 +50,7 @@ particle_statistics:
   z_min: -2
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
-  input_dir: C:\Work\ot_install_test\oceantracker\demos\demo_hindcast\schsim3D
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast\schsim3D
 regrid_z_to_uniform_sigma_levels: true
 release_groups:
 - class_name: PointRelease
@@ -91,7 +91,7 @@ release_groups:
   water_depth_min: 500
 resuspension:
   critical_friction_velocity: 0.01
-root_output_dir: C:\Work\ot_install_test\oceantracker_output\unit_tests
+root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
 screen_output_time_interval: 1800
 time_step: 1800
 tracks_writer:

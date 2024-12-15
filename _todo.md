@@ -5,7 +5,6 @@
    1. 3D sigma reader
 1. Stats
     1. matab read polygon
-    1. general rebuild?
 1. write of case info file even if errors, trap json encoding erorrs 
 2. centalize polygon list creation and param checking 
 3. Note if pending  memory issues and log sizes used. write error log

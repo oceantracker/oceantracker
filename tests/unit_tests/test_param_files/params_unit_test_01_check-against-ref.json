@@ -1,6 +1,6 @@
 {
     "output_file_base": "unit_test_01_check-against-ref",
-    "root_output_dir": "C:\\Work\\ot_install_test\\oceantracker_output\\unit_tests",
+    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
     "time_step": 1800,
     "use_random_seed": true,
     "NCDF_time_chunk": 1,
@@ -15,7 +15,7 @@
         "NCDF_particle_chunk": 500
     },
     "reader": {
-        "input_dir": "C:\\Work\\ot_install_test\\oceantracker\\demos\\demo_hindcast\\schsim3D",
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
     },
     "release_groups": [
