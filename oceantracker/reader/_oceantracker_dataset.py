@@ -46,7 +46,7 @@ class OceanTrackerDataSet(object):
         cat['ref_time'] = time
 
         vi = deepcopy(cat['variables'][v_name])
-        vi.update(dims=info['time_dim'], shape=( time .size,), dtype=time.dtype )
+        vi.update(dims=info['time_dim'], shape=( time.size,), dtype=time.dtype )
         cat['variables'][info['time_variable']] = vi
 
         # set up statr ends times

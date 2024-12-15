@@ -287,7 +287,6 @@ class _OceanTrackerRunner(object):
 
         reader_builder['catalog'], dataset = self._get_hydro_file_catalog(reader_builder['params'],crumbs=crumbs)
 
-
         # add info to reader bulider on if 3D hindcast and mapped fields
         reader_builder = self._map_and_catagorise_field_variables(run_builder, reader_builder, reader)
 

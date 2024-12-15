@@ -243,7 +243,6 @@ class _BaseReader(ParameterBaseClass):
         # ensure variables have right type
         grid['x'] = grid['x'].astype(np.float64)
 
-
         return grid
 
     def construct_grid_variables(self, grid):
