@@ -14,7 +14,7 @@ def write_JSON(file_name,d, indent=4):
         fn=file_name+'.json'
     try:
         with open(fn, mode='w') as fp:
-            json.dump(d, fp, cls=MyEncoder, indent=indent,allow_nan=True)
+            json.dump(d, fp, indent=indent,allow_nan=True, cls=MyEncoder)
 
     except Exception as e:
         print('Error>>  Failed to write json file ="' + file_name +'"')
@@ -39,8 +39,8 @@ def read_JSON(file_name):
 
 #Store as JSON a numpy.ndarray or any nested-list composition.
 class MyEncoder(json.JSONEncoder):
-    def default(self, obj):
 
+    def default(self, obj):
         #print('xx0',type(obj),str(obj))
         try :
             # first numpy types
@@ -49,7 +49,7 @@ class MyEncoder(json.JSONEncoder):
                     return str(obj)
                 elif obj.dtype in [np.bool_,bool]:
                         return obj.astype(np.int8).tolist()
-                elif np.issubdtype(obj.dtype,np.floating):
+                elif False or np.issubdtype(obj.dtype,np.floating):
                     sel = np.logical_or(~np.isfinite(obj),np.isnan(obj))
                     val = deepcopy(obj)
                     val[sel] = -9.99999e32
@@ -65,28 +65,31 @@ class MyEncoder(json.JSONEncoder):
 
             elif isinstance(obj,float):
                   if np.isnan(obj):
+                      #print('xx float',str(obj))
                       return None
                   else:
                       return float(obj)
-                #print('xx float',str(obj))
 
             elif isinstance(obj,np.dtype):
                 return str(obj)
             elif np.issubdtype(obj,np.datetime64):
-                return str(obj)
-
-            elif np.issubdtype(obj,np.datetime64):
+                if np.isnan(obj):
+                    return None
                 return str(obj)
 
             elif np.issubdtype(obj, np.integer):
                 # make single numpy int values
                 return str(obj)
 
+
+            elif type(obj) == np.timedelta64:
+                return str(obj.astype(timedelta)) # timedelta has better formating
+
             elif np.issubdtype(obj, np.floating):
                 # make single numpy float values
-                print('xx1 numpy', str(obj))
+
                 if np.isnan(obj):
-                    print('xx2 numpy', str(obj))
+                    #print('xx2 np.floating', str(obj))
                     return None
                 elif not np.isfinite(obj):
                     return None
@@ -97,8 +100,7 @@ class MyEncoder(json.JSONEncoder):
                 # make single numpy int values
                 return int(obj)
 
-            elif type(obj) == np.timedelta64:
-                return str(obj.astype(timedelta)) # timedelta has better formating
+
 
             elif type(obj) == timedelta:
                 return str(obj)

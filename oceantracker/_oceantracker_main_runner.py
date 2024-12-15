@@ -304,7 +304,6 @@ class _OceanTrackerRunner(object):
                           hint=f'must be one of {str(vgt.possible_values())}',
                           caller=self, fatal_error=True)
 
-
         hi['has_A_Z_profile'] = 'A_Z_profile' in reader_builder['reader_field_info']
         hi['has_bottom_stress'] = 'bottom_stress' in reader_builder['reader_field_info']
         # work out in 3D run from water velocity
