@@ -196,11 +196,10 @@ def read_stats_file(file_name,nt=None):
                 new_data[name] = d[var]/d['count'] # calc mean
                 d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
 
-    # get
     if d['stats_type'] == 'grid':
-        d['connectivity_matrix'] = d['count'] / d['count_all_particles'][:, :, np.newaxis, np.newaxis]
+        d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis, np.newaxis]
     else:
-        d['connectivity_matrix'] = d['count'] / d['count_all_particles'][:, :, np.newaxis]
+        d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis]
 
     d.update(new_data)
     nc.close()
