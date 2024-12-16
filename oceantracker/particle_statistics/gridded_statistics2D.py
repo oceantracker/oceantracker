@@ -1,5 +1,4 @@
 import numpy as np
-from numba import njit
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util import cord_transforms
 
@@ -22,7 +21,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
                                             units='meters'),
                  'grid_span':           PLC(None, float, doc_str='(width-x, height-y)  of the statistics grid', units='meters (dx,dy) or degrees (dlon, dlat) if geographic',
                                             is_required=True),
-                 'role_output_file_tag' :    PVC('stats_gridded_time',str),
+                 'role_output_file_tag' :    PVC('stats_gridded_time_2D',str),
                     })
         self.grid = {}
 
