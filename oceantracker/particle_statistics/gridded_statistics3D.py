@@ -22,7 +22,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             'vertical_range': PCC([0.0, 100.0], single_cord=True, is3D=True,
                                   doc_str='Vertical extent of the statistics grid as (min, max). Depth is positive down e.g. 0 is surface and 100 is 100m below surface', 
                                   units='meters'),
-            'role_output_file_tag': PVC('stats_gridded_time_3d', str),
+            'role_output_file_tag': PVC('stats_gridded_time_3D', str),
         })
 
     def check_requirements(self):
