@@ -151,7 +151,6 @@ class OceanTrackerDataSet(object):
         info['dims']= {}
         info['attrs'] = {}
 
-
         for fileID, fn in enumerate(file_names):
             fi = dict(name=fn, ID=fileID, has_time=False)
             ds = self._open_file(fi['name'])
@@ -159,7 +158,8 @@ class OceanTrackerDataSet(object):
             if time_variable in ds.variables:
                 info['time_dim'] = ds[time_variable].dims[0]
                 info['time_dtype'] = ds[time_variable].dtype
-                info['time_units'] = ds.variables[info['time_variable']].encoding['units']
+                if 'units' in ds.variables[info['time_variable']].encoding:
+                    info['time_units'] = ds.variables[info['time_variable']].encoding['units']
                 fi['has_time'] = True
                 time = ds.variables[info['time_variable']].data
                 fi['time'] = time

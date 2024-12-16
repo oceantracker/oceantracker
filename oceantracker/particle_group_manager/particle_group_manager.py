@@ -31,8 +31,6 @@ class ParticleGroupManager(ParameterBaseClass):
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x_last_good',
                      write=False, vector_dim=nDim)  # location when last moving
 
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='particle_velocity',
-                     vector_dim=nDim)
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='velocity_modifier',
                      vector_dim=nDim)
 

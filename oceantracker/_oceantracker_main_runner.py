@@ -288,7 +288,7 @@ class _OceanTrackerRunner(object):
         reader_builder['catalog'], dataset = self._get_hydro_file_catalog(reader_builder['params'],crumbs=crumbs)
 
         # add info to reader bulider on if 3D hindcast and mapped fields
-        reader_builder = self._map_and_catagorise_field_variables(run_builder, reader_builder, reader)
+        reader_builder = self._map_and_catagorise_field_variables(reader_builder, reader)
 
         # set working vertical grid,if remapping to sigma grids
         vgt = si.vertical_grid_types
@@ -481,12 +481,13 @@ class _OceanTrackerRunner(object):
 
         # look through files to see which reader's signature matches
         # must check all files as varables may be split between files
-
         found_reader = None
         all_variables= []
         for fn in file_list:
-            ds= xr.open_dataset(fn)
-            all_variables +=list(ds.variables.keys())
+            ds= xr.open_dataset(fn, decode_times=False)
+            all_variables += list(ds.variables.keys())
+            ds.close()
+
         all_variables = list(set(all_variables)) # unique list of variables
         for name, r in known_readers.items():
             # check if each variable in the signature
@@ -494,7 +495,6 @@ class _OceanTrackerRunner(object):
             # break if all variables are found for this reader
             if all(found_var):
                 found_reader = name
-                found_data_set = ds
                 break
 
         if found_reader is None:
@@ -509,7 +509,7 @@ class _OceanTrackerRunner(object):
 
         return params, reader
 
-    def _map_and_catagorise_field_variables(self, run_builder,reader_builder, reader):
+    def _map_and_catagorise_field_variables(self, reader_builder, reader):
         # add to catalog if 3D hindcast and mapped internal fields to file variables
         # also builds field_info,  pamareters and info  required to set up reader fields
         ml = msg_logger
@@ -583,6 +583,7 @@ class _OceanTrackerRunner(object):
             if len(file_vars_info) < len(var_list):
                 ml.msg(f'not all vector components found for field {name}',
                        hint=f'missing file variables {[x for x in var_list if x not in file_vars_info]}', warning=True)
+
         # record field map
         reader_builder['reader_field_info'] = reader_field_vars_map
         catalog['reader_field_info'] = reader_field_vars_map

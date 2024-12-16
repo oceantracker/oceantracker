@@ -7,7 +7,7 @@ Known issues
 __________________
 
 
-Version '0.5.0.000 2024-11-26'
+Version '0.5.0.000 2024-12-20'
 _________________________
 
 Faster and simplified internal structure
@@ -58,9 +58,13 @@ must also be groegraphic in (lon, lat) order, eg. release points, polygons, stat
 Behaviour changes
 ______________________________________________________________
 
-#. message logger fatal_error flag is now "error" flag, exit_now flag is "fatal_error"
-#. All user give intervals are now rounded to the an integer number of particle tracking  time steps after the models starting time, eg. release_interval, update_interval( particle statistics and others)
-As these updates can only happen at a model time step.
+#. message logger fatal_error flag is now "error" flag, exit_now flag is "fatal_error".
+
+#.  All user give intervals are now rounded to the an integer number of particle tracking  time steps after the models starting time,
+    eg. release_interval, update_interval( particle statistics and others)
+    As these updates can only happen at a model time step.
+
+#. core particle property "particle_velocity" removed in favour of "water_velocity" property to remove ambiguity
 
 Known breaking changes- ask for help if needed to transition
 ______________________________________________________________
@@ -77,7 +81,6 @@ ______________________________________________________________
 #. Matlab code to read output is now in read_oceantracker.matlab
 
 Breaking changes for coders
-
 
 #. For coders getting parameter  argument mis-matches on update methods, all class update methods of part_prop and modifiers now have a n_time_step as the first parameter, the particle tracking time step starting at zero. This is the clock tick of the code, is used to more precisely take actions, and avoid situations such as the model time step in 3600sec, and the user request a 4000sec release interval, which currently result in periodic unequal release intervals and double pulses. So that methods like update(time_in_sec, active) become update(n_time_step, time_in_sec, active). Not all update methods will use these time syncing variables, but some variants may.
 
