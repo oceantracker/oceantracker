@@ -51,7 +51,7 @@ def get_case(n):
     time_step=3600.
     fall_vel= -0.01
     pulse_size = 10
-    use_open_boundary = False,
+    use_open_boundary = False
     reader= None
     is3D=True
     water_depth_file = None
@@ -166,7 +166,7 @@ def get_case(n):
 
         case 200:
             # FVCOM
-            root_input_dir=r'F:\Hindcast_reader_tests\FVCOM_LakeSuperior\historical_sample\2022'
+            root_input_dir=r'D:\Hindcast_reader_tests\FVCOM_LakeSuperior\historical_sample\2022'
             x0 = [[47.540046778478064, -87.64392022390314]]
             x0 = np.flip(np.asarray(x0), axis=1)
             file_mask = 'nos.lsofs.fields.n000*.nc'

@@ -84,7 +84,7 @@
             "name": "a_pollutant"
         },
         {
-            "class_name": "Speed"
+            "class_name": "WaterSpeed"
         },
         {
             "class_name": "AgeDecay",

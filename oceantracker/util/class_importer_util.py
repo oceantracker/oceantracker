@@ -145,8 +145,15 @@ class ClassImporter():
             mod,_ ,c = class_name.rpartition('.')
 
             # import module/file
-            m = self._import_module_from_string(mod)
+            try:
+                m = self._import_module_from_string(mod)
 
+            except Exception as e:
+                self.msg_logger.spell_check(f'Cannot find module/file class_name= "{class_name}", does not match any inbuilt module',
+                                            f'{mod}.{c}', list(self.full_name_class_map.keys()),
+                                            hint='A miss-spelt short class_name? or missing custom class?',
+                                            exception=e,
+                                            fatal_error=True)
             # now return get class within module/file
             try:
                 return getattr(m, c)  # get class as module attribute

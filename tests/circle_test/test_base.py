@@ -67,7 +67,7 @@ def plot_sample(caseInfoFile, num_to_plot=10 ** 3):
 
 # particle speed from change in positions is harsher test
     ax=plt.subplot(2, 2, 3)
-    #v=nc.variables['particle_velocity'][:,sel,:]
+
     dt = (data['time'][-1]-data['time'][0])/data['time'].shape[0]
     v=np.diff(x,axis=0)/dt
     vmag = np.sqrt(v[:, :, 0] ** 2 + v[:, :, 1] ** 2)

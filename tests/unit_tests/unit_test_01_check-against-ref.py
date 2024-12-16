@@ -32,7 +32,7 @@ def main(args):
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
-    ot.add_class('particle_properties', class_name='Speed')
+    ot.add_class('particle_properties', class_name='WaterSpeed')
     ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
@@ -41,7 +41,6 @@ def main(args):
 
     ot.add_class('particle_statistics', **test_definitions.poly_stats,
                  polygon_list=[dict(points=hm['polygon'])])
-
 
     ot.add_class('resuspension', critical_friction_velocity=0.01)
 

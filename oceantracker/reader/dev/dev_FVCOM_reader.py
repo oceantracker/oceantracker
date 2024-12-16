@@ -14,35 +14,42 @@ from oceantracker.shared_info import shared_info as si
 #todo use A_H and A_V fields in random walk
 #todo implement depth average mode using depth average variables in the file
 
-class unstructured_FVCOM(_BaseUnstructuredReader):
+class FVCOM(_BaseUnstructuredReader):
     # loads a standard SCHISM netcdf output file with nodal data
     # variable names can be tweaked via maps in shared_params, if non-standard names used
 
     def __init__(self):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params(field_variable_map= {
-                                                'water_velocity': PLC(['u','v','ww'], str, fixed_len=2),
-                                                'water_depth': PVC('h', str,doc_str='maps standard internal field name to file variable name'),
-                                                'tide': PVC('zeta', str,doc_str='maps standard internal field name to file variable name'),
-                                                'water_temperature': PVC('temp', str, doc_str='maps standard internal field name to file variable name'),
-                                                 'salinity': PVC('salinity', str, doc_str='maps standard internal field name to file variable name'),
-                                                 'wind_velocity': PLC(['uwind_speed', 'vwind_speed'], str, doc_str='maps standard internal field name to file variable name'),
-                                            'bottom_stress': PVC('not_known', str, doc_str='maps standard internal field name to file variable name'),
-                                            'A_Z_profile': PVC('not_known', str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                            },
-                                grid_variable_map= dict(
-                                            time=PVC('time', str, doc_str='Name of time variable in hindcast'),
-                                            x = PVC('SCHISM_hgrid_node_x', str, doc_str='x location of nodes'),
-                                            y = PVC('SCHISM_hgrid_node_y', str, doc_str='y location of nodes'),
-                                            zlevel=PVC('zcor', str),
-                                            triangles =PVC('SCHISM_hgrid_face_nodes', str),
-                                            bottom_cell_index =PVC('node_bottom_index', str),
-                                            is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
-                                            ),
+        self.add_default_params(
+                field_variable_map= dict(
+                        water_velocity= PLC(['u','v','ww'], str, fixed_len=2),
+                        water_depth = PVC('h', str,doc_str='maps standard internal field name to file variable name'),
+                        tide =PVC('zeta', str,doc_str='maps standard internal field name to file variable name'),
+                        water_temperature = PVC('temp', str, doc_str='maps standard internal field name to file variable name'),
+                        salinity = PVC('salinity', str, doc_str='maps standard internal field name to file variable name'),
+                        wind_velocity = PLC(['uwind_speed', 'vwind_speed'], str, doc_str='maps standard internal field name to file variable name'),
+                        bottom_stress = PVC(None, str, doc_str='maps standard internal field name to file variable name'),
+                        A_Z_profile = PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
+                        ),
+                grid_variable_map= dict(
+                        time=PVC('time', str, doc_str='Name of time variable in hindcast'),
+                        x = PVC('SCHISM_hgrid_node_x', str, doc_str='x location of nodes'),
+                        y = PVC('SCHISM_hgrid_node_y', str, doc_str='y location of nodes'),
+                        zlevel=PVC('zcor', str),
+                        triangles =PVC('SCHISM_hgrid_face_nodes', str),
+                        bottom_cell_index =PVC('node_bottom_index', str),
+                        is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
+                        ),
+                variable_signature = PLC(['u', 'v', 'zeta'], str,
+                                      doc_str='Variable names used to test if file is this format'),
+                )
 
-                                )
+    def get_hindcast_info(self, catalog):
 
+        dm = self.params['dimension_map']
+        fvm = self.params['field_variable_map']
+        gm = self.params['grid_variable_map']
 
     def is_file_format(self, file_name):
         nc = NetCDFhandler(file_name,'r')

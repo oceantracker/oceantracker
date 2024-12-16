@@ -24,7 +24,7 @@ class _BaseWriter(ParameterBaseClass):
                         update_interval =  PVC(None, float, min=0.01, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
                         output_step_count =  PVC(None,int,min=1,  obsolete=True,  doc_str='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
                         turn_on_write_particle_properties_list =  PLC(None, str,doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
-                        turn_off_write_particle_properties_list =  PLC(['water_velocity', 'particle_velocity','velocity_modifier'], str,
+                        turn_off_write_particle_properties_list =  PLC(['water_velocity', 'velocity_modifier'], str,
                                     doc_str='Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually'),
                         time_steps_per_per_file =  PVC(None, int,min=1, doc_str='Split track output into files with given number of time integer steps'),
                         write_dry_cell_flag =  PVC(False, bool, doc_str='Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down '),

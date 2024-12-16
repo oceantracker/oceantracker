@@ -59,7 +59,8 @@ class _BaseReader(ParameterBaseClass):
                             z=PVC( None, str, doc_str='name of dimensions for z layer boundaries '),
                             all_z_dims=PLC(None, str, doc_str='All z dims used to identify  3D variables'),
                             ),
-            'field_variables': PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
+            'field_variables' : PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
+            'drop_variables ' :PLC(None, str,doc_str='Variable for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant'),
         })  # list of normal required dimensions
 
         self.info['buffer_info'] = dict( time_steps_in_buffer = [])
