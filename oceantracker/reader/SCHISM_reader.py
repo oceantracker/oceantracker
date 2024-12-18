@@ -77,13 +77,16 @@ class SCHISMreaderNCDF(_BaseUnstructuredReader):
         return self.dataset.read_variable(self.params['grid_variable_map']['zlevel'], nt = nt)
 
     def read_triangles(self, grid):
-        # read nodes in triangles (N by 3) or mix of triangles and quad cells as (N by 4)
+        # read nodes in triangles (N by 3) or mix of triangles and quad cells as  (N by 4)
         ds = self.dataset
         gm = self.grid_variable_map
 
-        grid['triangles']  = ds.read_variable(gm['triangles']).data
-        grid['triangles'] =  grid['triangles'].astype(np.int32)
-        grid['triangles'] -= 1
+        tri = ds.read_variable(gm['triangles']).data
+        sel = np.isnan(tri)
+        tri[sel] = 0
+        tri = tri.astype(np.int32)
+        tri -= 1
+        grid['triangles'] = tri
         return grid
 
 

@@ -65,7 +65,7 @@ def get_case(n):
 
     match n:
         case 100:
-            root_input_dir = r'G:\Hindcasts_large\2024_OceanNumNZ-2022-06-20\final_version\2022\01'
+            root_input_dir = r'Z:\Hindcasts_large\2024_OceanNumNZ-2022-06-20\final_version\2022\01'
             output_file_base = 'NZnational'
             file_mask = 'NZfinite*.nc'
 
@@ -99,9 +99,22 @@ def get_case(n):
                 [-40.905652106497435, 173.88863555540422]]
             x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
             ax = None # Auck
-            title = 'Auckland test'
+            title = '2020_MalbroughSounds_10year_benPhD'
 
             geo_cords = True
+        case 122:
+            root_input_dir = r'D:\Hindcasts\UpperSouthIsland\2018_benHABS\nogrowth\1_Apr2018'
+            output_file_base = 'SoundsBen_Phd'
+            file_mask = 'Ny**.nc'
+            params['EPSG_code_meters_grid'] = 2193
+            x0=[[-40.788387332710876, 172.8418709119585],
+                [-40.905652106497435, 173.88863555540422]]
+            x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
+            ax = None # Auck
+            title = '2018_benHABS-nogrowth'
+
+            geo_cords = True
+
         case 141:
             #schism v5,
             root_input_dir = r'F:\Hindcast_reader_tests\Schimsv5\WHOI_calvin\SCHISM_v5'
