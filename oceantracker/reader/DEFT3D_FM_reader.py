@@ -11,7 +11,7 @@ from oceantracker.reader.util import  hydromodel_grid_transforms
 from oceantracker.util.numba_util import  njitOT
 from oceantracker.shared_info import shared_info as si
 
-class DELFTFM(_BaseUnstructuredReader):
+class DELF3D_TFM(_BaseUnstructuredReader):
     development = True
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
@@ -78,21 +78,36 @@ class DELFTFM(_BaseUnstructuredReader):
         hi['node_dim'] = dm['node']
         hi['num_nodes'] =  catalog['info']['dims'][hi['node_dim']]
 
-        if len(catalog['variables'][gm['triangles']]['dims']) > 4:
-            si.msg_logger.msg(f'DELFT3D FM-reader currently only works with triangle and quad cells, not cells with {mesh2d_face_nodes.shape[1]} sides',
-                   fatal_error=True, caller=self)
-
+        if hi['vert_grid_type'] == si.vertical_grid_types.Sigma:
+            si.msg_logger.msg('DEFT3D FM not yet tested with sigma vertical grid, only tested to work with fixed z level grid', warning=True)
         return hi
 
+    def read_horizontal_grid_coords(self, grid):
+        # reader nodal locations
+        ds = self.dataset
+        gm = self.grid_variable_map
 
+        x = ds.read_variable(gm['x']).data
+        y = ds.read_variable(gm['y']).data
+        grid['x'] = np.stack((x, y), axis=1).astype(np.float64)
+        return grid
 
-    def get_field_params(self,nc, name):
-        fmap = self.params['field_variable_map']
-        f_params = dict(time_varying=nc.is_var_dim(fmap[name][0], 'time'),
-                        is3D=nc.is_var_dim(fmap[name][0], 'mesh2d_nLayers'),
-                        is_vector=len(fmap[name]) > 1
-                        )
-        return f_params
+    def read_triangles(self, grid):
+        # read nodes in triangles (N by 3) or mix of triangles and quad cells as (N by 4)
+        ds = self.dataset
+        gm = self.grid_variable_map
+
+        tri = ds.read_variable(gm['triangles']).data
+        if tri.shape[1] > 4:
+            si.msg_logger.msg(
+                f'DELFT3D FM-reader currently only works with triangle and quad cells, not cells with {tri.shape[1]} sides',
+                fatal_error=True, caller=self)
+
+        sel = np.isnan(tri)
+        tri[sel] = 0
+        grid['triangles'] = tri.astype(np.int32) - 1 # make zero based
+
+        return grid
 
     def read_dry_cell_data(self,nt_index, buffer_index):
         # get dry cells from water depth and tide
@@ -112,9 +127,18 @@ class DELFTFM(_BaseUnstructuredReader):
         # first values in z axis is the top? so flip
         gm = self.params['grid_variable_map']
         fm = self.params['field_variable_map']
+        info = self.info
         ds = self.dataset
-        grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values
-        grid['z_layer'] =ds.read_variable(gm['z_layer']).data.astype(np.float32)   # layer center fractions
+
+        if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
+            grid['sigma'] = ds.read_variable('mesh2d_interface_sigma').data.astype(np.float32) # layer interfaces
+            grid['sigma'][0] = -1  # not sure why this value is 9.96920997e+36??
+            grid['sigma'] = 1.+ grid['sigma'] #
+            grid['sigma_layer'] = ds.read_variable('mesh2d_layer_sigma').data.astype(np.float32) # layer center
+        else:
+            # fixed z levels
+            grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values
+            grid['z_layer'] = ds.read_variable(gm['z_layer']).data.astype(np.float32)   # layer center fractions
 
         grid = super().build_vertical_grid(grid)
 
@@ -127,13 +151,19 @@ class DELFTFM(_BaseUnstructuredReader):
     def read_bottom_cell_index(self, grid):
         gm = self.params['grid_variable_map']
         fm = self.params['field_variable_map']
+        info =  self.info
         ds = self.dataset
-        # find bottom cell based on nans in a dummy read of mid-layer velocity after it has been converted to nodal values
-        u = ds.read_variable(fm['water_velocity'][0], nt=0).data  # from non nans in first hori velocity time step
-        u = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(u,
-                            grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
 
-        bottom_cell_index = self.find_layer_with_first_non_nan(u[0, :, :])
+        if info['vert_grid_type'] == si.vertical_grid_types.Zfixed:
+            # find bottom cell based on nans in a dummy read of mid-layer velocity after it has been converted to nodal values
+            u = ds.read_variable(fm['water_velocity'][0], nt=0).data  # from non nans in first hori velocity time step
+            u = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(u,
+                                grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
+            bottom_cell_index = self.find_layer_with_first_non_nan(u[0, :, :])
+        else:
+            # bottom cell is the first cell
+            bottom_cell_index = np.zeros((info['num_nodes'],),  dtype=np.int32)
+
         return bottom_cell_index
 
 
@@ -150,8 +180,10 @@ class DELFTFM(_BaseUnstructuredReader):
 
         # setp up node to face map and weights needed
         # to get nodal values from face values
-        grid['quad_face_nodes'] = ds.read_variable(gm['quad_face_nodes']).data - 1
-        grid['quad_face_nodes'] = numpy_util.ensure_int32_dtype(grid['quad_face_nodes'])
+        grid['quad_face_nodes'] = ds.read_variable(gm['quad_face_nodes']).data
+        sel = np.isnan(grid['quad_face_nodes'])
+        grid['quad_face_nodes'][sel] = 0
+        grid['quad_face_nodes'] = grid['quad_face_nodes'].astype(np.int32) - 1
 
         grid['node_to_quad_cell_map'],grid['quad_cells_per_node'] = hydromodel_grid_transforms.get_node_to_cell_map(grid['quad_face_nodes'], grid['x'].shape[0])
 
@@ -164,7 +196,7 @@ class DELFTFM(_BaseUnstructuredReader):
 
         return grid
 
-    def read_file_var_as_4D_nodal_values(self,var_name,field, nt=None):
+    def read_file_var_as_4D_nodal_values(self, var_name, var_info, nt=None):
         # read variable into 4D ( time, node, depth, comp) format
         # assumes same variable order in the file
         ds = self.dataset
@@ -174,22 +206,21 @@ class DELFTFM(_BaseUnstructuredReader):
         dm = params['dimension_map']
         info = self.info
 
-        data = ds.read_variable(var_name, nt=nt)
-        data_dims =data.dims
-        data = data.data
+        data = ds.read_variable(var_name, nt=nt).data
+
         # add time dim if needed
-        if info['time_dim'] not in data_dims: data = data[np.newaxis, ...]
+        if info['time_dim'] not in var_info['dims']: data = data[np.newaxis, ...]
 
         # add z dim if needed
-        if all(x not in data_dims for x in dm['all_z_dims']): data = data[..., np.newaxis]
+        if all(x not in var_info['dims'] for x in dm['all_z_dims']): data = data[..., np.newaxis]
 
         # some variables at nodes, some at edge mid points ( eg u,v,w)
-        if dm['cell_dim'] in data_dims:
+        if dm['cell_dim'] in var_info['dims']:
             # data is at cell center/element/triangle  move to nodes
             data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(
                                         data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
         # must be done after nodal values
-        if dm['z_layer_dim'] in data_dims:
+        if dm['z_layer_dim'] in var_info['dims']:
             data = hydromodel_grid_transforms.convert_mid_layer_fixedZ_top_bot_layer_values(
                 data, grid['z_layer'], grid['z'], grid['bottom_cell_index'], grid['water_depth'])
 

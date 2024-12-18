@@ -2,9 +2,7 @@ from oceantracker.shared_info import shared_info as si
 from oceantracker.reader._base_all_readers import _BaseReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC, ParameterListChecker as PLC
 import numpy as np
-from oceantracker.util.triangle_utilities import split_quad_cells
-import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
-from oceantracker.util.numpy_util import ensure_int32_dtype
+from oceantracker.reader.util import  hydromodel_grid_transforms
 
 class _BaseStructuredReader(_BaseReader):
     def __init__(self):
@@ -22,7 +20,7 @@ class _BaseStructuredReader(_BaseReader):
     def read_triangles(self, grid):
         # build triangles from regular grid
         # get nodes for each corner of quad
-        grid = hydromodel_grid_transforms.convert_regular_grid_to_triangles(grid, grid['land_mask'])
+        grid['triangles'] = hydromodel_grid_transforms.convert_regular_grid_to_triangles(grid, grid['land_mask'])
 
         return grid
 

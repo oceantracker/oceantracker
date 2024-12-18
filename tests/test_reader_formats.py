@@ -167,7 +167,7 @@ def get_case(n):
         case 200:
             # FVCOM
             root_input_dir=r'D:\Hindcast_reader_tests\FVCOM_LakeSuperior\historical_sample\2022'
-            x0 = [[47.540046778478064, -87.64392022390314]]
+            x0 = [[47.540046778478064, 360-87.64392022390314]]
             x0 = np.flip(np.asarray(x0), axis=1)
             file_mask = 'nos.lsofs.fields.n000*.nc'
             output_file_base = 'FVCOM_Lake_Superior'
@@ -222,7 +222,6 @@ def get_case(n):
             file_mask = 'Exmouth_FlowFM*.nc'
             output_file_base = 'DELF3D-FM_Exmouth'
             title = 'DELF3D-FM test'
-            reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = False
             show_grid = False
         case 402:
@@ -233,7 +232,6 @@ def get_case(n):
             file_mask = 'FlowFM_map*.nc'
             output_file_base = 'DELF3D-FM-sigma'
             title = 'DELF3D-FM sigma'
-            #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
 
             show_grid = True
 
@@ -260,16 +258,6 @@ def get_case(n):
             is3D = True
             show_grid = False
 
-        case 500:
-            # NEMO
-            root_input_dir = r'F:\Hindcast_reader_tests\NEMO\NemoNorthSeaORCA025-N006_data'
-            file_mask = '*.nc'
-            x0=[[57706.375512704304, 421967.24984360463]]
-
-            output_file_base = 'Nemo01'
-            title = 'Nemo test'
-            reader = 'oceantracker.reader.dev.dev_nemo_reader.NemoReader'
-            is3D = True
 
         case   1100:
             # batic sea GLORYS
@@ -476,8 +464,8 @@ if __name__ == '__main__':
             plot_tracks.animate_particles(track_data, axis_lims=None,
                                           title=params['user_note'], movie_file=plot_file, aspect_ratio=None,
                                           show_grid=plot_opt['show_grid'])
-
-            plot_tracks.plot_path_in_vertical_section(track_data, particleID=0,)
+            if track_data['x'].shape[1] > 2:
+                plot_tracks.plot_path_in_vertical_section(track_data, particleID=0,)
 
             plot_file = plot_base + '_decay_01.mp4' if args.save_plot else None
             plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],

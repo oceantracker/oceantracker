@@ -17,7 +17,7 @@ from oceantracker import definitions
 from oceantracker.util import json_util ,yaml_util, get_versions_computer_info
 from oceantracker.util.message_logger import GracefulError, MessageLogger
 from oceantracker.reader.util import get_hydro_model_info
-from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
+#from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
 import traceback
 
@@ -25,7 +25,7 @@ from  oceantracker.shared_info import shared_info as si
 
 msg_logger= MessageLogger()
 
-class _OceanTrackerRunner(object):
+class _OceanTrackerMainRunner(object):
     def __init__(self):
         pass
 
@@ -282,29 +282,28 @@ class _OceanTrackerRunner(object):
         # detect reader format and add clas_name to params
         reader_builder['params'], reader = self._detect_hydro_file_format(reader_builder['params'], file_list, crumbs=crumbs)
 
-        reader_builder['catalog'], dataset = self._get_hydro_file_catalog(reader_builder['params'],crumbs=crumbs)
 
-        # add info to reader bulider on if 3D hindcast and mapped fields
-        reader_builder = self._map_and_catagorise_field_variables(reader_builder, reader)
+        # sort files into time order and add info to reader bulider on if 3D hindcast and mapped field
+        reader_builder = reader.catalog_dataset(reader_builder, msg_logger=msg_logger,crumbs=crumbs)
 
         # set working vertical grid,if remapping to sigma grids
         vgt = si.vertical_grid_types
         hi = reader_builder['hindcast_info']
-        hi['vert_grid_type_in_files'] = hi['vert_grid_type']
+        hi['vert_grid_type_in_files'] = copy(hi['vert_grid_type'])
         if hi['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and si.settings.regrid_z_to_uniform_sigma_levels:
             hi['vert_grid_type'] = vgt.Sigma
             hi['regrid_z_to_uniform_sigma_levels'] = True
         elif hi['vert_grid_type'] in [vgt.Sigma, vgt.Zfixed]:
             hi['regrid_z_to_uniform_sigma_levels'] = False
         elif hi['is3D']:
-            si.msg_logger.msg(f'Unknown grid vertical type "{hi["vert_grid_type"]}"',
+            msg_logger.msg(f'Unknown grid vertical type "{hi["vert_grid_type"]}"',
                           hint=f'must be one of {str(vgt.possible_values())}',
                           caller=self, fatal_error=True)
 
         hi['has_A_Z_profile'] = 'A_Z_profile' in reader_builder['reader_field_info']
         hi['has_bottom_stress'] = 'bottom_stress' in reader_builder['reader_field_info']
         # work out in 3D run from water velocity
-        hi['geographic_coords'] = reader.detect_lonlat_grid(dataset,msg_logger)
+        hi['geographic_coords'] = reader.detect_lonlat_grid(msg_logger)
         return reader_builder, reader
 
 
@@ -439,17 +438,7 @@ class _OceanTrackerRunner(object):
             msg_logger.msg(f'No files found in input_dir, or its sub-dirs matching mask "{mask}"',
                            hint=f'searching with "gob" mask "{mask}"', fatal_error=True)
         return file_list
-    def _get_hydro_file_catalog(self, reader_params,  crumbs=''):
-        t0 = perf_counter()
-        ml = msg_logger
-        # open hindcast dataset and get the catalog
-        ds = OceanTrackerDataSet()
-        cat = ds.build_catalog(reader_params['input_dir'], reader_params['grid_variable_map']['time'],
-                               msg_logger=ml, crumbs=crumbs,
-                               file_mask=reader_params['file_mask'])
-        ml.progress_marker('Cataloged hydro-model files/variables in time order', start_time=t0)
 
-        return cat, ds
 
     def _detect_hydro_file_format(self, reader_params, file_list, crumbs=''):
         # detect hindcast format and add reader class_name to params if missing
@@ -466,22 +455,24 @@ class _OceanTrackerRunner(object):
         # first build full set of instances of known readers
         # and their variable signatures
         known_readers={}
+        drop_variables=[]
         for name, r in definitions.known_readers.items():
             params = deepcopy(reader_params)
             params['class_name'] = r
             reader = self.class_importer.make_class_instance_from_params('reader',
-                    params, check_for_unknown_keys=False, # dont flag unknown keys
-                    crumbs=crumbs + f'> loading reader "{name}"  class "{r}"', caller=self)
+                                    params, check_for_unknown_keys=False, # dont flag unknown keys
+                                    crumbs=crumbs + f'> loading reader "{name}"  class "{r}"', caller=self)
             known_readers[name] = dict(instance=reader,
                                 variable_sig = reader.params['variable_signature'],
                                 )
+            drop_variables += reader.params['drop_variables'] # find all problematic variables to drop
 
         # look through files to see which reader's signature matches
-        # must check all files as varables may be split between files
+        # must check all files as variables may be split between files
         found_reader = None
         all_variables= []
         for fn in file_list:
-            ds= xr.open_dataset(fn, decode_times=False)
+            ds= xr.open_dataset(fn, decode_times=False, drop_variables=drop_variables)
             all_variables += list(ds.variables.keys())
             ds.close()
 
@@ -506,90 +497,6 @@ class _OceanTrackerRunner(object):
 
         return params, reader
 
-    def _map_and_catagorise_field_variables(self, reader_builder, reader):
-        # add to catalog if 3D hindcast and mapped internal fields to file variables
-        # also builds field_info,  pamareters and info  required to set up reader fields
-        ml = msg_logger
-        catalog = reader_builder['catalog']
-
-        reader_builder['hindcast_info'] = catalog['info']
-
-        # additional info on vert grid etc, node dim etc
-        hi = reader.get_hindcast_info(catalog)
-
-        if hi['vert_grid_type'] is not None and hi['vert_grid_type'] not in si.vertical_grid_types.possible_values():
-            ml.msg(f'Coding error, dont recognise vert_grid_type grid type, got {hi["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
-                           hint=f'check reesder codes  get_hindcast_info() ', error=True)
-
-        reader_builder['hindcast_info'].update(hi)
-
-        # categorise field variables
-        file_vars = catalog['variables']
-        reader_field_vars_map = {}
-
-        # loop over mapped variables and loaded variables
-        mapped_fields= reader.params['field_variable_map']
-        for name in list(set(reader.params['load_fields'] + list(mapped_fields.keys()))):
-            # if named var not in map, try to use is name as a map,
-            # ie load named field is a file varaiable name
-            if name not in mapped_fields:
-                    mapped_fields[name] = name
-                    if name not in catalog['variables']:
-                        ml.msg(f' No  field_variable_map to load variable named "{name}" and no variable in file matching this name, so can not load this field',
-                               hint=f'Add a map for this variable readers "field_variable_map"  param or check spelling loaded variable name matches a file variable, current map is {str(mapped_fields)}',
-                               fatal_error=True)
-
-            # decompose variabele lis
-            var_list = mapped_fields[name]
-            if type(var_list) != list: var_list = [var_list]  # ensure it is a list
-
-            # use first variable to get basic info
-            v1 = var_list[0]
-            if v1 not in file_vars: continue
-
-            field_params = dict(time_varying=file_vars[v1]['has_time'],
-                                is3D = any(x in hi['all_z_dims'] for x in file_vars[v1]['dims']),
-                                    )
-            field_params['zlevels'] = reader_builder['hindcast_info']['num_z_levels'] if  field_params['is3D'] else  1
-
-            # work out if variable is a vector field
-            file_vars_info = {}
-
-            dm = reader.params['dimension_map']
-            for n_var, v in enumerate(var_list):
-                if v not in file_vars: continue  # listed var not in file, eg vecotion variable has npo vertical velocity
-
-                if dm['vector2D'] is not None and dm['vector2D'] in file_vars[v]['dims']:
-                    n_comp = 2
-                elif dm['vector3D'] is not None and dm['vector2D'] in file_vars[v]['dims']:
-                    n_comp = 3
-                else:
-                    n_comp = 1
-
-                s4D = [reader.params['time_buffer_size'] if field_params['time_varying'] else 1,
-                       hi['num_nodes'],
-                       hi['num_z_levels'] if field_params['is3D'] else 1,
-                       n_comp ]
-
-                file_vars_info[v] =dict(vector_components_per_file_var=n_comp,
-                                        shape4D=np.asarray(s4D,dtype=np.int32))
-
-            field_params['is_vector'] = sum(x['vector_components_per_file_var']for x in file_vars_info.values()) > 1
-            reader_field_vars_map[name] = dict(file_vars_info=file_vars_info,
-                                                params=field_params)
-            if len(file_vars_info) < len(var_list):
-                ml.msg(f'not all vector components found for field {name}',
-                       hint=f'missing file variables {[x for x in var_list if x not in file_vars_info]}', warning=True)
-
-        # record field map
-        reader_builder['reader_field_info'] = reader_field_vars_map
-        catalog['reader_field_info'] = reader_field_vars_map
-        # add grid variable info
-        reader_builder['grid_info'] = dict(variable_map=reader.params['grid_variable_map'])
-
-        ml.exit_if_prior_errors('Errors matching field variables with those in the file, see above')
-
-        return reader_builder
 
     def close(self):
         msg_logger.close()

@@ -31,30 +31,6 @@ class BaseGenericReader(_BaseReader):
              })  # list of normal required dimensions
 
 
-    def is_file_format(self,file_name):
-        # check if file matches this file format
-        nc = self._open_file(file_name)
-        gm = self.params['grid_variable_map']
-        fm  = self.params['field_variable_map']
-        dm = self.params['dimension_map']
-
-        is_file_type=  nc.is_dim(dm['time']) and nc.is_dim(dm['node']) and nc.is_var(gm['x'][0]) and nc.is_var(gm['x'][1]) and nc.is_var(fm['tide']) and nc.is_var(fm['water_depth'])
-        nc.close()
-        return is_file_type
-
-    def get_field_params(self, nc, name, crumbs=''):
-        # work out if feild is 3D ,etc
-        fmap = deepcopy(self.params['field_variable_map'][name])
-        dim_map = self.params['dimension_map']
-
-        if type(fmap) != list: fmap = [fmap]
-        f_params = dict(time_varying=nc.is_var_dim(fmap[0], dim_map['time']),
-                        is3D=nc.is_var_dim(fmap[0], dim_map['z']),
-                        is_vector=nc.is_var_dim(fmap[0],  dim_map['vector2D']) or nc.is_var_dim(fmap[0],  dim_map['vector3D']) or len(fmap) > 1
-                        )
-        return f_params
-
-
     def is_3D_variable(self,nc, var_name):
         # is variable 3D
         return  nc.is_var_dim(var_name,self.params['dimension_map']['z'])
@@ -114,16 +90,6 @@ class BaseGenericReader(_BaseReader):
     # Below are basic variable read methods for any new reader
     #---------------------------------------------------------
 
-
-    def read_time_sec_since_1970(self, nc, file_index=None):
-        vname = self.params['grid_variable_map']['time']
-        if file_index is None: file_index = np.arange(nc.var_shape(vname)[0])
-
-        time = nc.read_a_variable(vname, sel=file_index)
-
-        if self.params['isodate_of_hindcast_time_zero'] is not None:
-            time += time_util.isostr_to_seconds(self.params['isodate_of_hindcast_time_zero'])
-        return time
 
     def read_horizontal_grid_coords(self,  grid):
         params= self.params
@@ -246,7 +212,7 @@ class BaseGenericReader(_BaseReader):
             # get dry cells from hydro file for each triangle allowing for splitting quad cells
             self.read_dry_cell_data(self, nc, grid, fields, file_index, is_dry_cell_buffer, buffer_index)
 
-    def read_zlevel_as_float32(self, nc,grid,fields, file_index, zlevel_buffer, buffer_index):
+    def read_zlevel(self, nc,grid,fields, file_index, zlevel_buffer, buffer_index):
         # read in place
         zlevel_buffer[buffer_index,...] = nc.read_a_variable('zcor', sel=file_index).astype(np.float32)
 

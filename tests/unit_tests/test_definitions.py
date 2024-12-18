@@ -40,7 +40,7 @@ reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_read
              dimension_map=dict(time='t', rows='y', cols='x'),
              grid_variable_map=dict(time='Time', x=['x_grid', 'y_grid']),
              field_variable_map=dict(water_depth='Depth', water_velocity=['U', 'V'], tide='Tide'),
-             hydro_model_cords_geographic=False)
+             )
 
 reader_NZnational=dict(  input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2022\01',
             file_mask = 'NZfinite*.nc')

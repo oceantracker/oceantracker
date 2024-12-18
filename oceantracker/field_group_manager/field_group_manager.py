@@ -8,7 +8,7 @@ from copy import deepcopy
 from oceantracker.shared_info import shared_info as si
 from  oceantracker.definitions import  node_types, cell_search_status_flags
 from oceantracker.interpolator.util import  triangle_eval_interp
-from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
+#from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
 class FieldGroupManager(ParameterBaseClass):
     # class holding data in file and ability to spatially interpolate fields that it holds
@@ -163,13 +163,8 @@ class FieldGroupManager(ParameterBaseClass):
         self.reader = si._class_importer.make_class_instance_from_params('reader', reader_builder['params'],
                                    caller=self, crumbs=f'setup_hydro_fields> reader class ')
         reader = self.reader
+        reader.initial_setup(reader_builder)
 
-
-        # first build data set
-        dataset = OceanTrackerDataSet()
-        dataset.build_dataset_from_catalog(reader_builder['catalog'])
-
-        reader.initial_setup(reader_builder,dataset)
         # add request to load compulsory fields
         reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
 

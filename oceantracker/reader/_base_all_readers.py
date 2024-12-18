@@ -23,6 +23,8 @@ from oceantracker.definitions import node_types, cell_search_status_flags
 
 from oceantracker.shared_info import shared_info as si
 
+from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
+
 class _BaseReader(ParameterBaseClass):
 
     def __init__(self):
@@ -60,7 +62,7 @@ class _BaseReader(ParameterBaseClass):
                             all_z_dims=PLC(None, str, doc_str='All z dims used to identify  3D variables'),
                             ),
             'field_variables' : PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
-            'drop_variables ' :PLC(None, str,doc_str='Variable for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant'),
+            'drop_variables' :PLC(None, str,doc_str='Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant'),
         })  # list of normal required dimensions
 
         self.info['buffer_info'] = dict( time_steps_in_buffer = [])
@@ -77,7 +79,7 @@ class _BaseReader(ParameterBaseClass):
 
     def read_horizontal_grid_coords(self, grid):   nopass()
 
-    def read_triangles(self, grid):     nopass()
+    def read_triangles(self, grid):     nopass('need a read_triangle methods for both structured (which makes trianglation from mesh) and unstructured grids')
 
     def read_zlevel(self, nt):   pass
 
@@ -87,31 +89,13 @@ class _BaseReader(ParameterBaseClass):
 
     def set_up_uniform_sigma(self,grid): pass
 
-    def is_file_format(self, catalog):
-        # check if variables match signature
-        vars = catalog['variables'].keys()
-        has_var = all([x in vars for x in self.params['variable_signature']])
-        return has_var
-
-
     def preprocess_field_variable(self, name,grid, data): return data
 
 
-    # calculate dry cell flags, if any cell node is dry
-    # not required but have defaults
-    def read_horizontal_grid_coords(self, grid):
-        # reader nodal locations
-        ds = self.dataset
-        gm = self.grid_variable_map
-
-        x = ds.read_variable(gm['x']).data
-        y = ds.read_variable(gm['y']).data
-        dx_nodes  = np.stack((x, y), axis=1).astype(np.float64)
-        return dx_nodes
 
     def read_bottom_cell_index(self, grid):
         # dummy bottom cell
-        bottom_cell_index = np.full((grid['x'].shape[0],), 0, dtype=np.int32)
+        bottom_cell_index = np.full((self.info['num_nodes'],), 0, dtype=np.int32)
         return bottom_cell_index
 
     def read_open_boundary_data_as_boolean(self, grid):
@@ -129,11 +113,16 @@ class _BaseReader(ParameterBaseClass):
     # -------------------------------------------------
     # core reader processes
 
-    def initial_setup(self,reader_builder, dataset):
+    def initial_setup(self, reader_builder):
         self.reader_builder = reader_builder
-        self.dataset = dataset
+
         self.grid_variable_map = reader_builder['grid_info']['variable_map']
         self.reader_field_vars_map = reader_builder['reader_field_info']
+        self.catalog = reader_builder['catalog']
+
+        # build dat set from reader builder catalog
+        self.open_dataset()
+        self.dataset.build_dataset_from_catalog(self.catalog)
 
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
@@ -144,6 +133,109 @@ class _BaseReader(ParameterBaseClass):
         hi = self.reader_builder['hindcast_info']
         info.update(hi)
         pass
+
+    def catalog_dataset(self,reader_builder, msg_logger=None, crumbs=None):
+        # get files in time sorted order and info on its fields
+        params = self.params
+        self.open_dataset()
+        reader_builder['catalog'] = self.dataset.build_catalog(params['input_dir'], params['grid_variable_map']['time'],
+                                                  msg_logger=msg_logger, crumbs=crumbs,
+                                                  file_mask=params['file_mask'])
+        catalog = reader_builder['catalog']
+
+        # Builds field_info,  parameters and info  required to set up reader fields
+
+        catalog = reader_builder['catalog']
+
+        reader_builder['hindcast_info'] = catalog['info']
+
+        # additional info on vert grid etc, node dim etc
+        hi = self.get_hindcast_info(catalog)
+
+        # todo check all required fields are set
+
+
+        if hi['vert_grid_type'] is not None and hi['vert_grid_type'] not in si.vertical_grid_types.possible_values():
+            msg_logger.msg(f'Coding error, dont recognise vert_grid_type grid type, got {hi["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
+                hint=f'check reader codes  get_hindcast_info() ', error=True)
+
+        reader_builder['hindcast_info'].update(hi)
+
+        # categorise field variables
+        file_vars = catalog['variables']
+        reader_field_vars_map = {}
+
+        # loop over mapped variables and loaded variables
+        mapped_fields = params['field_variable_map']
+        for name in list(set(params['load_fields'] + list(mapped_fields.keys()))):
+            # if named var not in map, try to use is name as a map,
+            # ie load named field is a file varaiable name
+            if name not in mapped_fields:
+                mapped_fields[name] = name
+                if name not in catalog['variables']:
+                    msg_logger.msg(
+                        f' No  field_variable_map to load variable named "{name}" and no variable in file matching this name, so can not load this field',
+                        hint=f'Add a map for this variable readers "field_variable_map"  param or check spelling loaded variable name matches a file variable, current map is {str(mapped_fields)}',
+                        fatal_error=True)
+
+            # decompose variabele lis
+            var_list = mapped_fields[name]
+            if type(var_list) != list: var_list = [var_list]  # ensure it is a list
+
+            # use first variable to get basic info
+            v1 = var_list[0]
+            if v1 not in file_vars: continue
+
+            field_params = dict(time_varying=file_vars[v1]['has_time'],
+                                is3D=any(x in hi['all_z_dims'] for x in file_vars[v1]['dims']),
+                                )
+            field_params['zlevels'] = reader_builder['hindcast_info']['num_z_levels'] if field_params['is3D'] else 1
+
+            # work out if variable is a vector field
+            file_vars_info = {}
+
+            dm = params['dimension_map']
+            for n_var, v in enumerate(var_list):
+                if v not in file_vars: continue  # listed var not in file, eg vecotion variable has npo vertical velocity
+
+                if dm['vector2D'] is not None and dm['vector2D'] in file_vars[v]['dims']:
+                    n_comp = 2
+                elif dm['vector3D'] is not None and dm['vector2D'] in file_vars[v]['dims']:
+                    n_comp = 3
+                else:
+                    n_comp = 1
+
+                s4D = [params['time_buffer_size'] if field_params['time_varying'] else 1,
+                       hi['num_nodes'],
+                       hi['num_z_levels'] if field_params['is3D'] else 1,
+                       n_comp]
+
+                file_vars_info[v] = dict(vector_components_per_file_var=n_comp,
+                                         shape4D=np.asarray(s4D, dtype=np.int32),
+                                         time_varying= field_params['time_varying'],
+                                         is3D= field_params['is3D'] ,
+                                         dims = list(file_vars[v]['dims'].keys()))
+
+            field_params['is_vector'] = sum(x['vector_components_per_file_var'] for x in file_vars_info.values()) > 1
+            reader_field_vars_map[name] = dict(file_vars_info=file_vars_info,
+                                               params=field_params)
+            if len(file_vars_info) < len(var_list):
+                msg_logger.msg(f'not all vector components found for field {name}',
+                       hint=f'missing file variables {[x for x in var_list if x not in file_vars_info]}', warning=True)
+
+        # record field map
+        reader_builder['reader_field_info'] = reader_field_vars_map
+        catalog['reader_field_info'] = reader_field_vars_map
+        # add grid variable info
+        reader_builder['grid_info'] = dict(variable_map= params['grid_variable_map'])
+
+        msg_logger.exit_if_prior_errors('Errors matching field variables with those in the file, see above')
+
+        return reader_builder
+
+    def open_dataset(self):
+        params = self.params
+        self.dataset = OceanTrackerDataSet(drop_variables=params['drop_variables'])
 
 
     def build_reader(self, gridID=0):
@@ -204,7 +296,7 @@ class _BaseReader(ParameterBaseClass):
             # 2D
             grid['zlevel'] = None
 
-        #todo is below needed???
+        #todo is below cneeded???
         for name in ['zlevel', 'zlevel_fractions']:
             if name in grid:
                 v = grid[name]
@@ -216,18 +308,16 @@ class _BaseReader(ParameterBaseClass):
         # read nodal values and triangles
         params = self.params
         info = self.info
-        grid['x'] = self.read_horizontal_grid_coords(grid) # read nodal x's
+        grid = self.read_horizontal_grid_coords(grid) # read nodal x's
 
         bounds =np.asarray( [grid['x'].min(axis=0), grid['x'].max(axis=0)])
-
-
 
         b = f'{np.array2string(bounds[0], precision=3, floatmode="fixed")} to {np.array2string(bounds[1], precision=3, floatmode="fixed")}'
 
         info['bounding_box'] = b
-        si.msg_logger.msg(f'Hydro-model is "{"3D" if info["is3D"] else "2D"}", in geographic coords = "{info["geographic_coords"] }"  type "{self.__class__.__name__}"',
+        si.msg_logger.msg(f'Hydro-model is "{"3D" if info["is3D"] else "2D"}", type "{self.__class__.__name__}"',
                           tabs=2,note=True, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
-
+        si.msg_logger.msg(f'Geographic coords = "{info["geographic_coords"] }" ',tabs=4)
         si.msg_logger.msg(f'Hindcast start: {info["start_date"]}  end:  {info["end_date"]}', tabs=4)
         dt = time_util.seconds_to_pretty_duration_string(info['time_step'])
         si.msg_logger.msg(f'time step = {dt}, number of time steps= {info["total_time_steps"]} ',
@@ -235,7 +325,7 @@ class _BaseReader(ParameterBaseClass):
         si.msg_logger.msg('grid bounding box = ' + b, tabs=5)
 
         # reader triangles
-        grid['triangles'] = self.read_triangles(grid)
+        grid = self.read_triangles(grid)
         grid['quad_cells_to_split'],grid['triangles'] = self.find_and_split_quad_cells(grid['triangles'])
 
         # find nodes that are used in triangulation (ie not land)
@@ -402,7 +492,8 @@ class _BaseReader(ParameterBaseClass):
 
         # add variable info on file variables list for reader fields
         if name in reader_builder['reader_field_info']:
-            i.info.update(file_vars_info=reader_builder['reader_field_info'][name]['file_vars_info'])
+            i.info.update(file_vars_info=reader_builder['reader_field_info'][name]['file_vars_info'],
+                          )
 
         self.fields[name] = i
         return i
@@ -580,13 +671,13 @@ class _BaseReader(ParameterBaseClass):
         out = np.zeros(s, dtype=np.float32)  # todo faster make a generic  buffer at start
 
         m = 0  # num of vector components read so far
-        for var_name, f in field.info['file_vars_info'].items() :
+        for var_name, var_info in field.info['file_vars_info'].items() :
             if var_name is None: continue
-            data = self.read_file_var_as_4D_nodal_values(var_name,f, nt=nt_index)
-            m1 = m + f['vector_components_per_file_var']
+            data = self.read_file_var_as_4D_nodal_values(var_name, var_info,  nt=nt_index)
+            m1 = m + var_info['vector_components_per_file_var']
             # get view of where in buffer data is to be placed
             out[:, :, :, m:m1] = data
-            m += f['vector_components_per_file_var']
+            m += var_info['vector_components_per_file_var']
         return out
 
     def read_time_varying_grid_variables(self, nt, buffer_index):
@@ -645,13 +736,13 @@ class _BaseReader(ParameterBaseClass):
         nt_hindcast = self.time_to_hydro_model_index(time_sec)
         return nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
-    def detect_lonlat_grid(self, dataset,msg_logger):
-        x= dataset.read_variable(self.params['grid_variable_map']['x']).data
+    def detect_lonlat_grid(self, msg_logger):
+        x = self.dataset.read_variable(self.params['grid_variable_map']['x']).data
         # look at range to see if too small to be meters grid
         islatlong=  (np.nanmax(x)- np.nanmin(x) < 360) or (np.nanmax(x)- np.nanmin(x) < 360)
 
         if islatlong:
-            msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so not a meters grid ', note=True,
+            msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so using a native  (lon, lat ) a grid, all input coords  should be be lon lat ', note=True,
                               caller = self)
 
         return islatlong
@@ -713,6 +804,7 @@ class _BaseReader(ParameterBaseClass):
         # pre version 0.5 json outline
         #output_files['grid_outline'] = output_files['output_file_base'] + '_' + key + '_outline.json'
         #json_util.write_JSON(path.join(output_files['run_output_dir'], output_files['grid_outline']), grid['grid_outline'])
+
 
 
     def close(self):
