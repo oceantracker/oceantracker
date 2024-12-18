@@ -7,7 +7,7 @@ from datetime import  datetime
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.shared_info import shared_info as si
 from oceantracker.util.numba_util import njitOT
-from oceantracker.util.numpy_util import ensure_int32_dtype
+
 from copy import copy
 
 class GLORYSreader(_BaseStructuredReader):
@@ -102,7 +102,7 @@ class GLORYSreader(_BaseStructuredReader):
 
         grid['x'] =  np.stack((grid['lon'].ravel(),grid['lat'].ravel()),  axis=1)
 
-        return grid['x']
+        return grid
 
 
     def build_hori_grid(self, grid):
@@ -138,15 +138,16 @@ class GLORYSreader(_BaseStructuredReader):
         grid['bottom_cell_index_grid'] = ds.read_variable(gm['bottom_cell_index']).data - self.params['one_based_indices']
         # file cell count is top down, convert to bottom up index
         grid['bottom_cell_index_grid'] = cat['info']['num_z_levels'] - grid['bottom_cell_index_grid'] # do this before making an it to capture nans
+
         # land nodes use 0
         sel = np.isnan(grid['bottom_cell_index_grid'])
         grid['bottom_cell_index_grid'][sel] = 0
 
-        grid['bottom_cell_index_grid'] =  ensure_int32_dtype(grid['bottom_cell_index_grid'])
+        grid['bottom_cell_index_grid'] =    grid['bottom_cell_index_grid'].astype(np.int32)
 
         return grid['bottom_cell_index_grid'].ravel()
 
-    def read_file_var_as_4D_nodal_values(self,var_name, var_info, nt=None):
+    def read_file_var_as_4D_nodal_values(self,var_name, var_info,  nt=None):
         # reformat file variable into 4D time,node,depth, components  form
 
         ml = si.msg_logger

@@ -40,7 +40,6 @@ class ROMsNativeReader(_BaseStructuredReader):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
         self.add_default_params(
-                hydro_model_cords_geographic= PVC(False, bool, doc_str='Force conversion given nodal lat longs to a UTM meters grid, only used if lat long coordinates not auto detected'),
 
                 field_variable_map= {'water_velocity': PLC(['u','v','w'], str, fixed_len=3),
                                     'water_depth': PVC('h', str),
@@ -128,7 +127,7 @@ class ROMsNativeReader(_BaseStructuredReader):
 
         grid['x'] =  np.stack((grid['lon'].ravel(),grid['lat'].ravel()),  axis=1)
 
-        return grid['x']
+        return grid
 
 
 
@@ -150,14 +149,12 @@ class ROMsNativeReader(_BaseStructuredReader):
         grid = self.grid
 
         # get xarray variable
-        data = ds.read_variable(var_name, nt=nt)
-        data_dims = data.dims
-        data = data.data  # now a numpy array for numba to work on
+        data = ds.read_variable(var_name, nt=nt).data
 
         # add dummy time dim if none
-        if info['time_dim'] not in data_dims: data = data[np.newaxis,...]
+        if info['time_dim'] not in var_info['dims']: data = data[np.newaxis,...]
 
-        if any(x in info['all_z_dims'] for x in data_dims):
+        if var_info['is3D']:
             # move depth to last dim
             # also depth dim [0] is deepest value, like schisim, ie cold water at bottom
             data = np.transpose(data,[0,2,3,1])
@@ -168,14 +165,14 @@ class ROMsNativeReader(_BaseStructuredReader):
         # data is now shaped as (time, row, col, depth)
 
         # convert data  to psi grid, from other variable grids if needed
-        if 'eta_rho' in data_dims:
+        if 'eta_rho' in var_info['dims']:
             data = rho_grid_to_psi(data, grid['rho_land_mask'])
 
-        elif 'eta_u' in data_dims:
+        elif 'eta_u' in var_info['dims']:
             # masked value 10^36 ,  so set to zero before finding mean value for psi grid
             data = u_grid_to_psi(data, grid['u_land_mask'])
 
-        elif  'eta_v' in data_dims:
+        elif  'eta_v' in var_info['dims']:
             data = v_grid_to_psi(data, grid['v_land_mask'])
 
         # now flatten (time,rows, col, depth)  to  (time,nodes, depth)
@@ -188,7 +185,7 @@ class ROMsNativeReader(_BaseStructuredReader):
 
         data = data.reshape( (s[0],s[1]*s[2], s[3])) # this should match flatten in "C" order
 
-        if 's_rho' in data_dims:
+        if 's_rho' in var_info['dims']:
             # convert mid-layer values to values at layer boundaries, ie zlevels
             data = convert_mid_layer_sigma_top_bot_layer_values(data, grid['sigma_layer'], grid['sigma'])
 

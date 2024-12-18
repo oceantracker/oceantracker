@@ -21,7 +21,7 @@ from oceantracker import definitions
 from oceantracker.util import json_util ,yaml_util, get_versions_computer_info
 from oceantracker.util.message_logger import GracefulError, MessageLogger
 
-from oceantracker._oceantracker_main_runner import _OceanTrackerRunner
+from oceantracker._oceantracker_main_runner import _OceanTrackerMainRunner
 
 import traceback
 
@@ -35,7 +35,7 @@ help_url_base = 'https://oceantracker.github.io/oceantracker/_build/html/info/'
 
 def run(params):
     '''Run a single OceanTracker case using given parameters'''
-    ot = _OceanTrackerRunner()
+    ot = _OceanTrackerMainRunner()
     case_info_files = ot.run(deepcopy(params))  # run on copy to preserve external state
     return case_info_files
 
@@ -125,7 +125,7 @@ class OceanTracker():
 
     def run(self):
         msg_logger.progress_marker('Starting run using helper class')
-        ot_runner= _OceanTrackerRunner()
+        ot_runner= _OceanTrackerMainRunner()
         # todo print helper message here at end??
         msg_logger.exit_if_prior_errors('Found errors see above')
 

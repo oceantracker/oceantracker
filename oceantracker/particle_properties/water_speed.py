@@ -10,7 +10,7 @@ class WaterSpeed(CustomParticleProperty):
     '''
     def __init__(self):
         super().__init__()
-        self.add_default_params(  name = PVC('speed', str,doc_str='name used within code and in output',units='m/s'),
+        self.add_default_params(  name = PVC('water_speed', str,doc_str='name used within code and in output', units='m/s'),
                                   )
 
     def update(self,n_time_step, time_sec,active):

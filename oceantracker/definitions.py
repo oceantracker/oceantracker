@@ -31,8 +31,8 @@ known_readers = dict(
                 ROMS =  'oceantracker.reader.ROMS_reader.ROMsNativeReader',
                 SCHISM_v5 =  'oceantracker.reader.SCHISM_reader_v5.SCHISMreaderNCDFv5',
                 GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
-                DEFT3D_FM =  'oceantracker.reader.delft_fm.DELFTFM',
-                FVCOM =  'oceantracker.reader.dev.dev_FVCOM_reader.FVCOM',
+                DEFT3D_FM =  'oceantracker.reader.DEFT3D_FM_reader.DELF3D_TFM',
+                #FVCOM =  'oceantracker.reader.dev.dev_FVCOM_reader.FVCOM',
 
                 #generic =  'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 #dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',

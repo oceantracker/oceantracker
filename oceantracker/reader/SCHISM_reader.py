@@ -76,6 +76,26 @@ class SCHISMreaderNCDF(_BaseUnstructuredReader):
     def read_zlevel(self, nt):
         return self.dataset.read_variable(self.params['grid_variable_map']['zlevel'], nt = nt)
 
+    def read_triangles(self, grid):
+        # read nodes in triangles (N by 3) or mix of triangles and quad cells as (N by 4)
+        ds = self.dataset
+        gm = self.grid_variable_map
+
+        grid['triangles']  = ds.read_variable(gm['triangles']).data
+        grid['triangles'] =  grid['triangles'].astype(np.int32)
+        grid['triangles'] -= 1
+        return grid
+
+
+    def read_horizontal_grid_coords(self, grid):
+        # reader nodal locations
+        ds = self.dataset
+        gm = self.grid_variable_map
+
+        x = ds.read_variable(gm['x']).data
+        y = ds.read_variable(gm['y']).data
+        grid['x']  = np.stack((x, y), axis=1).astype(np.float64)
+        return grid
 
     def read_bottom_cell_index(self, grid):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid
@@ -86,7 +106,7 @@ class SCHISMreaderNCDF(_BaseUnstructuredReader):
             bottom_cell_index= ds.read_variable(var_name).data - 1
         else:
             # S  grid bottom cell index = zero
-            bottom_cell_index = np.zeros((grid['x'].shape[0],),dtype=np.int32)
+            bottom_cell_index = np.zeros((self.info['num_nodes'],), dtype=np.int32)
         return bottom_cell_index
 
     def read_dry_cell_data(self,nt_index, buffer_index):

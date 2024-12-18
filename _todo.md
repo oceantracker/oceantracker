@@ -2,7 +2,7 @@
 
 # Required for version 0.5
 1. DEFT3D FM
-   1. 3D sigma reader
+   1. 3D sigma reader requires vertical regridder
 1. Stats
     1. matab read polygon
 1. write of case info file even if errors, trap json encoding erorrs 
@@ -32,7 +32,8 @@
 1. used np.datetime64, milli sec internally
 2. Add positive=True to param checker to ensure vale is >0
 2. faster to do dry cellby updating adjacency matrix? aviods addtional decsion in cel serach
-1, throw error if all release points in a release group or all of polygon vertices  are outside domain
+1. throw error if all release points in a release group or all of polygon vertices  are outside domain
+1. Spell checking dictionary like class, against existing keys
 
 ## Niggles that need sorting some time
 
@@ -58,7 +59,7 @@
 1. read write polygons from geo-jsons, release groups poly stats
 1. add netcdf variable atributes. dimensions etc when reading output
 1.  add message logging to post processing
-2. 
+2.  remove dimension map in favour of using get_hindcast_info() method
 
 # Other
 

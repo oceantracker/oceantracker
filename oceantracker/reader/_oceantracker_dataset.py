@@ -1,10 +1,7 @@
 import numpy as np
-from oceantracker.reader.SCHISM_reader import SCHISMreaderNCDF
 from os import path ,walk
 from glob import glob
-from oceantracker.util import class_importer_util, basic_util
 from oceantracker.shared_info import shared_info as si
-from oceantracker.util.message_logger import MessageLogger
 import xarray as xr
 from time import perf_counter
 from copy import  copy, deepcopy
@@ -15,9 +12,13 @@ class OceanTrackerDataSet(object):
     copes with variables being help in different files
     assumes - all files with variables with t time dimension hane
             - assume time variable has units atrbute which enables x array to convert to datetime64
-
     '''
+    def __init__(self,drop_variables=None):
+        self.drop_variables =drop_variables
+
+
     def build_catalog(self, input_dir, time_variable, file_mask='*.nc', msg_logger=None, crumbs=''):
+        # get all files in sorted order
         t0 = perf_counter()
         self.msg_logger= msg_logger
         self.crumbs= crumbs +'OceanTrackerDataSet> '
@@ -134,7 +135,7 @@ class OceanTrackerDataSet(object):
         return out
 
     def _open_file(self, file_name):
-        ds =xr.open_dataset(file_name )
+        ds = xr.open_dataset(file_name, drop_variables=self.drop_variables)
         return ds
 
     def _unpack_variables(self, file_names, time_variable):
@@ -156,6 +157,7 @@ class OceanTrackerDataSet(object):
             ds = self._open_file(fi['name'])
             # add time info if present
             if time_variable in ds.variables:
+                # add time info from files with time varying variables
                 info['time_dim'] = ds[time_variable].dims[0]
                 info['time_dtype'] = ds[time_variable].dtype
                 if 'units' in ds.variables[info['time_variable']].encoding:

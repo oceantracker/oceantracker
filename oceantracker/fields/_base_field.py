@@ -33,6 +33,7 @@ class _BaseField(ParameterBaseClass):
         ]
 
         self.data = np.full(s, 0., dtype=np.float32)  # all fields are float 32
+        self.info.update(params)
 
     def is_time_varying(self): return self.data.shape[0] > 1
     def is3D(self): return  self.data.shape[2] > 1

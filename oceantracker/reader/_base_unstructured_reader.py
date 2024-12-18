@@ -4,28 +4,19 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 import numpy as np
 from  oceantracker.util import time_util, numpy_util
 import oceantracker.reader.util.hydromodel_grid_transforms as  hydromodel_grid_transforms
-from oceantracker.util.numpy_util import ensure_int32_dtype
+
 class _BaseUnstructuredReader(_BaseReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
-            dimension_map=dict(node=PVC('node', str, doc_str='Nodes in grid', is_required=True)),
+            dimension_map=dict(node=PVC(None, str, doc_str='Nodes in grid', is_required=True)),
         )  # list of normal required dimensions
 
     # Below are basic variable read methods for any new reader
     # ---------------------------------------------------------
 
 
-    def read_triangles(self, grid):
-        # read nodes in triangles (N by 3) or mix of triangles and quad cells as (N by 4)
-        ds = self.dataset
-        gm = self.grid_variable_map
 
-        tri = ds.read_variable(gm['triangles']).data
-        tri = numpy_util.ensure_int32_dtype(tri)
-        if self.params['one_based_indices']:  tri-= 1  # make zero based
-        tri = ensure_int32_dtype(tri,missing_value=-1)
-        return tri
 
     def read_water_depth(self, grid):
         ds = self.dataset
@@ -60,6 +51,7 @@ class _BaseUnstructuredReader(_BaseReader):
 
         # get profile with the smallest bottom layer  tickness as basis for first sigma layer
         node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],grid['bottom_cell_index'])
+
         # use layer fractions from this node to give layer fractions everywhere
         # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
         nz_bottom = grid['bottom_cell_index'][node_thinest_bot_layer]
