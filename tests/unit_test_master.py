@@ -5,6 +5,8 @@ from glob import glob
 import importlib
 import  sys
 from oceantracker.util import json_util, yaml_util
+import unit_tests.test_definitions
+import oceantracker.main
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -1,6 +1,8 @@
 # To do List
 
 # Required for version 0.5
+1. check available RAM or slow running, which happens when memory use exceeds physical ram, and uses disk cacheing,
+2. warn to reduce number of processors used below max available  (to have fewer simultaneous readers memory buffers  ) and/or reduce memory use with smaller reader time_buffer_size 
 1. DEFT3D FM
    1. 3D sigma reader requires vertical regridder
 1. Stats

@@ -1,5 +1,5 @@
 from time import perf_counter
-
+import psutil
 
 import numpy as np
 from oceantracker.util import time_util
@@ -75,6 +75,11 @@ class Solver(ParameterBaseClass):
             t0_step = perf_counter()
             self.start_update_timer()
             time_sec = model_times[n_time_step]
+
+            # warn of  high physical memory use
+            if psutil.virtual_memory().percent > 95:
+                ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
+                       hint=f'For parallel runs,reduce "processors" setting below max. available (={psutil.cpu_count(logical=False)} cores) to have fewer simultaneous cases and/or reduce memory use with smaller reader time_buffer_size ')
 
             # release particles
             new_particleIDs  = pgm.release_particles(n_time_step, time_sec)

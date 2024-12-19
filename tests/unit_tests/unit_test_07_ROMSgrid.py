@@ -19,9 +19,8 @@ def main(args):
                  NCDF_particle_chunk= 500) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)
-    hm = test_definitions.hydro_model['demoSchism3D']
-    hm['reader'].update(input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','ROMS'),
-                        file_mask='ROMS3D_00*.nc')
+    hm = test_definitions.hydro_model['demoROMS']
+
     ot.add_class('reader', **hm['reader'])
 
     # add a point release
@@ -33,7 +32,8 @@ def main(args):
     ot.add_class('release_groups',name='my_polygon_release',  # name used internal to refer to this release
                             class_name='PolygonRelease',  # class to use
                             release_interval = 900,
-                            points=poly_points)
+                            points=hm['polygon'])
+
     ot.add_class('release_groups', name='my_grid_release',  # name used internal to refer to this release
                  class_name='GridRelease',  # class to use
                  release_interval=1800,
