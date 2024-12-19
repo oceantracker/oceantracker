@@ -30,6 +30,9 @@ reader_demo_schisim3D=   dict( # folder to search for hindcast files, sub-dirs w
                  input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','schsim3D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                 file_mask='demo_hindcast_schisim3D*.nc',
 )  # file mask to search for
+reader_demo_ROMS = deepcopy(reader_demo_schisim3D)
+reader_demo_ROMS.update(input_dir=path.join(path.dirname(definitions.package_dir), 'demos', 'demo_hindcast', 'ROMS'),
+                    file_mask='ROMS3D_00*.nc')
 
 reader_demo_schisim2D=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
                  input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','schsim2D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
@@ -52,7 +55,11 @@ hydro_model = dict(demoSchism3D=dict(reader= reader_demo_schisim3D,
                             polygon=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
                                     [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
                             ),
-
+                demoROMS=dict(reader= reader_demo_ROMS,
+                            axis_lims=None,
+                            x0=[[-69.2, 43.4] ],
+                            polygon= np.asarray([[-69., 43.5], [-69.2, 43.5], [-69.2, 43.7],[-69.1, 43.7],[-69., 43.5]]),
+                            ),
                 doubleGyre=dict(reader= reader_double_gyre,axis_lims=[0, 2, 0, 1]),
                 NZnational=dict(reader= reader_NZnational,axis_lims= [1727860, 1823449, 5878821, 5957660],
                              x0=[[1750624.1218, 5921952.0475],
