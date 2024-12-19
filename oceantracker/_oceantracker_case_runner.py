@@ -76,11 +76,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.case_summary['case_info_file'] = path.join(ri.run_output_dir, ri.output_file_base) + '_caseInfo.json'
 
-        ml.print_line()
+        ml.hori_line()
         ml.msg('Starting case number %3.0f, ' % ri.caseID + ' '
                                       + ri.output_file_base
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
-        ml.print_line()
+        ml.hori_line()
 
         # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
         if si.settings['multiprocessing_case_start_delay'] > 0:
@@ -116,7 +116,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
             # -----------run-------------------------------
             self.info['model_run_started'] = datetime.now()
-            si.msg_logger.print_line()
+            si.msg_logger.hori_line()
             si.msg_logger.progress_marker('Starting ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
             # ------------------------------------------
 
@@ -157,12 +157,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                            caller= i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
 
             ml.show_all_warnings_and_errors() # reshow warnings
-            ml.print_line()
+            ml.hori_line()
             ml.progress_marker('Finished case number %3.0f, ' % ri.caseID + ' '
                                           + si.run_info.output_file_base
                                           + ' started: ' + str(d0) + ', ended: ' + str(datetime.now()))
             ml.msg('Computational time =' + str(datetime.now() - d0), tabs=3)
-            ml.print_line(f'End case {ri.caseID}')
+            ml.hori_line(f'End case {ri.caseID}')
 
             self.close()  # close all classes and msg logger
             ml.close()
