@@ -67,7 +67,7 @@ class Solver(ParameterBaseClass):
 
         # run forwards through model time variable, which for backtracking are backwards in time
         t2 = model_times[0]
-        ml.print_line()
+        ml.hori_line()
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)} '
                            + f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)} ')
 
@@ -79,7 +79,7 @@ class Solver(ParameterBaseClass):
             # warn of  high physical memory use
             if psutil.virtual_memory().percent > 95:
                 ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
-                       hint=f'For parallel runs,reduce "processors" setting below max. available (={psutil.cpu_count(logical=False)} cores) to have fewer simultaneous cases and/or reduce memory use with smaller reader time_buffer_size ')
+                       hint=f'For parallel runs,reduce "processors" setting below max. available (={psutil.cpu_count(logical=False)} cores) \n to have fewer simultaneous cases and/or reduce memory use with smaller reader time_buffer_size ')
 
             # release particles
             new_particleIDs  = pgm.release_particles(n_time_step, time_sec)

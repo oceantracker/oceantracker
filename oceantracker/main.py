@@ -44,7 +44,7 @@ class OceanTracker():
     def __init__(self,params=None):
         self.params= {}
         msg_logger.set_screen_tag('helper')
-        msg_logger.print_line()
+        msg_logger.hori_line()
         msg_logger.msg('Starting OceanTracker helper class')
         self.has_run = False
 
@@ -124,7 +124,6 @@ class OceanTracker():
                 return {}
 
     def run(self):
-        msg_logger.progress_marker('Starting run using helper class')
         ot_runner= _OceanTrackerMainRunner()
         # todo print helper message here at end??
         msg_logger.exit_if_prior_errors('Found errors see above')

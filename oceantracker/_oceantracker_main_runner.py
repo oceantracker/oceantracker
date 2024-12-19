@@ -37,7 +37,7 @@ class _OceanTrackerMainRunner(object):
         self.start_t0 = perf_counter()
         self.start_date = datetime.now()
 
-        ml.print_line()
+        ml.hori_line()
         ml.msg(f'{definitions.package_fancy_name} starting main:')
         # add classiport and short name package tree to shared info
         self.class_importer = class_importer_util.ClassImporter(ml)
@@ -74,7 +74,7 @@ class _OceanTrackerMainRunner(object):
         # set numba config environment variables, before any import of numba, eg by readers,
         setup_util.config_numba_environment_and_random_seed(working_params['settings'], ml, crumbs='main setup', caller=self)  # must be done before any numba imports
 
-        ml.print_line()
+        ml.hori_line()
         ml.msg(f' {definitions.package_fancy_name} version {definitions.version["str"]} - preliminary setup')
 
         ml.exit_if_prior_errors('parameters have errors')
@@ -158,10 +158,10 @@ class _OceanTrackerMainRunner(object):
 
         ml = msg_logger
         ml.set_screen_tag('End')
-        ml.print_line('Summary')
+        ml.hori_line('Summary')
         ml.msg('Run summary with case file names in "*_runInfo.json"', tabs=2, note=True)
         ml.show_all_warnings_and_errors()
-        ml.print_line()
+        ml.hori_line()
 
         # count total messages
         num_case_errors, num_case_warnings, num_case_notes = 0, 0, 0
@@ -175,17 +175,17 @@ class _OceanTrackerMainRunner(object):
 
         case_info_files = self._write_run_info_json(case_summary, run_builder)
 
-        ml.print_line()
+        ml.hori_line()
         ml.msg(f'OceanTracker summary:  elapsed time =' + str(datetime.now() - self.start_date), )
         ml.msg(f'Cases - {num_case_errors:3d} errors, {num_case_warnings:3d} warnings, {num_case_notes:3d} notes, check above', tabs=3)
         ml.msg(f'Main  - {ml.error_count:3d} errors, {ml.warning_count:3d} warnings, {ml.note_count:3d} notes, check above', tabs=3)
         ml.msg(f'Output in {si.run_info.run_output_dir}', tabs=1)
-        ml.print_line()
+        ml.hori_line()
         total_errors = num_case_errors + len(ml.errors_list)
         if total_errors > 0:
-            ml.print_line('Found errors, so some cases may not have completed')
-            ml.print_line(' ** see above or  *_caseLog.txt and *_caseLog.err files')
-            ml.print_line()
+            ml.hori_line('Found errors, so some cases may not have completed')
+            ml.hori_line(' ** see above or  *_caseLog.txt and *_caseLog.err files')
+            ml.hori_line()
         ml.close()
         return case_info_files if failed_count == 0 else None
 
