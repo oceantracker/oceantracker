@@ -14,10 +14,10 @@ from oceantracker.shared_info import shared_info as si
 #todo use A_H and A_V fields in random walk
 #todo implement depth average mode using depth average variables in the file
 
-class FVCOM(_BaseUnstructuredReader):
+class FVCOMreader(_BaseUnstructuredReader):
     # loads a standard SCHISM netcdf output file with nodal data
     # variable names can be tweaked via maps in shared_params, if non-standard names used
-    development = True
+    development = 'FVCOMreader has not been tested for all variations of file variables, contact developers if reader fails unexpectedly'
     def __init__(self):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
@@ -196,9 +196,4 @@ class FVCOM(_BaseUnstructuredReader):
 
         return data
 
-    def preprocess_field_variable(self, name,grid, data):
-        if name =='water_velocity' and data.shape[2] > 1: # process if 3D velocity
-            # linear extrapolation of 3D velocity to bottom zlevel, may not give zero vel at bottom so set to zero
-            data[:, :, 0, :] = 0.
-        return data
 

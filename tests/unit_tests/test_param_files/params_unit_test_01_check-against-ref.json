@@ -1,5 +1,5 @@
 {
-    "output_file_base": "unit_test_01_check-against-ref",
+    "output_file_base": "unit_test_01_check-against-ref_00",
     "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
     "time_step": 1800,
     "use_random_seed": true,

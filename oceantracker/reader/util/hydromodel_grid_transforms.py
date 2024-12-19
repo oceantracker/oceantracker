@@ -170,18 +170,26 @@ def convert_mid_layer_fixedZ_top_bot_layer_values(data_zlayer, z_layer, z, botto
 def get_nodal_values_from_weighted_data(data, node_to_tri_map, tri_per_node, cell_center_weights):
     # get nodal values from 4D data in surrounding cells based in distance weighting
     # used in FVCOM, DELFT3D FM  reader
-    #todo make this faster as works in 4D?
+
     s = (data.shape[0],len(node_to_tri_map)) + data.shape[2:4]
-    data_nodes = np.full( s , 0., dtype=np.float32)
+    data_nodes = np.full( s, np.nan, dtype=np.float32)
 
     for nt in range(data.shape[0]): # loop over time steps
-        # loop over triangles
-        for node in range(s[1]):
+
+        for node in range(s[1]): # loop over triangles
             for nz in range(s[2]):
                 # loop over cells containing this node
+                node_val = 0.
+                n_good = 0
                 for m in range(tri_per_node[node]):
                     cell = node_to_tri_map[node, m]
-                    data_nodes[nt, node, nz] += data[nt, cell, nz]*cell_center_weights[node, m] # weight this cell value
+                    val = data[nt, cell, nz]
+                    if not np.isnan(val):
+                        # cope with nans in data
+                        node_val += val * cell_center_weights[node, m] # weight this cell value
+                        n_good += 1
+                if n_good > 0:
+                    data_nodes[nt, node, nz] = node_val*tri_per_node[node] / n_good # weight total basd on non nans
 
     return data_nodes
 

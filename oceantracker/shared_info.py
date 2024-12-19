@@ -82,8 +82,6 @@ class _DefaultSettings(_SharedStruct):
                            doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
     multiprocessing_case_start_delay = PVC(0., float, min=0.,expert=True,
                                            doc_str='Delay start of each sucessive case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
-    EPSG_code_meters_grid = PVC(None, int,
-                doc_str='If hydro-model has lon_lat coords, then grid is converted to this meters system. For codes see https://epsg.io/. eg EPSG for NZ Transverse Mercator use 2193. Default grid is UTM' )
     write_tracks = PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes' )
     user_note = PVC('No user note', str, doc_str='Any run note to store in case info file' )
     z0 = PVC(0.005, float, units='m', doc_str='Bottom roughness, used for tolerance and log layer calcs. ', min=0.0001 )  # default bottom roughness

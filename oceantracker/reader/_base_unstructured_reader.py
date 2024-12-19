@@ -9,7 +9,7 @@ class _BaseUnstructuredReader(_BaseReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
-            dimension_map=dict(node=PVC(None, str, doc_str='Nodes in grid', is_required=True)),
+            dimension_map=dict(node=PVC(None, str, doc_str='Nodes in grid')),
         )  # list of normal required dimensions
 
     # Below are basic variable read methods for any new reader

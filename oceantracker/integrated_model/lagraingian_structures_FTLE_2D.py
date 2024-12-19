@@ -16,7 +16,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
      Annual review of fluid mechanics, 47, pp.137-162.')
      Currently only 2D  implemented
      '''
-    development = True
+    development = 'LCS only working in 2D, contact developers if reader fails unexpectedly'
 
     def __init__(self):
         # set up info/attributes

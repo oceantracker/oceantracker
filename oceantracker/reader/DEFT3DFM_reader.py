@@ -11,8 +11,8 @@ from oceantracker.reader.util import  hydromodel_grid_transforms
 from oceantracker.util.numba_util import  njitOT
 from oceantracker.shared_info import shared_info as si
 
-class DELF3D_TFM(_BaseUnstructuredReader):
-    development = True
+class DELF3DFMreader(_BaseUnstructuredReader):
+    development =  'DELFTreader has not been tested for all variations of file variables, contact developers if reader fails unexpectedly'
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
@@ -33,11 +33,6 @@ class DELF3D_TFM(_BaseUnstructuredReader):
                             ),
             dimension_map=dict(
                         time=PVC('time', str, doc_str='name of time dimension in files'),
-                        node=PVC('mesh2d_nNodes', str, doc_str='name of nodes dimension in files'),
-                        z=PVC('mesh2d_nInterfaces', str, doc_str='name of dimensions for z layer boundaries '),
-                        all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers'], str, doc_str='All z dims used to identify  3D variables'),
-                        cell_dim=PVC('mesh2d_nFaces', str, doc_str='Triangle/quad cell dim'),
-                        z_layer_dim=PVC('mesh2d_nLayers', str, doc_str='Number of layers, one less than z values'),
                          ),
             field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
                         'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
@@ -57,29 +52,40 @@ class DELF3D_TFM(_BaseUnstructuredReader):
         dm = self.params['dimension_map']
         fvm= self.params['field_variable_map']
         gm = self.params['grid_variable_map']
-        hi = dict(is3D=  'mesh2d_nLayers' in catalog['info']['dims'])
+
+        dims = catalog['info']['dims']
+        hi = dict(is3D='mesh2d_nInterfaces' in  dims or 'nmesh2d_interface' in dims)
 
         if hi['is3D']:
-            hi['z_dim'] = dm['z']
-            hi['num_z_levels'] = catalog['info']['dims'][hi['z_dim']]
-            hi['all_z_dims'] = dm['all_z_dims']
-            # Only LSC hasbottom_cell_index
-            hi['vert_grid_type'] = si.vertical_grid_types.Zfixed if 'mesh2d_interface_z' in catalog['variables'] \
-                                                                        else si.vertical_grid_types.Sigma
+            # 2 variants of fixed z layer dimension names
+            if 'mesh2d_nInterfaces' in dims:
+                hi['z_dim'] = 'mesh2d_nInterfaces'
+                hi['layer_dim'] = 'mesh2d_nLayers'
+                hi['all_z_dims'] = ['mesh2d_nInterfaces','mesh2d_nLayers']
+            else:
+                hi['z_dim'] = 'nmesh2d_interface'
+                hi['layer_dim'] = 'nmesh2d_layer'
+                hi['all_z_dims'] = ['nmesh2d_interface','nmesh2d_layer']
+
+            hi['num_z_levels'] = dims[hi['z_dim']]
+            hi['vert_grid_type'] = si.vertical_grid_types.Zfixed if 'mesh2d_interface_z' in catalog['variables']  else si.vertical_grid_types.Sigma
         else:
             hi['z_dim'] = None
             hi['num_z_levels'] = 1
-            hi['all_z_dims'] =  []
+            hi['all_z_dims'] = []
             hi['vert_grid_type'] = None
 
         # get num nodes in each field
         # is the number of nodes = uniques nodes in the quad mesh
 
-        hi['node_dim'] = dm['node']
-        hi['num_nodes'] =  catalog['info']['dims'][hi['node_dim']]
+        hi['node_dim'] = 'mesh2d_nNodes' if 'mesh2d_nNodes' in dims else 'nmesh2d_node'
+
+        hi['num_nodes'] =  dims[hi['node_dim']]
+        hi['cell_dim'] = 'mesh2d_nFaces' if 'mesh2d_nFaces' in dims else 'nmesh2d_face'
 
         if hi['vert_grid_type'] == si.vertical_grid_types.Sigma:
             si.msg_logger.msg('DEFT3D FM not yet tested with sigma vertical grid, only tested to work with fixed z level grid', warning=True)
+
         return hi
 
     def read_horizontal_grid_coords(self, grid):
@@ -202,8 +208,6 @@ class DELF3D_TFM(_BaseUnstructuredReader):
         ds = self.dataset
         grid = self.grid
         params = self.params
-        gm = params['grid_variable_map']
-        dm = params['dimension_map']
         info = self.info
 
         data = ds.read_variable(var_name, nt=nt).data
@@ -212,15 +216,15 @@ class DELF3D_TFM(_BaseUnstructuredReader):
         if info['time_dim'] not in var_info['dims']: data = data[np.newaxis, ...]
 
         # add z dim if needed
-        if all(x not in var_info['dims'] for x in dm['all_z_dims']): data = data[..., np.newaxis]
+        if all(x not in var_info['dims'] for x in info['all_z_dims']): data = data[..., np.newaxis]
 
         # some variables at nodes, some at edge mid points ( eg u,v,w)
-        if dm['cell_dim'] in var_info['dims']:
+        if info['cell_dim'] in var_info['dims']:
             # data is at cell center/element/triangle  move to nodes
             data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(
                                         data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
-        # must be done after nodal values
-        if dm['z_layer_dim'] in var_info['dims']:
+        #  interp layer values to interfaces, must be done after nodal values
+        if var_info['is3D'] and info['layer_dim'] in var_info['dims']:
             data = hydromodel_grid_transforms.convert_mid_layer_fixedZ_top_bot_layer_values(
                 data, grid['z_layer'], grid['z'], grid['bottom_cell_index'], grid['water_depth'])
 
@@ -229,17 +233,10 @@ class DELF3D_TFM(_BaseUnstructuredReader):
 
         return data
 
-    def preprocess_field_variable(self, name,grid, data):
-
-        if name =='water_depth':
-            # depth seems to be read as upwards z at node, so rervese z
-            data = -data
-        elif name == 'water_velocity' and data.shape[2] > 1:
-            # ensure vel zero at sea bed
-            data = reader_util.patch_bottom_velocity_to_make_it_zero(data, grid['bottom_cell_index'])
-        return data
-
-
+    def setup_water_depth_field(self):
+        i = self._add_a_reader_field('water_depth')
+        i.data = self.read_field_data('water_depth', i) # read time in varient field
+        i.data = -i.data   # depth seems to be read as upwards z at node, so rervese z
 
     @staticmethod
     @njitOT

@@ -1,6 +1,6 @@
 NCDF_time_chunk: 1
 debug: true
-output_file_base: unit_test_01_check-against-ref
+output_file_base: unit_test_01_check-against-ref_00
 particle_properties:
 - class_name: oceantracker.particle_properties.age_decay.AgeDecay
   decay_time_scale: 7200.0
