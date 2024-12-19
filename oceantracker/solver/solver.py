@@ -71,7 +71,7 @@ class Solver(ParameterBaseClass):
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)} '
                            + f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)} ')
 
-        for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
+        for n_time_step in range(model_times.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()
             self.start_update_timer()
             time_sec = model_times[n_time_step]
