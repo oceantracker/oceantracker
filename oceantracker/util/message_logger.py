@@ -14,13 +14,6 @@ class GracefulError(Exception):
 
 
 
-def msg_str(msg,tabs=0):
-    tab = '  '
-    m = ''
-    for n in range(tabs): m += tab
-    m +=  msg
-    return m
-
 class MessageLogger(object ):
     def __init__(self):
 
@@ -80,46 +73,40 @@ class MessageLogger(object ):
             fatal_error = True
         if fatal_error: error = True
 
-        m = ['']
-        if dev: m[0] +='Core developer '
+        m = ''
+
+        if dev: m +='Core developer:'
         # first line of message
         if error:
-            m[0] += msg_str( '>>> Error: ', tabs)
+            m = self._append_message(m, '>>> Error: ' + msg_text, tabs)
             self.error_count += 1
 
         elif warning:
-            m[0] += msg_str('>>> Warning: ' , tabs)
+            m= self._append_message(m,'>>> Warning: ' + msg_text, tabs)
             self.warning_count += 1
+            if self.warning_count > self.max_warnings: return
+
         elif note:
-            m[0] += msg_str('>>> Note: ', tabs)
+            m= self._append_message(m, '>>> Note: ' + msg_text, tabs)
             self.note_count += 1
+            if self.note_count > self.max_warnings: return
 
         else:
-            m[0] += msg_str('', tabs)
+            m = self._append_message(m, msg_text, tabs)
 
         if exception is not None:
-            m[0] += msg_str('exception >>: ' + str(exception), tabs+2)
+            self._append_message('exception >>: ' + str(exception), tabs + 2)
 
         if traceback_str is not None:
-            m[0] += msg_str('traceback >>: ' + str(traceback_str), tabs + 2)
-
-        m[0] +=  msg_text
+            self._append_message('traceback >>: ' + str(traceback_str), tabs + 2)
 
         # first line complete
         if hint is not None:
-            if '\n' in hint:
-                # multi line hint
-                for l in hint.split('\n'):
-                    m.append(msg_str('hint: ' + l, tabs + 3))
-            else:
-                m.append(msg_str('hint: ' + hint, tabs + 3))
-
-        if spell_check is not None:
-           m.append(f'\n Closest matches to "{spell_check}" = {difflib.get_close_matches(spell_check, possible_values, cutoff=0.4)}')
+            m = self._append_message(m, 'hint: ' + hint, tabs+2)
 
         # make crumb trail
         if crumbs is not None and crumbs != '':
-            m.append(msg_str(f'in: {crumbs}', tabs + 3))
+            m =self._append_message(f'in: {crumbs}', tabs + 3)
 
         if caller is not None and (error or warning) :
             if hasattr(caller,'__class__'):
@@ -133,49 +120,50 @@ class MessageLogger(object ):
 
             else:
                 origin = caller.__name__
-            m.append(msg_str(f'caller: {origin}', tabs + 3))
-
-
+            m = self._append_message(m, f'caller: {origin}', tabs + 3)
 
         if link is not None:
-            m.append(msg_str('see user documentation: ' + self.links[link], tabs + 3))
+            m= self._append_message(m, 'see user documentation: ' + self.links[link], tabs + 3)
 
+        pass
         # write message lines
-        for l in m:
+
+        for l in  m.split('\n')[:-1]: # drop last \n
             ll = self.screen_tag + ' ' + l
             print(ll)
             if self.log_file is not None:
                 self.log_file.write(ll + '\n')
 
-            # keeplist ond warnings errors etc to print at end
-            if error:
-                    self.errors_list.append(l)
-                    #self.build_stack()
-            if warning :
-                if len(self.warnings_list) <= self.max_warnings:
-                    self.warnings_list.append(l)
-            if note:
-                if len(self.notes_list) <= self.max_warnings:
-                    self.notes_list.append(l)
+        # keep list ond warnings errors etc to print at end
+        if error:  self.errors_list.append(m)
+                #self.build_stack()
+        if warning: self.warnings_list.append(m)
+        if note:self.notes_list.append(m)
 
         # todo add traceback to message?
         if fatal_error:
             raise GracefulError('Fatal error cannot continue')
-
+        pass
+    def _append_message(self, m, msg, tabs):
+        # append allowing  line breaks
+        tab = '  '
+        for n, s in enumerate(msg.split('\n')):
+            m += (tabs + int(n > 0))*tab + s + '\n'
+        return m
 
     def has_errors(self): return  self.error_count > 0
 
     def exit_if_prior_errors(self,msg, caller=None, crumbs=''):
         if self.has_errors():
-            self.print_line()
+            self.hori_line()
             self.msg(msg + '>>> Fatal errors, can not continue', crumbs= crumbs, caller=caller)
             for m in self.errors_list:
                 self.msg(m)
-            self.print_line()
+            self.hori_line()
             sleep(1) # allow time for messages to print
             raise GracefulError('Fatal error cannot continue >>> ' +msg if msg is not None else '', hint='Check above or run.err file for errors')
 
-    def print_line(self, text=None):
+    def hori_line(self, text=None):
         n= 70
         if text is None:
             self.msg(n*'-')
@@ -191,12 +179,13 @@ class MessageLogger(object ):
         self.msg('- ' + msg, tabs=tabs)
 
     def show_all_warnings_and_errors(self):
-
-        for t in [self.notes_list, self.warnings_list, self.errors_list]:
-            for l in t:
-                print(self.screen_tag + ' ' + l)
-                if self.log_file is not None:
-                    self.log_file.write(l + '\n')
+        for t in [self.warnings_list, self.errors_list]:
+            tt= list(set(t))
+            for m in tt:
+                for l in m.split('\n'):
+                    print(self.screen_tag + ' ' + l)
+                    if self.log_file is not None:
+                        self.log_file.write(l + '\n')
 
     def write_error_log_file(self, e,traceback_str):
         sleep(.5)
