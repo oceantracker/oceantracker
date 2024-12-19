@@ -70,30 +70,25 @@ def _run(args):
     ot.settings(**test_definitions.base_settings(__file__, args, label))
     ot.settings(**settings)
 
-    ot.add_class('integrated_model',
-                 class_name= 'dev_LagarangianStructuresFTLE2D',
+    ot.add_class('integrated_model',  class_name= 'dev_LagarangianStructuresFTLE2D',
                 **model_settings)
     case_info_file_name= ot.run()
 
     LCS_data = load_output_files.load_LSC(case_info_file_name)
 
-    match args.variant:
-        case 0:
-            plot_statistics.plot_LCS(LCS_data, n_time_step=None)
-        case 1:
-            plot_statistics.plot_LCS(LCS_data, n_time_step=-1)
-        case 2:
-            plot_statistics.plot_LCS(LCS_data)
-        case 3:
-            plot_statistics.plot_LCS(LCS_data)
+    if args.plot:
+        match args.variant:
+            case 0:
+                plot_statistics.plot_LCS(LCS_data, n_time_step=None)
+            case 1:
+                plot_statistics.plot_LCS(LCS_data, n_time_step=-1)
+            case 2:
+                plot_statistics.plot_LCS(LCS_data)
+            case 3:
+                plot_statistics.plot_LCS(LCS_data)
     return None
 
 
 def main(args):
-    if args.variant is None:
-        for v in [0,1,2]:
-            args.variant=v
-            _run(args)
-    else:
-        _run(args)
+   _run(args)
 

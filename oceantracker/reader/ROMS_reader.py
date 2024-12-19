@@ -30,7 +30,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 #todo implement depth average mode using depth average variables in the file
 #todo friction velocity from bottom stress ???
 
-class ROMsNativeReader(_BaseStructuredReader):
+class ROMSreader(_BaseStructuredReader):
     # reads  ROMS file, and tranforms all data to PSI grid
     # then splits all triangles in two to  use in oceantracker as a triangular grid,
     # so works with curvilinear ROMS grids
@@ -193,17 +193,6 @@ class ROMsNativeReader(_BaseStructuredReader):
         data = data[:, :, :, np.newaxis]
 
         return data
-
-
-    def preprocess_field_variable(self, name,grid, data):
-        if name =='water_velocity':
-            if data.shape[2] > 1:
-                # ensure water vel at bottom is zero
-                # linear extrapolation of 3D velocity to bottom zlevel, may not give zero vel at bottom so set to zero
-                data[:, :, 0, :]= 0.
-
-        return data
-
 
 
 

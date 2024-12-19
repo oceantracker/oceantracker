@@ -7,7 +7,7 @@ import numpy as np
 from oceantracker.shared_info import shared_info as si
 from oceantracker.reader.util import reader_util
 
-class SCHISMreaderNCDF(_BaseUnstructuredReader):
+class SCHISMreader(_BaseUnstructuredReader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
@@ -119,13 +119,6 @@ class SCHISMreaderNCDF(_BaseUnstructuredReader):
         data_added_to_buffer = self.dataset.read_variable(self.params['grid_variable_map']['is_dry_cell'], nt_index).data
         is_dry_cell_buffer[buffer_index, :] = reader_util.append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
-
-
-    def preprocess_field_variable(self, name,grid, data):
-        if name =='water_velocity' and data.shape[2] > 1:
-            # for 3D schism velocity partial fix for  non-zero hvel at nodes where cells in LSC grid span a change in bottom_cell_index
-            data = reader_util.patch_bottom_velocity_to_make_it_zero(data, grid['bottom_cell_index'])
-        return data
 
     def read_open_boundary_data_as_boolean(self, grid):
         # make boolen of whether node is an open boundary node

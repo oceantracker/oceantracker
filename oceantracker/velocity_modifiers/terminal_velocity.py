@@ -36,7 +36,6 @@ class TerminalVelocity(_VelocityModiferBase):
          
         pgm= si.core_class_roles.particle_group_manager
 
-        si.msg_logger.msg('When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',note=True)
 
     def update(self,n_time_step, time_sec, active):
         # modify vertical velocity, if backwards, make negative

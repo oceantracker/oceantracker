@@ -38,7 +38,7 @@ debug: true
 dispersion:
   A_H: 0.2
   A_V: 0.001
-output_file_base: unit_test_05_parallel
+output_file_base: unit_test_05_parallel_00
 particle_properties:
 - class_name: oceantracker.particle_properties.age_decay.AgeDecay
   decay_time_scale: 7200.0
@@ -62,10 +62,10 @@ particle_statistics:
 processors: 2
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
-  input_dir: C:\Work\ot_install_test\oceantracker\demos\demo_hindcast\schsim3D
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast\schsim3D
 resuspension:
   critical_friction_velocity: 0.005
-root_output_dir: C:\Work\ot_install_test\oceantracker_output\unit_tests
+root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
 time_step: 120
 use_random_seed: true
 velocity_modifiers:

@@ -204,7 +204,7 @@ schsim_base_params=\
             'NUMBA_cache_code': False,'use_A_Z_profile' : False,
             'regrid_z_to_uniform_sigma_levels': True,
                 #'numba_caching': False,
-        'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreaderNCDF',
+        'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreader',
                     'input_dir': 'demo_hindcast\schsim3D',
                              'file_mask': 'demo_hindcast_schisim3D_00.nc',
                      'load_fields':['water_temperature']

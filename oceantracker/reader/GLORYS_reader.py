@@ -12,7 +12,7 @@ from copy import copy
 
 class GLORYSreader(_BaseStructuredReader):
 
-    development= True
+    development = 'GORYSreader has not been tested for all variations of file variables, contact developers if reader fails unexpectedly'
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(

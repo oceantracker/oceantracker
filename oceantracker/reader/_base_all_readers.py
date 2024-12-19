@@ -132,6 +132,10 @@ class _BaseReader(ParameterBaseClass):
 
         hi = self.reader_builder['hindcast_info']
         info.update(hi)
+
+        if self.development is not None:
+            si.msg_logger.msg(self.development , warning=True)
+
         pass
 
     def catalog_dataset(self,reader_builder, msg_logger=None, crumbs=None):
@@ -263,7 +267,7 @@ class _BaseReader(ParameterBaseClass):
                                                 crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
             # set up conversion of meters to degreees
             i = self._add_a_reader_field('degrees_per_meter',dict(time_varying=False,is3D=False, is_vector=True, write_interp_particle_prop_to_tracks_file=False ),dummy=True)
-            i.data[0, :, 0, :] = cord_transforms.get_deg_per_meter(grid['x'])
+            i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'])
             pass
 
         reader_builder= self.reader_builder
@@ -525,12 +529,13 @@ class _BaseReader(ParameterBaseClass):
     def setup_water_velocity_field(self):
         reader_builder = self.reader_builder
         fi = reader_builder['reader_field_info']
+        #todo move check on whether vertical vel is in files here
 
         # look for depth averaged if 3D velocity not there
         if 'water_velocity' not in fi:
             if 'water_velocity_depth_averaged' not in fi:
                 # use depth average if vailable
-                si.msg_logger.msg('Cannot find water_velocity or depth averaged water velocity in hindcast',
+                si.msg_logger.msg('Cannot find water_velocity components or depth averaged water velocity components in hindcast',
                                hint=f'Found variables mapped to {str(fi.keys())} \n File variables are {str(reader_builder["catalog"]["variables"].keys())}',
                                fatal_error=True)
 
@@ -546,9 +551,12 @@ class _BaseReader(ParameterBaseClass):
         field = self.fields['water_velocity']
         data = self.read_field_data('water_velocity', field, nt)
 
-        if field.is3D() and self.info['regrid_z_to_uniform_sigma_levels']:
-            data = self._vertical_regrid_Slayer_field_to_uniform_sigma('water_velocity', data)
-        #data[:,:,:,:] = np.asarray([.1,0,0.]) #debug with uniform eastward flow
+        if field.is3D():
+            if self.info['regrid_z_to_uniform_sigma_levels']:
+                data = self._vertical_regrid_Slayer_field_to_uniform_sigma('water_velocity', data)
+            # ensure vel at bottom is zero
+            data = reader_util.patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
+
         field.data[buffer_index, ...] = data
         return data
 

@@ -277,7 +277,6 @@ class Solver(ParameterBaseClass):
         particle_operations_util.add_to(water_velocity, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity step 2
 
 
-
         # step 3, a second half step
         t2 = time_sec + 0.5 * dt
         fgm.setup_time_step(t2, x2, is_moving)

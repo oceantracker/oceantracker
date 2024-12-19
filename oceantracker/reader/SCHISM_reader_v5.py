@@ -1,11 +1,11 @@
-from oceantracker.reader.SCHISM_reader import SCHISMreaderNCDF
+from oceantracker.reader.SCHISM_reader import SCHISMreader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
 from pathlib import Path as pathlib_Path
 from os import  path
 import numpy as np
 from copy import  deepcopy, copy
 from glob import  glob
-class SCHISMreaderNCDFv5(SCHISMreaderNCDF):
+class SCHISMreaderv5(SCHISMreader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params

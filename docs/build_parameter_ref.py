@@ -187,8 +187,11 @@ def make_class_sub_pages(class_role, link_tag=''):
         p.add_lines(f'**full class_name :** {info["mod_str"]}')
         p.add_lines()
 
-        if short_name.lower().startswith('dev'):
-            p.add_directive('warning', body='Class is under development may not yet work in all cases, if errors contact developer')
+        if instance.development is not None or  short_name.lower().startswith('dev') :
+            m = 'Class is under development may not yet work in all cases, if errors contact developer' \
+                    if instance.deveplment is None else instance.development
+
+            p.add_directive('warning',body=m)
 
         # show inheritance
         parents=''

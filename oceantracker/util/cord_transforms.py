@@ -90,13 +90,13 @@ def fix_any_spanning180east(lon_lat,single_cord=False, msg_logger=None, caller=N
     if single_cord: lon_lat = lon_lat[0]
     return lon_lat
 
-def get_deg_per_meter(lon_lat, single_cord=False):
+def get_degrees_per_meter(lon_lat, single_cord=False):
     dx = 1. / 111000.  # deg per m of latitude, rows of lon_lat are multiple locations
     if single_cord: lon_lat = lon_lat[np.newaxis, :]
     out = np.full_like(lon_lat,0., dtype =lon_lat.dtype)
 
     out[:, 0] = dx * np.cos(np.deg2rad(lon_lat[:, 1]))
-    out[:, 1]= dx
+    out[:, 1] = dx
     if single_cord: out = out[0]
     return  out
 
@@ -104,7 +104,7 @@ def rectangle_area_meters_sq(xll,yll, xur, yur, is_geographic=False):
     # calculate area of "small" retangle in meters squred, for bth m's and geographic coorindates
     # given coords of lower left and upper right
     if is_geographic:
-        dxy = get_deg_per_meter(np.asarray([xll,.5*(yll+yur)]), single_cord=True)
+        dxy = get_degrees_per_meter(np.asarray([xll,.5*(yll+yur)]), single_cord=True)
         return ((xur-xll)/dxy[0])*((yur-yll)/dxy[1])
     else:
         return (xur - xll)*(yur-yll)

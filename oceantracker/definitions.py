@@ -27,13 +27,12 @@ ot_root_dir = path.dirname(package_dir)
 default_output_dir = path.join(path.dirname(path.dirname(package_dir)),'oceantracker_output')
 
 known_readers = dict(
-                SCHISM= 'oceantracker.reader.SCHISM_reader.SCHISMreaderNCDF',
-                ROMS =  'oceantracker.reader.ROMS_reader.ROMsNativeReader',
-                SCHISM_v5 =  'oceantracker.reader.SCHISM_reader_v5.SCHISMreaderNCDFv5',
+                SCHISM= 'oceantracker.reader.SCHISM_reader.SCHISMreader',
+                ROMS =  'oceantracker.reader.ROMS_reader.ROMSreader',
+                SCHISM_v5 =  'oceantracker.reader.SCHISM_reader_v5.SCHISMreaderv5',
                 GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
-                DEFT3D_FM =  'oceantracker.reader.DEFT3D_FM_reader.DELF3D_TFM',
-                #FVCOM =  'oceantracker.reader.dev.dev_FVCOM_reader.FVCOM',
-
+                DEFT3D_FM =  'oceantracker.reader.DEFT3DFM_reader.DELF3DFMreader',
+                FVCOMreader =  'oceantracker.reader.FVCOM_reader.FVCOMreader',
                 #generic =  'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 #dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',
                  )
