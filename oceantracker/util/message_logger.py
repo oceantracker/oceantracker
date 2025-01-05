@@ -74,7 +74,6 @@ class MessageLogger(object ):
         if fatal_error: error = True
 
         m = ''
-
         if dev: m +='Core developer:'
         # first line of message
         if error:
