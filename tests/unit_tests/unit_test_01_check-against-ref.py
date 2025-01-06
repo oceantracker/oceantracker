@@ -50,8 +50,9 @@ def main(args):
 
     case_info_file = ot.run()
 
-    if args.plot:
-        test_definitions.show_track_plot(case_info_file, args)
+    test_definitions.compare_reference_run(case_info_file, args)
+
+    test_definitions.show_track_plot(case_info_file, args)
 
     return  ot.params
 
