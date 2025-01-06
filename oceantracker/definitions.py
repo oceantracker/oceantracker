@@ -7,7 +7,7 @@ from os import path
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5, revision  = 11, date = '2025-01-06', parameter_ver=0.5)
+version= dict(major= 0.5, revision  = 12, date = '2025-01-06', parameter_ver=0.5)
 version['str'] = f"{version['major']:.2f}.{version['revision']:04.0f}-{version['date']}"
 
 try:
@@ -29,7 +29,7 @@ default_output_dir = path.join(path.dirname(path.dirname(package_dir)),'oceantra
 known_readers = dict(
                 SCHISM= 'oceantracker.reader.SCHISM_reader.SCHISMreader',
                 ROMS =  'oceantracker.reader.ROMS_reader.ROMSreader',
-                SCHISM_v5 =  'oceantracker.reader.SCHISM_reader_v5.SCHISMreaderv5',
+                SCHISM_v5 =  'oceantracker.reader.SCHISM_reader_v5.SCHISMreaderV5',
                 GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
                 DEFT3D_FM =  'oceantracker.reader.DEFT3DFM_reader.DELF3DFMreader',
                 FVCOMreader =  'oceantracker.reader.FVCOM_reader.FVCOMreader',

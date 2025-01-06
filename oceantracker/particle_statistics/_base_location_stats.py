@@ -89,7 +89,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         names=[]
         for name in self.params['particle_property_list']:
 
-            si.msg_logger.spell_check(f'Particle property name {name} not recognised',
+            si.msg_logger.spell_check(f'Particle property name "{name}" not recognised',
                                       name, si.class_roles.particle_properties.keys(),
                                       hint='check parameter "particle_property_list"',
                                       crumbs=f'Particle Statistic "{self.params["name"]}" >',

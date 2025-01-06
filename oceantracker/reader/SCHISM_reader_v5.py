@@ -5,7 +5,7 @@ from os import  path
 import numpy as np
 from copy import  deepcopy, copy
 from glob import  glob
-class SCHISMreaderv5(SCHISMreader):
+class SCHISMreaderV5(SCHISMreader):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
