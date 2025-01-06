@@ -94,10 +94,10 @@ class MessageLogger(object ):
             m = self._append_message(m, msg_text, tabs)
 
         if exception is not None:
-            self._append_message('exception >>: ' + str(exception), tabs + 2)
+            m = self._append_message(m, 'exception >>: ' + str(exception), tabs + 2)
 
         if traceback_str is not None:
-            self._append_message('traceback >>: ' + str(traceback_str), tabs + 2)
+            m = self._append_message(m, 'traceback >>: ' + str(traceback_str), tabs + 2)
 
         # first line complete
         if hint is not None:

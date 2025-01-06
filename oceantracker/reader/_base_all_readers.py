@@ -624,7 +624,7 @@ class _BaseReader(ParameterBaseClass):
 
         buffer_index = self.hydro_model_index_to_buffer_index(nt_available)
         s = f' Reading {buffer_index.size:2d} time steps, '
-        s += f' for hindcast time steps {nt_available[0]:02d}:{nt_available[-1]:02d}} '
+        s += f' for hindcast time steps {nt_available[0]:02d}:{nt_available[-1]:02d}'
         s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03d} '
         si.msg_logger.progress_marker(s)
 

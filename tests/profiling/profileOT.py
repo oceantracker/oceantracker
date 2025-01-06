@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasource', default=1, type=int)
-    parser.add_argument('--profiler', default=0, type=int)
+    parser.add_argument('--profiler', default=1, type=int)
     parser.add_argument('-scatch_tests', action='store_true')
     parser.add_argument('-test', action='store_true')
     parser.add_argument('-dev', action='store_true')

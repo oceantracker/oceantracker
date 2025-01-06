@@ -3,7 +3,7 @@ from numba import njit, float64, int32, float32, int8, int64, boolean, uint8
 from oceantracker.util import  basic_util
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.numba_util import njitOT
-from numba import njit, prange
+from numba import njit, prange, set_num_threads
 @njitOT
 def time_independent_2D_scalar_field(F_out, F_data, triangles, n_cell, bc_cords, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
@@ -112,10 +112,10 @@ def time_dependent_3D_vector_field_data_in_all_layers(nb, fractional_time_steps,
     # create views to remove redundant dim at current and next time step, improves speed?
     F1 = F_data[nb[0], :, :, :]
     F2 = F_data[nb[1], :, :, :]
-
+    #set_num_threads(10)
     # loop over active particles and vector components
-    for n in active:
-
+    for nn in prange(active.size):
+        n = active[nn]
         zf2 = z_fraction[n]
         zf1 = 1. - zf2
         nz = nz_cell[n]
