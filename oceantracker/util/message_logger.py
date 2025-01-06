@@ -105,7 +105,7 @@ class MessageLogger(object ):
 
         # make crumb trail
         if crumbs is not None and crumbs != '':
-            m =self._append_message(f'in: {crumbs}', tabs + 3)
+            m =self._append_message(m, f'in: {crumbs}', tabs + 3)
 
         if caller is not None and (error or warning) :
             if hasattr(caller,'__class__'):

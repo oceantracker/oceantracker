@@ -14,13 +14,13 @@ from oceantracker.util.json_util import read_JSON , write_JSON
 def get_params(datasource=1):
     time_step = 300  # 5min
     release_interval = 3600
-    pulse_size = 500
+    pulse_size = 1500
     calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
         input_dir =  r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2008'
         file_mask  = 'schism_marl200801*.nc'
-        root_output_dir = 'F:\\OceanTrackerOtuput\\OceanTrackerProfiling'
+        root_output_dir = 'D:\\OceanTrackerOutput\\OceanTrackerProfiling'
 
     elif datasource==2:
         output_file_base= 'Sounds'
@@ -85,6 +85,7 @@ def get_params(datasource=1):
             'particle_statistics' :[ {'name': 'statas1','class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_ageBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'grid_size': [220, 221],
+                                        'grid_span':[10000,20000],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},
                                      {'name': 'statas2', 'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],

@@ -8,7 +8,11 @@ from time import  perf_counter
 from oceantracker.util.message_logger import MessageLogger, GracefulError
 from oceantracker.util import profiling_util, get_versions_computer_info
 import numpy as np
+
+#os.environ['NUMBA_NUM_THREADS'] = '2'
+
 from oceantracker.util import time_util, numba_util, output_util
+
 from oceantracker.util import json_util, setup_util
 from datetime import datetime
 from time import sleep
@@ -500,17 +504,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # check numba code for SIMD
         if True:
             from numba.core import config
-            d['numba_code_info'] = dict(signatures={},SMID_code = {},
-                                        config={key:val for key, val in config.__dict__.items()
-                                                    if not key.startswith('_') and type(val) in [None,int,str,float]
-                                                }
-                                        )
-            for name, func in  numba_util.numba_func_info.items():
-                if hasattr(func,'signatures') : # only code that has been compiled has a sig
-                    sig = func.signatures
-                    d['numba_code_info']['signatures'][name] = str(sig)
-                    d['numba_code_info']['SMID_code'][name] = []
-                    for nsig in range(len(sig)):
-                        d['numba_code_info']['SMID_code'][name].append(numba_util.count_simd_intructions(func, sig=nsig))
-                    pass
+            d['numba_code_info'] = numba_util.get_numba_func_info()
+
         return d
