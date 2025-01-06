@@ -74,7 +74,7 @@ def check_python_version(msg_logger):
         p_minor= v['python_minor_version']
         install_hint = 'Install Python 3.10 or used environment310.yml to build a Conda virtual environment named oceantracker'
         if not ( p_major > 2 and p_minor >= 9):
-            ml.msg('Oceantracker requires Python 3 , version >= 3.9  and < 3.11',
+            ml.msg('Oceantracker requires Python 3 , version >= 3.10  and < 3.11',
                          hint=install_hint, warning=True, tabs=1)
         if (p_major == 3 and p_minor >= 11):
             ml.msg('Oceantracker is compatible with Python 3.11, but > 3.11, however not all external imported packages have been updated to be compatible with 3.11', warning=True,
@@ -85,6 +85,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     # this must be done before first import of numba
 
     environ['NUMBA_function_cache_size'] = str(settings['NUMBA_function_cache_size'])
+
 
     if 'NUMBA_cache_code' in settings  and settings['NUMBA_cache_code']:
        environ['OCEANTRACKER_NUMBA_CACHING'] = '1'

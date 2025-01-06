@@ -3,7 +3,7 @@ from numba import njit, float64, int32, float32, int8, int64, boolean, uint8
 from oceantracker.util import  basic_util
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.numba_util import njitOT
-
+from numba import njit, prange
 @njitOT
 def time_independent_2D_scalar_field(F_out, F_data, triangles, n_cell, bc_cords, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
@@ -121,7 +121,8 @@ def time_dependent_3D_vector_field_data_in_all_layers(nb, fractional_time_steps,
         nz = nz_cell[n]
 
         # loop over each vertex in triangle
-        for i in range(3): F_out[n, i] = 0. # zero out for summing
+        for c in range(3): F_out[n, c] = 0. # zero out for summing
+
         n_nodes = triangles[n_cell[n], :]
         for m in range(3):
             # loop over vector components
@@ -129,10 +130,9 @@ def time_dependent_3D_vector_field_data_in_all_layers(nb, fractional_time_steps,
                 # add contributions from layer above and below particle, for each spatial component at two time steps
                 # slightly faster with temp variable, as allows more LLVM optimisations?
                 temp  = (F1[n_nodes[m], nz, c] * zf1 + F1[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[0]
-                temp += (F2[n_nodes[m], nz, c] * zf1 + F2[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[1]
+                temp += (F2[n_nodes[m], nz, c] * zf1 + F2[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[1]# second time step
                 F_out[n, c] += bc_cords[n, m] * temp
-                #F_out[n, c] += bc_cords[n, m] * (F1[n_nodes[m], nz, c] * zf1 + F1[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[0]  \
-                #            +  bc_cords[n, m] * (F2[n_nodes[m], nz, c] * zf1 + F2[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[1]  # second time step
+
 
 
 @njitOT
