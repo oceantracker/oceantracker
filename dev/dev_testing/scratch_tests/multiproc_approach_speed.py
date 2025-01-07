@@ -4,36 +4,32 @@ from matplotlib import  pyplot as plt
 from importlib import reload
 import os
 from psutil import  cpu_count
-#os.environ['NUMBA_NUM_THREADS'] ='32'
 import numba as nb
 #
 
 
-def numba_setup():
-
-    global nb
-    os.environ['NUMBA_NUM_THREADS'] ='30'
-    reload(nb)
 
 def get_data(Nodes, time_steps):
     A = np.sin(np.arange(Nodes))
-    B = np.cos(np.arange(Nodes))
     t= np.sin(np.arange(time_steps))
     A = (t.reshape(-1,1)*A.reshape(1,-1))
-    B = (t.reshape(-1,1)*B.reshape(1,-1))
     tri= np.random.randint(Nodes, size = (Nodes,3))
+
+    A= np.tile(A[:,:,np.newaxis],(1,1,3))
+    B = A.copy()*np.random.random(A.shape)
     return A, B, tri
 
 @nb.njit
 def load1(a,b,tri):
     s = 0.
     for m in range(3):
-        s += a[tri[m]]*b[tri[m]]
-    return  s
+        for ncomp in range(a.shape[1]):
+            s += a[tri[m],ncomp]*b[tri[m],ncomp]
+    return s
 
 
 @nb.njit
-def base_eval_interp(A,B,tri, cells, C, active):
+def no_threads_eval_interp(A,B,tri, cells, C, active):
     for n in active:
         C[n] =load1(A, B,tri[cells[n],:])
 
@@ -44,24 +40,26 @@ def prange_eval_interp(A, B, tri, cells, C, active):
         C[n] =load1(A, B,tri[cells[n],:])
 
 if __name__ == "__main__":
-    pass
-    #numba_setup()
+
 
     frac= .9
     data=dict()
     N = np.asarray([1,  100, 500,10**3, 10 ** 4, 10 ** 5, 10 ** 6, 10**7, 10**8])
+    #N = N[:6]
     time_steps= 24
     Nodes = 10**5
 
 
     A, B, tri = get_data(Nodes,time_steps)
     funcs =  [prange_eval_interp]
-    threads = np.asarray([1,2, 5, 10 ,15,20, 30, 60])
+    threads = np.asarray([1,2, 5, 10 ,15,20, 25, 30, 60])
     max_threads = max(cpu_count(logical=False) - 1, 1)
     threads = threads[threads < max_threads]
 
+    print('max threads=',max_threads)
+
     # set up data ouput dict
-    data=dict(base_eval_interp=dict(N=N, time=np.zeros((N.size,),dtype=np.float64), threads=threads))
+    data=dict(no_threads_eval_interp=dict(N=N, time=np.zeros((N.size,),dtype=np.float64), threads=threads))
     for F in funcs:
        data[F.__name__] = dict(N=N, time=np.zeros((N.size,threads.size),dtype=np.float64), threads=threads)
 
@@ -72,12 +70,12 @@ if __name__ == "__main__":
         C = np.full((n,), 0., dtype=A.dtype)
 
         # no threads case
-        base_eval_interp(A[0,:],B[0,:],tri, cells,C,active[:2]) # compile code
+        no_threads_eval_interp(A[0,:],B[0,:],tri, cells,C,active[:2]) # compile code
         t0 = perf_counter()
         for nt in range(time_steps):
-            base_eval_interp(A[nt, :], B[nt, :], tri, cells, C, active)
+            no_threads_eval_interp(A[nt, :], B[nt, :], tri, cells, C, active)
 
-        data['base_eval_interp']['time'][nn] = perf_counter() - t0
+        data['no_threads_eval_interp']['time'][nn] = perf_counter() - t0
 
         print(f'particles {n:,}','Base checksum ',  np.sum(C[active]))
 
@@ -99,7 +97,7 @@ if __name__ == "__main__":
 
         # do plots
     #1 time  per time step verse particles
-    plt.plot(data['base_eval_interp']['N'], data['base_eval_interp']['time'] * 1000 / time_steps, label=f'base_eval_interp')
+    plt.plot(data['no_threads_eval_interp']['N'], data['no_threads_eval_interp']['time'] * 1000 / time_steps, label=f'no_threads_eval_interp')
 
     for nth, n_thread in enumerate(threads):
         for f in funcs:
@@ -110,13 +108,13 @@ if __name__ == "__main__":
     plt.ylabel('Time per time step, msec')
     plt.xscale('log')
     plt.yscale('log')
-    plt.legend()
+    plt.legend(fontsize="8")
     plt.grid()
     plt.show()
 
     #2 time per partilce per time step
-    plt.plot(data['base_eval_interp']['N'], data['base_eval_interp']['time'] * 1000 / time_steps / N,
-             label=f'base_eval_interp')
+    plt.plot(data['no_threads_eval_interp']['N'], data['no_threads_eval_interp']['time'] * 1000 / time_steps / N,
+             label=f'no_threads_eval_interp')
 
     for nth, n_thread in enumerate(threads):
         for f in funcs:
@@ -128,12 +126,14 @@ if __name__ == "__main__":
     plt.ylabel('Time per time step per particle, msec')
     plt.xscale('log')
     plt.yscale('log')
-    plt.legend()
+    plt.legend(fontsize="8")
     plt.grid()
     plt.show()
 
     #3 time per partilce per time step verses threads
+
     for nn , n in enumerate(N):
+        plt.scatter(0,data['no_threads_eval_interp']['time'][nn]  * 1000 / time_steps / N[nn])#,  label=f'no_threads_eval_interp, particles={n:,}')
         for f in funcs:
             name = f.__name__
             plt.plot(data[name]['threads'], data[name]['time'][nn,:]*1000/time_steps/N[nn], label = f'{name}, particles={n:,}')
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     plt.ylabel('Time per time step per particle, msec')
     plt.xlabel('Threads')
     plt.yscale('log')
-    plt.legend()
+    plt.legend(fontsize="8")
     plt.grid()
     plt.show()
 
@@ -151,14 +151,14 @@ if __name__ == "__main__":
     for nth, n_thread in enumerate(threads):
         for f in funcs:
             name= f.__name__
-            r= data[name]['time'][:,nth]/data['base_eval_interp']['time']
+            r= data[name]['time'][:,nth]/data['no_threads_eval_interp']['time']
             plt.plot(data[name]['N'], r, label=f'{name}, threads={n_thread}, min = {np.round(r.min(),4)}')
 
     plt.xlabel('Number of particles')
     plt.ylabel('Speed relative to single core')
     plt.xscale('log')
     plt.yscale('log')
-    plt.legend()
+    plt.legend(fontsize="8")
     plt.grid()
     plt.show()
 
@@ -166,14 +166,14 @@ if __name__ == "__main__":
     for nn , n in enumerate(N):
         for f in funcs:
             name = f.__name__
-            r= data[name]['time'][nn,:]/data['base_eval_interp']['time'][nn]
+            r= data[name]['time'][nn,:]/data['no_threads_eval_interp']['time'][nn]
             plt.plot(data[name]['threads'], r, label=f'{name}, N={n}, min = {np.round(r.min(),4)}')
 
     plt.xlabel('Threads')
     plt.ylabel('Speed relative to single core')
     #plt.xscale('log')
     plt.yscale('log')
-    plt.legend()
+    plt.legend(fontsize="8")
     plt.grid()
     plt.show()
 
