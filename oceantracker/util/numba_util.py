@@ -40,7 +40,7 @@ def get_numba_func_info():
 
 
 max_threads = max(cpu_count(logical=False)-1,1)
-nb.set_num_theads(max_threads) # cap threads at one less than physical cores
+nb.set_num_threads(max_threads) # cap threads at one less than physical cores
 
 def set_num_theads(n):
     threads =  max(min(20,max_threads-1),1)
