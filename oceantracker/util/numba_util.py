@@ -39,11 +39,16 @@ def get_numba_func_info():
     return  d
 
 
-max_threads = cpu_count(logical=False)
-def set_num_theads(n):
-    nb.set_num_threads( max(min(20,max_threads-1),1))
+max_threads = max(cpu_count(logical=False)-1,1)
+nb.set_num_theads(max_threads) # cap threads at one less than physical cores
 
-set_num_theads(20)
+def set_num_theads(n):
+    threads =  max(min(20,max_threads-1),1)
+    nb.set_num_threads(threads)
+    return threads
+
+
+
 def apply_numba_settings(settings):
     # need to apply environment settings before import of numba, so reimport
     pass
