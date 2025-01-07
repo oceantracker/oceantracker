@@ -1,10 +1,10 @@
 import numpy as np
 from os import environ
-
-
-import numba as nb
-
 import os
+#os.environ['NUMBA_NUM_THREADS'] ='20'
+import numba as nb
+from psutil import  cpu_count
+
 from time import perf_counter
 
 numba_func_info={}
@@ -22,6 +22,7 @@ def njitOT(func):
 
     return num_func
 
+
 def get_numba_func_info():
     d = dict(signatures={}, SMID_code={},
            config={key: val for key, val in nb.config.__dict__.items()
@@ -37,6 +38,12 @@ def get_numba_func_info():
                 d['SMID_code'][name].append(count_simd_intructions(func, sig=nsig))
     return  d
 
+
+max_threads = cpu_count(logical=False)
+def set_num_theads(n):
+    nb.set_num_threads( max(min(20,max_threads-1),1))
+
+set_num_theads(20)
 def apply_numba_settings(settings):
     # need to apply environment settings before import of numba, so reimport
     pass
