@@ -10,6 +10,8 @@ from oceantracker.interpolator.util import  triangle_eval_interp
 from oceantracker.particle_properties.util import  particle_operations_util
 from oceantracker.util.numba_util import njitOT
 
+from numba import njit, prange, set_num_threads
+
 # globals to complile into numba to save pass arguments
 psf = si.particle_status_flags
 status_moving = int(psf['moving'])
@@ -59,15 +61,17 @@ class FindVerticalCellSigmaGrid(object):
                                     active, si.settings.z0)
 
     @staticmethod
-    @njitOT
+    #@njitOT
+    @njit(parallel=True)
     def get_depth_cell_sigma_layers(xq, triangles, water_depth, tide, minimum_total_water_depth,
                                     sigma, sigma_map_nz,sigma_map_dz,
                                     n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
                                     current_buffer_steps, fractional_time_steps,
                                     active, z0):
         # temp working space for interp eval
-
-        for n in active:  # loop over active particles
+        set_num_threads(20)
+        for nn in prange(active.size):  # loop over active particles
+            n= active[nn]
             nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
             zq = float(xq[n, 2])
 

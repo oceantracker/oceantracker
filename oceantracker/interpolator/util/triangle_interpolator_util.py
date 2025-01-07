@@ -64,9 +64,7 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
 
 
     # loop over active particles in place
-    for nn in prange(active.size):
-        n= active[nn]
-
+    for n in active:
         # start with good cell search
         cell_search_status[n] = cell_search_ok
 

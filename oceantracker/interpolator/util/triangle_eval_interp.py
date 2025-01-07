@@ -4,6 +4,7 @@ from oceantracker.util import  basic_util
 from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.numba_util import njitOT
 from numba import njit, prange, set_num_threads
+
 @njitOT
 def time_independent_2D_scalar_field(F_out, F_data, triangles, n_cell, bc_cords, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
@@ -102,7 +103,8 @@ def time_dependent_3D_scalar_field_data_in_all_layers(nb, fractional_time_steps,
             temp += (F2[n_nodes[m], nz] * zf1 + F2[n_nodes[m], nz + 1] * zf2) * fractional_time_steps[1]# second time step
             F_out[n] += bc_cords[n, m] * temp
 
-@njitOT
+#@njitOT
+@njit(parallel=True)
 def time_dependent_3D_vector_field_data_in_all_layers(nb, fractional_time_steps, F_data,
                                                       triangles,
                                                       n_cell, bc_cords, nz_cell, z_fraction,
@@ -112,7 +114,9 @@ def time_dependent_3D_vector_field_data_in_all_layers(nb, fractional_time_steps,
     # create views to remove redundant dim at current and next time step, improves speed?
     F1 = F_data[nb[0], :, :, :]
     F2 = F_data[nb[1], :, :, :]
-    #set_num_threads(10)
+
+    set_num_threads(20 if active.size > 10000 else 1 + int(19*active.size/10000) )
+
     # loop over active particles and vector components
     for nn in prange(active.size):
         n = active[nn]
@@ -133,7 +137,7 @@ def time_dependent_3D_vector_field_data_in_all_layers(nb, fractional_time_steps,
                 temp += (F2[n_nodes[m], nz, c] * zf1 + F2[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[1]# second time step
                 F_out[n, c] += bc_cords[n, m] * temp
 
-
+    set_num_threads(32)
 
 @njitOT
 def time_dependent_3D_scalar_field_ragged_bottom(nb, fractional_time_steps, F_data,

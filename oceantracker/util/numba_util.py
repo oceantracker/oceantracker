@@ -1,10 +1,10 @@
 import numpy as np
 from os import environ
-
-
-import numba as nb
-
 import os
+#os.environ['NUMBA_NUM_THREADS'] ='20'
+import numba as nb
+#nb.set_num_threads(20)
+
 from time import perf_counter
 
 numba_func_info={}
@@ -21,6 +21,7 @@ def njitOT(func):
         numba_func_info[key] = num_func
 
     return num_func
+
 
 def get_numba_func_info():
     d = dict(signatures={}, SMID_code={},
