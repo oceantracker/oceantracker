@@ -132,7 +132,7 @@ def calc_BC_cords_numba(x, n_cells, BCtransform, bc):
 
 @njitOT
 def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tri_per_node, BCtransform, bc_walk_tol):
-    # get BC cords of set of points x inside given cells and return in bc
+    # get BC cords of set of points x inside given cells and return in bc variable
     N = x.shape[0]
     is_inside_domain= np.full((N,),False)
     bc = np.zeros((N,3), dtype=np.float64)  # working space
