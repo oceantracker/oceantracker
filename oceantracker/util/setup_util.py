@@ -6,7 +6,6 @@ from os import path, makedirs, walk, unlink
 import traceback
 from oceantracker.util import json_util
 from oceantracker.util import basic_util , get_versions_computer_info
-from numba import  njit
 import  numpy as np
 from oceantracker import definitions
 
@@ -86,10 +85,9 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
 
     environ['NUMBA_function_cache_size'] = str(settings['NUMBA_function_cache_size'])
 
-
     if 'NUMBA_cache_code' in settings  and settings['NUMBA_cache_code']:
-       environ['OCEANTRACKER_NUMBA_CACHING'] = '1'
-       environ['NUMBA_CACHE_DIR'] = path.join(settings['root_output_dir'], 'numba_cache')
+        environ['OCEANTRACKER_NUMBA_CACHING'] = '1'
+        environ['NUMBA_CACHE_DIR'] = path.join(settings['root_output_dir'], 'numba_cache')
     else:
         environ['OCEANTRACKER_NUMBA_CACHING'] = '0'
 
@@ -97,16 +95,30 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
         environ['NUMBA_BOUNDSCHECK'] = '1'
         environ['NUMBA_FULL_TRACEBACKS'] = '1'
 
+    from psutil import cpu_count
+    max_threads = max(cpu_count(logical=False) - 1, 1)
+
+    #environ['NUMBA_PARALLEL_DIAGNOSTICS']= '4'
+    #environ['NUMBA_DEBUG'] = '1'
+    from numba import njit, set_num_threads
+
+
+    #set_num_threads(min(max_threads,10))  # cap threads at one less than physical cores or 15 at most as limitye memory bus speed
+
+    @njit
+    def set_seed(value):
+        np.random.seed(value)
+    @njit
+    def test_random():
+        return  np.random.rand()
+
+
+
     if settings['use_random_seed']:
             np.random.seed(0)  # set numpy
             set_seed(0) # set numba seed which is different from numpys
             msg_logger.msg('Using numpy.random.seed(0),seed_numba_random(0) makes results reproducible (only use for testing developments give the same results!)', warning=True)
-@njit
-def set_seed(value):
-    np.random.seed(value)
-@njit
-def test_random():
-    return  np.random.rand()
+
 
 
 def merge_settings(settings, default_settings, msg_logger, settings_to_merge=None, crumbs='', caller=None):
