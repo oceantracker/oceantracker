@@ -1,10 +1,9 @@
 import numpy as np
-from numba import njit,prange, types as nbt, typeof, from_dtype
 from oceantracker.util.profiling_util import function_profiler
 
 # record variable to hold walk info/counts
 # to reduce number of args required in numba functions and be morr readable
-from oceantracker.util.numba_util import  njitOT
+from oceantracker.util.numba_util import  njitOT, njitOTparallel, prange
 import os
 from copy import copy
 from oceantracker.shared_info import shared_info as si
@@ -59,12 +58,11 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
                 active):
     # Barycentric walk across triangles to find cells
 
-    bc = np.zeros((3,), dtype=np.float64) # working space
-    # shortcuts needed to use prange
-
-
     # loop over active particles in place
-    for n in active:
+    for nn in  prange(active.size):
+        n = active[nn]
+        #bc = np.zeros((3,), dtype=np.float64)  # working space inside loop to run in parallel as not shared
+        bc = bc_cords[n,:]
         # start with good cell search
         cell_search_status[n] = cell_search_ok
 
@@ -116,16 +114,14 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
         if n_steps >= max_triangle_walk_steps:  # dont update cell
             cell_search_status[n] = search_failed
 
-
         if cell_search_status[n] == cell_search_ok:
             # update cell anc BC for new triangle, if not fixed in solver after full step
             n_cell[n] = n_tri
-            for i in range(3): bc_cords[n, i] = bc[i]
 
-        walk_counts[0] += 1  # particles walked
         walk_counts[1] += n_steps  # steps taken
         walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
 
+    walk_counts[0] += active.size  # particles walked
 
 @njitOT
 def calc_BC_cords_numba(x, n_cells, BCtransform, bc):

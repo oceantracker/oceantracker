@@ -8,7 +8,7 @@ from time import perf_counter
 from oceantracker.util import numpy_util
 from oceantracker.interpolator.util import  triangle_eval_interp
 from oceantracker.particle_properties.util import  particle_operations_util
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel
 
 from numba import njit, prange, set_num_threads
 
@@ -61,8 +61,7 @@ class FindVerticalCellSigmaGrid(object):
                                     active, si.settings.z0)
 
     @staticmethod
-    #@njitOT
-    @njit(parallel=True)
+    @njitOT
     def get_depth_cell_sigma_layers(xq, triangles, water_depth, tide, minimum_total_water_depth,
                                     sigma, sigma_map_nz,sigma_map_dz,
                                     n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,
@@ -71,7 +70,7 @@ class FindVerticalCellSigmaGrid(object):
         # temp working space for interp eval
 
         for nn in prange(active.size):  # loop over active particles
-            n= active[nn]
+            n = active[nn]
             nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
             zq = float(xq[n, 2])
 

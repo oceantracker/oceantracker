@@ -3,7 +3,7 @@ from numba import njit, prange
 from numba.typed import List as NumbaList
 from oceantracker.util.polygon_util import make_domain_mask
 from oceantracker.util import  basic_util, cord_transforms
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel
 
 
 # build node to cell map

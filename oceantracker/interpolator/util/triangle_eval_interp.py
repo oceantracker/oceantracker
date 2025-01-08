@@ -1,9 +1,8 @@
 import numpy as np
-from numba import njit, float64, int32, float32, int8, int64, boolean, uint8
 from oceantracker.util import  basic_util
 from oceantracker.util.profiling_util import function_profiler
-from oceantracker.util.numba_util import njitOT
-from numba import njit, prange, set_num_threads
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
+
 
 @njitOT
 def time_independent_2D_scalar_field(F_out, F_data, triangles, n_cell, bc_cords, active):
@@ -104,7 +103,7 @@ def time_dependent_3D_scalar_field_data_in_all_layers(nb, fractional_time_steps,
             F_out[n] += bc_cords[n, m] * temp
 
 #@njitOT
-@njit(parallel=True)
+@njitOT
 def time_dependent_3D_vector_field_data_in_all_layers(nb, fractional_time_steps, F_data,
                                                       triangles,
                                                       n_cell, bc_cords, nz_cell, z_fraction,
