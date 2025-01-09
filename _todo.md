@@ -14,6 +14,7 @@
 1. slow start up
    1. after  - Starting time stepping:
    1. after -  read  24 time steps in  9.2 sec
+1. small track differences after moving to threaded version with unit test 1, need to recalc bc cords if move back?
 
 ##  Internal Structure
 
@@ -27,6 +28,8 @@
 1. set max treads before numbas import
 1. use fast math numba option?
 2. comparison tests in parallelized?
+3. restructure particle ID buffers?
+1. restructure  particle method find_those_in_range_of_values()?
 
 ## New additions
 

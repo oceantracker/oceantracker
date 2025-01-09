@@ -7,7 +7,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from  oceantracker.particle_group_manager.util import  pgm_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_properties._base_particle_properties import FieldParticleProperty,ManuallyUpdatedParticleProperty,CustomParticleProperty
-
+from oceantracker.particle_properties.util import particle_comparisons_util
 # holds and provides access to different types a group of particle properties, eg position, field properties, custom properties
 class ParticleGroupManager(ParameterBaseClass):
 
@@ -35,6 +35,8 @@ class ParticleGroupManager(ParameterBaseClass):
                      vector_dim=nDim)
 
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status', dtype='int8', )
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status_last_good', dtype='int8', )
+
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='age', initial_value=0.,
                      units='seconds', description='Time in seconds since particle released')
 
@@ -77,6 +79,9 @@ class ParticleGroupManager(ParameterBaseClass):
 
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
+
+        # setup boolean shared buffer used in all particle comparisons tests
+        particle_comparisons_util.setup_shared_comparison_IndexBuffer(si.settings.particle_buffer_initial_size, si.settings.parallel_threads)
 
     #@function_profiler(__name__)
     def release_particles(self,n_time_step, time_sec):
@@ -160,6 +165,9 @@ class ParticleGroupManager(ParameterBaseClass):
             np.copyto(new_data[:num_in_buffer, ...], old_data[:num_in_buffer, ...])
             i.data = new_data
             del old_data
+
+        # enlarge particle comparisons working space to match current buffer size
+        particle_comparisons_util.setup_shared_comparison_IndexBuffer(info['current_particle_buffer_size'], si.settings.parallel_threads)
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 
@@ -246,7 +254,7 @@ class ParticleGroupManager(ParameterBaseClass):
         s += f'Active:{info["num_alive"]:<6,d} M:{counts[sf.moving-128]:<6,d} '
         s += f'S:{counts[sf.stranded_by_tide-128]:<6,d}  B:{counts[sf.on_bottom -128]:<6,d} '
         s += f'D:{counts[sf.dead - 128]:<6,d} O:{counts[sf.outside_open_boundary - 128]:<6,d} '
-        s += f'N:{counts[sf.bad_cord - 128]:<6,d} Buffer:{info["particles_in_buffer"]:<6,d} '
+        s += f'N:{counts[sf.bad_coord - 128]:<6,d} Buffer:{info["particles_in_buffer"]:<6,d} '
         s += '%3.0f%%' % (100. * info['particles_in_buffer'] / si.core_class_roles.particle_group_manager.info['current_particle_buffer_size'])
         s += self.screen_msg
         return s

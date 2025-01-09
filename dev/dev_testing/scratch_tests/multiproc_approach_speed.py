@@ -36,6 +36,7 @@ def no_threads_eval_interp(A,B,tri, cells, C, active):
 @nb.njit(parallel=True)
 def prange_eval_interp(A, B, tri, cells, C, active):
     for i in nb.prange(active.shape[0]):
+        #if nb.get_thread_id() > 0: print('xxID', nb.get_thread_id())
         n = active[i]
         C[n] =load1(A, B,tri[cells[n],:])
 

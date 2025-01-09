@@ -27,7 +27,7 @@ import traceback
 
 from  oceantracker.shared_info import shared_info
 
-# use separate message logger for actions in main, cases use si.msg_logger
+# use separate message logger for actions in main
 msg_logger = MessageLogger()
 
 OTname = definitions.package_fancy_name
@@ -51,9 +51,13 @@ class OceanTracker():
     # helper methods
     def settings(self,case=None, **kwargs):
         # work out if to add to base params or case list params
-        existing_params = self._get_case_params_to_work_on(case)
+        if case is not None:
+            msg_logger.msg('Cases run as seperate parallel processes are no longer supported, computations are now parallelized within a single process using threads',
+                   hint='Remove case argument and computations will automatically be run on parallel threads by default',
+                   caller = self,
+                   fatal_error=True)
         for key in kwargs:
-            existing_params[key]= kwargs[key]
+            self.params[key]= kwargs[key]
 
     def add_class(self, class_role:str=None, class_name:str=None, name: str=None, case:int=None,  **kwargs):
         '''
@@ -65,6 +69,12 @@ class OceanTracker():
         '''
         ml = msg_logger
         known_class_roles = shared_info.core_class_roles.possible_values() + shared_info.class_roles.possible_values()
+
+        if case is not None:
+            ml.msg('Cases run as seperate parallel processes are no longer supported, computations are now parallelized within a single process using threads',
+                   hint='Remove case argument and computations will automatically be run on parallel threads by default',
+                   caller = self,
+                   fatal_error=True)
 
         if class_role is None:
             ml.msg('oceantracker.add_class, must give first parameter as class role, eg. "release_group"', error=True, caller =self)
@@ -80,7 +90,7 @@ class OceanTracker():
                            class_role,known_class_roles, error=True, hint=f'Possible_values {str(known_class_roles)}')
             return
 
-        existing_params = self._get_case_params_to_work_on(case)
+        params = self.params
 
         #add class name and name if given
         if class_name is not None: kwargs['class_name'] = class_name
@@ -88,40 +98,18 @@ class OceanTracker():
 
         # add new params to core or other roles
         if class_role in shared_info.core_class_roles.possible_values():
-            if class_role not in existing_params: existing_params[class_role] = {}
-            existing_params[class_role].update(kwargs)
+            if class_role not in params: params[class_role] = {}
+            params[class_role].update(kwargs)
         else:
             #add to mulit component role list
-            if class_role not in existing_params: existing_params[class_role] = []
-            if type(existing_params[class_role]) != list:
+            if class_role not in params: params[class_role] = []
+            if type(params[class_role]) != list:
                 ml.msg(f'oceantracker.add_class {class_role} must be a list of dictionaries, with optional name key',
-                       error=True, caller=self,  hint='Given type =' + str(type(existing_params[class_role])))
+                       error=True, caller=self,  hint='Given type =' + str(type(params[class_role])))
 
-            existing_params[class_role].append(kwargs) # add users params
+            params[class_role].append(kwargs) # add users params
 
         return
-
-    def _get_case_params_to_work_on(self, case):
-        # work out whether to work on base of given case
-        if case is None:
-            # base case only
-            return self.params
-        else:
-            if 'case_list' not in self.params: self.params['case_list'] = []
-            case_list = self.params['case_list']
-            if type(case) != int or case < 0:
-                msg_logger.msg(f'Case keyword must be an integer >=0', error=True, hint=f'Got value :{str(case)}')
-
-            if case < len(case_list):
-                return case_list[case] # work on existing case
-            elif case == len(case_list):
-                # next in line case
-                case_list.append({}) # expand by  one extra cases as empty
-                return case_list[case] # work on new last one
-            else:
-                msg_logger.msg(f'New cases must be added in order, have case = {case}',error=True,
-                     hint=f"This would be the {case + 1}'th case added, but only :{len(case_list)} cases have been added so far" )
-                return {}
 
     def run(self):
         ot_runner= _OceanTrackerMainRunner()

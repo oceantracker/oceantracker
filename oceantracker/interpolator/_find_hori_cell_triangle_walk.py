@@ -48,7 +48,12 @@ class FindHoriCellTriangleWalk(object):
                      initial_value=0, caller=self, crumbs=crumbs)
         si.add_class('particle_properties', name='cell_search_status', class_name='ManuallyUpdatedParticleProperty', write=False,
                      initial_value=cell_search_status_flags.ok, dtype='int8', caller=self, crumbs=crumbs)
-        si.add_class('particle_properties', name='bc_cords', class_name='ManuallyUpdatedParticleProperty', write=False,
+        si.add_class('particle_properties', name='need_fixingIDs', class_name='ManuallyUpdatedParticleProperty',
+                     write=False, dtype='int32',
+                     initial_value=0, caller=self, crumbs=crumbs)
+        si.add_class('particle_properties', name='bc_coords', class_name='ManuallyUpdatedParticleProperty', write=False,
+                     initial_value=0., vector_dim=3, dtype='float32', caller=self, crumbs=crumbs)
+        si.add_class('particle_properties', name='bc_coords_last_good', class_name='ManuallyUpdatedParticleProperty', write=False,
                      initial_value=0., vector_dim=3, dtype='float32', caller=self, crumbs=crumbs)
 
         self.walk_counts = np.zeros((6,), dtype=np.int64)
@@ -83,13 +88,14 @@ class FindHoriCellTriangleWalk(object):
         part_prop = si.class_roles.particle_properties
         grid= self.grid
         n_cell = part_prop['n_cell'].data
-        bc_cords = part_prop['bc_cords'].data
+        bc_coords = part_prop['bc_coords'].data
         cell_search_status = part_prop['cell_search_status'].data
+        need_fixingIDs = part_prop['need_fixingIDs'].data
         params = self.params
 
         tri_interp_util.BCwalk(xq,
             self.tri_walk_AOS, grid['dry_cell_index'],
-            n_cell, cell_search_status, bc_cords,
+            n_cell, cell_search_status, bc_coords,
             self.walk_counts,
             params['max_search_steps'], params['bc_walk_tol'],
             si.settings['block_dry_cells'], active)

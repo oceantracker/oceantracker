@@ -35,6 +35,8 @@ class  InterpTriangularGrid(_BaseInterp):
         info = self.info
 
     #@function_profiler(__name__)
+
+    
     def initial_setup(self, reader):
         super().initial_setup(reader)  # children must call this parent class to default shared_params etc
         params = self.params
@@ -148,7 +150,7 @@ class  InterpTriangularGrid(_BaseInterp):
 
             n_cell, bc, is_inside_domain = self.find_initial_cell(xq[sel,...])
             part_prop['n_cell'].set_values(n_cell, sel)
-            part_prop['bc_cords'].set_values(bc, sel)
+            part_prop['bc_coords'].set_values(bc, sel)
 
             # recheck for additional failures
             sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
@@ -177,15 +179,15 @@ class  InterpTriangularGrid(_BaseInterp):
     #@function_profiler(__name__)
     def are_points_inside_domain(self,xq):
         n_cell, bc, is_inside_domain  = self.find_initial_cell(xq)
-        part_data = dict(x = xq, n_cell=n_cell, bc_cords=bc)
+        part_data = dict(x = xq, n_cell=n_cell, bc_coords=bc)
         # todo add interpolated water depth, tide???
         return is_inside_domain, part_data # is inside if  magnitude of all BC < 1
 
-    def get_bc_cords(self,grid, x,n_cells):
+    def get_bc_coords(self,grid, x,n_cells):
         # get BC cords for given x's
-        bc_cords = np.full((x.shape[0],3), 0.)
-        tri_interp_util.calc_BC_cords_numba(x, n_cells, grid['bc_transform'], bc_cords)
-        return bc_cords
+        bc_coords = np.full((x.shape[0],3), 0.)
+        tri_interp_util.calc_BC_cords_numba(x, n_cells, grid['bc_transform'], bc_coords)
+        return bc_coords
 
     def close(self):
         info = self.info

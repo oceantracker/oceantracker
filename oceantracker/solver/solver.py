@@ -216,23 +216,14 @@ class Solver(ParameterBaseClass):
 
         part_prop['x_last_good'].copy('x', is_moving)
         part_prop['n_cell_last_good'].copy('n_cell', is_moving)
+        part_prop['bc_coords_last_good'].copy('bc_coords', is_moving)
+        part_prop['status_last_good'].copy('status', is_moving)
 
 
         # do time step
         dt = si.settings.time_step*si.run_info.model_direction
         self.RK_step(time_sec, dt,is_moving)
 
-
-        # check bc coords correct
-        if si.settings['dev_debug_opt'] ==10:
-            from oceantracker.util import debug_util
-            still_bad = debug_util.check_walk_step(si.core_class_roles.reader.grid, part_prop, bad, msg_logger=si.msg_logger, crumbs='solver-post RK step')
-
-            if still_bad.size > 0:
-                si.msg_logger.msg(f'Cell search,  some still bad after fixing step  {np.count_nonzero(still_bad)} of  {is_moving.size} ', warning=True)
-                if si.settings['debug_plots']:
-                    debug_util.plot_walk_step(part_prop['x'].data, si.core_class_roles.reader.grid, part_prop, still_bad)
-                pass
         pass
 
     def RK_step(self,time_sec, dt, is_moving):
