@@ -24,7 +24,7 @@ def get_params(datasource=1):
 
     elif datasource==2:
         output_file_base= 'Sounds'
-        input_dir =  '/hpcfreenas/hindcast/MarlbroughSounds_hindcast_10years_BenPhd_2019ver'
+        input_dir =  '/hpcfreenas/hindcast/UpperSouthIsland/MarlbroughSounds_hindcast_10years_BenPhd_2019ver/'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = '/hpcfreenas/ross/oceanTrackerOutput/profiling/'
 
@@ -59,6 +59,7 @@ def get_params(datasource=1):
          'time_step': time_step,
         'screen_output_time_interval':6*time_step,
          'max_run_duration': 6 *24*3600,  # 10 days
+         #'parallel_threads': 10,
          'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,
                     #'time_buffer_size': 3,

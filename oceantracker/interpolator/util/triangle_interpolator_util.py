@@ -50,7 +50,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 
     return np.argmin(bc), np.argmax(bc)
 
-@njitOT
+@njitOTparallel
 def BCwalk(xq, tri_walk_AOS, dry_cell_index,
                 n_cell, cell_search_status,bc_cords,
                 walk_counts,
@@ -61,7 +61,6 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
     # loop over active particles in place
     for nn in  prange(active.size):
         n = active[nn]
-        #bc = np.zeros((3,), dtype=np.float64)  # working space inside loop to run in parallel as not shared
         bc = bc_cords[n,:]
         # start with good cell search
         cell_search_status[n] = cell_search_ok
@@ -69,7 +68,7 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
         if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
             # if any is nan copy all and move on
             cell_search_status[n]= search_bad_cord
-            walk_counts[3] += 1  # count nans
+            #walk_counts[3] += 1  # count nans
             continue
 
         n_tri = n_cell[n]  # starting triangle
@@ -118,8 +117,8 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
             # update cell anc BC for new triangle, if not fixed in solver after full step
             n_cell[n] = n_tri
 
-        walk_counts[1] += n_steps  # steps taken
-        walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
+        #walk_counts[1] += n_steps  # steps taken
+        #walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
 
     walk_counts[0] += active.size  # particles walked
 

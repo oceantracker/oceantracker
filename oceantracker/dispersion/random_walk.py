@@ -1,8 +1,7 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.dispersion._base_dispersion import _BaseDispersion
-from numba import njit, types as nbtypes
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 
 from random import normalvariate
 from oceantracker.util.numba_util import njitOT
@@ -73,26 +72,29 @@ class RandomWalk(_BaseDispersion):
                                     np.abs(si.settings.time_step),
                                     active, part_prop['velocity_modifier'].data)
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _add_random_walk_velocity2D_modifier_constantAZ(random_walk_velocity, velocity_modifier, active):
-        for n in active:
+        for nn in prange(active.size):
+            n = active[nn]
             for m in range(2):
                 velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _add_random_walk_velocity3D_modifier_constantAZ(random_walk_velocity, active, velocity_modifier):
-        for n in active:
+        for nn in prange(active.size):
+            n = active[nn]
             for m in range(3):
                 velocity_modifier[n, m] += normalvariate(0., random_walk_velocity[m])
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _add_random_walk_velocity_modifier_A_Z_profile(A_Z, A_Z_vertical_gradient, random_walk_velocity, timestep, active, velocity_modifier):
         # add vertical advection effect of dispersion to random walk, see Lynch Particles in the Coastal Ocean: Theory and Applications
         # this avoids particle accumulating in areas of high vertical gradient of A_Z, ie top and bottom
 
-        for n in active:
+        for nn in prange(active.size):
+            n = active[nn]
             # random walk velocity in horizontal
             for m in range(2):
                 velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])

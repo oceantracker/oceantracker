@@ -14,7 +14,8 @@ def njitOT(func):
     #num_func = njit(func, *args)
 
     cache= 'OCEANTRACKER_NUMBA_CACHING' in os.environ and os.environ['OCEANTRACKER_NUMBA_CACHING'] == '1'
-    num_func = nb.njit(func, cache= cache)
+    num_func = nb.njit(func,
+                       cache= 'OCEANTRACKER_NUMBA_CACHING' in os.environ and os.environ['OCEANTRACKER_NUMBA_CACHING'] == '1')
 
     if hasattr(func,'__name__'):
         # record numba version of the function
@@ -29,8 +30,10 @@ def njitOTparallel(func):
     # add ability to inspect the functions after compilation at end for SIMD code
     #num_func = njit(func, *args)
 
-    cache= 'OCEANTRACKER_NUMBA_CACHING' in os.environ and os.environ['OCEANTRACKER_NUMBA_CACHING'] == '1'
-    num_func = nb.njit(func, cache= cache, parallel=True)
+    num_func = nb.njit(func,
+                       cache='OCEANTRACKER_NUMBA_CACHING' in os.environ and os.environ['OCEANTRACKER_NUMBA_CACHING'] == '1',
+                       parallel= 'OCEANTRACKER_USE_PARALLEL_THREADS' not in os.environ or os.environ['OCEANTRACKER_USE_PARALLEL_THREADS'] =='1',
+                       nogil=True)
 
     if hasattr(func,'__name__'):
         # record numba version of the function
