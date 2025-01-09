@@ -80,6 +80,8 @@ class _DefaultSettings(_SharedStruct):
                                     doc_str='Size of memory cache for compiled numba functions in kB' )
     NUMBA_cache_code = PVC(False, bool, expert=True,
                            doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
+    NUMBA_fastmath = PVC(False, bool, expert=True,
+                           doc_str='Use NUmbas fastmath mode to speed operation with slight reduction in accuracy"')
     multiprocessing_case_start_delay = PVC(0., float, min=0.,expert=True,
                                            doc_str='Delay start of each sucessive case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
     write_tracks = PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes' )

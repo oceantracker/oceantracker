@@ -60,7 +60,7 @@ def time_dependent_2D_scalar_field(nb, fractional_time_steps, F_out, F_data, tri
 def time_dependent_2D_vector_field(nb, fractional_time_steps, F_out, F_data, triangles, n_cell, bc_cords, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
     # time dependent  fields from two time slices in hindcast
-    n_comp = F_data.shape[3]  # time step of data is always [node,z,comp] even in 2D
+
     F1 = F_data[nb[0], :, 0, :]
     F2 = F_data[nb[1], :, 0, :]
 
@@ -146,7 +146,7 @@ def time_dependent_3D_scalar_field_ragged_bottom(nb, fractional_time_steps, F_da
                                             n_cell, bc_cords, nz_cell, z_fraction,
                                             F_out, active):
     #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
-
+    #todo ncomp is always 1 for a scalar??
     n_comp = F_data.shape[3]  # time step of data is always [nb, node,z,comp] even in 2D
 
     # create views of scalar data
@@ -183,9 +183,6 @@ def time_dependent_3D_vector_field_ragged_bottom(nb, fractional_time_steps, F_da
                                                  n_cell, bc_cords, nz_cell, z_fraction,
                                                  F_out, active):
     #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
-
-    n_comp = F_data.shape[3]  # time step of data is always [nb, node,z,comp] even in 2D
-
     # create views to remove redundant dim at current and next time step, improves speed?
     F1 = F_data[nb[0], :, :, :]
     F2 = F_data[nb[1], :, :, :]
@@ -193,7 +190,7 @@ def time_dependent_3D_vector_field_ragged_bottom(nb, fractional_time_steps, F_da
     # loop over active particles and vector components
     for nn in prange(active.size):
         n = active[nn]
-        for i in range(n_comp): F_out[n, i] = 0. # zero out for summing
+        for i in range(3): F_out[n, i] = 0. # zero out for summing
         zf = z_fraction[n]
         zf1 = 1. - zf
         nz = nz_cell[n]
@@ -207,7 +204,7 @@ def time_dependent_3D_vector_field_ragged_bottom(nb, fractional_time_steps, F_da
             nz_below = max(nzb, nz)
             nz_above = max(nzb, nz + 1)
             # loop over vector components
-            for c in range(n_comp):
+            for c in range(3):
                 # add contributions from layer above and below particle, for each spatial component at two time steps
                 F_out[n, c] +=     bc_cords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*fractional_time_steps[0]  \
                                 +  bc_cords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step

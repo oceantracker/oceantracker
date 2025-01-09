@@ -103,7 +103,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
         max_threads = min(settings['parallel_threads'], max_threads)
     # let numbas_util know if to use threads
     environ['OCEANTRACKER_USE_PARALLEL_THREADS'] = str(int(settings['use_parallel_threads']))
-
+    environ['NUMBA_FASTMATH'] = str(int(settings['NUMBA_fastmath']))
 
     #environ['NUMBA_PARALLEL_DIAGNOSTICS']= '4'
     #environ['NUMBA_DEBUG'] = '1'
@@ -111,7 +111,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     #  environment variable settings must be used before numbas is first imported
     from numba import njit, set_num_threads
     set_num_threads(max_threads)
-
+    msg_logger.hori_line()
     msg_logger.progress_marker(f'Applied Numba settings,use parallel threads = {settings["use_parallel_threads"]}, max threads ={max_threads}, physical cores ={physical_cores}')
 
     @njit
