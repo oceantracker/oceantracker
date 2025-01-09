@@ -193,11 +193,11 @@ class _BaseReleaseGroup(ParameterBaseClass):
             fgm = si.core_class_roles.field_group_manager
             release_part_prop['water_depth'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
                                                 'water_depth', release_part_prop['x'],
-                                                release_part_prop['n_cell'],release_part_prop['bc_cords'], time_sec=None,
+                                                release_part_prop['n_cell'],release_part_prop['bc_coords'], time_sec=None,
                                                 hydro_model_gridID=release_part_prop['hydro_model_gridID'])
             release_part_prop['tide'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
                                                 'tide', release_part_prop['x'],
-                                                release_part_prop['n_cell'],release_part_prop['bc_cords'], time_sec=time_sec,
+                                                release_part_prop['n_cell'],release_part_prop['bc_coords'], time_sec=time_sec,
                                                 hydro_model_gridID=release_part_prop['hydro_model_gridID'])
             return release_part_prop
 

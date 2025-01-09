@@ -177,7 +177,7 @@ class DevNestedFields(ParameterBaseClass):
         return is_inside, part_data
 
 
-    def interp_named_2D_scalar_fields_at_given_locations_and_time(self,field_name,  x, n_cell, bc_cords, time_sec = None, hydro_model_gridID = None):
+    def interp_named_2D_scalar_fields_at_given_locations_and_time(self,field_name,  x, n_cell, bc_coords, time_sec = None, hydro_model_gridID = None):
 
         vals= np.full((x.shape[0],), 0., dtype=np.float32)
 
@@ -186,8 +186,8 @@ class DevNestedFields(ParameterBaseClass):
             fgm = self.fgm_hydro_grids[n]
             sel = hydro_model_gridID == n
             vals[sel, ...] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(field_name, x[sel, :],
-                                          n_cell[sel],bc_cords[sel,:], time_sec= time_sec,hydro_model_gridID=n)
-        #field_name, x, n_cell, bc_cords, time_sec = None, hydro_model_gridID = None
+                                          n_cell[sel],bc_coords[sel,:], time_sec= time_sec,hydro_model_gridID=n)
+        #field_name, x, n_cell, bc_coords, time_sec = None, hydro_model_gridID = None
         return vals
 
     def setup_time_step(self, time_sec, xq, active):
@@ -217,7 +217,7 @@ class DevNestedFields(ParameterBaseClass):
                 part_prop['hydro_model_gridID'].set_values(n, s)  # put on inner grid
                 part_prop['n_cell'].set_values(pp['n_cell'][is_inside], s)
                 part_prop['n_cell_last_good'].set_values(pp['n_cell'][is_inside], s)
-                part_prop['bc_cords'].set_values(pp['bc_cords'][is_inside, ...], s)
+                part_prop['bc_coords'].set_values(pp['bc_coords'][is_inside, ...], s)
                 on_outer_grid = on_outer_grid[~is_inside]  # found a grid so drop from consideration of moving to another inner grid
 
             # now update existing and those moved from outer to this inner grid
@@ -239,7 +239,7 @@ class DevNestedFields(ParameterBaseClass):
                     part_prop['hydro_model_gridID'].set_values(0, s)  # put on outer grid
                     part_prop['n_cell'].set_values(pp['n_cell'][inside_outer], s)
                     part_prop['n_cell_last_good'].set_values(pp['n_cell'][inside_outer], s)
-                    part_prop['bc_cords'].set_values(pp['bc_cords'][inside_outer, ...], s)
+                    part_prop['bc_coords'].set_values(pp['bc_coords'][inside_outer, ...], s)
                     #print('xx moved to outer grid', s[:2], part_prop['status'].data[s[:2]], part_prop['x'].data[s[:2]],  part_prop['hydro_model_gridID'].data[:1])
                     # update those now on outer grid and apply its open boundary condition
                     fgm_outer_grid.setup_time_step(time_sec, xq, s)

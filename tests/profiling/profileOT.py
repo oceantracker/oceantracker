@@ -60,6 +60,7 @@ def get_params(datasource=1):
         'screen_output_time_interval':6*time_step,
          'max_run_duration': 6 *24*3600,  # 10 days
          #'parallel_threads': 10,
+         #'NUMBA_cache_code' : True,
          'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,
                     #'time_buffer_size': 3,

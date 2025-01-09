@@ -192,6 +192,8 @@ class FieldGroupManager(ParameterBaseClass):
         if sel.size > 0:
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
+            part_prop['bc_coords'].copy('bc_coords_last_good', sel)  # move back the cell
+            part_prop['status'].copy('status_last_good', sel)  # move back the cell
 
         # debug_util.plot_walk_step(xq, si.core__class_roles.reader.grid, part_prop)
 
@@ -209,9 +211,9 @@ class FieldGroupManager(ParameterBaseClass):
         field= self.reader.fields[field_name]
         self.reader.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
 
-    def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_cords, time_sec= None,hydro_model_gridID=None):
+    def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_coords, time_sec= None,hydro_model_gridID=None):
         # interp reader field_name at specfied locations,  not particle locations
-        # used for getting tide and water depth at release locations give cell and bc_cords
+        # used for getting tide and water depth at release locations give cell and bc_coords
         #todo smarter ways to do this special case using interploator class, not numba kernals?
         part_prop = si.class_roles.particle_properties
         info = self.info
@@ -223,11 +225,11 @@ class FieldGroupManager(ParameterBaseClass):
 
         if time_sec is None:
             triangle_eval_interp.time_independent_2D_scalar_field(output, field_instance.data,
-                                            self.reader.grid['triangles'],n_cell, bc_cords, active)
+                                            self.reader.grid['triangles'],n_cell, bc_coords, active)
         else:
             current_hydro_model_step, current_buffer_steps, fractional_time_steps = self.reader._time_step_and_buffer_offsets(time_sec)
             triangle_eval_interp.time_dependent_2D_scalar_field(current_buffer_steps, fractional_time_steps, output,
-                                      field_instance.data, self.reader.grid['triangles'], n_cell, bc_cords, active)
+                                      field_instance.data, self.reader.grid['triangles'], n_cell, bc_coords, active)
         return output
 
     def update_dry_cell_values(self):

@@ -37,7 +37,7 @@ def default_params():
 
 
 
-    params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_cords'])
+    params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_coords'])
 
     return  params
 

@@ -82,7 +82,7 @@ class _CellSearchStatusFlags(_base_values_class):
     domain_edge: int = -1
     open_boundary_edge: int = -2
     dry_cell_edge : int = -3
-    bad_cord: int = -20
+    bad_coord: int = -20
     failed: int = -30
 
     def get_edge_vars(self):

@@ -17,15 +17,15 @@ status_on_bottom = int(psf['on_bottom'])
 status_stranded_by_tide = int(psf['stranded_by_tide'])
 status_outside_open_boundary = int(psf['outside_open_boundary'])
 status_dead = int(psf['dead'])
-status_bad_cord = int(psf['bad_cord'])
-status_cell_search_failed = int(psf['cell_search_failed'])
+status_bad_coord = int(psf['bad_coord'])
+
 
 cell_search_ok= int(cell_search_status_flags.ok)
 cell_search_domain_edge= int(cell_search_status_flags.domain_edge)
 cell_search_open_boundary_edge= int(cell_search_status_flags.open_boundary_edge)
 cell_search_dry_cell_edge= int(cell_search_status_flags.dry_cell_edge)
 
-search_bad_cord= int(cell_search_status_flags.bad_cord)
+search_bad_coord= int(cell_search_status_flags.bad_coord)
 
 search_failed= int(cell_search_status_flags.failed)
 
@@ -52,7 +52,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 
 @njitOTparallel
 def BCwalk(xq, tri_walk_AOS, dry_cell_index,
-                n_cell, cell_search_status,bc_cords,
+                n_cell, cell_search_status,bc_coords,
                 walk_counts,
                 max_triangle_walk_steps, bc_walk_tol, block_dry_cells,
                 active):
@@ -61,13 +61,13 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
     # loop over active particles in place
     for nn in  prange(active.size):
         n = active[nn]
-        bc = bc_cords[n,:]
+        bc = bc_coords[n,:]
         # start with good cell search
         cell_search_status[n] = cell_search_ok
 
         if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
             # if any is nan copy all and move on
-            cell_search_status[n]= search_bad_cord
+            cell_search_status[n]= search_bad_coord
             #walk_counts[3] += 1  # count nans
             continue
 
@@ -129,7 +129,7 @@ def calc_BC_cords_numba(x, n_cells, BCtransform, bc):
     for n in range(x.shape[0]):
         _get_single_BC_cord_numba(x[n, :], BCtransform[n_cells[n], :, :], bc[n, :])
 
-@njitOT
+@njitOTparallel
 def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tri_per_node, BCtransform, bc_walk_tol):
     # get BC cords of set of points x inside given cells and return in bc variable
     N = x.shape[0]
@@ -137,7 +137,7 @@ def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tr
     bc = np.zeros((N,3), dtype=np.float64)  # working space
     n_cell = np.full((N,),-1, np.int32)
 
-    for n in range(x.shape[0]):
+    for n in prange(x.shape[0]):
         nn = node[n]
         # loop over tri attached to node
         for m in range(tri_per_node[nn]):

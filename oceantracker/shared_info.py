@@ -146,10 +146,11 @@ from dataclasses import dataclass
 class _ParticleStatusFlags(_SharedStruct):
     '''Particle status flags mapped to integer values'''
     unknown  = -20
-    bad_cord = -16
-    cell_search_failed=  -15
+    bad_coord = -16
+    cell_search_failed= -15
     notReleased = -10
     dead = -5
+    outside_domain = -3
     outside_open_boundary =-2
     stationary = 0
     stranded_by_tide = 3
@@ -319,6 +320,8 @@ class _SharedInfoClass():
             b[name] = dict(time=0.,calls=0)
         b[name]['time'] += perf_counter()-t0
         b[name]['calls'] += 1
+
+
 
 
 # make the instance used throughout code
