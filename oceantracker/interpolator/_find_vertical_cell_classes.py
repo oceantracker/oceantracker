@@ -61,7 +61,7 @@ class FindVerticalCellSigmaGrid(object):
                                     active, si.settings.z0)
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def get_depth_cell_sigma_layers(xq, triangles, water_depth, tide, minimum_total_water_depth,
                                     sigma, sigma_map_nz,sigma_map_dz,
                                     n_cell, status, bc_cords, nz_cell, z_fraction, z_fraction_water_velocity,

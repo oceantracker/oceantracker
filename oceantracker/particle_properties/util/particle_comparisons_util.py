@@ -3,7 +3,7 @@
 
 import numpy as np
 from numba import njit
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 
 @njitOT
 def is_eq(a, b): return a == b
@@ -48,9 +48,9 @@ def _prop_compared_to_value(part_prop, comparison_func, value, out):
    # now search for those where test is true
 
     nfound = 0
-    for n in range(part_prop.shape[0]):
-        if comparison_func(part_prop[n], value):
-            out[nfound] = n
+    for nn in range(part_prop.shape[0]):
+        if comparison_func(part_prop[nn], value):
+            out[nfound] = nn
             nfound += 1
 
     return out[:nfound]

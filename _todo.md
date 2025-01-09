@@ -23,7 +23,10 @@
     1. trace backs
     1. always get secondary case.json info error?
 2.  have field manager with each field having its own reader, grid and interpolator
-
+1. Rebuild interp walk counts/stats
+1. set max treads before numbas import
+1. use fast math numba option?
+2. comparison tests in parallelized?
 
 ## New additions
 

@@ -99,6 +99,9 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
+    use_parallel_threads = PVC(True, bool,doc_str='Use threads to distubute compuation across mutilpe threads')
+    parallel_threads = PVC(None, int, min=1,
+                 doc_str='Maximum number of threads to use in parallelization, default is one less than the number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                  doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
 
