@@ -19,7 +19,7 @@ from oceantracker.util import triangle_utilities, basic_util, cord_transforms
 
 from oceantracker.reader.util import reader_util
 
-from oceantracker.definitions import node_types, cell_search_status_flags
+from oceantracker.definitions import  cell_search_status_flags
 
 from oceantracker.shared_info import shared_info as si
 
@@ -368,16 +368,16 @@ class _BaseReader(ParameterBaseClass):
         msg_logger.progress_marker('built domain and island outlines', start_time=t0,tabs=2)
 
         # make island and domain nodes, not in regular grid some nodes may be unsed so mark as land
-        grid['node_type'] = np.full(grid['x'].shape[0],  node_types.land,dtype=np.int8) # mark all as land
+        grid['node_type'] = np.full(grid['x'].shape[0],  si.node_types.land,dtype=np.int8) # mark all as land
 
         # now mark all active nodes, those in a triangle,  as inside model
-        grid['node_type'][np.unique(grid['triangles'])] = node_types.interior
+        grid['node_type'][np.unique(grid['triangles'])] = si.node_types.interior
 
         # now mark boundary nodes
         for c in grid['grid_outline']['islands']:
-            grid['node_type'][c['nodes']] = node_types.island_boundary
+            grid['node_type'][c['nodes']] = si.node_types.island_boundary
 
-        grid['node_type'][grid['grid_outline']['domain']['nodes']] = node_types.domain_boundary
+        grid['node_type'][grid['grid_outline']['domain']['nodes']] = si.node_types.domain_boundary
 
         t0 = perf_counter()
         grid['triangle_area'] = triangle_utilities.calcuate_triangle_areas(grid['x'], grid['triangles'],info['geographic_coords'])
@@ -387,11 +387,11 @@ class _BaseReader(ParameterBaseClass):
         # adjust node type and adjacent for open boundaries
         # todo define node and adjacent type values in dict, for single definition and case info output?
         is_open_boundary_node = self.read_open_boundary_data_as_boolean(grid)
-        grid['node_type'][is_open_boundary_node] = node_types.open_boundary
+        grid['node_type'][is_open_boundary_node] = si.node_types.open_boundary
 
         is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'], grid['adjacency'], is_open_boundary_node)
 
-        grid['adjacency'][is_open_boundary_adjacent] = cell_search_status_flags.open_boundary_edge
+        grid['adjacency'][is_open_boundary_adjacent] = si.edge_types.open_boundary
 
         grid['limits'] = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
 
@@ -785,7 +785,7 @@ class _BaseReader(ParameterBaseClass):
         nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(cell_search_status_flags.get_edge_vars()))
-        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(node_types.asdict())}, description='type of node, types are' + str(node_types.asdict()))
+        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
 
         if 'water_depth' in self.fields:

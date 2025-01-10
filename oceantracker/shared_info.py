@@ -5,20 +5,17 @@ from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, 
 
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 
-from oceantracker.util import class_importer_util, basic_util
+from oceantracker.util import class_importer_util, numba_util
 from oceantracker.util.message_logger import  MessageLogger
 
 from time import  perf_counter
-from oceantracker.util import cord_transforms
-import numpy as np
-from oceantracker.util.scheduler import Scheduler
 from oceantracker.particle_properties import particle_operations
 
 # useful utility classes to enable auto complete
 class _Object(object):  pass
 class _SharedStruct():
     '''
-    holds variables as clas attributes to enable auto complete hints
+    holds variables as class attributes to enable auto complete hints
     and give iterators over these variables
 
     allows both  instance.backtracking and i['instance.backtracking']
@@ -141,21 +138,6 @@ class _CoreClassRoles(_SharedStruct):
     tidal_stranding = {}
     resuspension = {}
     integrated_model = None # this is here as there can be only one at a time
-from dataclasses import dataclass
-
-class _ParticleStatusFlags(_SharedStruct):
-    '''Particle status flags mapped to integer values'''
-    unknown  = -20
-    bad_coord = -16
-    cell_search_failed= -15
-    notReleased = -10
-    dead = -5
-    outside_domain = -3
-    outside_open_boundary =-2
-    stationary = 0
-    stranded_by_tide = 3
-    on_bottom = 6
-    moving =  10
 
 
 class _VerticalGridTypes(_SharedStruct):
@@ -204,20 +186,16 @@ class _SharedInfoClass():
     core_class_roles = _CoreClassRoles()
     particle_operations = particle_operations
     default_settings = _DefaultSettings()
-    particle_status_flags = _ParticleStatusFlags() # need to be instances to allow particle_status_flags[key] form
+    particle_status_flags = definitions._ParticleStatusFlags()  # need to be instances to allow particle_status_flags[key] form
+    node_types =  definitions._NodeTypes()
+    edge_types = definitions._EdgeTypes()
     vertical_grid_types = _VerticalGridTypes()
     run_info  = _RunInfo()
     hindcast_info = None
     msg_logger = MessageLogger()
     block_timers={}
-    classes = {}  # todo deprecated
-    info = _UseFullInfo
 
-    # list of params only setable in base case
-    base_case_only_params = ['root_output_dir', 'output_file_base', 'processors', 'max_warnings',
-                                  'multi_processing_method', 'multiprocessing_case_start_delay',
-                                  'backtracking', 'add_date_to_run_output_dir', 'debug', 'use_random_seed']
-    base_case_only_params += [key for key in default_settings.possible_values() if 'numba' in key.lower()]
+    info = _UseFullInfo
 
 
     def __init__(self):

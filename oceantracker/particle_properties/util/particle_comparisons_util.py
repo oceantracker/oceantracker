@@ -2,8 +2,8 @@
 # returns indies for which test is true in a view of int32 array
 
 import numpy as np
-from numba import njit, get_thread_id, get_num_threads
-from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
+from oceantracker.util.numba_util import njitOT, njitOTparallel
+import numba as nb
 
 @njitOT
 def is_eq(a, b): return a == b
@@ -71,7 +71,7 @@ def _prop_compared_to_valueV2(part_prop, comparison_func, value,shared_compariso
    # now search for those where test is true
 
     # do find  using threads
-    for nn in prange(part_prop.shape[0]):
+    for nn in nb.prange(part_prop.shape[0]):
         shared_comparison_IndexBuffer[nn] = comparison_func(part_prop[nn], value)
 
     nfound = 0
@@ -86,12 +86,12 @@ def prop_subset_compared_to_value(active, part_prop, test, value, out):
     # return a view of  indices where  part_prop (test) value, is true for active particles
     if out is None: out = np.full((part_prop.shape[0],), -127, np.int32)
 
-    #return _prop_subset_compared_to_value(active, part_prop, _get_comparison(test), value, out)
-    return _prop_subset_compared_to_value(active, part_prop, _get_comparison(test),
-                                          value,_shared_comparison_IndexBuffer, _number_found_in_each_thread,out)
+    return _prop_subset_compared_to_value(active, part_prop, _get_comparison(test), value, out)
+    #return _prop_subset_compared_to_value_not_used(active, part_prop, _get_comparison(test),
+    #                                      value,_shared_comparison_IndexBuffer, _number_found_in_each_thread,out)
 
 @njitOT
-def _prop_subset_compared_to_valueV1_not_threaded(active, part_prop,comparison_func,value, out):
+def _prop_subset_compared_to_value(active, part_prop,comparison_func,value, out):
     #return a view of indices where   part_prop (test) is true
    # now search for those where test is true
     nfound = 0
@@ -101,26 +101,26 @@ def _prop_subset_compared_to_valueV1_not_threaded(active, part_prop,comparison_f
             nfound += 1
     return out[:nfound]
 
-@njitOT
-def _prop_subset_compared_to_value(active, part_prop,comparison_func,value,
+@njitOTparallel
+def _prop_subset_compared_to_value_not_used(active, part_prop,comparison_func,value,
                                    shared_comparison_IndexBuffer, number_found_in_each_thread,out):
     #return a view of indices where   part_prop (test) is true
    # now search for those where test is true
 
     # do search split into threads
-    for threadID in range(get_num_threads()): number_found_in_each_thread[threadID] = 0
+    for threadID in range(nb.get_num_threads()): number_found_in_each_thread[threadID] = 0
 
-    for nn in prange(active.size):
+    for nn in nb.prange(active.size):
         n = active[nn]
         if comparison_func(part_prop[n],value):
-            threadID = get_thread_id()
+            threadID = nb.get_thread_id()
             shared_comparison_IndexBuffer[threadID, number_found_in_each_thread[threadID]] = n
             number_found_in_each_thread[threadID] += 1
 
 
     # combine results from each thread
     nfound = 0
-    for threadID in range(get_num_threads()):
+    for threadID in range(nb.get_num_threads()):
         for nn in range(number_found_in_each_thread[threadID]):
             out[nfound] = shared_comparison_IndexBuffer[threadID, nn]
             nfound += 1

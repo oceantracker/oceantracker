@@ -10,16 +10,16 @@ from oceantracker.interpolator.util import  triangle_eval_interp
 from oceantracker.particle_properties.util import  particle_operations_util
 from oceantracker.util.numba_util import njitOT, njitOTparallel
 
-from numba import njit, prange, set_num_threads
+import numba as nb
 
 # globals to complile into numba to save pass arguments
 psf = si.particle_status_flags
-status_moving = int(psf['moving'])
-status_on_bottom = int(psf['on_bottom'])
-status_stranded_by_tide = int(psf['stranded_by_tide'])
-status_outside_open_boundary = int(psf['outside_open_boundary'])
-status_dead = int(psf['dead'])
-status_bad_coord = int(psf['bad_coord'])
+status_moving = int(psf.moving)
+status_on_bottom = int(psf.on_bottom)
+status_stranded_by_tide = int(psf.stranded_by_tide)
+status_outside_open_boundary = int(psf.outside_open_boundary)
+status_dead = int(psf.dead)
+status_bad_coord = int(psf.bad_coord)
 
 class FindVerticalCellSigmaGrid(object):
 
@@ -34,7 +34,6 @@ class FindVerticalCellSigmaGrid(object):
         # the smalest sigms later thickness is at the bottom
 
         grid['sigma_nz_map'], grid['sigma_map_dz'] = make_search_map(grid['sigma'])
-
 
 
     def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
@@ -68,7 +67,7 @@ class FindVerticalCellSigmaGrid(object):
                                     active, z0):
         # temp working space for interp eval
 
-        for nn in prange(active.size):  # loop over active particles
+        for nn in nb.prange(active.size):  # loop over active particles
             n = active[nn]
             nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
             zq = float(xq[n, 2])

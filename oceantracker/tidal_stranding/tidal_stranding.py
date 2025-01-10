@@ -1,6 +1,7 @@
 from numba import njit
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
-from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
+from oceantracker.util.numba_util import njitOT, njitOTparallel
+import numba as nb
 
 from oceantracker.shared_info import shared_info as si
 
@@ -36,7 +37,7 @@ class TidalStranding(_BaseTrajectoryModifier):
 def tidal_stranding_from_dry_cell_index(dry_cell_index, n_cell, active, status):
     # look at all particles in buffer to check total water depth < water_depth_min
     #  use  0-255 dry cell index updated at each interpolation update
-    for nn in prange(active.size):
+    for nn in nb.prange(active.size):
         n = active[nn]
         if status[n] >= status_stationary:
 

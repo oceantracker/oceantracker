@@ -39,8 +39,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         # give shared access to params
 
         #todo add memory monitor
-        #python_process = psutil.Process(os.getpid())
-        #si.mem_monitor = dict(python_procssID=python_process , updates=0,initial_men_used=python_process.memory_info().rss, total_mem_used=0) # use to monitot memory usage
 
         si.run_builder = run_builder
         si.working_params = run_builder['working_params']
@@ -423,7 +421,7 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
              'update_timers': {},
              'settings' : si.settings.as_dict(),
              'run_info' : info,
-             'particle_status_flags': si.particle_status_flags.as_dict(),
+             'particle_status_flags': si.particle_status_flags.asdict(),
              'errors': si.msg_logger.errors_list,
              'warnings': si.msg_logger.warnings_list,
              'notes': si.msg_logger.notes_list,
