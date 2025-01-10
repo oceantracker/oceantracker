@@ -9,7 +9,7 @@ import numba as nb
 import os
 from copy import copy
 from oceantracker.shared_info import shared_info as si
-from oceantracker.definitions import cell_search_status_flags
+
 # globals
 
 # globals to compile into numba to save pass arguments
@@ -24,6 +24,7 @@ status_outside_open_boundary = int(psf.outside_open_boundary)
 status_dead = int(psf.dead)
 status_bad_coord = int(psf.bad_coord)
 status_cell_search_failed = int(psf.cell_search_failed)
+status_hit_dry_cell = int(psf.hit_dry_cell)
 
 
 domain_edge =  int(si.edge_types.domain)
@@ -107,7 +108,7 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
             if block_dry_cells:  # is faster split into 2 ifs, not sure why
                 if dry_cell_index[next_tri] > 128:
                     # treats dry cell like a lateral boundary,  move back and keep triangle the same
-                    status[n] = status_outside_domain
+                    status[n] = status_hit_dry_cell
                     cell_search_OK = False
                     break
 

@@ -7,7 +7,6 @@ from oceantracker.util import time_util
 from oceantracker.shared_info import shared_info as si
 from time import  perf_counter
 from copy import copy, deepcopy
-from oceantracker.definitions import  cell_search_status_flags
 
 # run fields nested with outer main readers grid
 

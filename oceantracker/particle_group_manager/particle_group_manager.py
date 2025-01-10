@@ -35,7 +35,6 @@ class ParticleGroupManager(ParameterBaseClass):
                      vector_dim=nDim)
 
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status', dtype='int8', )
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status_last_good', dtype='int8', )
 
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='age', initial_value=0.,
                      units='seconds', description='Time in seconds since particle released')

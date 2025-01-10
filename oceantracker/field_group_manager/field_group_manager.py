@@ -138,14 +138,19 @@ class FieldGroupManager(ParameterBaseClass):
         self._move_back(sel_outside_domain)
 
         if si.settings.block_dry_cells:
-            sel_hit_dry = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
-                                                                    cell_search_status_flags.dry_cell_edge,
+            sel_hit_dry = part_prop['status'].find_subset_where(sel_fix, 'eq',
+                                                                    si.particle_status_flags.hit_dry_cell,
                                                                     out=self.get_partID_subset_buffer('B2'))
             self._apply_dry_cell_boundary_condition(sel_hit_dry)
 
-        # finally move back bad cell searches, nan etc
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
+        # move back bad coords, nan etc
+        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.bad_coord, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel) # those still bad, eg nan etc
+
+        # move back cell search failed
+        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.cell_search_failed,
+                                                    out=self.get_partID_subset_buffer('B2'))
+        self._move_back(sel)  # those still bad, eg nan etc
 
         if reader.info['is3D']:
             # find vertical cell
@@ -190,7 +195,7 @@ class FieldGroupManager(ParameterBaseClass):
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
             part_prop['bc_coords'].copy('bc_coords_last_good', sel)  # move back the cell
-            part_prop['status'].copy('status_last_good', sel)  # move back the cell
+            part_prop['status'].set_values(si.particle_status_flags.moving, sel)  # set statud to moving
 
         # debug_util.plot_walk_step(xq, si.core__class_roles.reader.grid, part_prop)
 
