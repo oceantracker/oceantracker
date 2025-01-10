@@ -73,6 +73,7 @@ class _ParticleStatusFlags(_BaseConstantsClass):
     cell_search_failed: int = -15
     notReleased : int = -10
     dead : int = -5
+    hit_dry_cell: int = -4
     outside_domain : int = -3
     outside_open_boundary : int = -2
     stationary : int = 0

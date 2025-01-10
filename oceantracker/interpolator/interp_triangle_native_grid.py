@@ -1,22 +1,15 @@
 # linear interploation for triangles in both space and time
 #todo  are BC cords as np.float32, faster as lower memory transfer demand and good enough?
 import numpy as np
-from scipy.spatial import cKDTree
-
 from oceantracker.interpolator._base_interp import _BaseInterp
-from oceantracker.util import basic_util
-from oceantracker.util.profiling_util import function_profiler
 from time import perf_counter
-from oceantracker.util import numpy_util
 from oceantracker.interpolator.util import triangle_interpolator_util as tri_interp_util ,  triangle_eval_interp
-from oceantracker.particle_properties.util import  particle_operations_util
-
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
-from oceantracker.definitions import cell_search_status_flags
 from oceantracker.shared_info import shared_info as si
 from oceantracker.interpolator._find_hori_cell_triangle_walk import FindHoriCellTriangleWalk
 from oceantracker.interpolator._eval_interp_triangles import EvalInterpTriangles
 from oceantracker.interpolator import _find_vertical_cell_classes
+
 class  InterpTriangularGrid(_BaseInterp):
 
     # uses tweaked sci py which allows using start triangle location
