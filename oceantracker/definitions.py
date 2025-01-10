@@ -57,27 +57,49 @@ default_classes_dict = dict(
                 )
 # index values
 
-# below are mapping names to index name
+# below are mapping names to index name, and are added to shared info
 @dataclass
-class _base_values_class:
-    def asdict(self):
-        return asdict(self)
+class _BaseConstantsClass:
+    c = 1
+    def asdict(self):  return self.__dict__
+    def possible_values(self):  return list(self.__dict__.keys())
+
+
+''' Particle status flags mapped to integer values '''
+@dataclass
+class _ParticleStatusFlags(_BaseConstantsClass):
+    unknown : int = -20
+    bad_coord : int = -16
+    cell_search_failed: int = -15
+    notReleased : int = -10
+    dead : int = -5
+    outside_domain : int = -3
+    outside_open_boundary : int = -2
+    stationary : int = 0
+    stranded_by_tide : int = 3
+    on_bottom : int = 6
+    moving : int = 10
+
 
 # types of node
 @dataclass
-class _node_types_class(_base_values_class):
+class _NodeTypes(_BaseConstantsClass):
     interior: int = 0
     island_boundary: int = 1
     domain_boundary: int = 2
     open_boundary: int = 3
     land: int = 4
-node_types = _node_types_class()
 
+@dataclass
+class _EdgeTypes(_BaseConstantsClass):
+    interior: int = 0
+    domain: int = -1
+    open_boundary: int = -2
 
 
 # status of cell search
 @dataclass
-class _CellSearchStatusFlags(_base_values_class):
+class _CellSearchStatusFlags(_BaseConstantsClass):
     ok: int = 0
     domain_edge: int = -1
     open_boundary_edge: int = -2

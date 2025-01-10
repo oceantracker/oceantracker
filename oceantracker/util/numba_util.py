@@ -5,7 +5,7 @@ import os
 
 import numba as nb
 
-
+# give direct access to some numba stuff.
 from time import perf_counter
 
 numba_func_info={}
@@ -26,7 +26,7 @@ def njitOT(func):
 
     return num_func
 
-prange = nb.prange
+
 
 def njitOTparallel(func):
     # add ability to inspect the functions after compilation at end for SIMD code
@@ -60,6 +60,57 @@ def get_numba_func_info():
             for nsig in range(len(sig)):
                 d['SMID_code'][name].append(count_simd_intructions(func, sig=nsig))
     return  d
+
+# below makes a self expanding buffer to store the indes found with each prange loop,
+# to merge into single array of indices
+# is not used currently
+thread_index_chunk_size = 10 ** 5
+
+
+class ThreadIndeBuffer_not_used_yet():
+    def __init__(self,max_num_threads):
+        self.buffers_list, self.indicies_per_thread  = self._make_thread_index_buffer(max_num_threads)
+
+    @staticmethod
+    @nb.njit
+    def _make_thread_index_buffer(max_num_threads):
+        # build a numba usable list of indices arrays to store indices found within each tread of a prange loop
+        # initial size isup  n indices per thread
+
+        A = np.full((thread_index_chunk_size,), -1, dtype=np.int32)
+
+        buffers_list=[A.copy() for n in range(max_num_threads)]
+        indicies_per_thread = np.full((thread_index_chunk_size,), -1, dtype=np.int32)
+
+        return buffers_list, indicies_per_thread
+
+    def merge_thread_index_buffers(self, output_array):
+        result= self._merge_thread_index_buffers(self.buffers_list, self.indicies_per_thread, output_array)
+        return result
+    @staticmethod
+    @nb.njit
+    def _merge_thread_index_buffers( buffers_list, indicies_per_thread, output_array):
+        #merge over current threads being used, which may be less than the maximum number of threads
+        n_found = 0
+        for n_thread, a in enumerate(buffers_list[:get_num_threads]):
+            # merge only inserted vales from each array
+            for n in a[:indicies_per_thread[n_thread]]:
+                output_array[n_found] = n
+                n_found += 1
+
+        return output_array[:n_found] # view of all indicies in the buffer
+@nb.njit
+def add_to_thread_index_buffer(index_val, buffers_list, indicies_per_thread, threadID):
+    # add indcies to buffer for given threadID
+    N = buffers_list[0].size
+    # expand is needed
+    if indicies_per_thread[threadID] >= N:
+        # expand thsi buffer
+        buffers_list[threadID] = np.append( (indicies_per_thread[threadID],np.full((thread_index_chunk_size,),-1,dtype=np.int32)))
+
+    # insert index value in this threads array
+    buffers_list[threadID][indicies_per_thread[threadID]] = index_val
+    indicies_per_thread[threadID] += 1
 
 
 

@@ -35,7 +35,7 @@ class SplitParticles(_BaseTrajectoryModifier):
         params = self.params
         self.add_scheduler('splitter01', interval=params['interval'], caller=self)
 
-        self.statuses_to_split = IDmapToArray(si.particle_status_flags, params['statuses'])
+        self.statuses_to_split = IDmapToArray(si.particle_status_flags.asdict(), params['statuses'])
 
         self.age_bounds= np.asarray([ 0. if params['min_age'] is None else params['min_age'],
                                      si.info.large_float if params['max_age'] is None else params['max_age']

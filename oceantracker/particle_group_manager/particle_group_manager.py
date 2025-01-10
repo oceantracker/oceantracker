@@ -80,8 +80,6 @@ class ParticleGroupManager(ParameterBaseClass):
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
 
-        # setup boolean shared buffer used in all particle comparisons tests
-        particle_comparisons_util.setup_shared_comparison_IndexBuffer(si.settings.particle_buffer_initial_size, si.settings.parallel_threads)
 
     #@function_profiler(__name__)
     def release_particles(self,n_time_step, time_sec):
@@ -166,8 +164,6 @@ class ParticleGroupManager(ParameterBaseClass):
             i.data = new_data
             del old_data
 
-        # enlarge particle comparisons working space to match current buffer size
-        particle_comparisons_util.setup_shared_comparison_IndexBuffer(info['current_particle_buffer_size'], si.settings.parallel_threads)
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 

@@ -90,15 +90,17 @@ class FindHoriCellTriangleWalk(object):
         n_cell = part_prop['n_cell'].data
         bc_coords = part_prop['bc_coords'].data
         cell_search_status = part_prop['cell_search_status'].data
+        status = part_prop['status'].data
         need_fixingIDs = part_prop['need_fixingIDs'].data
         params = self.params
 
-        tri_interp_util.BCwalk(xq,
-            self.tri_walk_AOS, grid['dry_cell_index'],
-            n_cell, cell_search_status, bc_coords,
-            self.walk_counts,
-            params['max_search_steps'], params['bc_walk_tol'],
-            si.settings['block_dry_cells'], active)
+        IDs_need_fixing= tri_interp_util.BCwalk(xq,
+                                self.tri_walk_AOS, grid['dry_cell_index'],
+                                n_cell, status, need_fixingIDs ,bc_coords,
+                                self.walk_counts,
+                                params['max_search_steps'], params['bc_walk_tol'],
+                                si.settings['block_dry_cells'], active)
+        return IDs_need_fixing
 
     def close(self):
         info= self.info

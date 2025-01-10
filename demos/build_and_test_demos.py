@@ -112,18 +112,6 @@ p4.update({'output_file_base' :'demo04_ageBasedHeatmaps' })
 
 params.append (p4)
 
-# demo 5 parallel
-base_case = deepcopy(p2)
-del base_case['release_groups']
-base_case.update({'output_file_base' :'demo05_parallel',
-            'processors': 2,
-          })
-case_list=[]
-for n in range(5):
-    case_list.append({ 'release_groups': p2['release_groups']})
-base_case['case_list'] = case_list
-params.append(base_case)
-
 # track animation with settlement on reef polygon
 # demo 6
 p6 = deepcopy(p2)

@@ -151,31 +151,7 @@ def merge_settings(settings, default_settings, msg_logger, settings_to_merge=Non
         pass
     return settings
 
-def merge_base_and_case_working_params(base_working_params,n_case, case_working_params,base_case_only_params, msg_logger, crumbs='', caller=None):
 
-    # check any case settings are not in the ones that can only be shared
-    for key in case_working_params['settings'].keys():
-        pass
-        if key in base_case_only_params:
-            msg_logger.msg(f'Setting {key} cannot be set with a case', crumbs= crumbs,
-                          hint=f'Move parameter from cases to the base case #{n_case}', caller=caller, error=True)
-
-    # merge the settings first
-    for key, item in base_working_params['settings'].items():
-        if key not in case_working_params:
-            case_working_params['settings'][key] = item
-
-    # merge core classes
-    for key, item in base_working_params['core_class_roles'].items():
-        if key not in case_working_params:
-            case_working_params['core_class_roles'][key]= item
-    # class dicts
-    for role, role_dict in base_working_params['class_roles'].items():
-        # loop over named base case classes
-        for item in base_working_params['class_roles'][role]:
-            case_working_params['class_roles'][role].append(item)
-
-    return case_working_params
 
 
 

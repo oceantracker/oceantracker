@@ -139,10 +139,10 @@ class  InterpTriangularGrid(_BaseInterp):
         info = self.info
         part_prop = si.class_roles.particle_properties
 
-        self._get_hori_cell(xq, active)
+        IDs_need_fixing = self._get_hori_cell(xq, active)
 
         # try to fix any failed walks
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
+        sel = part_prop['status'].find_subset_where(IDs_need_fixing, 'eq', si.particle_status_flags.cell_search_failed, out=self.get_partID_subset_buffer('B1'))
 
         if sel.size > 0:
             # si.msg_logger.msg(f'Search retried for {sel.size} cells')
@@ -152,9 +152,10 @@ class  InterpTriangularGrid(_BaseInterp):
             part_prop['n_cell'].set_values(n_cell, sel)
             part_prop['bc_coords'].set_values(bc, sel)
 
-            # recheck for additional failures
-            sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
-
+            # recheck for repeated failures of failed searched, which must be outside domain if not found by intial serarch
+            # , but not outside an open boundary which is flagged separately
+            sel = sel[~is_inside_domain]
+            IDs_need_fixing = IDs_need_fixing[sel]
             if sel.size > 0:
                 wf = {'x0': part_prop['x_last_good'].get_values(sel),
                       'xq': part_prop['x'].get_values(sel)}
@@ -171,6 +172,8 @@ class  InterpTriangularGrid(_BaseInterp):
                 part_prop['status'].set_values(si.particle_status_flags.dead, sel)
 
         si.block_timer('Find cell, horizontal walk', t0)
+
+        return IDs_need_fixing
 
     def find_vertical_cell(self, fields, xq, current_buffer_steps,fractional_time_steps, active):
         # locate vertical cell in place

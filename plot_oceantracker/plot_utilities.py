@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as clr
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as font_manager
-from oceantracker.definitions import node_types
+from oceantracker.definitions import _NodeTypes
+node_types = _NodeTypes()
+
 from time import perf_counter
 
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar

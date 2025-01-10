@@ -6,7 +6,7 @@ from oceantracker.field_group_manager.util import field_group_manager_util
 from time import  perf_counter
 from copy import deepcopy
 from oceantracker.shared_info import shared_info as si
-from  oceantracker.definitions import  node_types, cell_search_status_flags
+from  oceantracker.definitions import  cell_search_status_flags
 from oceantracker.interpolator.util import  triangle_eval_interp
 #from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
@@ -52,7 +52,7 @@ class FieldGroupManager(ParameterBaseClass):
         info = self.info
         grid = self.reader.grid
 
-        info['has_open_boundary_nodes'] = np.any(self.reader.grid['node_type'] == node_types.open_boundary)
+        info['has_open_boundary_nodes'] = np.any(self.reader.grid['node_type'] == si.node_types.open_boundary)
 
         if 'use_open_boundary' not in info :
             # set info here if not preset by nested grids
@@ -124,19 +124,16 @@ class FieldGroupManager(ParameterBaseClass):
         part_prop = si.class_roles.particle_properties
         reader = self.reader
         # find hori cell
-        self.reader.interpolator.find_hori_cell(xq, active)
+        sel_fix = self.reader.interpolator.find_hori_cell(xq, active)
 
-        # all those that need fixing, lateral boundaries and bad, ie cell_status < blocked_dry_cell
-        sel_fix = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('B1'))
-
-        sel_outside_open = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', cell_search_status_flags.open_boundary_edge,
+        sel_outside_open = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.outside_open_boundary,
                                                                         out=self.get_partID_subset_buffer('B2'))
         if sel_outside_open.size > 0:
             self._fix_those_outside_open_boundary(sel_outside_open)
 
         # outside domain but not an open boundary,
-        sel_outside_domain = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
-                                                                        cell_search_status_flags.domain_edge,
+        sel_outside_domain = part_prop['status'].find_subset_where(sel_fix, 'eq',
+                                                                        si.particle_status_flags.outside_domain,
                                                                         out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel_outside_domain)
 
