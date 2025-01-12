@@ -158,12 +158,12 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     #environ['NUMBA_DEBUG'] = '1'
 
     #  environment variable settings must be used before numbas is first imported
-    #environ['NUMBA_NUM_THREADS']  = str(max_threads)
-
     if 'numba' in sys.modules:
-        #import  numba
-        msg_logger.msg('Numba has already been imported, some numba options may not work, ignore SVML warning', note=True)
-        #importlib.reload(numba)
+        msg_logger.msg('Numba has already been imported, some numba options may not be used (ignore SVML warning)',
+                       hint='Ensure any code using Numba is imported after Oceantracker is run, eg Oceantrackers "load_output_files.py" and "read_ncdf_output_files.py"',
+                       warning=True)
+
+    environ['NUMBA_NUM_THREADS']  = str(max_threads)
 
     from numba import njit, set_num_threads
     set_num_threads(max_threads)

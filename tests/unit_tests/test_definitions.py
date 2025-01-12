@@ -1,14 +1,13 @@
 import datetime
 from os import path, sep
 from oceantracker.main import OceanTracker
-from read_oceantracker.python import load_output_files
-from plot_oceantracker import plot_tracks
+
+
 import  argparse
 import shutil
 import numpy as np
 from oceantracker import definitions
-from oceantracker.util import cord_transforms
-from plot_oceantracker import plot_tracks
+
 from copy import deepcopy
 
 def base_settings(fn,args,label=None):
@@ -169,10 +168,11 @@ ax = [1591000, 1601500, 5478500, 5491000]
 
 
 def read_tracks(case_info_file):
+    from read_oceantracker.python import load_output_files
     return load_output_files.load_track_data(case_info_file)
 
 def compare_reference_run(case_info_file, args):
-
+    from read_oceantracker.python import load_output_files
     reference_case_info_file = case_info_file.replace('unit_tests', 'unit_test_reference_cases')
     if args.reference_case:
         # rewrite reference case output
@@ -201,7 +201,7 @@ def compare_reference_run(case_info_file, args):
     print('max time difference, sec', np.max(dt))
     pass
 def show_track_plot(case_info_file, args):
-
+    from plot_oceantracker import plot_tracks
     if not args.plot : return
     tracks= read_tracks(case_info_file)
 
