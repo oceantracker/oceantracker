@@ -1,9 +1,8 @@
 from typing import TypedDict
 
 from oceantracker import definitions
-from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParameterListChecker as PLC
 
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 
 from oceantracker.util import class_importer_util
 from oceantracker.util.message_logger import  MessageLogger

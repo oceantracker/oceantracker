@@ -38,7 +38,6 @@ class MessageLogger(object ):
         self.error_count = 0
         self.warning_count = 0
         self.note_count = 0
-        self.screen_tag = 'prelim:'
         self.max_warnings = 25
 
 

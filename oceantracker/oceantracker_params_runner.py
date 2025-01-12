@@ -1,3 +1,6 @@
+import sys
+
+
 from copy import deepcopy, copy
 from os import path, makedirs, walk, unlink
 import numpy as np
@@ -11,15 +14,14 @@ from oceantracker.field_group_manager import set_up_reader
 
 #os.environ['NUMBA_NUM_THREADS'] = '2'
 
-from oceantracker.util import time_util, numba_util, output_util
+from oceantracker.util import time_util, output_util
 
-from oceantracker.util import json_util, setup_util
+from oceantracker.util import json_util, setup_util, class_importer_util
 from datetime import datetime
 from time import sleep
 import traceback
 from oceantracker.util.setup_util import config_numba_environment_and_random_seed
 from oceantracker import definitions
-from oceantracker.util import setup_util, class_importer_util
 from oceantracker.shared_info import shared_info as si
 
 # note do not import numba here as its environment  setting must ve done first, import done below
@@ -46,7 +48,9 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
                                                     crumbs='Buling working params')
         ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
 
+
         si.add_settings(working_params['settings'])  # add full settings to shared info
+
 
         # setup output dir and msg files
         output_files = setup_util.setup_output_dir(working_params['settings'], crumbs='Setting up output dir')
@@ -55,7 +59,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
                                                                                   output_files[
                                                                                       'output_file_base'] + '_runLog')  # message logger output file setup
 
-        ml.msg(f'For Output is in dir "{output_files["run_output_dir"]}"',
+        ml.msg(f'Output is in dir "{output_files["run_output_dir"]}"',
                hint='see for copies of screen output and user supplied parameters, plus all other output')
 
         # write raw params to a file
@@ -75,17 +79,16 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
                            version=definitions.version,
                            computer_info=get_versions_computer_info.get_computer_info(),
                            output_files=output_files)
-
+        ml.set_screen_tag('setup')
         ml.hori_line()
-        ml.msg(f' {definitions.package_fancy_name} version {definitions.version["str"]} - preliminary setup')
+        ml.msg(f' {definitions.package_fancy_name} version {definitions.version["str"]} ')
 
         ml.exit_if_prior_errors('parameters have errors')
 
         run_builder['reader_builder'] = self._create_reader_builders(run_builder)
 
         # do run
-        si.msg_logger.set_screen_tag('setup')
-        case_info_file = self.run_case(run_builder)
+        case_info_file = self._run_case(run_builder)
 
         ml.close()
         return case_info_file
@@ -127,7 +130,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
 
 
-    def run_case(self, run_builder):
+    def _run_case(self, run_builder):
         # one case
 
         d0 = datetime.now()
@@ -150,9 +153,6 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         si.add_settings(si.working_params['settings']) # push settings into shared info
 
-        # set numba config environment variables, before any import of numba, eg by readers,
-        # also done in main but also needed here for parallel runs
-        config_numba_environment_and_random_seed(si.working_params['settings'], ml, crumbs='Starting case_runner', caller=self)  # must be done before any numba imports
 
         ml.exit_if_prior_errors('Errors in settings??', caller=self)
         # transfer all settings to shared_info.settings to allow tab hints
@@ -610,7 +610,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         # check numba code for SIMD
         if True:
-            from numba.core import config
+            from oceantracker.util import numba_util
             d['numba_code_info'] = numba_util.get_numba_func_info()
 
         case_info_file = path.join(si.output_files[ 'run_output_dir'],si.output_files['caseInfo_file'])
