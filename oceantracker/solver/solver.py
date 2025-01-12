@@ -41,6 +41,7 @@ class Solver(ParameterBaseClass):
     #@profile
     def solve(self):
         # solve for data in buffer
+
         ri=si.run_info
         ml = si.msg_logger
         part_prop = si.class_roles.particle_properties
@@ -70,6 +71,8 @@ class Solver(ParameterBaseClass):
         ml.hori_line()
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)} '
                            + f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)} ')
+
+        si.msg_logger.set_screen_tag('step')
 
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()
@@ -311,8 +314,9 @@ class Solver(ParameterBaseClass):
     def screen_output(self, nt, time_sec,t0_model, t0_step):
         ri = si.run_info
         fraction_done= abs((time_sec - ri.start_time) / ri.duration)
-        s = f'{100* fraction_done:02.0f}%'
-        s += f' step {nt:04d}'
+        s = f'{nt:04d}'
+        s += f': {100* fraction_done:02.0f}%'
+
         s += si.core_class_roles.field_group_manager.screen_info()
 
         t = abs(time_sec - ri.start_time)

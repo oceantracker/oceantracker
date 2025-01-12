@@ -83,7 +83,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def add_custom_field(self,name, params, default_classID=None):
         r = self.reader
-        i = si._class_importer.make_class_instance_from_params('fields',params, name=name,
+        i = si.class_importer.make_class_instance_from_params('fields',params, name=name,
                                             default_classID=default_classID)
         i.initial_setup(r.params['time_buffer_size'],r.info,r.fields, r.grid)
         r.fields[name] = i
@@ -162,7 +162,7 @@ class FieldGroupManager(ParameterBaseClass):
         # build a readers
         info = self.info
 
-        self.reader = si._class_importer.make_class_instance_from_params('reader', reader_builder['params'],
+        self.reader = si.class_importer.make_class_instance_from_params('reader', reader_builder['params'],
                                    caller=self, crumbs=f'setup_hydro_fields> reader class ')
         reader = self.reader
         reader.initial_setup(reader_builder)

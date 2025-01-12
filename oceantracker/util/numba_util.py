@@ -15,8 +15,8 @@ def njitOT(func):
 
     cache= 'OCEANTRACKER_NUMBA_CACHING' in os.environ and os.environ['OCEANTRACKER_NUMBA_CACHING'] == '1'
     num_func = nb.njit(func,
-                       cache= 'OCEANTRACKER_NUMBA_CACHING' in os.environ and os.environ['OCEANTRACKER_NUMBA_CACHING'] == '1',
-                       #fastmath='NUMBA_FASTMATH' not in os.environ or os.environ['NUMBA_FASTMATH'] =='1'
+                       cache=cache,
+                       #fastmath= os.environ['NUMBA_FASTMATH'] =='1'
                        )
 
     if hasattr(func,'__name__'):

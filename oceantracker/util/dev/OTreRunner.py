@@ -23,7 +23,7 @@ def build_reader(input_dir, params):
     file_info, reader_params, reader= otsim._build_sorted_hindcast_files(params['reader'], input_dir)
 
     # get dummry oceanTrackerSimulation instance with intialised reader
-    otsim = OceanTrackerCaseRunner()
+    otsim = OceanTrackerParamsRunner()
     otsim.shared_info.working_params= {'sorted_hindcast_file_info' : file_info}  # nack to give reader acess to hindcastr file info
 
     params['reader'].update({'time_buffer_size': file_info['n_time_steps_in_hindcast']})  # set buffer size to hindcast size
@@ -66,7 +66,7 @@ class OceanTrackerReRunner(object):
         run_params = ot1._build_run_case_params(params['shared_params'], params['reader'], params['base_case_params'], [], None,outputFiles)
 
 
-        ot2= OceanTrackerCaseRunner()
+        ot2= OceanTrackerParamsRunner()
 
         ot2._A2_do_run(run_params[0], pre_built_reader=self.pre_built_reader)
 

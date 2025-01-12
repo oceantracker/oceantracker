@@ -1,13 +1,13 @@
-import os
-import psutil
-from copy import deepcopy
-from os import path, environ, remove
+from copy import deepcopy, copy
+from os import path, makedirs, walk, unlink
+import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 
 from time import  perf_counter
 from oceantracker.util.message_logger import MessageLogger, GracefulError
 from oceantracker.util import profiling_util, get_versions_computer_info
-import numpy as np
+
+from oceantracker.field_group_manager import set_up_reader
 
 #os.environ['NUMBA_NUM_THREADS'] = '2'
 
@@ -19,22 +19,120 @@ from time import sleep
 import traceback
 from oceantracker.util.setup_util import config_numba_environment_and_random_seed
 from oceantracker import definitions
-
+from oceantracker.util import setup_util, class_importer_util
 from oceantracker.shared_info import shared_info as si
 
 # note do not import numba here as its environment  setting must ve done first, import done below
-class OceanTrackerCaseRunner(ParameterBaseClass):
+class OceanTrackerParamsRunner(ParameterBaseClass):
     # this class runs a single case
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required
+
+    def run(self, user_given_params):
+        ml = si.msg_logger
+        ml.reset()
+        ml.set_screen_tag('prelim')
+        setup_util.check_python_version(ml)
+        self.start_t0 = perf_counter()
+        self.start_date = datetime.now()
+
+        ml.hori_line()
+        ml.msg(f'{definitions.package_fancy_name} starting main:')
+
+
+        # split params in to settings, core and class role params
+        working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
+                                                    crumbs='Buling working params')
+        ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
+
+        si.add_settings(working_params['settings'])  # add full settings to shared info
+
+        # setup output dir and msg files
+        output_files = setup_util.setup_output_dir(working_params['settings'], crumbs='Setting up output dir')
+
+        output_files['run_log'], output_files['run_error_file'] = ml.set_up_files(output_files['run_output_dir'],
+                                                                                  output_files[
+                                                                                      'output_file_base'] + '_runLog')  # message logger output file setup
+
+        ml.msg(f'For Output is in dir "{output_files["run_output_dir"]}"',
+               hint='see for copies of screen output and user supplied parameters, plus all other output')
+
+        # write raw params to a file
+        setup_util.write_raw_user_params(output_files, user_given_params, ml)
+
+        # setup numba before first import as its environment variable settings  have to be set before first import on Numba
+        # set numba config environment variables, before any import of numba, eg by readers,
+        setup_util.config_numba_environment_and_random_seed(working_params['settings'], ml, crumbs='main setup',
+                                                            caller=self)  # must be done before any numba imports
+
+        # add class importer, import all package parameter classes and build short name package tree to shared info
+        # must be after numba setup as it imports al classes
+        si.class_importer = class_importer_util.ClassImporter(si.msg_logger)
+
+        # base case run builder
+        run_builder = dict(working_params=working_params,
+                           version=definitions.version,
+                           computer_info=get_versions_computer_info.get_computer_info(),
+                           output_files=output_files)
+
+        ml.hori_line()
+        ml.msg(f' {definitions.package_fancy_name} version {definitions.version["str"]} - preliminary setup')
+
+        ml.exit_if_prior_errors('parameters have errors')
+
+        run_builder['reader_builder'] = self._create_reader_builders(run_builder)
+
+        # do run
+        si.msg_logger.set_screen_tag('setup')
+        case_info_file = self.run_case(run_builder)
+
+        ml.close()
+        return case_info_file
+
+
+    def _create_reader_builders(self, run_builder):
+        # created a dict which can be used to build a reader and nested reader builders
+        t0 = perf_counter()
+        ml = si.msg_logger
+        crumbs = '_get_hindcast_file_info> '
+        working_params = run_builder['working_params']
+        settings = working_params['settings']
+        # primary reader
+        reader = set_up_reader.build_a_reader(working_params['core_class_roles']['reader'], settings, ml, crumbs)
+        reader_builder = reader.builder
+        reader_builder['params'] = reader.params
+
+        json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], 'hindcast_variable_catalog.json'),
+                             reader_builder)
+
+        # get file info for nested readers
+        nested_reader_builders = []
+        for n, nested_reader_params in enumerate(working_params['class_roles']['nested_readers']):
+            t0 = perf_counter()
+            r = set_up_reader.build_a_reader(nested_reader_params, settings, ml, crumbs=crumbs + f'> nested reader#{n}')
+            nrb = r.builder
+            nrb['params'] = r.params
+            json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'],
+                                           f'hindcast_variable_catalog_nested_reader{n:03d}.json'),
+                                 nrb['catalog'])
+            nested_reader_builders.append(nrb)
+
+            ml.progress_marker(f'sorted nested hyrdo-model #{n} files in time order ', start_time=t0)
+
+        ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
+
+        reader_builder['nested_reader_builders'] = nested_reader_builders
+        return reader_builder
+
+
 
     def run_case(self, run_builder):
         # one case
 
         d0 = datetime.now()
         t_start = perf_counter()
-        crumbs = 'OceanTrackerCaseRunner setup'
+        crumbs = 'OceanTrackerParamsRunner setup'
 
         # give shared access to params
 
@@ -42,11 +140,11 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.run_builder = run_builder
         si.working_params = run_builder['working_params']
-        si.case_summary=dict(case_info_file=None)
+        si.run_summary=dict(case_info_file=None)
 
         # setup shared info and message logger
         si._setup() # clear out classes from class instance of SharedInfo if running series of mains
-        si.msg_logger.set_screen_tag(f'C{run_builder["caseID"]:03d}')
+
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml = si.msg_logger # shortcut for logger
 
@@ -61,7 +159,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         # basic  shortcuts
         ri = si.run_info
-        ri.caseID = run_builder['caseID']
         si.output_files = run_builder['output_files']
 
         # move stuff to run info as central repository
@@ -76,25 +173,18 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
         output_files['case_log_file'], output_files['case_error_file'] = \
                     ml.set_up_files(output_files['run_output_dir'], output_files['output_file_base'] + '_caseLog')
 
-        si.case_summary['case_info_file'] = path.join(ri.run_output_dir, ri.output_file_base) + '_caseInfo.json'
+        si.run_summary['run_info_file'] = path.join(ri.run_output_dir, ri.output_file_base) + '_caseInfo.json'
 
         ml.hori_line()
-        ml.msg('Starting case number %3.0f, ' % ri.caseID + ' '
-                                      + ri.output_file_base
+        ml.msg('Starting run' + ri.output_file_base
                                       + ' at ' + time_util.iso8601_str(datetime.now()))
         ml.hori_line()
 
-        # delay  start, which may avoid occasional lockup at start if many cases try to read same hindcast file at same time
-        if si.settings['multiprocessing_case_start_delay'] > 0:
-            delay = si.settings['multiprocessing_case_start_delay'] * (si.run_info.caseID % si.settings['processors'])
-            ml.progress_marker('Delaying start by  ' + str(delay) + ' sec')
-            sleep(delay)
-            ml.progress_marker('Starting after delay  of ' + str(delay) + ' sec')
 
         # set up profiling
         #profiling_util.set_profile_mode(si.settings['profiler'])
         # run info
-        ri = si.run_info
+
 
         # case set up
         has_errors = False
@@ -120,20 +210,20 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             self.info['model_run_started'] = datetime.now()
             si.msg_logger.hori_line()
             si.msg_logger.progress_marker('Starting ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
-            # ------------------------------------------
 
             si.core_class_roles.solver.solve() # do time stepping
+
 
             # ----------ended--------------------------------
 
         except GracefulError as e:
             ml.show_all_warnings_and_errors()
-            ml.msg(f' Case Runner graceful exit from case number [{ri.caseID:2}]', hint ='Parameters/setup has errors, see above', error= True)
+            ml.msg(f' Case Runner graceful exit ', hint ='Parameters/setup has errors, see above', error= True)
             ml.write_error_log_file(e, traceback.format_exc())
             has_errors= True
         except Exception as e:
             ml.show_all_warnings_and_errors()
-            ml.msg(f' Unexpected error in case number [{ri.caseID:2}] ', error=True,hint='check above or .err file')
+            ml.msg(f' Unexpected error  ', error=True,hint='check above or .err file')
             tb = traceback.format_exc()
 
             ml.write_error_log_file(e, tb)
@@ -144,12 +234,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         finally:
             # ----- wrap up ---------------------------------
+            ml.set_screen_tag('end')
+            ml.hori_line()
 
             si.output_files['release_groups'] = output_util.write_release_group_netcdf()      # write release groups
             for i in si._all_class_instance_pointers_iterator(): i.close()     # close all instances, eg their files if not close etc
 
-            case_info = self._get_case_info(d0, t_start)
-            json_util.write_JSON(path.join(ri.run_output_dir,  si.case_summary['case_info_file'] ), case_info)
+
 
             # check for non-releases
             # flag if some release groups did not release
@@ -158,25 +249,43 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                     ml.msg(f'No particles were released by release_group named= "{name}"', error=True,
                            caller= i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
 
+            run_info_file = self._get_case_run(d0, t_start)
+
+
+
             ml.show_all_warnings_and_errors() # reshow warnings
-            ml.hori_line()
-            ml.progress_marker('Finished case number %3.0f, ' % ri.caseID + ' '
-                                          + si.run_info.output_file_base
-                                          + ' started: ' + str(d0) + ', ended: ' + str(datetime.now()))
-            ml.msg('Computational time =' + str(datetime.now() - d0), tabs=3)
-            ml.hori_line(f'End case {ri.caseID}')
 
             self.close()  # close all classes and msg logger
+
+            # write a sumary of errors etc
+            num_errors = len(ml.errors_list)
+            ml.hori_line()
+            ml.msg(f'Error counts - {num_errors:3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes, check above',
+                        tabs=3)
+
+            ml.msg('')
+
+            if num_errors > 0:
+                ml.hori_line('Found errors, so some cases may not have completed')
+                ml.hori_line(' ** see above or  *_caseLog.txt and *_caseLog.err files')
+                ml.hori_line()
+
+            ml.progress_marker('Finished'  + si.run_info.output_file_base
+                                          + ' started: ' + str(d0) + ', ended: ' + str(datetime.now()))
+            ml.msg('Computational time =' + str(datetime.now() - d0), tabs=3)
+            ml.msg(f'Output in {si.run_info.run_output_dir}', tabs=1)
+            ml.hori_line(f'Finished Oceantracker run')
+
             ml.close()
 
             # complete case summary, add run_info without times and dates to make smaller
             ri = deepcopy(si.run_info.as_dict())
             ri.pop('times')
             if 'dates' in ri: ri.pop('dates')
-            si.case_summary.update(dict(has_errors=has_errors, run_info= ri,
-                    msg_counts= dict( errors =ml.error_count,warnings= ml.warning_count,notes= ml.note_count)))
+            si.run_summary.update(dict(has_errors=has_errors, run_info= ri,
+                                       msg_counts= dict( errors =ml.error_count,warnings= ml.warning_count,notes= ml.note_count)))
 
-        return si.case_summary
+        return run_info_file
 
     def _make_all_class_instances_from_params(self, working_params, reader_builder):
 
@@ -396,13 +505,13 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
 
         si.msg_logger.progress_marker('Finished field group manager and readers setup', start_time=t0)
 
-
     # ____________________________
     # internal methods below
     # ____________________________
-    def _get_case_info(self, d0, t0):
+    def _get_case_run(self, d0, t0):
         pgm= si.core_class_roles.particle_group_manager
         info = self.info
+        ml = si.msg_logger
         elapsed_time_sec = perf_counter() -t0
         info.update(dict(started=str(d0), ended=str(datetime.now()),
                          duration=str(datetime.now() - d0),
@@ -410,12 +519,12 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
                          number_particles_released= pgm.info['particles_released'] if pgm  is not None else None ))
         info.update(si.run_info.as_dict())
         # base class variable warnings is common with all descendants of parameter_base_class
-        d = {'caseID' : si.run_info.caseID,
-             'user_note': si.settings['user_note'],
+        d = {'user_note': si.settings['user_note'],
              'file_written': datetime.now().isoformat(),
              'output_files': deepcopy(si.output_files),
              'version_info':   si.run_builder['version'],
              'computer_info':  si.run_builder['computer_info'],
+
              'working_params': dict(settings = si.settings.as_dict() ,core_class_roles={}, class_roles={}),
              'timing':dict(block_timings=[], function_timers= {}),
              'update_timers': {},
@@ -504,4 +613,6 @@ class OceanTrackerCaseRunner(ParameterBaseClass):
             from numba.core import config
             d['numba_code_info'] = numba_util.get_numba_func_info()
 
-        return d
+        case_info_file = path.join(si.output_files[ 'run_output_dir'],si.output_files['caseInfo_file'])
+        json_util.write_JSON(case_info_file, d)
+        return case_info_file

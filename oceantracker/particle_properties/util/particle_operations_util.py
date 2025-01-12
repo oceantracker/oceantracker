@@ -115,11 +115,13 @@ def set_value_and_add(x1, value, x2, active, scale=1.0):
     if dim_notMatching(x1, x2):  raise Exception('set_value_and_add: x1 and x2 must be the same size')
 
     if x1.ndim == 1: # 1D
-        for n in active:
+        for nn in nb.prange(active.size):
+            n = active[nn]
             x1[n] = value
             x1[n] += x2[n]*scale
     else:
-        for n in active:
+        for nn in nb.prange(active.size):
+            n = active[nn]
             for m in range(x1.shape[1]):
                 x1[n, m] = value
                 x1[n, m] += x2[n,m]*scale

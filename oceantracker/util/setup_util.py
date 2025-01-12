@@ -1,3 +1,4 @@
+import importlib
 from os import  environ, path, mkdir
 from copy import copy, deepcopy
 from datetime import datetime
@@ -5,10 +6,58 @@ import shutil
 from os import path, makedirs, walk, unlink
 import traceback
 from oceantracker.util import json_util
-from oceantracker.util import basic_util , get_versions_computer_info
 import  numpy as np
 from oceantracker import definitions
+from oceantracker.shared_info import  shared_info as si
+import sys
 
+def setup_output_dir(params, crumbs='', caller=None):
+    # setus up params, opens log files/ error handling, required befor mesage loger can be used
+    crumbs += '> setup_output_dir'
+
+    # check outpu_file_base is not dir, just a test
+    if len(path.dirname(params['output_file_base'])) > 0:
+        si.msg_logger.msg(
+            f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{params["output_file_base"]}"',
+            error=True,
+            hint='Use setting "root_output_dir" to designate which dir. to place output files in',
+            crumbs=crumbs, caller=caller,
+            fatal_error=True)
+
+    # get output files location
+    root_output_dir = path.abspath(path.normpath(params['root_output_dir']))
+    run_output_dir = path.join(root_output_dir, params['output_file_base'])
+
+    if params['add_date_to_run_output_dir']:
+        run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
+
+    # clear existing folder
+    if path.isdir(run_output_dir):
+        shutil.rmtree(run_output_dir)
+        si.msg_logger.msg('Deleted contents of existing output dir', warning=True)
+
+    # make a new dir
+    try:
+        makedirs(run_output_dir)  # make  and clear out dir for output
+    except OSError as e:
+        # path may already exist, but if not through other error, exit
+        si.msg_logger.msg(f'Failed to make run output dir:{run_output_dir}',
+                          crumbs=crumbs, caller=caller,
+                          exception=e, traceback_str=traceback.print_exc(), fatal_error=True)
+
+    # write a copy of user given parameters, to help with debugging and code support
+    fb = 'users_params_' + params['output_file_base']
+    output_files = {'root_output_dir': root_output_dir,
+                    'run_output_dir': run_output_dir,
+                    'output_file_base': params['output_file_base'],
+                    'raw_output_file_base': copy(params['output_file_base']),
+                    # this is need for grid file so it does not get a case number in // runs
+                    'caseInfo_file': params['output_file_base'] + '_caseInfo.json',
+                    'runLog_file': params['output_file_base'] + '_runScreen.log',
+                    'run_error_file': params['output_file_base'] + '_run.err',
+                    'users_params_json': fb + '.json',
+                    }
+    return output_files
 
 
 def write_raw_user_params(output_files, params,msg_logger):
@@ -17,8 +66,8 @@ def write_raw_user_params(output_files, params,msg_logger):
     json_util.write_JSON(path.join(output_files['run_output_dir'],   output_files['raw_user_params']),params)
     msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
 
-def decompose_params(shared_info, params, msg_logger, crumbs='', caller=None):
-    si = shared_info
+def decompose_params(params, msg_logger, crumbs='', caller=None):
+
     crumbs += '> decompose_params'
     w = dict(settings= {},
              core_class_roles = {k: None for k in si.core_class_roles.possible_values()},  # insert full list and defaults
@@ -85,7 +134,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
 
     environ['NUMBA_function_cache_size'] = str(settings['NUMBA_function_cache_size'])
 
-    if 'NUMBA_cache_code' in settings  and settings['NUMBA_cache_code']:
+    if settings['NUMBA_cache_code']:
         environ['OCEANTRACKER_NUMBA_CACHING'] = '1'
         environ['NUMBA_CACHE_DIR'] = path.join(settings['root_output_dir'], 'numba_cache')
     else:
@@ -98,9 +147,9 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     # maxium threads used
     from psutil import cpu_count
     physical_cores=cpu_count( logical=False)
-    max_threads =max(physical_cores- 1, 1)
-    if settings['parallel_threads'] is not None:
-        settings['parallel_threads'] = min(settings['parallel_threads'], max_threads)
+    max_threads = max(physical_cores - 1, 1)
+    max_threads = max_threads if settings['processors'] is None else settings['processors']
+
     # let numbas_util know if to use threads
     environ['OCEANTRACKER_USE_PARALLEL_THREADS'] = str(int(settings['use_parallel_threads']))
     environ['NUMBA_FASTMATH'] = str(int(settings['NUMBA_fastmath']))
@@ -109,12 +158,19 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     #environ['NUMBA_DEBUG'] = '1'
 
     #  environment variable settings must be used before numbas is first imported
+    #environ['NUMBA_NUM_THREADS']  = str(max_threads)
+
+    if 'numba' in sys.modules:
+        #import  numba
+        msg_logger.msg('Numba has already been imported, some numba options may not work, ignore SVML warning', note=True)
+        #importlib.reload(numba)
+
     from numba import njit, set_num_threads
     set_num_threads(max_threads)
-    settings['parallel_threads'] = max_threads # adjust setting thread number to match max possible
+    settings['processors'] = max_threads # adjust setting thread number to match max possible
 
     msg_logger.hori_line()
-    msg_logger.progress_marker(f'Numbma setup: applied settings,use parallel threads = {settings["use_parallel_threads"]}, max threads = {max_threads}, physical cores = {physical_cores}')
+    msg_logger.progress_marker(f'Numba setup: applied settings,use parallel threads = {settings["use_parallel_threads"]}, max threads = {max_threads}, physical cores = {physical_cores}')
 
     @njit
     def set_seed(value):
@@ -150,6 +206,37 @@ def merge_settings(settings, default_settings, msg_logger, settings_to_merge=Non
                             crumbs = crumbs + f'> {key}', caller=caller, error=True)
         pass
     return settings
+
+def _build_working_params(params, msg_logger, crumbs=''):
+    # slit params into settings, core_class_params and close_role params and merge settings
+    crumbs += 'build_working_params'
+    ml = msg_logger
+    if type(params) != dict:
+        ml.msg('Parameters must be of type dict, ', hint=f'Got type {str(type(params))} ',
+               fatal_error=True)
+
+    # check for reader classes
+    if 'reader' not in params or len(params['reader']) < 2:
+        ml.msg('Parameter "reader" is required, or missing required parameters',
+               hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
+               error=True, crumbs='case_run_set_up')
+
+    # split apart params and case list
+
+    if 'case_list' in params:
+        ml.msg(
+            'Cases run as seperate parallel processes are no longer supported, computations are now parallelized within a single process using threads',
+            hint='Remove case_list argument and merge parameters with base case and computations  will automatically be run on parallel threads by default',
+            fatal_error=True)
+
+    working_params = decompose_params(params, msg_logger=ml,
+                                crumbs=crumbs + ' Forming working params ')
+
+    # get defaults of settings only
+    working_params['settings'] = merge_settings(working_params['settings'], si.default_settings,
+                                                           ml, crumbs=crumbs)
+    return working_params
+
 
 
 
