@@ -131,7 +131,7 @@ def BCwalk(xq, tri_walk_AOS, dry_cell_index,
 
     walk_counts[0] += active.size  # particles walked
 
-    # merge index ID of those needing fixing
+    # merge index IDs for those needing fixing from each thread
     n_found = 0
     for IDs in thread_buffer_index:
         for ID in IDs:

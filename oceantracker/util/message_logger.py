@@ -44,7 +44,8 @@ class MessageLogger(object ):
 
     def settings(self, max_warnings=None):
         self.max_warnings = None if max_warnings is None else 25
-    def set_screen_tag(self, screen_tag:str): self.screen_tag = screen_tag
+    def set_screen_tag(self, screen_tag:str): self.screen_tag = screen_tag + ':'
+
     def set_max_warnings(self, n:int): self.max_warnings = n
 
     def set_up_files(self, run_output_dir, output_file_base, append=False):

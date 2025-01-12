@@ -1,30 +1,9 @@
-# method to run ocean tracker from parameters
-# eg run(params)
-import sys
-
-#
-
-
-# Dev notes
-# line debug?? python3.6 -m pyinstrument --show-all plasticsTrackOnLine_Main.py
-# python -m cProfile
-# python -m vmprof  <program.py> <program parameters>
-# python -m cProfile -s cumtime
-
-# do first to ensure its right
-
 from copy import  copy, deepcopy
 
 
-from oceantracker.util import setup_util, class_importer_util, time_util
 from oceantracker import definitions
-from oceantracker.util import json_util ,yaml_util, get_versions_computer_info
 from oceantracker.util.message_logger import GracefulError, MessageLogger
-
-from oceantracker._oceantracker_main_runner import _OceanTrackerMainRunner
-
-import traceback
-
+from oceantracker.oceantracker_params_runner import OceanTrackerParamsRunner
 from  oceantracker.shared_info import shared_info
 
 # use separate message logger for actions in main
@@ -35,7 +14,8 @@ help_url_base = 'https://oceantracker.github.io/oceantracker/_build/html/info/'
 
 def run(params):
     '''Run a single OceanTracker case using given parameters'''
-    ot = _OceanTrackerMainRunner()
+
+    ot = OceanTrackerParamsRunner()
     case_info_files = ot.run(deepcopy(params))  # run on copy to preserve external state
     return case_info_files
 
@@ -112,7 +92,7 @@ class OceanTracker():
         return
 
     def run(self):
-        ot_runner= _OceanTrackerMainRunner()
+        ot_runner= OceanTrackerParamsRunner()
         # todo print helper message here at end??
         msg_logger.exit_if_prior_errors('Found errors see above')
 

@@ -12,9 +12,9 @@ import oceantracker.main
 from oceantracker.util.json_util import read_JSON , write_JSON
 
 def get_params(datasource=1):
-    time_step = 300  # 5min
+    time_step = 60  # 5min
     release_interval = 3600
-    pulse_size = 1500
+    pulse_size = 50000
     calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
@@ -58,8 +58,9 @@ def get_params(datasource=1):
         {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': False,
          'time_step': time_step,
         'screen_output_time_interval':6*time_step,
-         'max_run_duration': 6 *24*3600,  # 10 days
-         #'parallel_threads': 10,
+         'max_run_duration': 1 *24*3600,  # 1 days
+         # 'use_parallel_threads' : False,
+         #'parallel_threads': 20,
          #'NUMBA_cache_code' : True,
          'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,

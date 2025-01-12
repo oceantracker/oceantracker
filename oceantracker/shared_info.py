@@ -5,11 +5,10 @@ from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, 
 
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 
-from oceantracker.util import class_importer_util, numba_util
+from oceantracker.util import class_importer_util
 from oceantracker.util.message_logger import  MessageLogger
 
 from time import  perf_counter
-from oceantracker.particle_properties import particle_operations
 
 # useful utility classes to enable auto complete
 class _Object(object):  pass
@@ -70,7 +69,7 @@ class _DefaultSettings(_SharedStruct):
     max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,min=.00001,units='sec',
                            doc_str='Useful in testing setup with shorter runs, as normally run duration is determined from release groups. This  limits the maximum duration in seconds of model runs.' )  # limit all cases to this duration
     max_particles = PVC(10**10, int, min=1, doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
-    processors = PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list to run in parallel' )
+
     max_warnings = PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps' )  # dont record more that this number of warnings, to keep caseInfo.json finite
     use_random_seed = PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!', expert=True )
     NUMBA_function_cache_size = PVC(4048, int, min=128, expert=True,
@@ -79,8 +78,7 @@ class _DefaultSettings(_SharedStruct):
                            doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
     NUMBA_fastmath = PVC(False, bool, expert=True,
                            doc_str='Use NUmbas fastmath mode to speed operation with slight reduction in accuracy"')
-    multiprocessing_case_start_delay = PVC(0., float, min=0.,expert=True,
-                                           doc_str='Delay start of each sucessive case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
+    multiprocessing_case_start_delay = PVC(0., int,  obsolete=True , doc_str='No longer needed in threaded version of code, remove this parameter from settings' )
     write_tracks = PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes' )
     user_note = PVC('No user note', str, doc_str='Any run note to store in case info file' )
     z0 = PVC(0.005, float, units='m', doc_str='Bottom roughness, used for tolerance and log layer calcs. ', min=0.0001 )  # default bottom roughness
@@ -98,8 +96,8 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
-    use_parallel_threads = PVC(True, bool,doc_str='Use threads to distubute compuation across mutilpe threads')
-    parallel_threads = PVC(None, int, min=1,
+    use_parallel_threads = PVC(True, bool,doc_str='Use threads to distribute computation across mutiple threads')
+    processors= PVC(None, int, min=1,
                  doc_str='Maximum number of threads to use in parallelization, default is one less than the number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                  doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
@@ -162,7 +160,6 @@ class _RunInfo(_SharedStruct):
     duration = None
     run_output_dir = None
     output_file_base = None
-    caseID = None
     time_of_nominal_first_occurrence = None
     total_alive_particles = 0
     time_steps_completed = 0
@@ -184,7 +181,6 @@ class _SharedInfoClass():
     settings = _DefaultSettings() # will be overwritten with actual values by case runner
     class_roles = _ClassRoles()
     core_class_roles = _CoreClassRoles()
-    particle_operations = particle_operations
     default_settings = _DefaultSettings()
     particle_status_flags = definitions._ParticleStatusFlags()  # need to be instances to allow particle_status_flags[key] form
     node_types =  definitions._NodeTypes()
@@ -211,9 +207,7 @@ class _SharedInfoClass():
 
     def _setup(self):
         # this allows shared info to make a class importer when needed
-        self.msg_logger.set_screen_tag('Prelim')
         self.msg_logger.reset()
-        self._class_importer = class_importer_util.ClassImporter(self.msg_logger)
 
         # empty out roles and core roles in case of rerunning and shared info import only happens once
         for role in self.core_class_roles.as_dict().keys():
@@ -245,7 +239,7 @@ class _SharedInfoClass():
         if class_role in self.core_class_roles.possible_values():
             #core  roles
             params['name'] = None
-            i =  self._class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs,
+            i =  self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs,
                                           check_for_unknown_keys=check_for_unknown_keys, caller=caller, initialize=initialize)
             i.info['instanceID'] = 0
             self.core_class_roles[class_role] = i
@@ -253,7 +247,7 @@ class _SharedInfoClass():
         elif class_role in self.class_roles.possible_values():
             #other roles
             instanceID= len(self.class_roles[class_role])
-            i = self._class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
+            i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
                                                                      crumbs=crumbs, caller=caller,initialize=initialize)
             i.info['instanceID'] = instanceID
             if params['name'] is None:

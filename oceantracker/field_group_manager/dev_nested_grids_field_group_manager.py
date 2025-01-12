@@ -27,7 +27,7 @@ class DevNestedFields(ParameterBaseClass):
         si.settings.use_bottom_stress = si.settings.use_bottom_stress and 'bottom_stress' in reader_builder['reader_field_info']
         si.settings.use_A_Z_profile = si.settings.use_A_Z_profile and 'A_Z_profile' in reader_builder['reader_field_info']
 
-        fgm_outer_grid = si._class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
+        fgm_outer_grid = si.class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
                                caller= caller, crumbs='adding outer hydro-grid field manager for nested grid run')
         fgm_outer_grid.initial_setup( reader_builder,  caller=self)
 
@@ -45,7 +45,7 @@ class DevNestedFields(ParameterBaseClass):
 
             t0= perf_counter()
 
-            fgm_nested =  si._class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
+            fgm_nested =  si.class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
                                                  caller=caller, crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
             fgm_nested.initial_setup(rb, caller=caller)
 

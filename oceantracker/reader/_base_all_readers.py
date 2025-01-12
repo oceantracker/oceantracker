@@ -138,20 +138,17 @@ class _BaseReader(ParameterBaseClass):
 
         pass
 
-    def catalog_dataset(self,reader_builder, msg_logger=None, crumbs=None):
+    def catalog_dataset(self, msg_logger=None, crumbs=None):
+        #todo rename as open datseta and merge with it
         # get files in time sorted order and info on its fields
         params = self.params
         self.open_dataset()
-        reader_builder['catalog'] = self.dataset.build_catalog(params['input_dir'], params['grid_variable_map']['time'],
+        catalog = self.dataset.build_catalog(params['input_dir'], params['grid_variable_map']['time'],
                                                   msg_logger=msg_logger, crumbs=crumbs,
                                                   file_mask=params['file_mask'])
-        catalog = reader_builder['catalog']
+        builder = dict(catalog=catalog)
 
-        # Builds field_info,  parameters and info  required to set up reader fields
-
-        catalog = reader_builder['catalog']
-
-        reader_builder['hindcast_info'] = catalog['info']
+        builder['hindcast_info'] = catalog['info']
 
         # additional info on vert grid etc, node dim etc
         hi = self.get_hindcast_info(catalog)
@@ -163,7 +160,7 @@ class _BaseReader(ParameterBaseClass):
             msg_logger.msg(f'Coding error, dont recognise vert_grid_type grid type, got {hi["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
                 hint=f'check reader codes  get_hindcast_info() ', error=True)
 
-        reader_builder['hindcast_info'].update(hi)
+        builder['hindcast_info'].update(hi)
 
         # categorise field variables
         file_vars = catalog['variables']
@@ -193,7 +190,7 @@ class _BaseReader(ParameterBaseClass):
             field_params = dict(time_varying=file_vars[v1]['has_time'],
                                 is3D=any(x in hi['all_z_dims'] for x in file_vars[v1]['dims']),
                                 )
-            field_params['zlevels'] = reader_builder['hindcast_info']['num_z_levels'] if field_params['is3D'] else 1
+            field_params['zlevels'] = builder['hindcast_info']['num_z_levels'] if field_params['is3D'] else 1
 
             # work out if variable is a vector field
             file_vars_info = {}
@@ -228,16 +225,17 @@ class _BaseReader(ParameterBaseClass):
                        hint=f'missing file variables {[x for x in var_list if x not in file_vars_info]}', warning=True)
 
         # record field map
-        reader_builder['reader_field_info'] = reader_field_vars_map
+        builder['reader_field_info'] = reader_field_vars_map
         catalog['reader_field_info'] = reader_field_vars_map
         # add grid variable info
-        reader_builder['grid_info'] = dict(variable_map= params['grid_variable_map'])
+        builder['grid_info'] = dict(variable_map= params['grid_variable_map'])
 
         msg_logger.exit_if_prior_errors('Errors matching field variables with those in the file, see above')
 
-        return reader_builder
+        return builder
 
     def open_dataset(self):
+        #todo merge with catalog data set
         params = self.params
         self.dataset = OceanTrackerDataSet(drop_variables=params['drop_variables'])
 
@@ -489,7 +487,7 @@ class _BaseReader(ParameterBaseClass):
         if not dummy:
             params.update(reader_builder['reader_field_info'][name][ 'params'])
 
-        i = si._class_importer.make_class_instance_from_params('fields', params,
+        i = si.class_importer.make_class_instance_from_params('fields', params,
                                         default_classID='field_reader',
                                         check_for_unknown_keys=False, crumbs=f'Adding reader field "{name}"')
         i.initial_setup(self.params['time_buffer_size'], hi, self.fields)
@@ -505,7 +503,7 @@ class _BaseReader(ParameterBaseClass):
 
     def _set_up_interpolator(self, reader_builder):
         if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
-        i = si._class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
+        i = si.class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
                                              default_classID='interpolator', caller= self,
                                              crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
         i.initial_setup(self)
@@ -771,8 +769,6 @@ class _BaseReader(ParameterBaseClass):
             f_name = output_files['raw_output_file_base'] + f'_grid{info["gridID"]:03d}.nc'
             output_files['nested_grids'].append(f_name)
 
-        # only  write grid for first parallel cases
-        if si.run_info.caseID > 0: return
 
         nc = ncdf_util.NetCDFhandler(path.join(output_files['run_output_dir'], f_name), 'w')
         nc.write_global_attribute('index_note', ' all indices are zero based')
