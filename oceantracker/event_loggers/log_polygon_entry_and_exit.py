@@ -18,8 +18,8 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
     def check_requirements(self):
        self.check_class_required_fields_prop_etc(required_props_list=['event_polygon', 'current_polygon_for_event_logging'])
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
-        super().add_required_classes_and_settings(settings, reader_builder, msg_logger)
+    def add_required_classes_and_settings(self):
+        super().add_required_classes_and_settings()
         info = self.info
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='event_polygon', initial_value=-1, dtype='int16')
         si.add_class('particle_properties', name='current_polygon_for_event_logging',

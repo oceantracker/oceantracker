@@ -164,6 +164,8 @@ class _RunInfo(_SharedStruct):
     time_steps_completed = 0
     hindcast_start_time = None
     hindcast_end_time = None
+    has_A_Z_profile = None
+    has_bottom_stress = None
 
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
@@ -215,7 +217,8 @@ class _SharedInfoClass():
             setattr(self.class_roles, role, {})
 
 
-    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=False,check_for_unknown_keys=True, **kwargs):
+    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=False,
+                  check_for_unknown_keys=True, add_required_classes_and_settings=True,  **kwargs):
         #todo get rid in initialize
         ml = self.msg_logger
         crumbs += f'Adding class {class_role}>'
@@ -247,7 +250,7 @@ class _SharedInfoClass():
             #other roles
             instanceID= len(self.class_roles[class_role])
             i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
-                                                                     crumbs=crumbs, caller=caller,initialize=initialize)
+                    crumbs=crumbs, caller=caller,initialize=initialize,add_required_classes_and_settings=add_required_classes_and_settings)
             i.info['instanceID'] = instanceID
             if params['name'] is None:
                 # if no name in params or default param
@@ -260,9 +263,8 @@ class _SharedInfoClass():
                    error=True, crumbs=crumbs, caller=caller)
             return None
 
-        # add classes required by this class
-        i.add_required_classes_and_settings(self.settings, self.run_builder['reader_builder'], self.msg_logger)
-        i.si = self # for alternative acess to shared info
+
+        i.si = self # for alternative access to shared info
         return i
 
     # wrapers for adding fields

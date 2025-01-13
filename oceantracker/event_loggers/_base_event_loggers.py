@@ -26,7 +26,7 @@ class _BaseEventLogger(ParameterBaseClass):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['event_has_started_boolean'])
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='event_has_started_boolean', initial_value=False, dtype='bool', write=False)
         self.time_steps_written = 0

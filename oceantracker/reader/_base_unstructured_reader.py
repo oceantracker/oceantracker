@@ -20,7 +20,7 @@ class _BaseUnstructuredReader(_BaseReader):
 
     def read_water_depth(self, grid):
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
         water_depth = ds.read_variable(gm['water_depth']).data
         return water_depth
 

@@ -46,20 +46,20 @@ class SCHISMreader(_BaseUnstructuredReader):
 
         pass
 
-    def get_hindcast_info(self, catalog):
-
+    def get_hindcast_info(self):
+        info = self. info
         dm = self.params['dimension_map']
         fvm= self.params['field_variable_map']
         gm = self.params['grid_variable_map']
 
-        hi = dict(is3D=  fvm['water_velocity'][0]  in catalog['variables'])
+        hi = dict(is3D=  fvm['water_velocity'][0]  in info['variables'])
 
         if hi['is3D']:
             hi['z_dim'] = dm['z']
-            hi['num_z_levels'] = catalog['info']['dims'][hi['z_dim']]
+            hi['num_z_levels'] = info['dims'][hi['z_dim']]
             hi['all_z_dims'] = dm['all_z_dims']
             # Only LSC hasbottom_cell_index
-            hi['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_cell_index'] in catalog['variables'] \
+            hi['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_cell_index'] in info['variables'] \
                                                                         else si.vertical_grid_types.Slayer
         else:
             hi['z_dim'] = None
@@ -70,7 +70,7 @@ class SCHISMreader(_BaseUnstructuredReader):
 
         # get num nodes in each field
         hi['node_dim'] = self.params['dimension_map']['node']
-        hi['num_nodes'] =  catalog['info']['dims'][hi['node_dim']]
+        hi['num_nodes'] =  info['dims'][hi['node_dim']]
         return hi
 
     def read_zlevel(self, nt):
@@ -79,7 +79,7 @@ class SCHISMreader(_BaseUnstructuredReader):
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as  (N by 4)
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
 
         tri = ds.read_variable(gm['triangles']).data
         sel = np.isnan(tri)
@@ -93,7 +93,7 @@ class SCHISMreader(_BaseUnstructuredReader):
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
 
         x = ds.read_variable(gm['x']).data
         y = ds.read_variable(gm['y']).data
@@ -102,11 +102,11 @@ class SCHISMreader(_BaseUnstructuredReader):
 
     def read_bottom_cell_index(self, grid):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid
-        ds = self.dataset
-        gm = self.grid_variable_map
-        var_name = gm['bottom_cell_index']
-        if var_name in ds.variables:
-            bottom_cell_index= ds.read_variable(var_name).data - 1
+        info = self.info
+        var_name = self.params['grid_variable_map']['bottom_cell_index']
+
+        if var_name in info['variables']:
+            bottom_cell_index=  self.dataset.read_variable(var_name).data - 1
         else:
             # S  grid bottom cell index = zero
             bottom_cell_index = np.zeros((self.info['num_nodes'],), dtype=np.int32)

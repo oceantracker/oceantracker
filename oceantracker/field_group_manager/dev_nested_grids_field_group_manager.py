@@ -95,7 +95,7 @@ class DevNestedFields(ParameterBaseClass):
 
     def build_readers(self):
         for n, fgm in  enumerate(self.fgm_hydro_grids):
-            fgm.reader.build_reader(gridID=n)
+            fgm.reader.build_grid_fields(gridID=n)
             fgm.reader.write_hydro_model_grid()
         pass
 

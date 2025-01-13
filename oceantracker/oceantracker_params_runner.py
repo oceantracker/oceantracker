@@ -85,49 +85,11 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         ml.exit_if_prior_errors('parameters have errors')
 
-        run_builder['reader_builder'] = self._create_reader_builders(run_builder)
-
         # do run
         case_info_file = self._run_case(run_builder)
 
         ml.close()
         return case_info_file
-
-
-    def _create_reader_builders(self, run_builder):
-        # created a dict which can be used to build a reader and nested reader builders
-        t0 = perf_counter()
-        ml = si.msg_logger
-        crumbs = '_get_hindcast_file_info> '
-        working_params = run_builder['working_params']
-        settings = working_params['settings']
-        # primary reader
-        reader = set_up_reader.build_a_reader(working_params['core_class_roles']['reader'], settings, ml, crumbs)
-        reader_builder = reader.builder
-        reader_builder['params'] = reader.params
-
-        json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'], 'hindcast_variable_catalog.json'),
-                             reader_builder)
-
-        # get file info for nested readers
-        nested_reader_builders = []
-        for n, nested_reader_params in enumerate(working_params['class_roles']['nested_readers']):
-            t0 = perf_counter()
-            r = set_up_reader.build_a_reader(nested_reader_params, settings, ml, crumbs=crumbs + f'> nested reader#{n}')
-            nrb = r.builder
-            nrb['params'] = r.params
-            json_util.write_JSON(path.join(run_builder['output_files']['run_output_dir'],
-                                           f'hindcast_variable_catalog_nested_reader{n:03d}.json'),
-                                 nrb['catalog'])
-            nested_reader_builders.append(nrb)
-
-            ml.progress_marker(f'sorted nested hyrdo-model #{n} files in time order ', start_time=t0)
-
-        ml.progress_marker('sorted hyrdo-model files in time order', start_time=t0)
-
-        reader_builder['nested_reader_builders'] = nested_reader_builders
-        return reader_builder
-
 
 
     def _run_case(self, run_builder):
@@ -192,9 +154,9 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
             # - -------- start set up---------------------------------------------------------------------
 
             # must make fields first, so other claseses can add own required fields
-            self._build_field_group(si.working_params, run_builder['reader_builder'])
+            self._build_field_group(si.working_params)
 
-            self._make_all_class_instances_from_params(si.working_params, run_builder['reader_builder'])
+            self._make_all_class_instances_from_params(si.working_params)
 
             self._add_release_groups_to_get_run_start_end(si.working_params)
 
@@ -287,20 +249,19 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         return run_info_file
 
-    def _make_all_class_instances_from_params(self, working_params, reader_builder):
+    def _make_all_class_instances_from_params(self, working_params):
 
-        settings= working_params['settings']
-        hi= reader_builder['hindcast_info']
+        fgm = si.core_class_roles['field_group_manager']
         ccr = working_params['core_class_roles']
         for role, params in ccr.items():
             if role in ['particle_group_manager', 'solver', 'tidal_stranding']:
                 i= si.add_class(role,params=params)
             pass
 
-        if settings['use_dispersion']:
+        if si.settings['use_dispersion']:
             i = si.add_class('dispersion', params= ccr['dispersion'])
 
-        if hi['is3D']:
+        if fgm.info['is3D']:
             i = si.add_class('resuspension', params=ccr['resuspension'])
 
         if si.settings.write_tracks:
@@ -332,7 +293,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         fgm = si.core_class_roles.field_group_manager
         fgm.final_setup()
-        if fgm.info['geographic_coords']:  si.settings.use_geographic_coords = True
+
 
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
 
@@ -461,7 +422,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         si.msg_logger.progress_marker('Added release groups and found run start and end times', start_time=t0)
 
 
-    def _build_field_group(self, working_params, reader_builder):
+    def _build_field_group(self, working_params):
         # initialise all classes, order is important!
         # shortcuts
         info = self.info
@@ -472,7 +433,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         # as it has info on whether 2D or 3D which  changes class options'
         # reader prams should be full and complete from oceanTrackerRunner, so dont initialize
         # chose file manager for normal or nested readers
-        if len(reader_builder['nested_reader_builders']) > 0:
+        if len(working_params['class_roles']['nested_readers']) > 0:
             # use development nested readers class field group manager
             if working_params['core_class_roles']['field_group_manager'] is None: working_params['core_class_roles']['field_group_manager'] ={}
             if 'class_name' not in working_params['core_class_roles']['field_group_manager']:
@@ -480,7 +441,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         # set up fields
         fgm = si.add_class('field_group_manager',working_params['core_class_roles']['field_group_manager'])
-        fgm.initial_setup(reader_builder, caller=self)
+        fgm.initial_setup(caller=self)
 
         # tweak options based on available fields
         settings = si.settings
@@ -493,7 +454,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
             settings.use_resuspension = False
 
         # now setup reader knowing if geographic, if A_Z_profile or bottom stress available,  and in use
-        fgm.build_readers()
+        fgm.build_reader_grid_fields()
 
         si.run_info.is3D_run = fgm.info['is3D']
         si.run_info.vector_components = 3 if si.run_info.is3D_run else 2

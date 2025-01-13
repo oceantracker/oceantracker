@@ -74,7 +74,7 @@ class _BaseReader(ParameterBaseClass):
     # ---------------------------------------------------------
 
 
-    def get_hindcast_info(self, catalog): nopass()
+    def get_hindcast_info(self): nopass()
     # get is 3D, vertical grid type and
 
     def read_horizontal_grid_coords(self, grid):   nopass()
@@ -113,25 +113,16 @@ class _BaseReader(ParameterBaseClass):
     # -------------------------------------------------
     # core reader processes
 
-    def initial_setup(self, reader_builder):
-        self.reader_builder = reader_builder
-
-        self.grid_variable_map = reader_builder['grid_info']['variable_map']
-        self.reader_field_vars_map = reader_builder['reader_field_info']
-        self.catalog = reader_builder['catalog']
+    def initial_setup(self):
+        info = self.info
 
         # build dat set from reader builder catalog
-        self.open_dataset()
-        self.dataset.build_dataset_from_catalog(self.catalog)
 
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         # first build data set
 
         info = self.info
-
-        hi = self.reader_builder['hindcast_info']
-        info.update(hi)
 
         if self.development is not None:
             si.msg_logger.msg(self.development , warning=True)
@@ -142,28 +133,24 @@ class _BaseReader(ParameterBaseClass):
         #todo rename as open datseta and merge with it
         # get files in time sorted order and info on its fields
         params = self.params
+        info = self.info
         self.open_dataset()
-        catalog = self.dataset.build_catalog(params['input_dir'], params['grid_variable_map']['time'],
-                                                  msg_logger=msg_logger, crumbs=crumbs,
-                                                  file_mask=params['file_mask'])
-        builder = dict(catalog=catalog)
-
-        builder['hindcast_info'] = catalog['info']
+        self.dataset.catalog_data(params['input_dir'], params['grid_variable_map']['time'],
+                                                 msg_logger=msg_logger, crumbs=crumbs,
+                                                 file_mask=params['file_mask'])
+        info.update(self.dataset.info)
 
         # additional info on vert grid etc, node dim etc
-        hi = self.get_hindcast_info(catalog)
-
+        hi = self.get_hindcast_info()
+        info.update(hi)
         # todo check all required fields are set
-
 
         if hi['vert_grid_type'] is not None and hi['vert_grid_type'] not in si.vertical_grid_types.possible_values():
             msg_logger.msg(f'Coding error, dont recognise vert_grid_type grid type, got {hi["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
                 hint=f'check reader codes  get_hindcast_info() ', error=True)
 
-        builder['hindcast_info'].update(hi)
-
         # categorise field variables
-        file_vars = catalog['variables']
+        file_vars = info['variables']
         reader_field_vars_map = {}
 
         # loop over mapped variables and loaded variables
@@ -173,7 +160,7 @@ class _BaseReader(ParameterBaseClass):
             # ie load named field is a file varaiable name
             if name not in mapped_fields:
                 mapped_fields[name] = name
-                if name not in catalog['variables']:
+                if name not in info['variables']:
                     msg_logger.msg(
                         f' No  field_variable_map to load variable named "{name}" and no variable in file matching this name, so can not load this field',
                         hint=f'Add a map for this variable readers "field_variable_map"  param or check spelling loaded variable name matches a file variable, current map is {str(mapped_fields)}',
@@ -190,7 +177,7 @@ class _BaseReader(ParameterBaseClass):
             field_params = dict(time_varying=file_vars[v1]['has_time'],
                                 is3D=any(x in hi['all_z_dims'] for x in file_vars[v1]['dims']),
                                 )
-            field_params['zlevels'] = builder['hindcast_info']['num_z_levels'] if field_params['is3D'] else 1
+            field_params['zlevels'] = hi['num_z_levels'] if field_params['is3D'] else 1
 
             # work out if variable is a vector field
             file_vars_info = {}
@@ -225,14 +212,10 @@ class _BaseReader(ParameterBaseClass):
                        hint=f'missing file variables {[x for x in var_list if x not in file_vars_info]}', warning=True)
 
         # record field map
-        builder['reader_field_info'] = reader_field_vars_map
-        catalog['reader_field_info'] = reader_field_vars_map
+        info['field_info'] = reader_field_vars_map
         # add grid variable info
-        builder['grid_info'] = dict(variable_map= params['grid_variable_map'])
-
         msg_logger.exit_if_prior_errors('Errors matching field variables with those in the file, see above')
 
-        return builder
 
     def open_dataset(self):
         #todo merge with catalog data set
@@ -240,7 +223,7 @@ class _BaseReader(ParameterBaseClass):
         self.dataset = OceanTrackerDataSet(drop_variables=params['drop_variables'])
 
 
-    def build_reader(self, gridID=0):
+    def build_grid_fields(self, gridID=0):
 
         # make grid
         self.grid = self._set_up_grid()
@@ -268,16 +251,14 @@ class _BaseReader(ParameterBaseClass):
             i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'])
             pass
 
-        reader_builder= self.reader_builder
-
-        self._set_up_interpolator(reader_builder)
-        self._setup_fields(reader_builder)
+        self._set_up_interpolator()
+        self._setup_fields()
 
         # set up ring buffer  info
         bi = self.info['buffer_info']
         bi['n_filled'] = 0
-        bi['buffer_size'] = self.params['time_buffer_size']
-        bi['buffer_available'] = bi['buffer_size']
+        bi['time_buffer_size'] = self.params['time_buffer_size']
+        bi['buffer_available'] = bi['time_buffer_size']
         bi['nt_buffer0'] = 0
 
 
@@ -452,9 +433,10 @@ class _BaseReader(ParameterBaseClass):
 
 
 
-    def _setup_fields(self, reader_builder):
+    def _setup_fields(self):
         # setup field classes , ie make memory buffer
-        cat =self.dataset.catalog
+        info = self.info
+        params = self.params
         fields = self.fields
 
         # add essential fields- water depth, tide, water velocity
@@ -466,7 +448,7 @@ class _BaseReader(ParameterBaseClass):
         self.setup_water_velocity_field()
 
         # first reader fields
-        load_fields= reader_builder['params']['load_fields']
+        load_fields= params['load_fields']
 
         # add reader fields
         for name  in list(set(load_fields)):
@@ -479,29 +461,29 @@ class _BaseReader(ParameterBaseClass):
                     i.data = self.read_field_data(name, i)
 
     def _add_a_reader_field(self, name, params={},dummy=False):
-        reader_builder = self.reader_builder
+        info = self.info
 
-        hi = reader_builder['hindcast_info']
         params = deepcopy(params)
         params['name'] = name
         if not dummy:
-            params.update(reader_builder['reader_field_info'][name][ 'params'])
+            params.update(info['field_info'][name][ 'params'])
 
         i = si.class_importer.make_class_instance_from_params('fields', params,
-                                        default_classID='field_reader',
+                                       add_required_classes_and_settings=False,
+                                        default_classID='field_reader',initialize=False,
                                         check_for_unknown_keys=False, crumbs=f'Adding reader field "{name}"')
-        i.initial_setup(self.params['time_buffer_size'], hi, self.fields)
+        i.initial_setup(info)
 
         # add variable info on file variables list for reader fields
-        if name in reader_builder['reader_field_info']:
-            i.info.update(file_vars_info=reader_builder['reader_field_info'][name]['file_vars_info'],
-                          )
+        if name in info['field_info']:
+            i.info.update(file_vars_info=info['field_info'][name]['file_vars_info'] )
 
         self.fields[name] = i
         return i
 
 
-    def _set_up_interpolator(self, reader_builder):
+    def _set_up_interpolator(self):
+
         if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
         i = si.class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
                                              default_classID='interpolator', caller= self,
@@ -525,8 +507,8 @@ class _BaseReader(ParameterBaseClass):
         return data
 
     def setup_water_velocity_field(self):
-        reader_builder = self.reader_builder
-        fi = reader_builder['reader_field_info']
+        info = self.info
+        fi = info['field_info']
         #todo move check on whether vertical vel is in files here
 
         # look for depth averaged if 3D velocity not there
@@ -534,7 +516,7 @@ class _BaseReader(ParameterBaseClass):
             if 'water_velocity_depth_averaged' not in fi:
                 # use depth average if vailable
                 si.msg_logger.msg('Cannot find water_velocity components or depth averaged water velocity components in hindcast',
-                               hint=f'Found variables mapped to {str(fi.keys())} \n File variables are {str(reader_builder["catalog"]["variables"].keys())}',
+                               hint=f'Found variables mapped to {str(fi.keys())} \n File variables are {str(info["variables"].keys())}',
                                fatal_error=True)
 
             fi['water_velocity'] = fi['water_velocity_depth_averaged']
@@ -572,8 +554,8 @@ class _BaseReader(ParameterBaseClass):
         current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
 
         # ring buffer locations of surrounding steps
-        current_buffer_steps[0] = current_hydro_model_step % bi['buffer_size']
-        current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % bi['buffer_size']
+        current_buffer_steps[0] = current_hydro_model_step % bi['time_buffer_size']
+        current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % bi['time_buffer_size']
 
         time_hindcast = grid['time'][current_buffer_steps[0]]
 
@@ -604,10 +586,10 @@ class _BaseReader(ParameterBaseClass):
         params = self.params
         md = si.run_info.model_direction
         t0 = perf_counter()
-        hi = self.dataset.catalog['info'] # hindcast info
+
         info = self.info
         bi = info['buffer_info']
-        buffer_size = bi['buffer_size']
+        buffer_size = bi['time_buffer_size']
 
         bi['buffer_available'] = buffer_size
         nt0_hindcast = self.time_to_hydro_model_index(time_sec)
@@ -730,7 +712,7 @@ class _BaseReader(ParameterBaseClass):
 
     def hydro_model_index_to_buffer_index(self, nt_hindcast):
         # ring buffer mapping
-        return nt_hindcast % self.info['buffer_info']['buffer_size']
+        return nt_hindcast % self.info['buffer_info']['time_buffer_size']
 
 
     def are_time_steps_in_buffer(self, time_sec):

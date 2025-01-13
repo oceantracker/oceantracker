@@ -46,7 +46,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
             write_tracks=  PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off by default for LCS'),
 
         )
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         # change parameters
         info = self.info

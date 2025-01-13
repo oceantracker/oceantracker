@@ -47,13 +47,13 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                                    },
                             )
 
-    def get_hindcast_info(self, catalog):
+    def get_hindcast_info(self,):
 
         dm = self.params['dimension_map']
         fvm= self.params['field_variable_map']
         gm = self.params['grid_variable_map']
-
-        dims = catalog['info']['dims']
+        info = self.info
+        dims = info['dims']
         hi = dict(is3D='mesh2d_nInterfaces' in  dims or 'nmesh2d_interface' in dims)
 
         if hi['is3D']:
@@ -68,7 +68,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                 hi['all_z_dims'] = ['nmesh2d_interface','nmesh2d_layer']
 
             hi['num_z_levels'] = dims[hi['z_dim']]
-            hi['vert_grid_type'] = si.vertical_grid_types.Zfixed if 'mesh2d_interface_z' in catalog['variables']  else si.vertical_grid_types.Sigma
+            hi['vert_grid_type'] = si.vertical_grid_types.Zfixed if 'mesh2d_interface_z' in info['variables']  else si.vertical_grid_types.Sigma
         else:
             hi['z_dim'] = None
             hi['num_z_levels'] = 1
@@ -91,7 +91,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
 
         x = ds.read_variable(gm['x']).data
         y = ds.read_variable(gm['y']).data
@@ -101,7 +101,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as (N by 4)
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
 
         tri = ds.read_variable(gm['triangles']).data
         if tri.shape[1] > 4:
