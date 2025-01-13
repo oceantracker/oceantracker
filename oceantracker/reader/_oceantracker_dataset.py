@@ -15,9 +15,10 @@ class OceanTrackerDataSet(object):
     '''
     def __init__(self,drop_variables=None):
         self.drop_variables =drop_variables
+        self.info= dict(variables= {}, files = [])
 
 
-    def build_catalog(self, input_dir, time_variable, file_mask='*.nc', msg_logger=None, crumbs=''):
+    def catalog_data(self, input_dir, time_variable, file_mask='*.nc', msg_logger=None, crumbs=''):
         # get all files in sorted order
         t0 = perf_counter()
         self.msg_logger= msg_logger
@@ -32,51 +33,47 @@ class OceanTrackerDataSet(object):
                            hint=f'searching with "gob" mask "{mask}"',fatal_error=True)
         msg_logger.msg(f'Cataloging hindcast with {len(file_names)} files in dir {input_dir}')
 
-        self.catalog = dict(info=dict(input_dir=path.normpath(input_dir),file_mask=file_mask),
-                            file_info=[], variables={})
-        cat = self.catalog
-        info = cat['info']
+        info = self.info
+        info.update(input_dir=path.normpath(input_dir),file_mask=file_mask)
+
         self._unpack_variables(file_names, time_variable)
         self._time_sort_variable_fileIDs()
         self._make_time_step_to_fileID_map()
 
         # special case, set up time to be read,
         # as same time may be in multiple files, if variables split among files
-        v_name = next(name for name, i in cat['variables'].items() if i['has_time'])  # first variable with time
-        time = cat['variables'][v_name]['global_time_step_check']
-        cat['ref_time'] = time
+        var ={}
 
-        vi = deepcopy(cat['variables'][v_name])
+        v_name = next(name for name, i in info['variables'].items() if i['has_time'])  # first variable with time
+        time = info['variables'][v_name]['global_time_step_check']
+        info['ref_time'] = time
+
+        vi = deepcopy(info['variables'][v_name])
         vi.update(dims=info['time_dim'], shape=( time.size,), dtype=time.dtype )
-        cat['variables'][info['time_variable']] = vi
+        info['variables'][info['time_variable']] = vi
 
         # set up statr ends times
-        i = cat['info']
-        i['start_date'], i['end_date'] = time[0], time[-1]
-        i['start_time'], i['end_time'] = float(time[0])/1e9, float(time[-1])/1e9
-        i['duration'] = i['end_time'] - i['start_time']
-        i['total_time_steps'] = time.size
-        i['time_step'] = i['duration']/(time.size-1)
+        info['start_date'], info['end_date'] = time[0], time[-1]
+        info['start_time'], info['end_time'] = float(time[0])/1e9, float(time[-1])/1e9
+        info['duration'] = info['end_time'] - info['start_time']
+        info['total_time_steps'] = time.size
+        info['time_step'] = info['duration']/(time.size-1)
 
         self._check_time_consistency()
-        return self.get_catalog()
 
-    def build_dataset_from_catalog(self,catalog):
-        self.catalog = catalog
-        self.variables = self.catalog['variables']
+
 
     def time_steps_available(self, nt):
         # which of  time steps are in the data set
         # used to calculate buffer index
-        cat = self.catalog
-        sel =  np.logical_and( nt >= 0, nt < cat['ref_time'].size)
+        sel =  np.logical_and( nt >= 0, nt < self.info['ref_time'].size)
         nt_available = nt[sel]
         return nt_available
 
     def read_variable(self, file_var_name: str, nt=None):
         # read simple variable
-        cat = self.catalog
-        vi = cat['variables'][file_var_name]
+        info = self.info
+        vi = info['variables'][file_var_name]
         if vi['has_time']:
             out = self._read_time_varying_variable(file_var_name, nt)
         else:
@@ -84,9 +81,9 @@ class OceanTrackerDataSet(object):
         return out
 
     def _read_non_time_varying_variable(self, file_var_name: str):
-        cat = self.catalog
-        vi = cat['variables'][file_var_name]
-        fi = cat['file_info'][vi['fileID']]
+        info = self.info
+        vi = info['variables'][file_var_name]
+        fi = info['files'][vi['fileID']]
 
         ds = self._open_file(fi['name'])
         out = ds[file_var_name].compute()
@@ -95,9 +92,9 @@ class OceanTrackerDataSet(object):
     def _read_time_varying_variable(self,file_var_name:str, nt):
         # get data at "nt" model integer time steps
 
-        cat = self.catalog
-        info = cat['info']
-        vi = cat['variables'][file_var_name]
+        info = self.info
+        vi = info['variables'][file_var_name]
+
         time_dim =info['time_dim']
 
         if nt is None: nt = np.zeros((1,),dtype=np.int32)
@@ -105,11 +102,11 @@ class OceanTrackerDataSet(object):
         nt_required = nt.copy()
 
         # clip to full range
-        nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < cat['ref_time'].size)]
+        nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < info['ref_time'].size)]
         files_read = 0
         while nt_required.size > 0 :
             file_no = vi['time_step_to_fileID_map'][nt_required[0]]
-            fi = cat['file_info'][file_no]
+            fi = info['files'][file_no]
 
             # required time steps in this file
             nt0 = fi['first_time_step_in_file']
@@ -142,11 +139,14 @@ class OceanTrackerDataSet(object):
         # find variables
         t0= perf_counter()
         tlast=perf_counter()
-        cat = self.catalog
-        info = cat['info']
+
+        info = self.info
+        var_info = info['variables']
+
         info['time_variable'] = time_variable
         info['time_dim'] = None
         info['time_units'] = None
+        var_info = info['variables']
 
         ml = self.msg_logger
         info['dims']= {}
@@ -172,22 +172,22 @@ class OceanTrackerDataSet(object):
 
             for key, d in ds.sizes.items(): info['dims'][key] = d
             for key, d in ds.attrs.items(): info['attrs'][key] = d
-            cat['file_info'].append(fi)
+            info['files'].append(fi)
 
             # get variable data
             for v_name in ds.variables:
                 if v_name == info['time_variable']: continue
                 data = ds[v_name]
                 # add to variables
-                if v_name not in cat['variables']:  # make new variable
-                    cat['variables'][v_name] = dict(fileID=[])
-                cat['variables'][v_name]['fileID'].append(fileID)
-                cat['variables'][v_name]['dims'] = {key:ds.sizes[key]  for key in data.dims}
-                cat['variables'][v_name]['attrs'] = data.attrs
-                cat['variables'][v_name]['encoding'] = data.encoding
-                cat['variables'][v_name]['dtype'] = data.dtype
-                cat['variables'][v_name]['shape'] = data.shape
-                cat['variables'][v_name]['has_time'] = info['time_dim'] in data.dims
+                if v_name not in var_info:  # make new variable
+                    var_info[v_name] = dict(fileID=[])
+                var_info[v_name]['fileID'].append(fileID)
+                var_info[v_name]['dims'] = {key:ds.sizes[key]  for key in data.dims}
+                var_info[v_name]['attrs'] = data.attrs
+                var_info[v_name]['encoding'] = data.encoding
+                var_info[v_name]['dtype'] = data.dtype
+                var_info[v_name]['shape'] = data.shape
+                var_info[v_name]['has_time'] = info['time_dim'] in data.dims
 
             ds.close()
             if  perf_counter()-tlast > 30:
@@ -201,20 +201,22 @@ class OceanTrackerDataSet(object):
                    hint='Hindcast filed do not have time variable with "units" attribute meeting CF convention, eg. "seconds since 2017-01-01 00:00:00 +0000"  ')
     def _time_sort_variable_fileIDs(self):
         # sort variable fileIDs by time, now all files are read
-        cat = self.catalog
-        for v_name, item in cat['variables'].items():
+        info = self.info
+        fi = info['files']
+
+        for v_name, item in info['variables'].items():
             if item['has_time']:
                 item['fileID'] = np.asarray(item['fileID'])
-                start_times = np.asarray([cat['file_info'][x]['start_time'] for x in item['fileID']])
+                start_times = np.asarray([fi[x]['start_time'] for x in item['fileID']])
                 file_order = np.argsort(start_times)
                 item['fileID'] = item['fileID'][file_order]
                 # get first time step in the file
-                time_steps = np.asarray([cat['file_info'][x]['time_steps'] for x in item['fileID']])
+                time_steps = np.asarray([fi[x]['time_steps'] for x in item['fileID']])
                 first_time_step_in_file = np.cumsum(time_steps) - time_steps[0]
                 # insert first time step into the file info in time order
                 # this will be unnecessarily  repeated, if more than one variable in a file
                 for n, fID in enumerate(item['fileID']):
-                    cat['file_info'][fID]['first_time_step_in_file'] = first_time_step_in_file[n]
+                    fi[fID]['first_time_step_in_file'] = first_time_step_in_file[n]
             else:
                 item['fileID'] = item['fileID'][0]
 
@@ -222,14 +224,13 @@ class OceanTrackerDataSet(object):
     def _make_time_step_to_fileID_map(self):
 
         # make time step to fileID map, accounting for file order
-        cat = self.catalog
-        info = cat['info']
-        for v_name, item in cat['variables'].items():
+        info = self.info
+        for v_name, item in info['variables'].items():
             if item['has_time']:
                 time_step_file_map = np.zeros((0,),dtype=np.int32)
                 global_time_check = np.zeros((0,),dtype=info['time_dtype'])
                 for fileID in  item['fileID']: #IDs have aleady been time sorted
-                    fi = cat['file_info'][fileID]
+                    fi = info['files'][fileID]
                     time_step_file_map =  np.append(time_step_file_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
                     times = fi['time']
                     global_time_check  = np.append(global_time_check, times)
@@ -238,7 +239,7 @@ class OceanTrackerDataSet(object):
         pass
     def _check_time_consistency(self):
         # check all variables have same time_step_to_fileID_map, and save one version of it
-        cat = self.catalog
+        info= self.info
         ml = self.msg_logger
 
 
@@ -247,7 +248,7 @@ class OceanTrackerDataSet(object):
         ref_time = None
         vars=[]
 
-        for v_name, item in cat['variables'].items():
+        for v_name, item in info['variables'].items():
 
             if item['has_time']:
                 starts.append(item['global_time_step_check'][0])
@@ -269,8 +270,8 @@ class OceanTrackerDataSet(object):
                             hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
 
         # for all check missing time steps
-        t =cat['ref_time'].astype('datetime64[s]').astype(np.float64)
-        sel = np.flatnonzero(np.abs(np.diff(t)) > 4*cat['info']['time_step'])
+        t = info['ref_time'].astype('datetime64[s]').astype(np.float64)
+        sel = np.flatnonzero(np.abs(np.diff(t)) > 4*info['time_step'])
         if sel.size > 0:
             ml.msg('There are gaps in hindcast times larger than 4 time steps',warning=True,
                             hint= f'there may be missing hindcast files, look at dates around {[ str(x) for x in cat["ref_time"][sel]]}')
@@ -278,12 +279,11 @@ class OceanTrackerDataSet(object):
     def get_time_step(self,time, backtracking):
 
         #round down/up to time step for forward backwards
-        info = self.catalog['info']
+        info = self.info
         nt = (info['total_time_steps']-1)*abs(time-info['start_time'])/abs(info['end_time']-info['start_time'])
         nt = np.ceil(nt) if backtracking else np.floor(nt)
         return int(nt)
 
-    def get_catalog(self): return self.catalog
 
 if __name__ == "__main__":
     # dev testing code
@@ -315,20 +315,20 @@ if __name__ == "__main__":
             file_mask='DopAnV2R3*.nc'
 
     ds = OceanTrackerDataSet()
-    ds.build_catalog(input_dir,time_var, file_mask=file_mask, msg_logger=si.msg_logger)
+    ds.catalog_data(input_dir, time_var, file_mask=file_mask, msg_logger=si.msg_logger)
 
 
 
     t0 = perf_counter()
-    time= ds.catalog['info']['start_time'] + 7190
+    time= ds.info['start_time'] + 7190
     print('time step',ds.get_time_step(time,False))
     data= {}
-    for name in ds.catalog['variables'].keys():
+    for name in ds.info['variables'].keys():
         t1=perf_counter()
         data[name] = ds.read_variable(name, nt=sel)
 
     print('read vars', perf_counter()-t0)
-    print('info', ds.catalog['info'])
+    print('info', ds.info)
     pass
 
 

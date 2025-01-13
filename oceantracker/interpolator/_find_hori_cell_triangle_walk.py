@@ -46,8 +46,6 @@ class FindHoriCellTriangleWalk(object):
                      initial_value=0, caller=self, crumbs=crumbs)  # start with cell number guess of zero
         si.add_class('particle_properties', name='n_cell_last_good', class_name='ManuallyUpdatedParticleProperty', write=False, dtype='int32',
                      initial_value=0, caller=self, crumbs=crumbs)
-        si.add_class('particle_properties', name='cell_search_status', class_name='ManuallyUpdatedParticleProperty', write=False,
-                     initial_value=cell_search_status_flags.ok, dtype='int8', caller=self, crumbs=crumbs)
         si.add_class('particle_properties', name='need_fixingIDs', class_name='ManuallyUpdatedParticleProperty',
                      write=False, dtype='int32',
                      initial_value=0, caller=self, crumbs=crumbs)
@@ -89,7 +87,6 @@ class FindHoriCellTriangleWalk(object):
         grid= self.grid
         n_cell = part_prop['n_cell'].data
         bc_coords = part_prop['bc_coords'].data
-        cell_search_status = part_prop['cell_search_status'].data
         status = part_prop['status'].data
         need_fixingIDs = part_prop['need_fixingIDs'].data
         params = self.params

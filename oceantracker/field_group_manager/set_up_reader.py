@@ -15,29 +15,33 @@ def build_a_reader(reader_params, settings, msg_logger, crumbs=''):
 
     # detect reader format and add clas_name to params
     reader = _detect_hydro_file_format(reader_params, file_list, crumbs=crumbs)
+    info = reader.info
 
     # sort files into time order and add info to reader bulider on if 3D hindcast and mapped field
-    builder = reader.catalog_dataset(msg_logger=msg_logger, crumbs=crumbs)
-    reader.builder = builder
+    reader.catalog_dataset(msg_logger=msg_logger, crumbs=crumbs)
 
     # set working vertical grid type,if remapping to sigma grids
     vgt = si.vertical_grid_types
-    hi = builder['hindcast_info']
-    hi['vert_grid_type_in_files'] = copy(hi['vert_grid_type'])
-    if hi['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and settings['regrid_z_to_uniform_sigma_levels']:
-        hi['vert_grid_type'] = vgt.Sigma
-        hi['regrid_z_to_uniform_sigma_levels'] = True
-    elif hi['vert_grid_type'] in [vgt.Sigma, vgt.Zfixed]:
-        hi['regrid_z_to_uniform_sigma_levels'] = False
-    elif hi['is3D']:
-        msg_logger.msg(f'Unknown grid vertical type "{hi["vert_grid_type"]}"',
+
+    info['vert_grid_type_in_files'] = copy(info['vert_grid_type'])
+
+    if info['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and settings['regrid_z_to_uniform_sigma_levels']:
+        info['vert_grid_type'] = vgt.Sigma
+        info['regrid_z_to_uniform_sigma_levels'] = True
+
+    elif info['vert_grid_type'] in [vgt.Sigma, vgt.Zfixed]:
+        info['regrid_z_to_uniform_sigma_levels'] = False
+
+    elif info['is3D']:
+        msg_logger.msg(f'Unknown grid vertical type "{info["vert_grid_type"]}"',
                        hint=f'must be one of {str(vgt.possible_values())}',
                        fatal_error=True)
 
-    hi['has_A_Z_profile'] = 'A_Z_profile' in builder['reader_field_info']
-    hi['has_bottom_stress'] = 'bottom_stress' in builder['reader_field_info']
+    info['has_A_Z_profile'] = 'A_Z_profile' in info['field_info']
+    info['has_bottom_stress'] = 'bottom_stress' in info['field_info']
     # work out in 3D run from water velocity
-    hi['geographic_coords'] = reader.detect_lonlat_grid(msg_logger)
+    info['geographic_coords'] = reader.detect_lonlat_grid(msg_logger)
+    info['time_buffer_size'] = reader.params['time_buffer_size']
 
     return reader
 
@@ -73,7 +77,7 @@ def _detect_hydro_file_format(reader_params, file_list, crumbs=''):
     found_reader = None
     all_variables= []
     for fn in file_list:
-        ds= xr.open_dataset(fn, decode_times=False, drop_variables=drop_variables)
+        ds = xr.open_dataset(fn, decode_times=False, drop_variables=drop_variables)
         all_variables += list(ds.variables.keys())
         ds.close()
 

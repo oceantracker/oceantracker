@@ -19,13 +19,12 @@ class RandomWalk(_BaseDispersion):
                                 A_V=PVC(0.01, float, min=0., doc_str='Constant vertical turbulent eddy viscosity',
                                         units='m/s^2'),
                                        )
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
-        hi = reader_builder['hindcast_info']
 
         # set up mode/type of random walk
-        if hi['is3D']:
-            if settings['use_A_Z_profile'] and 'A_Z_profile' in reader_builder['reader_field_info']:
+        if si.run_info.is3D_run:
+            if si.settings.use_A_Z_profile:
                 info['mode'] = 4
                 si.add_reader_field( 'A_Z_profile', dict(write_interp_particle_prop_to_tracks_file=False))
                 si.add_custom_field('A_Z_profile_vertical_gradient', dict(class_name = 'VerticalGradient',

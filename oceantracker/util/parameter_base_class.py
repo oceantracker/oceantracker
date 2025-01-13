@@ -47,7 +47,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.schedulers ={}
 
 
-    def add_required_classes_and_settings(self, settings, reader_builder, message_logger):
+    def add_required_classes_and_settings(self,**kwargs):
         # this adds classes required by this a class using si.add_class.
         # reader/custom fields are  added with field group manager methods
         pass

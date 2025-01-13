@@ -14,8 +14,7 @@ class FieldGroupManager(ParameterBaseClass):
     # class holding data in file and ability to spatially interpolate fields that it holds
     #   all the fields in a file and interpolation which belongs to the set of fields (rather than individual variable)
     # works with 2D or 3D  with appropriate interplotor
-    known_field_types=['reader_field','custom_field']
-    # todo distingish between hydro model reader fields and auxilary fields, eg waves from another reader
+
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
@@ -26,23 +25,20 @@ class FieldGroupManager(ParameterBaseClass):
         info['fractional_time_steps']= np.zeros((2,), dtype=np.float64)
         info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
 
-    def initial_setup(self, reader_builder,  caller=None):
+    def initial_setup(self,  caller=None):
+
         ml = si.msg_logger
         info = self.info
 
         # build  primary. ie  velocity field, reader
-        self._create_readers(reader_builder)
-        reader = self.reader
+        self._create_readers()
 
-        # add velocity reader to field group info
-        info.update(reader.info)
         pass
 
 
 
-    def build_readers(self):
-
-        self.reader.build_reader()
+    def build_reader_grid_fields(self):
+        self.reader.build_grid_fields()
         self.reader.write_hydro_model_grid()
 
         # todo add ancillary field readers here, eg waves
@@ -82,14 +78,14 @@ class FieldGroupManager(ParameterBaseClass):
 
 
     def add_custom_field(self,name, params, default_classID=None):
+        # todo move to reader??
         r = self.reader
         i = si.class_importer.make_class_instance_from_params('fields',params, name=name,
-                                            default_classID=default_classID)
-        i.initial_setup(r.params['time_buffer_size'],r.info,r.fields, r.grid)
+            add_required_classes_and_settings=False,      default_classID=default_classID)
+        i.add_required_classes_and_settings(r.info)   # add classes required by this class
+        i.initial_setup(r.info)
         r.fields[name] = i
 
-        # add classes required by this class
-        i.add_required_classes_and_settings(si.settings, r.reader_builder, self.msg_logger)
 
 
 
@@ -158,21 +154,20 @@ class FieldGroupManager(ParameterBaseClass):
             reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
 
-    def _create_readers(self, reader_builder):
+    def _create_readers(self):
         # build a readers
-        info = self.info
-        reader_params = reader_builder['params']
-
-        #self.reader = set_up_reader.build_a_reader(reader_params, si.settings, si.msg_logger, crumbs='')
-        self.reader = si.class_importer.make_class_instance_from_params('reader', reader_params,
-                                  caller=self, crumbs=f'setup_hydro_fields> reader class ')
+        self.reader = set_up_reader.build_a_reader(si.working_params['core_class_roles']['reader'],
+                                                   si.settings, si.msg_logger, crumbs='')
         reader = self.reader
-        reader.initial_setup(reader_builder)
+        reader.initial_setup()
 
         # add request to load compulsory fields
         reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
 
-        #todo add ancillary file readers below here
+        # tag field group as 3D etc
+        for n in ['is3D', 'geographic_coords','has_A_Z_profile',
+                  'has_bottom_stress','start_time','end_time']:
+            self.info[n] = reader.info[n]
 
 
     def _apply_dry_cell_boundary_condition(self, sel_hit_dry):

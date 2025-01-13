@@ -18,7 +18,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # set up pointer dict and lists
         self.status_flags= si.particle_status_flags
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         nDim = si.run_info.vector_components
         info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size

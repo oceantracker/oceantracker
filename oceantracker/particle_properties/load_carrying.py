@@ -15,7 +15,7 @@ class ParticleLoad(CustomParticleProperty):
 
         self.add_default_params({'initial_value': PVC(1., float,doc_str='Value of the particle property when it is released') })
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name=self.params['name'] + '_initial_value',time_varying=False, write=False)
 

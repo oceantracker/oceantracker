@@ -20,7 +20,7 @@ class Resuspension(BaseResuspension):
                 'critical_friction_velocity': PVC(0., float, min=0., doc_str='Critical friction velocity, u_* in m/s defined in terms of bottom stress (this param is not the same as near seabed velocity)'),
                                  })
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         i = si.add_custom_field('friction_velocity', dict(write_interp_particle_prop_to_tracks_file=False),
                                 default_classID='field_friction_velocity')
 

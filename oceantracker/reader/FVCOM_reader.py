@@ -49,13 +49,14 @@ class FVCOMreader(_BaseUnstructuredReader):
                 drop_variables= PLC(['Itime2'], str,doc_str='Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant'),
                 )
 
-    def get_hindcast_info(self, catalog):
+    def get_hindcast_info(self):
 
         dm = self.params['dimension_map']
         fvm = self.params['field_variable_map']
         gm = self.params['grid_variable_map']
-        dims = catalog['info']['dims']
-        hi = dict(is3D='siglay' in catalog['info']['dims'])
+        info = self.info
+        dims = info['dims']
+        hi = dict(is3D='siglay' in info['dims'])
 
         if hi['is3D']:
             hi['z_dim'] = 'siglev'
@@ -116,7 +117,7 @@ class FVCOMreader(_BaseUnstructuredReader):
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
 
         x = ds.read_variable(gm['x']).data
         y = ds.read_variable(gm['y']).data
