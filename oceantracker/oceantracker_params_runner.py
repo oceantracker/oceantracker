@@ -236,7 +236,9 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
                                           + ' started: ' + str(d0) + ', ended: ' + str(datetime.now()))
             ml.msg('Computational time =' + str(datetime.now() - d0), tabs=3)
             ml.msg(f'Output in {si.run_info.run_output_dir}', tabs=1)
+            ml.msg('')
             ml.hori_line(f'Finished Oceantracker run')
+            ml.msg('')
 
             ml.close()
 
@@ -443,7 +445,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         fgm = si.add_class('field_group_manager',working_params['core_class_roles']['field_group_manager'])
         fgm.initial_setup(caller=self)
 
-        # tweak options based on available fields
+        # tweak settings based on available fields etc
         settings = si.settings
         settings.use_geographic_coords = fgm.info['geographic_coords'] or si.settings.use_geographic_coords
         settings.use_A_Z_profile = fgm.info['has_A_Z_profile'] and settings.use_A_Z_profile

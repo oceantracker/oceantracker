@@ -162,8 +162,8 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
         msg_logger.msg('Numba has already been imported, some numba options may not be used (ignore SVML warning)',
                        hint='Ensure any code using Numba is imported after Oceantracker is run, eg Oceantrackers "load_output_files.py" and "read_ncdf_output_files.py"',
                        warning=True)
-
-    environ['NUMBA_NUM_THREADS']  = str(max_threads)
+    else:
+        environ['NUMBA_NUM_THREADS']  = str(max_threads)
 
     from numba import njit, set_num_threads
     set_num_threads(max_threads)
@@ -175,9 +175,6 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     @njit
     def set_seed(value):
         np.random.seed(value)
-    @njit
-    def test_random():
-        return  np.random.rand()
 
     if settings['use_random_seed']:
             np.random.seed(0)  # set numpy

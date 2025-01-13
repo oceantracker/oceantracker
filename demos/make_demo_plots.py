@@ -167,7 +167,7 @@ def demo55_SCHISM_3D_fall_velocity(case_info_file_name,output_file=None):
     return None
 
 def demo56_SCHISM_3D_resupend_crtitical_friction_vel(case_info_file_name,output_file=None):
-    from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
+    from read_oceantracker.python.load_output_files import load_track_data
     from plot_oceantracker.plot_tracks import animate_particles
 
     track_data = load_track_data(case_info_file_name, fraction_to_read=.9)
@@ -188,7 +188,7 @@ def demo56_SCHISM_3D_resupend_crtitical_friction_vel(case_info_file_name,output_
     return None
 
 def demo57_SCHISM_3D_lateralBoundaryTest(case_info_file_name,output_file=None):
-    from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
+    from read_oceantracker.python.load_output_files import load_track_data
     from plot_oceantracker.plot_tracks import animate_particles
 
     track_data = load_track_data(case_info_file_name)
@@ -200,7 +200,7 @@ def demo57_SCHISM_3D_lateralBoundaryTest(case_info_file_name,output_file=None):
     return None
 
 def demo58_bottomBounce(case_info_file_name,output_file=None):
-    from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
+    from read_oceantracker.python.load_output_files import load_track_data
     from plot_oceantracker.plot_tracks import animate_particles
     from plot_oceantracker.plot_tracks import plot_path_in_vertical_section, plot_relative_height
 
@@ -216,7 +216,7 @@ def demo58_bottomBounce(case_info_file_name,output_file=None):
     return None
 
 def demo59_crit_shear_resupension(case_info_file_name,output_file=None):
-    from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
+    from read_oceantracker.python.load_output_files import load_track_data
     from plot_oceantracker.plot_tracks import plot_path_in_vertical_section
 
     track_data = load_track_data(case_info_file_name, var_list=['tide', 'water_depth'])
