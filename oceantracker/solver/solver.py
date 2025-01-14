@@ -4,7 +4,7 @@ import psutil
 import numpy as np
 from oceantracker.util import time_util
 from datetime import datetime
-from oceantracker.particle_properties.util import particle_operations_util
+from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
@@ -217,9 +217,10 @@ class Solver(ParameterBaseClass):
         fgm = si.core_class_roles.field_group_manager
         part_prop = si.class_roles.particle_properties
 
-        part_prop['x_last_good'].copy('x', is_moving)
-        part_prop['n_cell_last_good'].copy('n_cell', is_moving)
-        part_prop['bc_coords_last_good'].copy('bc_coords', is_moving)
+        # used  copy particle operation directly to save overhead cost
+        particle_operations_util.copy(part_prop['x_last_good'].data, part_prop['x'].data, is_moving)
+        particle_operations_util.copy(part_prop['n_cell_last_good'].data, part_prop['n_cell'].data, is_moving)
+        particle_operations_util.copy(part_prop['bc_coords_last_good'].data, part_prop['bc_coords'].data, is_moving)
 
         # do time step
         dt = si.settings.time_step*si.run_info.model_direction
@@ -244,7 +245,6 @@ class Solver(ParameterBaseClass):
         water_velocity  = part_prop['water_velocity'].data
         v_temp  = part_prop['v_temp'].data  # temp vel from interp at each RK substeps
         velocity_modifier= part_prop['velocity_modifier'].data
-
 
         #  step 1 from current location and time
         fgm.setup_time_step(time_sec, x1, is_moving)

@@ -10,25 +10,6 @@ import os
 from copy import copy
 from oceantracker.shared_info import shared_info as si
 
-# globals
-
-# globals to compile into numba to save pass arguments
-# numba code needs integer versions of constants
-psf = si.particle_status_flags
-
-status_moving = int(psf.moving)
-status_on_bottom = int(psf.on_bottom)
-status_stranded_by_tide = int(psf.stranded_by_tide)
-status_outside_domain = int(psf.outside_domain)
-status_outside_open_boundary = int(psf.outside_open_boundary)
-status_dead = int(psf.dead)
-status_bad_coord = int(psf.bad_coord)
-status_cell_search_failed = int(psf.cell_search_failed)
-status_hit_dry_cell = int(psf.hit_dry_cell)
-
-
-domain_edge =  int(si.edge_types.domain)
-open_bounday_edge=  int(si.edge_types.open_boundary)
 
 #below is called by another numba function which will work out signature on first call
 @njitOT
@@ -50,95 +31,7 @@ def _get_single_BC_cord_numba(x, BCtransform, bc):
 
     return np.argmin(bc), np.argmax(bc)
 
-@njitOTparallel
-def BCwalk(xq, tri_walk_AOS, dry_cell_index,
-                n_cell, status,need_fixingIDs,bc_coords,
-                walk_counts,
-                max_triangle_walk_steps, bc_walk_tol, block_dry_cells,
-                active):
-    # Barycentric walk across triangles to find cells
 
-    thread_buffer_index = [nb.typed.List.empty_list(nb.types.int32) for n in range(nb.get_num_threads())]
-
-
-    # loop over active particles in place
-    for nn in  nb.prange(active.size):
-        n = active[nn]
-        bc = bc_coords[n, :]
-
-        if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
-            # if any is nan copy all and move on
-            status[n]= status_bad_coord
-            thread_buffer_index[nb.get_thread_id()].append(n)
-            continue
-
-        n_tri = n_cell[n]  # starting triangle
-        # do BC walk
-        n_steps = 0
-        cell_search_OK = True
-
-        while n_steps < max_triangle_walk_steps:
-            # update barcentric cords of xq
-
-            n_min, n_max = _get_single_BC_cord_numba(xq[n, :], tri_walk_AOS[n_tri]['bc_transform'], bc)
-
-            if bc[n_min] > -bc_walk_tol and bc[n_max] < 1. + bc_walk_tol:
-                # are now inside triangle, leave particle status as is
-                break  # with current n_tri as found cell
-
-            n_steps += 1
-            # move to neighbour triangle at face with smallest bc then test bc cord again
-            next_tri = tri_walk_AOS[n_tri]['adjacency'][n_min]  # n_min is the face num in  tri to move across
-
-            if next_tri < 0:
-                # if no new adjacent triangle, then are trying to exit domain at a boundary triangle,
-                # keep n_cell, bc  unchanged
-                if next_tri == open_bounday_edge:  # outside domain
-                    # leave x, bc, cell, location  unchanged as outside
-                    status[n] = status_outside_open_boundary
-                    cell_search_OK = False
-                    break
-                else:  # n_tri == -1 outside domain and any future
-                    # solid boundary, so just move back
-                    status[n] = status_outside_domain
-                    cell_search_OK = False
-                    break
-
-            # check for dry cell
-            if block_dry_cells:  # is faster split into 2 ifs, not sure why
-                if dry_cell_index[next_tri] > 128:
-                    # treats dry cell like a lateral boundary,  move back and keep triangle the same
-                    status[n] = status_hit_dry_cell
-                    cell_search_OK = False
-                    break
-
-            n_tri = next_tri
-
-        # not found in given number of search steps
-        if n_steps >= max_triangle_walk_steps:  # dont update cell
-            status[n] = status_cell_search_failed
-            cell_search_OK = False
-
-        if cell_search_OK:
-            # update cell anc BC for new triangle, if not fixed in solver after full step
-            n_cell[n] = n_tri
-        else:
-            # record ID to fix outside
-            thread_buffer_index[nb.get_thread_id()].append(n)
-
-        #walk_counts[1] += n_steps  # steps taken
-        #walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
-
-    walk_counts[0] += active.size  # particles walked
-
-    # merge index IDs for those needing fixing from each thread
-    n_found = 0
-    for IDs in thread_buffer_index:
-        for ID in IDs:
-            need_fixingIDs[n_found] = ID
-            n_found += 1
-
-    return need_fixingIDs[:n_found] # return IDs of those needing fixing
 @njitOT
 def calc_BC_cords_numba(x, n_cells, BCtransform, bc):
     # get BC cords of set of points x inside given cells and return in bc

@@ -84,6 +84,7 @@ def copy(x1, x2, active, scale=1.0):
         for nn in nb.prange(active.size):
             n = active[nn]
             x1[n] = x2[n]*scale
+    # faster if range of 2nd dimesion explicit
     else:
         for nn in nb.prange(active.size):
             n = active[nn]

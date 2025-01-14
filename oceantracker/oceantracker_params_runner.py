@@ -446,19 +446,17 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         fgm.initial_setup(caller=self)
 
         # tweak settings based on available fields etc
-        settings = si.settings
-        settings.use_geographic_coords = fgm.info['geographic_coords'] or si.settings.use_geographic_coords
-        settings.use_A_Z_profile = fgm.info['has_A_Z_profile'] and settings.use_A_Z_profile
-        settings.use_bottom_stress = fgm.info['has_bottom_stress'] and settings.use_bottom_stress
+        si.settings.use_geographic_coords = fgm.info['geographic_coords'] or si.settings.use_geographic_coords
+        si.settings.use_A_Z_profile = fgm.info['has_A_Z_profile'] and si.settings.use_A_Z_profile
+        si.settings.use_bottom_stress = fgm.info['has_bottom_stress'] and si.settings.use_bottom_stress
 
         si.run_info.is3D_run = fgm.info['is3D']
         if not si.run_info.is3D_run:
-            settings.use_resuspension = False
+            si.settings.use_resuspension = False
 
         # now setup reader knowing if geographic, if A_Z_profile or bottom stress available,  and in use
         fgm.build_reader_grid_fields()
 
-        si.run_info.is3D_run = fgm.info['is3D']
         si.run_info.vector_components = 3 if si.run_info.is3D_run else 2
         fgm.final_setup()
 

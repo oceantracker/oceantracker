@@ -169,9 +169,13 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     set_num_threads(max_threads)
     settings['processors'] = max_threads # adjust setting thread number to match max possible
 
+
     msg_logger.hori_line()
     msg_logger.progress_marker(f'Numba setup: applied settings,use parallel threads = {settings["use_parallel_threads"]}, max threads = {max_threads}, physical cores = {physical_cores}')
 
+    # make buffer to hold indicies found by each thread
+    #from oceantracker.util.numba_util import make_thread_index_buffer
+    #si.thread_index_buffer = make_thread_index_buffer(max_threads, si.settings.particle_buffer_chunk_size)
     @njit
     def set_seed(value):
         np.random.seed(value)
