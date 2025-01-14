@@ -4,6 +4,8 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
+from oceantracker.util.numba_util import make_thread_index_buffer
+
 from  oceantracker.particle_group_manager.util import  pgm_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_properties._base_particle_properties import FieldParticleProperty,ManuallyUpdatedParticleProperty,CustomParticleProperty
@@ -21,7 +23,7 @@ class ParticleGroupManager(ParameterBaseClass):
     def add_required_classes_and_settings(self):
         info = self.info
         nDim = si.run_info.vector_components
-        info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size
+        info['current_particle_buffer_size'] = si.settings.particle_buffer_chunk_size
         # core particle props. , write at each required time step
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x',
                      vector_dim=nDim)  # particle location
@@ -151,6 +153,7 @@ class ParticleGroupManager(ParameterBaseClass):
         n_chunks = max(1,int(np.ceil(num_particles/si.settings.particle_buffer_chunk_size)))
         info['current_particle_buffer_size'] = n_chunks*si.settings.particle_buffer_chunk_size
         num_in_buffer = info['particles_in_buffer']
+
         #print('xxy',num_particles,n_chunks,num_in_buffer,info['current_particle_buffer_size'])
         # copy property data
         for key, i in part_prop.items():
@@ -163,6 +166,9 @@ class ParticleGroupManager(ParameterBaseClass):
             i.data = new_data
             del old_data
 
+        # expand index buffer
+
+        #si.thread_index_buffer = make_thread_index_buffer(si.settings.processors, info['current_particle_buffer_size'])
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 

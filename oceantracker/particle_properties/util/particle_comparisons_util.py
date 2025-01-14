@@ -2,8 +2,9 @@
 # returns indies for which test is true in a view of int32 array
 
 import numpy as np
-from oceantracker.util.numba_util import njitOT, njitOTparallel
+from oceantracker.util.numba_util import njitOT, njitOTparallel, _merge_thread_index_buffers
 import numba as nb
+from oceantracker.shared_info import shared_info as si
 
 @njitOT
 def is_eq(a, b): return a == b
@@ -42,45 +43,49 @@ def setup_shared_comparison_IndexBuffer(current_particle_buffer_size, n_threads)
     _shared_comparison_IndexBuffer = np.full((n_threads, current_particle_buffer_size), False, dtype=np.int32)
     _number_found_in_each_thread = np.zeros((n_threads,), dtype=np.int32)
 
-def compared_prop_to_value(part_prop, test, value, out=None):
+
+def compared_prop_to_value(part_prop_data, test, value, out=None):
     # return a view of indices where  part_prop (test) value, is true
 
-    if out is None: out = np.full((part_prop.shape[0],), -127, np.int32)
-    comp= _get_comparison(test)
+    comp = _get_comparison(test)
 
-    return _prop_compared_to_value(part_prop,comp , value, out)
-    #return _prop_compared_to_value(part_prop,comp , value,_shared_comparison_IndexBuffer, out)
-
+    return _prop_compared_to_value(part_prop_data, comp, value, out)
+    # test of threaded version
+    #_prop_compared_to_value(part_prop,comp , value,
+     #              si.thread_index_buffer['buffer'], si.thread_index_buffer['indicies_per_thread'], out)
+    #return _merge_thread_index_buffers(si.thread_index_buffer['buffer'], si.thread_index_buffer['indicies_per_thread'], out)
 
 @njitOT
-def _prop_compared_to_value(part_prop, comparison_func, value, out):
+def _prop_compared_to_value(part_prop_data, comparison_func, value, out):
     #return a view of indices where   part_prop (test) is true fro all particles
    # now search for those where test is true
 
     nfound = 0
-    for nn in range(part_prop.shape[0]):
-        if comparison_func(part_prop[nn], value):
-            out[nfound] = nn
-            nfound += 1
+    for nn in range(part_prop_data.shape[0]):
+        # branchless recording of index if comparison true
+        ok = comparison_func(part_prop_data[nn], value)
+        out[nfound] = nn
+        nfound += ok
 
     return out[:nfound]
 
-@njitOT
-def _prop_compared_to_valueV2(part_prop, comparison_func, value,shared_comparison_IndexBuffer, out):
-    #return a view of indices where   part_prop (test) is true fro all particles
-   # now search for those where test is true
+# test of thread safe version
+@njitOTparallel
+def _prop_compared_to_value_not_used(part_prop_data, comparison_func, value,
+                                     thread_index_buffer, indicies_per_thread, out):
+    #return a view of indices where   part_prop (test) is true for all particles
+
+    # zero count for each thread
+    for i in range(nb.get_num_threads()): indicies_per_thread[i] = 0
 
     # do find  using threads
-    for nn in nb.prange(part_prop.shape[0]):
-        shared_comparison_IndexBuffer[nn] = comparison_func(part_prop[nn], value)
+    for nn in nb.prange(part_prop_data.shape[0]):
+        if comparison_func(part_prop_data[nn], value):
+            nthread = nb.get_thread_id()
+            thread_index_buffer[nthread, indicies_per_thread[nthread]] = nn
+            indicies_per_thread[nthread] += 1
 
-    nfound = 0
-    for nn in range(part_prop.shape[0]):
-        if shared_comparison_IndexBuffer[nn]:
-            out[nfound] = nn
-            nfound += 1
-
-    return out[:nfound]
+    return _merge_thread_index_buffers(si.thread_index_buffer['buffer'], si.thread_index_buffer['indicies_per_thread'], out)
 
 def prop_subset_compared_to_value(active, part_prop, test, value, out):
     # return a view of  indices where  part_prop (test) value, is true for active particles
@@ -103,19 +108,19 @@ def _prop_subset_compared_to_value(active, part_prop,comparison_func,value, out)
 
 @njitOTparallel
 def _prop_subset_compared_to_value_not_used(active, part_prop,comparison_func,value,
-                                   shared_comparison_IndexBuffer, number_found_in_each_thread,out):
+                                   thread_index_buffer, indicies_per_thread ,out):
     #return a view of indices where   part_prop (test) is true
    # now search for those where test is true
 
     # do search split into threads
-    for threadID in range(nb.get_num_threads()): number_found_in_each_thread[threadID] = 0
+    for threadID in range(nb.get_num_threads()): indicies_per_thread[threadID] = 0
 
     for nn in nb.prange(active.size):
         n = active[nn]
         if comparison_func(part_prop[n],value):
             threadID = nb.get_thread_id()
-            shared_comparison_IndexBuffer[threadID, number_found_in_each_thread[threadID]] = n
-            number_found_in_each_thread[threadID] += 1
+            thread_index_buffer[threadID, indicies_per_thread[threadID]] = n
+            indicies_per_thread[threadID] += 1
 
 
     # combine results from each thread

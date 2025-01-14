@@ -37,9 +37,8 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def initial_setup(self):
         params = self.params
-        s = (si.settings.particle_buffer_initial_size,) # initial size one chunk
-        if params['vector_dim'] > 1:
-            s += (params['vector_dim'],)
+        s = (si.settings.particle_buffer_chunk_size,) # initial size one chunk
+        if params['vector_dim'] > 1: s += (params['vector_dim'],)
 
         # third matrix dim, so far only used recording vertical cell at each node  3D for 2 time steps
         if params['prop_dim3'] > 0 and params['prop_dim3'] > 1:
