@@ -218,7 +218,7 @@ class ParticleGroupManager(ParameterBaseClass):
         info = self.info
         part_prop = si.class_roles.particle_properties
 
-        ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
+        ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary)
         num_alive = ID_alive.shape[0]
         nDead = info['particles_in_buffer'] - num_alive
 
@@ -237,7 +237,6 @@ class ParticleGroupManager(ParameterBaseClass):
                 part_prop['status'].set_values(si.particle_status_flags.notReleased, notReleased)
 
                 info['particles_in_buffer'] = num_alive # record new number in buffer
-
 
 
     # below return  info about particle group
