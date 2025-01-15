@@ -60,7 +60,7 @@ def get_params(datasource=1):
         'screen_output_time_interval':6*time_step,
          'max_run_duration': 1 *24*3600,  # 1 days
          # 'use_parallel_threads' : False,
-         #'parallel_threads': 20,
+         #'processors': 1,
          #'NUMBA_cache_code' : True,
          'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,
@@ -147,10 +147,6 @@ if __name__ == '__main__':
         import cProfile
         import pstats
         import time
-
-
-
-
         profiler = cProfile.Profile()
 
         profiler.enable()

@@ -432,7 +432,6 @@ class _BaseReader(ParameterBaseClass):
         return quad_cells_to_split, tri
 
 
-
     def _setup_fields(self):
         # setup field classes , ie make memory buffer
         info = self.info
@@ -538,6 +537,7 @@ class _BaseReader(ParameterBaseClass):
             data = reader_util.patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
 
         field.data[buffer_index, ...] = data
+
         return data
 
     #------------------------------------------------------------------------------------------------

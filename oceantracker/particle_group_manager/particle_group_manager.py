@@ -4,8 +4,6 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
-from oceantracker.util.numba_util import make_thread_index_buffer
-
 from  oceantracker.particle_group_manager.util import  pgm_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_properties._base_particle_properties import FieldParticleProperty,ManuallyUpdatedParticleProperty,CustomParticleProperty
@@ -168,7 +166,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # expand index buffer
 
-        #si.thread_index_buffer = make_thread_index_buffer(si.settings.processors, info['current_particle_buffer_size'])
+
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 

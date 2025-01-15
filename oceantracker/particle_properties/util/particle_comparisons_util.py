@@ -2,7 +2,7 @@
 # returns indies for which test is true in a view of int32 array
 
 import numpy as np
-from oceantracker.util.numba_util import njitOT, njitOTparallel, _merge_thread_index_buffers
+from oceantracker.util.numba_util import njitOT, njitOTparallel
 import numba as nb
 from oceantracker.shared_info import shared_info as si
 
@@ -104,32 +104,6 @@ def _prop_subset_compared_to_value(active, part_prop,comparison_func,value, out)
         if comparison_func(part_prop[n],value):
             out[nfound] = n
             nfound += 1
-    return out[:nfound]
-
-@njitOTparallel
-def _prop_subset_compared_to_value_not_used(active, part_prop,comparison_func,value,
-                                   thread_index_buffer, indicies_per_thread ,out):
-    #return a view of indices where   part_prop (test) is true
-   # now search for those where test is true
-
-    # do search split into threads
-    for threadID in range(nb.get_num_threads()): indicies_per_thread[threadID] = 0
-
-    for nn in nb.prange(active.size):
-        n = active[nn]
-        if comparison_func(part_prop[n],value):
-            threadID = nb.get_thread_id()
-            thread_index_buffer[threadID, indicies_per_thread[threadID]] = n
-            indicies_per_thread[threadID] += 1
-
-
-    # combine results from each thread
-    nfound = 0
-    for threadID in range(nb.get_num_threads()):
-        for nn in range(number_found_in_each_thread[threadID]):
-            out[nfound] = shared_comparison_IndexBuffer[threadID, nn]
-            nfound += 1
-
     return out[:nfound]
 
 @njitOT

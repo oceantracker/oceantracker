@@ -47,59 +47,25 @@ def njitOTparallel(func):
     return num_func
 
 def get_numba_func_info():
-    d = dict(signatures={}, SMID_code={},
-           config={key: val for key, val in nb.config.__dict__.items()
-                   if not key.startswith('_') and type(val) in [None, int, str, float] }
-                  )
+    d = dict( config={key: val for key, val in nb.config.__dict__.items()
+                   if not key.startswith('_') and type(val) in [None, int, str, float] },
+             modules={}     )
+
     for name, func in numba_func_info.items():
 
         if hasattr(func, 'signatures'):  # only code that has been compiled has a sig
-            sig = func.signatures
-            d['signatures'][name] = str(sig)
-            d['SMID_code'][name] = []
-            for nsig in range(len(sig)):
-                d['SMID_code'][name].append(count_simd_intructions(func, sig=nsig))
-    return  d
+            mod, fname = name.rsplit('.',1)
+            fd = []
+            for nsig, sig  in enumerate(list(func.signatures)):
+                p = dict(signature=str(sig))
+                p['simd_instructions'],code= count_simd_intructions(func, sig=nsig)
+                #p['code'] = code
+                fd.append(p)
 
-# below makes a self expanding buffer to store the indices found with each prange loop,
-# to merge into single array of indices
-
-
-@nb.njit
-def _make_thread_index_buffer(max_num_threads, particle_buffer_size):
-    # build a numba usable list of indices arrays to store indices found within each tread of a prange loop
-    # initial size isup  n indices per thread
-
-    n = int(10*3 + 1.1*np.ceil(particle_buffer_size/max_num_threads))
-
-    thread_index_buffer = np.full((max_num_threads, n), -1, dtype=np.int32)
-    indicies_per_thread = np.zeros((max_num_threads,), dtype=np.int32)
-
-    return thread_index_buffer, indicies_per_thread
-
-def make_thread_index_buffer(max_num_threads, particle_buffer_size):
-    # make an index to hold intermediate results for the indices found in each thread
-
-    a, b = _make_thread_index_buffer(max_num_threads, particle_buffer_size)
-    return dict( buffer=a, indicies_per_thread=b)
-
-@nb.njit
-def _merge_thread_index_buffers( thread_index_buffer, indicies_per_thread, out):
-    #merge over current threads being used, which may be less than the maximum number of threads
-    n_found = 0
-    for n_thread in range(nb.get_num_threads()):
-        # merge only inserted vales from each array
-        for nn in range(indicies_per_thread[n_thread]):
-            out[n_found] = thread_index_buffer[n_thread, nn]
-            n_found += 1
-
-    return out[:n_found] # view of all indices in the buffer
-def set_num_threads_not_used(n, settings):
-    if n is None: n = max_threads
-    threads =  max(min(n,max_threads-1),1)
-    nb.set_num_threads(threads)
-    return threads
-
+            if mod not in d['modules']: d['modules'][mod] = {}
+            d['modules'][mod][name] = fd
+    d['modules'] = {key : d['modules'][key] for key in  sorted(d['modules'].keys())}
+    return d
 
 avx_instructions ='vmovapd|vmulpd|vaddpd|vsubpd|vfmadd213pd|vfmadd231pd|vfmadd132pd|vmulsd|vaddsd|vmosd|vsubsd|vbroadcastss|vbroadcastsd|vblendpd|vshufpd|vroundpd|vroundsd|vxorpd|vfnmadd231pd|vfnmadd213pd|vfnmadd132pd|vandpd|vmaxpd|vmovmskpd|vcmppd|vpaddd|vbroadcastf128|vinsertf128|vextractf128|vfmsub231pd|vfmsub132pd|vfmsub213pd|vmaskmovps|vmaskmovpd|vpermilps|vpermilpd|vperm2f128|vzeroall|vzeroupper|vpbroadcastb|vpbroadcastw|vpbroadcastd|vpbroadcastq|vbroadcasti128|vinserti128|vextracti128|vpminud|vpmuludq|vgatherdpd|vgatherqpd|vgatherdps|vgatherqps|vpgatherdd|vpgatherdq|vpgatherqd|vpgatherqq|vpmaskmovd|vpmaskmovq|vpermps|vpermd|vpermpd|vpermq|vperm2i128|vpblendd|vpsllvd|vpsllvq|vpsrlvd|vpsrlvq|vpsravd|vblendmpd|vblendmps|vpblendmd|vpblendmq|vpblendmb|vpblendmw|vpcmpd|vpcmpud|vpcmpq|vpcmpuq|vpcmpb|vpcmpub|vpcmpw|vpcmpuw|vptestmd|vptestmq|vptestnmd|vptestnmq|vptestmb|vptestmw|vptestnmb|vptestnmw|vcompresspd|vcompressps|vpcompressd|vpcompressq|vexpandpd|vexpandps|vpexpandd|vpexpandq|vpermb|vpermw|vpermt2b|vpermt2w|vpermi2pd|vpermi2ps|vpermi2d|vpermi2q|vpermi2b|vpermi2w|vpermt2ps|vpermt2pd|vpermt2d|vpermt2q|vshufDataByTriTemp2x4|vshuff64x2|vshuffi32x4|vshuffi64x2|vpmultishiftqb|vpternlogd|vpternlogq|vpmovqd|vpmovsqd|vpmovusqd|vpmovqw|vpmovsqw|vpmovusqw|vpmovqb|vpmovsqb|vpmovusqb|vpmovdw|vpmovsdw|vpmovusdw|vpmovdb|vpmovsdb|vpmovusdb|vpmovwb|vpmovswb|vpmovuswb|vcvtps2udq|vcvtpd2udq|vcvttps2udq|vcvttpd2udq|vcvtss2usi|vcvtsd2usi|vcvttss2usi|vcvttsd2usi|vcvtps2qq|vcvtpd2qq|vcvtps2uqq|vcvtpd2uqq|vcvttps2qq|vcvttpd2qq|vcvttps2uqq|vcvttpd2uqq|vcvtudq2ps|vcvtudq2pd|vcvtusi2ps|vcvtusi2pd|vcvtusi2sd|vcvtusi2ss|vcvtuqq2ps|vcvtuqq2pd|vcvtqq2pd|vcvtqq2ps|vgetexppd|vgetexpps|vgetexpsd|vgetexpss|vgetmantpd|vgetmantps|vgetmantsd|vgetmantss|vfixupimmpd|vfixupimmps|vfixupimmsd|vfixupimmss|vrcp14pd|vrcp14ps|vrcp14sd|vrcp14ss|vrndscaleps|vrndscalepd|vrndscaless|vrndscalesd|vrsqrt14pd|vrsqrt14ps|vrsqrt14sd|vrsqrt14ss|vscalefps|vscalefpd|vscalefss|vscalefsd|valignd|valignq|vdbpsadbw|vpabsq|vpmaxsq|vpmaxuq|vpminsq|vpminuq|vprold|vprolvd|vprolq|vprolvq|vprord|vprorvd|vprorq|vprorvq|vpscatterdd|vpscatterdq|vpscatterqd|vpscatterqq|vscatterdps|vscatterdpd|vscatterqps|vscatterqpd|vpconflictd|vpconflictq|vplzcntd|vplzcntq|vpbroadcastmb2q|vpbroadcastmw2d|vexp2pd|vexp2ps|vrcp28pd|vrcp28ps|vrcp28sd|vrcp28ss|vrsqrt28pd|vrsqrt28ps|vrsqrt28sd|vrsqrt28ss|vgatherpf0dps|vgatherpf0qps|vgatherpf0dpd|vgatherpf0qpd|vgatherpf1dps|vgatherpf1qps|vgatherpf1dpd|vgatherpf1qpd|vscatterpf0dps|vscatterpf0qps|vscatterpf0dpd|vscatterpf0qpd|vscatterpf1dps|vscatterpf1qps|vscatterpf1dpd|vscatterpf1qpd|vfpclassps|vfpclasspd|vfpclassss|vfpclasssd|vrangeps|vrangepd|vrangess|vrangesd|vreduceps|vreducepd|vreducess|vreducesd|vpmovm2d|vpmovm2q|vpmovm2b|vpmovm2w|vpmovd2m|vpmovq2m|vpmovb2m|vpmovw2m|vpmullq|vpmadd52luq|vpmadd52huq|v4fmaddps|v4fmaddss|v4fnmaddps|v4fnmaddss|vp4dpwssd|vp4dpwssds|vpdpbusd|vpdpbusds|vpdpwssd|vpdpwssds|vpcompressb|vpcompressw|vpexpandb|vpexpandw|vpshld|vpshldv|vpshrd|vpshrdv|vpopcntd|vpopcntq|vpopcntb|vpopcntw|vpshufbitqmb|gDataByTrip8affineinvqb|gDataByTrip8affineqb|gDataByTrip8mulb|vpclmulqdq|vaesdec|vaesdeclast|vaesenc|vaesenclast'.split('|')
 avx_instructions += 'addps|addss|andnps|andps|cmpps|cmpss|comiss|cvtpi2ps|cvtps2pi|cvtsi2ss|cvtss2s|cvttps2pi|cvttss2si|divps|divss|ldmxcsr|maxps|maxss|minps|minss|movaps|movhlps|movhps|movlhps|movlps|movmskps|movntps|movss|movups|mulps|mulss|orps|rcpps|rcpss|rsqrtps|rsqrtss|shufps|sqrtps|sqrtss|stmxcsr|subps|subss|ucomiss|unpckhps|unpcklps|xorps|pavgb|pavgw|pextrw|pinsrw|pmaxsw|pmaxub|pminsw|pminub|pmovmskb|psadbw|pshufw'.split('|')
@@ -108,12 +74,15 @@ def count_simd_intructions(func, sig=0,keep_zeros=False):
 
     simd_instruct={}
 
+
     # hack a full list of avx
     if not hasattr(func,'inspect_asm'):
         print(func.__name__, 'Nested fuction no separate code')
         return simd_instruct
 
     code = func.inspect_asm(func.signatures[sig])
+
+
     for  i in avx_instructions:
         simd_instruct[i] = code.count(i)
 
@@ -124,7 +93,9 @@ def count_simd_intructions(func, sig=0,keep_zeros=False):
     if not keep_zeros:
         simd_instruct = {i: count for i, count in simd_instruct.items() if count > 0}
 
-    return simd_instruct
+    code = code.replace('\t','    ').split('\n')
+    return simd_instruct, code
+
 def compare_simd(numba_fun_list,show=True):
     counts=[]
     for  f in numba_fun_list:

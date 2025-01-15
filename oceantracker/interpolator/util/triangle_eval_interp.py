@@ -140,7 +140,6 @@ def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, fractional_time_
                 temp += (F2[n_nodes[m], nz, c] * zf1 + F2[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[1]# second time step
                 F_out[n, c] += bc_coords[n, m] * temp
 
-
 @njitOTparallel
 def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps, F_data,
                                             triangles, bottom_cell_index,
@@ -173,8 +172,6 @@ def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps
             # add contributions from layer above and below particle, for each spatial component at two time steps
             F_out[n] += bc_coords[n, m] * (F1[n_node, nz_below] * zf1 + F1[n_node, nz_above] * zf) * fractional_time_steps[0] \
                       + bc_coords[n, m] * (F2[n_node, nz_below] * zf1 + F2[n_node, nz_above] * zf) * fractional_time_steps[1]  # second time step
-
-
 
 
 #@function_profiler(__name__)
