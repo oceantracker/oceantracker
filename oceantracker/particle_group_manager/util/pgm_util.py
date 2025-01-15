@@ -18,7 +18,7 @@ def _status_counts_and_kill_old_particles(age, status, IDrelease_group,max_age_f
 
         # add to histogram of status values
         status_counts[status[n] - 128] += 1
-        if status[n] >= status_stationary :
+        if status[n] >= status_stationary:
             num_alive += 1
 
     return num_alive

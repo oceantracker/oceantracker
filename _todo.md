@@ -30,6 +30,7 @@
 2. comparison tests in parallelized?
 3. restructure particle ID buffers?
 1. restructure  particle method find_those_in_range_of_values()?
+2. 1. sture feilds by triangles for faster interp? afterf asyc reader?
 
 ## New additions
 
