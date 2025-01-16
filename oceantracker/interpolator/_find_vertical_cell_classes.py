@@ -39,7 +39,7 @@ class FindVerticalCellSigmaGrid(object):
     def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
         # locate vertical cell in place
         part_prop = si.class_roles.particle_properties
-        n_cell = part_prop['n_cell_last_good'].data
+        n_cell = part_prop['n_cell'].data
         status = part_prop['status'].data
         bc_coords = part_prop['bc_coords'].data
         grid = self.grid
@@ -145,7 +145,7 @@ class FindVerticalCellSlayerLSCGrid(object):
 
     def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
         part_prop = si.class_roles.particle_properties
-        n_cell = part_prop['n_cell_last_good'].data
+        n_cell = part_prop['n_cell'].data
         status = part_prop['status'].data
         bc_coords = part_prop['bc_coords'].data
         grid = self.grid
@@ -301,7 +301,7 @@ class FindVerticalCellZfixed(object):
 
     def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
         part_prop = si.class_roles.particle_properties
-        n_cell = part_prop['n_cell_last_good'].data
+        n_cell = part_prop['n_cell'].data
         status = part_prop['status'].data
         bc_coords = part_prop['bc_coords'].data
         grid = self.grid
