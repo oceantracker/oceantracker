@@ -116,6 +116,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         si.add_settings(si.working_params['settings']) # push settings into shared info
 
 
+
         ml.exit_if_prior_errors('Errors in settings??', caller=self)
         # transfer all settings to shared_info.settings to allow tab hints
 

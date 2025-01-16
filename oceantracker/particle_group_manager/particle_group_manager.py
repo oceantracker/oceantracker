@@ -162,11 +162,6 @@ class ParticleGroupManager(ParameterBaseClass):
             new_data = np.zeros(s, dtype=old_data.dtype) # the new buffer
             np.copyto(new_data[:num_in_buffer, ...], old_data[:num_in_buffer, ...])
             i.data = new_data
-            del old_data
-
-        # expand index buffer
-
-
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 

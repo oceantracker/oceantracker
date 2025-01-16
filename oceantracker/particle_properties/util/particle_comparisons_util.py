@@ -51,9 +51,7 @@ def compared_prop_to_value(part_prop_data, test, value, out=None):
 
     return _prop_compared_to_value(part_prop_data, comp, value, out)
     # test of threaded version
-    #_prop_compared_to_value(part_prop,comp , value,
-     #              si.thread_index_buffer['buffer'], si.thread_index_buffer['indicies_per_thread'], out)
-    #return _merge_thread_index_buffers(si.thread_index_buffer['buffer'], si.thread_index_buffer['indicies_per_thread'], out)
+    #return _prop_compared_to_value(part_prop_data, comp, value, si.particle_buffer_mask, out,)
 
 @njitOT
 def _prop_compared_to_value(part_prop_data, comparison_func, value, out):
@@ -62,12 +60,15 @@ def _prop_compared_to_value(part_prop_data, comparison_func, value, out):
 
     nfound = 0
     for nn in range(part_prop_data.shape[0]):
-        # branchless recording of index if comparison true
-        ok = comparison_func(part_prop_data[nn], value)
-        out[nfound] = nn
-        nfound += ok
+        # index if comparison true
+        if  comparison_func(part_prop_data[nn], value):
+            out[nfound] = nn
+            nfound += 1
 
     return out[:nfound]
+
+
+
 
 # test of thread safe version
 @njitOTparallel
