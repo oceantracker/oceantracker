@@ -31,6 +31,7 @@
 3. restructure particle ID buffers?
 1. restructure  particle method find_those_in_range_of_values()?
 2. 1. sture feilds by triangles for faster interp? afterf asyc reader?
+3. are results of random slighly dif when threaded?
 
 ## New additions
 

@@ -1,5 +1,4 @@
-from typing import TypedDict
-
+import numpy as np
 from oceantracker import definitions
 
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
@@ -194,7 +193,6 @@ class _SharedInfoClass():
 
     info = _UseFullInfo
 
-
     def __init__(self):
 
         self.default_polygon_dict_params = {'user_polygonID': PVC(0, int, min=0),
@@ -271,6 +269,7 @@ class _SharedInfoClass():
     def add_reader_field(self, name, params):
         return self.core_class_roles.field_group_manager.add_reader_field(name, params)
     def add_custom_field(self, name, params, default_classID=None):
+        #todo is this redundent use filed group manager version?
         return self.core_class_roles.field_group_manager.add_custom_field(name, params, default_classID=default_classID)
 
 

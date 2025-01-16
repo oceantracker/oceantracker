@@ -36,6 +36,19 @@ class Resuspension(BaseResuspension):
         info['resuspension_factor']= 2.0*0.4*si.settings.z0*si.settings.time_step/(1. - 2./np.pi)
         pass
 
+    def select_particles_to_resupend(self, active):
+        # compare to single critical value
+        # todo add comparison to  particles critical value from distribution, add new particle property to hold  individual critical values
+        part_prop = si.class_roles.particle_properties
+        on_bottom = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.on_bottom,
+                                                               out=self.get_partID_buffer('B1'))
+
+        # compare to critical friction velocity
+        resupend = part_prop['friction_velocity'].find_subset_where(on_bottom, 'gteq',
+                                                                    self.params['critical_friction_velocity'],
+                                                                    out=self.get_partID_subset_buffer('B1'))
+        return resupend
+
 
     # all particles checked to see if they need status changing
     def update(self,n_time_step, time_sec, alive):
@@ -46,10 +59,12 @@ class Resuspension(BaseResuspension):
         # resuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.class_roles.particle_properties
 
+        resupend= self.select_particles_to_resupend(alive)
+
         self.resuspension_jump(part_prop['friction_velocity'].data, part_prop['status'].data,
                                 self.params['critical_friction_velocity'],
                                info['resuspension_factor'],
-                               part_prop['x'].data, part_prop['water_depth'].data,si.settings.z0, alive)
+                               part_prop['x'].data, part_prop['water_depth'].data,si.settings.z0, resupend)
 
 
         self.stop_update_timer()
@@ -58,12 +73,8 @@ class Resuspension(BaseResuspension):
     @njitOT
     def resuspension_jump(friction_velocity, status,
                           critical_friction_velocity,
-                          resuspension_factor, x, water_depth, z0, alive):
+                          resuspension_factor, x, water_depth, z0, sel):
         # add entrainment jump up to particle z, Book: Lynch(2015) book, Particles in the coastal ocean  eq 9.26 and 9.28
-        for n in alive:
-            #todo threade prange version give diffent results in tracks only  .2m on average,
-            # so slight different if decision when threaded? use threads  and accept change for faster threaded code?
-            if status[n] == status_on_bottom and friction_velocity[n] >= critical_friction_velocity:
-                # do suspension
-                x[n, 2] = -water_depth[n] + z0 + np.sqrt(resuspension_factor*friction_velocity[n])*np.abs(np.random.randn())
-                status[n] = status_moving
+        for n in sel:
+            x[n, 2] = -water_depth[n] + z0 + np.sqrt(resuspension_factor*friction_velocity[n])*np.abs(np.random.randn())
+            status[n] = status_moving
