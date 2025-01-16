@@ -22,7 +22,7 @@ if __name__ == "__main__":
     ot = OceanTracker()
     ot.settings(time_step=15*60, use_A_Z_profile=False, write_tracks=False,
                 max_run_duration= 30*24*3600,
-                use_parallel_threads=False,
+                use_parallel_threads=True,
                 root_output_dir=root_output_dir, output_file_base='benchmark_v01')
     ot.add_class('reader',  input_dir = input_dir,    file_mask = 'NZfinite*.nc',
                  time_buffer_size=12)
