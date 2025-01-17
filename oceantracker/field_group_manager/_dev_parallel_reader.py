@@ -5,18 +5,12 @@ import sys
 from  numba import njit
 from copy import  deepcopy, copy
 import traceback
-from oceantracker import shared_info as si
 
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 
-class ParallelReaderManager():
-
-    def __init__(self, field_group_manager):
-
-        reader = self
-        pass
+class ParallelReader():
     def create_shared_memory(self,grid):
 
         # below are needed to bulid async reader
@@ -231,6 +225,69 @@ class Reader(ParameterBaseClass):
         return nt_hydro
 
 
+class FieldGroupManger(ParameterBaseClass):
+    def __init__(self):
+        super().__init__()
+        self.add_default_params(dict(
+                    async_pause_interval=PVC(.005, [float, int],
+                                            doc_str='time asyc reader pauses bewteen checking if action is needed',
+                                            units='s'),
+                    async_progress_warning_interval=PVC(30., [float, int],
+                                            doc_str='time asyc reader warns of time, if reader or model solver waits too long for movement by the other',
+                                            units='s' ),
+                                 ))
+    def initial_setup(self):
+
+        self.info= dict(nt_hydro_current=np.full((2,), -1,dtype=np.int32),
+                        current_step_fractions=np.full((2,), -1, dtype=np.float64),
+                        )
+
+        self.reader = Reader()
+        reader = self.reader
+        reader.params = merge_params_with_defaults(reader.params,reader.default_params,reader.shared_info.msg_logger)
+
+        async_settings=  {k: v for k, v in self.params.items() if k.startswith('async')}
+
+        self.grid = reader.initial_setup()
+        #setup async reader
+        self.A = AsyncReaderManager()
+        self.A.start(async_settings,self.grid,self.reader)
+
+    def update(self, time_model):
+
+        info=  self.info
+        # get buffer step at this and next hydro model step
+        nb = self.reader.get_hydrofile_time_step(time_model)
+ 
+        self.A.update(nb) # fill buffer if possible
+
+        time_buffer = self.grid['time']
+        nb= info['nt_hydro_current'] % time_buffer.size
+
+        f= (time_model - time_buffer[nb[0]]) / (time_buffer[nb[1]] -time_buffer[nb[0]])
+        info['current_step_fractions'][0] = 1. - f
+        info['current_step_fractions'][1] = f
+        self.step_fraction = f
+        pass
+
+    def interp_fields(self):
+        # interp at current time
+        grid= self.grid
+        info = self.info
+
+        time_buffer = self.grid['time']
+        nb = info['nt_hydro_current'] % time_buffer.size
+
+        self.time_check = time_buffer[nb[0]]* info['current_step_fractions'][0] + time_buffer[nb[1]]* info['current_step_fractions'][1]
+
+    def close(self):
+        self.A.close()
+
+class dummy_msg_logger():
+    def msg(self,text, warning=None, hint=None):
+        print(text)
+
+
 def connect_to_shared_memory(sm_builder, shared_refs):
     sm_name = sm_builder['shared_mem_name']
     shared_refs[sm_name] = shared_memory.SharedMemory(sm_name, create=False) # maintains a reference
@@ -248,6 +305,8 @@ class ControlAsyc():
         self._nt_buffer_start = control_array[2:3]
         self._nt_buffer_end = control_array[3:4]
         self._number_steps_in_buffer = control_array[4:5]
+
+
 
     def set_current_hydro_step(self,nt):self._nt_hydro_current[0] = nt
     def get_current_hydro_step(self): return self._nt_hydro_current[0]
@@ -284,7 +343,7 @@ class ControlAsyc():
 
 if __name__ == '__main__':
     dt = 3600
-
+    ml = dummy_msg_logger()
     F = FieldGroupManger()
     F.shared_info.msg_logger= ml
     F.params = merge_params_with_defaults(F.params, F.default_params, ml)
