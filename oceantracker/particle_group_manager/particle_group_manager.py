@@ -21,7 +21,7 @@ class ParticleGroupManager(ParameterBaseClass):
     def add_required_classes_and_settings(self):
         info = self.info
         nDim = si.run_info.vector_components
-        info['current_particle_buffer_size'] = si.settings.particle_buffer_chunk_size
+
         # core particle props. , write at each required time step
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='x',
                      vector_dim=nDim)  # particle location
@@ -75,7 +75,7 @@ class ParticleGroupManager(ParameterBaseClass):
         info['particles_in_buffer'] = 0
         info['particles_released'] = 0
         info['num_alive'] = 0
-
+        info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size
         self.status_count_array= np.zeros((256,),np.int32) # array to insert status counts for a
         self.screen_msg = ''
 
@@ -92,6 +92,9 @@ class ParticleGroupManager(ParameterBaseClass):
                 release_part_prop = rg.get_release_locations(time_sec)
                 new_index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
+
+        # aviod calling numba code with nothing to do
+        if new_buffer_indices.size==0 : return new_buffer_indices  # no releases shedulued
 
         # initial values  part prop derived from fields
         for name, i  in si.class_roles.particle_properties.items():
@@ -148,8 +151,8 @@ class ParticleGroupManager(ParameterBaseClass):
         info = self.info
         part_prop = si.class_roles.particle_properties
         # get number of chunks required rounded up
-        n_chunks = max(1,int(np.ceil(num_particles/si.settings.particle_buffer_chunk_size)))
-        info['current_particle_buffer_size'] = n_chunks*si.settings.particle_buffer_chunk_size
+        n_chunks = max(1,int(np.ceil(num_particles/si.settings.particle_buffer_initial_size)))
+        info['current_particle_buffer_size'] = n_chunks*si.settings.particle_buffer_initial_size
         num_in_buffer = info['particles_in_buffer']
 
         #print('xxy',num_particles,n_chunks,num_in_buffer,info['current_particle_buffer_size'])

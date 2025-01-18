@@ -100,9 +100,12 @@ class _DefaultSettings(_SharedStruct):
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                  doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
 
-    particle_buffer_chunk_size = PVC(1_000_000, int, min=1,
-                                     doc_str='How much particle property memory buffer sizes are increased by when they are full',
-                                     expert=True)
+    particle_buffer_initial_size = PVC(None, int, min=1, expert=True,
+                   doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive'
+                                    )
+    NCDF_particle_chunk =  PVC(None, int, min=1,  expert=True,
+                   doc_str='Chunk size for particle variable Net CDF output files, default is estimated max. particles alive',
+                                    )
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
         #                 doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules ' )

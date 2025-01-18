@@ -31,7 +31,7 @@ def F1mask(A, B, C, mask):
 reps = 5
 N=10**6
 fracs= np.asarray([1E-5, 1E-3, .1,  .5 ,.75 , 1.])
-M = np.asarray([1, 20, 100, 200, 500], dtype=np.int32)
+M = np.asarray([0, 1, 20, 100, 200, 500], dtype=np.int32)
 funcs =  [F1,F1mask]
 times = np.full((M.size, fracs.size),0, dtype =np.float64)
 
@@ -77,6 +77,7 @@ for name, f in d.items():
 plt.xscale('log')
 plt.yscale('log')
 plt.xlabel('Work')
+plt.ylabel('Time, sec')
 plt.legend()
 plt.show()
 
@@ -87,5 +88,6 @@ for name, f in d.items():
 
 plt.yscale('log')
 plt.xlabel('Frac ')
+plt.ylabel('Time, sec')
 plt.legend()
 plt.show()

@@ -53,7 +53,7 @@ class GridRelease(_BaseReleaseGroup):
 
         pass
 
-    def get_number_required(self):
+    def get_number_required_per_release(self):
         return self.params['pulse_size'] * self.points.shape[0]
 
     def get_release_location_candidates(self):

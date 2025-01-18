@@ -62,7 +62,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info['depth_range'] = np.asarray( info['depth_range'])
 
     def get_release_location_candidates(self): nopass()
-    def get_number_required(self): nopass()
+    def get_number_required_per_release(self): nopass()
 
     # optional filter on release points
     def filter_release_points(self,is_inside, release_part_prop, time_sec= None):
@@ -96,7 +96,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info= self.info
         params=self.params
 
-        n_required = self.get_number_required()
+        n_required = self.get_number_required_per_release()
 
         # there must be a particle property set up for every release_part_prop must have a
         if 'points' in params :
@@ -153,7 +153,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info['total_number_required'] += n_required  # used to check what proportion  sucessfully release all that were required, used to find groups tha have no releaseses
 
 
-        n_required = release_part_prop['x'].shape[0] #
+        # trim or deliver points found
+        n_required = min(release_part_prop['x'].shape[0], n_required) #
 
         # trim initial location, cell  etc to required number
         for key in release_part_prop.keys():

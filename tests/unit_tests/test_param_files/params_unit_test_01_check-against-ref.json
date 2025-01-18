@@ -11,8 +11,7 @@
     "regrid_z_to_uniform_sigma_levels": true,
     "tracks_writer": {
         "update_interval": 3600,
-        "write_dry_cell_flag": false,
-        "NCDF_particle_chunk": 500
+        "write_dry_cell_flag": false
     },
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast\\schsim3D",

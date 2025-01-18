@@ -244,27 +244,50 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         # initialise all classes, order is important!
         crumbs='initial_setup_all_classes>'
         t0 = perf_counter()
-
+        settings = si.settings
+        
+        
         fgm = si.core_class_roles.field_group_manager
         fgm.final_setup()
-
-
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
 
-        # particle group manager for particle handing infra-structure
-        pgm = si.core_class_roles.particle_group_manager
-        pgm.initial_setup()
-
         # schedule all release groups
-        pgm.info['max_age_for_each_release_group'] = np.zeros((0,),dtype=np.int32)
+        number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)
+        max_ages = []
+
         for name, i in si.class_roles.release_groups.items():
             p = i.params
             i.initial_setup() # delayed set up
             i.add_scheduler('release',start=p['start'], end=p['end'], duration=p['duration'],
                             interval =p['release_interval'], crumbs=f'Adding release groups scheduler {name} >')
             # max_ages needed for culling operations
-            max_age = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
-            pgm.info['max_age_for_each_release_group'] = np.append(pgm.info['max_age_for_each_release_group'], max_age)
+            i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
+            max_ages.append(i.params['max_age'])
+            number_released += i.schedulers['release'].task_flag * i.get_number_required_per_release()  # find total released at each time step
+
+        # use forcast number alive to set up particle chunking, for memory buffers and output files
+        ri = si.run_info
+        ri.forcasted_number_alive = np.cumsum(number_released)
+        ri.forcasted_max_number_alive = ri.forcasted_number_alive.max()
+
+        # particle chunking
+        if settings.particle_buffer_initial_size is None:
+             settings.particle_buffer_initial_size = ri.forcasted_max_number_alive
+
+        if settings.NCDF_particle_chunk is None:
+            settings.NCDF_particle_chunk = ri.forcasted_max_number_alive
+
+        # particle group manager for particle handing infra-structure
+        pgm = si.core_class_roles.particle_group_manager
+        pgm.initial_setup()
+
+        # record max age for each group, used to kill old particles
+        pgm.info['max_age_for_each_release_group'] = np.asarray(max_ages)
+
+        # with particle mager and sizes  now do release group initialization
+
+        for name, rg in si.class_roles.release_groups.items():
+            rg.initial_setup()
 
         # make other core classes
         ccr = si.core_class_roles
@@ -307,6 +330,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
     def _add_release_groups_to_get_run_start_end(self, working_params):
         # particle_release groups setup and instances,
         # find extremes of  particle existence to calculate model start time and duration
+        # also set particle chunking based on estimated max. number alive during the run
         t0 = perf_counter()
         ri = si.run_info
         md = ri.model_direction
@@ -325,6 +349,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         last_time = []
         default_start = hi_end   if si.settings.backtracking else hi_start
         default_end   = hi_start if si.settings.backtracking else hi_end
+
 
         for name, rg in si.class_roles['release_groups'].items():
             rg_params = rg.params

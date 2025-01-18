@@ -90,7 +90,7 @@ p3['particle_statistics'] = [{'name':'gridstats1','class_name': 'oceantracker.pa
                 {'name':'polystats1','class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
                        'polygon_list':[ {'points':poly_points}]},]
-p3.update({'particle_buffer_chunk_size': 20000, 'write_tracks': False,  'max_run_duration': 3 * 24 * 3600  })
+p3.update({'particle_buffer_initial_size': 20000, 'write_tracks': False,  'max_run_duration': 3 * 24 * 3600  })
 
 p3.update({'output_file_base' :'demo03_heatmaps' })
 
@@ -245,7 +245,7 @@ s56['particle_statistics']= [ {'name':'grid1',   'class_name': 'oceantracker.par
 
 s56['resuspension'] = {'critical_friction_velocity': .005}
 #s56['resuspension'] = {'critical_friction_velocity': 1000.}
-s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel',
+s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_frictn_vel',
             })
 s56['velocity_modifiers']= [ {'name': 'terminal_velocity','class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.001}]
 

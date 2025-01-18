@@ -22,7 +22,7 @@ class Solver(ParameterBaseClass):
         self.add_default_params({
                         'RK_order':                   PVC(4, int, possible_values=[1, 2, 4]),
                         'n_sub_steps': PVC(None, int, obsolete=True,  doc_str ='use shared_parameter "time_step", run may not have required time step'),
-                        'screen_output_step_count': PVC(None, int, obsolete=True,  doc_str='use setting "screen_output_time_interval" in seconds')
+                        'screen_output_step_count': PVC(None, int, obsolete=True,  doc_str='use main setting "screen_output_time_interval" in seconds. ie not a solver setting')
                             })
 
     def add_required_classes_and_settings(self):
@@ -31,8 +31,6 @@ class Solver(ParameterBaseClass):
         si.add_class('particle_properties', name= 'v_temp',class_name='ManuallyUpdatedParticleProperty', vector_dim= si.run_info.vector_components, write=False, crumbs=crumbs)
 
     def initial_setup(self):pass
-
-
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'v_temp'])
@@ -202,14 +200,19 @@ class Solver(ParameterBaseClass):
 
         # write tracks
         if si.settings.write_tracks:
+            t0_write = perf_counter()
             tracks_writer = si.core_class_roles.tracks_writer
-            tracks_writer.open_file_if_needed()
+            opened_file = tracks_writer.open_file_if_needed()
             if new_particleIDs.size > 0:
                 tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
             # write tracks file
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
+
+            if opened_file:
+                # note file opening and time to open file set up chucks and write first block
+                si.msg_logger.progress_marker(f'Opened tracks output and done written first time step in: "{tracks_writer.info["output_file"][-1]}"', start_time=t0_write)
 
 
     def do_time_step(self, time_sec, is_moving):
