@@ -108,6 +108,39 @@ def time_dependent_3D_scalar_field_data_in_all_layers(n_buffer, fractional_time_
             temp += (F2[n_nodes[m], nz] * zf1 + F2[n_nodes[m], nz + 1] * zf2) * fractional_time_steps[1]# second time step
             F_out[n] += bc_coords[n, m] * temp
 
+@njitOTparallel
+def time_dependent_3D_vector_field_data_in_all_layersV2(n_buffer, fractional_time_steps, F_data,
+                                                      triangles,
+                                                      n_cell, bc_coords, nz_cell, z_fraction,
+                                                      F_out, active):
+    #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
+
+    # create views to remove redundant dim at current and next time step, improves speed?
+    F1 = F_data[n_buffer[0], :, :, :]
+    F2 = F_data[n_buffer[1], :, :, :]
+    zf = np.zeros((2,), dtype=F_data.dtype)
+    fractional_time_steps = fractional_time_steps.astype(F_data.dtype)
+
+    # loop over active particles and vector components
+    for nn in nb.prange(active.size):
+        n = active[nn]
+        zf[1] = z_fraction[n]
+        zf[0] = 1. - zf[1]
+        nz = nz_cell[n]
+
+        # loop over each vertex in triangle
+        for c in range(3): F_out[n, c] = 0. # zero out for summing
+
+        n_nodes = triangles[n_cell[n], :]
+        for m in range(3):
+            # loop over vector components
+            for c in range(3):
+                # add contributions from layer above and below particle, for each spatial component at two time steps
+                # slightly faster with temp variable, as allows more LLVM optimisations?
+                temp  = (F1[n_nodes[m], nz, c] * zf[0] + F1[n_nodes[m], nz + 1, c] * zf[1])*fractional_time_steps[0]
+                temp += (F2[n_nodes[m], nz, c] * zf[0] + F2[n_nodes[m], nz + 1, c] * zf[1])*fractional_time_steps[1]# second time step
+                F_out[n, c] += bc_coords[n, m] * temp
+
 #@njitOT
 @njitOTparallel
 def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, fractional_time_steps, F_data,

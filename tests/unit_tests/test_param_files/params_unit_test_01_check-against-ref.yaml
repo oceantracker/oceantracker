@@ -95,7 +95,6 @@ root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_test
 screen_output_time_interval: 1800
 time_step: 1800
 tracks_writer:
-  NCDF_particle_chunk: 500
   update_interval: 3600
   write_dry_cell_flag: false
 use_A_Z_profile: true
