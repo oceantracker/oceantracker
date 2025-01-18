@@ -131,10 +131,10 @@ class _BaseWriter(ParameterBaseClass):
     def pre_time_step_write_book_keeping(self): pass
 
     def post_time_step_write_book_keeping(self):
-        #self.get_file_size()
+        #self.estimate_open_file_size()
         pass
 
-    def get_file_size(self):
+    def estimate_open_file_size(self):
         # estimate  size of open file not working too big by factor of 2?
         fh = self.nc.file_handle
         b = 0.
@@ -145,12 +145,12 @@ class _BaseWriter(ParameterBaseClass):
             bytes_allocated = int(np.prod(chunks_allocated * chunks)*v.dtype.itemsize)
             b += bytes_allocated
 
-            print('xx',name,  v.size, v.dtype, v.shape,v.dtype.itemsize,  v.chunking(), chunks_allocated, bytes_allocated, b )
+            #print('xx',name,  v.size, v.dtype, v.shape,v.dtype.itemsize,  v.chunking(), chunks_allocated, bytes_allocated, b )
             pass
 
         b1  = sum([ v.size*v.dtype.itemsize for name, v in fh.variables.items()])
         b_file = path.getsize(path.join(si.run_info.run_output_dir, self.info['output_file'][0])) # reports constant bad value
-        print('fx',bytes_allocated,b,  b_file/1000, b1/1000, b/1000)
+        print('fx',bytes_allocated,b_file/1000, b1/1000, b/1000)
         return b
 
     def create_variable_to_write(self,name,first_dim_name,dim_len,**kwargs): pass

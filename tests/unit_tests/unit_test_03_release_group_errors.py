@@ -25,8 +25,7 @@ def main(args):
     rg['z_min'] = -2
     ot.add_class('release_groups', **rg)
 
-    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
-                 NCDF_particle_chunk= 500) # keep file small
+    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False)
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
