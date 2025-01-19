@@ -19,17 +19,19 @@ class DevNestedFields(ParameterBaseClass):
 
     readers=[] # first is outer grid readers[0], nesting readers are readers[1:]
 
-    def initial_setup(self,reader_builder,  caller=None):
+    def initial_setup(self,  caller=None):
 
         ml = si.msg_logger
         info= self.info
-        # setup outer grid first and for presence of key reader fields in all hindcasts
-        si.settings.use_bottom_stress = si.settings.use_bottom_stress and 'bottom_stress' in reader_builder['reader_field_info']
-        si.settings.use_A_Z_profile = si.settings.use_A_Z_profile and 'A_Z_profile' in reader_builder['reader_field_info']
 
-        fgm_outer_grid = si.class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
+        fgm_outer_grid = si.class_importer.make_class_instance_from_params('field_group_manager',
+                                          {}, default_classID='field_group_manager',
                                caller= caller, crumbs='adding outer hydro-grid field manager for nested grid run')
-        fgm_outer_grid.initial_setup( reader_builder,  caller=self)
+        fgm_outer_grid.initial_setup( caller=self)
+
+        # setup outer grid first and for presence of key reader fields in all hindcasts, outer first
+        info['has_A_Z_profile'] = si.settings.use_A_Z_profile and fgm_outer_grid.info['has_A_Z_profile']
+        info['has_bottom_stress']= si.settings.use_bottom_stress and fgm_outer_grid.info['has_bottom_stress']
 
         hi = fgm_outer_grid.reader.info
         info.update(hi)
@@ -40,7 +42,7 @@ class DevNestedFields(ParameterBaseClass):
         # add nested grids
         checks=dict(has_A_Z_profile=[],has_bottom_stress=[],is3D=[],geographic_coords=[], start_time=[],end_time=[],
                     input_dir=[])
-        for rb in reader_builder['nested_reader_builders']:
+        for p  in si.working_params['nested_readers']:
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}')
 
             t0= perf_counter()
