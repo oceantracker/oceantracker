@@ -13,11 +13,12 @@ if __name__ == "__main__":
     else:
         # Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20
         input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\2017\01'
-
+        #input_dir = r'/hpcfreenas/hindcast/UpperSouthIsland/2024_OceanNumNZ-2022-06-20/final_version/2017/01'
     if args.root_output_dir:
         root_output_dir = args.root_output_dir
     else:
         root_output_dir = r'F:\OceanTrackerOutput\bench_marks'
+        #root_output_dir = r'/hpcfreenas/ross/oceanTrackerOutput/benchmarks'
 
     ot = OceanTracker()
     ot.settings(time_step=15*60, use_A_Z_profile=False, write_tracks=False,

@@ -152,7 +152,7 @@ class FieldGroupManager(ParameterBaseClass):
             reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
 
-    def _create_readers(self, reader_params):
+    def _create_readers(self):
         # build a readers
         self.reader = set_up_reader.build_a_reader(si.working_params['core_class_roles']['reader'],
                                                    si.settings, si.msg_logger, crumbs='')
