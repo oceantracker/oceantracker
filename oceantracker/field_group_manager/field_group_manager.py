@@ -25,19 +25,21 @@ class FieldGroupManager(ParameterBaseClass):
         info['fractional_time_steps']= np.zeros((2,), dtype=np.float64)
         info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
 
-    def initial_setup(self,  caller=None):
+    def initial_setup(self, working_params, gridID=0,  caller=None):
 
         ml = si.msg_logger
         info = self.info
-
+        info['gridID'] = gridID
         # build  primary. ie  velocity field, reader
-        self._create_readers()
+        self.reader, add_info = self._make_a_reader(working_params['reader'])
+        info.update(add_info)
 
-        pass
 
-    def build_reader_grid_fields(self):
-        self.reader.build_grid_fields()
-        self.reader.write_hydro_model_grid()
+
+
+    def build_reader_fields(self):
+        reader = self.reader
+        reader.build_fields()
 
         # todo add ancillary field readers here, eg waves
 
@@ -46,12 +48,9 @@ class FieldGroupManager(ParameterBaseClass):
         info = self.info
         grid = self.reader.grid
 
-        info['has_open_boundary_nodes'] = np.any(self.reader.grid['node_type'] == si.node_types.open_boundary)
-
         if 'use_open_boundary' not in info :
             # set info here if not preset by nested grids
             info['use_open_boundary'] = si.settings.use_open_boundary
-        info['use_open_boundary'] = info['has_open_boundary_nodes'] and info['use_open_boundary']
 
         # set up dry cell adjacency space for triangle walk
         grid['adjacency_with_dry_edges'] = grid['adjacency'].copy()  # working space to add dry cell boundaries to
@@ -62,6 +61,10 @@ class FieldGroupManager(ParameterBaseClass):
         i = si.add_class('tidal_stranding', {}, crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', caller=self)
         self.tidal_stranding = i
 
+        # write_grid
+        self.reader.write_grid(info['gridID'])
+
+
         pass
         if si.settings['display_grid_at_start'] and self.reader.info['gridID']==1:
             from matplotlib import pyplot as plt
@@ -70,10 +73,10 @@ class FieldGroupManager(ParameterBaseClass):
             plt.show()
 
 
+
     def add_reader_field(self,name, params):
         r = self.reader
         r._add_a_reader_field(name, params)
-
 
     def add_custom_field(self,name, params, default_classID=None):
         # todo move to reader??
@@ -83,8 +86,6 @@ class FieldGroupManager(ParameterBaseClass):
         i.add_required_classes_and_settings(r.info)   # add classes required by this class
         i.initial_setup(r.info)
         r.fields[name] = i
-
-
 
 
     def add_part_prop_from_fields_plus_book_keeping(self):
@@ -152,22 +153,23 @@ class FieldGroupManager(ParameterBaseClass):
             reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
 
-    def _create_readers(self):
+
+    def _make_a_reader(self,reader_params):
         # build a readers
-        self.reader = set_up_reader.build_a_reader(si.working_params['core_class_roles']['reader'],
-                                                   si.settings, si.msg_logger, crumbs='')
-        reader = self.reader
+        reader = set_up_reader.make_a_reader_from_params(reader_params,
+                                                         si.settings, si.msg_logger, crumbs='')
         reader.initial_setup()
+        reader.final_setup()
 
         # add request to load compulsory fields
         reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
 
         # tag field group as 3D etc
-        for n in ['is3D', 'geographic_coords','has_A_Z_profile',
-                  'has_bottom_stress','start_time','end_time']:
-            self.info[n] = reader.info[n]
-
-
+        add_info= {}
+        for n in ['is3D', 'geographic_coords','has_A_Z_profile','has_open_boundary',
+                  'has_bottom_stress','start_time','end_time','input_dir']:
+            add_info[n] = reader.info[n]
+        return reader, add_info
     def _apply_dry_cell_boundary_condition(self, sel_hit_dry):
         # dry cell boundary
         self._move_back(sel_hit_dry)
@@ -178,7 +180,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         if self.info['use_open_boundary']:
             # dont move back
-            part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel_outside)
+            part_prop['status'].set_values(si.particle_status_flags.outside_open_boundary, sel_outside)
         else:
             # outside and no open boundary so move back
             self._move_back(sel_outside)

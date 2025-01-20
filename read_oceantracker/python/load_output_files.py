@@ -26,7 +26,7 @@ def read_case_info_file(case_info_file_name):
     case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
     return case_info
 
-def load_track_data(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1, run_output_dir=None, gridID=0):
+def load_track_data(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1, gridID=0):
     # load one track file from squeuence of what may be split files
     # todo load split track files into  dictionary
 
@@ -64,15 +64,13 @@ def load_concentration_data(case_info_file_name, name= None):
     d =  _extract_useful_info(case_info, d)
     return d
 
-def load_grid(case_info_file_name,gridID=0):
+def load_grid(case_info_file_name, gridID=0):
     # load OT output file grid from  output of load_runInfo() or load_runcase_info()
     case_info = read_case_info_file(case_info_file_name)
-    if gridID==0:
-        grid_file = path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['grid'])
-    else:
-        grid_file = case_info['output_files']['nested_grids'][gridID-1]
 
+    grid_file = case_info['output_files']['grid'][gridID]
     grid_file = path.join(case_info['output_files']['run_output_dir'],grid_file)
+
     d = read_ncdf_output_files.read_grid_file(grid_file)
 
     if 'grid_outline' not in d:

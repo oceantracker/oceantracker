@@ -418,9 +418,15 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
             if 'class_name' not in working_params['core_class_roles']['field_group_manager']:
                 working_params['core_class_roles']['field_group_manager']['class_name'] = definitions.default_classes_dict['field_group_manager_nested']
 
-        # set up fields
-        fgm = si.add_class('field_group_manager',working_params['core_class_roles']['field_group_manager'])
-        fgm.initial_setup(caller=self)
+        # set up field griup manger, normal or nested
+        fgm_params = working_params['core_class_roles']['field_group_manager']
+        fgm_params = {} if fgm_params is None else fgm_params
+        if len(working_params['nested_readers']) > 0:
+            fgm_params.update(class_name= definitions.default_classes_dict['field_group_manager_nested'])
+
+        fgm = si.add_class('field_group_manager',fgm_params)
+
+        fgm.initial_setup(si.working_params, caller=self)
 
         # tweak settings based on available fields etc
         si.settings.use_geographic_coords = fgm.info['geographic_coords'] or si.settings.use_geographic_coords
@@ -432,7 +438,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
             si.settings.use_resuspension = False
 
         # now setup reader knowing if geographic, if A_Z_profile or bottom stress available,  and in use
-        fgm.build_reader_grid_fields()
+        fgm.build_reader_fields()
 
         si.run_info.vector_components = 3 if si.run_info.is3D_run else 2
         fgm.final_setup()

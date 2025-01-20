@@ -15,6 +15,7 @@
    1. after  - Starting time stepping:
    1. after -  read  24 time steps in  9.2 sec
 1. small track differences after moving to threaded version with unit test 1, need to recalc bc cords if move back?
+1. Thread stats counts, events counts etc
 
 ##  Internal Structure
 
