@@ -123,6 +123,7 @@ class _BaseReader(ParameterBaseClass):
         # first build data set
 
         info = self.info
+        self.grid = self._build_hori_and_vert_grids()
 
         if self.development is not None:
             si.msg_logger.msg(self.development , warning=True)
@@ -223,14 +224,13 @@ class _BaseReader(ParameterBaseClass):
         self.dataset = OceanTrackerDataSet(drop_variables=params['drop_variables'])
 
 
-    def build_grid_fields(self, gridID=0):
-
-        # make grid
-        self.grid = self._set_up_grid()
-        grid = self.grid
-        params = self.params
+    def build_fields(self):
         info = self.info
-        info['gridID'] = gridID
+        # make grid
+
+        grid = self.grid
+
+        params = self.params
 
         if si.settings.use_geographic_coords:
             if not info['geographic_coords']:
@@ -262,19 +262,15 @@ class _BaseReader(ParameterBaseClass):
         bi['nt_buffer0'] = 0
 
 
-
-
     def final_setup(self):      pass
 
-    def _set_up_grid(self):
+    def _build_hori_and_vert_grids(self):
         grid={}
         grid = self.build_hori_grid(grid)
-        grid = self.construct_grid_variables(grid)
-
+        grid = self._construct_hori_grid_variables(grid)
 
         if self.info['is3D']:
             grid = self.build_vertical_grid(grid)
-
         else:
             # 2D
             grid['zlevel'] = None
@@ -319,7 +315,7 @@ class _BaseReader(ParameterBaseClass):
 
         return grid
 
-    def construct_grid_variables(self, grid):
+    def _construct_hori_grid_variables(self, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
         info = self.info
@@ -367,6 +363,7 @@ class _BaseReader(ParameterBaseClass):
         # todo define node and adjacent type values in dict, for single definition and case info output?
         is_open_boundary_node = self.read_open_boundary_data_as_boolean(grid)
         grid['node_type'][is_open_boundary_node] = si.node_types.open_boundary
+        info['has_open_boundary'] = np.any(is_open_boundary_node)
 
         is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'], grid['adjacency'], is_open_boundary_node)
 
@@ -735,28 +732,20 @@ class _BaseReader(ParameterBaseClass):
 
         return islatlong
 
-    def write_hydro_model_grid(self):
+    def write_grid(self, gridID):
         # write a netcdf of the grid from first hindcast file
+        #todo
         grid = self.grid
         info = self.info
-        output_files = si.output_files
+        if 'grid' not in si.output_files: si.output_files['grid'] = []
 
-        # add to list of outptut files
-        if info['gridID'] ==0:
-            # primary/outer grid
-            f_name= output_files['raw_output_file_base'] + '_grid.nc'
-            output_files['grid'] = f_name
-        else:
-            if 'nested_grids' not in output_files: output_files['nested_grids'] = []
-            f_name = output_files['raw_output_file_base'] + f'_grid{info["gridID"]:03d}.nc'
-            output_files['nested_grids'].append(f_name)
+        f_name = si.output_files['raw_output_file_base'] + f'_grid{gridID:03d}.nc'
+        si.output_files['grid'].append(f_name)
 
-
-        nc = ncdf_util.NetCDFhandler(path.join(output_files['run_output_dir'], f_name), 'w')
+        nc = ncdf_util.NetCDFhandler(path.join(si.output_files['run_output_dir'], f_name), 'w')
         nc.write_global_attribute('index_note', ' all indices are zero based')
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
         nc.write_global_attribute('geographic_coords_used', 1 if self.info['geographic_coords'] else 0)
-
 
 
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))

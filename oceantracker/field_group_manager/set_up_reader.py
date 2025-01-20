@@ -7,7 +7,7 @@ from oceantracker.shared_info import shared_info as si
 from oceantracker import definitions
 
 
-def build_a_reader(reader_params, settings, msg_logger, crumbs=''):
+def make_a_reader_from_params(reader_params, settings, msg_logger, crumbs=''):
     crumbs = crumbs + '>build_a_reader '
 
 

@@ -66,14 +66,15 @@ def write_raw_user_params(output_files, params,msg_logger):
     json_util.write_JSON(path.join(output_files['run_output_dir'],   output_files['raw_user_params']),params)
     msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
 
-def decompose_params(params, msg_logger, crumbs='', caller=None):
+def build_working_params(params, msg_logger, crumbs='', caller=None):
 
     crumbs += '> decompose_params'
-    w = dict(settings= {},
+    working_params = dict(settings= {},
              core_class_roles = {k: None for k in si.core_class_roles.possible_values()},  # insert full list and defaults
              class_roles = {k: [] for k in si.class_roles.possible_values()},
+             reader = {},
+             nested_readers= [],
              )
-
 
     setting_keys = si.default_settings.possible_values()
     core_role_keys = si.core_class_roles.possible_values()
@@ -92,11 +93,16 @@ def decompose_params(params, msg_logger, crumbs='', caller=None):
             msg_logger.msg(f'Top level parameters must be key : value pairs of a dictionary, got a tuple for key= "{key}", value= "{str(item)}"', error=True, crumbs=crumbs,
                    hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead', caller=caller)
 
+        elif key == 'reader':
+            working_params['reader']= item
+        elif key == 'nested_readers':
+            working_params['nested_readers'] = item
+
         elif k in setting_keys:
-            w['settings'][k] = item
+            working_params['settings'][k] = item
 
         elif k in core_role_keys:
-            w['core_class_roles'][k] = item
+            working_params['core_class_roles'][k] = item
 
         elif k in role_keys:
             if type(item) != list:
@@ -104,14 +110,14 @@ def decompose_params(params, msg_logger, crumbs='', caller=None):
                                +'\n Roles changed from dict type to list type in new version',
                                        hint =f'Got type {str(type(item))}, value={str(item)}' ,
                                        crumbs=crumbs, error=True)
-            w['class_roles'][k] = item
+            working_params['class_roles'][k] = item
         else:
             msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
                            crumbs=crumbs, link='parameter_ref_toc', error=True)
 
     msg_logger.exit_if_prior_errors('Errors in decomposing parameters into settings, and classes')
 
-    return w
+    return working_params
 
 def check_python_version(msg_logger):
         # set up log files for run
@@ -229,8 +235,8 @@ def _build_working_params(params, msg_logger, crumbs=''):
             hint='Remove case_list argument and merge parameters with base case and computations  will automatically be run on parallel threads by default',
             fatal_error=True)
 
-    working_params = decompose_params(params, msg_logger=ml,
-                                crumbs=crumbs + ' Forming working params ')
+    working_params = build_working_params(params, msg_logger=ml,
+                                          crumbs=crumbs + ' Forming working params ')
 
     # get defaults of settings only
     working_params['settings'] = merge_settings(working_params['settings'], si.default_settings,

@@ -185,7 +185,7 @@ class _SharedInfoClass():
     class_roles = _ClassRoles()
     core_class_roles = _CoreClassRoles()
     default_settings = _DefaultSettings()
-    particle_status_flags = definitions._ParticleStatusFlags()  # need to be instances to allow particle_status_flags[key] form
+    particle_status_flags = definitions._ParticleStatusFlags()
     node_types =  definitions._NodeTypes()
     edge_types = definitions._EdgeTypes()
     vertical_grid_types = _VerticalGridTypes()

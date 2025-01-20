@@ -410,8 +410,7 @@ def get_case(n):
         params['reader']['hgrid_file_name']= hgrid_file
 
 
-    if nested_readers is not None:
-        params['nested_readers']=nested_readers
+    params['nested_readers']=nested_readers
 
     plot_opt=dict(ax=ax,show_grid=show_grid)
     return params, plot_opt
@@ -459,7 +458,7 @@ if __name__ == '__main__':
 
         # do plot
         if not args.noplots and caseInfoFile is not None:
-            track_data = load_output_files.load_track_data(caseInfoFile)
+            track_data = load_output_files.load_track_data(caseInfoFile, gridID = 1 if len(params['nested_readers'])==1 else 0)
             if False:
                 plot_utilities.display_grid(track_data['grid'], ginput=3, axis_lims=None)
             plot_base = path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base'])
@@ -473,17 +472,19 @@ if __name__ == '__main__':
                 plot_tracks.plot_path_in_vertical_section(track_data, particleID=0,)
 
             plot_file = plot_base + '_decay_01.mp4' if args.save_plot else None
-            plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
-                              title='Ross Sea',
-                              colour_using_data=track_data['hydro_model_gridID'],
-                           #part_color_map='hot_r',
-                            part_color_map='hot',
-                              #size_using_data=track_data['part_decay'],
-                              vmax=1, vmin=-1,
-                              movie_file=plot_file,
-                              fps=24,
-                              aspect_ratio=None,
-                              interval=20, show_dry_cells=False)
+
+            if len(params['nested_readers']) > 0:
+                plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
+                                  title='Ross Sea',
+                                  colour_using_data=track_data['hydro_model_gridID'],
+                                              vmin =0, vmax=len(params['nested_readers'])+3,
+                               #part_color_map='hot_r',
+                                part_color_map='hot',
+                                  #size_using_data=track_data['part_decay'],
+                                  movie_file=plot_file,
+                                  fps=24,
+                                  aspect_ratio=None,
+                                  interval=20, show_dry_cells=False)
 
 
 

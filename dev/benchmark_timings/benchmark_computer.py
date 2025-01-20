@@ -13,7 +13,7 @@ if __name__ == "__main__":
     else:
         # Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20
         input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\2017\01'
-        #input_dir = r'/hpcfreenas/hindcast/UpperSouthIsland/2024_OceanNumNZ-2022-06-20/final_version/2017/01'
+        # input_dir = r'/hpcfreenas/hindcast/NZ_region/OceanNumNZ-2022-06-20/final_version/2017/01/'
     if args.root_output_dir:
         root_output_dir = args.root_output_dir
     else:

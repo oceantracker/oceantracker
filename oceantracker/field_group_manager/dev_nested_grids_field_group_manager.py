@@ -19,51 +19,53 @@ class DevNestedFields(ParameterBaseClass):
 
     readers=[] # first is outer grid readers[0], nesting readers are readers[1:]
 
-    def initial_setup(self,  caller=None):
+    def initial_setup(self, working_params,  caller=None):
 
         ml = si.msg_logger
         info= self.info
 
-
+        # make outergrid field manager
         fgm_outer_grid = si.class_importer.make_class_instance_from_params('field_group_manager',
-                                          {}, default_classID='field_group_manager',
-                               caller= caller, crumbs='adding outer hydro-grid field manager for nested grid run')
-        fgm_outer_grid.initial_setup( caller=self)
+                           {}, default_classID='field_group_manager',
+                               caller= self, crumbs='adding outer hydro-grid field manager for nested grid run')
+        fgm_outer_grid.initial_setup(working_params['reader'], gridID=0,  caller=self)
+        fgm_outer_grid.build_reader_fields()
+        fgm_outer_grid.final_setup()
 
         # setup outer grid first and for presence of key reader fields in all hindcasts, outer first
         info['has_A_Z_profile'] = si.settings.use_A_Z_profile and fgm_outer_grid.info['has_A_Z_profile']
         info['has_bottom_stress']= si.settings.use_bottom_stress and fgm_outer_grid.info['has_bottom_stress']
-
-        hi = fgm_outer_grid.reader.info
-        info.update(hi)
+        info['start_time']  = fgm_outer_grid.info['start_time']
+        info['end_time'] = fgm_outer_grid.info['end_time']
+        info['geographic_coords'] =  fgm_outer_grid.info['geographic_coords']
+        info['is3D'] = fgm_outer_grid.info['is3D']
 
         # first grid is outer grid
         self.fgm_hydro_grids = [fgm_outer_grid]
 
         # add nested grids
-        checks=dict(has_A_Z_profile=[],has_bottom_stress=[],is3D=[],geographic_coords=[], start_time=[],end_time=[],
-                    input_dir=[])
-        for p  in si.working_params['nested_readers']:
+        checks=dict(has_A_Z_profile=[],has_bottom_stress=[], is3D=[],geographic_coords=[], start_time=[],end_time=[],
+                    input_dir=[],has_open_boundary=[])
+        for n, nr_params in enumerate(working_params['nested_readers']):
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}')
 
             t0= perf_counter()
 
             fgm_nested =  si.class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
                                                  caller=caller, crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
-            fgm_nested.initial_setup(rb, caller=caller)
+
+            fgm_nested.initial_setup(nr_params, gridID=n+1, caller=caller)
+            fgm_nested.build_reader_fields()
+            fgm_nested.final_setup()
 
             for key, item in checks.items():
                 item.append(fgm_nested.info[key])
 
+            # add to list of field_group managers
             self.fgm_hydro_grids.append(fgm_nested)
 
-            # note start and end times
-            hi = fgm_nested.info
-            info['start_time'] = max(info['start_time'],hi['start_time'])
-            info['end_time']   = min(info['end_time'],  hi['end_time'])
-
-            ml.progress_marker(f'Finished nested hydro-model grid setup #{len(self.fgm_hydro_grids)} '
-                               f'from {time_util.seconds_to_isostr(hi["start_time"])} to  {time_util.seconds_to_isostr(hi["end_time"])}', start_time=t0)
+            ml.progress_marker(f'Finished nested hydro-model grid setup #{len(self.fgm_hydro_grids)} '+
+                   f'from {time_util.seconds_to_isostr(fgm_nested.info["start_time"])} to  {time_util.seconds_to_isostr(fgm_nested.info["end_time"])}', start_time=t0)
 
         # overlapping times checks
         for  n, d in enumerate(zip(checks['start_time'],checks['end_time'], checks['input_dir'])):
@@ -77,14 +79,15 @@ class DevNestedFields(ParameterBaseClass):
         # settings consistency with hindcast
         info['has_A_Z_profile'] = info['has_A_Z_profile'] and all(checks['has_A_Z_profile'])
         info['has_bottom_stress'] = info['has_bottom_stress'] and all(checks['has_bottom_stress'])
+
         info['geographic_coords'] = info['geographic_coords'] or any(checks['geographic_coords'])
+
+        #todo check which fgs dont have geograhpic and no EPGS code for conversion
 
         if not all ([ x== info['is3D']for x in checks['is3D']]):
             ml.msg(f'Cannot mix 2D and 3D nestd grids ',
                    hint= f'For primary reader 3D ={info["is3D"]}, nested readers are 3D={str(checks["is3D"])}',
                    crumbs='Nested reader set up', fatal_error=True, caller=self)
-
-        #todo add check times overlaping
 
         # dry cell flag
         if si.settings['write_dry_cell_flag']:
@@ -96,31 +99,25 @@ class DevNestedFields(ParameterBaseClass):
 
         pass
 
-    def build_readers(self):
+    def build_reader_fields(self):
         for n, fgm in  enumerate(self.fgm_hydro_grids):
-            fgm.reader.build_grid_fields(gridID=n)
-            fgm.reader.write_hydro_model_grid()
+            fgm.reader.build_fields()
         pass
 
-
     def final_setup(self):
-
         ml = si.msg_logger
         # do final setup for each grid
         self.fgm_hydro_grids[0].final_setup()
 
-
         # check nested grids
         for n, fgm in enumerate(self.fgm_hydro_grids[1:]):
-            fgm.final_setup()
-            fgm.info['use_open_boundary'] = True  # force open boundary condition for inner grid
-            if not fgm.info['has_open_boundary_nodes']:
+            if not fgm.info['has_open_boundary']:
                 ml.msg(f'Nested grids must have open boundary nodes defined, nested grid {n} " does not',
                                   fatal_error=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
 
         # outer grid is not required to have open boundary nodes, but can if provided
         fgm = self.fgm_hydro_grids[0]
-        if not fgm.info['has_open_boundary_nodes'] and si.settings.use_open_boundary: fgm.info['use_open_boundary'] = True
+        if not fgm.info['has_open_boundary'] and si.settings.use_open_boundary: fgm.info['use_open_boundary'] = True
         pass
 
 
