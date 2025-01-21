@@ -228,28 +228,6 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         # make grid
 
-        grid = self.grid
-
-        params = self.params
-
-        if si.settings.use_geographic_coords:
-            if not info['geographic_coords']:
-                # if not already in geographic
-                if params['EPSG_code'] is None:
-                    si.msg_logger.msg('When using geographic coords and hydromodel not already in geographic coords, Reader must have "EPSG_code" parameter set to do conversion',
-                                      hint = 'EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes for hydro model at at https://spatialreference.org/',
-                                      caller = self, fatal_error=True)
-                # do conversion
-                grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
-
-
-            # fix any spanning 179 to -179
-            grid['x'] = fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
-                                                crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
-            # set up conversion of meters to degreees
-            i = self._add_a_reader_field('degrees_per_meter',dict(time_varying=False,is3D=False, is_vector=True, write_interp_particle_prop_to_tracks_file=False ),dummy=True)
-            i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'])
-            pass
 
         self._set_up_interpolator()
         self._setup_fields()
@@ -289,8 +267,29 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         grid = self.read_horizontal_grid_coords(grid) # read nodal x's
 
-        bounds =np.asarray( [grid['x'].min(axis=0), grid['x'].max(axis=0)])
+        if si.settings.use_geographic_coords:
+            if not info['geographic_coords']:
+                # if not already in geographic
+                if params['EPSG_code'] is None:
+                    si.msg_logger.msg(
+                        'When using geographic coords and hydromodel not already in geographic coords, Reader must have "EPSG_code" parameter set to do conversion',
+                        hint='EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes for hydro model at at https://spatialreference.org/',
+                        caller=self, fatal_error=True)
+                # do conversion
+                grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
 
+            # fix any spanning 179 to -179
+            grid['x'] = fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
+                                                crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
+            # set up conversion of meters to degreees
+            i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False, is3D=False, is_vector=True,
+                              write_interp_particle_prop_to_tracks_file=False),  dummy=True)
+            i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'])
+            si.msg_logger.msg('Converted hindcast to geographic coords',note=True)
+            pass
+
+        # get bounding box
+        bounds =np.asarray( [grid['x'].min(axis=0), grid['x'].max(axis=0)])
         b = f'{np.array2string(bounds[0], precision=3, floatmode="fixed")} to {np.array2string(bounds[1], precision=3, floatmode="fixed")}'
 
         info['bounding_box'] = b

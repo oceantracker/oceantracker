@@ -98,7 +98,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(
             si.output_files['run_output_dir'],
             si.output_files[
-                'output_file_base'] + '_runLog')  # message logger output file setup
+                'output_file_base'] + '_caseLog')  # message logger output file setup
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
                hint='see for copies of screen output and user supplied parameters, plus all other output')
@@ -426,7 +426,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         fgm = si.add_class('field_group_manager',fgm_params)
 
-        fgm.initial_setup(si.working_params, caller=self)
+        fgm.initial_setup(caller=self)
 
         # tweak settings based on available fields etc
         si.settings.use_geographic_coords = fgm.info['geographic_coords'] or si.settings.use_geographic_coords

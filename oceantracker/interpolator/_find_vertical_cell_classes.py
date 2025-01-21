@@ -348,7 +348,7 @@ class FindVerticalCellZfixed(object):
             z_top = 0.
             for m in range(3):
                 z_top += bc_coords[n, m] * tide[current_buffer_steps[0], nodes[m], 0, 0] * fractional_time_steps[0]
-                z_top += bc_cords[n, m] * tide[current_buffer_steps[1], nodes[m], 0, 0] * fractional_time_steps[1]
+                z_top += bc_coords[n, m] * tide[current_buffer_steps[1], nodes[m], 0, 0] * fractional_time_steps[1]
 
             zq = min(max(zq, z_bot), z_top) # clip to water depth and free surface
             n_in_map = int((zq - z[0]) / dz_map) # number of map steps between zq and deepest fixed z in the map

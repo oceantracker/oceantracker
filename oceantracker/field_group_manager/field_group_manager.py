@@ -25,13 +25,20 @@ class FieldGroupManager(ParameterBaseClass):
         info['fractional_time_steps']= np.zeros((2,), dtype=np.float64)
         info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
 
-    def initial_setup(self, working_params, gridID=0,  caller=None):
+    def initial_setup(self,gridID=0,  caller=None):
 
         ml = si.msg_logger
         info = self.info
         info['gridID'] = gridID
+
+        # get params from main or nested reader
+        if gridID > 0:
+            reader_params = si.working_params['nested_readers'][gridID -1]
+        else:
+            reader_params = si.working_params['reader']
         # build  primary. ie  velocity field, reader
-        self.reader, add_info = self._make_a_reader(working_params['reader'])
+
+        self.reader, add_info = self._make_a_reader(reader_params)
         info.update(add_info)
 
 

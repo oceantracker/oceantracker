@@ -19,16 +19,20 @@ class DevNestedFields(ParameterBaseClass):
 
     readers=[] # first is outer grid readers[0], nesting readers are readers[1:]
 
-    def initial_setup(self, working_params,  caller=None):
+    def initial_setup(self, caller=None):
 
         ml = si.msg_logger
         info= self.info
+
+        ml.msg('Nested grids only use geographic coords',warning=True,
+               hint= 'Any hindcast not already in geographic coords must include a reader parameter "EPSG_code" to enable conversion')
+        si.settings.use_geographic_coords = True
 
         # make outergrid field manager
         fgm_outer_grid = si.class_importer.make_class_instance_from_params('field_group_manager',
                            {}, default_classID='field_group_manager',
                                caller= self, crumbs='adding outer hydro-grid field manager for nested grid run')
-        fgm_outer_grid.initial_setup(working_params['reader'], gridID=0,  caller=self)
+        fgm_outer_grid.initial_setup(gridID=0,  caller=self)
         fgm_outer_grid.build_reader_fields()
         fgm_outer_grid.final_setup()
 
@@ -37,8 +41,11 @@ class DevNestedFields(ParameterBaseClass):
         info['has_bottom_stress']= si.settings.use_bottom_stress and fgm_outer_grid.info['has_bottom_stress']
         info['start_time']  = fgm_outer_grid.info['start_time']
         info['end_time'] = fgm_outer_grid.info['end_time']
+
         info['geographic_coords'] =  fgm_outer_grid.info['geographic_coords']
         info['is3D'] = fgm_outer_grid.info['is3D']
+
+
 
         # first grid is outer grid
         self.fgm_hydro_grids = [fgm_outer_grid]
@@ -46,15 +53,14 @@ class DevNestedFields(ParameterBaseClass):
         # add nested grids
         checks=dict(has_A_Z_profile=[],has_bottom_stress=[], is3D=[],geographic_coords=[], start_time=[],end_time=[],
                     input_dir=[],has_open_boundary=[])
-        for n, nr_params in enumerate(working_params['nested_readers']):
+        for n, nr_params in enumerate(si.working_params['nested_readers']):
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}')
 
             t0= perf_counter()
-
             fgm_nested =  si.class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
                                                  caller=caller, crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
 
-            fgm_nested.initial_setup(nr_params, gridID=n+1, caller=caller)
+            fgm_nested.initial_setup(gridID=n+1, caller=caller)
             fgm_nested.build_reader_fields()
             fgm_nested.final_setup()
 
@@ -96,7 +102,6 @@ class DevNestedFields(ParameterBaseClass):
             si.settings['write_dry_cell_flag'] = False
 
         #todo check hindcasts over lap
-
         pass
 
     def build_reader_fields(self):
@@ -155,6 +160,7 @@ class DevNestedFields(ParameterBaseClass):
         # todo below look in all grids, starting with outer, faster to find first grid starting with nesteds
         # look find grid containing points, starting with last nested grid
         # do outer domain first, so oute has lowest prioity
+
         for n, fgm in enumerate(self.fgm_hydro_grids):
 
             sel_n, part_data_n = fgm.are_points_inside_domain(x,include_dry_cells)

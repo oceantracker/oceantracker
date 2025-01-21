@@ -1,7 +1,7 @@
 from psutil import cpu_count
 import  os
 physical_cores = cpu_count(logical=False)
-max_threads = max(physical_cores - 1, 1)
+max_threads = max(physical_cores, 1)
 os.environ['NUMBA_NUM_THREADS'] = str(max_threads)
 
 import numba as nb
@@ -14,7 +14,7 @@ parallel = True
 def work(a,b):
     sum = 0.
     for m in range(a.shape[0]):
-        sum += a[m] + b[m]
+        sum += a[m]* b[m]
     return sum
 @nb.njit(parallel = parallel)
 def F1(A,B,C, sel):
@@ -35,6 +35,8 @@ M = np.asarray([0, 1, 20, 100, 200, 500], dtype=np.int32)
 funcs =  [F1,F1mask]
 times = np.full((M.size, fracs.size),0, dtype =np.float64)
 
+
+nb.set_num_threads(4)
 d={}
 for  nm, m in enumerate(M):
     for nfrac, frac in enumerate(fracs):
@@ -72,22 +74,23 @@ colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 for name, f in d.items():
     for nfrac, frac in enumerate(f['fracs']):
         lt = '--' if 'mask' in name else '-'
-        plt.plot(f['work'], f['time'][:, nfrac], label=f'{name} frac={frac}', c = colors[nfrac], ls = lt)
+        plt.plot(f['work'], f['time'][:, nfrac]*1000/reps, label=f'{name} frac={frac}', c = colors[nfrac], ls = lt)
 
+plt.title(f'Threads={nb.get_num_threads()}')
 plt.xscale('log')
 plt.yscale('log')
 plt.xlabel('Work')
-plt.ylabel('Time, sec')
+plt.ylabel('Time per time step, msec')
 plt.legend()
 plt.show()
 
 for name, f in d.items():
     for nwork, work in enumerate(f['work']):
         lt = '--' if 'mask' in name else '-'
-        plt.plot(f['fracs'], f['time'][nwork, :], label=f'{name} work={work}',c = colors[nwork], ls = lt)
+        plt.plot(f['fracs'], f['time'][nwork, :]*1000/reps, label=f'{name} work={work}',c = colors[nwork], ls = lt)
 
 plt.yscale('log')
 plt.xlabel('Frac ')
-plt.ylabel('Time, sec')
+plt.ylabel('Time per time step, msec')
 plt.legend()
 plt.show()
