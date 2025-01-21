@@ -108,7 +108,7 @@ class GLORYSreader(_BaseStructuredReader):
     def build_hori_grid(self, grid):
 
         ds = self.dataset
-        if 'mask' in ds.variables:
+        if 'mask' in self.info['variables']:
             grid['water_3D_mask'] = ds.read_variable('mask').data == 1 # water grid
             grid['water_3D_mask'] = np.transpose(grid['water_3D_mask'],(1,2,0)) # put z last
             grid['water_3D_mask'] = np.flip(grid['water_3D_mask'], axis=2) # mask 0 layer is
