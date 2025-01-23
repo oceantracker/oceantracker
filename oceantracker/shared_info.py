@@ -265,6 +265,9 @@ class _SharedInfoClass():
                    error=True, crumbs=crumbs, caller=caller)
             return None
 
+        if i.development:
+            ml.msg(f'Class "{params["class_name"].split(".")[-1]}" under development, it may not work in all cases, contact developer with any issues',
+                hint=f'Full class name is "{params["class_name"]}", instance name is "{params["name"]}"', warning=True)
 
         i.si = self # for alternative access to shared info
         return i
