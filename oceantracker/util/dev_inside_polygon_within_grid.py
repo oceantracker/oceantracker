@@ -1,25 +1,50 @@
-#import matplotlib.patches as patches
-#from matplotlib import gridspec
-from numba import njit, types as nbtypes
-#from  matplotlib import nxutils
 import numpy as np
-import time
+from time import  perf_counter
 import copy
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util import cord_transforms
+from oceantracker.util import polygon_util, triangle_utilities
+from scipy.spatial import cKDTree
+from oceantracker.interpolator.util import find_initial_cell
 
-class InsidePolygon(object):
+class InsidePolygonWithinGrid(object):
     # finds points inside given polygon (M,2) vertices as numpy array
     # may be a closed or not closed polygon
-    def __init__(self,verticies,geographic_coords=None, bounds_sub_grid_size=20):
+    def __init__(self,x_polygon, grid, bc_walk_tol=0.001,  geographic_coords=None):
+        # from domain grid build a sub triangular grid spanning polygon to do search with its KDtree
+
+        self.bc_walk_tol= bc_walk_tol
         self.geographic_coords = geographic_coords
-        self.points = self._make_closed(verticies).astype(np.float64) # close  polygon if needed
-        self._build_inside_indicies_func(self.points, bounds_sub_grid_size)
 
-        # build number function wrapped in precalc data as constants
-        self._build_inside_indicies_func(self.points, bounds_sub_grid_size)
+        # make a inside polygon finder to use only if needed
+        self._inside_polygon = polygon_util.InsidePolygon(x_polygon, geographic_coords=geographic_coords)
 
-    def is_inside(self, xq,  out = None):
+        # find triangls overlappred by polygon
+        domain_tri = grid['triangles']
+        node_inside_polygon = np.full_like(domain_tri,False,dtype=bool)
+        for n in range(3):
+            x_node= grid['x'][domain_tri[:,n],:2]
+            node_inside_polygon[:, n] =  self._inside_polygon.is_inside(x_node)
+        tri_overlaps = np.any(node_inside_polygon, axis=1)
+
+
+
+        # make triangulation for subgrid from domain triangulation
+        # first make a map from domain tri to subgrid tri
+        sub_grid_tri = domain_tri[tri_overlaps, :]
+        sub_grid_nodes = np.unique(sub_grid_tri)
+
+        m = np.full((domain_tri.size,),-1,dtype=np.int32)
+        m[sub_grid_nodes] = np.arange(sub_grid_nodes.size) # insert new node numbers into
+
+        sub_grid = dict( x = grid['x'][sub_grid_nodes,:],
+                         triangles =  m[sub_grid_tri])
+
+        sub_grid['node_to_tri_map'], sub_grid['tri_per_node'] =  triangle_utilities.build_node_to_triangle_map(sub_grid['triangles'], sub_grid['x'])
+        self.subgrid = sub_grid
+        pass
+
+    def is_inside(self, xq, n_domain_cell = None,  out = None):
         # returns vector of booleans if each point in (N,2) numpy array of points
         # guard against single xq as [x,y], not [[x,y]]
         if xq.size ==2 and xq.ndim ==1:  xq = xq.reshape((-1,2))
@@ -131,8 +156,6 @@ class InsidePolygon(object):
         if self.geographic_coords:
             xy =  cord_transforms.WGS84_to_UTM(xy, in_lat_lon_order=False)
 
-
-
         x,y = xy[:,0], xy[:,1]
         n = len(x)
         area = 0.0
@@ -198,85 +221,93 @@ class InsidePolygon(object):
 
         return inside_ray_tracing_indices
 
-def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
-    msg=[]
-    polygons=[]
-    for n, poly in enumerate(polygon_list):
 
-        a = np.asarray(poly['points'])
-
-        p = InsidePolygon(verticies=a,geographic_coords=geographic_coords)  # do set up to speed inside using pre-calculation
-        polygons.append(p)
-
-        # ensure points closure updates parameters
-        poly.update({'points': p.points.tolist()})
-    return polygons, msg
-
-
-
-def make_anticlockwise_polygon(xy):
-    # ensure points in polygon are ordered in anti-clockwise order
-    is_clockwise = np.sum(np.arctan2( xy[:,0],xy[:,1]  ),axis=0) > 0
-    if ~is_clockwise:
-        xy = xy [::-1,:]
-    return xy
 
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    N=10**4
+    import xarray as xr
+    from oceantracker.util.ncdf_util import NetCDFhandler
 
 
-    v = np.array([[5.5      , -5],
-                  [  5.11      , -10.00907385],
-                  [  5.11      , -14.68307385],
-                  [  6.89      , -14.68307385],
-                  [ 10    , -10.00907385],
-                  [0, -8],
-                  [ -1      , 3]
-                  ])
-    dx =.5
-    bounds = [np.min(v[:,0]) -dx, np.max(v[:,0]) +dx, np.min(v[:,1]) -dx, np.max(v[:,1]) +dx]
-    x = np.stack(((np.random.rand(N, )-.5)*np.diff(bounds[:2]), (np.random.rand(N, )-.5)*np.diff(bounds[2:])),axis=1) + np.mean(v,axis=0)
+    fn =r'F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests\unit_test_01_check-against-ref_00\unit_test_01_check-against-ref_00_grid000.nc'
+    fn=r'D:\OceanTrackerOutput\OceanTrackerProfiling\Sounds\Sounds_grid000.nc'
+
+    nc = NetCDFhandler(fn)
+    grid= nc.read_variables()
+
+
+
+    x_polygon = [[1597682.1237, 5489972.7479],
+                 [1598604.1667, 5490275.5488],
+                 [1598886.4247, 5489464.0424],
+                 [1597917.3387, 5487000],
+                 [1597300, 5487000],
+                 [1597682.1237, 5489972.7479]]
+
+    x_polygon = [[1590000, 5489000],
+                 [1598000, 5490000],
+                 [1597000, 5480000],
+                [1590000, 5475000],
+              ]
+
+    x_polygon= np.asarray(x_polygon)
+
+
+    P= InsidePolygonWithinGrid(x_polygon, grid)
+
+
+
+    # make random ponts acros the domain
+    N=10**3
+    dx = 10000
+    bounds = [x_polygon[:,0].min()-dx, x_polygon[:,0].max()+dx,x_polygon[:,1].min()-dx, x_polygon[:,1].max()+dx,]
+    x = np.stack((np.random.uniform(low=bounds[0], high=bounds[1], size=(N,)),
+                    np.random.uniform(low=bounds[2], high=bounds[3], size=(N,))), axis=1)
+
+
 
     active = np.sort(np.flatnonzero(np.random.rand(N) > 0.1))
     out = np.zeros((N,), dtype=np.int32)
 
-    # speed tests
-    P= InsidePolygon(v,bounds_sub_grid_size = 20)
-
+    # speed tests old version
+    P= polygon_util.InsidePolygon(x_polygon)
     nrepeats = 10
     P.inside_indices(x[:3, :], out=out)
-    t0=time.time()
-
+    t0=perf_counter()
     for n in range(nrepeats):
         indices_inside = P.inside_indices(x,active=active, out= out)
-    print('indicies inside', time.time() - t0, nrepeats*N/10**6,'million points checked')
+    print('indicies inside', perf_counter() - t0, nrepeats*N/10**6,'million points checked')
 
 
     # test plots
-    xtest = x[::20,:]
-    indices_inside = P.inside_indices(xtest)
+    xtest = x[::10000,:]
+
     # check index and boolean agree
     indices_inside_check = np.flatnonzero(P.is_inside(xtest))
-    if indices_inside.size > 0:
-        print('compare', np.max(np.abs(indices_inside-indices_inside_check)))
-    else:
-        print('no points')
 
-    x, y = np.meshgrid(P.sub_grid_x, P.sub_grid_y)
-    plt.plot(x,y,c=[.8,.8,.8])
-    plt.plot(x.T, y.T, c=[.8, .8, .8])
-    plt.plot(v[:, 0], v[:, 1], 'k-', markersize=10, )
-    plt.plot(P.points[:, 0], P.points[:, 1], 'k--', markersize=10, )
-    plt.plot(xtest[:,0],xtest[:,1],'x',markersize=3,color=[1,0,0])
-    plt.plot(xtest[indices_inside, 0], xtest[indices_inside, 1], '.', markersize=4, color=[0, 1, 0])
 
-    x,y = np.meshgrid(P.sub_grid_x,P.sub_grid_y)
-    x = .5*(x[:-1,:-1]+x[1:,1:])
-    y = .5 * (y[:-1, :-1] + y[1:, 1:])
-    sel=P.sub_grid_overlaps_polygon ==0
-    plt.scatter(x[sel],y[sel],marker='x', c='k', s=8)
+
+    plt.triplot(xgrid[:,0],xgrid[:,1], tri_grid, c=[.8,.8, .8])
+    plt.scatter(x[:,0], x[:,1], s= 2)
+    plt.scatter(x[indices_inside, 0], x[indices_inside, 1], s=4, color=[0, 1, 0])
+
+    plt.plot(x_polygon[:, 0], x_polygon[:, 1], c='r')
+
+    #x, y = np.meshgrid(P.sub_grid_x, P.sub_grid_y)
+    #plt.plot(x,y,c=[.8,.8,.8])
+    #plt.plot(x.T, y.T, c=[.8, .8, .8])
+    #plt.plot(x[:, 0], x[:, 1], 'k-', markersize=10, )
+    #plt.plot(P.points[:, 0], P.points[:, 1], 'k--', markersize=10, )
+
+    plt.xlim(bounds[0]-dx, bounds[1]+dx)
+    plt.ylim(bounds[2]-dx, bounds[3]+dx)
+    if False:
+        x,y = np.meshgrid(P.sub_grid_x,P.sub_grid_y)
+        x = .5*(x[:-1,:-1]+x[1:,1:])
+        y = .5 * (y[:-1, :-1] + y[1:, 1:])
+        sel=P.sub_grid_overlaps_polygon ==0
+        plt.scatter(x[sel],y[sel],marker='x', c='k', s=8)
 
     plt.show()
 

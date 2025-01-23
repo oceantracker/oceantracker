@@ -18,6 +18,7 @@ class DevNestedFields(ParameterBaseClass):
      '''
 
     readers=[] # first is outer grid readers[0], nesting readers are readers[1:]
+    development =  True
 
     def initial_setup(self, caller=None):
 

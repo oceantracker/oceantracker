@@ -193,6 +193,7 @@ class _SharedInfoClass():
     hindcast_info = None
     msg_logger = MessageLogger()
     block_timers={}
+    class_importer = class_importer_util.ClassImporter(msg_logger)
 
     info = _UseFullInfo
 

@@ -144,7 +144,6 @@ def _asyc_reader_engine(info, shared_var_info):
     count = 0
     ca.start_async_running()
     while ca.get_buffer_start() < ca.get_current_hydro_step() and ca.is_async_running():
-        sleep(settings['async_pause_interval'])
         # see if time step changed
         count += 1
         #print('child- checking for read, attempt#',count,' , nt_model', nt_model, control['nt_hydro_buffer'])

@@ -4,7 +4,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 from oceantracker.fields.reader_field import  ReaderField
-from oceantracker.util.polygon_util import make_domain_mask
+
 from oceantracker.util import time_util, ncdf_util
 from datetime import datetime
 from os import path
@@ -753,6 +753,9 @@ class _BaseReader(ParameterBaseClass):
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(cell_search_status_flags.get_edge_vars()))
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
+        nc.write_a_new_variable('node_to_tri_map', grid['node_to_tri_map'], ('node_dim','max_nodes_per_tri'))
+        nc.write_a_new_variable('tri_per_node', grid['tri_per_node'], ('node_dim',))
+        nc.write_a_new_variable('bc_transform', grid['bc_transform'], ('triangle_dim','bc_transform_rows','bc_transform_cols'))
 
         if 'water_depth' in self.fields:
             nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))

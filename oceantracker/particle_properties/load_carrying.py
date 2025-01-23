@@ -6,7 +6,7 @@ from oceantracker.shared_info import shared_info as si
 
 class ParticleLoad(CustomParticleProperty):
     '''
-    Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass.
+    Particle property which carries a constant load or mass, which can be used to calculate spatial and temporal statistics of this load or mass.
     '''
     def __init__(self):
         super().__init__()

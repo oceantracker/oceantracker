@@ -20,7 +20,7 @@ class  InterpTriangularGrid(_BaseInterp):
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        self.add_default_params({'bc_walk_tol': PVC(1.0e-4, float,min = 0.),
+        self.add_default_params({'bc_walk_tol': PVC(1.0e-3, float,min = 0.),
                                  'max_search_steps': PVC(500,int, min =1)})
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
 

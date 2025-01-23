@@ -1,7 +1,7 @@
 import numpy as np
 import numba as nb
 from numba.typed import List as NumbaList
-from oceantracker.util.polygon_util import make_domain_mask
+from oceantracker.util.polygon_util import make_anticlockwise_polygon
 from oceantracker.util import  basic_util, cord_transforms
 from oceantracker.util.numba_util import njitOT, njitOTparallel
 from oceantracker.shared_info import shared_info as si
@@ -170,6 +170,21 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
     # add domain mask, a polygon made up of bounding box and the domain, usedto plot domain
     out['domain_masking_polygon']=make_domain_mask(out['domain']['points'])
     return out
+
+def make_domain_mask(xy):
+    # make fillable mask outside domain xy with columns (x,y)
+    xy= make_anticlockwise_polygon(xy)
+
+    # bounds
+    bx= [np.min(xy[:, 0]),np.max(xy[:, 0])]
+    by= [np.min(xy[:, 1]),np.max(xy[:, 1])]
+
+    # put box around domain spit at southernmost point
+    n =np.argmin(xy[:,1])
+    xy= np.concatenate(( xy[:n,:],
+                    np.asarray([[bx[0],by[0]],[bx[0],by[1]], [bx[1],by[1]], [bx[1],by[0]]]),
+                    xy[n:,:] ), axis=0)
+    return xy
 
 def calcuate_triangle_areas(xy, tri, geographic_coords=False):
     if geographic_coords:

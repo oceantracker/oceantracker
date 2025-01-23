@@ -19,6 +19,7 @@ class MessageLogger(object ):
 
 
         self.reset()
+        self.set_screen_tag('prelim')
 
         # build links lookup
         link_map= [['parameter_ref_toc', 'info/parameter_ref/parameter_ref_toc.html'],

@@ -225,14 +225,14 @@ class Reader(ParameterBaseClass):
         return nt_hydro
 
 
-class FieldGroupManger(ParameterBaseClass):
+class dev_FieldGroupMangerParrallelReader(ParameterBaseClass):
     def __init__(self):
         super().__init__()
         self.add_default_params(dict(
-                    async_pause_interval=PVC(.005, [float, int],
+                    async_pause_interval=PVC(.005, float,
                                             doc_str='time asyc reader pauses bewteen checking if action is needed',
                                             units='s'),
-                    async_progress_warning_interval=PVC(30., [float, int],
+                    async_progress_warning_interval=PVC(30., float,
                                             doc_str='time asyc reader warns of time, if reader or model solver waits too long for movement by the other',
                                             units='s' ),
                                  ))
