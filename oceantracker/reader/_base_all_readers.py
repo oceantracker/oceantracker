@@ -267,7 +267,7 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         grid = self.read_horizontal_grid_coords(grid) # read nodal x's
 
-        if si.settings.use_geographic_coords:
+        if si.settings.use_geographic_coords or info['geographic_coords']:
             if not info['geographic_coords']:
                 # if not already in geographic
                 if params['EPSG_code'] is None:
