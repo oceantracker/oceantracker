@@ -1,14 +1,14 @@
-######
-Speed
-######
+###########
+WaterSpeed
+###########
 
-**Doc:**     Calculates the horizontal speed of water or particles.    
+**Doc:**     Calculates the horizontal speed of water, particle speed may differ due to velocity modifiers, e.g. terminal velocity and random walk    
 
-**short class_name:** Speed
+**short class_name:** WaterSpeed
 
-**full class_name :** oceantracker.particle_properties.speed.Speed
+**full class_name :** oceantracker.particle_properties.water_speed.WaterSpeed
 
-**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> CustomParticleProperty> Speed
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> CustomParticleProperty> WaterSpeed
 
 
 Parameters:
@@ -35,11 +35,12 @@ Parameters:
 		- default: ``0.0``
 		- data_type: ``<class 'float'>``
 
-	* ``name`` :   ``<class 'str'>`` **<isrequired>**
-		Description: Name used to refer to this particle property in code and output
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: name used within code and in output
 
-		- default: ``None``
+		- default: ``water_speed``
 		- data_type: ``<class 'str'>``
+		- units: ``m/s``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
 		Description: size of a 3d dimesion of particle property
@@ -65,13 +66,6 @@ Parameters:
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-
-	* ``variable`` :   ``<class 'str'>``   *<optional>*
-		Description: Which speed to calculate
-
-		- default: ``water_velocity``
-		- data_type: ``<class 'str'>``
-		- possible_values: ``['water_velocity', 'particle_velocity']``
 
 	* ``vector_dim`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``

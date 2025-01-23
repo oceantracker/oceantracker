@@ -2,15 +2,9 @@ from scipy.spatial import cKDTree
 import numpy as np
 
 from oceantracker.shared_info import shared_info as si
-from oceantracker.definitions import cell_search_status_flags
-
-from oceantracker.interpolator._base_interp import _BaseInterp
-from oceantracker.util import basic_util
-from oceantracker.util.profiling_util import function_profiler
 from time import perf_counter
 from oceantracker.util import numpy_util
-from oceantracker.interpolator.util import triangle_interpolator_util,  triangle_eval_interp
-from oceantracker.particle_properties.util import  particle_operations_util
+from oceantracker.interpolator.util import triangle_interpolator_util,  find_initial_cell
 
 from oceantracker.util.numba_util import  njitOT, njitOTparallel
 import numba as nb
@@ -47,20 +41,15 @@ class FindHoriCellTriangleWalk(object):
 
         # pre calc matric to calculate bc coords
         t0= perf_counter()
-        self.bc_transform = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles'].data).astype(np.float64)
+        grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles'].data).astype(np.float64)
 
         # build triangle walk array of structures
         self.tri_walk_AOS = numpy_util.numpy_array_of_structures_from_dict(
-            dict(bc_transform=self.bc_transform,
+            dict(bc_transform= grid['bc_transform'],
                  adjacency=grid['adjacency'],
                  #   adjacency=grid['adjacency_with_dry_edges']
                  )
         )
-        # explore array of structures is faster?
-        #self.tri_data =numpy_util.numpy_array_of_structures_from_dict(
-        #                dict(triangles=grid['triangles'], adjacency=grid['adjacency'], bc_transform=self.bc_transform,
-        #                                    ))
-
         si.msg_logger.progress_marker('built barycentric-transform matrix', start_time=t0,tabs=2)
 
         # classes need by this class
@@ -88,22 +77,11 @@ class FindHoriCellTriangleWalk(object):
                     )
     def find_initial_cell(self, xq):
         # find nearest cell to xq
-        grid= self.grid
         t0 = perf_counter()
-
-        # find nearest node
-        dist, nodes = self.KDtree.query(xq[:, :2])
-        nodes = nodes.astype(np.int32)  # KD tree gives int64,need for compatibility of types
-
-        # look in triangles attached to each node for tri containing the point
-        # t0= perf_counter()
-        is_inside_domain, n_cell, bc  = triangle_interpolator_util.check_if_point_inside_triangle_connected_to_node(xq[:, :2], nodes,
-                                    grid['node_to_tri_map'], grid['tri_per_node'],
-                                    self.bc_transform, self.params['bc_walk_tol'])
-        # if x is nan dist is infinite
-        n_cell[~np.isfinite(dist)] = -1
+        n_cell, bc, is_inside_domain= find_initial_cell.find_cellKDtree(xq, self.grid, self.KDtree, self.params['bc_walk_tol'])
         si.block_timer('Initial cell guess', t0)
         return n_cell, bc, is_inside_domain
+
 
     def find_cell(self,xq, active):
         part_prop = si.class_roles.particle_properties

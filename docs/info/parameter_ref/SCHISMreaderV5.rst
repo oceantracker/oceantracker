@@ -1,14 +1,14 @@
-#################
-ROMsNativeReader
-#################
+###############
+SCHISMreaderV5
+###############
 
 **Doc:** 
 
-**short class_name:** ROMsNativeReader
+**short class_name:** SCHISMreaderV5
 
-**full class_name :** oceantracker.reader.ROMS_reader.ROMsNativeReader
+**full class_name :** oceantracker.reader.SCHISM_reader_v5.SCHISMreaderV5
 
-**Inheritance:** > ParameterBaseClass> _BaseReader> _BaseStructuredReader> ROMsNativeReader
+**Inheritance:** > ParameterBaseClass> _BaseReader> _BaseUnstructuredReader> SCHISMreader> SCHISMreaderV5
 
 
 Parameters:
@@ -26,18 +26,25 @@ Parameters:
 		- default: ``None``
 		- data_type: ``<class 'str'>``
 
+	* ``drop_variables``:  *<optional>*
+		Description: - Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
 		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
 
-	* ``hydro_model_cords_geographic`` :   ``<class 'bool'>``   *<optional>*
-		Description: Force conversion given nodal lat longs to a UTM meters grid, only used if lat long coordinates not auto detected
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
+	* ``hgrid_file_name`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
@@ -67,9 +74,9 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``one_based_indices`` :   ``<class 'bool'>``   *<optional>*
-		Description: File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex
+		Description: Schism has indices starting at 1 not zero
 
-		- default: ``False``
+		- default: ``True``
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
@@ -86,7 +93,7 @@ Parameters:
 		Description: - Variable names used to test if file is this format
 
 		- a list containing type:  ``[]``
-		- default list : ``['ocean_time', 'mask_psi', 'lat_psi', 'lon_psi', 'h', 'zeta', 'u', 'v']``
+		- default list : ``['SCHISM_hgrid_node_x', 'horizontalVelX', 'dryFlagElement']``
 		- data_type: ``<class 'str'>``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``

@@ -59,7 +59,7 @@ Parameters:
 		- a list containing type:  ``[]``
 		- default list : ``['moving', 'on_bottom', 'stranded_by_tide', 'stationary']``
 		- data_type: ``<class 'str'>``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- possible_values: ``['unknown', 'bad_coord', 'cell_search_failed', 'notReleased', 'dead', 'hit_dry_cell', 'outside_domain', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``
 		- min_len: ``1``

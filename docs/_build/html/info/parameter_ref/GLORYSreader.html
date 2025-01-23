@@ -15,8 +15,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ROMsNativeReader" href="ROMsNativeReader.html" />
-    <link rel="prev" title="DELFTFM" href="DELFTFM.html" />
+    <link rel="next" title="ROMSreader" href="ROMSreader.html" />
+    <link rel="prev" title="FVCOMreader" href="FVCOMreader.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -55,29 +55,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#top-level-settings">Top level settings</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html#core-class-roles">Core “class” roles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#multiple-classes-for-each-role">Multiple classes for each role</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../change_log.html">Change log</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="reader_toc.html">reader</a><ul>
-      <li>Previous: <a href="DELFTFM.html" title="previous chapter">DELFTFM</a></li>
-      <li>Next: <a href="ROMsNativeReader.html" title="next chapter">ROMsNativeReader</a></li>
-  </ul></li>
+      <li>Previous: <a href="FVCOMreader.html" title="previous chapter">FVCOMreader</a></li>
+      <li>Next: <a href="ROMSreader.html" title="next chapter">ROMSreader</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -106,6 +105,10 @@
 <p><strong>Doc:</strong></p>
 <p><strong>short class_name:</strong> GLORYSreader</p>
 <p><strong>full class_name :</strong> oceantracker.reader.GLORYS_reader.GLORYSreader</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Class is under development may not yet work in all cases, if errors contact developer</p>
+</aside>
 <p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseReader&gt; _BaseStructuredReader&gt; GLORYSreader</p>
 <section id="parameters">
 <h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
@@ -125,6 +128,19 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">drop_variables</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant</p>
+<ul class="simple">
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>min_len: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -258,10 +274,10 @@
     <ul>
         <li>
           &larr;
-          <a href="DELFTFM.html" title="Previous document">DELFTFM</a>
+          <a href="FVCOMreader.html" title="Previous document">FVCOMreader</a>
         </li>
         <li>
-          <a href="ROMsNativeReader.html" title="Next document">ROMsNativeReader</a>
+          <a href="ROMSreader.html" title="Next document">ROMSreader</a>
           &rarr;
         </li>
     </ul>

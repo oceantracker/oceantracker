@@ -183,7 +183,7 @@
 <span class="w">    </span><span class="nt">&quot;particle_statistics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">        </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gridstats1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;update_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1800</span><span class="p">,</span><span class="w"></span>
 <span class="w">            </span><span class="nt">&quot;particle_property_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">                </span><span class="s2">&quot;water_depth&quot;</span><span class="w"></span>
@@ -236,7 +236,7 @@
 <span class="w">            </span><span class="p">]</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 <span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;particle_buffer_chunk_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;particle_buffer_initial_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;write_tracks&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;max_run_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">259200</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="w"></span>
@@ -254,7 +254,7 @@
 <span class="w">  </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
 <span class="nt">max_run_duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">259200</span><span class="w"></span>
 <span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo03_heatmaps</span><span class="w"></span>
-<span class="nt">particle_buffer_chunk_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20000</span><span class="w"></span>
+<span class="nt">particle_buffer_initial_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20000</span><span class="w"></span>
 <span class="nt">particle_properties</span><span class="p">:</span><span class="w"></span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AgeDecay</span><span class="w"></span>
 <span class="w">  </span><span class="nt">decay_time_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">86400.0</span><span class="w"></span>
@@ -269,7 +269,7 @@
 <span class="w">  </span><span class="nt">initial_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_constant_prop</span><span class="w"></span>
 <span class="nt">particle_statistics</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased</span><span class="w"></span>
 <span class="w">  </span><span class="nt">grid_size</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">220</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">221</span><span class="w"></span>

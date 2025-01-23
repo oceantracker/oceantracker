@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="time_varying_info" href="time_varying_info_toc.html" />
-    <link rel="prev" title="PolygonReleaseWaterDepthRange" href="PolygonReleaseWaterDepthRange.html" />
+    <link rel="prev" title="PolygonRelease" href="PolygonRelease.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -55,29 +55,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#top-level-settings">Top level settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#core-class-roles">Core “class” roles</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html#multiple-classes-for-each-role">Multiple classes for each role</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../change_log.html">Change log</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="release_groups_toc.html">release_groups</a><ul>
-      <li>Previous: <a href="PolygonReleaseWaterDepthRange.html" title="previous chapter">PolygonReleaseWaterDepthRange</a></li>
+      <li>Previous: <a href="PolygonRelease.html" title="previous chapter">PolygonRelease</a></li>
       <li>Next: <a href="time_varying_info_toc.html" title="next chapter">time_varying_info</a></li>
-  </ul></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -174,7 +173,7 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">max_cycles_to_find_release_points</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">100</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
 </ul>
@@ -279,6 +278,26 @@
 </dl>
 </li>
 <li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">water_depth_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: max water depth to release in, normally &gt;0</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>units: <code class="docutils literal notranslate"><span class="pre">m</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">water_depth_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: min water depth to release in, normally &gt;0, useful for releases with a depth rage, eg larvae from inter-tidal shellfish</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
+<li><p>units: <code class="docutils literal notranslate"><span class="pre">m</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">z_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: max/ highest z vale release for to randomly release in 3D, overrides any given release z value</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
@@ -312,7 +331,7 @@
     <ul>
         <li>
           &larr;
-          <a href="PolygonReleaseWaterDepthRange.html" title="Previous document">PolygonReleaseWaterDepthRange</a>
+          <a href="PolygonRelease.html" title="Previous document">PolygonRelease</a>
         </li>
         <li>
           <a href="time_varying_info_toc.html" title="Next document">time_varying_info</a>

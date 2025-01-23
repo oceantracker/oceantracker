@@ -55,29 +55,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#top-level-settings">Top level settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#core-class-roles">Core “class” roles</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html#multiple-classes-for-each-role">Multiple classes for each role</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../change_log.html">Change log</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="particle_properties_toc.html">particle_properties</a><ul>
       <li>Previous: <a href="CustomParticleProperty.html" title="previous chapter">CustomParticleProperty</a></li>
       <li>Next: <a href="FieldParticleProperty.html" title="next chapter">FieldParticleProperty</a></li>
-  </ul></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -138,7 +137,8 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">initial_value</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">initial_value</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: start with zero distance traveled</p>
+<ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></code></p></li>
 </ul>
@@ -146,9 +146,9 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: Name used to refer to this particle property in code and output</p>
+<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Internal name of property</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">distance_travelled</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>

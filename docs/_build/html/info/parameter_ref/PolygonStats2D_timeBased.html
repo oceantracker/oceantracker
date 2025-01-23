@@ -55,29 +55,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#top-level-settings">Top level settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#core-class-roles">Core “class” roles</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html#multiple-classes-for-each-role">Multiple classes for each role</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../change_log.html">Change log</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="particle_statistics_toc.html">particle_statistics</a><ul>
       <li>Previous: <a href="PolygonStats2D_ageBased.html" title="previous chapter">PolygonStats2D_ageBased</a></li>
       <li>Next: <a href="ResidentInPolygon.html" title="next chapter">ResidentInPolygon</a></li>
-  </ul></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -207,22 +206,16 @@
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">status_max</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with status  &lt;= to this value</p>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">status_list</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - List of particle status types to count,eg  [“on_bottom”,”moving”], other status types will be ignored in statistcs</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">moving</span></code></p></li>
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['stationary',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'stationary',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">status_min</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Count only those particles with status &gt;= to this value</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">stationary</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'stationary',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_coord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'hit_dry_cell',</span> <span class="pre">'outside_domain',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'stationary',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p></li>
+<li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>min_len: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
 </ul>
 </dd>
 </dl>

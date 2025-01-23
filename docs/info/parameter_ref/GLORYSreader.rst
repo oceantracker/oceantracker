@@ -8,6 +8,13 @@ GLORYSreader
 
 **full class_name :** oceantracker.reader.GLORYS_reader.GLORYSreader
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseReader> _BaseStructuredReader> GLORYSreader
 
 
@@ -25,6 +32,16 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
+
+	* ``drop_variables``:  *<optional>*
+		Description: - Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
 
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
 		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern

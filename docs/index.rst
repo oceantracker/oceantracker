@@ -37,8 +37,8 @@ Code is on `github <https://github.com/oceantracker/oceantracker/>`_ , released 
 Features
 ====================
 
-* Fast and extendable offline native grid particle tracking for unstructured grids [1]_
-* Calculate the tracks of millions of particles
+* Fast and extendable offline native grid particle tracking for unstructured grids [1] and  stuctured grids.
+* Calculate the tracks of millions of particles with fast efficient computation and parallel processing.
 * User configurable settings and computational pipeline driven entirely by json or yaml text files.
 * Add user defined particle properties and behaviours from parameter text files.
 * Native grid particle tracking which preserves the vertical resolution
@@ -75,7 +75,14 @@ Architecture
    info/about.rst
    info/features.rst
    info/gallery.rst
-   info/users_guide.rst
+   info/installing.rst
+   info/how_to.rst
+   info/running_ocean_tracker.rst
+   info/trouble_shooting.rst
+   info/parameter_ref/parameter_ref_toc.rst
+   info/how_to/D_output_files.rst
+   info/change_log.rst
+
 
 .. warning::
 

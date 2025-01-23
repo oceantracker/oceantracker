@@ -21,7 +21,7 @@ Parameters:
 	* ``count_status_equal_to`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- possible_values: ``['unknown', 'bad_coord', 'cell_search_failed', 'notReleased', 'dead', 'hit_dry_cell', 'outside_domain', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``initial_particle_load`` :   ``<class 'float'>``   *<optional>*
 		Description: initial load of particles on release

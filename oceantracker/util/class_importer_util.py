@@ -13,16 +13,18 @@ class ClassImporter():
         self.msg_logger =msg_logger
         ml = msg_logger
         ml.msg(f'Starting package set up',tabs=2, caller=self)
-        t0 = perf_counter()
 
+
+
+
+    def _build_class_tree_ans_short_name_map(self, caller=None):
+        t0 = perf_counter()
         # build class tree of al package parameter classes, with short, long name maps
         self.class_tree = self.scan_package_for_classes(crumbs='Package set up', caller=self)
         self.short_name_class_map, self.full_name_class_map =  self.build_short_and_full_name_maps(self.class_tree)
-
+        ml = self.msg_logger
         ml.exit_if_prior_errors(f'"ClassImporter" setup errors', caller=caller)
         ml.progress_marker(f'Done package set up to setup ClassImporter', start_time=t0)
-
-
     def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None, initialize=False,
                                         add_required_classes_and_settings=True, caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):
         ml = self.msg_logger
@@ -31,7 +33,7 @@ class ClassImporter():
         if name is not None: params['name'] = name
 
         if class_role not in self.class_tree:
-            self.msg_logger.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
+            ml.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
                                 hint= f'possible values={self.class_tree.keys()}',
                                 fatal_error=True, caller=caller)
 
@@ -45,11 +47,14 @@ class ClassImporter():
             return None
         i = class_obj() # make instance
 
+        if i.development:
+            ml.msg(f'Class "{ params["class_name"].split(".")[-1]}" under development, it may not work in all cases, contact developer with any issues',
+                   hint = f'Full class name is "{params["class_name"]}", instance name is "{name}"',warning =True)
 
         i.info['class_role'] = class_role
 
         if merge_params:
-            i.params  = merge_params_with_defaults(params, i.default_params, self.msg_logger, crumbs=crumbs,check_for_unknown_keys=check_for_unknown_keys, caller=i)
+            i.params  = merge_params_with_defaults(params, i.default_params, ml, crumbs=crumbs,check_for_unknown_keys=check_for_unknown_keys, caller=i)
 
         # attach the current message loger to instance
         i.msg_logger = self.msg_logger

@@ -1,14 +1,14 @@
-######################
-BaseTrajectoryModifer
-######################
+################
+_BaseDispersion
+################
 
 **Doc:** 
 
-**short class_name:** BaseTrajectoryModifer
+**short class_name:** _BaseDispersion
 
-**full class_name :** oceantracker.dispersion._base_dispersion.BaseTrajectoryModifer
+**full class_name :** oceantracker.dispersion._base_dispersion._BaseDispersion
 
-**Inheritance:** > ParameterBaseClass> BaseTrajectoryModifer
+**Inheritance:** > ParameterBaseClass> _BaseDispersion
 
 
 Parameters:

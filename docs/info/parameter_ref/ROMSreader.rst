@@ -1,14 +1,14 @@
-########
-DELFTFM
-########
+###########
+ROMSreader
+###########
 
 **Doc:** 
 
-**short class_name:** DELFTFM
+**short class_name:** ROMSreader
 
-**full class_name :** oceantracker.reader.delft_fm.DELFTFM
+**full class_name :** oceantracker.reader.ROMS_reader.ROMSreader
 
-**Inheritance:** > ParameterBaseClass> _BaseReader> _BaseUnstructuredReader> DELFTFM
+**Inheritance:** > ParameterBaseClass> _BaseReader> _BaseStructuredReader> ROMSreader
 
 
 Parameters:
@@ -26,6 +26,16 @@ Parameters:
 		- default: ``None``
 		- data_type: ``<class 'str'>``
 
+	* ``drop_variables``:  *<optional>*
+		Description: - Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
 		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern
 
@@ -37,13 +47,13 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``load_fields``:  *<optional>*
-		Description: - always load tide and water depth, for dry cells id 2D
+		Description: - A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter
 
 		- a list containing type:  ``[]``
-		- default list : ``['water_depth']``
+		- default list : ``None``
 		- data_type: ``<class 'str'>``
 		- possible_types: ``[]``
-		- make_list_unique: ``False``
+		- make_list_unique: ``True``
 		- min_len: ``0``
 
 	* ``max_numb_files_to_load`` :   ``<class 'int'>``   *<optional>*
@@ -60,9 +70,9 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``one_based_indices`` :   ``<class 'bool'>``   *<optional>*
-		Description: DELFT 3D has indices starting at 1 not zero
+		Description: File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex
 
-		- default: ``True``
+		- default: ``False``
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
@@ -79,7 +89,7 @@ Parameters:
 		Description: - Variable names used to test if file is this format
 
 		- a list containing type:  ``[]``
-		- default list : ``['mesh2d_waterdepth', 'mesh2d_face_nodes']``
+		- default list : ``['ocean_time', 'mask_psi', 'lat_psi', 'lon_psi', 'h', 'zeta', 'u', 'v']``
 		- data_type: ``<class 'str'>``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``

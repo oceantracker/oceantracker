@@ -24,6 +24,7 @@ from oceantracker.util.setup_util import config_numba_environment_and_random_see
 from oceantracker import definitions
 from oceantracker.shared_info import shared_info as si
 
+
 # note do not import numba here as its environment  setting must ve done first, import done below
 class OceanTrackerParamsRunner(ParameterBaseClass):
     # this class runs a single case
@@ -111,9 +112,10 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         setup_util.config_numba_environment_and_random_seed(si.working_params['settings'], ml, crumbs='main setup',
                                                             caller=self)  # must be done before any numba imports
 
-        # add class importer, import all package parameter classes and build short name package tree to shared info
+        # import all package parameter classes and build short name package tree to shared info
         # must be after numba setup as it imports al classes
-        si.class_importer = class_importer_util.ClassImporter(si.msg_logger)
+        si.class_importer._build_class_tree_ans_short_name_map()
+
 
         si.run_info.version = definitions.version
         si.run_info.computer_info = get_versions_computer_info.get_computer_info()

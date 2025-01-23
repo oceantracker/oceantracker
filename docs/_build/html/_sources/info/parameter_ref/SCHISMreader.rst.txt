@@ -1,21 +1,14 @@
-############
-dev_DELFTFM
-############
+#############
+SCHISMreader
+#############
 
 **Doc:** 
 
-**short class_name:** dev_DELFTFM
+**short class_name:** SCHISMreader
 
-**full class_name :** oceantracker.reader.delft_fm.dev_DELFTFM
+**full class_name :** oceantracker.reader.SCHISM_reader.SCHISMreader
 
-
-.. warning::
-
-	Class is under development may not yet work in all cases, if errors contact developer
-
-
-
-**Inheritance:** > ParameterBaseClass> _BaseReader> _BaseUnstructuredReader> dev_DELFTFM
+**Inheritance:** > ParameterBaseClass> _BaseReader> _BaseUnstructuredReader> SCHISMreader
 
 
 Parameters:
@@ -33,9 +26,23 @@ Parameters:
 		- default: ``None``
 		- data_type: ``<class 'str'>``
 
+	* ``drop_variables``:  *<optional>*
+		Description: - Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
 		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern
 
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``hgrid_file_name`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
 
@@ -44,13 +51,13 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``load_fields``:  *<optional>*
-		Description: - always load tide and water depth, for dry cells id 2D
+		Description: - A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter
 
 		- a list containing type:  ``[]``
-		- default list : ``['water_depth']``
+		- default list : ``None``
 		- data_type: ``<class 'str'>``
 		- possible_types: ``[]``
-		- make_list_unique: ``False``
+		- make_list_unique: ``True``
 		- min_len: ``0``
 
 	* ``max_numb_files_to_load`` :   ``<class 'int'>``   *<optional>*
@@ -67,7 +74,7 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``one_based_indices`` :   ``<class 'bool'>``   *<optional>*
-		Description: DELFT 3D has indices starting at 1 not zero
+		Description: Schism has indices starting at 1 not zero
 
 		- default: ``True``
 		- data_type: ``<class 'bool'>``
@@ -86,7 +93,7 @@ Parameters:
 		Description: - Variable names used to test if file is this format
 
 		- a list containing type:  ``[]``
-		- default list : ``['mesh2d_waterdepth', 'mesh2d_face_nodes']``
+		- default list : ``['SCHISM_hgrid_node_x', 'dahv']``
 		- data_type: ``<class 'str'>``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``
@@ -105,7 +112,7 @@ Expert Parameters:
 *******************
 
 	* ``geographic_coords`` :   ``<class 'bool'>``   *<optional>*
-		Description: Read file coords as geographic values,normaly auto-detects if in geographic coords, usinh this setting  forces reading as geograraphic coord if auto-dectect fails
+		Description: Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails
 
 		- default: ``False``
 		- data_type: ``<class 'bool'>``

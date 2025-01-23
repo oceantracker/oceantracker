@@ -5,7 +5,7 @@ import numpy as np
 
 from oceantracker.util import json_util
 from oceantracker.util.numba_util import njitOT
-from oceantracker.util.polygon_util import make_domain_mask
+from oceantracker.util.triangle_utilities import make_domain_mask
 def read_particle_tracks_file(file_name, var_list=None, release_group= None, fraction_to_read=None):
     # release group is 1 based
     nc = NetCDFhandler(file_name, mode='r')

@@ -1,14 +1,14 @@
-###################
-SCHISMreaderNCDFv5
-###################
+###############
+SCHISMreaderV5
+###############
 
 **Doc:** 
 
-**short class_name:** SCHISMreaderNCDFv5
+**short class_name:** SCHISMreaderV5
 
-**full class_name :** oceantracker.reader.SCHISM_reader_v5.SCHISMreaderNCDFv5
+**full class_name :** oceantracker.reader.SCHISM_reader_v5.SCHISMreaderV5
 
-**Inheritance:** > ParameterBaseClass> _BaseReader> _BaseUnstructuredReader> SCHISMreaderNCDF> SCHISMreaderNCDFv5
+**Inheritance:** > ParameterBaseClass> _BaseReader> _BaseUnstructuredReader> SCHISMreader> SCHISMreaderV5
 
 
 Parameters:
@@ -25,6 +25,16 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
+
+	* ``drop_variables``:  *<optional>*
+		Description: - Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
 
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
 		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern

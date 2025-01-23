@@ -55,29 +55,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../users_guide.html">Users guide</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../future_dev.html">Future development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#top-level-settings">Top level settings</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html#core-class-roles">Core “class” roles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameter_ref_toc.html#multiple-classes-for-each-role">Multiple classes for each role</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../change_log.html">Change log</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="tracks_writer_toc.html">tracks_writer</a><ul>
       <li>Previous: <a href="tracks_writer_toc.html" title="previous chapter">tracks_writer</a></li>
       <li>Next: <a href="_BaseWriter.html" title="next chapter">_BaseWriter</a></li>
-  </ul></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -143,7 +142,7 @@
 <dt><code class="docutils literal notranslate"><span class="pre">turn_off_write_particle_properties_list</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually</p>
 <ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['water_velocity',</span> <span class="pre">'particle_velocity',</span> <span class="pre">'velocity_modifier']</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['water_velocity',</span> <span class="pre">'velocity_modifier']</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 <li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
@@ -201,26 +200,6 @@
 <h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">NCDF_particle_chunk</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: number of particles per time chunk in the netcdf file</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">100000</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">100</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">NCDF_time_chunk</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: number of time steps per time chunk in the netcdf file</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">24</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">role_output_file_tag</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">tracks_compact</span></code></p></li>
