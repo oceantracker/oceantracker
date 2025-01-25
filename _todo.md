@@ -45,6 +45,7 @@
 2. faster to do dry cellby updating adjacency matrix? aviods addtional decsion in cel serach
 1. throw error if all release points in a release group or all of polygon vertices  are outside domain
 1. Spell checking dictionary like class, against existing keys
+1. for nested grids, find cells of transferred particles faster with map of nearest cell in new grid too old grid cell
 
 ## Niggles that need sorting some time
 
@@ -58,6 +59,7 @@
 3.  reader grid transforms faster with pre-allocated buffers?
     
 ## Nice to haves
+1.   remove_tidally_stranded_particles option?
 1. attach name of method to message loggers crumb trail
 1.  read polygons with fiona?
 1. make param keys case insensitive?

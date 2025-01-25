@@ -26,7 +26,7 @@ class DevNestedFields(ParameterBaseClass):
         info= self.info
 
         ml.msg('Nested grids only use geographic coords',warning=True,
-               hint= 'Any hindcast not already in geographic coords must include a reader parameter "EPSG_code" to enable conversion')
+               hint= 'Any hindcast not already in geographic coords must include a reader parameter "EPSG_code" to enable conversion, see https://spatialreference.org/')
         si.settings.use_geographic_coords = True
 
         # make outergrid field manager

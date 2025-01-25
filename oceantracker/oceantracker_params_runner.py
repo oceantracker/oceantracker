@@ -80,11 +80,11 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         ml = si.msg_logger
         ml.reset()
-        ml.set_screen_tag('prelim')
+        ml.set_screen_tag('helper')
         setup_util.check_python_version(ml)
 
         ml.hori_line()
-        ml.msg(f'{definitions.package_fancy_name} starting main:')
+        ml.msg(f'{definitions.package_fancy_name} version {definitions.version["str"]}  starting setup helper "main.py":')
 
         # split params in to settings, core and class role params
         si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
