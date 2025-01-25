@@ -15,7 +15,6 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Future development" href="future_dev.html" />
     <link rel="prev" title="_VelocityModiferBase" href="parameter_ref/_VelocityModiferBase.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -56,8 +55,8 @@
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installing.html">Installing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_to.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l1"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
@@ -82,7 +81,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#version-0-2-751-22-6-2022">Version 0.2.751, 22/6/2022</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="future_dev.html">Future development</a></li>
 </ul>
 
 <div class="relations">
@@ -90,7 +88,6 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="parameter_ref/_VelocityModiferBase.html" title="previous chapter">_VelocityModiferBase</a></li>
-      <li>Next: <a href="future_dev.html" title="next chapter">Future development</a></li>
   </ul></li>
 </ul>
 </div>
@@ -128,7 +125,7 @@
 <p>#. Now works in natively geographic coords if hindcast is in geographic coords. If using geographic coords all inputs
 must also be groegraphic in (lon, lat) order, eg. release points, polygons, stats etc.</p>
 <ol class="arabic simple">
-<li><p>Also grid spans  are now always required and must  be in  (dx,dy) meters or degrees as (dlon, dlat) if geographic</p></li>
+<li><p>Also grid spans  are now always required and must  be in  (dx,dy) meters not geographic</p></li>
 <li><p>gridded_statistics module renamed gridded_statistics2D in prep for 3D versions</p></li>
 <li><p>particle stats params status_min, _max are obsolete replaced by status_list</p></li>
 <li><p>Most expensive step in 3D finding vertical cell is now 5 times faster, so code net 2-3 times faster, as by default regrids  3D data to uniform Sigma grid, to speed vertical cell search by factor of 5. Original slower native vertical grid short vertical walk search still available.</p></li>
@@ -439,10 +436,6 @@ As these updates can only happen at a model time step.</p></li>
         <li>
           &larr;
           <a href="parameter_ref/_VelocityModiferBase.html" title="Previous document">_VelocityModiferBase</a>
-        </li>
-        <li>
-          <a href="future_dev.html" title="Next document">Future development</a>
-          &rarr;
         </li>
     </ul>
   </nav>

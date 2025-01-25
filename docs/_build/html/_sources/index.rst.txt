@@ -76,8 +76,8 @@ Architecture
    info/features.rst
    info/gallery.rst
    info/installing.rst
-   info/how_to.rst
    info/running_ocean_tracker.rst
+   info/how_to.rst
    info/trouble_shooting.rst
    info/parameter_ref/parameter_ref_toc.rst
    info/how_to/D_output_files.rst

@@ -8,6 +8,13 @@ ParticleConcentrations2D
 
 **full class_name :** oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseTriangleProperties> ParticleConcentrations2D
 
 

@@ -520,6 +520,7 @@ class _BaseReader(ParameterBaseClass):
                 note=True)
 
         i = self._add_a_reader_field('water_velocity')
+
         return i
 
     def update_water_velocity_field(self, buffer_index, nt):
