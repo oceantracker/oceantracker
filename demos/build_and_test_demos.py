@@ -27,13 +27,13 @@ poly_points_large=[[1597682.1237, 5489972.7479],
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
     'NUMBA_cache_code': False,
-
+    'time_buffer_size': 15,
    'time_step' : 900,
     'debug': True,
     'reader': {
                 'input_dir': 'demo_hindcast\schsim2D',
                 'file_mask': 'Random_order_*.nc',
-                 'time_buffer_size': 15,
+
                 },
     'user_note':'test of notes',
     #'numba_caching': False,
@@ -344,7 +344,7 @@ p90= deepcopy(p2)
 p90.update({'max_run_duration': 2*24*3600.,'output_file_base': 'demo90forward',
             'use_dispersion':False,
             'backtracking': False,'debug': True,'time_step' :60 })
-p90['reader']['time_buffer_size']=2  # test with  tiny buffer
+p90['time_buffer_size']=2  # test with  tiny buffer
 p90['release_groups']= [{'name':'P1','pulse_size': 1, 'release_interval': 0,
            'points': [[1594500, 5486500], [1596500, 5489000], [1595000, 5483000] ]}]
 

@@ -35,7 +35,7 @@ class _BaseReader(ParameterBaseClass):
             'geographic_coords': PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
                                      expert=True),
             'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
-            'time_buffer_size': PVC(24, int, min=2),
+            'time_buffer_size': PVC(24, int, min=2, doc_str='This reader parameter has be removed,  now a top level setting , use  setting "time_buffer_size"', obsolete=True),
             'load_fields': PLC(None, str,
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
@@ -194,7 +194,7 @@ class _BaseReader(ParameterBaseClass):
                 else:
                     n_comp = 1
 
-                s4D = [params['time_buffer_size'] if field_params['time_varying'] else 1,
+                s4D = [si.settings.time_buffer_size if field_params['time_varying'] else 1,
                        hi['num_nodes'],
                        hi['num_z_levels'] if field_params['is3D'] else 1,
                        n_comp]
@@ -235,8 +235,8 @@ class _BaseReader(ParameterBaseClass):
         # set up ring buffer  info
         bi = self.info['buffer_info']
         bi['n_filled'] = 0
-        bi['time_buffer_size'] = self.params['time_buffer_size']
-        bi['buffer_available'] = bi['time_buffer_size']
+        bi['time_buffer_size'] = si.settings.time_buffer_size
+        bi['buffer_available'] = si.settings.time_buffer_size
         bi['nt_buffer0'] = 0
 
 
@@ -371,13 +371,13 @@ class _BaseReader(ParameterBaseClass):
         grid['limits'] = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
 
         # now set up time buffers
-        time_buffer_size = self.params['time_buffer_size']
+        time_buffer_size = si.settings.time_buffer_size
         grid['time'] = np.zeros((time_buffer_size,), dtype=np.float64)
         grid['date'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')  # time buffer
         grid['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
 
         # space for dry cell info
-        grid['is_dry_cell_buffer'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
+        grid['is_dry_cell_buffer'] = np.full((time_buffer_size, grid['triangles'].shape[0]), 1, np.int8)
 
         # reader working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
@@ -408,7 +408,7 @@ class _BaseReader(ParameterBaseClass):
         if info['vert_grid_type'] in [vgt.LSC, vgt.Slayer]:
             # native  vertical grid option, could be  Schisim LCS vertical grid
             # used to size field data arrays
-            s = [self.params['time_buffer_size'], grid['x'].shape[0], info['num_z_levels']]
+            s = [si.settings.time_buffer_size, grid['x'].shape[0], info['num_z_levels']]
             grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
             info['read_zlevels'] = True
 
@@ -521,6 +521,10 @@ class _BaseReader(ParameterBaseClass):
 
         i = self._add_a_reader_field('water_velocity')
 
+        if False:
+            # dev testing storing by  triangles
+            s= i.data.shape
+            i.data_by_vertex= np.zeros( (s[0], self.grid['triangles'].shape[0],s[2],3,s[3]), dtype = i.data.dtype)
         return i
 
     def update_water_velocity_field(self, buffer_index, nt):
@@ -535,6 +539,11 @@ class _BaseReader(ParameterBaseClass):
 
         field.data[buffer_index, ...] = data
 
+        if False:
+            # dev testing storing by  triangles
+            grid = self.grid
+            for n in range(3):
+                field.data_by_vertex[buffer_index,:,:,:, n] = data[:,grid['triangles'][:,n],...]
         return data
 
     #------------------------------------------------------------------------------------------------
@@ -551,8 +560,8 @@ class _BaseReader(ParameterBaseClass):
         current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
 
         # ring buffer locations of surrounding steps
-        current_buffer_steps[0] = current_hydro_model_step % bi['time_buffer_size']
-        current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % bi['time_buffer_size']
+        current_buffer_steps[0] = current_hydro_model_step % si.settings.time_buffer_size
+        current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % si.settings.time_buffer_size
 
         time_hindcast = grid['time'][current_buffer_steps[0]]
 
@@ -586,7 +595,7 @@ class _BaseReader(ParameterBaseClass):
 
         info = self.info
         bi = info['buffer_info']
-        buffer_size = bi['time_buffer_size']
+        buffer_size = si.settings.time_buffer_size
 
         bi['buffer_available'] = buffer_size
         nt0_hindcast = self.time_to_hydro_model_index(time_sec)
@@ -709,7 +718,7 @@ class _BaseReader(ParameterBaseClass):
 
     def hydro_model_index_to_buffer_index(self, nt_hindcast):
         # ring buffer mapping
-        return nt_hindcast % self.info['buffer_info']['time_buffer_size']
+        return nt_hindcast % si.settings.time_buffer_size
 
 
     def are_time_steps_in_buffer(self, time_sec):
