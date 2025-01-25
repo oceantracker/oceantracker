@@ -1,4 +1,4 @@
-import sys
+import sys, psutil
 
 
 from copy import deepcopy, copy
@@ -143,6 +143,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         ml.exit_if_prior_errors('Errors in settings??', caller=self)
         # transfer all settings to shared_info.settings to allow tab hints
 
+
         try:
             # - -------- start set up---------------------------------------------------------------------
 
@@ -160,6 +161,14 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
             self._do_run_integrity_checks()
 
             ml.exit_if_prior_errors('Errors in setup??', caller=self)
+
+            # check memory usage
+            mem_used = psutil.Process().memory_info().vms
+            si.run_info['memory_used_GB'] = mem_used / 10 ** 9
+
+            if mem_used > int(0.9 * psutil.virtual_memory().total):
+                ml.msg(f'Oceantracker is using more than 90% of memory= {mem_used/10**9} Giga bytes, so may run slow or fail ', warning=True,
+                       hint=f'First try reduce setting "time_buffer_size" currently = {si.settings.time_buffer_size}, then try reducing number of particles ')
 
             # -----------run-------------------------------
             self.info['model_run_started'] = datetime.now()
@@ -453,6 +462,8 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
     # ____________________________
     # internal methods below
     # ____________________________
+
+
     def _get_case_run_info(self, d0, t0):
         pgm= si.core_class_roles.particle_group_manager
         info = self.info

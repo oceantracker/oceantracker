@@ -41,7 +41,7 @@ def make_a_reader_from_params(reader_params, settings, msg_logger, crumbs=''):
     info['has_bottom_stress'] = 'bottom_stress' in info['field_info']
     # work out in 3D run from water velocity
     info['geographic_coords'] = reader.detect_lonlat_grid(msg_logger)
-    info['time_buffer_size'] = reader.params['time_buffer_size']
+    info['time_buffer_size'] = si.settings.time_buffer_size
 
     return reader
 

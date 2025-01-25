@@ -2,12 +2,12 @@
     "output_file_base": "demo04_ageBasedHeatmaps",
     "add_date_to_run_output_dir": false,
     "NUMBA_cache_code": false,
+    "time_buffer_size": 15,
     "time_step": 900,
     "debug": true,
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "Random_order_*.nc",
-        "time_buffer_size": 15
+        "file_mask": "Random_order_*.nc"
     },
     "user_note": "test of notes",
     "dispersion": {
