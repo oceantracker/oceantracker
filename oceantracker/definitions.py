@@ -7,7 +7,7 @@ from os import path
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5, revision  = 18, date = '2025-01-06', parameter_ver=0.5)
+version= dict(major= 0.5, revision  = 19, date = '2025-01-28', parameter_ver=0.5)
 version['str'] = f"{version['major']:.2f}.{version['revision']:04.0f}-{version['date']}"
 
 try:
@@ -26,6 +26,7 @@ package_dir = path.dirname(__file__)
 ot_root_dir = path.dirname(package_dir)
 default_output_dir = path.join(path.dirname(path.dirname(package_dir)),'oceantracker_output')
 
+#todo automate build of known readers list
 known_readers = dict(
                 SCHISM= 'oceantracker.reader.SCHISM_reader.SCHISMreader',
                 ROMS =  'oceantracker.reader.ROMS_reader.ROMSreader',
@@ -33,8 +34,10 @@ known_readers = dict(
                 GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
                 DEFT3D_FM =  'oceantracker.reader.DEFT3DFM_reader.DELF3DFMreader',
                 FVCOMreader =  'oceantracker.reader.FVCOM_reader.FVCOMreader',
+                ROMSmoanaProject = 'oceantracker.reader.ROMS_reader_moana_project.ROMSreaderMonaProject'
                 #generic =  'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 #dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',
+
                  )
 
 default_classes_dict = dict(

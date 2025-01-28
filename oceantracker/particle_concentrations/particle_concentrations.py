@@ -7,7 +7,7 @@ import numpy as np
 from oceantracker.shared_info import shared_info as si
 
 class  ParticleConcentrations2D(_BaseTriangleProperties):
-    development = True
+    development = 'R'
     def __init__(self):
         super().__init__()
         # set up info/attributes

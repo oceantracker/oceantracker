@@ -31,7 +31,7 @@ class OceanTrackerDataSet(object):
         if len(file_names)==0:
             msg_logger.msg(f'No files found in input_dir, or its sub-dirs matching mask "{file_mask}"',
                            hint=f'searching with "gob" mask "{mask}"',fatal_error=True)
-        msg_logger.msg(f'Cataloging hindcast with {len(file_names)} files in dir {input_dir}')
+        msg_logger.progress_marker(f'Cataloging hindcast with {len(file_names)} files in dir {input_dir}')
 
         info = self.info
         info.update(input_dir=path.normpath(input_dir),file_mask=file_mask)
@@ -196,9 +196,9 @@ class OceanTrackerDataSet(object):
                                         f'name="{s}"',start_time=t0)
                 tlast = perf_counter()
         if info['time_dim'] is None or info['time_units'] is None:
-            ml.msg(f'X=xarray could not identify time variable index in file ={fn}',
+            ml.msg(f'xarray could not identify time variable index in file ={fn}',
                    fatal_error=True, crumbs= self.crumbs,
-                   hint='Hindcast filed do not have time variable with "units" attribute meeting CF convention, eg. "seconds since 2017-01-01 00:00:00 +0000"  ')
+                   hint='Hindcast files do not have time variable with "units" attribute meeting CF convention, eg. "seconds since 2017-01-01 00:00:00 +0000"  ')
     def _time_sort_variable_fileIDs(self):
         # sort variable fileIDs by time, now all files are read
         info = self.info

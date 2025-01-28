@@ -200,9 +200,7 @@ def get_case(n):
             show_grid = True
         case 301:
             #ROMS MOANA
-            root_input_dir = r'F:\Hindcast_reader_tests\MOANA_project_National_hindcast\Hourly_nestfiles'
-            x0 =  [[616042, 4219971, -1], [616042, 4729971, -1], [616042, 4910000, -1],
-                   [387649.9416260512, 4636593.611571449, -1], [-132118.97253055905, 4375233.36585782, -1], [-178495.6601573273, 4132294.9876834783, -1]]
+            root_input_dir = r'D:\Hindcast_reader_tests\ROMS_samples\MOANA_project_National_hindcast\Hourly_nestfiles'
             x0 = [[-36.81612195216445, 174.82731398519584],
                   [-37.070731274878, 175.39302783837365],
                   [-36.4051733326401, 174.7771263023033],
@@ -210,7 +208,7 @@ def get_case(n):
                   ]
             x0 = np.flip(np.asarray(x0),axis=1)
             file_mask  =  'nz5km_his*.nc'
-            output_file_base= 'ROMS'
+            output_file_base= 'ROMS_moana'
             title = 'ROMS test'
             show_grid = True
         case 400:

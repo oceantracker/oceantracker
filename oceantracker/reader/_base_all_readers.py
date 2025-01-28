@@ -40,7 +40,7 @@ class _BaseReader(ParameterBaseClass):
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
             'one_based_indices': PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
-            'variable_signature':PLC(None, str,doc_str='Variable names used to test if file is this format'),
+            'variable_signature':PLC(None, str,doc_str='Variable names used to test if file is this format, in addition to time , x and velocity variables '),
             'EPSG_code': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
 
@@ -53,7 +53,9 @@ class _BaseReader(ParameterBaseClass):
                             ),
             'field_variable_map': dict(
                             water_depth=PVC(None, str, doc_str='maps standard internal field name to file variable name',
-                                is_required=True),
+                                ),
+                water_velocity=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
+                water_velocity_depth_averaged=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
                             ),
             'dimension_map': dict(
                             vector2D=PVC(None, str, doc_str='name of dimension names for 2D vectors'),
@@ -124,9 +126,6 @@ class _BaseReader(ParameterBaseClass):
 
         info = self.info
         self.grid = self._build_hori_and_vert_grids()
-
-        if self.development is not None:
-            si.msg_logger.msg(self.development , warning=True)
 
         pass
 
@@ -294,7 +293,7 @@ class _BaseReader(ParameterBaseClass):
 
         info['bounding_box'] = b
         si.msg_logger.msg(f'Hydro-model is "{"3D" if info["is3D"] else "2D"}", type "{self.__class__.__name__}"',
-                          tabs=2,note=True, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
+                          tabs=2, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
         si.msg_logger.msg(f'Geographic coords = "{info["geographic_coords"] }" ',tabs=4)
         si.msg_logger.msg(f'Hindcast start: {info["start_date"]}  end:  {info["end_date"]}', tabs=4)
         dt = time_util.seconds_to_pretty_duration_string(info['time_step'])

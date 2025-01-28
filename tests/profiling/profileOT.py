@@ -156,13 +156,16 @@ if __name__ == '__main__':
         prof_file = fnn + ".prof"
         profiler.dump_stats(prof_file)  # Save results to a file
 
-        out_file = fnn + ".txt"
-        with open(out_file, "w") as f:
+        with open(fnn + "_tottime.txt", "w") as f:
             ps = pstats.Stats(prof_file, stream=f)
-            #ps.sort_stats('cumulative')
             ps.sort_stats('tottime')
             ps.print_stats()
 
+        with open(fnn + "_cumtime.txt", "w") as f:
+            ps = pstats.Stats(prof_file, stream=f)
+            # ps.sort_stats('cumulative')
+            ps.sort_stats('cumtime')
+            ps.print_stats()
 
     elif args.profiler==1:
         import pyinstrument

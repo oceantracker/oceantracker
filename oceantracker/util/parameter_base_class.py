@@ -20,7 +20,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
     # 6) Defaults must be set in .__init__()  using method ._update_default_param_dictionary({})
     # 7) children must call   super().__init__()   to get defaults of parent
 
-    development = None
+    development = False
 
     def initial_setup(self): pass
 

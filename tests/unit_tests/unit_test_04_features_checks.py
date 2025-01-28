@@ -10,7 +10,8 @@ from tests.unit_tests import test_definitions
 def main(args):
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__,args))
-    ot.settings(time_step=1800, particle_buffer_initial_size=20000 )
+    ot.settings(time_step=1800, particle_buffer_initial_size=20000,
+                use_parallel_threads= False)
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False)
 
