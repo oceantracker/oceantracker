@@ -158,6 +158,8 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
 
     # let numbas_util know if to use threads
     environ['OCEANTRACKER_USE_PARALLEL_THREADS'] = str(int(settings['use_parallel_threads']))
+    max_threads = max_threads  if  settings['use_parallel_threads'] else  1
+
     environ['NUMBA_FASTMATH'] = str(int(settings['NUMBA_fastmath']))
 
     #environ['NUMBA_PARALLEL_DIAGNOSTICS']= '4'
@@ -177,7 +179,8 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
 
 
     msg_logger.hori_line()
-    msg_logger.progress_marker(f'Numba setup: applied settings,use parallel threads = {settings["use_parallel_threads"]}, max threads = {max_threads}, physical cores = {physical_cores}')
+    msg_logger.msg(f'Numba setup: applied settings, max threads = {max_threads}, physical cores = {physical_cores}',
+                    hint=f" use threads ={settings['use_parallel_threads']}, cache code = { settings['NUMBA_cache_code']}, fastmath= {settings['NUMBA_fastmath']}")
 
     # make buffer to hold indicies found by each thread
 

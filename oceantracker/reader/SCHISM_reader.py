@@ -52,7 +52,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         fvm= self.params['field_variable_map']
         gm = self.params['grid_variable_map']
 
-        hi = dict(is3D=  fvm['water_velocity'][0]  in info['variables'])
+        hi = dict(is3D=  fvm['water_velocity'][0] in info['variables'])
 
         if hi['is3D']:
             hi['z_dim'] = dm['z']

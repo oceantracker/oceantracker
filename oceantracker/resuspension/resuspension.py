@@ -28,7 +28,6 @@ class Resuspension(BaseResuspension):
                                 default_classID='field_friction_velocity')
 
 
-
     def initial_setup(self, **kwargs):
         info = self.info
         #  don't adjust re-suspension distance for terminal velocity,
@@ -58,13 +57,21 @@ class Resuspension(BaseResuspension):
 
         # resuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.class_roles.particle_properties
+        if True:
 
-        resupend= self.select_particles_to_resupend(alive)
+            resupend= self.select_particles_to_resupend(alive)
 
-        self.resuspension_jump(part_prop['friction_velocity'].data, part_prop['status'].data,
-                                self.params['critical_friction_velocity'],
-                               info['resuspension_factor'],
-                               part_prop['x'].data, part_prop['water_depth'].data,si.settings.z0, resupend)
+
+            self.resuspension_jump(part_prop['friction_velocity'].data, part_prop['status'].data,
+                                   info['resuspension_factor'],
+                                   part_prop['x'].data, part_prop['water_depth'].data, si.settings.z0, resupend)
+
+        else:
+            # test merging select parcels into  jumping, this unexpectedly  slower as it uses branched code over all particles?
+            self.resuspension_jumpV2(part_prop['friction_velocity'].data, part_prop['status'].data,
+                                    self.params['critical_friction_velocity'],
+                                   info['resuspension_factor'],
+                                   part_prop['x'].data, part_prop['water_depth'].data,si.settings.z0, alive)
 
 
         self.stop_update_timer()
@@ -72,9 +79,19 @@ class Resuspension(BaseResuspension):
     @staticmethod
     @njitOT
     def resuspension_jump(friction_velocity, status,
-                          critical_friction_velocity,
                           resuspension_factor, x, water_depth, z0, sel):
         # add entrainment jump up to particle z, Book: Lynch(2015) book, Particles in the coastal ocean  eq 9.26 and 9.28
         for n in sel:
             x[n, 2] = -water_depth[n] + z0 + np.sqrt(resuspension_factor*friction_velocity[n])*np.abs(np.random.randn())
             status[n] = status_moving
+    @staticmethod
+    @njitOT
+    def resuspension_jumpV2(friction_velocity, status,
+                          critical_friction_velocity,
+                          resuspension_factor, x, water_depth, z0, sel):
+        # add entrainment jump up to particle z, Book: Lynch(2015) book, Particles in the coastal ocean  eq 9.26 and 9.28
+        for nn in range(sel.size):
+            n = sel[nn]
+            if status[n] == status_on_bottom and friction_velocity[n] > critical_friction_velocity:
+                x[n, 2] = -water_depth[n] + z0 + np.sqrt(resuspension_factor*friction_velocity[n])*np.abs(np.random.randn())
+                status[n] = status_moving

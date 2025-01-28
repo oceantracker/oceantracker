@@ -13,9 +13,20 @@ def make_a_reader_from_params(reader_params, settings, msg_logger, crumbs=''):
 
     file_list = _check_input_dir(reader_params, crumbs=crumbs)
 
+    known_readers, all_variables, all_dims =  _get_known_readers_variables_and_dims(reader_params,file_list, crumbs)
+
     # detect reader format and add clas_name to params
-    reader = _detect_hydro_file_format(reader_params, file_list, crumbs=crumbs)
+    reader = _detect_hydro_file_format(reader_params, known_readers, all_variables, all_dims, crumbs=crumbs)
+
+    if reader.development:
+        msg_logger.msg(f'Class "{reader.__class__.__name__}" under development, it may not work in all cases',
+                           hint=f' contact developer with any unexpected issues', warning=True)
+
+
     info = reader.info
+
+    # additional info on vert grid etc, node dim etc
+    reader.info.update(reader.get_hindcast_info())
 
     # sort files into time order and add info to reader bulider on if 3D hindcast and mapped field
     reader.catalog_dataset(msg_logger=msg_logger, crumbs=crumbs)
@@ -45,64 +56,79 @@ def make_a_reader_from_params(reader_params, settings, msg_logger, crumbs=''):
 
     return reader
 
-def _detect_hydro_file_format(reader_params, file_list, crumbs=''):
-    # detect hindcast format and add reader class_name to params if missing
-    # return reader class_name if given
-    ml = si.msg_logger
-    crumbs += '> detecting reader file format '
-    if 'class_name' in reader_params:
-        reader = si.class_importer.make_class_instance_from_params('reader',
-                                                                   reader_params, check_for_unknown_keys=True,
-                                                                   crumbs=crumbs + f'> loading given reader with class_name "{reader_params["class_name"]}"')
-        return reader
-
-    # search all known readers for variable signature match
-    # first build full set of instances of known readers
-    # and their variable signatures
-    known_readers ={}
-    drop_variables =[]
+def _get_known_readers_variables_and_dims(reader_params,file_list, crumbs):
+    # get dict of known  reader instances  and file variables and dims
+    known_readers = {}
+    drop_variables = []
     for name, r in definitions.known_readers.items():
         params = deepcopy(reader_params)
         params['class_name'] = r
         reader = si.class_importer.make_class_instance_from_params('reader',
-                                                                   params, check_for_unknown_keys=False, # dont flag unknown keys
+                                                                   params, check_for_unknown_keys=False,  # dont flag unknown keys
                                                                    crumbs=crumbs + f'> loading reader "{name}"  class "{r}"')
-        known_readers[name] = dict(instance=reader,
-                                   variable_sig = reader.params['variable_signature'],
-                                   )
-        drop_variables += reader.params['drop_variables'] # find all problematic variables to drop
+        known_readers[name] = reader
+        drop_variables += reader.params['drop_variables']  # find all problematic variables to drop
 
     # look through files to see which reader's signature matches
     # must check all files as variables may be split between files
-    found_reader = None
-    all_variables= []
+
+    all_variables = []
+    all_dims = {}
     for fn in file_list:
         ds = xr.open_dataset(fn, decode_times=False, drop_variables=drop_variables)
         all_variables += list(ds.variables.keys())
+        all_dims.update(ds.sizes)
         ds.close()
+    all_variables = sorted(list(set(all_variables)))  # unique list of variables
 
-    all_variables = list(set(all_variables)) # unique list of variables
+    return known_readers, all_variables, all_dims
+
+def _detect_hydro_file_format(reader_params, known_readers, all_variables, all_dims, crumbs=''):
+    # detect hindcast format and add reader class_name to params if missing
+    # return reader class_name if given
+    #todo show which tests passed for each reader
+    ml = si.msg_logger
+    crumbs += '> detecting reader file format '
+    if 'class_name' in reader_params:
+        reader = si.class_importer.make_class_instance_from_params('reader',
+                                     reader_params, check_for_unknown_keys=True,
+                                     crumbs=crumbs + f'> loading given reader with class_name "{reader_params["class_name"]}"')
+        reader.info['variables'] = all_variables
+        reader.info['dims'] = all_dims
+        return reader
+
+    # lok for reader amonst known readers
+    reader = None
+
+    tests ={} # set of tests to pass
+
     for name, r in known_readers.items():
-        # check if each variable in the signature
-        found_var = [v in all_variables for v in r['variable_sig']]
-        # break if all variables are found for this reader
-        if all(found_var):
-            found_reader = name
+        # first check if essential variables are in the file
+        gmap = r.params['grid_variable_map']
+        fmap= r.params['field_variable_map']
+        t = dict(time = gmap['time'] in all_variables,
+                x = gmap['x'] in all_variables,
+                velocity = fmap['water_velocity'][0] in  all_variables \
+                        or fmap['water_velocity_depth_averaged'][0] in  all_variables)
+        # check if other variables in the signature are present
+        for s in r.params['variable_signature']:
+            t[s] = s in all_variables
+
+        tests[name] = t
+        # break if all testes passed as found reader
+        if all(t.values()):
+            reader = r
             break
 
-    if found_reader is None:
-        ml.msg \
-            (f'Could not set up reader, no files in dir = "{reader_params["input_dir"]} found matching mask = "{reader_params["file_mask"]}"  (or "out2d*.nc" if schism v5), or files do no match known format',
-               hint='Check given input_dir and  file_mask params, check if any non-hydro netcdf files in the dir, otherwise may not be known format',
+    if reader is None:
+        ml.msg (f'Could not set up reader, could not detect file format  as not all expected variables are present ',
+               hint=f'May be an unknown format, or unexpected differences in variable names to the expected format, varaibles {all_variables}',
                fatal_error=True, crumbs=crumbs)
-    # match found
-    ml.progress_marker(f'found hydro-model files of type  "{found_reader.upper()}"')
-    # return merged params
-    # params = known_readers[found_reader]['instance'].params
-    reader = known_readers[found_reader]['instance']
 
+    reader.info['variables'] = all_variables
+    reader.info['dims'] = all_dims
+    ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
-
 
 
 def _check_input_dir(reader_params,crumbs=''):

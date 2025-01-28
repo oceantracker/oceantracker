@@ -47,7 +47,6 @@ class ClassImporter():
             return None
         i = class_obj() # make instance
 
-
         i.info['class_role'] = class_role
 
         if merge_params:
