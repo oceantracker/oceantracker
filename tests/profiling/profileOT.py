@@ -37,7 +37,7 @@ def get_params(datasource=1):
         time_step = 60  # 1min
         release_interval = 600
         pulse_size = 200
-        calculation_interval = 3*3600
+        calculation_interval = 3600
 
 
     points= [[1595000, 5482600. , -1],
@@ -60,7 +60,7 @@ def get_params(datasource=1):
         'screen_output_time_interval':6*time_step,
          'max_run_duration': 1 *24*3600,  # 1 days
          # 'use_parallel_threads' : False,
-         #'processors': 1,
+         'processors': 30,
          #'NUMBA_cache_code' : True,
          'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,

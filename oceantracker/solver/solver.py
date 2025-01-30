@@ -87,6 +87,8 @@ class Solver(ParameterBaseClass):
 
             # count particles of each status and count number >= stationary status
             num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
+            pgm.remove_dead_particles_from_memory(num_alive)
+
             if num_alive == 0:
                 #freewheel until more are released or end of run/hindcast
                 if not ri.free_wheeling:
@@ -110,7 +112,7 @@ class Solver(ParameterBaseClass):
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
-            is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.moving, out=self.get_partID_buffer('ID1'))
+            is_moving = pgm.find_moving_particles()
 
             # update particle velocity modification prior to integration
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
@@ -162,10 +164,8 @@ class Solver(ParameterBaseClass):
         ri.current_model_time_step = n_time_step
         ri.current_model_time = time_sec
 
-        pgm.remove_dead_particles_from_memory()
-
         # some may now have status dead so update
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('ID1'))
+        alive = pgm.find_alive_particles()
 
         # trajectory modifiers,
         for name, i in si.class_roles.trajectory_modifiers.items():
@@ -174,7 +174,7 @@ class Solver(ParameterBaseClass):
         # modify status, eg tidal stranding
         fgm.update_dry_cell_values()
 
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('ID1'))
+        alive = pgm.find_alive_particles()
 
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
@@ -261,7 +261,7 @@ class Solver(ParameterBaseClass):
         fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
 
         self.euler_substep( x1, v_temp, velocity_modifier, dt2, is_moving, x2)
-        particle_operations_util.copy(water_velocity, v_temp, is_moving, scale=1.0 / 6.0)   # accumulate RK velocity to reduce space taken by temporary working variables
+        particle_operations_util.scale_and_copy(water_velocity, v_temp, is_moving, scale=1.0 / 6.0)   # accumulate RK velocity to reduce space taken by temporary working variables
 
         # step 2, get improved half step velocity
         t2= time_sec + 0.5 * dt
