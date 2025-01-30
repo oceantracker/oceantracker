@@ -197,6 +197,15 @@ class ParticleGroupManager(ParameterBaseClass):
                 i.stop_update_timer()
         si.block_timer('Update particle properties',t0)
 
+    def find_alive_particles(self):
+        status = si.class_roles.particle_properties['status'].data[:self.info['particles_in_buffer']]
+        alive = pgm_util._find_status_alive(status, self.get_partID_buffer('aliveIDs'))
+        return alive
+    def find_moving_particles(self):
+        status = si.class_roles.particle_properties['status'].data[:self.info['particles_in_buffer']]
+        moving = pgm_util._find_status_moving(status, self.get_partID_buffer('movingIDs'))
+        return moving
+
     def status_counts_and_kill_old_particles(self, t):
         # deactivate old particles for each release group
         part_prop = si.class_roles.particle_properties
@@ -211,18 +220,17 @@ class ParticleGroupManager(ParameterBaseClass):
         info['num_alive'] = num_alive
         return num_alive
 
-    def remove_dead_particles_from_memory(self):
+    def remove_dead_particles_from_memory(self, num_alive):
         # in comapct mode, if too many   dead particles remove then from buffer
         info = self.info
-        part_prop = si.class_roles.particle_properties
 
-        ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary)
-        num_alive = ID_alive.shape[0]
         nDead = info['particles_in_buffer'] - num_alive
 
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
         if nDead > 100_000 and nDead >= 0.20*info['particles_in_buffer']:
                 # if too many dead then delete from memory
+                part_prop = si.class_roles.particle_properties
+                ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
                 dead_frac=100*nDead/info['particles_in_buffer']
                 si.msg_logger.msg(f'removing dead {nDead:6,d} particles from buffer,  {dead_frac:2.0f}% are dead', tabs=3)
 

@@ -5,13 +5,14 @@ from os import path,chdir, mkdir
 import  sys
 from oceantracker.util import json_util, yaml_util
 from oceantracker.main import OceanTracker
-from plot_oceantracker import plot_tracks
-from read_oceantracker.python import  load_output_files
+
 if __name__ == "__main__":
     # nested schisim, glorys
 
-    input_dir1 = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D'
-    file_mask1='cmems*.nc'
+    #input_dir1 = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D'
+    #file_mask1='cmems*.nc'
+    input_dir1 = r'D:\Hindcast_reader_tests\Glorys\glorysRemySeaSpurgeSurfaceTestData2D'
+    file_mask1= 'CombineData_*'
     #input_dir1 = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge2D'
     #file_mask1 = 'surf*.nc'
 
@@ -24,9 +25,9 @@ if __name__ == "__main__":
                 )
     ot.add_class('reader',input_dir=input_dir1,
                  file_mask = file_mask1)
-    ot.add_class('nested_readers',input_dir=input_dir2, file_mask = 'NZfinite*.nc',
-                 EPSG_code=2193,
-                 hgrid_file_name= r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\hgridNZ_run.gr3')
+    #ot.add_class('nested_readers',input_dir=input_dir2, file_mask = 'NZfinite*.nc',
+     #            EPSG_code=2193,
+    #             hgrid_file_name= r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\hgridNZ_run.gr3')
 
 
     pulse_size = 5
@@ -48,6 +49,9 @@ if __name__ == "__main__":
         case_info_file= ot.run()
     else:
         case_info_file = r'D:\OceanTrackerOutput\sea_spurge01\f'
+
+    from plot_oceantracker import plot_tracks
+    from read_oceantracker.python import load_output_file
     tracks =load_output_files.load_track_data(case_info_file,gridID=1) # plot inner grid
     anim = plot_tracks.animate_particles(tracks,colour_using_data=tracks['hydro_model_gridID'],
                                          back_ground_depth=False, vmin=0,vmax=1,

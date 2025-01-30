@@ -153,7 +153,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     # maxium threads used
     from psutil import cpu_count
     physical_cores=cpu_count( logical=False)
-    max_threads = max(physical_cores, 1)
+    max_threads = max(physical_cores - 1, 1)
     max_threads = max_threads if settings['processors'] is None else settings['processors']
 
     # let numbas_util know if to use threads

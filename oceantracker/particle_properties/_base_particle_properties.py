@@ -100,6 +100,7 @@ class _BaseParticleProperty(ParameterBaseClass):
     def copy(self, prop_name, active):
         # copy from named particle
         part_prop= si.class_roles.particle_properties
+
         particle_operations_util.copy(self.data, part_prop[prop_name].data, active)
 
     def fill_buffer(self,value):

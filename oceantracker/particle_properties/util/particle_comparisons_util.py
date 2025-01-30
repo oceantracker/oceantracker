@@ -48,10 +48,7 @@ def compared_prop_to_value(part_prop_data, test, value, out=None):
     # return a view of indices where  part_prop (test) value, is true
 
     comp = _get_comparison(test)
-
     return _prop_compared_to_value(part_prop_data, comp, value, out)
-    # test of threaded version
-    #return _prop_compared_to_value(part_prop_data, comp, value, si.particle_buffer_mask, out,)
 
 @njitOT
 def _prop_compared_to_value(part_prop_data, comparison_func, value, out):
@@ -61,32 +58,12 @@ def _prop_compared_to_value(part_prop_data, comparison_func, value, out):
     nfound = 0
     for nn in range(part_prop_data.shape[0]):
         # index if comparison true
-        if  comparison_func(part_prop_data[nn], value):
+        if comparison_func(part_prop_data[nn], value):
             out[nfound] = nn
             nfound += 1
-
     return out[:nfound]
 
 
-
-
-# test of thread safe version
-@njitOTparallel
-def _prop_compared_to_value_not_used(part_prop_data, comparison_func, value,
-                                     thread_index_buffer, indicies_per_thread, out):
-    #return a view of indices where   part_prop (test) is true for all particles
-
-    # zero count for each thread
-    for i in range(nb.get_num_threads()): indicies_per_thread[i] = 0
-
-    # do find  using threads
-    for nn in nb.prange(part_prop_data.shape[0]):
-        if comparison_func(part_prop_data[nn], value):
-            nthread = nb.get_thread_id()
-            thread_index_buffer[nthread, indicies_per_thread[nthread]] = nn
-            indicies_per_thread[nthread] += 1
-
-    return _merge_thread_index_buffers(si.thread_index_buffer['buffer'], si.thread_index_buffer['indicies_per_thread'], out)
 
 def prop_subset_compared_to_value(active, part_prop, test, value, out):
     # return a view of  indices where  part_prop (test) value, is true for active particles

@@ -75,21 +75,42 @@ def add_values_to(x1, values, active, scale=1.0):
 
 # below are currently only called directly using pointers
 # but are not used often, mainly in time step of solver
+
 @njitOTparallel
-def copy(x1, x2, active, scale=1.0):
+def copy(x1, x2, active):
+    # x1 = x2 for active particles
+
+    if dim_notMatching(x1, x2): raise Exception('copy: x1 and x2 must be the same size')
+
+    if x1.ndim == 1: # 1D
+        for nn in nb.prange(active.size):
+            n = active[nn]
+            x1[n] = x2[n]
+    # faster if range of 2nd dimension explicit
+    else:
+        for nn in nb.prange(active.size):
+            n = active[nn]
+            for m in range(x1.shape[1]):
+                x1[n, m] = x2[n, m]
+
+@njitOTparallel
+def scale_and_copy(x1, x2, active, scale=1.0):
     # x1 = x2*scale for active particles
+
     if dim_notMatching(x1, x2): raise Exception('copy: x1 and x2 must be the same size')
 
     if x1.ndim == 1: # 1D
         for nn in nb.prange(active.size):
             n = active[nn]
             x1[n] = x2[n]*scale
-    # faster if range of 2nd dimesion explicit
+    # faster if range of 2nd dimension explicit
     else:
         for nn in nb.prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
                 x1[n, m] = x2[n, m]*scale
+
+
 
 
 @njitOTparallel
