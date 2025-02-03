@@ -25,7 +25,7 @@ def set_value(x1, value, active):
                 x1[n, m] = value
 
 @njitOTparallel
-def set_values(x1, values, active, scale=1.0):
+def set_values(x1, values, active):
     # set values of active particles in working buffer,
     # values must be same size as active
     #  values may be scaled
@@ -34,12 +34,12 @@ def set_values(x1, values, active, scale=1.0):
     if x1.ndim ==1:  # 1D
         for nn in nb.prange(active.size):
             n = active[nn]
-            x1[n] = values[nn]*scale
+            x1[n] = values[nn]
     else: #case Dim
         for nn in nb.prange(active.size):
-            n =active[nn]
+            n = active[nn]
             for m in range(x1.shape[1]):
-                x1[n, m] = values[nn, m]*scale
+                x1[n, m] = values[nn, m]
 
 @njitOTparallel
 def add_value_to(x1, value, active):
