@@ -1,6 +1,6 @@
 {
     "user_note": "No user note",
-    "file_written": "2025-01-31T08:43:12.379160",
+    "file_written": "2025-02-03T13:32:41.095030",
     "output_files": {
         "root_output_dir": "D:\\OceanTrackerOutput\\OceanTrackerProfiling",
         "run_output_dir": "D:\\OceanTrackerOutput\\OceanTrackerProfiling\\Sounds",
@@ -82,7 +82,7 @@
         "date": "2025-01-28",
         "parameter_ver": 0.5,
         "str": "0.50.0030-2025-01-28",
-        "git_revision": "8c07587cdea5992638752bfd28663f354dd6089b",
+        "git_revision": "e60a0e5b20ed2a0a22cf52033c0c8ae91c2c6c92",
         "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]",
         "python_major_version": 3,
         "python_minor_version": 10,
@@ -980,15 +980,15 @@
     },
     "timing": {
         "block_timings": [
-            "  91.7% Time stepping : calls 1440, 0 days 0 hrs 3 min 58 sec",
-            "  11.6% Update particle properties : calls 1465, 0 days 0 hrs 0 min 30 sec",
-            "  10.1% Filled reader buffers : calls    3, 0 days 0 hrs 0 min 26 sec",
-            "   9.8% Find cell, horizontal walk : calls 7201, 0 days 0 hrs 0 min 25 sec",
-            "   3.0% Initial cell guess : calls   57, 0 days 0 hrs 0 min 8 sec",
-            "   2.8% Update event loggers : calls 1441, 0 days 0 hrs 0 min 7 sec",
-            "   1.4% Update statistics : calls 1441, 0 days 0 hrs 0 min 4 sec",
+            "  90.3% Time stepping : calls 1440, 0 days 0 hrs 3 min 16 sec",
+            "  11.5% Filled reader buffers : calls    3, 0 days 0 hrs 0 min 25 sec",
+            "  11.1% Find cell, horizontal walk : calls 7201, 0 days 0 hrs 0 min 24 sec",
+            "   9.6% Update particle properties : calls 1465, 0 days 0 hrs 0 min 21 sec",
+            "   3.3% Initial cell guess : calls   62, 0 days 0 hrs 0 min 7 sec",
+            "   2.9% Update event loggers : calls 1441, 0 days 0 hrs 0 min 6 sec",
+            "   1.6% Update statistics : calls 1441, 0 days 0 hrs 0 min 3 sec",
             "   0.0% Update concentrations : calls 1441, 0 days 0 hrs 0 min 0 sec",
-            "--- Total time 0 days 0 hrs 4 min 20 sec"
+            "--- Total time 0 days 0 hrs 3 min 37 sec"
         ],
         "function_timers": {}
     },
@@ -1113,9 +1113,9 @@
                 "time_first_update_call": 0.0
             },
             "decay1": {
-                "time_spent_updating": 1.6563054999987799,
+                "time_spent_updating": 1.6477123000167921,
                 "update_calls": 1465,
-                "time_first_update_call": 0.30235210000000734
+                "time_first_update_call": 0.27621970000109286
             },
             "inside_polygon_for_onfly_stats_ 000": {
                 "time_spent_updating": 0.0,
@@ -1138,62 +1138,62 @@
                 "time_first_update_call": 0.0
             },
             "water_depth": {
-                "time_spent_updating": 2.088210900001741,
+                "time_spent_updating": 1.9439241000072798,
                 "update_calls": 1465,
-                "time_first_update_call": 0.41099309999981415
+                "time_first_update_call": 0.4186609000007593
             },
             "tide": {
-                "time_spent_updating": 2.3020613000003323,
+                "time_spent_updating": 2.0972941999734758,
                 "update_calls": 1465,
-                "time_first_update_call": 0.5510779999999613
+                "time_first_update_call": 0.6485783999996784
             },
             "water_velocity": {
-                "time_spent_updating": 8.508326799995302,
+                "time_spent_updating": 5.9690957000238996,
                 "update_calls": 1465,
-                "time_first_update_call": 0.9394486999999572
+                "time_first_update_call": 0.8012828999999329
             },
             "water_temperature": {
-                "time_spent_updating": 3.5970485999982884,
+                "time_spent_updating": 2.73725510001168,
                 "update_calls": 1465,
-                "time_first_update_call": 0.7095298999997794
+                "time_first_update_call": 0.7616221999996924
             },
             "A_Z_profile": {
-                "time_spent_updating": 2.775488900003893,
+                "time_spent_updating": 1.8462111000026198,
                 "update_calls": 1465,
-                "time_first_update_call": 0.00023539999983768212
+                "time_first_update_call": 0.0003876999999192776
             },
             "A_Z_profile_vertical_gradient": {
-                "time_spent_updating": 2.831619500002489,
+                "time_spent_updating": 1.8276454000024387,
                 "update_calls": 1465,
-                "time_first_update_call": 0.00020429999995030812
+                "time_first_update_call": 0.0002660999998624902
             },
             "friction_velocity": {
-                "time_spent_updating": 1.6683690999998362,
+                "time_spent_updating": 1.2644455000245216,
                 "update_calls": 1465,
-                "time_first_update_call": 0.0001461000001654611
+                "time_first_update_call": 0.0001666999996814411
             }
         },
         "velocity_modifiers": {},
         "trajectory_modifiers": {},
         "particle_statistics": {
             "statas1": {
-                "time_spent_updating": 3.815321799999765,
+                "time_spent_updating": 3.7706246999950963,
                 "update_calls": 18,
-                "time_first_update_call": 1.0488163999998505
+                "time_first_update_call": 1.0935895999991772
             },
             "statas2": {
-                "time_spent_updating": 3.4305316999980278,
+                "time_spent_updating": 3.0314215999969747,
                 "update_calls": 18,
-                "time_first_update_call": 1.2559999000000062
+                "time_first_update_call": 1.078878700000132
             }
         },
         "particle_concentrations": {},
         "nested_readers": {},
         "event_loggers": {
             "event1": {
-                "time_spent_updating": 14.53101839999681,
+                "time_spent_updating": 12.737426300041989,
                 "update_calls": 2882,
-                "time_first_update_call": 0.6829469000003883
+                "time_first_update_call": 0.7648334999994404
             }
         },
         "time_varying_info": {
@@ -1209,14 +1209,14 @@
             }
         },
         "solver": {
-            "time_spent_updating": 238.2923155999938,
+            "time_spent_updating": 195.75701470004606,
             "update_calls": 1440,
-            "time_first_update_call": 21.340891499999998
+            "time_first_update_call": 20.697143399998822
         },
         "field_group_manager": {
-            "time_spent_updating": 26.158330600000227,
+            "time_spent_updating": 24.931029899998975,
             "update_calls": 3,
-            "time_first_update_call": 9.433908800000154
+            "time_first_update_call": 9.105589299999338
         },
         "particle_group_manager": {
             "time_spent_updating": 0.0,
@@ -1224,19 +1224,19 @@
             "time_first_update_call": 0.0
         },
         "dispersion": {
-            "time_spent_updating": 11.623972600008528,
+            "time_spent_updating": 9.433607599956304,
             "update_calls": 1440,
-            "time_first_update_call": 0.8732783000000381
+            "time_first_update_call": 0.7196745000001101
         },
         "tidal_stranding": {
-            "time_spent_updating": 1.0334747000038078,
+            "time_spent_updating": 0.9043327000126737,
             "update_calls": 1441,
-            "time_first_update_call": 0.3332094000002144
+            "time_first_update_call": 0.2959800999997242
         },
         "resuspension": {
-            "time_spent_updating": 4.576487099989208,
+            "time_spent_updating": 3.7194066000320163,
             "update_calls": 1441,
-            "time_first_update_call": 0.7378960000000916
+            "time_first_update_call": 0.5315694000000803
         }
     },
     "settings": {
@@ -1284,11 +1284,11 @@
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2025-01-31T08:39:04.275580",
-        "started": "2025-01-31 08:38:52.565181",
-        "ended": "2025-01-31 08:43:12.379160",
+        "model_run_started": "2025-02-03T13:29:15.846155",
+        "started": "2025-02-03 13:29:04.215201",
+        "ended": "2025-02-03 13:32:41.095030",
         "duration": 86400.0,
-        "elapsed_time_sec": 259.81427329999997,
+        "elapsed_time_sec": 216.87984850000066,
         "number_particles_released": 8400000,
         "is3D_run": true,
         "backtracking": false,
@@ -2752,13 +2752,37 @@
         "hindcast_end_time": 1201824000.0,
         "has_A_Z_profile": null,
         "has_bottom_stress": null,
+        "particle_counts": {
+            "current_status_counts": {
+                "unknown": "0",
+                "bad_coord": "0",
+                "cell_search_failed": "0",
+                "notReleased": "0",
+                "dead": "0",
+                "hit_dry_cell": "0",
+                "outside_domain": "0",
+                "outside_open_boundary": "0",
+                "stationary": "0",
+                "stranded_by_tide": "973432",
+                "on_bottom": "1085",
+                "moving": "7425483"
+            },
+            "total_bad_status_counts": {
+                "cell_search_failed": 0,
+                "bad_coord": 0,
+                "outside_domain": 0
+            },
+            "num_alive": 8400000,
+            "particles_in_buffer": 8400000,
+            "particles_released": 8400000
+        },
         "version": {
             "major": 0.5,
             "revision": 30,
             "date": "2025-01-28",
             "parameter_ver": 0.5,
             "str": "0.50.0030-2025-01-28",
-            "git_revision": "8c07587cdea5992638752bfd28663f354dd6089b",
+            "git_revision": "e60a0e5b20ed2a0a22cf52033c0c8ae91c2c6c92",
             "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]",
             "python_major_version": 3,
             "python_minor_version": 10,
@@ -4222,12 +4246,12 @@
             8750000
         ],
         "forcasted_max_number_alive": "8750000",
-        "memory_used_GB": 6.181175296,
+        "memory_used_GB": 6.177267712,
         "model_end_date": "2008-01-02T00:30:00",
         "model_run_duration": 86400.0,
-        "computation_started": "2025-01-31T08:39:04.275580",
-        "computation_ended": "2025-01-31T08:43:12.344068",
-        "computation_duration": "0:04:08.068488"
+        "computation_started": "2025-02-03T13:29:15.846155",
+        "computation_ended": "2025-02-03T13:32:41.054441",
+        "computation_duration": "0:03:25.208286"
     },
     "particle_status_flags": {
         "unknown": -20,
@@ -4284,7 +4308,7 @@
             "time_spent_updating": 0.0,
             "update_calls": 0,
             "time_first_update_call": 0.0,
-            "number_released": 1651541,
+            "number_released": 1899664,
             "pulseID": 24,
             "total_number_required": 1200000,
             "release_type": "polygon",
@@ -4355,7 +4379,7 @@
                 "time_spent_updating": 0.0,
                 "update_calls": 0,
                 "time_first_update_call": 0.0,
-                "number_released": 1651541,
+                "number_released": 1899664,
                 "pulseID": 24,
                 "total_number_required": 1200000,
                 "release_type": "polygon",
@@ -4530,9 +4554,9 @@
             },
             "decay1": {
                 "instanceID": 21,
-                "time_spent_updating": 1.6563054999987799,
+                "time_spent_updating": 1.6477123000167921,
                 "update_calls": 1465,
-                "time_first_update_call": 0.30235210000000734,
+                "time_first_update_call": 0.27621970000109286,
                 "class_role": "particle_properties"
             },
             "inside_polygon_for_onfly_stats_ 000": {
@@ -4565,51 +4589,51 @@
             },
             "water_depth": {
                 "instanceID": 26,
-                "time_spent_updating": 2.088210900001741,
+                "time_spent_updating": 1.9439241000072798,
                 "update_calls": 1465,
-                "time_first_update_call": 0.41099309999981415,
+                "time_first_update_call": 0.4186609000007593,
                 "class_role": "particle_properties"
             },
             "tide": {
                 "instanceID": 27,
-                "time_spent_updating": 2.3020613000003323,
+                "time_spent_updating": 2.0972941999734758,
                 "update_calls": 1465,
-                "time_first_update_call": 0.5510779999999613,
+                "time_first_update_call": 0.6485783999996784,
                 "class_role": "particle_properties"
             },
             "water_velocity": {
                 "instanceID": 28,
-                "time_spent_updating": 8.508326799995302,
+                "time_spent_updating": 5.9690957000238996,
                 "update_calls": 1465,
-                "time_first_update_call": 0.9394486999999572,
+                "time_first_update_call": 0.8012828999999329,
                 "class_role": "particle_properties"
             },
             "water_temperature": {
                 "instanceID": 29,
-                "time_spent_updating": 3.5970485999982884,
+                "time_spent_updating": 2.73725510001168,
                 "update_calls": 1465,
-                "time_first_update_call": 0.7095298999997794,
+                "time_first_update_call": 0.7616221999996924,
                 "class_role": "particle_properties"
             },
             "A_Z_profile": {
                 "instanceID": 30,
-                "time_spent_updating": 2.775488900003893,
+                "time_spent_updating": 1.8462111000026198,
                 "update_calls": 1465,
-                "time_first_update_call": 0.00023539999983768212,
+                "time_first_update_call": 0.0003876999999192776,
                 "class_role": "particle_properties"
             },
             "A_Z_profile_vertical_gradient": {
                 "instanceID": 31,
-                "time_spent_updating": 2.831619500002489,
+                "time_spent_updating": 1.8276454000024387,
                 "update_calls": 1465,
-                "time_first_update_call": 0.00020429999995030812,
+                "time_first_update_call": 0.0002660999998624902,
                 "class_role": "particle_properties"
             },
             "friction_velocity": {
                 "instanceID": 32,
-                "time_spent_updating": 1.6683690999998362,
+                "time_spent_updating": 1.2644455000245216,
                 "update_calls": 1465,
-                "time_first_update_call": 0.0001461000001654611,
+                "time_first_update_call": 0.0001666999996814411,
                 "class_role": "particle_properties"
             }
         },
@@ -4618,9 +4642,9 @@
         "particle_statistics": {
             "statas1": {
                 "instanceID": 0,
-                "time_spent_updating": 3.815321799999765,
+                "time_spent_updating": 3.7706246999950963,
                 "update_calls": 18,
-                "time_first_update_call": 1.0488163999998505,
+                "time_first_update_call": 1.0935895999991772,
                 "output_file": "Sounds_stats_gridded_age_0_statas1.nc",
                 "class_role": "particle_statistics",
                 "z_range": [
@@ -4645,9 +4669,9 @@
             },
             "statas2": {
                 "instanceID": 1,
-                "time_spent_updating": 3.4305316999980278,
+                "time_spent_updating": 3.0314215999969747,
                 "update_calls": 18,
-                "time_first_update_call": 1.2559999000000062,
+                "time_first_update_call": 1.078878700000132,
                 "output_file": "Sounds_stats_polygon_age_1_statas2.nc",
                 "class_role": "particle_statistics",
                 "inside_polygon_particle_prop": "inside_polygon_for_onfly_stats_ 000",
@@ -4667,17 +4691,17 @@
         "event_loggers": {
             "event1": {
                 "instanceID": 0,
-                "time_spent_updating": 14.53101839999681,
+                "time_spent_updating": 12.737426300041989,
                 "update_calls": 2882,
-                "time_first_update_call": 0.6829469000003883,
+                "time_first_update_call": 0.7648334999994404,
                 "class_role": "event_loggers",
                 "prop_to_write": [
-                    "status",
+                    "event_polygon",
                     "IDrelease_group",
-                    "ID",
                     "x",
+                    "ID",
                     "age",
-                    "event_polygon"
+                    "status"
                 ],
                 "output_file": "Sounds_inside_polygon_events_event1.nc"
             }
@@ -4700,16 +4724,16 @@
         },
         "solver": {
             "instanceID": 0,
-            "time_spent_updating": 238.2923155999938,
+            "time_spent_updating": 195.75701470004606,
             "update_calls": 1440,
-            "time_first_update_call": 21.340891499999998,
+            "time_first_update_call": 20.697143399998822,
             "class_role": "solver"
         },
         "field_group_manager": {
             "instanceID": 0,
-            "time_spent_updating": 26.158330600000227,
+            "time_spent_updating": 24.931029899998975,
             "update_calls": 3,
-            "time_first_update_call": 9.433908800000154,
+            "time_first_update_call": 9.105589299999338,
             "current_hydro_model_step": 48,
             "fractional_time_steps": [
                 1.0,
@@ -29277,9 +29301,26 @@
             "total_time_steps": 1488,
             "time_step": 1800.0,
             "field_info": {
-                "water_temperature": {
+                "water_velocity": {
                     "file_vars_info": {
-                        "temp": {
+                        "hvel": {
+                            "vector_components_per_file_var": 2,
+                            "shape4D": [
+                                24,
+                                149233,
+                                38,
+                                2
+                            ],
+                            "time_varying": true,
+                            "is3D": true,
+                            "dims": [
+                                "time",
+                                "nSCHISM_hgrid_node",
+                                "nSCHISM_vgrid_layers",
+                                "two"
+                            ]
+                        },
+                        "vertical_velocity": {
                             "vector_components_per_file_var": 1,
                             "shape4D": [
                                 24,
@@ -29300,6 +29341,55 @@
                         "time_varying": true,
                         "is3D": true,
                         "zlevels": 38,
+                        "is_vector": true
+                    }
+                },
+                "tide": {
+                    "file_vars_info": {
+                        "elev": {
+                            "vector_components_per_file_var": 1,
+                            "shape4D": [
+                                24,
+                                149233,
+                                1,
+                                1
+                            ],
+                            "time_varying": true,
+                            "is3D": false,
+                            "dims": [
+                                "time",
+                                "nSCHISM_hgrid_node"
+                            ]
+                        }
+                    },
+                    "params": {
+                        "time_varying": true,
+                        "is3D": false,
+                        "zlevels": 1,
+                        "is_vector": false
+                    }
+                },
+                "water_depth": {
+                    "file_vars_info": {
+                        "depth": {
+                            "vector_components_per_file_var": 1,
+                            "shape4D": [
+                                1,
+                                149233,
+                                1,
+                                1
+                            ],
+                            "time_varying": false,
+                            "is3D": false,
+                            "dims": [
+                                "nSCHISM_hgrid_node"
+                            ]
+                        }
+                    },
+                    "params": {
+                        "time_varying": false,
+                        "is3D": false,
+                        "zlevels": 1,
                         "is_vector": false
                     }
                 },
@@ -29355,51 +29445,9 @@
                         "is_vector": false
                     }
                 },
-                "tide": {
+                "water_temperature": {
                     "file_vars_info": {
-                        "elev": {
-                            "vector_components_per_file_var": 1,
-                            "shape4D": [
-                                24,
-                                149233,
-                                1,
-                                1
-                            ],
-                            "time_varying": true,
-                            "is3D": false,
-                            "dims": [
-                                "time",
-                                "nSCHISM_hgrid_node"
-                            ]
-                        }
-                    },
-                    "params": {
-                        "time_varying": true,
-                        "is3D": false,
-                        "zlevels": 1,
-                        "is_vector": false
-                    }
-                },
-                "water_velocity": {
-                    "file_vars_info": {
-                        "hvel": {
-                            "vector_components_per_file_var": 2,
-                            "shape4D": [
-                                24,
-                                149233,
-                                38,
-                                2
-                            ],
-                            "time_varying": true,
-                            "is3D": true,
-                            "dims": [
-                                "time",
-                                "nSCHISM_hgrid_node",
-                                "nSCHISM_vgrid_layers",
-                                "two"
-                            ]
-                        },
-                        "vertical_velocity": {
+                        "temp": {
                             "vector_components_per_file_var": 1,
                             "shape4D": [
                                 24,
@@ -29420,30 +29468,6 @@
                         "time_varying": true,
                         "is3D": true,
                         "zlevels": 38,
-                        "is_vector": true
-                    }
-                },
-                "water_depth": {
-                    "file_vars_info": {
-                        "depth": {
-                            "vector_components_per_file_var": 1,
-                            "shape4D": [
-                                1,
-                                149233,
-                                1,
-                                1
-                            ],
-                            "time_varying": false,
-                            "is3D": false,
-                            "dims": [
-                                "nSCHISM_hgrid_node"
-                            ]
-                        }
-                    },
-                    "params": {
-                        "time_varying": false,
-                        "is3D": false,
-                        "zlevels": 1,
                         "is_vector": false
                     }
                 },
@@ -29486,21 +29510,40 @@
             "update_calls": 0,
             "time_first_update_call": 0.0,
             "class_role": "particle_group_manager",
-            "particles_in_buffer": 8400000,
+            "num_alive": 0,
             "particles_released": 8400000,
-            "num_alive": 8400000,
             "current_particle_buffer_size": "8750000",
+            "current_status_counts": {
+                "unknown": "0",
+                "bad_coord": "0",
+                "cell_search_failed": "0",
+                "notReleased": "0",
+                "dead": "0",
+                "hit_dry_cell": "0",
+                "outside_domain": "0",
+                "outside_open_boundary": "0",
+                "stationary": "0",
+                "stranded_by_tide": "973432",
+                "on_bottom": "1085",
+                "moving": "7425483"
+            },
+            "total_bad_status_counts": {
+                "cell_search_failed": 0,
+                "bad_coord": 0,
+                "outside_domain": 0
+            },
             "max_age_for_each_release_group": [
                 1e+50,
                 1e+50
             ],
-            "num_alive_last_time_step": 8400000
+            "particles_in_buffer": 8400000,
+            "num_alive_last_time_step": 0
         },
         "dispersion": {
             "instanceID": 0,
-            "time_spent_updating": 11.623972600008528,
+            "time_spent_updating": 9.433607599956304,
             "update_calls": 1440,
-            "time_first_update_call": 0.8732783000000381,
+            "time_first_update_call": 0.7196745000001101,
             "class_role": "dispersion",
             "mode": 4,
             "random_walk_size": [
@@ -29516,16 +29559,16 @@
         },
         "tidal_stranding": {
             "instanceID": 0,
-            "time_spent_updating": 1.0334747000038078,
+            "time_spent_updating": 0.9043327000126737,
             "update_calls": 1441,
-            "time_first_update_call": 0.3332094000002144,
+            "time_first_update_call": 0.2959800999997242,
             "class_role": "tidal_stranding"
         },
         "resuspension": {
             "instanceID": 0,
-            "time_spent_updating": 4.576487099989208,
+            "time_spent_updating": 3.7194066000320163,
             "update_calls": 1441,
-            "time_first_update_call": 0.7378960000000916,
+            "time_first_update_call": 0.5315694000000803,
             "class_role": "resuspension",
             "resuspension_factor": 0.6604652145321861
         }
@@ -30047,17 +30090,18 @@
             "oceantracker.particle_group_manager.util.pgm_util": {
                 "oceantracker.particle_group_manager.util.pgm_util._status_counts_and_kill_old_particles": [
                     {
-                        "signature": "(array(float64, 1d, C), array(int8, 1d, C), array(int32, 1d, C), array(float64, 1d, C), array(int32, 1d, C), int64)",
+                        "signature": "(array(float64, 1d, C), array(int8, 1d, C), array(int32, 1d, C), array(float64, 1d, C), array(int32, 2d, C), int64)",
                         "simd_instructions": {
-                            "%xmm": 32,
+                            "%xmm": 65,
                             "%ymm": 26,
-                            "movaps": 12,
-                            "movups": 24,
-                            "orps": 6,
+                            "movaps": 14,
+                            "movups": 23,
+                            "orps": 7,
                             "vandpd": 1,
-                            "vmovapd": 1,
-                            "vzeroupper": 8,
-                            "xorps": 6
+                            "vextracti128": 1,
+                            "vmovapd": 2,
+                            "vzeroupper": 10,
+                            "xorps": 7
                         }
                     }
                 ],
@@ -30144,7 +30188,7 @@
                 "oceantracker.particle_properties.util.particle_comparisons_util.is_inrange": [],
                 "oceantracker.particle_properties.util.particle_comparisons_util._prop_compared_to_value": [
                     {
-                        "signature": "(array(int8, 1d, C), type(CPUDispatcher(<function is_eq at 0x000002180B332680>)), int64, array(int32, 1d, C))",
+                        "signature": "(array(int8, 1d, C), type(CPUDispatcher(<function is_eq at 0x0000026F414E3EB0>)), int64, array(int32, 1d, C))",
                         "simd_instructions": {
                             "%xmm": 26,
                             "%ymm": 24,
@@ -30158,7 +30202,7 @@
                 ],
                 "oceantracker.particle_properties.util.particle_comparisons_util._prop_subset_compared_to_value": [
                     {
-                        "signature": "(array(int32, 1d, C), array(int8, 1d, C), type(CPUDispatcher(<function is_eq at 0x000002180B332680>)), int64, array(int32, 1d, C))",
+                        "signature": "(array(int32, 1d, C), array(int8, 1d, C), type(CPUDispatcher(<function is_eq at 0x0000026F414E3EB0>)), int64, array(int32, 1d, C))",
                         "simd_instructions": {
                             "%xmm": 31,
                             "%ymm": 26,
@@ -30170,7 +30214,7 @@
                         }
                     },
                     {
-                        "signature": "(array(int32, 1d, C), array(float64, 1d, C), type(CPUDispatcher(<function is_gteq at 0x000002180B332D40>)), float64, array(int32, 1d, C))",
+                        "signature": "(array(int32, 1d, C), array(float64, 1d, C), type(CPUDispatcher(<function is_gteq at 0x0000026F415105E0>)), float64, array(int32, 1d, C))",
                         "simd_instructions": {
                             "%xmm": 42,
                             "%ymm": 28,
@@ -30422,15 +30466,22 @@
                     {
                         "signature": "(array(float64, 1d, C), float64, array(float64, 1d, C), array(int32, 1d, C), float64)",
                         "simd_instructions": {
-                            "%xmm": 43,
-                            "%ymm": 16,
-                            "movaps": 14,
-                            "movups": 14,
-                            "orps": 4,
+                            "%xmm": 57,
+                            "%ymm": 20,
+                            "movaps": 18,
+                            "movups": 15,
+                            "orps": 5,
+                            "vaddpd": 1,
                             "vaddsd": 1,
+                            "vbroadcastsd": 2,
+                            "vgatherqpd": 1,
+                            "vmulpd": 1,
                             "vmulsd": 1,
-                            "vzeroupper": 6,
-                            "xorps": 4
+                            "vpbroadcastq": 2,
+                            "vpmovd2m": 1,
+                            "vscatterqpd": 1,
+                            "vzeroupper": 8,
+                            "xorps": 5
                         }
                     }
                 ],

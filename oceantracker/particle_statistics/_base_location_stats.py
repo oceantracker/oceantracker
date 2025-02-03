@@ -179,7 +179,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.start_update_timer()
 
 
-        num_in_buffer = si.core_class_roles.particle_group_manager.info['particles_in_buffer']
+        num_in_buffer = si.particles_in_buffer
 
         # first select those to count based on status and z location
         sel = self.sel_status_waterdepth_and_z(part_prop['status'].data, part_prop['x'].data, part_prop['water_depth'].data.ravel(),

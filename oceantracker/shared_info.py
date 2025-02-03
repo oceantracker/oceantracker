@@ -170,6 +170,7 @@ class _RunInfo(_SharedStruct):
     hindcast_end_time = None
     has_A_Z_profile = None
     has_bottom_stress = None
+    particle_counts = {}
 
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
@@ -196,7 +197,7 @@ class _SharedInfoClass():
     msg_logger = MessageLogger()
     block_timers={}
     class_importer = class_importer_util.ClassImporter(msg_logger)
-
+    particles_in_buffer = 0
     info = _UseFullInfo
 
     def __init__(self):
