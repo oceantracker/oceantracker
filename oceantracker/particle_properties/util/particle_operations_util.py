@@ -127,10 +127,10 @@ def add_to(x1, x2, active, scale=1.0):
         for nn in nb.prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
-                 x1[n, m ] += x2[n,m]*scale
+                 x1[n, m]  += x2[n,m]*scale
 
 
-@njitOT
+@njitOTparallel
 def set_value_and_add(x1, value, x2, active, scale=1.0):
     # set x1= value, then  x1 += x2*scale for active particles, x1 and x2 same size
 
@@ -139,14 +139,12 @@ def set_value_and_add(x1, value, x2, active, scale=1.0):
     if x1.ndim == 1: # 1D
         for nn in nb.prange(active.size):
             n = active[nn]
-            x1[n] = value
-            x1[n] += x2[n]*scale
+            x1[n] = value + x2[n]*scale
     else:
         for nn in nb.prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
-                x1[n, m] = value
-                x1[n, m] += x2[n,m]*scale
+                x1[n, m] = value + x2[n,m]*scale
 
 # utility methods
 @njitOT
@@ -159,13 +157,3 @@ def dim_notMatching(d1, d2):
     # check all dim match
     a=d1.shape != d2.shape
     return a
-
-@njitOT
-def copy_indicies(ID1, ID2, out = None):
-    # copy index array ID2  into ID1
-    # ID1 must be at least the same size as ID2
-    if out is None: out = np.full_like(ID2,-1)
-
-    for n in ID2:
-        ID1[n] = ID2[n]
-    return ID1[:ID2.shape[0]]
