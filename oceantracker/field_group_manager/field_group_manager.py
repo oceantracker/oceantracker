@@ -163,8 +163,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def _make_a_reader(self,reader_params):
         # build a readers
-        reader = set_up_reader.make_a_reader_from_params(reader_params,
-                                                         si.settings, si.msg_logger, crumbs='')
+        reader = set_up_reader.make_a_reader_from_params(reader_params, si.settings,  crumbs='')
         reader.initial_setup()
         reader.final_setup()
 
