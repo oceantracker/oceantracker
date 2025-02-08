@@ -129,98 +129,7 @@ class _BaseReader(ParameterBaseClass):
 
         pass
 
-    def catalog_dataset(self, msg_logger=None, crumbs=None):
-        #todo rename as open datseta and merge with it
-        # get files in time sorted order and info on its fields
-        params = self.params
-        info = self.info
-        self.open_dataset()
-        self.dataset.catalog_data(params['input_dir'], params['grid_variable_map']['time'],
-                                                 msg_logger=msg_logger, crumbs=crumbs,
-                                                 file_mask=params['file_mask'])
-        info.update(self.dataset.info)
 
-        # additional info on vert grid etc, node dim etc
-        hi = self.get_hindcast_info()
-        info.update(hi)
-        # todo check all required fields are set
-
-        if hi['vert_grid_type'] is not None and hi['vert_grid_type'] not in si.vertical_grid_types.possible_values():
-            msg_logger.msg(f'Coding error, dont recognise vert_grid_type grid type, got {hi["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
-                hint=f'check reader codes  get_hindcast_info() ', error=True)
-
-        # categorise field variables
-        file_vars = info['variables']
-        reader_field_vars_map = {}
-
-        # loop over mapped variables and loaded variables
-        mapped_fields = params['field_variable_map']
-        for name in list(set(params['load_fields'] + list(mapped_fields.keys()))):
-            # if named var not in map, try to use is name as a map,
-            # ie load named field is a file varaiable name
-            if name not in mapped_fields:
-                mapped_fields[name] = name
-                if name not in info['variables']:
-                    msg_logger.msg(
-                        f' No  field_variable_map to load variable named "{name}" and no variable in file matching this name, so can not load this field',
-                        hint=f'Add a map for this variable readers "field_variable_map"  param or check spelling loaded variable name matches a file variable, current map is {str(mapped_fields)}',
-                        fatal_error=True)
-
-            # decompose variabele lis
-            var_list = mapped_fields[name]
-            if type(var_list) != list: var_list = [var_list]  # ensure it is a list
-
-            # use first variable to get basic info
-            v1 = var_list[0]
-            if v1 not in file_vars: continue
-
-            field_params = dict(time_varying=file_vars[v1]['has_time'],
-                                is3D=any(x in hi['all_z_dims'] for x in file_vars[v1]['dims']),
-                                )
-            field_params['zlevels'] = hi['num_z_levels'] if field_params['is3D'] else 1
-
-            # work out if variable is a vector field
-            file_vars_info = {}
-
-            dm = params['dimension_map']
-            for n_var, v in enumerate(var_list):
-                if v not in file_vars: continue  # listed var not in file, eg vecotion variable has npo vertical velocity
-
-                if dm['vector2D'] is not None and dm['vector2D'] in file_vars[v]['dims']:
-                    n_comp = 2
-                elif dm['vector3D'] is not None and dm['vector2D'] in file_vars[v]['dims']:
-                    n_comp = 3
-                else:
-                    n_comp = 1
-
-                s4D = [si.settings.time_buffer_size if field_params['time_varying'] else 1,
-                       hi['num_nodes'],
-                       hi['num_z_levels'] if field_params['is3D'] else 1,
-                       n_comp]
-
-                file_vars_info[v] = dict(vector_components_per_file_var=n_comp,
-                                         shape4D=np.asarray(s4D, dtype=np.int32),
-                                         time_varying= field_params['time_varying'],
-                                         is3D= field_params['is3D'] ,
-                                         dims = list(file_vars[v]['dims'].keys()))
-
-            field_params['is_vector'] = sum(x['vector_components_per_file_var'] for x in file_vars_info.values()) > 1
-            reader_field_vars_map[name] = dict(file_vars_info=file_vars_info,
-                                               params=field_params)
-            if len(file_vars_info) < len(var_list):
-                msg_logger.msg(f'not all vector components found for field {name}',
-                       hint=f'missing file variables {[x for x in var_list if x not in file_vars_info]}', warning=True)
-
-        # record field map
-        info['field_info'] = reader_field_vars_map
-        # add grid variable info
-        msg_logger.exit_if_prior_errors('Errors matching field variables with those in the file, see above')
-
-
-    def open_dataset(self):
-        #todo merge with catalog data set
-        params = self.params
-        self.dataset = OceanTrackerDataSet(drop_variables=params['drop_variables'])
 
 
     def build_fields(self):
@@ -259,6 +168,31 @@ class _BaseReader(ParameterBaseClass):
                 if v is not None and v.dtype != np.float32:
                     si.msg_logger.msg(f'Reader type error {name} must be dtype {np.float64} ', warning=True)
         return grid
+
+
+
+    def _time_sort_variable_fileIDs(self):
+        # sort variable fileIDs by time, now all files are read
+        info = self.info
+        fi = info['file_names']
+
+        for v_name, item in info['variables'].items():
+            if item['has_time']:
+                item['fileIDs'] = np.asarray(item['fileIDs'])
+                start_times = np.asarray([fi[x]['start_time'] for x in item['fileIDs']])
+                file_order = np.argsort(start_times)
+                item['fileIDs'] = item['fileIDs'][file_order]
+                # get first time step in the file
+                time_steps = np.asarray([fi[x]['time_steps'] for x in item['fileIDs']])
+                first_time_step_in_file = np.cumsum(time_steps) - time_steps[0]
+                # insert first time step into the file info in time order
+                # this will be unnecessarily  repeated, if more than one variable in a file
+                for n, fID in enumerate(item['fileIDs']):
+                    fi[fID]['first_time_step_in_file'] = first_time_step_in_file[n]
+            else:
+                item['fileIDs'] = item['fileIDs'][0]
+
+        pass
 
     def build_hori_grid(self, grid):
         # read nodal values and triangles
@@ -683,14 +617,38 @@ class _BaseReader(ParameterBaseClass):
             grid['zlevel'][buffer_index,...] =  self.read_zlevel(nt)
         pass
 
-    def read_time(self, nt):
-        # assume time is seconds or datetime64
-        time_var = self.info['time_variable']
-        time = self.dataset.read_variable(time_var, nt=nt)
-        time = time.coords[time_var].data
 
-        if time.dtype == np.dtype('<M8[ns]'):
-            time = time.astype('datetime64[s]').astype(np.float64)
+    def decode_time(self,time):
+        # decode time as numpy array in seconds since 1970, input must be xarray variable
+        # defaults assumes time has units for cf complinance
+
+        units = time.attrs['units']
+
+        unit, date = units.split('since')
+        unit= unit.strip()
+        date = date.strip()
+
+        t = time.data
+        if unit == 'seconds':
+            t = t.astype(np.float64)
+        elif  unit == 'minutes':
+            t = t.astype(np.float64)/60.
+        elif  unit == 'hours':
+            t = t.astype(np.float64)/3600.
+        elif unit == 'days':
+            t = t.astype(np.float64) / 3600./24.
+        else:
+            si.msg_logger(f'Unrecognised time unit = {unit}', hint="must be one of [seconds,minutes,hours,days]")
+
+        d0 = np.datetime64(date).astype('datetime64[s]').astype(np.float64)
+        t = t + d0
+        return t
+
+    def read_time(self, nt=None):
+        # assume time is cf convention
+        time_var = self.info['time_var']
+        time = self.dataset.read_variable(time_var, nt=nt)
+        time = self.decode_time(time)
         return  time
 
     def _vertical_regrid_Slayer_field_to_uniform_sigma(self,name, data):
@@ -729,13 +687,13 @@ class _BaseReader(ParameterBaseClass):
         nt_hindcast = self.time_to_hydro_model_index(time_sec)
         return nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
-    def detect_lonlat_grid(self, msg_logger):
+    def detect_lonlat_grid(self):
         x = self.dataset.read_variable(self.params['grid_variable_map']['x']).data
         # look at range to see if too small to be meters grid
         islatlong=  (np.nanmax(x)- np.nanmin(x) < 360) or (np.nanmax(x)- np.nanmin(x) < 360)
 
         if islatlong:
-            msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so using a native  (lon, lat ) a grid, all input coords  should be be lon lat ', note=True,
+            si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so using a native  (lon, lat ) a grid, all input coords  should be be lon lat ', note=True,
                               caller = self)
 
         return islatlong
