@@ -27,10 +27,9 @@ class GLORYSreader(_BaseStructuredReader):
                         time=PVC('time', str, doc_str='Name of time variable in hindcast'),
                         x = PVC('longitude', str, doc_str='x location of nodes'),
                         y = PVC('latitude', str, doc_str='y location of nodes'),
-                        z=PVC('depth', str, doc_str='interface depth levels'),
+                        z = PVC('depth', str, doc_str='interface depth levels'),
                         bottom_cell_index=PVC('deptho_lev', str, doc_str='deepest vertical cell for each node'),
                         ),
-
             field_variable_map= {'water_velocity': PLC(['uo', 'vo','wo'], str),
                                    'tide': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('deptho', str, doc_str='maps standard internal field name to file variable name'),
@@ -56,6 +55,7 @@ class GLORYSreader(_BaseStructuredReader):
 
         if 'mask' not in info['variables']:
             si.msg_logger.msg('For GLORYS hindcasts, must include the static variables netcdf file in same folder as the currents hindcast files, as need variables such as the land mask in that file',
+                              hint =f'reader "file_mask param", must also include static file as  well, given mask {self.params["file_mask"]}',
                               caller = self, error=True, fatal_error=True)
 
         xvel_dims =  info['variables'][fm['water_velocity'][0]]['dims']

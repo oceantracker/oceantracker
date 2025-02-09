@@ -26,12 +26,14 @@ class OceanTrackerDataSet(object):
         self.info = dict(input_dir= reader_params['input_dir'], file_mask=reader_params['file_mask'],
                         variables={}, files=[], dims={}, attributes={})
         info = self.info
-        vars = self.info['variables']
+        vars = info['variables']
 
         for fileID, fn in enumerate(file_list):
             ds = xr.open_dataset(fn, decode_times=False)
             info['dims'].update(ds.sizes)
-            info['files'].append(dict(name=fn,start_time=None))
+            info['files'].append(dict(name=fn,start_time=None,
+                            variables= list(ds.variables.keys()),
+                            dims = ds.sizes)) # to see if dims the same
             for name, var in ds.variables.items():
                 if name not in vars:
                     vars[name] = dict( dims={key:ds.sizes[key]  for key in var.dims},

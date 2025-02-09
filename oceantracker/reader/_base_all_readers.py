@@ -634,11 +634,11 @@ class _BaseReader(ParameterBaseClass):
         if unit == 'seconds':
             t = t.astype(np.float64)
         elif  unit == 'minutes':
-            t = t.astype(np.float64)/60.
+            t = t.astype(np.float64)*60.
         elif  unit == 'hours':
-            t = t.astype(np.float64)/3600.
+            t = t.astype(np.float64)*3600.
         elif unit == 'days':
-            t = t.astype(np.float64) / 3600./24.
+            t = t.astype(np.float64) * 3600.*24.
         else:
             si.msg_logger(f'Unrecognised time unit = {unit}', hint="must be one of [seconds,minutes,hours,days]")
 

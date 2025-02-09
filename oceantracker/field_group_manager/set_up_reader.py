@@ -16,6 +16,8 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     _check_input_dir(reader_params, crumbs=crumbs)
     dataset = OceanTrackerDataSet(reader_params)
 
+
+
     # detect reader format and add clas_name to params
     reader = _detect_hydro_file_format(reader_params, dataset,  crumbs=crumbs)
 
@@ -174,7 +176,7 @@ def _time_sort_files(reader, crumbs):
     ds_info['start_time'] = time[0]
     ds_info['end_time'] = time[-1]
     ds_info['duration'] = time[-1]- time[0]
-    ds_info['total_time_steps'] =  sum([f['time_steps'] for f in ds_info['files']])
+    ds_info['total_time_steps'] =  time.size
     ds_info['time_step'] = ds_info['duration']/(time.size-1)
 
     ds_info['start_date'] = time_util.seconds_to_isostr(ds_info['start_time'])
