@@ -123,7 +123,8 @@ def _time_sort_files(reader, crumbs):
     ds_info= reader.dataset.info
 
     ds_info['time_var'] = reader.params['grid_variable_map']['time']
-    time_var_info = ds_info['variables'][ ds_info['time_var'] ]
+    time_var = ds_info['time_var']
+    time_var_info = ds_info['variables'][ time_var]
     ds_info['time_dim'] = list(time_var_info['dims'].keys())[0]
 
 
@@ -133,7 +134,7 @@ def _time_sort_files(reader, crumbs):
         ds = reader.dataset._open_file(f['name'])
         f['has_time'] =  ds_info['time_var'] in ds.variables
         if f['has_time']:
-            time = ds['time'].compute()
+            time = ds[time_var].compute()
             time = reader.decode_time(time)
             f['start_time'] = float(time[0])
             f['end_time'] = float(time[-1])

@@ -272,5 +272,5 @@ class FieldGroupManager(ParameterBaseClass):
         return sel
     
     def close(self):
-        self.info.update(self.reader.info)
+        pass
 

@@ -25,7 +25,7 @@ class OceanTracker():
         self.params= {}
         msg_logger.set_screen_tag('helper')
         msg_logger.hori_line()
-        msg_logger.msg('Starting OceanTracker helper class')
+        msg_logger.msg(f'Starting OceanTrackerhelper class,  version {definitions.version["str"]} ')
         self.has_run = False
 
     # helper methods

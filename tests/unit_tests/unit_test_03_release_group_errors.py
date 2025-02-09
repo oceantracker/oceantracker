@@ -20,7 +20,7 @@ def main(args):
     ot.add_class('reader', **hm['reader'])
 
     # add a point release outside domain
-    rg =  deepcopy(test_definitions.rg_start_in_middle)
+    rg =  deepcopy(test_definitions.rg_start_in_datetime1)
     rg['points'] = [0,0,1]
     rg['z_min'] = -2
     ot.add_class('release_groups', **rg)
