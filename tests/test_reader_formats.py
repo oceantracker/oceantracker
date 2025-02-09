@@ -313,8 +313,8 @@ def get_case(n):
         case  1102:
             # copernicus GLORYS 2D, surface values
 
-            root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge2D'
-            file_mask = 'cmems*.nc'
+            root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorysRemySeaSpurgeSurfaceTestData2D'
+            file_mask = '*.nc'
 
             x0 = [[174.665532083399, -35.922300421719214],  # hen and chickes, in outer grid
                   [167.70585302583135, -41.09760403942677],
