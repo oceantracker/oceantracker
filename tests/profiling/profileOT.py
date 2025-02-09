@@ -59,7 +59,6 @@ def get_params(datasource=1):
          'time_step': time_step,
         'screen_output_time_interval':6*time_step,
          'max_run_duration': 1 *24*3600,  # 1 days
-         # 'use_parallel_threads' : False,
          'processors': 30,
          #'NUMBA_cache_code' : True,
          'reader': {'input_dir': input_dir,

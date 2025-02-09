@@ -7,14 +7,13 @@ import pkgutil,inspect,importlib
 from oceantracker import  definitions
 import importlib
 from timeit import  timeit
+
 class ClassImporter():
     def __init__(self,msg_logger, crumbs='', caller=None):
         self.crumbs = crumbs
         self.msg_logger =msg_logger
         ml = msg_logger
         ml.msg(f'Starting package set up',tabs=2, caller=self)
-
-
 
 
     def _build_class_tree_ans_short_name_map(self, caller=None):

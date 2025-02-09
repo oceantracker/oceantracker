@@ -96,7 +96,6 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
-    use_parallel_threads = PVC(True, bool,doc_str='Use threads to distribute computation across mutiple threads')
     processors= PVC(None, int, min=1,
                  doc_str='Maximum number of threads to use in parallelization, default is one less than the number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
@@ -184,6 +183,7 @@ class _SharedInfoClass():
         eg SharedInfo.particle_properties is a dictionary of named particle property instances
 
     """
+
     settings = _DefaultSettings() # will be overwritten with actual values by case runner
     class_roles = _ClassRoles()
     core_class_roles = _CoreClassRoles()

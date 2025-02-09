@@ -51,6 +51,8 @@ def get_numba_func_info():
     d = dict( config={key: val for key, val in nb.config.__dict__.items()
                    if not key.startswith('_') and type(val) in [None, int, str, float] },
              modules={}     )
+    from numba.misc.numba_sysinfo import get_sysinfo
+    d['sysinfo']= get_sysinfo()
 
     for name, func in numba_func_info.items():
 
@@ -131,16 +133,6 @@ def time_numba_code(fun,*args, number=10):
         fun(*args)
     return (perf_counter()-t0)/number
 
-# below not used
-def numba_class_from_dict(d):
-    # return a numba class instance with attributes given by dict keys
-    # used to pass many arguments to numba functions efficiently as attributes of one class variable
-    # will ignore any dict within the given dict
-    # build class signature
-    sig=[]
-    for key,val in d.items():
-        if type(val) != dict:
-            sig.append((key,nb.typeof(val)))
 
 
 

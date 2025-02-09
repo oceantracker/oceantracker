@@ -30,13 +30,13 @@ class OceanTrackerDataSet(object):
 
         for fileID, fn in enumerate(file_list):
             ds = xr.open_dataset(fn, decode_times=False)
-            info['dims'].update(ds.dims)
+            info['dims'].update(ds.sizes)
             info['files'].append(dict(name=fn,start_time=None))
             for name, var in ds.variables.items():
                 if name not in vars:
                     vars[name] = dict( dims={key:ds.sizes[key]  for key in var.dims},
                                        fileIDs=[], attrs = var.attrs,
-                                       encoding = var.encoding,
+                                       #encoding = var.encoding,
                                        dtype = var.dtype)
 
                 info['variables'][name]['fileIDs'].append(fileID)

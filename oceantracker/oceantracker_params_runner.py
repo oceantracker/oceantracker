@@ -1,50 +1,43 @@
-import sys, psutil
-
+import psutil
 
 from copy import deepcopy, copy
-from os import path, makedirs, walk, unlink
+from os import path
 import numpy as np
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 
 from time import  perf_counter
-from oceantracker.util.message_logger import MessageLogger, GracefulError
+from oceantracker.util.message_logger import GracefulError
 from oceantracker.util import profiling_util, get_versions_computer_info
-
-from oceantracker.field_group_manager import set_up_reader
-
-#os.environ['NUMBA_NUM_THREADS'] = '2'
 
 from oceantracker.util import time_util, output_util
 
-from oceantracker.util import json_util, setup_util, class_importer_util
+from oceantracker.util import json_util, setup_util
 from datetime import datetime
-from time import sleep
 import traceback
-from oceantracker.util.setup_util import config_numba_environment_and_random_seed
 from oceantracker import definitions
 from oceantracker.shared_info import shared_info as si
 
 
 # note do not import numba here as its environment  setting must ve done first, import done below
-class OceanTrackerParamsRunner(ParameterBaseClass):
+class OceanTrackerParamsRunner(object):
     # this class runs a single case
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required
+        self.si = si
 
     def run(self, user_given_params):
-        d0 = datetime.now()
-        t_start = perf_counter()
+        self.start_date = datetime.now()
+        self.start_time = perf_counter()
 
         self._do_setup(user_given_params)
         ml = si.msg_logger
 
         # _________ do run ____________________________
-        ml.hori_line()
-        ml.msg('Starting run' + si.run_info.output_file_base   + ' at ' + time_util.iso8601_str(datetime.now()))
+        ml.msg(f'Starting user param. runner: "{si.run_info.output_file_base}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
         ml.hori_line()
 
-        self._run_case()
+        case_info_file= self._run_case()
         # _____________________________________________
 
         # write a sumary of errors etc
@@ -61,8 +54,8 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
             ml.hori_line()
 
         ml.progress_marker('Finished' + si.run_info.output_file_base
-                           + ' started: ' + str(d0) + ', ended: ' + str(datetime.now()))
-        ml.msg('Computational time =' + str(datetime.now() - d0), tabs=3)
+                           + ' started: ' + str(self.start_time) + ', ended: ' + str(datetime.now()))
+        ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
         ml.msg(f'Output in {si.run_info.run_output_dir}', tabs=1)
         ml.msg('')
         ml.hori_line(f'Finished Oceantracker run')
@@ -70,7 +63,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         ml.close()
 
-        case_info_file = self._get_case_run_info(d0, t_start)
+
 
         return case_info_file
 
@@ -137,7 +130,6 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
     def _run_case(self):
         ml = si.msg_logger # shortcut for logger
-
         si.add_settings(si.working_params['settings']) # push settings into shared info
 
         ml.exit_if_prior_errors('Errors in settings??', caller=self)
@@ -146,7 +138,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
         try:
             # - -------- start set up---------------------------------------------------------------------
-
+            ran_ok = False
             # must make fields first, so other claseses can add own required fields
             self._build_field_group_manager(si.working_params)
 
@@ -171,13 +163,12 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
                        hint=f'First try reduce setting "time_buffer_size" currently = {si.settings.time_buffer_size}, then try reducing number of particles ')
 
             # -----------run-------------------------------
-            self.info['model_run_started'] = datetime.now()
             si.msg_logger.hori_line()
             si.msg_logger.progress_marker('Starting ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
 
             si.core_class_roles.solver.solve() # do time stepping
 
-
+            ran_ok = True
             # ----------ended--------------------------------
 
         except GracefulError as e:
@@ -212,7 +203,10 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
             ml.show_all_warnings_and_errors() # reshow warnings
 
-            self.close()  # close all classes and msg logger
+            case_info_file = self._get_case_run_info(self.start_date, self.start_time)
+
+
+        return  case_info_file if ran_ok else None
 
     def _make_all_class_instances_from_params(self, working_params):
 
@@ -327,7 +321,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
         si.msg_logger.progress_marker('Done initial setup of all classes', start_time=t0)
 
     def _final_setup_all_classes(self):
-        # finlaise alll partimes after all inatilaised
+        # finalise alll classes setup  after all initialised
 
         for role, i in si.core_class_roles.as_dict().items():
             if i is not None:
@@ -337,6 +331,8 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
             for name, i in item.items():
                 if i is not None:
                     i.final_setup()  # some require instanceID from above add class to initialise
+
+        pass
 
     def _add_release_groups_to_get_run_start_end(self, working_params):
         # particle_release groups setup and instances,
@@ -415,7 +411,6 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
     def _build_field_group_manager(self, working_params):
         # initialise all classes, order is important!
         # shortcuts
-        info = self.info
         si.msg_logger.progress_marker('Start  field group manager and readers setup')
         t0 = perf_counter()
 
@@ -466,7 +461,7 @@ class OceanTrackerParamsRunner(ParameterBaseClass):
 
     def _get_case_run_info(self, d0, t0):
         pgm= si.core_class_roles.particle_group_manager
-        info = self.info
+        info = {}
         ml = si.msg_logger
         elapsed_time_sec = perf_counter() -t0
         info.update(dict(started=str(d0), ended=str(datetime.now()),

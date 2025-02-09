@@ -153,12 +153,11 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     # maxium threads used
     from psutil import cpu_count
     physical_cores=cpu_count( logical=False)
-    max_threads = max(physical_cores - 1, 1)
+    max_threads = max(physical_cores, 1)
     max_threads = max_threads if settings['processors'] is None else settings['processors']
 
-    # let numbas_util know if to use threads
-    environ['OCEANTRACKER_USE_PARALLEL_THREADS'] = str(int(settings['use_parallel_threads']))
-    max_threads = max_threads  if  settings['use_parallel_threads'] else  1
+    # let numba know if using threads, ie processors > 1
+    environ['OCEANTRACKER_USE_PARALLEL_THREADS'] = str(int(max_threads >1))
 
     environ['NUMBA_FASTMATH'] = str(int(settings['NUMBA_fastmath']))
 
@@ -180,8 +179,8 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
 
     msg_logger.hori_line()
     msg_logger.msg(f'Numba setup: applied settings, max threads = {max_threads}, physical cores = {physical_cores}',
-                    hint=f" use threads ={settings['use_parallel_threads']}, cache code = { settings['NUMBA_cache_code']}, fastmath= {settings['NUMBA_fastmath']}")
-
+                    hint=f" cache code = { settings['NUMBA_cache_code']}, fastmath= {settings['NUMBA_fastmath']}")
+    msg_logger.hori_line()
     # make buffer to hold indicies found by each thread
 
     @njit

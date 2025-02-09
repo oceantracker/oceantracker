@@ -71,6 +71,8 @@ class _BaseReader(ParameterBaseClass):
         self.grid={}
         self.fields ={}
 
+        self.si = si
+
 
     # Below are required  methods for any new reader
     # ---------------------------------------------------------
