@@ -324,8 +324,8 @@ def get_case(n):
                   [178.9627420221942, -41.47295972674199]
                   ]
 
-            output_file_base = 'GLORYS3D'
-            title = 'GLORYS 3D test'
+            output_file_base = 'GLORYS_seasurge2D'
+            title = 'GLORYS 2D seaspurge test'
             use_open_boundary = True
             max_days = 10
             time_step = 1800.

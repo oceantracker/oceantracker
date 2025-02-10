@@ -150,7 +150,7 @@ class FVCOMreader(_BaseUnstructuredReader):
         ds = self.dataset
         grid = self.grid
 
-        if 'wet_cells' in ds.variables:
+        if 'wet_cells' in ds.info['variables']:
             wet_cells= ds.read_variable('wet_cells', nt=nt_index).data
             grid['is_dry_cell_buffer'][buffer_index,:] = wet_cells != 1
         else:

@@ -171,9 +171,10 @@ def plot_path_in_vertical_section(tracks_data,  particleID =0,title='', ncase= 0
 
     ax.plot(t, -tracks_data['water_depth'][:, particleID], label='Water depth, m', color='k')
 
-    ax.plot(t, tracks_data['x'][:,particleID,2],label='Particle z, m', color = 'g')
+    if tracks_data['x'].size[1] == 3:
+        ax.plot(t, tracks_data['x'][:,particleID,2],label='Particle z, m', color = 'g')
 
-    ax.set(xlabel='Time, days',ylabel='z, m', title=title)
-    ax.legend()
-    plot_utilities.show_output(plot_file_name=plot_file_name)
+        ax.set(xlabel='Time, days',ylabel='z, m', title=title)
+        ax.legend()
+        plot_utilities.show_output(plot_file_name=plot_file_name)
 

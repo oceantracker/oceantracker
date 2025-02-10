@@ -45,8 +45,6 @@ class OceanTrackerDataSet(object):
 
         self.info['variables'] = vars
 
-
-
     def time_steps_available(self, nt):
         # which of  time steps are in the data set
         # used to calculate buffer index

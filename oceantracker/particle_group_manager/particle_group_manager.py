@@ -91,9 +91,6 @@ class ParticleGroupManager(ParameterBaseClass):
         info['total_bad_status_counts'] = {key :  0 for key  in  ['cell_search_failed','bad_coord','outside_domain']}
         si.run_info.particle_counts['total_bad_status_counts'] = info['total_bad_status_counts']
 
-        self.screen_msg = ''
-
-
     #@function_profiler(__name__)
     def release_particles(self,n_time_step, time_sec):
         # see if any group is ready to release
@@ -190,7 +187,6 @@ class ParticleGroupManager(ParameterBaseClass):
         cr.time_varying_info['num_part_released_so_far'].set_values(self.info['particles_released'])
         part_prop =cr.particle_properties
 
-        self.screen_msg= ''
         #  calculate age core particle property = t-time_released
         particle_operations_util.set_value_and_add(part_prop['age'].used_buffer(), time_sec,
                                                    part_prop['time_released'].used_buffer(), active, scale= -1.)
@@ -279,13 +275,12 @@ class ParticleGroupManager(ParameterBaseClass):
 
         pc = si.run_info.particle_counts
         counts = pc['current_status_counts']
-        s =  f' Rel.:{info["particles_released"]:<6,d}: '
-        s += f'Active:{pc["num_alive"]:<6,d} M:{counts["moving"]:<6,d} '
-        s += f'S:{counts["stranded_by_tide"]:<6,d}  B:{counts["on_bottom"]:<6,d} '
-        s += f'D:{counts["dead"]:<6,d} O:{counts["outside_open_boundary"]:<6,d} '
-        s += f'N:{counts["bad_coord"]:<6,d} Buffer:{si.particles_in_buffer:<6,d} '
+        s =  f' Rel:{info["particles_released"]:<5,d}: '
+        s += f'Active:{pc["num_alive"]:<6,d} Move:{counts["moving"]:<6,d} '
+        s += f'Bottom:{counts["on_bottom"]:4d} Strand:{counts["stranded_by_tide"]:<5,d}  '
+        s += f'Dead:{counts["dead"]:4d} Out:{counts["outside_open_boundary"]:4d} '
+        s += f'Buffer:{si.particles_in_buffer:<6,d} '
         s += '%3.0f%%' % (100. * si.particles_in_buffer / si.core_class_roles.particle_group_manager.info['current_particle_buffer_size'])
-        s += self.screen_msg
         return s
 
 
