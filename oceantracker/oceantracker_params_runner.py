@@ -68,7 +68,7 @@ class OceanTrackerParamsRunner(object):
         ml.msg('')
 
         if case_info_file is None:
-            ml.msg('Fatal errors, run did not complete  ', hint='check for first error above', error=True)
+            ml.msg('Fatal errors, run did not complete  ', hint='check for first error above, log file.txt or .err file ', error=True)
 
         ml.close()
 
