@@ -38,7 +38,13 @@ class OceanTrackerParamsRunner(object):
         ml.hori_line()
 
         case_info_file= self._run_case()
-        # _____________________________________________
+
+        # ----- wrap up ---------------------------------
+        ml.set_screen_tag('end')
+        ml.hori_line()
+
+        ml.show_all_warnings_and_errors()  # reshow warnings
+
 
         # write a sumary of errors etc
         num_errors = len(ml.errors_list)
@@ -61,9 +67,10 @@ class OceanTrackerParamsRunner(object):
         ml.hori_line(f'Finished Oceantracker run')
         ml.msg('')
 
+        if case_info_file is None:
+            ml.msg('Fatal errors, run did not complete  ', hint='check for first error above', error=True)
+
         ml.close()
-
-
 
         return case_info_file
 
@@ -135,10 +142,10 @@ class OceanTrackerParamsRunner(object):
         ml.exit_if_prior_errors('Errors in settings??', caller=self)
         # transfer all settings to shared_info.settings to allow tab hints
 
+        case_info_file = None
 
         try:
             # - -------- start set up---------------------------------------------------------------------
-            ran_ok = False
             # must make fields first, so other claseses can add own required fields
             self._build_field_group_manager(si.working_params)
 
@@ -168,7 +175,19 @@ class OceanTrackerParamsRunner(object):
 
             si.core_class_roles.solver.solve() # do time stepping
 
-            ran_ok = True
+            # -----------done -------------------------------
+            si.output_files['release_groups'] = output_util.write_release_group_netcdf()  # write release groups
+            for i in si._all_class_instance_pointers_iterator(): i.close()  # close all instances, eg their files if not close etc
+
+            # check for non-releases
+            # flag if some release groups did not release
+            for name, i in si.class_roles.release_groups.items():
+                if i.info['number_released'] == 0:
+                    ml.msg(f'No particles were released by release_group named= "{name}"', error=True,
+                           caller=i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
+
+            case_info_file = self._get_case_run_info(self.start_date, self.start_time)
+
             # ----------ended--------------------------------
 
         except GracefulError as e:
@@ -186,27 +205,9 @@ class OceanTrackerParamsRunner(object):
             ml.msg(str(e))
             ml.msg(tb)
 
-        finally:
-            # ----- wrap up ---------------------------------
-            ml.set_screen_tag('end')
-            ml.hori_line()
-
-            si.output_files['release_groups'] = output_util.write_release_group_netcdf()      # write release groups
-            for i in si._all_class_instance_pointers_iterator(): i.close()     # close all instances, eg their files if not close etc
-
-            # check for non-releases
-            # flag if some release groups did not release
-            for name, i in si.class_roles.release_groups.items():
-                if i.info['number_released'] == 0:
-                    ml.msg(f'No particles were released by release_group named= "{name}"', error=True,
-                           caller= i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
-
-            ml.show_all_warnings_and_errors() # reshow warnings
-
-            case_info_file = self._get_case_run_info(self.start_date, self.start_time)
 
 
-        return  case_info_file if ran_ok else None
+        return  case_info_file
 
     def _make_all_class_instances_from_params(self, working_params):
 
