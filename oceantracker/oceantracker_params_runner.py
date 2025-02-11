@@ -29,9 +29,16 @@ class OceanTrackerParamsRunner(object):
     def run(self, user_given_params):
         self.start_date = datetime.now()
         self.start_time = perf_counter()
-
-        self._do_setup(user_given_params)
         ml = si.msg_logger
+
+        # unpack params into working version as si.working_params
+        # set up output directory
+        error = self._do_setup(user_given_params)
+        if error is not None:
+            ml.msg('Errors unpacking parameters or in output directory, run did not complete  ',
+                   hint='check for first error above, log file.txt or .err file ',
+                   exception=error, error=True)
+
 
         # _________ do run ____________________________
         ml.msg(f'Starting user param. runner: "{si.run_info.output_file_base}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
@@ -59,8 +66,8 @@ class OceanTrackerParamsRunner(object):
             ml.hori_line(' ** see above or  *_caseLog.txt and *_caseLog.err files')
             ml.hori_line()
 
-        ml.progress_marker('Finished' + si.run_info.output_file_base
-                           + ' started: ' + str(self.start_time) + ', ended: ' + str(datetime.now()))
+        ml.progress_marker('Finished "' + si.run_info.output_file_base
+                           + '" started: ' + str(self.start_time) + ', ended: ' + str(datetime.now()))
         ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
         ml.msg(f'Output in {si.run_info.run_output_dir}', tabs=1)
         ml.msg('')
@@ -83,57 +90,66 @@ class OceanTrackerParamsRunner(object):
         ml.set_screen_tag('helper')
         setup_util.check_python_version(ml)
 
-        ml.hori_line()
-        ml.msg(f'{definitions.package_fancy_name} version {definitions.version["str"]}  starting setup helper "main.py":')
+        try:
+            ml.hori_line()
+            ml.msg(f'{definitions.package_fancy_name} version {definitions.version["str"]}  starting setup helper "main.py":')
 
-        # split params in to settings, core and class role params
-        si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
-                                                             crumbs='Buling working params')
-        ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
+            # split params in to settings, core and class role params
+            si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
+                                                                 crumbs='Buling working params')
+            ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
 
-        si.add_settings(si.working_params['settings'])  # add full settings to shared info
+            si.add_settings(si.working_params['settings'])  # add full settings to shared info
 
-        # setup output dir and msg files
-        si.output_files = setup_util.setup_output_dir(si.working_params['settings'], crumbs='Setting up output dir')
+            # setup output dir and msg files
+            si.output_files = setup_util.setup_output_dir(si.working_params['settings'], crumbs='Setting up output dir')
 
-        si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(
-            si.output_files['run_output_dir'],
-            si.output_files[
-                'output_file_base'] + '_caseLog')  # message logger output file setup
-        si.msg_logger.settings(max_warnings=si.settings.max_warnings)
-        ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
-               hint='see for copies of screen output and user supplied parameters, plus all other output')
+            si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(
+                si.output_files['run_output_dir'],
+                si.output_files[
+                    'output_file_base'] + '_caseLog')  # message logger output file setup
+            si.msg_logger.settings(max_warnings=si.settings.max_warnings)
+            ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
+                   hint='see for copies of screen output and user supplied parameters, plus all other output')
 
-        # write raw params to a file
-        setup_util.write_raw_user_params(si.output_files, user_given_params, ml)
+            # write raw params to a file
+            setup_util.write_raw_user_params(si.output_files, user_given_params, ml)
 
-        # setup numba before first import as its environment variable settings  have to be set before first import on Numba
-        # set numba config environment variables, before any import of numba, eg by readers,
-        setup_util.config_numba_environment_and_random_seed(si.working_params['settings'], ml, crumbs='main setup',
-                                                            caller=self)  # must be done before any numba imports
+            # setup numba before first import as its environment variable settings  have to be set before first import on Numba
+            # set numba config environment variables, before any import of numba, eg by readers,
+            setup_util.config_numba_environment_and_random_seed(si.working_params['settings'], ml, crumbs='main setup',
+                                                                caller=self)  # must be done before any numba imports
 
-        # import all package parameter classes and build short name package tree to shared info
-        # must be after numba setup as it imports al classes
-        si.class_importer._build_class_tree_ans_short_name_map()
+            # import all package parameter classes and build short name package tree to shared info
+            # must be after numba setup as it imports al classes
+            si.class_importer._build_class_tree_ans_short_name_map()
+            si.run_info.version = definitions.version
+            si.run_info.computer_info = get_versions_computer_info.get_computer_info()
 
+            ml.set_screen_tag('setup')
+            ml.hori_line()
+            ml.msg(f' {definitions.package_fancy_name} version {definitions.version["str"]} ')
 
-        si.run_info.version = definitions.version
-        si.run_info.computer_info = get_versions_computer_info.get_computer_info()
+            # cpty basic  shortcuts to run info
+            ri = si.run_info
 
-        ml.set_screen_tag('setup')
-        ml.hori_line()
-        ml.msg(f' {definitions.package_fancy_name} version {definitions.version["str"]} ')
+            # move stuff to run info as central repository
+            ri.run_output_dir = si.output_files['run_output_dir']
+            ri.output_file_base = si.output_files['output_file_base']
+            ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
+            ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
-        ml.exit_if_prior_errors('parameters have errors')
+            ml.exit_if_prior_errors('parameters have errors')
+            return None
 
-        # cpty basic  shortcuts to run info
-        ri = si.run_info
+        except Exception as e:
 
-        # move stuff to run info as central repository
-        ri.run_output_dir = si.output_files['run_output_dir']
-        ri.output_file_base = si.output_files['output_file_base']
-        ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
-        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
+            tb = traceback.format_exc()
+            ml.write_error_log_file(e, tb)
+
+            ml.msg(str(e))
+            ml.msg(tb)
+            return e
 
     def _run_case(self):
         ml = si.msg_logger # shortcut for logger
@@ -191,12 +207,10 @@ class OceanTrackerParamsRunner(object):
             # ----------ended--------------------------------
 
         except GracefulError as e:
-            ml.show_all_warnings_and_errors()
             ml.msg(f' Case Runner graceful exit ', hint ='Parameters/setup has errors, see above', error= True)
             ml.write_error_log_file(e, traceback.format_exc())
 
         except Exception as e:
-            ml.show_all_warnings_and_errors()
             ml.msg(f' Unexpected error  ', error=True,hint='check above or .err file')
             tb = traceback.format_exc()
 
@@ -205,9 +219,7 @@ class OceanTrackerParamsRunner(object):
             ml.msg(str(e))
             ml.msg(tb)
 
-
-
-        return  case_info_file
+        return case_info_file
 
     def _make_all_class_instances_from_params(self, working_params):
 

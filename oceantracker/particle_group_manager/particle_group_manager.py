@@ -265,12 +265,8 @@ class ParticleGroupManager(ParameterBaseClass):
 
                 si.particles_in_buffer = num_alive # record new number in buffer
 
-
-    # below return  info about particle group
-    #__________________________________
-
-
     def screen_info(self):
+        #  return  info about particle numbers
         info = self.info
 
         pc = si.run_info.particle_counts
