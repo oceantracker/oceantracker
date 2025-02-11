@@ -3,7 +3,7 @@
 import argparse
 from datetime import datetime
 from oceantracker.util import time_util
-
+from oceantracker.shared_info import shared_info as si
 
 def no_emit(msg_header, s): return
 
@@ -84,31 +84,30 @@ class OceanTrackerReRunner(object):
         self.emit = emit_method
         otsim = self.otsim
         si = otsim.shared_info
-        particle = otsim.shared_info.classes['particle_group_manager']
-        solver = otsim.shared_info.classes['solver']
-        reader = self.otsim.shared_info.classes['reader']
+        pgm = otsim.shared_info.core_class_roles.particle_group_manager
+        solver = otsim.shared_info.core_class_roles.solver
+        reader = si.core_class_roles.reader
 
         # clear, then add new release groups   re formed with new param
-        si.classes['release_groups']=[]
-        t_start, t_end, estimated_total_particles= otsim._setup_particle_release_groups(case_params['release_groups'])
+        si.class_roles.release_groups=[]
+        t_start, t_end, estimated_total_particles= None
+
 
         # adjust shared model run time and duration
         si.model_start_time= t_start
         si.model_duration=  min(abs(t_end - t_start), si.run_params['duration'])
 
         # reset any stats, reallocate count arrays, based on new release groups
-        for s in si.classes['particle_statistics']:
+        for s in si.class_roles.particle_statistics:
             s.initial_setup()
 
-        particle.info['num_released'] = 0
+        pgm.info['num_released'] = 0
 
-        solver.initialize_run()
         solver.solve_for_data_in_buffer()
 
     def _get_engine_info(self):
         otsim = self.otsim
-        si= otsim.shared_info
-        grid = si.classes['reader'].grid
+        grid =  si.core_class_roles.readergrid
 
         reader = otsim.shared_info.reader
         t1 = reader.get_first_time_in_hindcast()
@@ -144,7 +143,7 @@ class OceanTrackerReRunner(object):
 
 if __name__ == '__main__':
     # windows/linux  data source
-    a=1
+    pass
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-cookstrait', action='store_true')
@@ -220,9 +219,9 @@ if __name__ == '__main__':
 
     # 3) now test rerunner for a point and an polygon
     prg = [
-        {'release_start_date': '2017-01-05', 'points': [[1594500, 5482700], [
+        {'start': '2017-01-05', 'points': [[1594500, 5482700], [
             1598000, 5486100]], 'pulse_size': 10, 'release_interval': 1 * 3600},
-        {'release_start_date': '2017-01-05',
+        {'start': '2017-01-05',
             'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
          'points': [[1597682.1237, 5489972.7479],
                     [1598604.1667, 5490275.5488],

@@ -6,16 +6,16 @@ from oceantracker.util import basic_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 
-class VelocityModiferBase(ParameterBaseClass):
+class _VelocityModiferBase(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({'is3D': PVC(False,bool)})
 
-        self.class_doc(role='These classes add additional particle velocities to water velocity, eg terminal velocity, by updating  particle property "velocity_modifier" once per time step, which is added to water velocity every RK substep')
+        self.role_doc('These classes add additional particle velocities to water velocity, eg terminal velocity, by updating  particle property "velocity_modifier" once per time step, which is added to water velocity every RK substep')
     def initial_setup(self):pass
 
 
     # prototype for velocity modification of v, at some space and time for isActive particles
-    def update(self, v, time, active): basic_util.nopass('velocity modify must have a  modify_velocity method ')
+    def update(self, n_time_step, time, active): basic_util.nopass('velocity modify must have a  modify_velocity method ')

@@ -11,4 +11,4 @@ class _BaseTrajectoryModifier(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
 
     # all particles checked to see if they need status changing
-    def update(self, time_sec, active): pass
+    def update(self,n_time_step, time_sec, active): pass

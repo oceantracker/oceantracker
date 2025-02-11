@@ -2,9 +2,9 @@ from numba import  njit , prange ,types as nbt
 import numpy as np
 from oceantracker.interpolator.util import triangle_interpolator_util as tri_interp_util
 from oceantracker.interpolator.util import triangle_eval_interp
+from oceantracker.util.numba_util import njitOT
 
-#@njit(parallel = True, nogil=True)
-@njit()
+@njitOT
 def RKsolver(time_sec,vel_field, grid, part_prop, interp_step_info, ksi, time_step,RK_order,  active):
     # integrated interploated hydro model
     # and any velocity_modifier applied, eg terminal velocity , random walk
@@ -48,7 +48,7 @@ def RKsolver(time_sec,vel_field, grid, part_prop, interp_step_info, ksi, time_st
         for m in range(n_dims): ksi['v'][m] =ksi['v1'][m] + 2.0 * ksi['v2'][m] + 2.0 * ksi['v3'][m] + ksi['v4'][m]
         euler_substep(x0, ksi['v']/6.0, vm, time_step,  part_prop['x'][n, :])
 
-@njit()
+@njitOT()
 def eval_water_velocity(xq, time_sec,vel_field, grid, part_prop, st, bc,  n, v_out) :
     # evaluate water velocity for single particle, after cell search
 
@@ -64,14 +64,14 @@ def eval_water_velocity(xq, time_sec,vel_field, grid, part_prop, st, bc,  n, v_o
     # then evaluate velocity
     tri_interp_util._kernal_BCwalk_with_move_backs(xq, grid, part_prop, n, st, bc)
 
-    if st['is_3D_run']:
+    if st['is3D_run']:
         # vertical walk
         tri_interp_util._kernal_get_depth_cell_time_varying_Slayer(xq, grid, part_prop, st, n)
-        triangle_eval_interp._kernal_eval_water_velocity_3D(v_out, vel_field, grid, part_prop, st, n)
+        triangle_eval_interp._kernal_eval_water_velocity_3D_LSC_grid(v_out, vel_field, grid, part_prop, st, n)
     else:
         triangle_eval_interp._kernal_time_dependent_2Dfield(v_out, vel_field, grid, part_prop, st, n)
 
-@njit(nbt.void(nbt.float64[:],nbt.float64[:],nbt.float64[:],nbt.float64,nbt.float64[:]))
+@njitOT(nbt.void(nbt.float64[:],nbt.float64[:],nbt.float64[:],nbt.float64,nbt.float64[:]))
 def euler_substep(xold, water_velocity, velocity_modifier, dt, xnew):
     # do euler substep, xnew = xold+ (velocity+velocity_modifier) *dt for active particles
     for m in range(xnew.shape[0]):

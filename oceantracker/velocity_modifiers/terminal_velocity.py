@@ -1,56 +1,62 @@
-from  oceantracker.velocity_modifiers._base_velocity_modifer import VelocityModiferBase
+from  oceantracker.velocity_modifiers._base_velocity_modifer import _VelocityModiferBase
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from numba import njit
+from oceantracker.util.numba_util import njitOT
 
-class TerminalVelocity(VelocityModiferBase):
+from oceantracker.shared_info import shared_info as si
+
+class TerminalVelocity(_VelocityModiferBase):
     # add terminal velocity to particle velocity  < 0 is downwards ie sinking
 
     def __init__(self,):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params({'value': PVC(0.,float, doc_str='Terminal velocity positive upwards, ie fall velocities ate negative'),
-                                 'variance': PVC(None, float, min=0., doc_str='variance of normal distribution of terminal velocity, used to give each particles its own terminal velocity from random normal distribution'),
-                                 })
+        self.add_default_params(value= PVC(0.,float, doc_str='Terminal velocity positive upwards, ie fall velocities ate negative'),
+                                 mean= PVC(0., float, obsolete=True, doc_str='use "value" parameter'),
+                                 variance= PVC(None, float, min=0., doc_str='variance of normal distribution of terminal velocity, used to give each particles its own terminal velocity from random normal distribution'),
+                                 )
 
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
+
+        if self.params['variance'] is not None:
+            # set up individual particle terminal velocties
+            si.add_class('particle_properties', class_name='ParticleParameterFromNormalDistribution',
+                         name='terminal_velocity',
+                         value=self.params['value'], variance=self.params['variance'])
 
 
     def check_requirements(self):
-        self.check_class_required_fields_prop_etc(requires3D=True, required_props_list=['velocity_modifier'])
-
+        self.check_class_required_fields_prop_etc(requires3D=True,
+                                required_props_list=['velocity_modifier'])
 
     def initial_setup(self):
+
         super().initial_setup()
-        si = self.shared_info
-        particle= si.classes['particle_group_manager']
+         
+        pgm= si.core_class_roles.particle_group_manager
 
-        si.msg_logger.msg('When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1',warning=True)
 
-        if self.params['variance'] is not None:
-           # set up individual particle terminal velocties
-           particle.create_particle_property('terminal_velocity','user',dict(
-                                                          class_name='oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution',
-                                             value=self.params['value'], variance=self.params['variance']))
-
-    def update(self, time_sec, active):
+    def update(self,n_time_step, time_sec, active):
         # modify vertical velocity, if backwards, make negative
-        si = self.shared_info
-        part_prop = si.classes['particle_properties']
+         
+        part_prop = si.class_roles.particle_properties
         velocity_modifier = part_prop['velocity_modifier']
 
         if self.params['variance'] is None:
             # constant fall vel
-            self._add_constant_vertical_vel(velocity_modifier.data, self.params['value'] * si.model_direction, active)
+            self._add_constant_vertical_vel(velocity_modifier.data, self.params['value'] * si.run_info.model_direction, active)
         else:
-            self._add_individual_vertical_vel(velocity_modifier.data, part_prop['terminal_velocity'].data,  si.model_direction, active)
+            self._add_individual_vertical_vel(velocity_modifier.data, part_prop['terminal_velocity'].data,  si.run_info.model_direction, active)
 
     @staticmethod
-    @njit
+    @njitOT
     def _add_constant_vertical_vel(v, w, sel):
         for n in sel:
             v[n, 2] += w
 
     @staticmethod
-    @njit
+    @njitOT
     def _add_individual_vertical_vel(v, w, model_dir, sel):
         for n in sel:
             v[n, 2] += w[n]*model_dir

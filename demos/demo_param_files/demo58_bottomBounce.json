@@ -2,16 +2,13 @@
     "output_file_base": "demo58_bottomBounce",
     "debug": true,
     "time_step": 120,
+    "NUMBA_cache_code": false,
+    "use_A_Z_profile": false,
+    "regrid_z_to_uniform_sigma_levels": true,
     "reader": {
-        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "demoHindcastSchism3D.nc",
-        "field_variables": {
-            "water_temperature": "temp"
-        },
-        "depth_average": false,
-        "field_variables_to_depth_average": [
-            "water_velocity",
-            "salt",
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "demo_hindcast_schisim3D_00.nc",
+        "load_fields": [
             "water_temperature"
         ]
     },
@@ -19,8 +16,11 @@
         "A_H": 0.1,
         "A_V": 0.005
     },
-    "release_groups": {
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P11",
+            "pulse_size": 10,
+            "release_interval": 0,
             "points": [
                 [
                     1593000.0,
@@ -28,64 +28,19 @@
                     -1
                 ]
             ],
-            "pulse_size": 10,
-            "release_interval": 0
-        },
-        "poly1": {
-            "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
-            "points": [
-                [
-                    1597682.1237,
-                    5489972.7479
-                ],
-                [
-                    1598604.1667,
-                    5490275.5488
-                ],
-                [
-                    1598886.4247,
-                    5489464.0424
-                ],
-                [
-                    1597917.3387,
-                    5489000
-                ],
-                [
-                    1597300,
-                    5489000
-                ],
-                [
-                    1597682.1237,
-                    5489972.7479
-                ]
-            ],
-            "z_range": [
-                -2,
-                -4.0
-            ],
-            "pulse_size": 10,
-            "release_interval": 3600
-        },
-        "P11": {
-            "points": [
-                [
-                    1593000.0,
-                    5486000.0,
-                    -1
-                ]
-            ],
-            "pulse_size": 10,
-            "release_interval": 0
+            "release_at_surface": true
         }
-    },
-    "particle_properties": {
-        "age_decay": {
+    ],
+    "particle_properties": [
+        {
+            "name": "age_decay",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
-    },
-    "event_loggers": {
-        "inoutpoly": {
+    ],
+    "event_loggers": [
+        {
+            "name": "inoutpoly",
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [
                 "ID",
@@ -155,32 +110,40 @@
                 }
             ]
         }
-    },
-    "velocity_modifiers": {
-        "terminal_velocity": {
-            "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
-            "value": -0.002,
-            "variance": 0.0002
-        }
-    },
-    "particle_statistics": {
-        "grid1": {
-            "class_name": "oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_timeBased",
+    ],
+    "particle_statistics": [
+        {
+            "name": "grid1",
+            "class_name": "oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased",
             "update_interval": 3600,
             "particle_property_list": [
                 "water_depth"
             ],
-            "status_min": "moving",
+            "status_list": [
+                "moving"
+            ],
             "z_min": -2,
+            "grid_span": [
+                10000,
+                10000
+            ],
             "grid_size": [
                 120,
                 121
             ]
         }
-    },
+    ],
     "resuspension": {
         "critical_friction_velocity": 0.005
     },
+    "velocity_modifiers": [
+        {
+            "name": "terminal_velocity",
+            "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
+            "value": -0.002,
+            "variance": 0.0002
+        }
+    ],
     "backtracking": false,
     "root_output_dir": "output"
 }

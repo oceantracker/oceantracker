@@ -6,6 +6,98 @@ Change log
 Known issues
 __________________
 
+
+Version '0.5.0.000 2024-12-20'
+_________________________
+
+Faster and simplified internal structure
+
+New features
+--------------------
+
+#. Now works in natively geographic coords if hindcast is in geographic coords. If using geographic coords all inputs
+must also be groegraphic in (lon, lat) order, eg. release points, polygons, stats etc.
+
+#. Also grid spans  are now always required and must  be in  (dx,dy) meters or degrees as (dlon, dlat) if geographic
+#. gridded_statistics module renamed gridded_statistics2D in prep for 3D versions
+#. particle stats params status_min, _max are obsolete replaced by status_list
+#. Most expensive step in 3D finding vertical cell is now 5 times faster, so code net 2-3 times faster, as by default regrids  3D data to uniform Sigma grid, to speed vertical cell search by factor of 5. Original slower native vertical grid short vertical walk search still available.
+
+#. By default uses diffusivity vertical profile for A_Z in random walk if variable mapped to A_Z_profile is found in the hydro file
+
+#. Re-suspension by critical friction velocity, uses bottom stress to calculate friction velocity field if variable mapped to bottom_stress is found in the hydro file, if not uses near seabed velocity
+
+#. Now reads new Schism v5 multi-file output, where 3D fields are in separate files
+
+#. In helper method in add_class "name" is  now optional, will auto nane eg ParticleRelease_0001
+
+#. Can auto detect if hydro-model has lat lng cords, by looking at bounds of grid coordinates.
+
+#. If hydro model is in geographic coords all inputs can now be in lon, lat, eg release locations, stats grid location and size. Currently outputs are in a meters grid, UTM or user given ESPG code. Future versions will work natively geographic coords, ie both inputs and outputs.
+
+#. Release group now has options to release at bottom or sea surface, with optional offset.These override any given z release values.
+
+#. Floating particle trajectory  modifier, forces particles to follow free surface
+
+#. Can now use short class_names,eg 'PolygonRelease' instead of 'oceantracker.release_groups.point_release.PolygonRelease' for OTs inbuilt classes
+
+#. Checks full class name is of the right type/role, to prevent using a class in the wrong role
+
+#. All on the fly stats. can restrict particle counting within given z range and also a given water depth range
+
+#. Now exits with error if any the release group start time is outside time range of hindcast
+
+#. Setting display_grid_at_start plots grid as a check, clicking on image will print coords in console to use as release points
+
+#. Release group data now writen to separate file for each case, to use
+
+#. For coders using IDEs (Pycharm, VS code) the shared info structure variables and methods now auto completes/hints variable/method names, with doc_strs where available.
+
+#. use of xarray to read individual files
+
+Behaviour changes
+______________________________________________________________
+
+#. message logger fatal_error flag is now "error" flag, exit_now flag is "fatal_error".
+
+#.  All user give intervals are now rounded to the an integer number of particle tracking  time steps after the models starting time,
+    eg. release_interval, update_interval( particle statistics and others)
+    As these updates can only happen at a model time step.
+
+#. core particle property "particle_velocity" removed in favour of "water_velocity" property to remove ambiguity
+
+Known breaking changes- ask for help if needed to transition
+______________________________________________________________
+
+
+#. Reader param load_fields replaces 'field_variables' param, to load variables to names used internally. These internal names may be mapped to file variables in  new  'field_variable_map'. If a special variable, eg concentration field, no map is needed.
+
+#. z range parameter for release and stats, replaced by z_min and z_max, warning is given
+
+#. the frozen particle status name is now stationary, the numerical value remains the same, it is rarely used and is not the same status as stranded by tide
+
+#. post_processing read and plot code has moved, so import statements need to change. read code imports are now "from read_oceantracker.python import *" and for plots "from plot_oceantracker import *"
+
+#. Matlab code to read output is now in read_oceantracker.matlab
+
+Breaking changes for coders
+
+#. For coders getting parameter  argument mis-matches on update methods, all class update methods of part_prop and modifiers now have a n_time_step as the first parameter, the particle tracking time step starting at zero. This is the clock tick of the code, is used to more precisely take actions, and avoid situations such as the model time step in 3600sec, and the user request a 4000sec release interval, which currently result in periodic unequal release intervals and double pulses. So that methods like update(time_in_sec, active) become update(n_time_step, time_in_sec, active). Not all update methods will use these time syncing variables, but some variants may.
+
+#. Shared info is done by  "import from oceantracker.shared_info import SharedInfo as si", old way si = self.shared_info still works
+
+#. shared_info.classes is deprecated, eg si.classes['particle_properties'] is now si.roles.particle_properties, where more than one class can be added. and   si.classes['particle_grop_manager'] is si.core_roles.particle_grop_manager. The .class[name] approach still works for now.
+
+#. all control vaiables and settings used during run moved from si.(name) to si.run ifo.(name) auto completes in IDEs, eg si.backtracking is now si.run_info.backtracking
+
+#. particle status flags are all on si.particle_status_flags and auto complete, Can use si.particle_status_flags.moving or  si.particle_status_flags['moving']
+
+Internal changes
+_________________
+
+#.
+
+
 Version 0.4 Major upgrade
 _________________________
 

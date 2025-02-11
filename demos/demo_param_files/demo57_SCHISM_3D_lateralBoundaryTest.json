@@ -2,19 +2,23 @@
     "output_file_base": "demo57_SCHISM_3D_lateralBoundaryTest",
     "debug": true,
     "time_step": 120,
+    "NUMBA_cache_code": false,
+    "use_A_Z_profile": true,
+    "regrid_z_to_uniform_sigma_levels": true,
     "reader": {
-        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "demoHindcastSchism3D.nc",
-        "field_variables": {
-            "water_temperature": "temp"
-        }
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "demo_hindcast_schisim3D_00.nc",
+        "load_fields": [
+            "water_temperature"
+        ]
     },
     "dispersion": {
         "A_H": 10,
-        "A_V": 0.001
+        "A_V": 1
     },
-    "release_groups": {
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P1",
             "points": [
                 [
                     1599750,
@@ -25,15 +29,17 @@
             "pulse_size": 20,
             "release_interval": 3600
         }
-    },
-    "particle_properties": {
-        "age_decay": {
+    ],
+    "particle_properties": [
+        {
+            "name": "age_decay",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
         }
-    },
-    "event_loggers": {
-        "inoutpoly": {
+    ],
+    "event_loggers": [
+        {
+            "name": "inoutpoly",
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [
                 "ID",
@@ -103,7 +109,14 @@
                 }
             ]
         }
-    },
-    "run_as_depth_averaged": true,
+    ],
+    "use_random_seed": false,
+    "velocity_modifiers": [
+        {
+            "name": "terminal_velocity",
+            "class_name": "TerminalVelocity",
+            "value": 0.0
+        }
+    ],
     "root_output_dir": "output"
 }

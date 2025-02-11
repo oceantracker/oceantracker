@@ -1,5 +1,9 @@
 import numpy as np
 
+possible_dtypes=['float64','float32','bool',
+                 'int32','int16','int8','int64',
+                 ]
+
 
 def numpy_structure_from_dict(d):
     # return a numpy sturcture with fields give by dict keys and copy of  from dictionary
@@ -23,9 +27,6 @@ def numpy_structure_from_dict(d):
     #copy dictionary data and point dict at structure's data
     for name in S.dtype.names:
         S[name] = np.copy(d[name])
-        d[name]= S[name]
-        #print('xx', name,  d[name].data, S[name] .data,np.may_share_memory(d[name],S[name]))
-        pass
 
     return S
 

@@ -1,19 +1,18 @@
-from os import path, mkdir, getcwd , system
+from os import path, mkdir, getcwd
 import argparse
 import glob
 import matplotlib.pyplot as plt
-from matplotlib import colors
 from oceantracker.util import json_util
 from oceantracker.util import time_util
 
 from oceantracker import main
-from oceantracker.post_processing.plotting import plot_statistics,plot_tracks, plot_vertical_tracks, plot_utilities
+from plot_oceantracker import plot_utilities
 import make_demo_plots
 import build_and_test_demos
 import numpy as np
-from oceantracker.post_processing.read_output_files import load_output_files
-from oceantracker.post_processing.read_output_files.load_output_files import load_stats_data, load_concentration_vars
-from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
+from read_oceantracker.python import load_output_files
+from read_oceantracker.python.load_output_files import load_stats_data, load_concentration_data
+from plot_oceantracker.plot_statistics import plot_heat_map, animate_heat_map
 
 two_points= [[1594500, 5483000], [1598000, 5486100]]
 
@@ -30,6 +29,7 @@ if __name__ == "__main__":
     parser.add_argument('-testing', action='store_true')
     args = parser.parse_args()
 
+    np.random.seed(0)
 
     build_and_test_demos.build_demos()
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     else:
         demo_list=[args.demo]
 
-    test_demo=70
+    test_demo=1000
     if  args.testing:
         demo_list=[test_demo] # ros ver
     else:
@@ -68,6 +68,7 @@ if __name__ == "__main__":
             exit('runOTdemos.py: No demo file number ' + str(n))
 
         params = json_util.read_JSON(f[0])
+
         if type(params) is list:
             demo_name = params[0]['output_file_base']
             if params[0]['reader'] is not None:
@@ -75,6 +76,7 @@ if __name__ == "__main__":
             output_folder = path.join(params[0]['root_output_dir'], params[0]['output_file_base'])
             params[0]['root_output_dir'] = 'output'
         else:
+            params['use_random_seed'] = True
             demo_name = params['output_file_base']
             if params['reader'] is not None:
                 params['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')
@@ -93,16 +95,14 @@ if __name__ == "__main__":
             ot.add_class('release_groups', name='my_point1', points=two_points,case=0)
             ot.add_class('release_groups', name='my_point1', points=two_points,case=1)
 
-            ot.add_class('dispersion', A_h=1)
+            ot.add_class('dispersion', A_H=1)
             ot.run()
 
             continue
 
+
         elif not args.skiprun:
-            if type(params) == list:
-                case_info_file_name = main.run_parallel(params[0], params[1])
-            else:
-                case_info_file_name = main.run(params)
+            case_info_file_name = main.run(params)
 
             if case_info_file_name is None:
                 print('Error during demo')
@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
         if args.testing:
             #tracks=load_output_files.load_track_data(case_info_file_name)
-            #from oceantracker.post_processing.plotting.plot_utilities import display_grid
+            #from plot_oceantracker.plot_utilities import display_grid
             #display_grid(tracks['grid'],ginput=3)
             pass
 
@@ -149,20 +149,20 @@ if __name__ == "__main__":
 
         elif n == 61:
             #todo make conc plotting work
-            continue
-            from oceantracker.post_processing.plotting.plot_statistics import animate_concentrations
 
-            c = load_concentration_vars(case_info_file_name, var_list=['particle_concentration', 'C'])
+            from plot_oceantracker.plot_statistics import animate_concentrations
+
+            c = load_concentration_data(case_info_file_name)
 
             axis_lims = [1591000, 1601500, 5478500, 5491000]
 
-            animate_concentrations(c, data_to_plot=c['particle_concentration'], logscale=True,
+            animate_concentrations(c, plot_load=False, logscale=True,
                                    axis_lims=axis_lims, cmap='hot_r',
                                    heading='SCHISIM-3D, 2D concentrations in triangles, shading',
                                    movie_file=plot_output_file + '_shading.mp4' if plot_output_file is not None else None,
                                    fps=7, interval=20,
                                    vmin=0., vmax=1.0)
-            animate_concentrations(c, data_to_plot=c['particle_count'], logscale=True,
+            animate_concentrations(c, plot_load=True, logscale=True,
                                    axis_lims=axis_lims, cmap='hot_r', shading=False, interval=200,
                                    heading='SCHISIM-3D, 2D particle counts in triangles, noshading',
                                    fps=7,
@@ -192,7 +192,8 @@ if __name__ == "__main__":
 
                 params['output_file_base'] = 'Demo90backward'
                 params['backtracking'] = True
-                params['release_groups']['P1'].update({ 'points': d90['x'][-1, :, :], 'release_start_date': start_date})
+                params['use_dispersion']= False
+                params['release_groups'][0].update({ 'points': d90['x'][-1, :, :], 'start': start_date})
 
                 print('backtracking start', start_date)
 
@@ -203,7 +204,7 @@ if __name__ == "__main__":
                 ax.scatter(d2['x'][0, :, 0], d2['x'][0, :, 1], color='y', marker='o', s=20, zorder=9)
                 ax.set_title('Test particle tracking forwards then backwards')
                 plt.gcf().tight_layout()
-                plot_utilities.show_output(plot_file_name= 'output\\'+ demo_name +'_and_backward_tracks.jpeg')
+                plot_utilities.show_output(plot_file_name='output\\' + demo_name + '_and_backward_tracks.jpeg')
             elif n==91:
 
                 track_data = load_output_files.load_track_data(case_info_file_name)
@@ -215,7 +216,7 @@ if __name__ == "__main__":
                 plt.show()
 
 
-                plt.scatter(t,np.sum(track_data['status'] >= track_data['particle_status_flags']['frozen'], axis=1), label='alive')
+                plt.scatter(t,np.sum(track_data['status'] >= track_data['particle_status_flags']['stationary'], axis=1), label='alive')
                 plt.plot(t,np.sum(track_data['status']==track_data['particle_status_flags']['dead'],axis=1),label='dead')
                 plt.plot(t, track_data['num_part_released_so_far'], label='released')
                 plt.ylabel('Number of part.')

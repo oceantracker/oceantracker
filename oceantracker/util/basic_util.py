@@ -1,15 +1,8 @@
 # utils for particle tracking
-from  copy import deepcopy, copy
-import time
 import numpy as np
-import platform
-from psutil import  cpu_count, cpu_freq
-
-
-from numba import  njit
-
-class OceanTrackerDummyClass(object): pass
-
+from time import sleep
+from os import path
+from pathlib import Path as pathlib_Path
 def deep_dict_update(d, d_updates):
     # recursively update dictionary tree d, ie a dictionary which may contain dictionaries with d_updates or listes of dictionaries
     # with corressponding key values in dictionary d_updates, d_updates may be a dictionary of dictionaries
@@ -39,18 +32,12 @@ def deep_dict_update(d, d_updates):
     return d
 
 
-def is_substring_in_list(sub_str,str_list):
-    out= False
-    for s in str_list:
-        if sub_str in s: out = True
-    return out
+
+def nopass(msg=''):
+    raise Exception("Missing method, base method must be overwritten" +msg)
 
 
-
-def nopass(msg=''):  raise Exception("Missing method, base method must be overwritten" +msg)
-
-
-
+def dummy_fuction(): pass
 def atLeast_Nby1(y):
     # create a view of output with at least one vector component
     if y.ndim == 1:
@@ -59,8 +46,37 @@ def atLeast_Nby1(y):
         return y
 
 
+def fillvalue(dtype:str):
+    '''value to fill array '''
 
-@njit
-def testNumbaRangeChecking():
-    x= np.full((10,1),0.)
-    x[x.shape[0]] = 1. # out of bounds test
+    if dtype in ['float64','float32', 'int64', 'int32','int16']:
+        v = -32768
+    elif dtype in ['int8','bool']:
+        v = -128
+    else:
+        CodingError('Need to add another numpy dtype  as string', hint=f'got type {dtype}')
+    return v
+
+def CodingError(message='-no error message given',hint=None, info=None):
+    # Call the base class constructor with the parameters it needs
+    msg= f'Coding error >> {message} \n hint= {hint} \n info= {info}'
+    sleep(.5)
+    raise Exception(msg)
+
+def get_file_list(root_dir,mask):
+    file_list = []
+    for fn in pathlib_Path(root_dir).rglob(mask):
+        file_list.append(path.abspath(fn))
+
+    return file_list
+def IDmapToArray(IDmap:dict, select_keys:list=None):
+    # converts a dict mapping names to integer IDs to a numpy array of integers
+    # for given keys of dictionary, eg convert particle status
+    # where array is used in numba code to check if status is one of given status values
+
+    keys= list(IDmap.keys()) if select_keys is None else select_keys
+    IDs =np.full((len(keys),),-32000, dtype=np.int32)
+    for n, key in enumerate(keys):
+        IDs[n] = IDmap[key]
+
+    return IDs

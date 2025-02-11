@@ -1,5 +1,6 @@
 import  numpy as np
 from numba import njit
+from oceantracker.util.numba_util import njitOT
 from oceantracker.util.ncdf_util import NetCDFhandler
 from os import  path
 
@@ -71,12 +72,12 @@ def _read_compact_var_time_step(nc, var_name, sel,nt,  cols, out=None):
 
     return d
 
-@njit
+@njitOT
 def _insertMatrixValues(x,col,values):
     for n in range(col.shape[0]):
         x[col[n],...] = values[n]
 
-@njit
+@njitOT
 def _filIinDeadParticles(data, var, status, missing_status):
     # fill in values after death with last good one
     for m in range(data.shape[1]):

@@ -5,12 +5,14 @@ from numba import njit, types as nbtypes
 import numpy as np
 import time
 import copy
-
+from oceantracker.util.numba_util import njitOT
+from oceantracker.util import cord_transforms
 
 class InsidePolygon(object):
     # finds points inside given polygon (M,2) vertices as numpy array
     # may be a closed or not closed polygon
-    def __init__(self,verticies, bounds_sub_grid_size=20):
+    def __init__(self,verticies,geographic_coords=None, bounds_sub_grid_size=20):
+        self.geographic_coords = geographic_coords
         self.points = self._make_closed(verticies).astype(np.float64) # close  polygon if needed
         self._build_inside_indicies_func(self.points, bounds_sub_grid_size)
 
@@ -58,7 +60,7 @@ class InsidePolygon(object):
         # 2) recalculates inv_slope for intersection calc and bounding box
         # 3) form subgrid of bounding region with vaules =1 if polygon overlays  subgrid cell
         # assumes a closed polygon
-
+        #todo this can be much faster with numba?
         nv = vert.shape[0]
         self.line_bounds = np.zeros((nv,3,2),dtype=np.float64)
         xyb= np.zeros((2,2),dtype=np.float64)
@@ -79,12 +81,12 @@ class InsidePolygon(object):
         self.polygon_bounds = np.array([np.min(vert[:,0]), np.max(vert[:,0]),
                          np.min(vert[:,1]),  np.max(vert[:,1]) ])
 
-        # make an initial function to find id points inside with one subcell
+        # make an initial function to find if points inside with one subcell
         x = np.linspace(self.polygon_bounds[0], self.polygon_bounds[1], 2)
         y = np.linspace(self.polygon_bounds[2], self.polygon_bounds[3],  2)
         overlap = np.ones((1, 1), dtype=np.int8)
-        self.inside_ray_tracing_indices_fun = make_inside_ray_tracing_indices(self.line_bounds, self.slope_inv, self.polygon_bounds,
-                                                            x,y,overlap)
+        self.inside_ray_tracing_indices_fun = make_inside_ray_tracing_indices_subgrids(self.line_bounds, self.slope_inv, self.polygon_bounds,
+                                                                                       x, y, overlap)
 
         # set up sub-grid of bounds to speed eliminating points from full check for ray tracing
         x = np.linspace(self.polygon_bounds[0], self.polygon_bounds[1], bounds_sub_grid_size + 1)
@@ -110,8 +112,8 @@ class InsidePolygon(object):
         self.sub_grid_x = x
         self.sub_grid_y = y
         self.sub_grid_overlaps_polygon = overlap
-        self.inside_ray_tracing_indices_fun = make_inside_ray_tracing_indices(self.line_bounds, self.slope_inv, self.polygon_bounds,
-                                                                     self.sub_grid_x, self.sub_grid_y, self.sub_grid_overlaps_polygon)
+        self.inside_ray_tracing_indices_fun = make_inside_ray_tracing_indices_subgrids(self.line_bounds, self.slope_inv, self.polygon_bounds,
+                                                                                       self.sub_grid_x, self.sub_grid_y, self.sub_grid_overlaps_polygon)
         pass
 
     def _make_closed(self, p):
@@ -120,10 +122,18 @@ class InsidePolygon(object):
             p= np.vstack((p,p[0,:]))
         return p
 
-    def _get_area(self):
-        # area of closed polygon, by planimeter method?
-        #todo move to own utility, use triangle util?
-        x, y=self.points[:,0], self.points[:,1]
+    def get_area(self):
+        # area of  closed polygon, by planimeter method?
+        #   if geographic_coords must be small ie a couple of degrees in longtitude geographically small
+        # ie inside one UTM zone
+
+        xy=self.points
+        if self.geographic_coords:
+            xy =  cord_transforms.WGS84_to_UTM(xy, in_lat_lon_order=False)
+
+
+
+        x,y = xy[:,0], xy[:,1]
         n = len(x)
         area = 0.0
 
@@ -135,14 +145,14 @@ class InsidePolygon(object):
         area = abs(area) / 2.0
         return area
 
-def make_inside_ray_tracing_indices(lb, slope_inv, bounds,sub_grid_x,sub_grid_y, sub_grid_overlaps_polygon):
+def make_inside_ray_tracing_indices_subgrids(lb, slope_inv, bounds, sub_grid_x, sub_grid_y, sub_grid_overlaps_polygon):
     # wrapper to make faster reduce number of arguments anf faster by compling fixed array references into code
 
     # useful constants
     sub_grid_dx = sub_grid_x[1] - sub_grid_x[0]
     sub_grid_dy = sub_grid_y[1] - sub_grid_y[0]
 
-    @njit()
+    @njitOT
     def inside_ray_tracing_indices(xq_vals, active, inside_IDs, outside_IDs):
         # finds if points indside polygon based on ray from point to +ve x
         # based on odd number of crossings of lines of polygon, resilt is in boolean working space, "inside"
@@ -187,19 +197,43 @@ def make_inside_ray_tracing_indices(lb, slope_inv, bounds,sub_grid_x,sub_grid_y,
 
     return inside_ray_tracing_indices
 
-def set_up_list_of_polygon_instances(polygon_list):
+def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
     msg=[]
     polygons=[]
     for n, poly in enumerate(polygon_list):
 
         a = np.asarray(poly['points'])
 
-        p = InsidePolygon(verticies=a)  # do set up to speed inside using pre-calculation
+        p = InsidePolygon(verticies=a,geographic_coords=geographic_coords)  # do set up to speed inside using pre-calculation
         polygons.append(p)
 
         # ensure points closure updates parameters
         poly.update({'points': p.points.tolist()})
     return polygons, msg
+
+
+
+def make_anticlockwise_polygon(xy):
+    # ensure points in polygon are ordered in anti-clockwise order
+    is_clockwise = np.sum(np.arctan2( xy[:,0],xy[:,1]  ),axis=0) > 0
+    if ~is_clockwise:
+        xy = xy [::-1,:]
+    return xy
+
+def make_domain_mask(xy):
+    # make fillable mask outside domain xy with columns (x,y)
+    xy= make_anticlockwise_polygon(xy)
+
+    # bounds
+    bx= [np.min(xy[:, 0]),np.max(xy[:, 0])]
+    by= [np.min(xy[:, 1]),np.max(xy[:, 1])]
+
+    # put box around domain spit at southernmost point
+    n =np.argmin(xy[:,1])
+    xy= np.concatenate(( xy[:n,:],
+                    np.asarray([[bx[0],by[0]],[bx[0],by[1]], [bx[1],by[1]], [bx[1],by[0]]]),
+                    xy[n:,:] ), axis=0)
+    return xy
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt

@@ -1,47 +1,34 @@
+NUMBA_cache_code: false
 add_date_to_run_output_dir: false
 backtracking: true
 debug: true
 dispersion:
   A_H: 0.1
-dispersion_miss-spelt:
-  A_H: 0.1
 output_file_base: demo01_plot_tracks
-'particle_properties ':
-  Oxygen:
-    class_name: oceantracker.particle_properties.age_decay.AgeDecay
-    decay_time_scale: 86400.0
-    initial_value: 20.0
-  distance_travelled:
-    class_name: oceantracker.particle_properties.distance_travelled.DistanceTravelled
+particle_properties:
+- class_name: AgeDecay
+  decay_time_scale: 86400.0
+  initial_value: 20.0
+  name: Oxygen
+- class_name: DistanceTravelled
+  name: distance_travelled
+- class_name: AgeDecay
+  decay_time_scale: 86400.0
+  name: age_decay
+- class_name: ParticleLoad
+  initial_value: 100
+  name: my_constant_prop
 reader:
-  class_name: oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader
-  dimension_map:
-    node: nodes
-    time: time
-  field_variables:
-    tide: tide
-    water_depth: depth
-    water_velocity:
-    - east_vel
-    - north_vel
-  file_mask: demoHindcast2D*.nc
-  grid_variables:
-    time: time_sec
-    triangles: tri
-    x:
-    - east
-    - north
-  input_dir: E:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
-  isodate_of_hindcast_time_zero: '2020-06-01'
-  search_sub_dirs: true
+  file_mask: Random_order_*.nc
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
   time_buffer_size: 15
 release_groups:
-  mypoints1:
-    points:
-    - - 1594500
-      - 5483000
-    pulse_size: 200
-    release_interval: 0
+- name: mypoints1
+  points:
+  - - 1594500
+    - 5483000
+  pulse_size: 200
+  release_interval: 0
 root_output_dir: output
 time_step: 600
 tracks_writer:

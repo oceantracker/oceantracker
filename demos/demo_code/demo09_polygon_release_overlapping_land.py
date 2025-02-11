@@ -2,17 +2,17 @@
 #---------------------------------------
 import oceantracker.main as main
 from oceantracker.util import json_util
-params = json_util.read_JSON("..\demo_param_files\demo09_polygon_release_overlapping_land.json")
+params = json_util.read_JSON("..\demo_param_files\demo62_polygon_release_overlapping_land.json")
 
 runInfo_file_name, has_errors = main.run(params)
 
 # output is now in output/demo09_polygon_release_overlapping_land
 
 # below only required for plotting
-from oceantracker.post_processing.read_output_files.load_output_files import load_track_data, get_case_info_file_from_run_file
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
+from plot_oceantracker.plot_tracks import animate_particles
 
-output_file= "output\demo09_polygon_release_overlapping_land"
+output_file= "output\demo62_polygon_release_overlapping_land"
 
 
 track_data = load_track_data(case_info_file_name)

@@ -1,32 +1,71 @@
 # add attributes mapping release index to release group name
 import numpy as np
+from oceantracker.util.ncdf_util import NetCDFhandler
+from os import path
+from oceantracker.shared_info import shared_info as si
 
-def add_release_group_ID_info_to_netCDF(nc, prg):
-    # add a maps of release group as attributes  index to net ndf
-    # plus release points /points of polygon
+def add_particle_status_values_to_netcdf(nc):
+    # write status values to file as attributes
+    for key, val in si.particle_status_flags.as_dict().items():
+        nc.write_global_attribute('status_' + key, int(val))
 
+def write_release_group_netcdf():
+    '''Write release groups data to own file for each case '''
+    fn =  si.run_info.output_file_base + '_release_groups.nc'
+    nc = NetCDFhandler(path.join(si.run_info.run_output_dir, fn), mode= 'w')
 
-    if nc is None: return # file already closed
+    # loop over release groups
+    for name, rg in si.class_roles.release_groups.items():
 
-    max_points= 0
-    for n, name in enumerate(prg.keys()):
-        nc.write_global_attribute(f'release_groupID_{name}', n)
-        max_points= max(max_points, prg[name].info['points'].shape[0])
+        ID = rg.info['instanceID']
+        v_name = f'ReleaseGroup_{ID:04d}'
+        dim_name = f'rg_{ID:04d}'
 
-    # make array full on points with different lengths for each release group
-    n_rel= len(prg)
-    points     = np.full((n_rel,max_points,3),np.nan,dtype= np.float64)
-    n_points   = np.full((n_rel, ), 0, dtype=np.int32)
-    is_polygon = np.full((n_rel,), 0, dtype=np.int8)
+        if rg.info['release_type'] in  ['point', 'polygon']:
+            v_name += '_points'
+            points = rg.params['points']
+            is3D = points.shape[1] ==3
+            dims = [dim_name + '_points', 'vector3D' if is3D else 'vector2D']
+
+        elif rg.info['release_type'] in ['grid']:
+            v_name += '_grid'
+            points =  rg.info['x_grid']
+            dims = [dim_name +'_rows', dim_name +'_cols', 'vector2D']
+            is3D = False
+        else:
+            raise('write_release_group_netcdf> unknown release group type')
+
+        nc.add_dimension(dim_name,points.shape[0])
+        sc = rg.schedulers['release'].info
+        # add useful info to variable atributes
+        attr= dict(release_type=rg.info['release_type'], is3D = is3D,
+                    release_group_name = name, instanceID= rg.info['instanceID'], pulses= rg.info['pulseID'],
+                   pulse_size =rg.params['pulse_size'],
+                   release_interval=rg.params['release_interval'],
+                   start =sc['start_time'], end =sc['end_time'], start_date= sc['start_date'], end_date =sc['end_date'],
+                   max_age = si.info.large_float if rg.params['max_age'] is None else rg.params['max_age'],
+                   user_release_groupID=rg.params['user_release_groupID'],
+                   user_release_group_name= rg.params['user_release_group_name'],
+                   number_released= rg.info['number_released'])
+        nc.write_a_new_variable(v_name, points, dims, units='meters or decimal deg. as  (lon, lat)',  attributes=attr)
     
-    for n, name in enumerate(prg.keys()):
-        r = prg[name]
-        p = r.info['points']
-        points[n,:p.shape[0],:p.shape[1]] = p
-        n_points[n] = p.shape[0]
-        is_polygon[n] = r.info['release_type'] == 'polygon'
+    nc.close()
+    return fn
 
-    nc.write_a_new_variable('release_points', points, ['release_group_dim','max_points_dim','components'], description='release points or points comprising polygon')
-    nc.write_a_new_variable('number_of_release_points', n_points, ['release_group_dim'], description='number of points in each relase group')
-    nc.write_a_new_variable('is_polygon_release', is_polygon, ['release_group_dim'], description=' =1 if release group is a polygon, 0 if point release')
 
+def add_polygon_list_to_group_netcdf(nc,polygon_list):
+    '''Write poygon in the file groups data to own file for each case '''
+    # loop over polygon_list
+    for ID, p in  enumerate(polygon_list):
+
+        v_name = f'Polygon_{ID:04d}'
+        dim_name = f'poly_{ID:04d}'
+        points = np.asarray(p['points'])
+        nc.add_dimension(dim_name, points.shape[0])
+        attr = dict(user_polygonID=p['user_polygonID'] if 'user_polygonID' in p else 0 , instanceID=ID,
+                    polygon_name=f'polygon{ID:04d}' if p['name'] is None else p['name'])
+        nc.write_a_new_variable(v_name, points, [dim_name,'vector2D'],
+                                units='meters or decimal deg. as  (lon, lat)',
+                                description='stats ploygon cords',
+                                attributes=attr)
+    pass

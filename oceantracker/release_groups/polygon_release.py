@@ -1,67 +1,71 @@
 import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
+from oceantracker.util import   cord_transforms
 from oceantracker.release_groups.point_release import PointRelease
-from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
-
+from oceantracker.shared_info import shared_info as si
 
 class PolygonRelease(PointRelease):
-    # random polygon release in 2D or 3D
+    '''
+    Release particles at random locations within given polygon.
+    Points chosen are always inside the domain, also inside wet cells unless setting allow_release_in_dry_cells is True.
+    '''
 
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        self.add_default_params(default_polygon_dict_params)
+        self.add_default_params(si.default_polygon_dict_params)
 
-
-        self.class_doc(description='Release particles at random locations within given polygon. Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.')
 
         # below are not needed for polygons
         self.remove_default_params(['release_radius'])
 
 
     def initial_setup(self):
+        super().initial_setup()  # required to get base class set up
         # sort out list  polygon from points
+
         info = self.info
-        si= self.shared_info
+        params= self.params
+        ml = si.msg_logger
+        if params['points'].shape[0] < 3:
+            ml.msg('"points" parameter have at least 3 points, given ' + str(params['points']), error=True, caller=self)
 
-
-        info['points'] = np.asarray( self.params['points']).astype(np.float64)[:,:2] # make sure i is 2D
+        # ensure points are  meters
+        if si.settings.use_geographic_coords:
+            params['points'] = cord_transforms.fix_any_spanning180east(params['points'], msg_logger=si.msg_logger, caller=self,
+                                                       crumbs=f'Point release#{params["name"]}')
         info['release_type'] = 'polygon'
-        if info['points'].shape[0] < 3:
-            si.msg_logger.msg('For polygon release group  "points" parameter have at least 3 points, given ' + str(info['points']), fatal_error=True)
+        info['bounding_box_ll_ul'] = np.stack((np.nanmin(params['points'][:,:2], axis=0),
+                                               np.nanmax(params['points'][:,:2], axis=0)))
 
-        self.polygon = InsidePolygon(verticies = info['points'])
+        self.polygon = InsidePolygon(verticies = params['points'], geographic_coords=si.settings.use_geographic_coords)
+        info['polygon_area'] = self.polygon.get_area()
+        ll, ur = info['bounding_box_ll_ul']
+        info['bounding_box_area'] = abs((ur[0] - ll[0]) * (ur[1] - ll[1]))
 
-        info['polygon_area'] = self.polygon._get_area()
-        b = self.polygon.polygon_bounds
-        info['bounding_box_area'] = (b[1]-b[0]) * (b[3]-b[2])
-
-        if info['polygon_area']  < 1:
-            si.msg_logger.msg('Release group = ' +self.info['name']
-                                    + ', a Polygon release, area of polygon is practically zero , cant release particles from polygon as shape badly formed, area =' + str(info['polygon_area']), fatal_error=True)
+        if info['polygon_area']  < 10:
+            ml.msg('Polygon release, area of polygon is < 10 sq meters , area =' + str(info['polygon_area']),
+                   hint='Is hydro model grid in meters and polygon coords given in (lon, lat)  degrees, convert polygons to hydro models meters coords? ',
+                   warning=True)
 
         info['number_released'] = 0
-        info['pulse_count'] = 0
+        info['pulseID'] = 0
 
 
     def get_release_location_candidates(self):
-        si = self.shared_info
         info = self.info
-        bounds = self.polygon.polygon_bounds
-
+        ll, ur = info['bounding_box_ll_ul']
         # find number required to have one guess get all required points
         # by scaling by fraction of bounding box polygon takes up
         n_candidates = int(np.ceil(self.params['pulse_size']*info['bounding_box_area']/ info['polygon_area'] ))
 
-        xi = np.random.uniform(low=bounds[0], high=bounds[1], size=n_candidates)
-        yi = np.random.uniform(low=bounds[2], high=bounds[3], size=n_candidates)
+        xi = np.random.uniform(low=ll[0], high=ur[0], size=n_candidates)
+        yi = np.random.uniform(low=ll[1], high=ur[1], size=n_candidates)
         xy_candidates = np.stack((xi, yi), axis=1)
 
         # select those inside polygon and domain
         sel = self.polygon.inside_indices(xy_candidates)
-
         x = xy_candidates[sel, :]
-
         return x
 
     def get_number_required(self):

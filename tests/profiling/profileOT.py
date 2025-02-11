@@ -14,17 +14,17 @@ from oceantracker.util.json_util import read_JSON , write_JSON
 def get_params(datasource=1):
     time_step = 300  # 5min
     release_interval = 3600
-    pulse_size = 500
+    pulse_size = 1500
     calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
-        input_dir =  r'G:\Hindcasts_large\MalbroughSounds_10year_benPhD'
+        input_dir =  r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2008'
         file_mask  = 'schism_marl200801*.nc'
-        root_output_dir = 'F:\\OceanTrackerOuput\\OceanTrackerProfiling'
+        root_output_dir = 'D:\\OceanTrackerOutput\\OceanTrackerProfiling'
 
     elif datasource==2:
         output_file_base= 'Sounds'
-        input_dir =  '/hpcfreenas/hindcast/MarlbroughSounds_hindcast_10years_BenPhd_2019ver/'
+        input_dir =  '/hpcfreenas/hindcast/MarlbroughSounds_hindcast_10years_BenPhd_2019ver'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = '/hpcfreenas/ross/oceanTrackerOutput/profiling/'
 
@@ -55,41 +55,44 @@ def get_params(datasource=1):
 
 
     params = \
-        {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': True,
+        {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': False,
          'time_step': time_step,
-         'max_threads' : 5,
         'screen_output_time_interval':6*time_step,
          'max_run_duration': 6 *24*3600,  # 10 days
          'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,
                     #'time_buffer_size': 3,
-                    'field_variables': {'water_temperature': 'temp'}
+                    'load_fields': ['water_temperature']
                     },
         'write_tracks': False,
         'dispersion': {'A_H': .2, 'A_V': 0.001},
-        'release_groups': {'p1':{'points': points,
+        'release_groups': [
+                {'name':'p1','points': points,
                                 'pulse_size': pulse_size, 'release_interval': release_interval,
                                 'allow_release_in_dry_cells': True},
-                           'p12': {'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
-                                     'points': poly_points,
-                                      'pulse_size': pulse_size, 'release_interval': release_interval}
-                                                 },
-                            'particle_properties': {'decay1':{'class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
-                                                       'decay_time_scale': 1. * 3600 * 24}},
-            'event_loggers': {'event1': {'class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
-                                                 'particle_prop_to_write_list': ['ID', 'x', 'IDrelease_group', 'status', 'age'],
-                                                 'polygon_list': [{'user_polygon_name': 'A', 'points': (np.asarray(poly_points) + np.asarray([-5000, 0])).tolist()},                                                                                                                ]
-                                                 }},
-            'particle_statistics' : { 'statas1':  {'class_name': 'oceantracker.particle_statistics.gridded_statistics.GriddedStats2D_agedBased',
+                {'name': 'p12' ,'class_name': 'oceantracker.release_groups.polygon_release.PolygonRelease',
+                            'points': poly_points,
+                            'pulse_size': pulse_size,
+                            'release_interval': release_interval}
+                            ],
+            'particle_properties': [ {'name':'decay1','class_name': 'oceantracker.particle_properties.age_decay.AgeDecay',
+                                    'decay_time_scale': 1. * 3600 * 24}],
+
+            'event_loggers':[ {'name':'event1','class_name': 'oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit',
+                                'particle_prop_to_write_list': ['ID', 'x', 'IDrelease_group', 'status', 'age'],
+                                'polygon_list': [{'user_polygon_name': 'A', 'points': (np.asarray(poly_points) + np.asarray([-5000, 0])).tolist()},                                                                                                                ]
+                                                 }],
+            'particle_statistics' :[ {'name': 'statas1','class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_ageBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'grid_size': [220, 221],
+                                        'grid_span':[10000,20000],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},
-                                        'statas2':  {'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
+                                     {'name': 'statas2', 'class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.,
                                          'polygon_list': [{'points': poly_points}]}
-                                                        }
-                                                         }
+                                        ]
+                    }
 
 
     return params
@@ -108,7 +111,7 @@ def run(profiler_name, params):
     ri = read_JSON(run_info_file)
     d = path.join(profile_dir, profiler_name, params['output_file_base'], platform.processor().replace(' ', '_').replace(',', '_'))
     makedirs(d, exist_ok=True)
-    fnn = path.join(d, results_file + '_CodeVer_' + ri['version_info']['version'].replace(' ', '_').replace(',', '_'))
+    fnn = path.join(d, results_file + '_CodeVer_' + ri['version_info']['str'].replace(' ', '_').replace(',', '_'))
 
     # copy case file
     ci = read_JSON(case_info_file)
@@ -121,7 +124,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasource', default=1, type=int)
-    parser.add_argument('--profiler', default=0, type=int)
+    parser.add_argument('--profiler', default=1, type=int)
     parser.add_argument('-scatch_tests', action='store_true')
     parser.add_argument('-test', action='store_true')
     parser.add_argument('-dev', action='store_true')

@@ -3,11 +3,12 @@
     "root_output_dir": "output",
     "time_step": 120,
     "reader": {
-        "input_dir": "../demos/demo_hindcast",
-        "file_mask": "demoHindcastSchism*.nc"
+        "input_dir": "../demos/demo_hindcast/schsim3D",
+        "file_mask": "demo_hindcast_schisim3D*.nc"
     },
-    "release_groups": {
-        "my_release_point": {
+    "release_groups": [
+        {
+            "name": "my_release_point",
             "points": [
                 [
                     1595000,
@@ -21,8 +22,8 @@
             "release_interval": 3600,
             "pulse_size": 10
         },
-        "my_polygon_release": {
-            "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
+        {
+            "class_name": "PolygonRelease",
             "points": [
                 [
                     1597682.1237,
@@ -52,15 +53,16 @@
             "release_interval": 7200,
             "pulse_size": 20
         }
-    },
+    ],
     "resuspension": {
         "critical_friction_velocity": 0.005
     },
-    "velocity_modifiers": {
-        "fall_velocity": {
-            "class_name": "oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity",
-            "mean": -0.001,
+    "velocity_modifiers": [
+        {
+            "name": "fall_velocity",
+            "class_name": "TerminalVelocity",
+            "value": -0.001,
             "variance": 0.0002
         }
-    }
+    ]
 }

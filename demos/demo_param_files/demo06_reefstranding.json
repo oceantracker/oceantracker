@@ -1,48 +1,24 @@
 {
     "output_file_base": "demo06_reefstranding",
     "add_date_to_run_output_dir": false,
+    "NUMBA_cache_code": false,
     "time_step": 600,
     "debug": true,
     "reader": {
-        "class_name": "oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader",
-        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "demoHindcast2D*.nc",
-        "search_sub_dirs": true,
-        "dimension_map": {
-            "time": "time",
-            "node": "nodes"
-        },
-        "grid_variables": {
-            "time": "time_sec",
-            "x": [
-                "east",
-                "north"
-            ],
-            "triangles": "tri"
-        },
-        "field_variables": {
-            "water_velocity": [
-                "east_vel",
-                "north_vel"
-            ],
-            "water_depth": "depth",
-            "tide": "tide"
-        },
-        "time_buffer_size": 15,
-        "isodate_of_hindcast_time_zero": "2020-06-01"
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "Random_order_*.nc",
+        "time_buffer_size": 15
     },
     "user_note": "test of notes",
-    "dispersion_miss-spelt": {
-        "A_H": 0.1
-    },
     "dispersion": {
         "A_H": 0.1
     },
     "tracks_writer": {
-        "write_dry_cell_index": true
+        "write_dry_cell_flag": true
     },
-    "release_groups": {
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P1",
             "points": [
                 [
                     1594500,
@@ -60,7 +36,8 @@
             "pulse_size": 10,
             "release_interval": 10800
         },
-        "poly1": {
+        {
+            "name": "poly1",
             "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
             "points": [
                 [
@@ -91,27 +68,33 @@
             "pulse_size": 1,
             "release_interval": 0
         }
-    },
-    "particle_properties ": {
-        "Oxygen": {
-            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+    ],
+    "particle_properties": [
+        {
+            "name": "Oxygen",
+            "class_name": "AgeDecay",
             "decay_time_scale": 86400.0,
             "initial_value": 20.0
         },
-        "distance_travelled": {
-            "class_name": "oceantracker.particle_properties.distance_travelled.DistanceTravelled"
+        {
+            "name": "distance_travelled",
+            "class_name": "DistanceTravelled"
+        },
+        {
+            "name": "age_decay",
+            "class_name": "AgeDecay",
+            "decay_time_scale": 86400.0
+        },
+        {
+            "name": "my_constant_prop",
+            "class_name": "ParticleLoad",
+            "initial_value": 100
         }
-    },
-    "particle_properties": {
-        "my_constant_prop": {
-            "class_name": "oceantracker.particle_properties.load_carrying.ParticleLoad",
-            "initial_value": 100,
-            "variance": 10.0
-        }
-    },
+    ],
     "block_dry_cells": true,
-    "trajectory_modifiers": {
-        "settle_in+polygon": {
+    "trajectory_modifiers": [
+        {
+            "name": "settle_in_polygon",
             "class_name": "oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon",
             "polygon": {
                 "points": [
@@ -144,10 +127,11 @@
             "probability_of_settlement": 0.1,
             "settlement_duration": 10800.0
         }
-    },
+    ],
     "backtracking": true,
-    "particle_statistics": {
-        "polystats1": {
+    "particle_statistics": [
+        {
+            "name": "polystats1",
             "class_name": "oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased",
             "update_interval": 1800,
             "particle_property_list": [
@@ -185,6 +169,6 @@
                 }
             ]
         }
-    },
+    ],
     "root_output_dir": "output"
 }

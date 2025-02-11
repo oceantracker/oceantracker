@@ -4,7 +4,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 
-class _BaseResuspension(ParameterBaseClass):
+class BaseResuspension(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes
@@ -12,4 +12,4 @@ class _BaseResuspension(ParameterBaseClass):
         self.add_default_params({}) # must be 3D
 
     # all particles checked to see if they need status changing
-    def update(self, time_sec, active): pass
+    def update(self,n_time_step, time_sec, active): pass

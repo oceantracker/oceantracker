@@ -5,8 +5,10 @@
     "time_step": 600,
     "screen_output_time_interval": null,
     "backtracking": null,
-    "run_as_depth_averaged": null,
+    "regrid_z_to_uniform_sigma_levels": null,
+    "dev_debug_plots": null,
     "debug": null,
+    "dev_debug_opt": null,
     "minimum_total_water_depth": null,
     "write_output_files": null,
     "max_run_duration": null,
@@ -14,6 +16,7 @@
     "processors": null,
     "max_warnings": null,
     "use_random_seed": null,
+    "numba_caching": null,
     "numba_function_cache_size": null,
     "multiprocessing_case_start_delay": null,
     "profiler": null,
@@ -21,23 +24,13 @@
     "case_output_file_tag": null,
     "write_tracks": null,
     "z0": null,
+    "water_density": null,
     "open_boundary_type": null,
     "block_dry_cells": null,
-    "dispersion": {
-        "A_h": 1
-    },
-    "field_group_manager": {},
-    "interpolator": {},
-    "particle_group_manager": {},
-    "reader": {
-        "input_dir": "demo_hindcast",
-        "file_mask": "demoHindcastSchism3D.nc"
-    },
-    "resuspension": {},
-    "solver": {},
-    "tracks_writer": {},
+    "use_A_Z_profile": null,
     "event_loggers": {},
     "fields": {},
+    "nested_readers": {},
     "particle_concentrations": {},
     "particle_properties": {},
     "particle_statistics": {},
@@ -46,5 +39,56 @@
     "status_modifiers": {},
     "time_varying_info": {},
     "trajectory_modifiers": {},
-    "velocity_modifiers": {}
+    "velocity_modifiers": {},
+    "dispersion": {
+        "A_H": 1
+    },
+    "field_group_manager": {},
+    "interpolator": {},
+    "particle_group_manager": {},
+    "reader": {
+        "input_dir": "demo_hindcast",
+        "file_mask": "demoHindcastSchism3D.nc",
+        "class_name": "oceantracker.reader.schism_reader.SCHISMSreaderNCDF",
+        "user_note": null,
+        "cords_in_lat_long": false,
+        "vertical_regrid": true,
+        "time_buffer_size": 24,
+        "load_fields": [],
+        "field_variables": [],
+        "field_variable_map": {
+            "water_velocity": [
+                "hvel",
+                "vertical_velocity"
+            ],
+            "tide": "elev",
+            "water_depth": "depth",
+            "A_Z_profile": "diffusivity",
+            "water_velocity_depth_averaged": [
+                "dahv",
+                null
+            ],
+            "water_temperature": "temp",
+            "salinity": "salt",
+            "wind_stress": "wind_stress",
+            "bottom_stress": "bottom_stress"
+        },
+        "EPSG": null,
+        "max_numb_files_to_load": 10000000,
+        "grid_variable_map": {
+            "time": "time",
+            "x": [
+                "SCHISM_hgrid_node_x",
+                "SCHISM_hgrid_node_y"
+            ],
+            "zlevel": "zcor",
+            "triangles": "SCHISM_hgrid_face_nodes",
+            "bottom_cell_index": "node_bottom_index",
+            "is_dry_cell": "wetdry_elem"
+        },
+        "hgrid_file_name": null
+    },
+    "resuspension": {},
+    "solver": {},
+    "tracks_writer": {}
 }
