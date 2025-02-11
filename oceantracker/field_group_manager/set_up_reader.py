@@ -86,7 +86,7 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
 
     tests ={} # set of tests to pass
     ds_info = dataset.info
-
+    file_vars = ds_info['variables']
     for name, class_name in definitions.known_readers.items():
         # first check if essential variables are in the file
         p = deepcopy(reader_params)
@@ -96,12 +96,12 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
                               crumbs=crumbs + f'> loading reader "{name}"  class name "{class_name}"')
         gmap = r.params['grid_variable_map']
         fmap= r.params['field_variable_map']
-        t = dict(time = gmap['time'] in ds_info['variables'],
-                x = gmap['x'] in ds_info['variables'],
-                velocity = fmap['water_velocity'][0] in  ds_info['variables'] \
-                        or fmap['water_velocity_depth_averaged'][0] in  ds_info['variables'])
+
+        # do basic tests for format for time, x and velocity
+        t = dict(velocity = fmap['water_velocity'][0] in  file_vars  # has normal or depth average velocity
+                                 or fmap['water_velocity_depth_averaged'][0] in  file_vars)
         # check if other variables in the signature are present
-        for s in r.params['variable_signature']:
+        for s in r.params['variable_signature'] + [gmap['time'],gmap['x']]:
             t[s] = s in ds_info['variables']
 
         tests[name] = t
@@ -111,11 +111,11 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
             break
 
     if reader is None:
-        ml.msg(f'Not all tests against known from file formats variables , ', tabs=2)
+        ml.msg(f' In detecting file format, not all tests against known file format variables were passed', error=True)
         for name, vals in tests.items():
-            ml.msg(f' Format "{name}" , variable tests passed {str(vals)} ', tabs= 3)
+            ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 2)
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
-               hint=f'usereader to map to names in files, found variables {ds_info["variables"].keys()}',
+               hint=f'use reader to map to names in files? found variables {list(ds_info["variables"].keys())}',
                fatal_error=True, crumbs=crumbs)
 
     reader.dataset = dataset
@@ -168,9 +168,12 @@ def _time_sort_files(reader, crumbs):
         else:
             item['fileIDs'] = item['fileIDs'][0]  # todo keep as list??
 
-    # append times in order of time variable's file IDs
+    # append times in order of velocity variable's file IDs,
+    # as time may appear in many files if variables are split between file
+    # eg schsim v5 than once in each file
     time = np.empty((0,), dtype=np.float64)
-    for ID in ds_info['variables'][ds_info['time_var']]['fileIDs']:
+    vel_var = reader.params['field_variable_map']['water_velocity'][0]
+    for ID in ds_info['variables'][vel_var]['fileIDs']:
         time = np.append(time, ds_info['files'][ID]['time'])
 
     ds_info['ref_time'] = time
@@ -178,7 +181,7 @@ def _time_sort_files(reader, crumbs):
    # hindcast start and ends times
     ds_info['start_time'] = time[0]
     ds_info['end_time'] = time[-1]
-    ds_info['duration'] = time[-1]- time[0]
+    ds_info['duration'] = time[-1] - time[0]
     ds_info['total_time_steps'] =  time.size
     ds_info['time_step'] = ds_info['duration']/(time.size-1)
 
