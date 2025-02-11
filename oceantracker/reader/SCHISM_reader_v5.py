@@ -26,7 +26,7 @@ class SCHISMreaderV5(SCHISMreader):
                                    },
             dimension_map = {'time': PVC('time', str),
                             },
-            variable_signature= PLC(['SCHISM_hgrid_node_x', 'horizontalVelX','dryFlagElement'], str, doc_str='Variable names used to test if file is this format'),
+            variable_signature= PLC(['depth','elevation', 'dryFlagElement'], str, doc_str='Variable names used to test if file is this format'),
                         )
 
 

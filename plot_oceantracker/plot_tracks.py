@@ -162,7 +162,6 @@ def plot_relative_height(tracks_data,  particleID =0, ax = plt.gca(), title='', 
 
 def plot_path_in_vertical_section(tracks_data,  particleID =0,title='', ncase= 0, plot_file_name=None,credit=None):
 
-
     t = tracks_data['time'] / 24. / 3600.
     t = t - t[0]
     ax = plt.gca()
@@ -171,8 +170,8 @@ def plot_path_in_vertical_section(tracks_data,  particleID =0,title='', ncase= 0
 
     ax.plot(t, -tracks_data['water_depth'][:, particleID], label='Water depth, m', color='k')
 
-    if tracks_data['x'].size[1] == 3:
-        ax.plot(t, tracks_data['x'][:,particleID,2],label='Particle z, m', color = 'g')
+    if tracks_data['x'].shape[-1] == 3:
+        ax.plot(t, tracks_data['x'][:, particleID,2],label='Particle z, m', color = 'g')
 
         ax.set(xlabel='Time, days',ylabel='z, m', title=title)
         ax.legend()

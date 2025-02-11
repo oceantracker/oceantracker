@@ -1,7 +1,7 @@
 from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
 
 
-from copy import deepcopy
+from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC, ParameterListChecker as PLC
 import numpy as np
 from oceantracker.shared_info import shared_info as si
@@ -40,11 +40,25 @@ class SCHISMreader(_BaseUnstructuredReader):
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'one_based_indices': PVC(True, bool, doc_str='Schism has indices starting at 1 not zero'),
-            'variable_signature': PLC([], str, doc_str='Variable names used to test if file is this format'),
+            'variable_signature': PLC(['elev','depth'], str, doc_str='Variable names used to test if file is this format'),
             'hgrid_file_name': PVC(None, str),
              })
 
         pass
+
+    def decode_time(self, time):
+
+        if 'units' in  time.attrs:
+            # is cf time convention compliant
+            return super().decode_time(time)
+        else:
+            # older based date schsim version, ignore time zone
+            s = time.attrs['base_date'].split()
+            d0 = np.datetime64(f'{int(s[0])}-{int(s[1]):02d}-{int(s[2]):02d}')
+            d0 = d0.astype('datetime64[s]').astype(np.float64)
+            d0 = d0 + float(s[3])*3600
+            t= time.data + d0
+            return t
 
     def get_hindcast_info(self):
         info = self. info
