@@ -40,7 +40,7 @@ class SCHISMreader(_BaseUnstructuredReader):
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'one_based_indices': PVC(True, bool, doc_str='Schism has indices starting at 1 not zero'),
-            'variable_signature': PLC(['SCHISM_hgrid_node_x','dahv'], str, doc_str='Variable names used to test if file is this format'),
+            'variable_signature': PLC([], str, doc_str='Variable names used to test if file is this format'),
             'hgrid_file_name': PVC(None, str),
              })
 
@@ -48,11 +48,15 @@ class SCHISMreader(_BaseUnstructuredReader):
 
     def get_hindcast_info(self):
         info = self. info
+        ds_info =  self.dataset.info
         dm = self.params['dimension_map']
         fvm= self.params['field_variable_map']
         gm = self.params['grid_variable_map']
 
-        hi = dict(is3D=  fvm['water_velocity'][0] in info['variables'])
+        v_name = fvm['water_velocity'][0]
+        hi = dict(is3D=   v_name in info['variables'] \
+                         and dm['z'] in ds_info['variables'][v_name]['dims']
+                  )
 
         if hi['is3D']:
             hi['z_dim'] = dm['z']

@@ -111,8 +111,11 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
             break
 
     if reader is None:
-        ml.msg (f'Could not set up reader, could not detect file format  as not all expected variables are present ',
-               hint=f'May be an unknown format, or unexpected differences in variable names to the expected format, varaibles {all_variables}',
+        ml.msg(f'Not all tests against known from file formats variables , ', tabs=2)
+        for name, vals in tests.items():
+            ml.msg(f' Format "{name}" , variable tests passed {str(vals)} ', tabs= 3)
+        ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
+               hint=f'usereader to map to names in files, found variables {ds_info["variables"].keys()}',
                fatal_error=True, crumbs=crumbs)
 
     reader.dataset = dataset
@@ -183,9 +186,6 @@ def _time_sort_files(reader, crumbs):
     ds_info['end_date'] = time_util.seconds_to_isostr(ds_info['end_time'])
 
     pass
-
-
-
 def catalog_fields(reader, crumbs=None):
     # categorise field variables
     params = reader.params
@@ -207,7 +207,7 @@ def catalog_fields(reader, crumbs=None):
                     hint=f'Add a map for this variable readers "field_variable_map"  param or check spelling loaded variable name matches a file variable, current map is {str(mapped_fields)}',
                     fatal_error=True)
 
-        # decompose variabele lis
+        # decompose variable lis
         var_list = mapped_fields[name]
         if type(var_list) != list: var_list = [var_list]  # ensure it is a list
 
