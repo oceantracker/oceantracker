@@ -15,7 +15,7 @@ class SCHISMreader(_BaseUnstructuredReader):
             'dimension_map': dict(
                         node=PVC('nSCHISM_hgrid_node', str, doc_str='name of nodes dimension in files'),
                         z=PVC('nSCHISM_vgrid_layers', str, doc_str='name of dimensions for z layer boundaries '),
-                        all_z_dims=PLC(['nSCHISM_vgrid_layers'], str, doc_str='All z dims used to identify  3D variables'),
+                        all_z_dims=PLC(['nSCHISM_vgrid_layers'], str, doc_str='All z dims, used to identify  3D variables'),
                         vector2D=PVC('two', str, doc_str='name of dimension names for 2D vectors'),
                         vector3D=PVC(None, str),
                                 ),
@@ -60,36 +60,25 @@ class SCHISMreader(_BaseUnstructuredReader):
             t= time.data + d0
             return t
 
-    def get_hindcast_info(self):
+    def add_hindcast_info(self):
+        params = self.params
         info = self. info
         ds_info =  self.dataset.info
-        dm = self.params['dimension_map']
-        fvm= self.params['field_variable_map']
-        gm = self.params['grid_variable_map']
+        dm = params['dimension_map']
+        fvm= params['field_variable_map']
+        gm = params['grid_variable_map']
 
-        v_name = fvm['water_velocity'][0]
-        hi = dict(is3D=   v_name in info['variables'] \
-                         and dm['z'] in ds_info['variables'][v_name]['dims']
-                  )
-
-        if hi['is3D']:
-            hi['z_dim'] = dm['z']
-            hi['num_z_levels'] = info['dims'][hi['z_dim']]
-            hi['all_z_dims'] = dm['all_z_dims']
-            # Only LSC hasbottom_cell_index
-            hi['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_cell_index'] in info['variables'] \
+        if info['is3D']:
+            # sort out z dim and vertical grid size
+            info['z_dim'] = dm['z']
+            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['all_z_dims'] = dm['all_z_dims']
+            info['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_cell_index'] in info['variables'] \
                                                                         else si.vertical_grid_types.Slayer
-        else:
-            hi['z_dim'] = None
-            hi['num_z_levels'] = 0
-            hi['num_z_levels'] = 0
-            hi['all_z_dims'] =  []
-            hi['vert_grid_type'] = None
 
-        # get num nodes in each field
-        hi['node_dim'] = self.params['dimension_map']['node']
-        hi['num_nodes'] =  info['dims'][hi['node_dim']]
-        return hi
+        info['node_dim'] = params['dimension_map']['node']
+        info['num_nodes'] = info['dims'][info['node_dim']]
+
 
     def read_zlevel(self, nt):
         return self.dataset.read_variable(self.params['grid_variable_map']['zlevel'], nt = nt)

@@ -17,7 +17,6 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     dataset = OceanTrackerDataSet(reader_params)
 
 
-
     # detect reader format and add clas_name to params
     reader = _detect_hydro_file_format(reader_params, dataset,  crumbs=crumbs)
 
@@ -25,15 +24,29 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
         si.msg_logger.msg(f'Class "{reader.__class__.__name__}" under development, it may not work in all cases',
                            hint=f' contact developer with any unexpected issues', warning=True)
 
-    # sort files into time order and add info to reader bulider on if 3D hindcast and mapped field
+    # sort out which velocity variable to use
+    # ie.  water_velocity field if present, otherwise try depth average velocity if present
+    fvm = reader.params['field_variable_map']
+    file_vars = dataset.info['variables']
+
+    if fvm['water_velocity'][0] not in file_vars and fvm['water_velocity_depth_averaged'] is not None:
+        fvm['water_velocity'] = fvm['water_velocity_depth_averaged']  # map to  depth average
+
+    if  fvm['water_velocity'][0] not in file_vars: # no velocity found
+        si.msg_logger.msg(f'No velocity variable  in files, could not find  {str(fvm["water_velocity"][0])}. nor  depth average vel. {str(fvm["water_velocity_depth_averaged"])}',
+                          hint=f'file variables ={str(list(file_vars))}', fatal_error=True)
+
+    # sort files into time order and add info to reader builder on if 3D hindcast and mapped field
+    # uses times in files containing the velocity variable
     _time_sort_files(reader, crumbs)
     reader.dataset._make_time_step_to_fileID_map()
 
     info = reader.info
     info.update(reader.dataset.info) # make data set and reader info the same
 
-    # additional info on vert grid etc, node dim etc
-    reader.info.update(reader.get_hindcast_info())
+    # additional info on is D, vert grid type, node dim etc needed to size field buffers etc
+    _standard_needed_info(reader) # common to all readers
+    reader.add_hindcast_info() # any tweaks for specific reader
 
     # checks on hindcast info
     # todo check all required fields are set
@@ -62,11 +75,33 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
 
     info['has_A_Z_profile'] = 'A_Z_profile' in info['field_info']
     info['has_bottom_stress'] = 'bottom_stress' in info['field_info']
+
     # work out in 3D run from water velocity
     info['geographic_coords'] = reader.detect_lonlat_grid()
     info['time_buffer_size'] = si.settings.time_buffer_size
 
     return reader
+
+def _standard_needed_info(reader):
+    # info need to size the field reader buffers etc
+    params= reader.params
+    info = reader.info
+    ds_info = reader.dataset.info
+    file_vars = ds_info['variables']
+    dm = params['dimension_map']
+    fvm = params['field_variable_map']
+    gm = params['grid_variable_map']
+
+    # hindcast is 3D if velocity has any z dim
+    v_name = fvm['water_velocity'][0]
+    info['is3D'] =  any([ d in file_vars[v_name]['dims'] for d in dm['all_z_dims']])
+
+    # set default z dim info to that for 2D, add_hindcast_info changes them for  3D
+    info['z_dim'] = None
+    info['num_z_levels'] = 1
+    info['all_z_dims'] = []
+    info['vert_grid_type'] = None
+
 
 def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
     # detect hindcast format and add reader class_name to params if missing

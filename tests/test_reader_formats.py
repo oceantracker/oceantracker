@@ -291,7 +291,6 @@ def get_case(n):
 
         case   1101:
             # copernicus GLORYS
-
             root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D'
             file_mask = 'cmems*.nc'
 

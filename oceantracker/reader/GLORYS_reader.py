@@ -12,7 +12,7 @@ from copy import copy
 
 class GLORYSreader(_BaseStructuredReader):
 
-    development = 'GORYSreader has not been tested for all variations of file variables, contact developers if reader fails unexpectedly'
+    development = True
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
@@ -43,50 +43,36 @@ class GLORYSreader(_BaseStructuredReader):
                                    },
             variable_signature= PLC(['time','latitude', 'uo','vo'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
-
                         )
 
-    def get_hindcast_info(self):
-
+    def add_hindcast_info(self):
+        params= self.params
         info = self.info
-        dm = self.params['dimension_map']
-        fm = self.params['field_variable_map']
-        hi = dict( )
+        dm = params['dimension_map']
+        fm = params['field_variable_map']
 
         if 'mask' not in info['variables']:
             si.msg_logger.msg('For GLORYS hindcasts, must include the static variables netcdf file in same folder as the currents hindcast files, as need variables such as the land mask in that file',
-                              hint =f'reader "file_mask param", must also include static file as  well, given mask {self.params["file_mask"]}',
+                              hint =f'reader "file_mask" param, must also include static file as  well, given mask {self.params["file_mask"]}',
                               caller = self, error=True, fatal_error=True)
-
-        xvel_dims =  info['variables'][fm['water_velocity'][0]]['dims']
-        hi['is3D']=any(d in xvel_dims  for d in dm['all_z_dims'])
-        # GLORYS may give unit z dim to 2D data
-        hi['is3D'] =  hi['is3D'] if dm['z'] in xvel_dims and xvel_dims[dm['z'] ] > 1 else False
-
-        if hi['is3D']:
-            hi['z_dim'] = dm['z']
-            hi['num_z_levels'] = info['dims'][hi['z_dim']]
-            hi['all_z_dims'] = dm['all_z_dims']
-
+        if info['is3D']:
+            # sort out z dim and vertical grid size
+            info['z_dim'] = dm['z']
+            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['all_z_dims'] = dm['all_z_dims']
             if 'deptho_lev' in info['variables']:
-                hi['vert_grid_type'] = si.vertical_grid_types.Zfixed
+                info['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:
                 si.msg_logger.msg('Glorys reader under development, only works for fixed zlevel grids, eg NEMO (output with "deptho_lev" variable) , contact developer to extend to sigma and other vertical grids',
                                   hint='Please provide hindcast example files to test fixes against', fatal_error=True)
-
         else:
-            hi['z_dim'] = None
-            hi['num_z_levels'] = 1
-            hi['all_z_dims'] = []
-            hi['vert_grid_type'] = None
-            fm['water_velocity'] = fm['water_velocity'][:2]
+            info['vert_grid_type'] = None
 
-        # get num nodes in each field
-        params= self.params
+        # get num nodes in each field, but glorys has either lat or latitude as dims
         dims = info['dims']
         # nodes = rows* cols
-        hi['num_nodes'] = dims['lat' if 'lat' in dims else 'latitude'] * dims['lon' if 'lon' in dims else 'longitude']
-        return hi
+        info['num_nodes'] = dims['lat' if 'lat' in dims else 'latitude'] * dims['lon' if 'lon' in dims else 'longitude']
+
 
     def read_horizontal_grid_coords(self, grid):
         ds = self.dataset

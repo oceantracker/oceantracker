@@ -269,7 +269,7 @@ class _SharedInfoClass():
             return None
 
         if i.development:
-            ml.msg(f'Class "{i.__class__.__name__}" under development, it may not work in all cases',
+            ml.msg(f'Class "{i.__class__.__name__}" under development, it may not work in all cases or variants of known hindcast file formats',
                            hint=f' contact developer with any unexpected issues', warning=True)
 
         i.si = self # for alternative access to shared info
