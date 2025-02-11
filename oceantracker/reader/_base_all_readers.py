@@ -4,7 +4,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 from oceantracker.fields.reader_field import  ReaderField
-
+import dateutil
 from oceantracker.util import time_util, ncdf_util
 from datetime import datetime
 from os import path
@@ -61,7 +61,7 @@ class _BaseReader(ParameterBaseClass):
                             vector2D=PVC(None, str, doc_str='name of dimension names for 2D vectors'),
                             vector3D=PVC(None, str, doc_str='name of dimension names for 3D vectors'),
                             z=PVC( None, str, doc_str='name of dimensions for z layer boundaries '),
-                            all_z_dims=PLC(None, str, doc_str='All z dims used to identify  3D variables'),
+                            all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
                             ),
             'field_variables' : PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
             'drop_variables' :PLC(None, str,doc_str='Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant'),
@@ -78,7 +78,7 @@ class _BaseReader(ParameterBaseClass):
     # ---------------------------------------------------------
 
 
-    def get_hindcast_info(self): nopass()
+    def add_hindcast_info(self): nopass()
     # get is 3D, vertical grid type and
 
     def read_horizontal_grid_coords(self, grid):   nopass()
@@ -441,25 +441,8 @@ class _BaseReader(ParameterBaseClass):
         fi = info['field_info']
         #todo move check on whether vertical vel is in files here
 
-        # look for depth averaged if 3D velocity not there
-        if 'water_velocity' not in fi:
-            if 'water_velocity_depth_averaged' not in fi:
-                # use depth average if vailable
-                si.msg_logger.msg('Cannot find water_velocity components or depth averaged water velocity components in hindcast',
-                               hint=f'Found variables mapped to {str(fi.keys())} \n File variables are {str(info["variables"].keys())}',
-                               fatal_error=True)
-
-            fi['water_velocity'] = fi['water_velocity_depth_averaged']
-            fi.pop('water_velocity_depth_averaged')
-            si.msg_logger.msg('No 3D velocity variables in hindcast, using depth averaged water velocity instead in 2D mode',
-                note=True)
-
         i = self._add_a_reader_field('water_velocity')
 
-        if False:
-            # dev testing storing by  triangles
-            s= i.data.shape
-            i.data_by_vertex= np.zeros( (s[0], self.grid['triangles'].shape[0],s[2],3,s[3]), dtype = i.data.dtype)
         return i
 
     def update_water_velocity_field(self, buffer_index, nt):
@@ -474,11 +457,6 @@ class _BaseReader(ParameterBaseClass):
 
         field.data[buffer_index, ...] = data
 
-        if False:
-            # dev testing storing by  triangles
-            grid = self.grid
-            for n in range(3):
-                field.data_by_vertex[buffer_index,:,:,:, n] = data[:,grid['triangles'][:,n],...]
         return data
 
     #------------------------------------------------------------------------------------------------
@@ -628,7 +606,10 @@ class _BaseReader(ParameterBaseClass):
 
         unit, date = units.split('since')
         unit= unit.strip()
+
+        date = date.split('+')[0] # remove "+" time zone data
         date = date.strip()
+        d0 = np.datetime64(date).astype('datetime64[s]').astype(np.float64) # seconds since 1970
 
         t = time.data
         if unit == 'seconds':
@@ -642,7 +623,7 @@ class _BaseReader(ParameterBaseClass):
         else:
             si.msg_logger(f'Unrecognised time unit = {unit}', hint="must be one of [seconds,minutes,hours,days]")
 
-        d0 = np.datetime64(date).astype('datetime64[s]').astype(np.float64)
+
         t = t + d0
         return t
 
